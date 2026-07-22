@@ -1,0 +1,62 @@
+// Geteilte Typen fuer die schlanke Engine.
+// Die Engine ist "isomorph": sie liest keine Dateien selbst, sondern bekommt
+// Physik + Parameter hereingereicht. So laeuft sie unveraendert im Browser
+// (fetch) wie im Node-Pruefstand (fs).
+
+/** Die 5 Gene / Merkmale (Phaenotyp-Achse), jeweils normiert 0..1. */
+export const TRAITS = ["insulation", "size", "limbLength", "metabolism", "armor"] as const;
+export type TraitName = (typeof TRAITS)[number];
+
+/** Ein Merkmalsvektor: [insulation, size, limbLength, metabolism, armor]. */
+export type TraitVector = number[];
+
+/** Die 4 Umwelt-Regler, die der Spieler steuert. Jeweils 0..1. */
+export interface Environment {
+  temperature: number; // 0 = eiskalt, 1 = heiss
+  predation: number; // 0 = keine Raeuber, 1 = extrem
+  foodAbundance: number; // 0 = Hungersnot, 1 = Ueberfluss
+  foodHeight: number; // 0 = Boden, 1 = hoch/schwer erreichbar
+}
+
+/** Die geteilte Fitness-Landschaft (aus physics.json). */
+export interface Physics {
+  traits: string[];
+  traitLabels: Record<string, string>;
+  defenseFromArmor: number;
+  defenseFromSize: number;
+  reachFromLimb: number;
+  reachFromSize: number;
+  heightPenalty: number;
+  forageBase: number;
+  forageMetabolism: number;
+  maintenance: {
+    base: number;
+    size: number;
+    insulation: number;
+    armor: number;
+    metabolism: number;
+  };
+  energyScale: number;
+  wThermal: number;
+  wPred: number;
+  wNutrition: number;
+  floor: number;
+  eps: number;
+}
+
+/**
+ * Die Parameter der schlanken Engine, die die Trainings-Schleife an das Orakel
+ * anpasst ("das Lernen"). NICHT die Physik - die ist fix. Hier wird nur die
+ * *Dynamik* (wie schnell/stark sich Gene bewegen) kalibriert.
+ */
+export interface EngineParams {
+  responseRate: number[]; // pro Gen: wie schnell es dem Selektionsdruck folgt (5 Werte)
+  mutationRate: number; // Mutations-Ruecktrieb zur Mitte (Mutation-Selektion-Balance)
+  selectionStrength: number; // globale Staerke der Selektion
+}
+
+export const DEFAULT_ENGINE_PARAMS: EngineParams = {
+  responseRate: [0.15, 0.15, 0.15, 0.15, 0.15],
+  mutationRate: 0.03,
+  selectionStrength: 1.5,
+};

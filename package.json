@@ -1,0 +1,19 @@
+{
+  "name": "evolve-sim-lab",
+  "version": "0.1.0",
+  "description": "Evolutionaeres Tamagotchi - Sim-Labor: schlanke Engine + Referenz-Orakel + Trainings-Schleife",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "oracle": "python3 oracle/generate_benchmark.py",
+    "train": "node dist/training/fit.js",
+    "demo": "node dist/cli/demo.js",
+    "all": "npm run build && npm run oracle && npm run train",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,31 @@
+{
+  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei, damit der Vergleich fair ist. Aendert man hier etwas, aendert es sich fuer beide Motoren gleichzeitig.",
+  "traits": ["insulation", "size", "limbLength", "metabolism", "armor"],
+  "traitLabels": {
+    "insulation": "Fell / Isolation",
+    "size": "Koerpergroesse",
+    "limbLength": "Gliedmassenlaenge",
+    "metabolism": "Stoffwechsel",
+    "armor": "Panzerung"
+  },
+  "defenseFromArmor": 0.6,
+  "defenseFromSize": 0.4,
+  "reachFromLimb": 0.65,
+  "reachFromSize": 0.35,
+  "heightPenalty": 1.5,
+  "forageBase": 0.55,
+  "forageMetabolism": 0.9,
+  "maintenance": {
+    "base": 0.08,
+    "size": 0.30,
+    "insulation": 0.18,
+    "armor": 0.22,
+    "metabolism": 0.25
+  },
+  "energyScale": 5.0,
+  "wThermal": 1.0,
+  "wPred": 1.0,
+  "wNutrition": 1.2,
+  "floor": 0.02,
+  "eps": 0.02
+}

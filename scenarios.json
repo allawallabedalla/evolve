@@ -1,0 +1,67 @@
+{
+  "_comment": "Benchmark-Szenarien. 'train' = die Training-Schleife fittet die Engine daran. 'test' = zurueckgehaltene Szenarien, an denen die Validitaet gemessen wird (Overfitting-Schutz). Umwelt-Regler jeweils 0..1.",
+  "environmentLevers": {
+    "temperature": "0 = eiskalt, 1 = gluehend heiss",
+    "predation": "0 = keine Raeuber, 1 = extremer Praedationsdruck",
+    "foodAbundance": "0 = Hungersnot, 1 = Ueberfluss",
+    "foodHeight": "0 = am Boden, 1 = hoch/schwer erreichbar"
+  },
+  "scenarios": [
+    {
+      "name": "Eiszeit",
+      "split": "train",
+      "generations": 80,
+      "env": { "temperature": 0.08, "predation": 0.15, "foodAbundance": 0.55, "foodHeight": 0.15 },
+      "expectation": "Isolation steigt stark (Kaelteschutz)."
+    },
+    {
+      "name": "Raeuberland",
+      "split": "train",
+      "generations": 80,
+      "env": { "temperature": 0.5, "predation": 0.9, "foodAbundance": 0.8, "foodHeight": 0.15 },
+      "expectation": "Panzerung und Groesse steigen (Verteidigung)."
+    },
+    {
+      "name": "Hungersnot",
+      "split": "train",
+      "generations": 80,
+      "env": { "temperature": 0.5, "predation": 0.1, "foodAbundance": 0.22, "foodHeight": 0.1 },
+      "expectation": "Stoffwechsel und Groesse sinken (Energie sparen)."
+    },
+    {
+      "name": "Hohe Nahrung",
+      "split": "train",
+      "generations": 80,
+      "env": { "temperature": 0.5, "predation": 0.1, "foodAbundance": 0.9, "foodHeight": 0.85 },
+      "expectation": "Gliedmassenlaenge steigt (Reichweite)."
+    },
+    {
+      "name": "Hitze-Duerre",
+      "split": "train",
+      "generations": 80,
+      "env": { "temperature": 0.92, "predation": 0.1, "foodAbundance": 0.3, "foodHeight": 0.1 },
+      "expectation": "Isolation und Stoffwechsel sinken (Hitze + Knappheit)."
+    },
+    {
+      "name": "Kaltes Raeuberland",
+      "split": "test",
+      "generations": 80,
+      "env": { "temperature": 0.1, "predation": 0.85, "foodAbundance": 0.75, "foodHeight": 0.15 },
+      "expectation": "Kombi: Isolation UND Panzerung steigen."
+    },
+    {
+      "name": "Heisse Jagd",
+      "split": "test",
+      "generations": 80,
+      "env": { "temperature": 0.9, "predation": 0.85, "foodAbundance": 0.8, "foodHeight": 0.15 },
+      "expectation": "Kombi: niedrige Isolation, aber hohe Panzerung."
+    },
+    {
+      "name": "Karge Hoehe",
+      "split": "test",
+      "generations": 80,
+      "env": { "temperature": 0.5, "predation": 0.1, "foodAbundance": 0.35, "foodHeight": 0.8 },
+      "expectation": "Kombi: Reichweite noetig, aber Knappheit begrenzt Koerperbau."
+    }
+  ]
+}
