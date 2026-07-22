@@ -51,6 +51,7 @@ export interface Physics {
     mobility: number;
     structure: number;
   };
+  baseEnergy: number;
   energyScale: number;
   defenseFromArmor: number;
   defenseFromStructure: number;

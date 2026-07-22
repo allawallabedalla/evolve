@@ -28,6 +28,7 @@
     "mobility": 0.15,
     "structure": 0.15
   },
+  "baseEnergy": 0.12,
   "energyScale": 5.0,
   "defenseFromArmor": 0.45,
   "defenseFromStructure": 0.35,

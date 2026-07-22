@@ -74,7 +74,14 @@ function main() {
 
   // Freie Umwelt?  demo.js "" temp pred food height light water gens
   if (arg === "" && process.argv.length >= 10) {
-    const [temp, pred, food, height, light, water, gens] = process.argv.slice(3, 10).map(Number);
+    // Robust: NaN -> 0.5, Regler auf 0..1 klemmen, gens als Integer >= 0.
+    const lever = (s: string) => {
+      const v = Number(s);
+      return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5;
+    };
+    const [temp, pred, food, height, light, water] = process.argv.slice(3, 9).map(lever);
+    const gensRaw = Number(process.argv[9]);
+    const gens = Number.isFinite(gensRaw) ? Math.max(0, Math.floor(gensRaw)) : 60;
     const sc: Scenario = {
       name: "Freie Umwelt",
       split: "custom",

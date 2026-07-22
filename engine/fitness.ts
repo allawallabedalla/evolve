@@ -35,8 +35,11 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const structure = traits[STRUCTURE];
 
   // 1) Thermoregulation (universell): ideale Isolation = Kaelte.
+  //    Quadratisch (glatter Peak, kein Knick) - verhindert das Ueberschwingen /
+  //    die Oszillation der gradientenbasierten Engine bei mittlerer Temperatur.
   const thermalIdeal = 1 - env.temperature;
-  const thermal = 1 - Math.abs(insulation - thermalIdeal);
+  const dT = insulation - thermalIdeal;
+  const thermal = 1 - dT * dT;
 
   // 2) Energie - zwei Strategien, gegenseitig ausschliessend.
   //    a) Photosynthese: braucht Licht UND Wasser. Stuetzgewebe erhoeht die
@@ -56,7 +59,10 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (phys.forageBase + phys.forageMetabolism * metabolism) *
     (1 - phys.exclusion * photo);
 
-  const totalEnergy = energyPhoto + energyForage;
+  // Grund-Energie: ein kleiner Sockel (minimale Aufnahme), damit die
+  // Fitness-Landschaft auch ohne Nahrungsquelle nicht voellig flach wird -
+  // sonst uebten Temperatur/Praedation gar keinen Selektionsdruck aus ("tote Zone").
+  const totalEnergy = phys.baseEnergy + energyPhoto + energyForage;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;

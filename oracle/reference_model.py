@@ -53,9 +53,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     mobility = traits[MOBILITY]
     structure = traits[STRUCTURE]
 
-    # 1) Thermoregulation
+    # 1) Thermoregulation (quadratisch, glatter Peak)
     thermal_ideal = 1.0 - env["temperature"]
-    thermal = 1.0 - abs(insulation - thermal_ideal)
+    d_t = insulation - thermal_ideal
+    thermal = 1.0 - d_t * d_t
 
     # 2) Energie - zwei sich ausschliessende Strategien
     light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure
@@ -75,7 +76,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = energy_photo + energy_forage
+    total_energy = phys["baseEnergy"] + energy_photo + energy_forage
 
     m = phys["maintenance"]
     maintenance = (
