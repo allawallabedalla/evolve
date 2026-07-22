@@ -59,8 +59,19 @@ Energie kommt aus zwei **sich gegenseitig ausschließenden** Strategien:
 Ein `exclusion`-Term macht beide unvereinbar (ein Blatt kann nicht jagen). Dieselbe Engine
 wird dadurch unter *viel Licht + wenig Futter* zur **Pflanze** (🌳 verholzt, hoch wachsend
 ums Licht) und unter *Dunkelheit + Beute* zum **Tier** (mobil, gepanzert) — je nach Umwelt,
-ohne dass es irgendwo fest verdrahtet ist. Ein **Archetyp-Klassifizierer** benennt das
-Ergebnis (Basis fürs spätere Genbuch).
+ohne dass es irgendwo fest verdrahtet ist.
+
+### Bauplan-Schicht: viele Formen aus wenigen Genen
+
+`engine/development.ts` übersetzt das Genom **deterministisch** in einen modularen Körper
+(Symmetrie, Segmente, Bedeckung, Anhänge, Fortbewegung) — reine Genotyp→Phänotyp-Abbildung,
+die die Fitness *nicht* berührt (also validitäts-neutral) und zugleich die Datenstruktur ist,
+die ein späterer prozeduraler Renderer direkt zeichnen kann. Ein **Archetyp-Klassifizierer**
+benennt das Ergebnis (🌳 Baum, 🐢 gepanzertes Beutetier, 🐭 kleines flinkes Tier …).
+
+Ein Grid-Scan über die 8 Gene ergibt schon bei grober 4-Stufen-Abtastung **13 verschiedene
+Archetypen und ~2400 verschiedene Bauplan-Beschreibungen** — kontinuierlich ist die Vielfalt
+praktisch unbegrenzt. Das ist die Grundlage für die „fast jede Ausprägung"-Vision.
 
 ## Ausprobieren
 
@@ -70,6 +81,7 @@ npm run all        # build + Orakel-Benchmark erzeugen + Engine trainieren
 npm run demo       # Text-Demo im Terminal (Standard: Eiszeit)
 npm run demo all   # alle Szenarien
 npm run demo "Raeuberland"
+npm run parity     # KRITISCH: prüft, dass TS- und Python-Fitness exakt identisch sind
 npm run serve      # dann http://localhost:8000/mockup/ im Browser öffnen
 ```
 
@@ -85,12 +97,24 @@ node dist/cli/demo.js "" 0.1 0.8 0.6 0.2 60
 physics.json          geteilte Fitness-Landschaft (Engine + Orakel)
 scenarios.json        Benchmark-Szenarien (train/test-Split)
 fitted-params.json    Ergebnis des Trainings (Parameter + Validität) — vom Mockup gelesen
-engine/               schlanke Engine (TS): fitness, simulate, explain, report
-oracle/               Referenz-Orakel (Python) + benchmark/ (erzeugte Ground Truth)
+engine/               schlanke Engine (TS): fitness, simulate, explain, report,
+                        archetype (Klassifizierer), development (Genom→Bauplan)
+oracle/               Referenz-Orakel (Python) + benchmark/ + check_parity.py
 training/             genetischer Algorithmus, der die Engine ans Orakel anpasst
 cli/                  Terminal-Text-Demo
 mockup/               Browser-Mockup (Text-I/O + Validitäts-Balken)
+tools/                parity.mjs (TS↔Python-Fitness-Paritätsprüfung)
 ```
+
+## Korrektheit & Audit
+
+Die gesamte Validierung steht und fällt damit, dass Engine (TS) und Orakel (Python)
+**exakt dieselbe Fitness-Physik** rechnen. `npm run parity` garantiert das: es vergleicht
+2000 Zufallsstichproben und schlägt fehl, wenn die Abweichung > 1e-9 ist (aktuell ~1e-16,
+also Fließkomma-Epsilon). Ein unabhängiges Code-Audit hat zusätzlich Trainings-Methodik
+(kein Test-Leakage), Trait-Reihenfolge-Konsistenz und die Kausal-Erklärungen geprüft;
+gefundene Punkte (u. a. ein NaN-Fallback im Mockup, eine irreführende Ursachen-Meldung)
+sind behoben.
 
 ## Aktueller Stand der Validität
 

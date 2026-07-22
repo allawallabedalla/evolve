@@ -11,3 +11,4 @@ export {
   type ValidityInfo,
 } from "./report.js";
 export { classify, type Archetype } from "./archetype.js";
+export { develop, describeMorphology, type Morphology, type Appendage } from "./development.js";

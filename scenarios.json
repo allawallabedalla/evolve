@@ -21,7 +21,7 @@
       "split": "train",
       "generations": 80,
       "env": { "temperature": 0.5, "predation": 0.9, "foodAbundance": 0.8, "foodHeight": 0.15, "light": 0.5, "water": 0.6 },
-      "expectation": "Tier: Panzerung und Groesse steigen (Verteidigung)."
+      "expectation": "Tier: Panzerung steigt; Groesse sinkt (Panzer/Mobilitaet sind billigere Verteidigung)."
     },
     {
       "name": "Hungersnot",

@@ -69,7 +69,7 @@ export interface Physics {
  * *Dynamik* (wie schnell/stark sich Gene bewegen) kalibriert.
  */
 export interface EngineParams {
-  responseRate: number[]; // pro Gen: wie schnell es dem Selektionsdruck folgt (5 Werte)
+  responseRate: number[]; // pro Gen: wie schnell es dem Selektionsdruck folgt (8 Werte, einer je Gen)
   mutationRate: number; // Mutations-Ruecktrieb zur Mitte (Mutation-Selektion-Balance)
   selectionStrength: number; // globale Staerke der Selektion
   varianceWeight: number; // 0..1: wie stark die Anpassung sich nahe Fixierung (Gen ->0/1) verlangsamt.

@@ -35,9 +35,10 @@ export function classify(t: TraitVector): Archetype {
   // Reich bestimmen ueber die Energie-Achse.
   if (photo > 0.45 && mob < 0.4) {
     // --- Pflanzen-Pfad ---
-    if (struct > 0.6) return { kingdom: "Pflanze", name: "Verholzt / Baum-artig (Licht-Konkurrent)", emoji: "🌳" };
+    if (struct > 0.6 && size > 0.45) return { kingdom: "Pflanze", name: "Verholzt / Baum-artig (Licht-Konkurrent)", emoji: "🌳" };
+    if (struct > 0.6) return { kingdom: "Pflanze", name: "Verholzter Strauch / Polster", emoji: "🪴" };
     if (armor > 0.5) return { kingdom: "Pflanze", name: "Bewehrte Pflanze (Dornen / Rinde)", emoji: "🌵" };
-    if (insul > 0.6) return { kingdom: "Pflanze", name: "Polsterpflanze (kaelteangepasst)", emoji: "🌿" };
+    if (insul > 0.6) return { kingdom: "Pflanze", name: "Behaarte Kaeltepflanze", emoji: "🌿" };
     return { kingdom: "Pflanze", name: "Kraut / niedrige Pflanze", emoji: "☘️" };
   }
 

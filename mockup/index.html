@@ -107,7 +107,7 @@
     </div>
 
     <script type="module">
-      import { runSimulation, formatRunReport } from "../dist/engine/index.js";
+      import { runSimulation, formatRunReport, DEFAULT_ENGINE_PARAMS } from "../dist/engine/index.js";
 
       const LEVERS = [
         { key: "temperature", label: "Temperatur (kalt→heiß)" },
@@ -128,7 +128,8 @@
           params = fitted.params;
           validity = fitted;
         } catch (e) {
-          params = { responseRate: [0.15,0.15,0.15,0.15,0.15], mutationRate: 0.03, selectionStrength: 1.5 };
+          // Noch nicht trainiert: saubere Default-Parameter (8 Gene + varianceWeight).
+          params = DEFAULT_ENGINE_PARAMS;
         }
         buildSliders();
         buildPresets();

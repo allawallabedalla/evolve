@@ -9,6 +9,7 @@
     "train": "node dist/training/fit.js",
     "demo": "node dist/cli/demo.js",
     "all": "npm run build && npm run oracle && npm run train",
+    "parity": "npm run build && node tools/parity.mjs && python3 oracle/check_parity.py",
     "serve": "python3 -m http.server 8000"
   },
   "devDependencies": {

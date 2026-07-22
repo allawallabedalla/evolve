@@ -31,7 +31,12 @@ function causeFor(trait: string, delta: number, env: Environment): string {
         if (env.foodHeight > 0.5) return "Groesse hilft, hoeher gelegene Nahrung zu erreichen";
         return "reichliche Nahrung macht einen groesseren Koerper tragbar";
       }
-      return "knappe Nahrung bestraft den hohen Energiebedarf grosser Koerper";
+      // Groesse faellt: Ursache haengt davon ab, ob Nahrung knapp ist.
+      if (env.foodAbundance < 0.4)
+        return "knappe Nahrung bestraft den hohen Energiebedarf grosser Koerper";
+      if (env.predation > 0.5)
+        return "Groesse ist ein teurer Weg zur Verteidigung - guenstigere Merkmale (Panzer, Mobilitaet) uebernehmen";
+      return "ohne klaren Vorteil lohnt der hohe Energiebedarf eines grossen Koerpers nicht";
     case "limbLength":
       return up
         ? "schwer erreichbare Nahrung selektiert fuer laengere Gliedmassen (Reichweite)"
@@ -45,13 +50,14 @@ function causeFor(trait: string, delta: number, env: Environment): string {
         ? "hoher Praedationsdruck selektiert fuer Panzerung"
         : "ohne Raeuber ist Panzerung nur teurer Ballast und wird abgebaut";
     case "photosynthesis":
-      return up
-        ? "viel Licht bei knappem Futter macht Photosynthese zur besten Energiequelle (Pflanzen-Pfad)"
-        : "ohne Licht/Wasser oder bei reichem Futter lohnt Photosynthese nicht";
+      if (up) return "viel Licht bei knappem Futter macht Photosynthese zur besten Energiequelle (Pflanzen-Pfad)";
+      if (env.light < 0.3 || env.water < 0.3) return "ohne Licht bzw. Wasser traegt Photosynthese nicht";
+      return "reichliche Nahrung macht die Nahrungssuche lohnender als Photosynthese";
     case "mobility":
-      return up
-        ? "erreichbares Futter belohnt aktive Fortbewegung (Tier-Pfad)"
-        : "wo Photosynthese traegt, wird teure Mobilitaet ueberfluessig";
+      if (up) return "erreichbares Futter belohnt aktive Fortbewegung (Tier-Pfad)";
+      if (env.light > 0.6 && env.foodAbundance < 0.4)
+        return "Photosynthese verdraengt die teure Mobilitaet (Pflanzen-Pfad)";
+      return "kaum erreichbare Nahrung macht aktive Fortbewegung unrentabel (Energie sparen)";
     case "structure":
       return up
         ? (env.foodHeight > 0.5 || env.light > 0.6)

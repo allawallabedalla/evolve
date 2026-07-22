@@ -227,12 +227,14 @@ function main() {
   console.log(`Ziel-Band: ${TARGET_LOW}-${TARGET_HIGH}%`);
   // Rundungskonsistent zum angezeigten Wert (1 Nachkommastelle).
   const shown = Math.round(validityTest * 10) / 10;
-  const status =
-    shown >= TARGET_LOW && shown <= TARGET_HIGH
-      ? "im Ziel-Band."
-      : shown > TARGET_HIGH
-        ? "ueber dem Band - Engine evtl. zu nah am schweren Modell."
-        : "unter dem Band - Engine muss reicher/besser kalibriert werden.";
+  const inBand = shown >= TARGET_LOW && shown <= TARGET_HIGH;
+  const status = inBand
+    ? shown < TARGET_LOW + 1
+      ? `im Ziel-Band (unteres Ende; roh ${validityTest.toFixed(2)}%).`
+      : "im Ziel-Band."
+    : shown > TARGET_HIGH
+      ? "ueber dem Band - Engine evtl. zu nah am schweren Modell."
+      : "unter dem Band - Engine muss reicher/besser kalibriert werden.";
   console.log(`Status: ${status}`);
   console.log("Gespeichert: fitted-params.json");
 }

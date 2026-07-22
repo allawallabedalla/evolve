@@ -6,6 +6,7 @@ import { TRAITS } from "./types.js";
 import type { SimResult } from "./simulate.js";
 import { explainRun } from "./explain.js";
 import { classify } from "./archetype.js";
+import { develop, describeMorphology } from "./development.js";
 
 export interface ValidityInfo {
   validityTest: number; // % auf zurueckgehaltenen Test-Szenarien
@@ -73,8 +74,10 @@ export function formatRunReport(
   lines.push("");
 
   const arch = classify(result.final);
+  const morph = develop(result.final);
   lines.push("--- Endzustand des Wesens ---");
   lines.push(`${arch.emoji}  ${arch.kingdom} — ${arch.name}`);
+  lines.push(`Bauplan: ${describeMorphology(morph)}`);
   lines.push("");
   for (let g = 0; g < TRAITS.length; g++) {
     const label = (phys.traitLabels[TRAITS[g]] ?? TRAITS[g]).padEnd(22, " ");
@@ -98,8 +101,10 @@ export function formatValidityBar(v: ValidityInfo): string {
   const shown = Math.round(v.validityTest * 10) / 10;
   const inBand = shown >= v.targetLow && shown <= v.targetHigh;
   const above = shown > v.targetHigh;
+  const lowerEdge = inBand && shown < v.targetLow + 1;
   let status: string;
-  if (inBand) status = "✅ im Ziel-Band";
+  if (lowerEdge) status = "✅ im Ziel-Band (unteres Ende)";
+  else if (inBand) status = "✅ im Ziel-Band";
   else if (above) status = "⚠️ ueber dem Band (evtl. zu nah am schweren Modell)";
   else status = "🔄 noch unter dem Ziel-Band - weiter trainieren";
   return (
