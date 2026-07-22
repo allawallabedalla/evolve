@@ -26,18 +26,15 @@ const TARGET_HIGH = 90;
 const VALIDITY_SCALE = 0.25;
 
 // ---- Parameter-Grenzen fuer den GA ----
-// Reihenfolge: responseRate[0..4], mutationRate, selectionStrength, varianceWeight
+// Reihenfolge: responseRate[0..7] (8 Gene), mutationRate, selectionStrength, varianceWeight
 // responseRate/selectionStrength weiter gefasst, weil die Varianz-Daempfung die
 // effektiven Schritte verkleinert - schnelle Szenarien brauchen mehr Spielraum.
+const NUM_GENES = 8;
 const BOUNDS: [number, number][] = [
-  [0.005, 0.8],
-  [0.005, 0.8],
-  [0.005, 0.8],
-  [0.005, 0.8],
-  [0.005, 0.8],
-  [0.0, 0.12],
-  [0.3, 6.0],
-  [0.0, 1.0],
+  ...Array.from({ length: NUM_GENES }, () => [0.005, 0.8] as [number, number]),
+  [0.0, 0.12], // mutationRate
+  [0.3, 6.0], // selectionStrength
+  [0.0, 1.0], // varianceWeight
 ];
 const DIM = BOUNDS.length;
 
@@ -73,10 +70,10 @@ interface Benchmark {
 
 function vecToParams(v: number[]): EngineParams {
   return {
-    responseRate: v.slice(0, 5),
-    mutationRate: v[5],
-    selectionStrength: v[6],
-    varianceWeight: v[7],
+    responseRate: v.slice(0, NUM_GENES),
+    mutationRate: v[NUM_GENES],
+    selectionStrength: v[NUM_GENES + 1],
+    varianceWeight: v[NUM_GENES + 2],
   };
 }
 
@@ -152,9 +149,10 @@ function main() {
   );
 
   // ---- Genetischer Algorithmus ----
-  const POP = 48;
-  const GENS = 80;
-  const ELITE = 2;
+  // Budget skaliert mit der Parameterzahl (11 Dim bei 8 Genen).
+  const POP = 72;
+  const GENS = 140;
+  const ELITE = 3;
   const TOURN = 3;
 
   let population = Array.from({ length: POP }, randomVector);
@@ -227,10 +225,12 @@ function main() {
   console.log(`Train-Validitaet: ${validityTrain.toFixed(1)}%`);
   console.log(`Test-Validitaet (zurueckgehalten): ${validityTest.toFixed(1)}%  <- der Prozentbalken`);
   console.log(`Ziel-Band: ${TARGET_LOW}-${TARGET_HIGH}%`);
+  // Rundungskonsistent zum angezeigten Wert (1 Nachkommastelle).
+  const shown = Math.round(validityTest * 10) / 10;
   const status =
-    validityTest >= TARGET_LOW && validityTest <= TARGET_HIGH
+    shown >= TARGET_LOW && shown <= TARGET_HIGH
       ? "im Ziel-Band."
-      : validityTest > TARGET_HIGH
+      : shown > TARGET_HIGH
         ? "ueber dem Band - Engine evtl. zu nah am schweren Modell."
         : "unter dem Band - Engine muss reicher/besser kalibriert werden.";
   console.log(`Status: ${status}`);

@@ -21,8 +21,17 @@ import random
 from typing import Dict, List, Sequence
 
 # Trait-Reihenfolge muss zu engine/types.ts passen:
-TRAITS = ["insulation", "size", "limbLength", "metabolism", "armor"]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR = 0, 1, 2, 3, 4
+TRAITS = [
+    "insulation",
+    "size",
+    "limbLength",
+    "metabolism",
+    "armor",
+    "photosynthesis",
+    "mobility",
+    "structure",
+]
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE = 0, 1, 2, 3, 4, 5, 6, 7
 
 
 def _clamp01(x: float) -> float:
@@ -40,22 +49,33 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     limb = traits[LIMB]
     metabolism = traits[METABOLISM]
     armor = traits[ARMOR]
+    photo = traits[PHOTO]
+    mobility = traits[MOBILITY]
+    structure = traits[STRUCTURE]
 
     # 1) Thermoregulation
     thermal_ideal = 1.0 - env["temperature"]
     thermal = 1.0 - abs(insulation - thermal_ideal)
 
-    # 2) Praedation
-    defense = _clamp01(armor * phys["defenseFromArmor"] + size * phys["defenseFromSize"])
-    pred_survival = 1.0 - env["predation"] * (1.0 - defense)
+    # 2) Energie - zwei sich ausschliessende Strategien
+    light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure
+    energy_photo = (
+        photo * env["light"] * env["water"] * light_access * (1.0 - phys["exclusion"] * mobility)
+    )
 
-    # 3) Nahrung vs. Energiebedarf
     reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"])
     if env["foodHeight"] <= reach:
         access = 1.0
     else:
         access = _clamp01(1.0 - (env["foodHeight"] - reach) * phys["heightPenalty"])
-    forage = env["foodAbundance"] * access * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
+    energy_forage = (
+        mobility
+        * env["foodAbundance"]
+        * access
+        * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
+        * (1.0 - phys["exclusion"] * photo)
+    )
+    total_energy = energy_photo + energy_forage
 
     m = phys["maintenance"]
     maintenance = (
@@ -64,10 +84,20 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + insulation * m["insulation"]
         + armor * m["armor"]
         + metabolism * m["metabolism"]
+        + photo * m["photosynthesis"]
+        + mobility * m["mobility"]
+        + structure * m["structure"]
     )
+    nutrition = _sigmoid((total_energy - maintenance) * phys["energyScale"])
 
-    energy = forage - maintenance
-    nutrition = _sigmoid(energy * phys["energyScale"])
+    # 3) Praedation
+    defense = _clamp01(
+        armor * phys["defenseFromArmor"]
+        + structure * phys["defenseFromStructure"]
+        + size * phys["defenseFromSize"]
+        + mobility * phys["defenseFromMobility"]
+    )
+    pred_survival = 1.0 - env["predation"] * (1.0 - defense)
 
     fit = (
         (thermal ** phys["wThermal"])

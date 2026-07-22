@@ -5,6 +5,7 @@ import type { Environment, Physics, TraitVector } from "./types.js";
 import { TRAITS } from "./types.js";
 import type { SimResult } from "./simulate.js";
 import { explainRun } from "./explain.js";
+import { classify } from "./archetype.js";
 
 export interface ValidityInfo {
   validityTest: number; // % auf zurueckgehaltenen Test-Szenarien
@@ -26,7 +27,9 @@ function envSummary(env: Environment): string {
   const p = env.predation < 0.33 ? "wenig Raeuber" : env.predation > 0.66 ? "viele Raeuber" : "mittlerer Raeuberdruck";
   const f = env.foodAbundance < 0.33 ? "Nahrung knapp" : env.foodAbundance > 0.66 ? "Nahrung reichlich" : "Nahrung mittel";
   const h = env.foodHeight > 0.5 ? "hoch gelegen" : "am Boden";
-  return `${t}, ${p}, ${f}, ${h}`;
+  const l = env.light < 0.33 ? "dunkel" : env.light > 0.66 ? "sonnig" : "halbschattig";
+  const w = env.water < 0.33 ? "trocken" : env.water > 0.66 ? "feucht" : "maessig feucht";
+  return `${t}, ${p}, ${f}, ${h}, ${l}, ${w}`;
 }
 
 /**
@@ -46,8 +49,9 @@ export function formatRunReport(
   lines.push(`=== ${scenarioName} ===`);
   lines.push(`Umwelt: ${envSummary(env)}`);
   lines.push(
-    `(Temperatur ${env.temperature.toFixed(2)} | Praedation ${env.predation.toFixed(2)} | ` +
-      `Nahrung ${env.foodAbundance.toFixed(2)} | Hoehe ${env.foodHeight.toFixed(2)})`,
+    `(Temp ${env.temperature.toFixed(2)} | Praed ${env.predation.toFixed(2)} | ` +
+      `Nahrung ${env.foodAbundance.toFixed(2)} | Hoehe ${env.foodHeight.toFixed(2)} | ` +
+      `Licht ${env.light.toFixed(2)} | Wasser ${env.water.toFixed(2)})`,
   );
   lines.push(`Simuliert: ${gens} Generationen`);
   lines.push("");
@@ -68,9 +72,12 @@ export function formatRunReport(
   }
   lines.push("");
 
+  const arch = classify(result.final);
   lines.push("--- Endzustand des Wesens ---");
+  lines.push(`${arch.emoji}  ${arch.kingdom} — ${arch.name}`);
+  lines.push("");
   for (let g = 0; g < TRAITS.length; g++) {
-    const label = (phys.traitLabels[TRAITS[g]] ?? TRAITS[g]).padEnd(18, " ");
+    const label = (phys.traitLabels[TRAITS[g]] ?? TRAITS[g]).padEnd(22, " ");
     lines.push(`${label} ${formatTraitBar(result.final[g])} ${result.final[g].toFixed(2)}`);
   }
   lines.push("");
@@ -88,8 +95,9 @@ export function formatValidityBar(v: ValidityInfo): string {
   const pct = clamp01(v.validityTest / 100);
   const filled = Math.round(pct * width);
   const bar = "█".repeat(filled) + "░".repeat(width - filled);
-  const inBand = v.validityTest >= v.targetLow && v.validityTest <= v.targetHigh;
-  const above = v.validityTest > v.targetHigh;
+  const shown = Math.round(v.validityTest * 10) / 10;
+  const inBand = shown >= v.targetLow && shown <= v.targetHigh;
+  const above = shown > v.targetHigh;
   let status: string;
   if (inBand) status = "✅ im Ziel-Band";
   else if (above) status = "⚠️ ueber dem Band (evtl. zu nah am schweren Modell)";

@@ -10,3 +10,4 @@ export {
   formatTraitBar,
   type ValidityInfo,
 } from "./report.js";
+export { classify, type Archetype } from "./archetype.js";

@@ -44,6 +44,20 @@ function causeFor(trait: string, delta: number, env: Environment): string {
       return up
         ? "hoher Praedationsdruck selektiert fuer Panzerung"
         : "ohne Raeuber ist Panzerung nur teurer Ballast und wird abgebaut";
+    case "photosynthesis":
+      return up
+        ? "viel Licht bei knappem Futter macht Photosynthese zur besten Energiequelle (Pflanzen-Pfad)"
+        : "ohne Licht/Wasser oder bei reichem Futter lohnt Photosynthese nicht";
+    case "mobility":
+      return up
+        ? "erreichbares Futter belohnt aktive Fortbewegung (Tier-Pfad)"
+        : "wo Photosynthese traegt, wird teure Mobilitaet ueberfluessig";
+    case "structure":
+      return up
+        ? (env.foodHeight > 0.5 || env.light > 0.6)
+          ? "Stuetzgewebe erlaubt hoeheres Wachstum - mehr Licht bzw. Reichweite"
+          : "Stuetzgewebe dient als Schutz (Rinde/Schale)"
+        : "ohne Hoehen- oder Schutzbedarf wird Stuetzgewebe abgebaut";
     default:
       return up ? "Selektionsdruck nach oben" : "Selektionsdruck nach unten";
   }

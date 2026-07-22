@@ -5,7 +5,7 @@
 //   node dist/cli/demo.js                 -> Standard-Szenario
 //   node dist/cli/demo.js "Eiszeit"       -> benanntes Szenario
 //   node dist/cli/demo.js all             -> alle Szenarien
-//   node dist/cli/demo.js "" 0.1 0.8 0.6 0.2 60   -> freie Umwelt: temp pred food height gens
+//   node dist/cli/demo.js "" 0.1 0.8 0.6 0.2 0.5 0.6 60  -> freie Umwelt: temp pred food height light water gens
 
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -72,14 +72,14 @@ function main() {
     return;
   }
 
-  // Freie Umwelt?  demo.js "" temp pred food height gens
-  if (arg === "" && process.argv.length >= 8) {
-    const [temp, pred, food, height, gens] = process.argv.slice(3, 8).map(Number);
+  // Freie Umwelt?  demo.js "" temp pred food height light water gens
+  if (arg === "" && process.argv.length >= 10) {
+    const [temp, pred, food, height, light, water, gens] = process.argv.slice(3, 10).map(Number);
     const sc: Scenario = {
       name: "Freie Umwelt",
       split: "custom",
       generations: gens,
-      env: { temperature: temp, predation: pred, foodAbundance: food, foodHeight: height },
+      env: { temperature: temp, predation: pred, foodAbundance: food, foodHeight: height, light, water },
     };
     runScenario(sc, phys, params, validity);
     return;

@@ -38,14 +38,29 @@ Das Orakel ist der Prüfstein dafür.
 - **Overfitting-Schutz:** Der Prozentwert wird auf **zurückgehaltenen Test-Szenarien**
   gemessen, die das Training nie gesehen hat.
 
-## Die Merkmale & Regler (Strohmann, wächst später)
+## Die Merkmale & Regler
 
-**4 Umwelt-Regler** (der Spieler): Temperatur · Prädationsdruck · Nahrungsfülle · Nahrungshöhe
+**6 Umwelt-Regler** (der Spieler): Temperatur · Prädationsdruck · Nahrungsfülle ·
+Nahrungshöhe · **Licht** · **Wasser**
 
-**5 Gene** (mit Nutzen *und* Preis): Isolation · Größe · Gliedmaßenlänge · Stoffwechsel · Panzerung
+**8 Gene** (mit Nutzen *und* Preis): Isolation · Größe · Gliedmaßenlänge · Stoffwechsel ·
+Panzerung · **Photosynthese** · **Mobilität** · **Stützgewebe**
 
-Die Tiefe kommt aus **Trade-offs**: Fell schützt vor Kälte, kostet aber bei Hitze und im
-Stoffwechsel; Größe schützt vor Räubern, kostet aber Nahrung; usw.
+Die Tiefe kommt aus **Trade-offs**: Fell schützt vor Kälte, kostet aber bei Hitze; Größe
+schützt vor Räubern, kostet aber Nahrung; usw.
+
+### Reich-Gabelung Pflanze ↔ Tier (emergent)
+
+Energie kommt aus zwei **sich gegenseitig ausschließenden** Strategien:
+
+- **Photosynthese** (sessil, braucht Licht + Wasser) → Pflanzen-Pfad
+- **Nahrungssuche** (mobil, braucht Futter) → Tier-Pfad
+
+Ein `exclusion`-Term macht beide unvereinbar (ein Blatt kann nicht jagen). Dieselbe Engine
+wird dadurch unter *viel Licht + wenig Futter* zur **Pflanze** (🌳 verholzt, hoch wachsend
+ums Licht) und unter *Dunkelheit + Beute* zum **Tier** (mobil, gepanzert) — je nach Umwelt,
+ohne dass es irgendwo fest verdrahtet ist. Ein **Archetyp-Klassifizierer** benennt das
+Ergebnis (Basis fürs spätere Genbuch).
 
 ## Ausprobieren
 
@@ -79,7 +94,31 @@ mockup/               Browser-Mockup (Text-I/O + Validitäts-Balken)
 
 ## Aktueller Stand der Validität
 
-**Test-Validität ~88% — im Ziel-Band (80–90%).** Training ~84%.
+**Test-Validität ~80%, Training ~81% — im Ziel-Band (80–90%).** Train ≈ Test heißt: kein
+Overfitting, die Engine generalisiert ehrlich. Mit der Reich-Gabelung (8 Gene) ist die
+Aufgabe schwerer geworden, wir liegen am unteren Band-Rand.
+
+### Anatomie der fehlenden ~20% (Weg statt Ziel)
+
+Die **Endzustände** treffen das Orakel sehr genau (z. B. Eiszeit Stoffwechsel 0.91 vs. 0.92).
+Die Lücke steckt fast nur im *Verlauf*, in drei Töpfen:
+
+1. **Dormanz-Timing** (der reparierbare Rest): in Knappheits-Szenarien schaltet die
+   stochastische Orakel-Population *scharf* in einen Ruhezustand, die glatte Engine gleitet
+   sanfter. Eingriffe hier sind heikel (Kipppunkte — ein Gliedmaßen-Kostentest brach ein
+   Szenario und wurde verworfen).
+2. **Neutrale Drift** (*bewusst offen gelassen*): selektionsfreie Merkmale wandern im Orakel
+   durch Zufall; die deterministische Engine hält sie fest. Das zu treffen hieße, Rauschen
+   einzubauen — Gegenteil von Lesbarkeit.
+3. **S-Kurven-Anlauf**: kurzer Beschleunigungs-Versatz am Anfang, selbstheilend.
+
+Der *sinnvoll* schließbare Anteil ist also kleiner als 20% — ein guter Teil ist absichtlich
+freigelassener Design-Raum. Genau darum war das Ziel ein Band bei 80–90%, nicht 100%.
+
+### Frühere Version (V1, nur Tiere)
+
+Der V1-Kern (5 Gene, 4 Regler) erreichte ~88%. Der Sprung von ~74% auf ~88% kam über einen
+bestätigten Struktur-Schritt (genetische Varianz `x·(1−x)`, Wright-Fisher). Details unten.
 
 ### Weg dorthin (dokumentiert als Beispiel der Wachstums-Mechanik)
 

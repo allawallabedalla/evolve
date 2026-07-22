@@ -25,6 +25,21 @@
   "file": "Hitze-Duerre.json"
  },
  {
+  "name": "Sonniger Sumpf",
+  "split": "train",
+  "file": "Sonniger_Sumpf.json"
+ },
+ {
+  "name": "Dunkle Tiefe",
+  "split": "train",
+  "file": "Dunkle_Tiefe.json"
+ },
+ {
+  "name": "Trockene Savanne",
+  "split": "train",
+  "file": "Trockene_Savanne.json"
+ },
+ {
   "name": "Kaltes Raeuberland",
   "split": "test",
   "file": "Kaltes_Raeuberland.json"
@@ -38,5 +53,10 @@
   "name": "Karge Hoehe",
   "split": "test",
   "file": "Karge_Hoehe.json"
+ },
+ {
+  "name": "Lichtkampf-Dickicht",
+  "split": "test",
+  "file": "Lichtkampf-Dickicht.json"
  }
 ]

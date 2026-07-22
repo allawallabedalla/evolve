@@ -114,6 +114,8 @@
         { key: "predation", label: "Prädationsdruck" },
         { key: "foodAbundance", label: "Nahrungsfülle" },
         { key: "foodHeight", label: "Nahrungshöhe (Boden→hoch)" },
+        { key: "light", label: "Licht (dunkel→sonnig)" },
+        { key: "water", label: "Wasser (trocken→feucht)" },
       ];
 
       let phys, scenarios, params, validity;
@@ -188,7 +190,8 @@
         band.style.width = (validity.targetHigh - validity.targetLow) + "%";
         document.getElementById("vband").textContent = `${validity.targetLow}–${validity.targetHigh}`;
         num.textContent = v.toFixed(1) + "%";
-        const inBand = v >= validity.targetLow && v <= validity.targetHigh;
+        const shown = Math.round(v * 10) / 10;
+        const inBand = shown >= validity.targetLow && shown <= validity.targetHigh;
         status.textContent = inBand
           ? "✅ im Ziel-Band — glaubwürdig & schlank"
           : v > validity.targetHigh
