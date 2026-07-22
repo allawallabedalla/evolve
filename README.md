@@ -118,9 +118,11 @@ sind behoben.
 
 ## Aktueller Stand der Validität
 
-**Test-Validität ~80%, Training ~81% — im Ziel-Band (80–90%).** Train ≈ Test heißt: kein
-Overfitting, die Engine generalisiert ehrlich. Mit der Reich-Gabelung (8 Gene) ist die
-Aufgabe schwerer geworden, wir liegen am unteren Band-Rand.
+**Test-Validität ~82% — komfortabel im Ziel-Band (80–90%).** Train ≈ Test heißt: kein
+Overfitting, die Engine generalisiert ehrlich. Ein Engine-Optimierungs-Pass (aus
+Playtest-Funden, siehe `BACKLOG.md`) hat u. a. die Fell-Oszillation behoben (thermal
+geglättet) — was die Validität von ~80% auf ~82–84% hob, weil die Oszillation ein
+Engine-Artefakt war, das das gemittelte Orakel nicht hat.
 
 ### Anatomie der fehlenden ~20% (Weg statt Ziel)
 

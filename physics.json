@@ -12,6 +12,8 @@
     "structure": "Stuetzgewebe / Verholzung"
   },
   "lightAccessBase": 0.4,
+  "structureLightFloor": 0.3,
+  "photoSizeFloor": 0.7,
   "exclusion": 0.8,
   "reachFromLimb": 0.65,
   "reachFromSize": 0.35,
@@ -28,7 +30,11 @@
     "mobility": 0.15,
     "structure": 0.15
   },
-  "baseEnergy": 0.12,
+  "maintenanceQuad": {
+    "metabolism": 0.22,
+    "mobility": 0.20
+  },
+  "nutritionFloor": 0.15,
   "energyScale": 5.0,
   "defenseFromArmor": 0.45,
   "defenseFromStructure": 0.35,

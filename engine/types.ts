@@ -35,6 +35,8 @@ export interface Physics {
   traits: string[];
   traitLabels: Record<string, string>;
   lightAccessBase: number;
+  structureLightFloor: number;
+  photoSizeFloor: number;
   exclusion: number;
   reachFromLimb: number;
   reachFromSize: number;
@@ -51,7 +53,11 @@ export interface Physics {
     mobility: number;
     structure: number;
   };
-  baseEnergy: number;
+  maintenanceQuad: {
+    metabolism: number;
+    mobility: number;
+  };
+  nutritionFloor: number;
   energyScale: number;
   defenseFromArmor: number;
   defenseFromStructure: number;

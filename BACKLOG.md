@@ -8,6 +8,24 @@ Priorität: **P0** = Korrektheit/Bug, **P1** = Kern-Erlebnis/Balance, **P2** = A
 > BAL-1, BAL-2, BAL-3) verändern die Physik → **Orakel neu erzeugen + neu
 > trainieren + `npm run parity`** ist Pflicht, sonst bricht der Prüfstand.
 
+## ✅ Erledigt im Engine-Pass (nur Engine-Funde; UX bewusst offen)
+
+- **BUG-1** Fell-Oszillation → thermal `1−d²` (glatt). *Nebeneffekt: Validität 80→84 %.*
+- **BUG-3** Eingabe-Clamping/NaN-Schutz (freie Umwelt).
+- **BAL-1** Pflanzen-Reich wiederhergestellt: Stützgewebe an vertikale Konkurrenz
+  (`foodHeight`) gekoppelt + Pflanzengröße zahlt auf Photosynthese ein → **alle 5
+  Pflanzen-Archetypen** wieder erreichbar (Kraut, Strauch, Baum, Kältepflanze, Kaktus).
+- **BAL-2** tote Zone → `nutritionFloor` (Temperatur/Prädation wirken auch ohne Nahrung,
+  ohne Gratis-Energie/Blob-Coasting).
+- **BAL-3** Dominanz → steigende Grenzkosten für Stoffwechsel/Mobilität
+  (90 %→33 % bzw. 95 %→62 %).
+- **BAL-4** (teilweise) Knappheits-Mischotroph war eine *echte* Anpassung (Abstand 0.32
+  vom Blob) → korrekt als **🫧 Zwerg-/Hungerform** benannt statt „Mischotroph".
+
+Aktuelle Test-Validität **~82 %** (im Band), Parität exakt (~1e-16). **Offen:** BAL-5
+(Verteilungsschiefe), tiefes BAL-4 (echte Mittel-Nische), alle AXIS-* und CLS-*, sowie
+alle UX-Punkte (bewusst zurückgestellt).
+
 ---
 
 ## P0 — Bugs (Korrektheit)

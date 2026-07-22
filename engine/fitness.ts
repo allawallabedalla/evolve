@@ -42,11 +42,17 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const thermal = 1 - dT * dT;
 
   // 2) Energie - zwei Strategien, gegenseitig ausschliessend.
-  //    a) Photosynthese: braucht Licht UND Wasser. Stuetzgewebe erhoeht die
-  //       Lichtausbeute (hoeher wachsen, Konkurrenz ums Licht).
-  const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure;
+  //    a) Photosynthese: braucht Licht UND Wasser.
+  //       Stuetzgewebe hilft dem Licht nur bei echter vertikaler Konkurrenz
+  //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
+  //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
+  const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
+  const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight;
+  //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
+  //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
+  const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
   const energyPhoto =
-    photo * env.light * env.water * lightAccess * (1 - phys.exclusion * mobility);
+    photo * env.light * env.water * lightAccess * photoSize * (1 - phys.exclusion * mobility);
 
   //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
   const reach = clamp01(limb * phys.reachFromLimb + size * phys.reachFromSize);
@@ -59,13 +65,11 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (phys.forageBase + phys.forageMetabolism * metabolism) *
     (1 - phys.exclusion * photo);
 
-  // Grund-Energie: ein kleiner Sockel (minimale Aufnahme), damit die
-  // Fitness-Landschaft auch ohne Nahrungsquelle nicht voellig flach wird -
-  // sonst uebten Temperatur/Praedation gar keinen Selektionsdruck aus ("tote Zone").
-  const totalEnergy = phys.baseEnergy + energyPhoto + energyForage;
+  const totalEnergy = energyPhoto + energyForage;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;
+  const mq = phys.maintenanceQuad;
   const maintenance =
     m.base +
     size * m.size +
@@ -74,9 +78,18 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     metabolism * m.metabolism +
     photo * m.photosynthesis +
     mobility * m.mobility +
-    structure * m.structure;
+    structure * m.structure +
+    // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet werden
+    // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
+    metabolism * metabolism * mq.metabolism +
+    mobility * mobility * mq.mobility;
 
-  const nutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+  // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
+  // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
+  // (keine "tote Zone"), OHNE dem Wesen Gratis-Energie zu geben - der Anreiz, sich
+  // auf einen echten Energiepfad festzulegen, bleibt erhalten.
+  const rawNutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+  const nutrition = phys.nutritionFloor + (1 - phys.nutritionFloor) * rawNutrition;
 
   // 3) Praedation: Verteidigung aus Panzer + Stuetzgewebe + Groesse, plus
   //    Flucht durch Mobilitaet.

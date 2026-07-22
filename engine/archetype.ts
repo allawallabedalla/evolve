@@ -53,6 +53,10 @@ export function classify(t: TraitVector): Archetype {
     return { kingdom: "Tier", name: "Generalisten-Tier", emoji: "🦎" };
   }
 
-  // --- Zwischenform ---
+  // --- Weder Pflanze noch Tier committed ---
+  // Extreme Knappheit -> alle Merkmale minimiert: echte Zwerg-/Hungerform
+  // (Dormanz-Anpassung), NICHT der unentschiedene 0.5-Blob.
+  if (size < 0.25 && mob < 0.35 && photo < 0.35 && metab < 0.35)
+    return { kingdom: "Uebergangsform", name: "Zwerg- / Hungerform (Minimalist)", emoji: "🫧" };
   return { kingdom: "Uebergangsform", name: "Mischotroph (Pflanze/Tier-Zwischenform)", emoji: "🦠" };
 }

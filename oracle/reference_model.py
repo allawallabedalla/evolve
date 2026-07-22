@@ -59,9 +59,11 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     thermal = 1.0 - d_t * d_t
 
     # 2) Energie - zwei sich ausschliessende Strategien
-    light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure
+    structure_light = phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]
+    light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
+    photo_size = phys["photoSizeFloor"] + (1.0 - phys["photoSizeFloor"]) * size
     energy_photo = (
-        photo * env["light"] * env["water"] * light_access * (1.0 - phys["exclusion"] * mobility)
+        photo * env["light"] * env["water"] * light_access * photo_size * (1.0 - phys["exclusion"] * mobility)
     )
 
     reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"])
@@ -76,9 +78,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = phys["baseEnergy"] + energy_photo + energy_forage
+    total_energy = energy_photo + energy_forage
 
     m = phys["maintenance"]
+    mq = phys["maintenanceQuad"]
     maintenance = (
         m["base"]
         + size * m["size"]
@@ -88,8 +91,11 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + photo * m["photosynthesis"]
         + mobility * m["mobility"]
         + structure * m["structure"]
+        + metabolism * metabolism * mq["metabolism"]
+        + mobility * mobility * mq["mobility"]
     )
-    nutrition = _sigmoid((total_energy - maintenance) * phys["energyScale"])
+    raw_nutrition = _sigmoid((total_energy - maintenance) * phys["energyScale"])
+    nutrition = phys["nutritionFloor"] + (1.0 - phys["nutritionFloor"]) * raw_nutrition
 
     # 3) Praedation
     defense = _clamp01(
