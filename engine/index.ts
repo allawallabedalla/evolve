@@ -1,7 +1,7 @@
 // Barrel: ein Einstiegspunkt fuer Browser-Mockup, CLI und Trainings-Schleife.
 export * from "./types.js";
 export { fitness } from "./fitness.js";
-export { runSimulation } from "./simulate.js";
+export { runSimulation, stepGeneration, DRIFT_SCALE } from "./simulate.js";
 export type { SimResult } from "./simulate.js";
 export { explainRun } from "./explain.js";
 export type { ExplainEvent } from "./explain.js";

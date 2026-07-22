@@ -26,6 +26,24 @@ Aktuelle Test-Validität **~82 %** (im Band), Parität exakt (~1e-16). **Offen:*
 (Verteilungsschiefe), tiefes BAL-4 (echte Mittel-Nische), alle AXIS-* und CLS-*, sowie
 alle UX-Punkte (bewusst zurückgestellt).
 
+## ✅ Erledigt im Spiel-Pass (Kern-Loop)
+
+- **STOCH-1 "immer gleiches Ergebnis"** → kalibrierte stochastische Drift/Mutation pro
+  Lebens-Seed (`stepGeneration`/`runSimulation(...,seed)`). Mittelwertfrei um das
+  validierte Ergebnis (Determinismus ohne Seed bleibt → Validität unberührt). Starker
+  Selektionsdruck hält den Grundtyp (lesbar), neutrale Merkmale + Kipppunkte variieren →
+  jedes Wesen einzigartig, teils anderer Archetyp aus gleicher Umwelt.
+- **TIME-1 kontinuierliche Zeit** → Mockup läuft jetzt als Dauer-Loop (`stepGeneration`
+  pro Tick), Umwelt wird *live* zwischendurch verändert; das Wesen passt sich ab seinem
+  aktuellen Zustand an (kein Neustart). Play/Pause, Tempo, „Neues Leben".
+
+**Offen / gesammelt (neu):**
+- **UX-PLANT** Pflanzen sind schwer zu finden — Rezept „viel Licht + Wasser + WENIG
+  Nahrung" ist nicht ersichtlich. Später: sichtbare Hinweise / „Rezept"-Presets.
+- **TIME-2** echte Offline-Zeit (Tamagotchi): Zustand + Zeitstempel speichern, bei
+  Rückkehr die vergangene Zeit nachsimulieren (braucht Account/Backend).
+- **STOCH-2** Drift-Stärke als spürbaren „Mutationsraten"-Regler exponieren (optional).
+
 ---
 
 ## P0 — Bugs (Korrektheit)

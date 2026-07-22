@@ -108,16 +108,21 @@
   input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--bio); cursor: pointer; border: 2px solid var(--abyss); }
   input[type=range]:focus-visible { box-shadow: 0 0 0 2px var(--bio-dim); }
 
-  .evolve {
-    width: 100%; margin-top: 8px; padding: 13px; border-radius: 12px; cursor: pointer;
-    font-family: var(--sans); font-size: .95rem; font-weight: 700; letter-spacing: .01em;
-    color: #062018; background: linear-gradient(180deg, var(--bio), var(--bio-dim));
-    border: none; box-shadow: 0 6px 18px rgba(95,230,176,.22);
-    transition: transform .05s, filter .15s;
+  .controls { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .ctrl {
+    font-family: var(--sans); font-size: .85rem; color: var(--text);
+    background: var(--chamber-2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 12px; cursor: pointer; transition: border-color .15s, transform .05s;
   }
-  .evolve:hover { filter: brightness(1.06); }
-  .evolve:active { transform: translateY(1px); }
-  .evolve:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
+  .ctrl:hover { border-color: var(--bio-dim); }
+  .ctrl:active { transform: translateY(1px); }
+  .ctrl.play { font-size: 1rem; min-width: 44px; }
+  .ctrl.newlife { margin-left: auto; }
+  .speeds { display: inline-flex; gap: 4px; background: var(--chamber-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .speed { font-size: .78rem; color: var(--muted); background: transparent; border: none; border-radius: 7px; padding: 5px 9px; cursor: pointer; }
+  .speed.active { background: var(--bio-dim); color: #06201a; font-weight: 700; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bio); box-shadow: 0 0 8px var(--bio); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
   .footnote { margin-top: 26px; color: var(--muted); font-size: .74rem; text-align: center; line-height: 1.6; }
   .footnote b { color: var(--text); font-weight: 600; }
@@ -128,14 +133,14 @@
 <div class="wrap">
   <header class="top">
     <div class="brand"><b>Evolve</b> · Bio-Kammer</div>
-    <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Dreh an der Umwelt, lass die Generationen laufen und sieh zu, wohin sich das Leben entwickelt.</div>
+    <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Die Zeit läuft ununterbrochen; dreh an der Umwelt und sieh zu, wie sich das Leben über Generationen anpasst.</div>
   </header>
 
   <div class="stage">
     <!-- Habitat + Identitaet -->
     <div class="panel viewport-panel">
       <div class="viewport">
-        <div class="gen-readout" id="genReadout">Generation 0</div>
+        <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <canvas id="habitat" width="720" height="560"></canvas>
       </div>
@@ -152,7 +157,11 @@
       <h2>Umwelt formen</h2>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
-      <button class="evolve" id="evolveBtn">▶ Generationen laufen lassen</button>
+      <div class="controls">
+        <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter">⏸</button>
+        <div class="speeds" id="speeds"></div>
+        <button class="ctrl newlife" id="newLifeBtn">🥚 Neues Leben</button>
+      </div>
     </div>
   </div>
 
@@ -202,25 +211,27 @@ function fitness(t, e){
   return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition), PHYS.floor);
 }
 
-function runSimulation(env, generations){
-  let m = new Array(8).fill(0.5);
-  const traj = [m.slice()];
-  const eps = PHYS.eps;
-  for(let gen=0; gen<generations; gen++){
-    const next = m.slice();
-    for(let g=0; g<8; g++){
-      const up=m.slice(); up[g]=clamp01(up[g]+eps);
-      const dn=m.slice(); dn[g]=clamp01(dn[g]-eps);
-      const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
-      const varFactor=4*next[g]*(1-next[g]);
-      const speedMod=PARAMS.varianceWeight*varFactor+(1-PARAMS.varianceWeight);
-      next[g]+=PARAMS.responseRate[g]*PARAMS.selectionStrength*grad*speedMod;
-      next[g]+=PARAMS.mutationRate*(0.5-next[g]);
-      next[g]=clamp01(next[g]);
-    }
-    m=next; traj.push(m.slice());
+// Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
+// Ergebnis) -> jedes Leben ist einzigartig. Identisch zu engine/simulate.ts.
+const DRIFT_SCALE = 0.05;
+function mulberry32(seed){ let a=seed>>>0; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+
+// EINE Generation weiter (Basis der kontinuierlichen Zeit): passt das Genom ab
+// seinem aktuellen Zustand an die aktuelle Umwelt an.
+function stepGeneration(m, env, randn){
+  const eps=PHYS.eps, next=m.slice();
+  for(let g=0; g<8; g++){
+    const up=m.slice(); up[g]=clamp01(up[g]+eps);
+    const dn=m.slice(); dn[g]=clamp01(dn[g]-eps);
+    const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
+    const varFactor=4*next[g]*(1-next[g]);
+    const speedMod=PARAMS.varianceWeight*varFactor+(1-PARAMS.varianceWeight);
+    next[g]+=PARAMS.responseRate[g]*PARAMS.selectionStrength*grad*speedMod;
+    next[g]+=PARAMS.mutationRate*(0.5-next[g]);
+    if(randn) next[g]+=randn()*DRIFT_SCALE*(0.35+0.65*varFactor);
+    next[g]=clamp01(next[g]);
   }
-  return traj;
+  return next;
 }
 
 // ---- Interpretation: Archetyp + Bauplan ----
@@ -291,7 +302,15 @@ const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzeru
 
 let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
 let genome = new Array(8).fill(0.5);
-let trajectory = null, animT = 0, evolving = false, lastBiome = "freie Umwelt";
+let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
+let rng, randn;
+function newLineage(){
+  genome = new Array(8).fill(0.5); generation = 0;
+  const seed = (Math.random()*4294967296)>>>0;
+  rng = mulberry32(seed);
+  randn = () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+}
+newLineage();
 
 // ---- UI aufbauen ----
 const leversEl = document.getElementById("levers");
@@ -313,7 +332,7 @@ BIOMES.forEach(b => {
     Object.assign(env, b.env);
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
-    evolve();
+    // Kein Neustart: die laufende Evolution reagiert ab dem aktuellen Zustand.
   });
   biomesEl.appendChild(btn);
 });
@@ -336,13 +355,24 @@ function updatePanels(){
   }
 }
 
-function evolve(){
-  if(evolving) return;
-  trajectory = runSimulation(env, 80);
-  evolving = true; animT = 0;
-  document.getElementById("evolveBtn").disabled = true;
-}
-document.getElementById("evolveBtn").addEventListener("click", evolve);
+// ---- Zeit-Steuerung ----
+const playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", () => {
+  running = !running;
+  playBtn.textContent = running ? "⏸" : "▶";
+  document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
+});
+const speedsEl = document.getElementById("speeds");
+[["langsam",3],["normal",8],["schnell",22]].forEach(([lbl,v]) => {
+  const b=document.createElement("button"); b.className="speed"+(v===gensPerSec?" active":""); b.textContent=lbl;
+  b.addEventListener("click", () => { gensPerSec=v; [...speedsEl.children].forEach(c=>c.classList.remove("active")); b.classList.add("active"); });
+  speedsEl.appendChild(b);
+});
+document.getElementById("newLifeBtn").addEventListener("click", () => {
+  newLineage();
+  document.getElementById("genReadout").textContent = "Generation 0";
+  updatePanels();
+});
 
 // ======================= Canvas-Renderer =======================
 const canvas = document.getElementById("habitat");
@@ -500,17 +530,20 @@ function drawDwarf(g, cx, cy, breath, time, rnd){
 }
 
 // ======================= Loop =======================
+let lastTime = null, acc = 0;
 function frame(time){
-  // Evolution animieren
-  if(evolving && trajectory){
-    animT += 1/60;
-    const p = Math.min(1, animT/2.6);      // ~2.6s
-    const idxF = p*(trajectory.length-1);
-    const i0 = Math.floor(idxF), i1 = Math.min(trajectory.length-1, i0+1), f = idxF-i0;
-    for(let g=0; g<8; g++) genome[g] = lerp(trajectory[i0][g], trajectory[i1][g], f);
-    document.getElementById("genReadout").textContent = "Generation " + Math.round(idxF);
-    updatePanels();
-    if(p>=1){ evolving=false; genome=trajectory[trajectory.length-1].slice(); document.getElementById("evolveBtn").disabled=false; updatePanels(); }
+  if(lastTime===null) lastTime=time;
+  const dt = Math.min(0.1, (time-lastTime)/1000); lastTime=time;
+  // Kontinuierliche Zeit: laufend Generationen weiterschieben (Tempo-abhaengig).
+  if(running){
+    acc += dt*gensPerSec;
+    let steps = Math.floor(acc);
+    if(steps>0){
+      acc -= steps; steps = Math.min(steps, 40);   // Nachhol-Deckel
+      for(let i=0;i<steps;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+      updatePanels();
+      document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");
+    }
   }
   drawHabitat();
   drawMotes(time);
