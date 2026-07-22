@@ -53,10 +53,14 @@ export interface EngineParams {
   responseRate: number[]; // pro Gen: wie schnell es dem Selektionsdruck folgt (5 Werte)
   mutationRate: number; // Mutations-Ruecktrieb zur Mitte (Mutation-Selektion-Balance)
   selectionStrength: number; // globale Staerke der Selektion
+  varianceWeight: number; // 0..1: wie stark die Anpassung sich nahe Fixierung (Gen ->0/1) verlangsamt.
+  // Modelliert die genetische Varianz x*(1-x): weniger Variation -> langsamere
+  // Reaktion. Verhindert Uebersteuern ueber das Orakel-Gleichgewicht hinaus.
 }
 
 export const DEFAULT_ENGINE_PARAMS: EngineParams = {
   responseRate: [0.15, 0.15, 0.15, 0.15, 0.15],
   mutationRate: 0.03,
   selectionStrength: 1.5,
+  varianceWeight: 0.5,
 };

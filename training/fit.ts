@@ -26,15 +26,18 @@ const TARGET_HIGH = 90;
 const VALIDITY_SCALE = 0.25;
 
 // ---- Parameter-Grenzen fuer den GA ----
-// Reihenfolge: responseRate[0..4], mutationRate, selectionStrength
+// Reihenfolge: responseRate[0..4], mutationRate, selectionStrength, varianceWeight
+// responseRate/selectionStrength weiter gefasst, weil die Varianz-Daempfung die
+// effektiven Schritte verkleinert - schnelle Szenarien brauchen mehr Spielraum.
 const BOUNDS: [number, number][] = [
-  [0.005, 0.4],
-  [0.005, 0.4],
-  [0.005, 0.4],
-  [0.005, 0.4],
-  [0.005, 0.4],
+  [0.005, 0.8],
+  [0.005, 0.8],
+  [0.005, 0.8],
+  [0.005, 0.8],
+  [0.005, 0.8],
   [0.0, 0.12],
-  [0.3, 4.0],
+  [0.3, 6.0],
+  [0.0, 1.0],
 ];
 const DIM = BOUNDS.length;
 
@@ -73,6 +76,7 @@ function vecToParams(v: number[]): EngineParams {
     responseRate: v.slice(0, 5),
     mutationRate: v[5],
     selectionStrength: v[6],
+    varianceWeight: v[7],
   };
 }
 

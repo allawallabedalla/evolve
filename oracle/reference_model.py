@@ -135,10 +135,14 @@ def run_oracle(
     env: Dict[str, float],
     generations: int,
     phys: Dict,
-    seeds: int = 6,
+    seeds: int = 24,
     base_seed: int = 12345,
 ) -> List[List[float]]:
-    """Mittelt mehrere stochastische Laeufe -> glatte, robuste Referenzkurve."""
+    """Mittelt mehrere stochastische Laeufe -> glatte, robuste Referenzkurve.
+
+    Mehr Seeds glaetten die neutrale Drift (Merkmale ohne Selektionsdruck) heraus,
+    sodass die Ground Truth naeher an ihrem unverzerrten Erwartungswert liegt.
+    """
     n = len(TRAITS)
     acc = [[0.0] * n for _ in range(generations + 1)]
     for s in range(seeds):

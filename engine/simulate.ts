@@ -53,9 +53,15 @@ export function runSimulation(
       dn[g] = clamp01(dn[g] - eps);
       const grad = (fitness(up, env, phys) - fitness(dn, env, phys)) / (2 * eps);
 
-      // Selektionsschritt
-      next[g] += params.responseRate[g] * params.selectionStrength * grad;
-      // Mutations-Ruecktrieb zur Mitte
+      // Genetische Varianz x*(1-x), normiert auf 0..1 (max bei 0.5, 0 an den Raendern).
+      // Die Selektion greift proportional zur vorhandenen Variation - nahe der
+      // Fixierung bleibt kaum Variation, also verlangsamt sich die Reaktion.
+      const varFactor = 4 * next[g] * (1 - next[g]);
+      const speedMod = params.varianceWeight * varFactor + (1 - params.varianceWeight);
+
+      // Selektionsschritt (varianz-gedaempft)
+      next[g] += params.responseRate[g] * params.selectionStrength * grad * speedMod;
+      // Mutations-Ruecktrieb zur Mitte (setzt zusammen mit der Varianz das Gleichgewicht unter der Grenze)
       next[g] += params.mutationRate * (0.5 - next[g]);
       next[g] = clamp01(next[g]);
     }

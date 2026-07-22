@@ -79,13 +79,31 @@ mockup/               Browser-Mockup (Text-I/O + Validitäts-Balken)
 
 ## Aktueller Stand der Validität
 
-Nach dem ersten Training liegt die **Test-Validität bei ~74%** — knapp unter dem Ziel-Band.
-Bemerkenswert: der **Endzustand** der Evolution trifft das Orakel schon sehr genau
-(z. B. Eiszeit: Isolation 0.89 vs. 0.89). Die Rest-Lücke stammt vor allem aus:
+**Test-Validität ~88% — im Ziel-Band (80–90%).** Training ~84%.
 
-1. **Anpassungs-Geschwindigkeit** — die *Form* der Kurve über die Generationen weicht ab.
-2. **Neutrale Drift** — Merkmale ohne Selektionsdruck (z. B. Gliedmaßenlänge ohne
-   Höhenbedarf) wandern im Orakel, die Engine hält sie fest.
+### Weg dorthin (dokumentiert als Beispiel der Wachstums-Mechanik)
 
-Beides sind **Struktur-Themen** → nächster Wachstumsschritt, der bewusst bestätigt wird
-(siehe Autonomie-Regel), nicht automatisch passiert.
+Das erste Training kam nur auf ~74%. Die Diagnose (Engine- vs. Orakel-Trajektorien
+Generation für Generation) zeigte drei strukturelle Ursachen:
+
+1. **Übersteuern** — stark selektierte Gene schossen über das Orakel-Gleichgewicht
+   hinaus (Panzer 0.99 statt 0.89).
+2. **Geschwindigkeit** — manche Anpassungen liefen zu langsam (Gliedmaßen).
+3. **Neutrale Drift** — selektionsfreie Merkmale wanderten im Orakel (Seed-Rauschen).
+
+Der bestätigte **Struktur-Wachstumsschritt**:
+
+- **Genetische Varianz `x·(1−x)`** in die Engine-Dynamik (Wright-Fisher): Anpassung
+  verlangsamt sich nahe der Fixierung, weil weniger Variation zum Selektieren bleibt.
+  Behebt Übersteuern *und* Kurvenform. Der GA gewichtete diesen Term mit **1.0** —
+  er hat ihn voll übernommen.
+- **Mehr Orakel-Seeds (6 → 24)**: mittelt die neutrale Drift heraus, bessere Ground Truth.
+
+Das ist die Mechanik in Aktion: Parameter automatisch gefittet, der *strukturelle*
+Schritt bewusst bestätigt — und die Physik blieb dabei unangetastet.
+
+### Verbleibende Rest-Lücke (bewusster Design-Freiraum)
+
+Kleinere Abweichungen bleiben (z. B. Größe vs. Panzer teilen sich die Verteidigung leicht
+anders auf). Das ist gewollt: bei 100% hätten wir das schwere Modell nachgebaut. ~88%
+heißt *glaubwürdig und schlank*.
