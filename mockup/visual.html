@@ -1,0 +1,523 @@
+<title>Evolve — Bio-Kammer</title>
+<style>
+  /* ============================================================
+     EVOLVE — visueller Mockup. Bewusst einwelt-dunkel ("Bio-Kammer"):
+     ein leuchtendes Lebewesen in einem Habitat-Fenster. Die Engine
+     (Fitness, Selektion, Genom->Bauplan) ist inline und identisch zur
+     validierten TS-Engine (~82% Orakel-Validitaet).
+     ============================================================ */
+  :root {
+    color-scheme: dark;
+    --abyss: #07100f;
+    --chamber: #0d1c1b;
+    --chamber-2: #112625;
+    --line: #21403c;
+    --line-soft: #17302d;
+    --text: #dcebe6;
+    --muted: #7f9c95;
+    --bio: #5fe6b0;          /* biolumineszentes Gruen - Akzent */
+    --bio-dim: #2f7d63;
+    --ember: #ffb271;        /* warmes Tier/Energie-Signal */
+    --danger: #ff7a6b;
+    --shadow: 0 8px 30px rgba(0,0,0,.45);
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #0f2422 0%, var(--abyss) 60%),
+      var(--abyss);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 18px 64px; }
+
+  header.top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .brand {
+    font-family: var(--serif); font-style: italic; font-size: 1.9rem; letter-spacing: .01em;
+    color: var(--text);
+  }
+  .brand b { color: var(--bio); font-style: normal; font-weight: 700; }
+  .tagline { color: var(--muted); font-size: .9rem; max-width: 46ch; }
+
+  .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start; }
+  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---- Habitat-Fenster ---- */
+  .viewport { position: relative; padding: 0; overflow: hidden; }
+  .viewport canvas { display: block; width: 100%; height: auto; border-radius: 16px 16px 0 0; }
+  .gen-readout {
+    position: absolute; top: 12px; left: 14px;
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .05em;
+    color: var(--bio); background: rgba(7,16,15,.55); border: 1px solid var(--line-soft);
+    padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(3px);
+  }
+  .biome-tag {
+    position: absolute; top: 12px; right: 14px;
+    font-size: .74rem; color: var(--muted); background: rgba(7,16,15,.55);
+    border: 1px solid var(--line-soft); padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(3px);
+  }
+
+  /* ---- Identitaets-Karte ---- */
+  .card { padding: 16px 20px 20px; border-top: 1px solid var(--line-soft); }
+  .kingdom { text-transform: uppercase; letter-spacing: .18em; font-size: .68rem; color: var(--bio-dim); }
+  .species { font-family: var(--serif); font-style: italic; font-size: 1.55rem; text-wrap: balance; margin: 2px 0 6px; display: flex; align-items: center; gap: 10px; }
+  .species .emoji { font-style: normal; font-size: 1.5rem; }
+  .bauplan { color: var(--muted); font-size: .9rem; }
+
+  /* ---- Genom-Ausgabe ---- */
+  .genes { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; margin-top: 16px; }
+  @media (max-width: 400px) { .genes { grid-template-columns: 1fr; } }
+  .gene { display: grid; grid-template-columns: 92px 1fr 30px; align-items: center; gap: 8px; }
+  .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
+  .gene .track { height: 6px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+  .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
+  .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---- Konsole ---- */
+  .console { padding: 18px 18px 20px; }
+  .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio); margin: 0 0 12px; }
+  .biomes { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+  .biome {
+    font-size: .8rem; color: var(--text); background: var(--chamber-2);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer;
+    transition: border-color .15s, transform .05s;
+  }
+  .biome:hover { border-color: var(--bio-dim); }
+  .biome:active { transform: translateY(1px); }
+
+  .lever { margin-bottom: 13px; }
+  .lever .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .lever .name { font-size: .82rem; }
+  .lever .name .ico { margin-right: 6px; }
+  .lever .val { font-family: var(--mono); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 999px; background: var(--line-soft); outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--bio); cursor: pointer; border: 2px solid var(--abyss); box-shadow: 0 0 8px var(--bio-dim); }
+  input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--bio); cursor: pointer; border: 2px solid var(--abyss); }
+  input[type=range]:focus-visible { box-shadow: 0 0 0 2px var(--bio-dim); }
+
+  .evolve {
+    width: 100%; margin-top: 8px; padding: 13px; border-radius: 12px; cursor: pointer;
+    font-family: var(--sans); font-size: .95rem; font-weight: 700; letter-spacing: .01em;
+    color: #062018; background: linear-gradient(180deg, var(--bio), var(--bio-dim));
+    border: none; box-shadow: 0 6px 18px rgba(95,230,176,.22);
+    transition: transform .05s, filter .15s;
+  }
+  .evolve:hover { filter: brightness(1.06); }
+  .evolve:active { transform: translateY(1px); }
+  .evolve:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
+
+  .footnote { margin-top: 26px; color: var(--muted); font-size: .74rem; text-align: center; line-height: 1.6; }
+  .footnote b { color: var(--text); font-weight: 600; }
+  .chip-val { font-family: var(--mono); color: var(--bio); }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>Evolve</b> · Bio-Kammer</div>
+    <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Dreh an der Umwelt, lass die Generationen laufen und sieh zu, wohin sich das Leben entwickelt.</div>
+  </header>
+
+  <div class="stage">
+    <!-- Habitat + Identitaet -->
+    <div class="panel viewport-panel">
+      <div class="viewport">
+        <div class="gen-readout" id="genReadout">Generation 0</div>
+        <div class="biome-tag" id="biomeTag">freie Umwelt</div>
+        <canvas id="habitat" width="720" height="560"></canvas>
+      </div>
+      <div class="card">
+        <div class="kingdom" id="kingdom">—</div>
+        <div class="species"><span class="emoji" id="emoji">🫧</span><span id="species">Ursprungszelle</span></div>
+        <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
+        <div class="genes" id="genes"></div>
+      </div>
+    </div>
+
+    <!-- Konsole -->
+    <div class="panel console">
+      <h2>Umwelt formen</h2>
+      <div class="biomes" id="biomes"></div>
+      <div id="levers"></div>
+      <button class="evolve" id="evolveBtn">▶ Generationen laufen lassen</button>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern gezeichnet — dieselbe Evolutions-Engine, die
+    gegen ein wissenschaftliches Referenzmodell auf <b class="chip-val">~82&nbsp;%</b> abgeglichen ist
+    (Modell-Güte, nicht Bewertung deines Wesens). Früher Mockup — die Optik verfeinern wir noch.
+  </p>
+</div>
+
+<script>
+"use strict";
+// ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
+const PHYS = {
+  lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
+  reachFromLimb: 0.65, reachFromSize: 0.35, heightPenalty: 1.5, forageBase: 0.55, forageMetabolism: 0.9,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15 },
+  maintenanceQuad: { metabolism:0.22, mobility:0.20 },
+  nutritionFloor: 0.15, energyScale: 5.0,
+  defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
+  wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
+};
+const PARAMS = {
+  responseRate:[0.5571512061949792,0.3932280521033467,0.331079620555689,0.27242700520566276,0.4276526481693577,0.35095724398392397,0.4094134552801699,0.4376337178885488],
+  mutationRate:0.04486513941253964, selectionStrength:1.02509910940179, varianceWeight:1
+};
+const clamp01 = x => x<0?0:x>1?1:x;
+const sigmoid = x => 1/(1+Math.exp(-x));
+
+function fitness(t, e){
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure]=t;
+  const dT = insulation-(1-e.temperature);
+  const thermal = 1-dT*dT;
+  const structureLight = PHYS.structureLightFloor+(1-PHYS.structureLightFloor)*e.foodHeight;
+  const lightAccess = PHYS.lightAccessBase+(1-PHYS.lightAccessBase)*structure*structureLight;
+  const photoSize = PHYS.photoSizeFloor+(1-PHYS.photoSizeFloor)*size;
+  const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*(1-PHYS.exclusion*mobility);
+  const reach = clamp01(limb*PHYS.reachFromLimb+size*PHYS.reachFromSize);
+  const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
+  const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*(1-PHYS.exclusion*photo);
+  const total = energyPhoto+energyForage;
+  const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility;
+  const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
+  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility);
+  const predSurv = 1-e.predation*(1-defense);
+  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition), PHYS.floor);
+}
+
+function runSimulation(env, generations){
+  let m = new Array(8).fill(0.5);
+  const traj = [m.slice()];
+  const eps = PHYS.eps;
+  for(let gen=0; gen<generations; gen++){
+    const next = m.slice();
+    for(let g=0; g<8; g++){
+      const up=m.slice(); up[g]=clamp01(up[g]+eps);
+      const dn=m.slice(); dn[g]=clamp01(dn[g]-eps);
+      const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
+      const varFactor=4*next[g]*(1-next[g]);
+      const speedMod=PARAMS.varianceWeight*varFactor+(1-PARAMS.varianceWeight);
+      next[g]+=PARAMS.responseRate[g]*PARAMS.selectionStrength*grad*speedMod;
+      next[g]+=PARAMS.mutationRate*(0.5-next[g]);
+      next[g]=clamp01(next[g]);
+    }
+    m=next; traj.push(m.slice());
+  }
+  return traj;
+}
+
+// ---- Interpretation: Archetyp + Bauplan ----
+function classify(t){
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
+  if(photo>0.45 && mob<0.4){
+    if(struct>0.6 && size>0.45) return {k:"Pflanze",n:"Verholzt · baumartig",e:"🌳"};
+    if(struct>0.6)              return {k:"Pflanze",n:"Verholzter Strauch",e:"🪴"};
+    if(armor>0.5)               return {k:"Pflanze",n:"Bewehrte Pflanze",e:"🌵"};
+    if(insul>0.6)               return {k:"Pflanze",n:"Behaarte Kältepflanze",e:"🌿"};
+    return {k:"Pflanze",n:"Kraut · niedrige Pflanze",e:"☘️"};
+  }
+  if(mob>0.45 && photo<0.4){
+    if(armor>0.55 && size>0.55) return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
+    if(armor>0.55)              return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
+    if(size>0.6 && metab>0.6)   return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
+    if(limb>0.6 && size<0.45)   return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
+    if(insul>0.6)               return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
+    if(size<0.3)                return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
+    return {k:"Tier",n:"Generalisten-Tier",e:"🦎"};
+  }
+  if(size<0.25 && mob<0.35 && photo<0.35 && metab<0.35) return {k:"Übergangsform",n:"Zwerg- · Hungerform",e:"🫧"};
+  return {k:"Übergangsform",n:"Mischotroph",e:"🦠"};
+}
+
+function describe(t){
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
+  const a=classify(t), plant=a.k==="Pflanze", animal=a.k==="Tier";
+  const sz = size<0.15?"winzig":size<0.35?"klein":size<0.6?"mittelgroß":size<0.8?"groß":"riesig";
+  const cover=[];
+  if(insul>0.5) cover.push(plant?"isolierende Behaarung":"dichtes Fell");
+  if(armor>0.5) cover.push(plant?"harte Rinde":"Panzerplatten");
+  if(plant && struct>0.6) cover.push("verholzte Achse");
+  if(!cover.length) cover.push(plant?"weiches Gewebe":"nackte Haut");
+  const parts=[];
+  if(plant){
+    const leaves=Math.round(photo*8); if(leaves>0) parts.push(leaves+" Photosynthese-Blätter");
+    if(struct>0.55 && size>0.4) parts.push("tragender Stamm");
+    parts.push("Wurzelwerk");
+  } else if(animal){
+    const legs=Math.round(clamp01(0.6*mob+0.4*limb)*8); if(legs>0) parts.push(legs+(limb>0.55?" lange Beine":" kurze Extremitäten"));
+    if(limb>0.5 && metab>0.4) parts.push("Greifwerkzeuge");
+    if(armor>0.6) parts.push("Stacheln");
+  } else parts.push("reduzierte Fortsätze");
+  const loco = plant?"sessil":mob<0.3?"kaum beweglich":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
+  const energy = plant?"Photosynthese":animal?"Jäger/Sammler":"Mischform";
+  return `${sz}, ${cover.join(" + ")}. ${parts.join(", ")}. Energie: ${energy}. Fortbewegung: ${loco}.`;
+}
+
+// ======================= Umwelt / Regler =======================
+const LEVERS = [
+  {key:"temperature", ico:"🌡️", name:"Temperatur", lo:"kalt", hi:"heiß"},
+  {key:"predation",   ico:"🦖", name:"Räuberdruck", lo:"keine", hi:"extrem"},
+  {key:"foodAbundance",ico:"🍖", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
+  {key:"foodHeight",  ico:"🪜", name:"Nahrungs-/Lichthöhe", lo:"Boden", hi:"hoch"},
+  {key:"light",       ico:"☀️", name:"Licht", lo:"dunkel", hi:"sonnig"},
+  {key:"water",       ico:"💧", name:"Wasser", lo:"Dürre", hi:"feucht"},
+];
+const BIOMES = [
+  {n:"❄️ Eiszeit", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
+  {n:"🦖 Räuberland", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.6}},
+  {n:"🌾 Hohe Nahrung", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
+  {n:"🏜️ Hitze-Dürre", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
+  {n:"☀️ Sonniger Sumpf", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
+  {n:"🌲 Lichtkampf", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
+];
+const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe"];
+
+let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
+let genome = new Array(8).fill(0.5);
+let trajectory = null, animT = 0, evolving = false, lastBiome = "freie Umwelt";
+
+// ---- UI aufbauen ----
+const leversEl = document.getElementById("levers");
+LEVERS.forEach(l => {
+  const d = document.createElement("div"); d.className="lever";
+  d.innerHTML = `<div class="row"><span class="name"><span class="ico">${l.ico}</span>${l.name}</span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
+    <input type="range" min="0" max="1" step="0.01" id="s-${l.key}" value="${env[l.key]}" aria-label="${l.name}">`;
+  leversEl.appendChild(d);
+  d.querySelector("input").addEventListener("input", ev => {
+    env[l.key] = +ev.target.value;
+    document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
+    lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+  });
+});
+const biomesEl = document.getElementById("biomes");
+BIOMES.forEach(b => {
+  const btn = document.createElement("button"); btn.className="biome"; btn.textContent=b.n;
+  btn.addEventListener("click", () => {
+    Object.assign(env, b.env);
+    LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
+    lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
+    evolve();
+  });
+  biomesEl.appendChild(btn);
+});
+const genesEl = document.getElementById("genes");
+GENE_LABELS.forEach((lbl,i) => {
+  const d=document.createElement("div"); d.className="gene";
+  d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
+  genesEl.appendChild(d);
+});
+
+function updatePanels(){
+  const a = classify(genome);
+  document.getElementById("kingdom").textContent = a.k;
+  document.getElementById("emoji").textContent = a.e;
+  document.getElementById("species").textContent = a.n;
+  document.getElementById("bauplan").textContent = describe(genome);
+  for(let i=0;i<8;i++){
+    document.getElementById("g-"+i).style.width = (genome[i]*100).toFixed(0)+"%";
+    document.getElementById("gn-"+i).textContent = genome[i].toFixed(2);
+  }
+}
+
+function evolve(){
+  if(evolving) return;
+  trajectory = runSimulation(env, 80);
+  evolving = true; animT = 0;
+  document.getElementById("evolveBtn").disabled = true;
+}
+document.getElementById("evolveBtn").addEventListener("click", evolve);
+
+// ======================= Canvas-Renderer =======================
+const canvas = document.getElementById("habitat");
+const ctx = canvas.getContext("2d");
+let CW=720, CH=560, DPR=1;
+function resize(){
+  const rect = canvas.getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio||1);
+  CW = rect.width; CH = rect.width * (560/720);
+  canvas.width = CW*DPR; canvas.height = CH*DPR;
+  canvas.style.height = CH+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize", resize);
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function mix(c1,c2,t){ return [lerp(c1[0],c2[0],t),lerp(c1[1],c2[1],t),lerp(c1[2],c2[2],t)]; }
+const rgb = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+// deterministischer RNG aus dem Genom (fuer organischen, aber stabilen Jitter)
+function seeded(g){ let s=0; for(let i=0;i<8;i++) s=(s*131+Math.floor(g[i]*997))>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+function drawHabitat(){
+  // Umwelt-getoenter Hintergrund
+  const cold=[18,44,58], hot=[54,32,26];
+  const base = mix(cold,hot,env.temperature);
+  const dark = lerp(0.45,1,env.light); // dunkler bei wenig Licht
+  const top = base.map(c=>c*0.5*dark+6), bot=[7,16,15];
+  const grd = ctx.createRadialGradient(CW/2,CH*0.42,40, CW/2,CH*0.5,CH*0.9);
+  grd.addColorStop(0, rgb(top)); grd.addColorStop(1, rgb(bot));
+  ctx.fillStyle=grd; ctx.fillRect(0,0,CW,CH);
+  // Boden
+  ctx.fillStyle="rgba(10,26,24,.9)";
+  ctx.beginPath(); ctx.ellipse(CW/2, CH*0.94, CW*0.6, CH*0.14, 0,0,Math.PI*2); ctx.fill();
+}
+
+let motes = [];
+function initMotes(){ motes = Array.from({length:26},()=>({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.6+0.4,s:Math.random()*0.3+0.05,ph:Math.random()*6})); }
+function drawMotes(time){
+  ctx.save(); ctx.globalCompositeOperation="lighter";
+  for(const m of motes){
+    m.y -= m.s; if(m.y< -4){ m.y=CH+4; m.x=Math.random()*CW; }
+    const a = 0.10+0.08*Math.sin(time*0.001+m.ph);
+    ctx.fillStyle=`rgba(95,230,176,${a})`;
+    ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawCreature(g, time){
+  const a = classify(g);
+  const rnd = seeded(g);
+  const breath = 1 + 0.025*Math.sin(time*0.0016);
+  const cx = CW/2;
+  ctx.save();
+  ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
+
+  if(a.k==="Pflanze"){
+    drawPlant(g, cx, CH*0.9, breath, time, rnd);
+  } else if(a.k==="Tier"){
+    drawAnimal(g, cx, CH*0.6, breath, time, rnd);
+  } else {
+    drawDwarf(g, cx, CH*0.62, breath, time, rnd);
+  }
+  ctx.restore();
+}
+
+function drawPlant(g, bx, by, breath, time, rnd){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const woody = struct>0.55;
+  const h = (60 + size*150 + struct*70) * breath;
+  const w = 5 + struct*16;
+  const sway = Math.sin(time*0.0012)*(0.06+0.05*(1-struct));
+  // Stamm
+  const stemCol = woody ? mix([90,66,44],[120,92,60],photo) : mix([70,120,60],[120,170,90],photo);
+  ctx.strokeStyle = rgb(stemCol); ctx.lineWidth=w; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(bx,by);
+  const topX=bx+Math.sin(sway)*h*0.5, topY=by-h;
+  ctx.quadraticCurveTo(bx+Math.sin(sway)*h*0.2, by-h*0.5, topX, topY); ctx.stroke();
+  // Blaetter
+  const leaves = 3+Math.round(photo*9);
+  const leafCol = mix([70,150,80],[140,220,120],photo);
+  for(let i=0;i<leaves;i++){
+    const t=(i+1)/(leaves+1);
+    const lx=lerp(bx,topX,t), ly=lerp(by,topY,t*0.98);
+    const side = i%2?1:-1;
+    const ls = (9+photo*20)*(0.6+t*0.6);
+    const ang = side*(0.5+0.5*rnd()) + Math.sin(time*0.002+i)*0.06;
+    ctx.save(); ctx.translate(lx,ly); ctx.rotate(ang);
+    ctx.fillStyle=rgb(leafCol);
+    ctx.beginPath(); ctx.ellipse(side*ls*0.8,0, ls, ls*0.42, 0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  // Kaeltehaare
+  if(insul>0.5){ ctx.strokeStyle="rgba(220,235,225,.5)"; ctx.lineWidth=1;
+    for(let i=0;i<24;i++){ const t=rnd(); const x=lerp(bx,topX,t),y=lerp(by,topY,t); const d=rnd()*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(d)*4,y+Math.sin(d)*4); ctx.stroke(); } }
+  // Wurzeln
+  ctx.strokeStyle="rgba(120,90,60,.5)"; ctx.lineWidth=2;
+  for(let i=0;i<4;i++){ const d=(i-1.5)*0.5; ctx.beginPath(); ctx.moveTo(bx,by);
+    ctx.quadraticCurveTo(bx+d*20,by+12,bx+d*40,by+26); ctx.stroke(); }
+}
+
+function drawAnimal(g, cx, cy, breath, time, rnd){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const R = (26 + size*46) * breath;
+  const bob = Math.sin(time*0.0018)*3;
+  cy += bob;
+  // Farbe: warm, bei Kaelte kuehler; Fell heller
+  const warm = mix([150,120,90],[190,150,110], metab);
+  const cool = mix([120,140,150],[150,120,90], env.temperature);
+  const body = mix(cool, warm, 0.5);
+  // Beine
+  const legs = 2 + Math.round((0.6*mob+0.4*limb)*5);
+  const legLen = 12 + limb*40;
+  ctx.strokeStyle = rgb(body.map(c=>c*0.7)); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
+  for(let i=0;i<legs;i++){
+    const t = legs===1?0.5:i/(legs-1);
+    const lx = cx + (t-0.5)*R*1.4;
+    const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
+    ctx.beginPath(); ctx.moveTo(lx, cy+R*0.5);
+    ctx.quadraticCurveTo(lx+swing*0.4, cy+R*0.5+legLen*0.6, lx+swing, cy+R*0.5+legLen); ctx.stroke();
+  }
+  // Fell (Aura aus kurzen Strichen)
+  if(insul>0.4){ ctx.strokeStyle=`rgba(230,238,230,${0.25+insul*0.4})`; ctx.lineWidth=1.4;
+    const n=Math.round(30+insul*50);
+    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2; const r1=R*0.92, r2=R*(1.05+insul*0.18+rnd()*0.06);
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1); ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2); ctx.stroke(); } }
+  // Koerper
+  ctx.fillStyle = rgb(body);
+  ctx.beginPath(); ctx.ellipse(cx, cy, R*1.05, R, 0,0,Math.PI*2); ctx.fill();
+  // Panzer
+  if(armor>0.5){ ctx.fillStyle=rgb(mix([90,100,110],[60,70,80],armor));
+    ctx.beginPath(); ctx.ellipse(cx, cy-R*0.15, R*0.95, R*0.8, 0, Math.PI*0.95, Math.PI*2.05); ctx.fill();
+    ctx.strokeStyle="rgba(20,30,30,.4)"; ctx.lineWidth=1.5;
+    for(let i=1;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx,cy-R*0.15,R*0.95*i/4,R*0.8*i/4,0,Math.PI,Math.PI*2); ctx.stroke(); } }
+  // Stacheln
+  if(armor>0.6){ ctx.fillStyle=rgb(mix([120,130,140],[80,90,100],armor));
+    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*0.32, ay=cy-R*0.8;
+      ctx.beginPath(); ctx.moveTo(ax-3,ay); ctx.lineTo(ax+3,ay); ctx.lineTo(ax, ay-8-armor*10); ctx.closePath(); ctx.fill(); } }
+  // Kopf + Auge
+  const hx=cx-R*1.0, hy=cy-R*0.15;
+  ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.ellipse(hx,hy,R*0.5,R*0.45,0,0,Math.PI*2); ctx.fill();
+  const blink = (Math.sin(time*0.0009)>0.985)?0.1:1;
+  ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(hx-R*0.15, hy-R*0.05, R*0.11, R*0.13*blink, 0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx-R*0.18, hy-R*0.09, R*0.04, 0,Math.PI*2); ctx.fill();
+}
+
+function drawDwarf(g, cx, cy, breath, time, rnd){
+  const R=(10+g[1]*22)*breath;
+  const bob=Math.sin(time*0.002)*2; cy+=bob;
+  ctx.fillStyle="rgb(120,150,145)";
+  ctx.beginPath(); ctx.ellipse(cx,cy,R*1.1,R,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-R*0.25,cy-R*0.1,R*0.16,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(95,230,176,.8)"; ctx.beginPath(); ctx.arc(cx-R*0.3,cy-R*0.16,R*0.06,0,Math.PI*2); ctx.fill();
+}
+
+// ======================= Loop =======================
+function frame(time){
+  // Evolution animieren
+  if(evolving && trajectory){
+    animT += 1/60;
+    const p = Math.min(1, animT/2.6);      // ~2.6s
+    const idxF = p*(trajectory.length-1);
+    const i0 = Math.floor(idxF), i1 = Math.min(trajectory.length-1, i0+1), f = idxF-i0;
+    for(let g=0; g<8; g++) genome[g] = lerp(trajectory[i0][g], trajectory[i1][g], f);
+    document.getElementById("genReadout").textContent = "Generation " + Math.round(idxF);
+    updatePanels();
+    if(p>=1){ evolving=false; genome=trajectory[trajectory.length-1].slice(); document.getElementById("evolveBtn").disabled=false; updatePanels(); }
+  }
+  drawHabitat();
+  drawMotes(time);
+  drawCreature(genome, time);
+  requestAnimationFrame(frame);
+}
+
+resize(); initMotes(); updatePanels();
+requestAnimationFrame(frame);
+</script>
