@@ -214,8 +214,22 @@ Katastrophen als Regler, Baum des Lebens entsteht von selbst). Kern-Prinzip:
 - `world/describe.ts` — prozedurale (emergente) Art-Benennung aus dem Genom.
 - `cli/world-demo.ts` — `npm run world-demo`. `tools/world-ecology-check.mjs` — Makro-Realitäts-Check (Arten-Areal etc.).
 
-Nächste Stufen: 5 Biotik-Interaktionen · 6 volles emergentes Naming (classify ablösen)
-· 7 UI + Anschluss an die Live-App (Kern hinter die heutige UX, dann Karte).
+**Stufen 5–7 (Prototyp) fertig, weiterhin headless:** 5 Räuber-Beute-Koevolution
+(`world/coevolution.ts`, Red Queen, `npm run coevolution-check`) · 6 Arten-Zensus
+(`world/census.ts`, prozedural benannt, `npm run census-check`) + emergente Rarität
+(`world/rarity.ts`, Seltenheit als Landschafts-Eigenschaft, `npm run rarity-check`) ·
+7 Standalone-Viewer (`world/viewer.html`). Getunte v2-Landschaft `world/physics-v2.json`
+(Größen-Kosten 0,14 → reichere Formen; Live-`physics.json` unberührt).
+
+**Pfad A Schritt 1 — JETZT LIVE (Beta):** Der v2-Kern läuft additiv IN der
+ausgelieferten App als Overlay „🌍 Lebende Welt (Beta)" (Knopf neben Genbuch):
+rauszoomen = Baum des Lebens (Orte, Chronik + Rarität, Veränderung-Hebel),
+reinzoomen = das bestehende Einzel-Wesen (byte-identisch unberührt). Kern gebündelt
+unter `app/core/` (`npm run bundle-app`; Pages liefert nur `app/`). Eigenes
+`<script type=module>`, per try/catch entkoppelt. `npm run app-world-smoke` (Playwright).
+Nächste Pfad-A-Schritte: Einzel-Wesen als EINEN Ort verdrahten · echter Zoom Pet↔Welt ·
+progressiver „Veränderung"-Knopf · Creature-Rendering · dann inline-v1-Engine durch den
+Populations-Kern ablösen.
 
 ## 7. Nächste Schritte (Priorität)
 1. **AXIS-2..5** — weitere Gen-Achsen (Graben, Aquatik/Habitat, Ernährungsmodus, Sinne/Tarnung);
