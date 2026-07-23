@@ -39,7 +39,8 @@ geräteübergreifend mit Account.
 - **Szenarien:** `scenarios.json` (train/test-Split).
 
 ### Modell
-- **8 Gene:** insulation, size, limbLength, metabolism, armor, photosynthesis, mobility, structure.
+- **9 Gene:** insulation, size, limbLength, metabolism, armor, photosynthesis, mobility, structure,
+  **wing** (Flügelfläche, AXIS-1). App genom-längen-robust (`NG`+`padGenome`, alte 8-Gen-Saves aufgefüllt).
 - **6 Umwelt-Regler:** temperature, predation, foodAbundance, foodHeight, light, water.
 - **Baum des Lebens — 5 Reiche** emergent aus den zwei Achsen Photosynthese × Mobilität
   (`exclusion`-Term erzwingt Spezialisierung):
@@ -181,6 +182,13 @@ geräteübergreifend mit Account.
 - **Engine-Pass BAL-5 (erledigt).** Panzer-Grenzkosten (`maintenanceQuad.armor`) entzerren die
   Formen-Verteilung: die drei Panzer-Formen von ~30 % → 12 % aller Umwelten, Mitte wieder vielfältig.
   Parität exakt, Validität 86,0 %, Ökologie C1–C6 ✓; `docs/rarity.json`+App-`RARITY` neu erzeugt.
+- **AXIS-1 Flug (erledigt).** Neues Gen `wing` (9. Gen). Flug nur für leichte, aktive Körper;
+  erschließt hohe Nahrung (`flightReach`) + modeste Flucht. 3 neue Formen (Fluginsekt 🦋, Vogel 🐦
+  neu Flug-gated, Fledermaus 🦇) mit eigenen Silhouetten. Parität exakt, Validität 85,3 %, C1–C6 ✓.
+  Muster für weitere Achsen: Gen in **alle 3 Fitness-Kopien** + physics.json + types.ts + fit.ts
+  (NUM_GENES) + app (PHYS/PARAMS/classify/TREE/FICON/ICONS/mutedGenes/drawAnimal) → `npm run all`
+  → parity → App-PARAMS syncen → Rarität neu → testen. *Nebeneffekt:* 14 legendäre Formen (extreme
+  + Wasser-Formen); AXIS-4 (Aquatik) holt die Wasser-Formen als Attraktoren zurück.
 
 ## 6a. Produkt-Pfeiler (Leitplanken)
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang.**
@@ -191,8 +199,9 @@ geräteübergreifend mit Account.
   *Weckt es Staunen, oder nur Sammel-Druck?*
 
 ## 7. Nächste Schritte (Priorität)
-1. **AXIS-1..5** — neue Gen-Achsen (Flug, Graben, Ernährungsmodus, Aquatik, Sinne/Tarnung);
-   je: neues Gen + Orakel-Spiegelung + Re-Validierung. Spätere Meilensteine.
+1. **AXIS-2..5** — weitere Gen-Achsen (Graben, Aquatik/Habitat, Ernährungsmodus, Sinne/Tarnung);
+   je: neues Gen + Orakel-Spiegelung + Re-Validierung. **AXIS-1 (Flug) erledigt.** AXIS-4 (Aquatik)
+   holt die Wasser-Formen (Fisch/Schnecke/Kopffüßer/Amphibie) aus drift-only zurück.
 2. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
    oder Renderer/Taxonomie in eine geteilte Datei auslagern.
 3. Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld), CLI-Bugs BUG-2/BUG-4/CLS-2.

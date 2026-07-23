@@ -29,7 +29,7 @@ const rng = mulberry32(987654321);
 const N = 2000;
 const samples = [];
 for (let i = 0; i < N; i++) {
-  const traits = Array.from({ length: 8 }, () => rng());
+  const traits = Array.from({ length: phys.traits.length }, () => rng());
   const env = {
     temperature: rng(),
     predation: rng(),

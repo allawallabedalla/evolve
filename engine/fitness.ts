@@ -23,6 +23,7 @@ const ARMOR = 4;
 const PHOTO = 5;
 const MOBILITY = 6;
 const STRUCTURE = 7;
+const WING = 8;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -33,6 +34,15 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const photo = traits[PHOTO];
   const mobility = traits[MOBILITY];
   const structure = traits[STRUCTURE];
+  const wing = traits[WING];
+
+  // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Grosse Masse (size) macht
+  // Fluegel wirkungslos, hoher Stoffwechsel treibt den Flug an. Zwei Auszahlungen
+  // unten: (a) erreicht hohe Nahrung/Licht ohne Reichweiten-Strafe, (b) Flucht.
+  const flight =
+    wing *
+    clamp01(1 - size * phys.flightSizePenalty) *
+    (phys.flightMetabFloor + (1 - phys.flightMetabFloor) * metabolism);
 
   // 1) Thermoregulation (universell): ideale Isolation = Kaelte.
   //    Quadratisch (glatter Peak, kein Knick) - verhindert das Ueberschwingen /
@@ -55,7 +65,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     photo * env.light * env.water * lightAccess * photoSize * (1 - phys.exclusion * mobility);
 
   //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
-  const reach = clamp01(limb * phys.reachFromLimb + size * phys.reachFromSize);
+  //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
+  const reach = clamp01(limb * phys.reachFromLimb + size * phys.reachFromSize + flight * phys.flightReach);
   const access =
     env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
   const energyForage =
@@ -99,6 +110,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     photo * m.photosynthesis +
     mobility * m.mobility +
     structure * m.structure +
+    wing * m.wing +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -121,7 +133,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     armor * phys.defenseFromArmor +
       structure * phys.defenseFromStructure +
       size * phys.defenseFromSize +
-      mobility * phys.defenseFromMobility,
+      mobility * phys.defenseFromMobility +
+      flight * phys.defenseFromFlight,
   );
   const predSurvival = 1 - env.predation * (1 - defenseScore);
 

@@ -379,16 +379,17 @@
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
   reachFromLimb: 0.65, reachFromSize: 0.35, heightPenalty: 1.5, forageBase: 0.55, forageMetabolism: 0.9,
+  flightSizePenalty: 1.5, flightMetabFloor: 0.35, flightReach: 0.75, defenseFromFlight: 0.2,
   absorbYield: 1.3, absorbBase: 0.4, absorbMetabolism: 0.85, absorbWaterFloor: 0.3,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15 },
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.5773746680464564,0.3749606254044794,0.4491816562385927,0.3994669753286272,0.3964781717596898,0.31887849445725047,0.47344527689320437,0.46162997440422615],
-  mutationRate:0.035941784657003116, selectionStrength:0.6799893932097313, varianceWeight:1
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838],
+  mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -431,6 +432,8 @@ const ICONS = {
   lizard:`<ellipse cx="11" cy="12" rx="5.2" ry="2.3"/><circle cx="6" cy="11.3" r="1.7"/><path d="M16 12c3.2-.6 4.4-2.6 3.4-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8.5 13.6l-2 3M11 14l-1 3.2M13.5 14l1 3.2"/></g>`,
   turtle:`<path d="M5 15a7 5 0 0 1 14 0z"/><circle cx="20" cy="14" r="1.8"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 16.5l-1.2 2.2M16 16.5l1.2 2.2"/></g>`,
   bird:`<path d="M4 9c4 .5 6-1 8-3 .5 2.5 2.5 3.5 5 3.5l-2 2 3 .5-3.5 2c-1 3-4 4.5-7 4 1-2.5.5-5-1-6.5C7.5 10 5.5 9.5 4 9z"/>`,
+  butterfly:`<rect x="11.4" y="6.5" width="1.2" height="11" rx=".6"/><path d="M11.5 9.5C9.3 4.8 4 4.8 3.6 8.6 3.2 11.4 7 12.2 11.5 12zM12.5 9.5C14.7 4.8 20 4.8 20.4 8.6 20.8 11.4 17 12.2 12.5 12zM11.5 12C8 12 4.2 13 4.7 16.4 5.1 19.6 10 18.7 11.5 13.9zM12.5 12C16 12 19.8 13 19.3 16.4 18.9 19.6 14 18.7 12.5 13.9z"/><g stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M11.7 6.5l-1.6-2M12.3 6.5l1.6-2"/></g>`,
+  bat:`<path d="M12 9c-.9 0-1.6.7-1.6 1.6 0 .3.1.6.3.9-1.5-1.4-2.9-2-4.2-2-.9 0-1.7.3-2.5.9.9.1 1.4.7 1.4 1.6 0 .6-.3 1.1-.8 1.5 1.9-.3 3.4.2 4.7 1.7.4-1.1 1.4-1.7 2.8-1.7s2.4.6 2.8 1.7c1.3-1.5 2.8-2 4.7-1.7-.5-.4-.8-.9-.8-1.5 0-.9.5-1.5 1.4-1.6-.8-.6-1.6-.9-2.5-.9-1.3 0-2.7.6-4.2 2 .2-.3.3-.6.3-.9C13.6 9.7 12.9 9 12 9z"/><path d="M10.5 6.6l1.5 1.6 1.5-1.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>`,
   fox:`<ellipse cx="11" cy="12" rx="5.5" ry="2.8"/><circle cx="17.5" cy="10.5" r="2.3"/><path d="M16 9l1-2.5 1.3 2.2zM18.5 9l1.2-2.3.6 2.5z"/><ellipse cx="4.5" cy="12" rx="2.5" ry="1.8"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 14.5v3.5M14 14v3.5"/></g>`,
   wolf:`<ellipse cx="11" cy="12" rx="6" ry="3"/><circle cx="17.8" cy="10.5" r="2.4"/><path d="M19.5 10l2.2-1-1 2.1z"/><path d="M16.4 9l1-2 1.1 2z"/><path d="M5 12c-2.5-.5-3.5-2-3-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 14.5v4M14 14.5v4"/></g>`,
   bear:`<ellipse cx="11" cy="12.5" rx="6.5" ry="4"/><circle cx="18" cy="10" r="3"/><circle cx="16.5" cy="7.3" r="1.6"/><circle cx="19.5" cy="7.3" r="1.6"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 15.5v3M15 15.5v3"/></g>`,
@@ -466,7 +469,7 @@ const FICON = {
   "Grünalge":"alga","Moos":"moss","Farn":"fern","Kraut · niedrige Pflanze":"herb","Blütenkraut":"flower",
   "Verholzter Strauch":"shrub","Laubbaum":"tree","Nadelbaum":"conifer","Sukkulente · Kaktus":"cactus","Polster-Kältepflanze":"cushion",
   "Wurm":"worm","Insekt · Gliederfüßer":"insect","Krebstier · Arthropode":"crab","Fisch · Aalform":"fish","Reptil · Echse":"lizard",
-  "Gepanzertes Beutetier":"turtle","Flatterer · Vogel":"bird","Fell-Warmblüter":"fox","Fell-Großtier":"bear","Aktiver Großjäger":"wolf",
+  "Gepanzertes Beutetier":"turtle","Flatterer · Vogel":"bird","Fluginsekt · Segler":"butterfly","Flugsäuger · Fledermaus":"bat","Fell-Warmblüter":"fox","Fell-Großtier":"bear","Aktiver Großjäger":"wolf",
   "Gepanzerter Koloss":"rhino","Behänder Kletterer":"monkey","Kleines flinkes Tier":"mouse","Generalisten-Tier":"quadruped",
   "Hutpilz":"agaric","Baumpilz · Porling":"bracket","Zunderschwamm":"bracket2","Myzel · Pilzgeflecht":"mycelium","Schimmel · Fadenpilz":"mold",
   "Flechte · Symbiose":"lichen","Hefe":"yeast",
@@ -478,14 +481,16 @@ const FICON = {
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0]=t;
   const dT = insulation-(1-e.temperature);
   const thermal = 1-dT*dT;
+  // Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
+  const flight = wing*clamp01(1-size*PHYS.flightSizePenalty)*(PHYS.flightMetabFloor+(1-PHYS.flightMetabFloor)*metabolism);
   const structureLight = PHYS.structureLightFloor+(1-PHYS.structureLightFloor)*e.foodHeight;
   const lightAccess = PHYS.lightAccessBase+(1-PHYS.lightAccessBase)*structure*structureLight;
   const photoSize = PHYS.photoSizeFloor+(1-PHYS.photoSizeFloor)*size;
   const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*(1-PHYS.exclusion*mobility);
-  const reach = clamp01(limb*PHYS.reachFromLimb+size*PHYS.reachFromSize);
+  const reach = clamp01(limb*PHYS.reachFromLimb+size*PHYS.reachFromSize+flight*PHYS.flightReach);
   const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
   const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*(1-PHYS.exclusion*photo);
   // Absorption/Zersetzung (Osmotrophie): sessile Heterotrophie (Pilze/Mikroben).
@@ -493,9 +498,9 @@ function fitness(t, e){
   const energyAbsorb = PHYS.absorbYield*(PHYS.absorbBase+PHYS.absorbMetabolism*metabolism)*substrate*(1-PHYS.exclusion*photo)*(1-PHYS.exclusion*mobility);
   const total = energyPhoto+energyForage+energyAbsorb;
   const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
-  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility);
+  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight);
   const predSurv = 1-e.predation*(1-defense);
   return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition), PHYS.floor);
 }
@@ -509,7 +514,7 @@ function mulberry32(seed){ let a=seed>>>0; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0
 // seinem aktuellen Zustand an die aktuelle Umwelt an.
 function stepGeneration(m, env, randn){
   const eps=PHYS.eps, next=m.slice();
-  for(let g=0; g<8; g++){
+  for(let g=0; g<NG; g++){
     const up=m.slice(); up[g]=clamp01(up[g]+eps);
     const dn=m.slice(); dn[g]=clamp01(dn[g]-eps);
     const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
@@ -525,7 +530,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -543,6 +548,12 @@ function classify(t){
 
   // ===== Reich TIERE — heterotroph + mobil =====
   if(mob>0.45 && photo<0.4){
+    // Flug-Baupläne (AXIS-1): hohe Flügelfläche + leichter, waffenloser Körper.
+    if(wing>0.5 && size<0.34 && armor<0.4){
+      if(metab>0.7 && insul>0.62)         return {k:"Tier",n:"Flugsäuger · Fledermaus",e:"🦇"};
+      if(metab>0.7)                       return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
+      return {k:"Tier",n:"Fluginsekt · Segler",e:"🦋"};
+    }
     if(armor>0.55 && size>0.55)           return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
     if(armor>0.5 && limb>0.5)             return {k:"Tier",n:"Krebstier · Arthropode",e:"🦀"};
     if(armor>0.55)                        return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
@@ -554,7 +565,6 @@ function classify(t){
     if(size>0.6 && metab>0.6)             return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
     if(insul>0.6 && size>0.52)            return {k:"Tier",n:"Fell-Großtier",e:"🐻"};
     if(insul>0.6)                         return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
-    if(limb>0.6 && metab>0.55 && size<0.45)return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
     if(limb>0.6 && size<0.45)             return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
     if(size<0.28)                         return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
     if(armor<0.32 && insul<0.32 && struct<0.35 && metab<0.5) return {k:"Tier",n:"Amphibie · Lurch",e:"🐸"};
@@ -639,11 +649,16 @@ const BIOMES = [
   {n:"Plankton-See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
   {n:"Algen-Riff", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
 ];
-const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe"];
+const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche"];
+// Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
+// daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
+// (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
+const NG = GENE_LABELS.length;
+const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
 let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
-let genome = new Array(8).fill(0.5);
-let displayGenome = new Array(8).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
+let genome = new Array(NG).fill(0.5);
+let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
 let rng, randn, lineageSeed = 0;
 let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
@@ -657,7 +672,7 @@ const STABLE_GENS = 15;
 let committedArch, candArch = null, candCount = 0;
 function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
 function newLineage(){
-  genome = new Array(8).fill(0.5); generation = 0;
+  genome = new Array(NG).fill(0.5); generation = 0;
   displayGenome = genome.slice();
   lineageSeed = (Math.random()*4294967296)>>>0;
   rng = mulberry32(lineageSeed); randn = makeRandn();
@@ -738,7 +753,9 @@ const TREE = [
     {n:"Amphibie · Lurch", e:"🐸", cl:"Amphibia", era:"vor ~370 Mio. J.", evo:"Erste Landwirbeltiere — noch ans Wasser gebunden (Laich)."},
     {n:"Reptil · Echse", e:"🦎", cl:"Reptilia", era:"vor ~320 Mio. J.", evo:"Amnioten — das Ei mit Schale löst vom Wasser."},
     {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia", era:"vor ~230 Mio. J.", evo:"Panzer/Schild als Verteidigung gegen Räuber."},
+    {n:"Fluginsekt · Segler", e:"🦋", cl:"Pterygota", era:"vor ~325 Mio. J.", evo:"Erste Flügel der Erdgeschichte — Insekten erobern den Luftraum."},
     {n:"Flatterer · Vogel", e:"🐦", cl:"Aves", era:"vor ~150 Mio. J.", evo:"Aus gefiederten Dinosauriern — Flug erobert die Luft."},
+    {n:"Flugsäuger · Fledermaus", e:"🦇", cl:"Chiroptera", era:"vor ~52 Mio. J.", evo:"Einzige aktiv fliegende Säuger — Flughaut + Echoortung."},
     {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia", era:"vor ~210 Mio. J.", evo:"Säugetiere — Fell + Warmblütigkeit; Radiation nach 66 Mio."},
     {n:"Fell-Großtier", e:"🐻", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Große Säuger nach dem Dino-Aussterben."},
     {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Raubsäuger füllen frei gewordene Jäger-Nischen."},
@@ -755,12 +772,11 @@ const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
 // 0% = nur ueber stochastische Drift erreichbar -> legendaerer "Fang".
 // Leitplanke: sanfte Anreize, kein Vollstaendigkeits-Zwang. Namen = classify().n.
 const RARITY = {
-  "Bakterie":"haeufig","Archaee · Extremophil":"haeufig","Euglenoid · Mixotroph":"haeufig","Myzel · Pilzgeflecht":"haeufig","Fell-Warmblüter":"haeufig","Kleines flinkes Tier":"haeufig",
-  "Protist · Amöbe":"gelegentlich","Verholzter Strauch":"gelegentlich","Baumpilz · Porling":"gelegentlich","Flechte · Symbiose":"gelegentlich","Hefe":"gelegentlich","Koralle · Riffbildner":"gelegentlich",
-  "Krebstier · Arthropode":"gelegentlich","Insekt · Gliederfüßer":"gelegentlich","Gepanzertes Beutetier":"gelegentlich","Aktiver Großjäger":"gelegentlich","Gepanzerter Koloss":"gelegentlich","Generalisten-Tier":"gelegentlich",
-  "Plankton":"selten","Laubbaum":"selten","Nadelbaum":"selten","Sukkulente · Kaktus":"selten","Polster-Kältepflanze":"selten","Kopffüßer · Tintenfisch":"selten","Reptil · Echse":"selten","Flatterer · Vogel":"selten","Fell-Großtier":"selten",
-  "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Hutpilz":"sehr-selten","Schimmel · Fadenpilz":"sehr-selten","Behänder Kletterer":"sehr-selten",
-  "Moos":"legendaer","Farn":"legendaer","Zunderschwamm":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer",
+  "Bakterie":"haeufig","Archaee · Extremophil":"haeufig","Euglenoid · Mixotroph":"haeufig","Myzel · Pilzgeflecht":"haeufig","Krebstier · Arthropode":"haeufig","Fell-Warmblüter":"haeufig","Kleines flinkes Tier":"haeufig",
+  "Protist · Amöbe":"gelegentlich","Plankton":"gelegentlich","Verholzter Strauch":"gelegentlich","Hefe":"gelegentlich","Insekt · Gliederfüßer":"gelegentlich","Gepanzertes Beutetier":"gelegentlich","Flatterer · Vogel":"gelegentlich",
+  "Laubbaum":"selten","Nadelbaum":"selten","Polster-Kältepflanze":"selten","Flechte · Symbiose":"selten","Koralle · Riffbildner":"selten","Flugsäuger · Fledermaus":"selten","Behänder Kletterer":"selten",
+  "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Baumpilz · Porling":"sehr-selten","Zunderschwamm":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Generalisten-Tier":"sehr-selten",
+  "Moos":"legendaer","Farn":"legendaer","Hutpilz":"legendaer","Schimmel · Fadenpilz":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Kopffüßer · Tintenfisch":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer","Fell-Großtier":"legendaer","Aktiver Großjäger":"legendaer","Gepanzerter Koloss":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (subtiler Ramp, Gold = legendaer).
 const RARITY_META = {
@@ -882,7 +898,7 @@ function timeStr(ms){
   const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
 }
 function applyState(s){
-  if(Array.isArray(s.genome) && s.genome.length===8) genome = s.genome.slice();
+  if(Array.isArray(s.genome) && s.genome.length>=6) genome = padGenome(s.genome);
   if(s.env){ env = Object.assign(env, s.env);
     LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } }); }
   generation = s.generation || 0;
@@ -917,7 +933,7 @@ async function restore(){
     else { saveState(); }   // erstes Login: aktuelles Wesen in die Cloud uebernehmen
   } else {
     let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { s = null; }
-    if(s && Array.isArray(s.genome) && s.genome.length===8){ applyState(s); offlineCatchup(s.ts); }
+    if(s && Array.isArray(s.genome) && s.genome.length>=6){ applyState(s); offlineCatchup(s.ts); }
   }
   updatePanels(); updateDisc(); updateBonding();
   maybeOnboard();
@@ -1070,12 +1086,13 @@ GENE_LABELS.forEach((lbl,i) => {
   genesEl.appendChild(d);
 });
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
-// Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct
+// Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct,8 wing
 function mutedGenes(a){
-  if(a.e==="🪸"||a.e==="🧽") return [2,6];        // sessile Tiere: keine Gliedmassen/Mobilitaet
-  if(a.k==="Tier") return [5];                     // Tiere: keine Photosynthese
-  if(a.k==="Protist") return [];                   // Mischotroph: (fast) alles relevant
-  return [2,6];                                     // Pflanze/Pilz/Mikrobe: sessil -> Gliedmassen/Mobilitaet
+  const flyer = a.e==="🦋"||a.e==="🐦"||a.e==="🦇";
+  if(a.e==="🪸"||a.e==="🧽") return [2,6,8];      // sessile Tiere: keine Gliedmassen/Mobilitaet/Flug
+  if(a.k==="Tier") return flyer ? [5] : [5,8];     // Tiere: keine Photosynthese; nur Flieger nutzen Flügel
+  if(a.k==="Protist") return [8];                  // Mischotroph: (fast) alles relevant, aber kein Flug
+  return [2,6,8];                                   // Pflanze/Pilz/Mikrobe: sessil -> Gliedmassen/Mobilitaet/Flug
 }
 
 function updatePanels(g, a){
@@ -1086,7 +1103,7 @@ function updatePanels(g, a){
   document.getElementById("species").textContent = a.n;
   document.getElementById("bauplan").textContent = describe(g);
   const muted = mutedGenes(a);
-  for(let i=0;i<8;i++){
+  for(let i=0;i<NG;i++){
     document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
     document.getElementById("gn-"+i).textContent = g[i].toFixed(2);
     document.getElementById("gene-"+i).classList.toggle("muted", muted.includes(i));
@@ -1176,7 +1193,7 @@ function lerp(a,b,t){ return a+(b-a)*t; }
 function mix(c1,c2,t){ return [lerp(c1[0],c2[0],t),lerp(c1[1],c2[1],t),lerp(c1[2],c2[2],t)]; }
 const rgb = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
 // deterministischer RNG aus dem Genom (fuer organischen, aber stabilen Jitter)
-function seeded(g){ let s=0; for(let i=0;i<8;i++) s=(s*131+Math.floor(g[i]*997))>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function seeded(g){ let s=0; for(let i=0;i<g.length;i++) s=(s*131+Math.floor(g[i]*997))>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
 
 function drawHabitat(){
   // Umwelt-getoenter Hintergrund
@@ -1407,7 +1424,7 @@ function drawPlant(g, bx, by, breath, time, rnd, a){
 }
 
 function drawAnimal(g, cx, cy, breath, time, rnd, a){
-  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const [insul,size,limb,metab,armor,photo,mob,struct,wing=0]=g;
   const kind = a.e;
   const R = (26 + size*46) * breath;
   const bob = Math.sin(time*0.0018)*3;
@@ -1531,6 +1548,56 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     for(const sd of [-1,1]){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(cx+sd*R*0.2,cy-H*0.7); ctx.lineTo(cx+sd*R*0.25,cy-H*1.05); ctx.stroke();
       ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.25,cy-H*1.12,R*0.1,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+
+  // ---- Fluginsekt: schlanker Koerper + 4 flatternde Fluegel + Fuehler ----
+  if(kind==="🦋"){
+    const flap=0.5+0.5*Math.abs(Math.sin(time*0.006));
+    const wc=mix(body,[150,120,195],0.5);
+    for(const sd of [-1,1]){
+      ctx.save(); ctx.translate(cx,cy); ctx.scale(sd*flap,1);
+      ctx.fillStyle=rgb(wc); ctx.beginPath(); ctx.ellipse(R*0.72,-R*0.42,R*0.72,R*0.56,0.32,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(R*0.6,R*0.52,R*0.5,R*0.42,-0.22,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=rgb(dark); ctx.beginPath(); ctx.ellipse(R*0.85,-R*0.44,R*0.2,R*0.16,0.32,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    ctx.fillStyle=rgb(dark); ctx.beginPath(); ctx.ellipse(cx,cy,R*0.16,R*0.62,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.5; ctx.lineCap="round";
+    for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+sd*R*0.06,cy-R*0.5); ctx.quadraticCurveTo(cx+sd*R*0.3,cy-R*0.95, cx+sd*R*0.46,cy-R*0.82); ctx.stroke();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.46,cy-R*0.84,R*0.05,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+  // ---- Vogel: Rumpf + spitze schlagende Fluegel + Schnabel + Schwanz ----
+  if(kind==="🐦"){
+    const flap=Math.sin(time*0.007)*0.55;
+    ctx.fillStyle=rgb(dark);
+    ctx.beginPath(); ctx.moveTo(cx+R*0.6,cy); ctx.lineTo(cx+R*1.35,cy-R*0.28); ctx.lineTo(cx+R*1.35,cy+R*0.28); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.ellipse(cx,cy,R*0.85,R*0.6,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=rgb(mix(body,dark,0.45));
+    for(const sd of [-1,1]){ ctx.save(); ctx.translate(cx,cy-R*0.08); ctx.rotate(sd*(0.28+flap));
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(sd*R*1.35,-R*0.32, sd*R*1.55,R*0.18); ctx.quadraticCurveTo(sd*R*0.9,R*0.12, 0,R*0.22); ctx.closePath(); ctx.fill(); ctx.restore(); }
+    ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.arc(cx-R*0.72,cy-R*0.32,R*0.42,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=rgb(mix(body,[215,165,60],0.75)); ctx.beginPath(); ctx.moveTo(cx-R*1.05,cy-R*0.36); ctx.lineTo(cx-R*1.45,cy-R*0.24); ctx.lineTo(cx-R*1.05,cy-R*0.12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-R*0.82,cy-R*0.4,R*0.1,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-R*0.85,cy-R*0.44,R*0.04,0,Math.PI*2); ctx.fill();
+    return;
+  }
+  // ---- Fledermaus: dunkler Rumpf + Hautfluegel (gefingert) + Ohren ----
+  if(kind==="🦇"){
+    const flap=0.35+0.4*Math.sin(time*0.008);
+    const wc=mix(body,[70,60,85],0.6);
+    for(const sd of [-1,1]){ ctx.save(); ctx.translate(cx,cy); ctx.rotate(sd*flap);
+      ctx.fillStyle=rgb(wc); ctx.beginPath(); ctx.moveTo(0,-R*0.1);
+      ctx.lineTo(sd*R*1.5,-R*0.42);
+      ctx.quadraticCurveTo(sd*R*1.2,R*0.02, sd*R*1.28,R*0.32);
+      ctx.quadraticCurveTo(sd*R*0.95,R*0.08, sd*R*0.9,R*0.42);
+      ctx.quadraticCurveTo(sd*R*0.62,R*0.14, sd*R*0.5,R*0.46);
+      ctx.lineTo(0,R*0.22); ctx.closePath(); ctx.fill(); ctx.restore(); }
+    ctx.fillStyle=rgb(mix(body,[55,48,66],0.6)); ctx.beginPath(); ctx.ellipse(cx,cy,R*0.32,R*0.5,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy-R*0.5,R*0.28,0,Math.PI*2); ctx.fill();
+    for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+sd*R*0.1,cy-R*0.68); ctx.lineTo(cx+sd*R*0.3,cy-R*1.06); ctx.lineTo(cx+sd*R*0.02,cy-R*0.78); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle="rgba(95,230,176,.9)"; for(const sd of [-1,1]){ ctx.beginPath(); ctx.arc(cx+sd*R*0.11,cy-R*0.52,R*0.06,0,Math.PI*2); ctx.fill(); }
     return;
   }
 
@@ -1822,7 +1889,7 @@ function frame(time){
   }
   // Geglaettete Anzeige: framerate-unabhaengiger gleitender Mittelwert (Zeitkonstante ~0.6s).
   const sm = 1 - Math.exp(-dt/0.6);
-  for(let i=0;i<8;i++) displayGenome[i] += (genome[i]-displayGenome[i])*sm;
+  for(let i=0;i<NG;i++) displayGenome[i] += (genome[i]-displayGenome[i])*sm;
   updatePanels(displayGenome, committedArch);
   updateDisc();
   drawHabitat();

@@ -1,8 +1,9 @@
 # Backlog
 
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
-Test-Validität **~86 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
-**41 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten).
+Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
+**43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
+**9 Gene** (inkl. Flügelfläche / Flug, AXIS-1).
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -51,6 +52,22 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - **Renderer-Vielfalt** (früher „VARIETY"): differenzierte Silhouetten je Archetyp.
 - UX-Quick-Wins: Entdeckungs-Toast, lo/hi-Regler-Labels, „Neues Leben"-Rückfrage,
   Passwort-Reset, Auto-Login-Fallback.
+
+### AXIS-1 Flug — neues Gen „Flügelfläche" (Session 2026-07)
+- **Erste neue Gen-Achse:** `wing` (Index 8) als 9. Gen. Flug = `wing · (1−size·flightSizePenalty)
+  · Stoffwechsel-Anteil` → nur leichte, aktive Körper fliegen. Zwei Auszahlungen: (1) erschließt
+  **hohe Nahrung/Licht** ohne Reichweiten-Strafe (`flightReach`), (2) modeste Flucht (`defenseFromFlight`).
+  Diagnose beim ersten Tuning: Flug wurde als *universelle* Verteidigung selektiert (49 % aller
+  Umwelten) → entschärft, jetzt klar an **hohe `foodHeight`** gebunden (echte Luft-/Kronen-Nische).
+- **3 neue Flug-Formen** (41→43): **Fluginsekt · Segler** 🦋, **Flatterer · Vogel** 🐦 (neu Flug-gated),
+  **Flugsäuger · Fledermaus** 🦇 — je eigene Silhouette (flatternde Flügel) + flaches Icon.
+- **App genom-längen-robust** gemacht (`NG`-Konstante + `padGenome`): alte Spielstände (8 Gene)
+  werden beim Laden mit 0.5 aufgefüllt. Fundament für alle weiteren Achsen.
+- **Re-Validierung:** Parität exakt (1,1e-16), Validität **85,3 %** (im Band), Ökologie C1–C6 ✓.
+  Rarität neu erzeugt. *Nebeneffekt:* der 9-Gen-Retrain (schärferer Mutations-Rücktrieb) schiebt
+  mehrere **extreme** Formen (Koloss, Großjäger, Reptil, Fell-Großtier) sowie die Wasser-Formen
+  (Fisch/Schnecke/Kopffüßer/Amphibie) auf drift-only → 14 legendäre „Fänge". Die Wasser-Formen
+  holt **AXIS-4 (Aquatik)** zurück (dann sind sie in Wasser-Umwelten echte Attraktoren).
 
 ### Engine-Pass BAL-5 — Verteilung entzerrt (Session 2026-07)
 - **BAL-5 / CLS-4 · Panzer-Grenzkosten** (`physics.json` v3→v3.1): neuer Term
@@ -107,8 +124,7 @@ Offen bleibt nur noch Feinschliff:
 ## ⬜ Offen — Große Brocken (je: neues Gen + Orakel-Spiegelung + Re-Validierung)
 
 Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
-- **AXIS-1 · Flug/Gleiten** (Gen „Flügelfläche"): belohnt bei hoher `foodHeight` + kleiner Größe
-  → echter 3D-Nahrungsraum, Insektenflug, Segler.
+- ✅ **AXIS-1 · Flug/Gleiten** (Gen „Flügelfläche") — **erledigt** (s. o.).
 - **AXIS-2 · Graben** (Gen „Grabklauen"): Flucht/Versteck bei Räuberdruck + Boden-Nahrung
   → Maulwurf, Wühlmaus.
 - **AXIS-3 · Ernährungsmodus** (Filtrierer/Aasfresser/Parasit) statt binärer Photo-vs-Jagd-Gabel.

@@ -29,7 +29,7 @@ const VALIDITY_SCALE = 0.25;
 // Reihenfolge: responseRate[0..7] (8 Gene), mutationRate, selectionStrength, varianceWeight
 // responseRate/selectionStrength weiter gefasst, weil die Varianz-Daempfung die
 // effektiven Schritte verkleinert - schnelle Szenarien brauchen mehr Spielraum.
-const NUM_GENES = 8;
+const NUM_GENES = 9;
 const BOUNDS: [number, number][] = [
   ...Array.from({ length: NUM_GENES }, () => [0.005, 0.8] as [number, number]),
   [0.0, 0.12], // mutationRate
