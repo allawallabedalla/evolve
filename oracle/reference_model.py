@@ -78,8 +78,12 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     structure_light = phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]
     light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
     photo_size = phys["photoSizeFloor"] + (1.0 - phys["photoSizeFloor"]) * size
+    # Temperatur-Abhaengigkeit (Biologie-Audit): Photosynthese hat ein Optimum;
+    # in Kaelte/Hitze sinkt die Enzym-Leistung (milde Glocke).
+    dtp = env["temperature"] - phys["photoTempOpt"]
+    photo_thermal = _clamp01(1.0 - phys["photoTempStrength"] * dtp * dtp)
     energy_photo = (
-        photo * env["light"] * env["water"] * light_access * photo_size * (1.0 - phys["exclusion"] * mobility)
+        photo * env["light"] * env["water"] * light_access * photo_size * photo_thermal * (1.0 - phys["exclusion"] * mobility)
     )
 
     reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"] + flight * phys["flightReach"])

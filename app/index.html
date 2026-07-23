@@ -574,7 +574,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.25.0";
+const APP_VERSION = "v0.26.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -584,6 +584,7 @@ const PHYS = {
   aquaticYield: 1.4, aquaticBase: 0.4, aquaticWaterFloor: 0.5, aquaticLimbDrag: 0.7, aquaticArmorDrag: 0.5,
   biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
   endothermyMetabFloor: 0.5,
+  photoTempOpt: 0.6, photoTempStrength: 0.6,
   maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
@@ -702,7 +703,9 @@ function fitness(t, e){
   const structureLight = PHYS.structureLightFloor+(1-PHYS.structureLightFloor)*e.foodHeight;
   const lightAccess = PHYS.lightAccessBase+(1-PHYS.lightAccessBase)*structure*structureLight;
   const photoSize = PHYS.photoSizeFloor+(1-PHYS.photoSizeFloor)*size;
-  const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*(1-PHYS.exclusion*mobility);
+  // Temperatur-Abhängigkeit (Biologie-Audit): Photosynthese hat ein Optimum; Kälte/Hitze senken sie.
+  const _dtp = e.temperature-PHYS.photoTempOpt, photoThermal = clamp01(1-PHYS.photoTempStrength*_dtp*_dtp);
+  const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*photoThermal*(1-PHYS.exclusion*mobility);
   const reach = clamp01(limb*PHYS.reachFromLimb+size*PHYS.reachFromSize+flight*PHYS.flightReach);
   const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
   const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*(1-PHYS.exclusion*photo);

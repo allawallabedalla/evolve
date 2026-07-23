@@ -63,6 +63,8 @@ export interface Physics {
   biolumDefense: number;
   biolumDarkFloor: number;
   endothermyMetabFloor: number;
+  photoTempOpt: number;
+  photoTempStrength: number;
   maintenance: {
     base: number;
     size: number;
