@@ -65,8 +65,13 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     )
 
     # 1) Thermoregulation (quadratisch, glatter Peak)
+    #    Endothermie (Biologie-Audit): Fell haelt Waerme, aber ohne metabolischen
+    #    "Ofen" gibt es kaum Koerperwaerme zu halten -> Kaelte braucht Isolation
+    #    UND Stoffwechsel (Warmblueter = Fell + hoher Stoffwechsel).
+    endo_factor = phys["endothermyMetabFloor"] + (1.0 - phys["endothermyMetabFloor"]) * metabolism
+    eff_insulation = insulation * endo_factor
     thermal_ideal = 1.0 - env["temperature"]
-    d_t = insulation - thermal_ideal
+    d_t = eff_insulation - thermal_ideal
     thermal = 1.0 - d_t * d_t
 
     # 2) Energie - zwei sich ausschliessende Strategien
