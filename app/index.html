@@ -80,6 +80,17 @@
   .species .emoji { font-style: normal; font-size: 1.5rem; }
   .bauplan { color: var(--muted); font-size: .9rem; }
 
+  /* ---- Name & Ahnenlinie (A4) ---- */
+  .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .cname-txt { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--bio); }
+  .cname-txt.unnamed { font-family: var(--mono); font-style: normal; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .cname-edit { font-size: .85rem; text-decoration: none; }
+  .ancestry { margin-top: 10px; font-family: var(--mono); font-size: .66rem; color: var(--muted); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ancestry[hidden] { display: none; }
+  .ancestry .anc { display: inline-flex; align-items: center; gap: 3px; }
+  .ancestry .anc .ic { width: .95rem; height: .95rem; }
+  .ancestry .sep { color: var(--bio-dim); }
+
   /* ---- Genom-Ausgabe ---- */
   .genes { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; margin-top: 16px; }
   @media (max-width: 400px) { .genes { grid-template-columns: 1fr; } }
@@ -87,6 +98,13 @@
   .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
   .gene .track { height: 6px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
   .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
+  .gene.muted { opacity: .32; }
+  .gene.muted .lbl::after { content: " ·"; }
+  /* ---- Vitalitäts-Anzeige (A3) ---- */
+  .vitality { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
+  .vit-track { flex: 1; height: 8px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+  .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); transition: width .25s ease, background .4s ease; }
+  .vit-num { min-width: 34px; text-align: right; color: var(--text); font-weight: 700; }
   .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
 
   /* ---- Konsole ---- */
@@ -122,6 +140,12 @@
   .ctrl:active { transform: translateY(1px); }
   .ctrl.play { font-size: 1rem; min-width: 44px; }
   .ctrl.newlife { margin-left: auto; }
+  /* B10: groessere Touch-Ziele auf Touch-Geraeten */
+  @media (pointer: coarse) {
+    .biome, .ctrl, .speed { min-height: 44px; }
+    .speed { padding: 10px 14px; }
+    .link { padding: 8px 4px; min-height: 40px; }
+  }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
   .speed { font-size: .78rem; color: var(--muted); background: transparent; border: none; border-radius: 7px; padding: 5px 9px; cursor: pointer; }
   .speed.active { background: var(--bio-dim); color: #06201a; font-weight: 700; }
@@ -153,6 +177,14 @@
   .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,230,176,.15), 0 0 14px rgba(95,230,176,.08); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
+  .gb-tile { cursor: help; }
+  #gbTip { position: fixed; z-index: 40; max-width: 250px; background: rgba(7,16,15,.97); border: 1px solid var(--bio-dim);
+    border-radius: 10px; padding: 9px 11px; font-size: .74rem; line-height: 1.45; color: var(--text);
+    box-shadow: var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
+  #gbTip.show { opacity: 1; }
+  #gbTip b { color: var(--bio); }
+  #gbTip .tip-clade { color: var(--muted); font-size: .68rem; }
+  #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
 
   /* ---- Flaches Icon-System ---- */
   .ic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.16em; fill: currentColor; }
@@ -201,6 +233,20 @@
   .reveal-body { font-size: .96rem; line-height: 1.6; color: var(--text); }
   .reveal-body b { color: var(--bio); font-weight: 700; }
   .reveal-body .arrow { font-family: var(--serif); font-style: italic; }
+  .reveal-forms { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 14px; }
+  .rf { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: .7rem; max-width: 112px; }
+  .rf-ic .ic { width: 2.5rem; height: 2.5rem; }
+  .rf-nm { line-height: 1.15; text-align: center; }
+  .rf-new { color: var(--bio); }
+  .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,230,176,.55)); }
+  .rf-arrow { color: var(--bio-dim); font-size: 1.4rem; }
+  /* ---- Onboarding-Startimpuls (A5) ---- */
+  .onboard { background: rgba(95,230,176,.08); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio); line-height: 1.5; }
+  .onboard[hidden] { display: none; }
+  .onboard b { color: var(--text); }
+  .biomes.hint .biome:first-child { border-color: var(--bio); animation: biomepulse 1.6s ease-in-out infinite; }
+  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(95,230,176,0); } 50%{ box-shadow: 0 0 0 4px rgba(95,230,176,.18); } }
+  @media (prefers-reduced-motion: reduce) { .biomes.hint .biome:first-child { animation: none; } }
   .reveal-x {
     margin-top: 16px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
     font-family: var(--sans); font-size: .85rem; font-weight: 600; color: #06201a;
@@ -228,8 +274,8 @@
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <canvas id="habitat" width="720" height="560"></canvas>
-        <div class="toast" id="toast" hidden></div>
-        <div class="reveal" id="reveal" hidden>
+        <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+        <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-label="Willkommen zurück" hidden>
           <div class="reveal-card">
             <div class="reveal-eyebrow">Willkommen zurück</div>
             <div class="reveal-body" id="revealBody"></div>
@@ -238,17 +284,25 @@
         </div>
       </div>
       <div class="card">
+        <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
         <div class="kingdom" id="kingdom">—</div>
         <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
+        <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
+          <span class="vit-label" id="vitLabel">Vitalität</span>
+          <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
+          <span class="vit-num" id="vitNum">—</span>
+        </div>
         <div class="genes" id="genes"></div>
         <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
+        <div class="ancestry" id="ancestryRow" hidden></div>
       </div>
     </div>
 
     <!-- Konsole -->
     <div class="panel console">
       <h2>Umwelt formen</h2>
+      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — dein Wesen passt sich <b>live</b> an.</div>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
       <div class="controls">
@@ -260,17 +314,21 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern gezeichnet — dieselbe Evolutions-Engine, die
-    gegen ein wissenschaftliches Referenzmodell auf <b class="chip-val">~84&nbsp;%</b> abgeglichen ist
-    (Modell-Güte, nicht Bewertung deines Wesens). Früher Mockup — die Optik verfeinern wir noch.
+    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern lebendig gezeichnet.
+    <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
+  </p>
+  <p class="footnote" id="engineDetail" hidden>
+    Dieselbe Evolutions-Engine ist gegen ein wissenschaftliches Referenzmodell auf
+    <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die <b>Modell-Güte</b> (wie gut die
+    schlanke Browser-Engine das schwere Referenzmodell trifft), <b>keine Bewertung deines Wesens</b>.
   </p>
 
-  <div class="login" id="login" hidden>
+  <div class="login" id="login" role="dialog" aria-modal="true" aria-label="Geräte-Sync — Login" hidden>
     <div class="login-card">
       <div class="reveal-eyebrow">Geräte-Sync</div>
       <p class="login-p">E-Mail + Passwort — dann folgt dein Wesen dir auf jedes Gerät. Dasselbe Passwort überall = dasselbe Wesen. Neu hier? Einfach „Konto erstellen".</p>
-      <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" />
-      <input type="password" id="loginPass" placeholder="Passwort (min. 6 Zeichen)" autocomplete="current-password" />
+      <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" aria-label="E-Mail-Adresse" />
+      <input type="password" id="loginPass" placeholder="Passwort (min. 6 Zeichen)" autocomplete="current-password" aria-label="Passwort" />
       <div class="login-row">
         <button id="loginIn" class="reveal-x">Einloggen</button>
         <button id="loginUp" class="ctrl">Konto erstellen</button>
@@ -285,7 +343,7 @@
   </div>
 
   <!-- Genbuch: begehbarer Lebensbaum -->
-  <div class="genbook" id="genbook" hidden>
+  <div class="genbook" id="genbook" role="dialog" aria-modal="true" aria-label="Lebensbaum — Genbuch" hidden>
     <div class="gb-card">
       <div class="gb-head">
         <div class="gb-title">Lebensbaum</div>
@@ -378,6 +436,12 @@ const ICONS = {
   // Protisten
   euglena:`<ellipse cx="11" cy="12" rx="6" ry="3" transform="rotate(-15 11 12)"/><path d="M16.5 10.5c2-.5 2-2.5 4.5-2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
   radiolarian:`<circle cx="12" cy="12" r="4"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></g>`,
+  // Lueckenschluss: Weichtiere, Amphibien, sessile Tiere
+  snail:`<path d="M2 18c0-2 1.5-3 4-3h4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M3 15V12M5.5 15V11"/></g><path fill-rule="evenodd" d="M15 6.5a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 2.6a3.6 3.6 0 100 7.2 3.6 3.6 0 000-7.2z"/><circle cx="15" cy="12.7" r="1.3"/>`,
+  octopus:`<circle cx="12" cy="8" r="5"/><g stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M8.5 12C7 15 6.5 18 5 20M10.5 13C10 16 9.5 18.5 8.5 21M13.5 13c.5 3 1 5.5 2 8M15.5 12c1.5 3 2 6 3.5 8"/></g>`,
+  frog:`<ellipse cx="12" cy="14" rx="7" ry="4.5"/><circle cx="8.5" cy="9" r="2.4"/><circle cx="15.5" cy="9" r="2.4"/><g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M5 16l-3 3M19 16l3 3M8 18l-1 2M16 18l1 2"/></g>`,
+  coral:`<g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M12 21V7M12 15c0-2-2-3-2-5M12 15c0-2 2-3 2-5M10 10c0-1.5-1.5-2-1.5-3.5M14 10c0-1.5 1.5-2 1.5-3.5"/></g><circle cx="12" cy="6.5" r="1.1"/><circle cx="8.3" cy="6" r="1.1"/><circle cx="15.7" cy="6" r="1.1"/>`,
+  sponge:`<path fill-rule="evenodd" d="M5 10a7 6 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 8a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM14 9a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM11 13.5a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z"/>`,
 };
 function ic(name, cls){ return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.dot}</svg>`; }
 // Archetyp-Name -> Icon-Schluessel (Namen exakt = classify().n)
@@ -391,6 +455,8 @@ const FICON = {
   "Flechte · Symbiose":"lichen","Hefe":"yeast",
   "Bakterie":"rod","Archaee · Extremophil":"flagellum","Protist · Amöbe":"amoeba",
   "Euglenoid · Mixotroph":"euglena","Plankton":"radiolarian",
+  "Schnecke · Weichtier":"snail","Kopffüßer · Tintenfisch":"octopus","Amphibie · Lurch":"frog",
+  "Koralle · Riffbildner":"coral","Schwamm":"sponge",
 };
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
@@ -463,15 +529,18 @@ function classify(t){
     if(armor>0.55 && size>0.55)           return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
     if(armor>0.5 && limb>0.5)             return {k:"Tier",n:"Krebstier · Arthropode",e:"🦀"};
     if(armor>0.55)                        return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
+    if(armor>0.45 && limb<0.3 && mob<0.6) return {k:"Tier",n:"Schnecke · Weichtier",e:"🐌"};
     if(limb<0.3 && armor<0.32 && mob>0.6) return {k:"Tier",n:"Fisch · Aalform",e:"🐟"};
     if(limb<0.3 && size<0.35)             return {k:"Tier",n:"Wurm",e:"🪱"};
     if(limb>0.6 && size<0.32 && insul<0.4)return {k:"Tier",n:"Insekt · Gliederfüßer",e:"🐜"};
+    if(limb>0.55 && struct<0.32 && armor<0.32 && insul<0.35 && size>0.32) return {k:"Tier",n:"Kopffüßer · Tintenfisch",e:"🐙"};
     if(size>0.6 && metab>0.6)             return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
     if(insul>0.6 && size>0.52)            return {k:"Tier",n:"Fell-Großtier",e:"🐻"};
     if(insul>0.6)                         return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
     if(limb>0.6 && metab>0.55 && size<0.45)return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
     if(limb>0.6 && size<0.45)             return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
     if(size<0.28)                         return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
+    if(armor<0.32 && insul<0.32 && struct<0.35 && metab<0.5) return {k:"Tier",n:"Amphibie · Lurch",e:"🐸"};
     if(armor<0.32 && insul<0.32)          return {k:"Tier",n:"Reptil · Echse",e:"🦎"};
     return {k:"Tier",n:"Generalisten-Tier",e:"🦥"};
   }
@@ -484,7 +553,9 @@ function classify(t){
     }
     if(size<0.28 && struct<0.35)          return {k:"Mikrobe",n:"Protist · Amöbe",e:"🔬"};
     if(metab>0.55 && size<0.35)           return {k:"Pilz",n:"Hefe",e:"🫧"};
+    if(photo>0.28 && struct>0.5 && armor>0.4) return {k:"Tier",n:"Koralle · Riffbildner",e:"🪸"};
     if(photo>0.28)                        return {k:"Pilz",n:"Flechte · Symbiose",e:"🍥"};
+    if(struct<0.3 && armor<0.3 && metab<0.45 && size>0.38) return {k:"Tier",n:"Schwamm",e:"🧽"};
     if(struct>0.55 && size>0.4)           return {k:"Pilz",n:"Baumpilz · Porling",e:"🪵"};
     if(armor>0.5)                         return {k:"Pilz",n:"Zunderschwamm",e:"🟤"};
     if(struct<0.3 && size<0.42)           return {k:"Pilz",n:"Schimmel · Fadenpilz",e:"🧵"};
@@ -535,7 +606,7 @@ const LEVERS = [
   {key:"temperature", ico:"temp", name:"Temperatur", lo:"kalt", hi:"heiß"},
   {key:"predation",   ico:"fang", name:"Räuberdruck", lo:"keine", hi:"extrem"},
   {key:"foodAbundance",ico:"grain", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
-  {key:"foodHeight",  ico:"height", name:"Nahrungs-/Lichthöhe", lo:"Boden", hi:"hoch"},
+  {key:"foodHeight",  ico:"height", name:"Höhe (Nahrung/Licht)", lo:"Boden", hi:"hoch"},
   {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"sonnig"},
   {key:"water",       ico:"drop", name:"Wasser", lo:"Dürre", hi:"feucht"},
 ];
@@ -559,6 +630,9 @@ let displayGenome = new Array(8).fill(0.5);   // geglaettete Anzeige (gleitender
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
 let rng, randn, lineageSeed = 0;
 let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
+// A4 Bindung: Name des aktuellen Wesens + Ahnenlinie (aelteste zuerst, gekappt).
+let creatureName = "";
+let ancestry = [];   // [{name, form, gen}]
 // Committed Archetyp mit Hysterese: Art/Zeichnung/Unlock wechseln erst, wenn eine
 // neue Form ~STABLE_GENS Generationen STABIL gehalten wird. Verhindert (a) Unlock
 // kurz ueberstreifter Formen und (b) spontanes Umschalten an classify()-Schwellen.
@@ -571,6 +645,7 @@ function newLineage(){
   lineageSeed = (Math.random()*4294967296)>>>0;
   rng = mulberry32(lineageSeed); randn = makeRandn();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  creatureName = "";
 }
 newLineage();
 
@@ -591,11 +666,11 @@ function saveState(){
     cloudTimer = setTimeout(async () => { cloudTimer = null;
       try { await sb.from("creatures").upsert({
         user_id: session.user.id, genome, env, generation,
-        lineage_seed: lineageSeed, discovered:[...discovered], last_seen: new Date().toISOString()
+        lineage_seed: lineageSeed, discovered:[...discovered], name: creatureName || null, last_seen: new Date().toISOString()
       }); } catch(e) { console.warn("save", e); }
     }, 2000);
   } else {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ genome, env, generation, lineageSeed, discovered:[...discovered], ts: now })); } catch(e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ genome, env, generation, lineageSeed, discovered:[...discovered], name: creatureName, ancestry, ts: now })); } catch(e) {}
   }
 }
 function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
@@ -605,50 +680,55 @@ function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.
 // Blaetter. Namen MUESSEN exakt classify().n entsprechen. Quelle: docs/tree-of-life.json.
 const TREE = [
   {k:"Mikrobe", forms:[
-    {n:"Bakterie", e:"🧫", cl:"Bacteria"},
-    {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea"},
-    {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa"},
+    {n:"Bakterie", e:"🧫", cl:"Bacteria", era:"vor ~3,5 Mrd. J.", evo:"Frühestes Leben — einfache Zelle ohne Kern (Prokaryot)."},
+    {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea", era:"vor ~3,5 Mrd. J.", evo:"Extremophile Urzeller; eigene Domäne neben den Bakterien."},
+    {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa", era:"vor ~1,8 Mrd. J.", evo:"Erste Zelle mit echtem Kern (Eukaryot) — via Endosymbiose."},
   ]},
   {k:"Protist", forms:[
-    {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa"},
-    {n:"Plankton", e:"✨", cl:"Radiolaria"},
+    {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa", era:"vor ~1 Mrd. J.", evo:"Schluckte eine Alge → Photosynthese UND Beweglichkeit."},
+    {n:"Plankton", e:"✨", cl:"Radiolaria", era:"vor ~500 Mio. J.", evo:"Einzeller mit Mineralskelett; Basis der Meeres-Nahrungsnetze."},
   ]},
   {k:"Pflanze", forms:[
-    {n:"Grünalge", e:"🟢", cl:"Chlorophyta"},
-    {n:"Moos", e:"🌱", cl:"Bryophyta"},
-    {n:"Farn", e:"🌿", cl:"Farne"},
-    {n:"Kraut · niedrige Pflanze", e:"☘️", cl:"Angiospermen"},
-    {n:"Blütenkraut", e:"🌸", cl:"Angiospermen"},
-    {n:"Verholzter Strauch", e:"🪴", cl:"Angiospermen"},
-    {n:"Laubbaum", e:"🌳", cl:"Angiospermen"},
-    {n:"Nadelbaum", e:"🌲", cl:"Koniferen"},
-    {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen"},
-    {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine"},
+    {n:"Grünalge", e:"🟢", cl:"Chlorophyta", era:"vor ~1 Mrd. J.", evo:"Aquatische Algen — Vorläufer aller Landpflanzen."},
+    {n:"Moos", e:"🌱", cl:"Bryophyta", era:"vor ~470 Mio. J.", evo:"Erste Landpflanzen; noch ohne echte Leitgefäße."},
+    {n:"Farn", e:"🌿", cl:"Farne", era:"vor ~360 Mio. J.", evo:"Gefäßpflanzen der Karbon-Wälder; Sporen statt Samen."},
+    {n:"Kraut · niedrige Pflanze", e:"☘️", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Blütenpflanzen — Blüte lockt Bestäuber."},
+    {n:"Blütenkraut", e:"🌸", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Blüte als Fortpflanzungs-Innovation; Koevolution mit Insekten."},
+    {n:"Verholzter Strauch", e:"🪴", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Verholzte Blütenpflanzen — mehrjährig, stabil."},
+    {n:"Laubbaum", e:"🌳", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Hohe verholzte Blütenpflanzen im Lichtwettbewerb."},
+    {n:"Nadelbaum", e:"🌲", cl:"Koniferen", era:"vor ~300 Mio. J.", evo:"Nacktsamer — Samen ohne Frucht, kälteresistent."},
+    {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen", era:"vor ~35 Mio. J.", evo:"Junge Blütenpflanzen — Sukkulenz gegen Trockenheit."},
+    {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine", era:"jung (Eiszeiten)", evo:"Alpine Anpassung — Polsterwuchs gegen Kälte und Wind."},
   ]},
   {k:"Pilz", forms:[
-    {n:"Hutpilz", e:"🍄", cl:"Basidiomycota"},
-    {n:"Baumpilz · Porling", e:"🪵", cl:"Basidiomycota"},
-    {n:"Zunderschwamm", e:"🟤", cl:"Basidiomycota"},
-    {n:"Myzel · Pilzgeflecht", e:"🍂", cl:"Fungi"},
-    {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota"},
-    {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten"},
-    {n:"Hefe", e:"🫧", cl:"Ascomycota"},
+    {n:"Hutpilz", e:"🍄", cl:"Basidiomycota", era:"vor ~120 Mio. J.", evo:"Ständerpilze mit Fruchtkörper zur Sporenverbreitung."},
+    {n:"Baumpilz · Porling", e:"🪵", cl:"Basidiomycota", era:"vor ~300 Mio. J.", evo:"Holzzersetzer — verholzte Konsolen am Totholz."},
+    {n:"Zunderschwamm", e:"🟤", cl:"Basidiomycota", era:"vor ~300 Mio. J.", evo:"Harter mehrjähriger Porling am Stamm."},
+    {n:"Myzel · Pilzgeflecht", e:"🍂", cl:"Fungi", era:"vor ~1 Mrd. J.", evo:"Fädiges Geflecht — der eigentliche Pilzkörper im Boden."},
+    {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Schlauchpilze — schnelle Sporen auf Substrat."},
+    {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten", era:"vor ~400 Mio. J.", evo:"Symbiose Pilz + Alge — besiedelt nackten Fels."},
+    {n:"Hefe", e:"🫧", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Einzellige Schlauchpilze — Gärung als Nische."},
   ]},
   {k:"Tier", forms:[
-    {n:"Wurm", e:"🪱", cl:"Annelida"},
-    {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta"},
-    {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea"},
-    {n:"Fisch · Aalform", e:"🐟", cl:"Fische"},
-    {n:"Reptil · Echse", e:"🦎", cl:"Reptilia"},
-    {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia"},
-    {n:"Flatterer · Vogel", e:"🐦", cl:"Aves"},
-    {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia"},
-    {n:"Fell-Großtier", e:"🐻", cl:"Mammalia"},
-    {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia"},
-    {n:"Gepanzerter Koloss", e:"🦏", cl:"Mammalia"},
-    {n:"Behänder Kletterer", e:"🐒", cl:"Primaten"},
-    {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager"},
-    {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten"},
+    {n:"Schwamm", e:"🧽", cl:"Porifera", era:"vor ~600 Mio. J.", evo:"Früheste Tiere — sessile Filtrierer, noch ohne echte Organe."},
+    {n:"Koralle · Riffbildner", e:"🪸", cl:"Cnidaria", era:"vor ~540 Mio. J.", evo:"Nesseltiere — sessil, riffbildend, oft mit Symbiose-Algen."},
+    {n:"Wurm", e:"🪱", cl:"Annelida", era:"vor ~518 Mio. J.", evo:"Kambrium — gegliederter Körper, Bewegung im Sediment."},
+    {n:"Schnecke · Weichtier", e:"🐌", cl:"Mollusca", era:"vor ~500 Mio. J.", evo:"Weichtiere mit schützendem Kalkhaus."},
+    {n:"Kopffüßer · Tintenfisch", e:"🐙", cl:"Cephalopoda", era:"vor ~500 Mio. J.", evo:"Weichtiere mit Fangarmen — Räuber, hohe Intelligenz."},
+    {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea", era:"vor ~510 Mio. J.", evo:"Gliederfüßer mit Panzer und Scheren."},
+    {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta", era:"vor ~400 Mio. J.", evo:"Erste Landgliederfüßer; Flügel (~325 Mio.) → artenreichste Gruppe."},
+    {n:"Fisch · Aalform", e:"🐟", cl:"Fische", era:"vor ~530 Mio. J.", evo:"Erste Wirbeltiere — Wirbelsäule und Kiemen."},
+    {n:"Amphibie · Lurch", e:"🐸", cl:"Amphibia", era:"vor ~370 Mio. J.", evo:"Erste Landwirbeltiere — noch ans Wasser gebunden (Laich)."},
+    {n:"Reptil · Echse", e:"🦎", cl:"Reptilia", era:"vor ~320 Mio. J.", evo:"Amnioten — das Ei mit Schale löst vom Wasser."},
+    {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia", era:"vor ~230 Mio. J.", evo:"Panzer/Schild als Verteidigung gegen Räuber."},
+    {n:"Flatterer · Vogel", e:"🐦", cl:"Aves", era:"vor ~150 Mio. J.", evo:"Aus gefiederten Dinosauriern — Flug erobert die Luft."},
+    {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia", era:"vor ~210 Mio. J.", evo:"Säugetiere — Fell + Warmblütigkeit; Radiation nach 66 Mio."},
+    {n:"Fell-Großtier", e:"🐻", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Große Säuger nach dem Dino-Aussterben."},
+    {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Raubsäuger füllen frei gewordene Jäger-Nischen."},
+    {n:"Gepanzerter Koloss", e:"🦏", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Mega-Pflanzenfresser mit Panzer/Horn zur Verteidigung."},
+    {n:"Behänder Kletterer", e:"🐒", cl:"Primaten", era:"vor ~55 Mio. J.", evo:"Primaten — Greifhände, Leben in den Bäumen."},
+    {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager", era:"vor ~66 Mio. J.", evo:"Nager — klein, schnell, extrem erfolgreich."},
+    {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten", era:"vor ~210 Mio. J.", evo:"Anpassungsfähiger Allrounder ohne Spezialisierung."},
   ]},
 ];
 const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
@@ -656,7 +736,7 @@ function renderGenbook(){
   const found = discovered.size;
   document.getElementById("gbSub").innerHTML =
     `<b class="chip-val" style="color:var(--bio)">${found}</b> von ${TREE_TOTAL} Formen entdeckt. ` +
-    `Forme neue Umwelten, um Äste des Lebensbaums freizuschalten — „???" wartet noch.`;
+    `Forme neue Umwelten, um Äste freizuschalten — „???" wartet noch. Fahr über eine Kachel: wann &amp; wie sie entstand.`;
   const body = document.getElementById("gbBody");
   body.innerHTML = "";
   for(const grp of TREE){
@@ -669,6 +749,10 @@ function renderGenbook(){
       const ok = discovered.has(f.n);
       const t = document.createElement("div");
       t.className = "gb-tile " + (ok?"found":"miss");
+      const title = ok ? f.n : "???";
+      const evo = ok ? (f.evo||"") : "Noch nicht entdeckt — forme die passende Umwelt.";
+      t.dataset.title = title; t.dataset.clade = f.cl; t.dataset.era = f.era||""; t.dataset.evo = evo;
+      t.title = `${title} · ${f.era||""} · ${evo}`;   // Fallback (Touch/a11y)
       t.innerHTML = `<div class="em">${ok?formIcon(f.n):ic("dot")}</div>`+
                     `<div class="nm">${ok?f.n:"???"}</div>`+
                     `<div class="cl">${f.cl}</div>`;
@@ -679,8 +763,49 @@ function renderGenbook(){
 }
 function openGenbook(){ renderGenbook(); document.getElementById("genbook").hidden = false; }
 document.getElementById("discBtn").addEventListener("click", openGenbook);
-document.getElementById("genbookClose").addEventListener("click", () => { document.getElementById("genbook").hidden = true; });
-document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") document.getElementById("genbook").hidden = true; });
+function closeGenbook(){ document.getElementById("genbook").hidden = true; gbTip.classList.remove("show"); }
+document.getElementById("genbookClose").addEventListener("click", closeGenbook);
+document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") closeGenbook(); });
+// Hover-Info: wann & wie sich die Art entwickelt hat
+const gbTip = document.createElement("div"); gbTip.id="gbTip"; document.body.appendChild(gbTip);
+const gbBodyEl = document.getElementById("gbBody");
+gbBodyEl.addEventListener("mousemove", (e) => {
+  const tile = e.target.closest(".gb-tile");
+  if(!tile){ gbTip.classList.remove("show"); return; }
+  gbTip.innerHTML = `<b>${tile.dataset.title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
+    `<div class="tip-era">${tile.dataset.era}</div><div>${tile.dataset.evo}</div>`;
+  gbTip.classList.add("show");
+  const pad=14, r=gbTip.getBoundingClientRect();
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+r.width>innerWidth) x=e.clientX-r.width-pad;
+  if(y+r.height>innerHeight) y=e.clientY-r.height-pad;
+  gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
+});
+gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+// A5: Onboarding-Startimpuls fuer echte Erstbesucher.
+function dismissOnboard(){ const o=document.getElementById("onboard"); if(!o||o.hidden) return;
+  o.hidden=true; document.getElementById("biomes").classList.remove("hint");
+  try{ localStorage.setItem("evolve_seen","1"); }catch(e){} }
+function maybeOnboard(){
+  let hasSave=false, seen=false;
+  try{ hasSave=!!localStorage.getItem(STORAGE_KEY); seen=!!localStorage.getItem("evolve_seen"); }catch(e){}
+  if(seen || hasSave || session) return;   // nur wer noch nie hier war
+  document.getElementById("onboard").hidden=false;
+  document.getElementById("biomes").classList.add("hint");
+}
+// B6: "Über die Engine" ein-/ausklappen (Jargon nur auf Wunsch).
+document.getElementById("engineInfoBtn").addEventListener("click", (e) => {
+  const d=document.getElementById("engineDetail"); const open=d.hidden;
+  d.hidden=!open; e.target.setAttribute("aria-expanded", String(open));
+});
+// B4: Escape schliesst offene Overlays (Genbuch/Login/Reveal).
+document.addEventListener("keydown", (e) => {
+  if(e.key !== "Escape") return;
+  const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
+  if(!gb.hidden){ closeGenbook(); }
+  else if(!lg.hidden){ lg.hidden = true; }
+  else if(!rv.hidden){ rv.hidden = true; }
+});
 let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");
@@ -703,6 +828,8 @@ function applyState(s){
     LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } }); }
   generation = s.generation || 0;
   discovered = new Set(s.discovered || []);
+  creatureName = s.name || "";
+  ancestry = Array.isArray(s.ancestry) ? s.ancestry : ancestry;   // Ahnenlinie: lokal (Cloud-Zeile hat keine Spalte)
   lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
   rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
   displayGenome = genome.slice();
@@ -721,7 +848,8 @@ function offlineCatchup(prevTs){
 }
 async function restore(){
   if(session){
-    document.getElementById("biomeTag").textContent = "Cloud-Welt";
+    // B7: Sync-Status gehoert in den Header (authState "☁️ E-Mail"), NICHT in den
+    // Biom-Tag - der zeigt weiter die echte Umwelt.
     let row = null;
     try { const r = await sb.from("creatures").select("*").eq("user_id", session.user.id).maybeSingle(); row = r.data; }
     catch(e) { console.warn("load", e); }
@@ -732,20 +860,25 @@ async function restore(){
     let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { s = null; }
     if(s && Array.isArray(s.genome) && s.genome.length===8){ applyState(s); offlineCatchup(s.ts); }
   }
-  updatePanels(); updateDisc();
+  updatePanels(); updateDisc(); updateBonding();
+  maybeOnboard();
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
+  const changed = beforeA.n !== afterA.n;
+  // A6: prominente Vorher -> Nachher-Silhouetten-Zeile.
+  const formsRow = `<div class="reveal-forms">`+
+    `<span class="rf"><span class="rf-ic">${formIcon(beforeA.n)}</span><span class="rf-nm">${beforeA.n}</span></span>`+
+    `<span class="rf-arrow">→</span>`+
+    `<span class="rf ${changed?'rf-new':''}"><span class="rf-ic">${formIcon(afterA.n)}</span><span class="rf-nm">${afterA.n}</span></span>`+
+    `</div>`;
   const parts = [];
   parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
-  if(beforeA.n !== afterA.n){
-    parts.push(`<span class="arrow">Aus ${formIcon(beforeA.n)} ${beforeA.n} wurde ${formIcon(afterA.n)} ${afterA.n}.</span>`);
-  } else {
-    parts.push(`Immer noch ${formIcon(afterA.n)} <b>${afterA.n}</b> — aber im Detail verändert.`);
-  }
+  parts.push(changed ? `Aus <b>${beforeA.n}</b> wurde <b>${afterA.n}</b>.`
+                     : `Immer noch <b>${afterA.n}</b> — aber im Detail verändert.`);
   const deltas = afterG.map((x,i)=>({i, d:x-beforeG[i]})).filter(o=>Math.abs(o.d)>0.05)
     .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
   if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
-  document.getElementById("revealBody").innerHTML = parts.map(p=>`<div>${p}</div>`).join("");
+  document.getElementById("revealBody").innerHTML = formsRow + parts.map(p=>`<div>${p}</div>`).join("");
   document.getElementById("reveal").hidden = false;
 }
 // ---- Auth-UI ----
@@ -753,7 +886,7 @@ function updateAuthUI(){
   const el = document.getElementById("authState");
   if(!el) return;
   if(session){
-    el.innerHTML = `<span class="auth-mail">☁️ ${session.user.email || "angemeldet"}</span> <button class="link" id="signOut">abmelden</button>`;
+    el.innerHTML = `<span class="auth-mail" title="Cloud-Sync aktiv — dein Wesen folgt dir auf jedes Gerät">☁️ ${session.user.email || "angemeldet"}</span> <button class="link" id="signOut">abmelden</button>`;
     document.getElementById("signOut").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
   } else {
     el.innerHTML = `<button class="link" id="signIn">☁️ Anmelden für Geräte-Sync</button>`;
@@ -767,6 +900,9 @@ async function doAuth(kind){
   if(!email || !pass){ msg.textContent = "E-Mail und Passwort eingeben."; return; }
   if(pass.length < 6){ msg.textContent = "Passwort mindestens 6 Zeichen."; return; }
   msg.textContent = kind === "up" ? "erstelle Konto …" : "melde an …";
+  const authBtns = [document.getElementById("loginIn"), document.getElementById("loginUp")];
+  authBtns.forEach(b => { if(b) b.disabled = true; });   // B13: kein Doppel-Submit
+  try {
   const { data, error } = kind === "up"
     ? await sb.auth.signUp({ email, password: pass })
     : await sb.auth.signInWithPassword({ email, password: pass });
@@ -791,6 +927,9 @@ async function doAuth(kind){
     msg.textContent = "Konto erstellt — jetzt einloggen."; return;
   }
   msg.textContent = "angemeldet ✓";   // onAuthStateChange laedt das Wesen
+  } finally {
+    authBtns.forEach(b => { if(b) b.disabled = false; });
+  }
 }
 document.getElementById("loginIn").addEventListener("click", () => doAuth("in"));
 document.getElementById("loginUp").addEventListener("click", () => doAuth("up"));
@@ -850,6 +989,7 @@ LEVERS.forEach(l => {
     env[l.key] = +ev.target.value;
     document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
     lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+    dismissOnboard();
   });
 });
 const biomesEl = document.getElementById("biomes");
@@ -859,16 +999,25 @@ BIOMES.forEach(b => {
     Object.assign(env, b.env);
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
+    dismissOnboard();
     // Kein Neustart: die laufende Evolution reagiert ab dem aktuellen Zustand.
   });
   biomesEl.appendChild(btn);
 });
 const genesEl = document.getElementById("genes");
 GENE_LABELS.forEach((lbl,i) => {
-  const d=document.createElement("div"); d.className="gene";
+  const d=document.createElement("div"); d.className="gene"; d.id="gene-"+i;
   d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
   genesEl.appendChild(d);
 });
+// CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
+// Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct
+function mutedGenes(a){
+  if(a.e==="🪸"||a.e==="🧽") return [2,6];        // sessile Tiere: keine Gliedmassen/Mobilitaet
+  if(a.k==="Tier") return [5];                     // Tiere: keine Photosynthese
+  if(a.k==="Protist") return [];                   // Mischotroph: (fast) alles relevant
+  return [2,6];                                     // Pflanze/Pilz/Mikrobe: sessil -> Gliedmassen/Mobilitaet
+}
 
 function updatePanels(g, a){
   g = g || genome;
@@ -877,10 +1026,38 @@ function updatePanels(g, a){
   document.getElementById("emoji").innerHTML = formIcon(a.n);
   document.getElementById("species").textContent = a.n;
   document.getElementById("bauplan").textContent = describe(g);
+  const muted = mutedGenes(a);
   for(let i=0;i<8;i++){
     document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
     document.getElementById("gn-"+i).textContent = g[i].toFixed(2);
+    document.getElementById("gene-"+i).classList.toggle("muted", muted.includes(i));
   }
+  // A3: Vitalitaet = wie gut passt das Wesen zur AKTUELLEN Umwelt (Fitness).
+  // Live -> dreht man einen Regler, sackt sie kurz ab und erholt sich beim Anpassen.
+  const fit = fitness(g, env);
+  const vit = clamp01((fit - 0.12) / 0.72);
+  const vf = document.getElementById("vitFill");
+  vf.style.width = (vit*100).toFixed(0) + "%";
+  vf.style.background = vit < 0.4 ? "linear-gradient(90deg,#9c5f33,#d08a44)"
+                     : vit < 0.7 ? "linear-gradient(90deg,#8a8a34,#cbc24a)"
+                     : "linear-gradient(90deg,var(--bio-dim),var(--bio))";
+  const word = vit<0.3 ? "kämpft" : vit<0.5 ? "hält sich" : vit<0.72 ? "gedeiht" : "blüht auf";
+  document.getElementById("vitLabel").textContent = "Vitalität · " + word;
+  document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
+}
+// A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
+function updateBonding(){
+  const c = document.getElementById("cname");
+  if(creatureName){ c.textContent = creatureName; c.classList.remove("unnamed"); }
+  else { c.textContent = "Unbenannt"; c.classList.add("unnamed"); }
+  const row = document.getElementById("ancestryRow");
+  if(!ancestry.length){ row.hidden = true; row.innerHTML = ""; return; }
+  row.hidden = false;
+  const shown = ancestry.slice(-4);
+  const lead = ancestry.length > shown.length ? `<span class="sep">…›</span>` : `<span class="sep">Ahnen:</span>`;
+  row.innerHTML = lead + shown.map(a =>
+    `<span class="anc">${formIcon(a.form)}${a.name || a.form.split(" · ")[0]}</span>`
+  ).join(`<span class="sep">›</span>`);
 }
 
 // ---- Zeit-Steuerung ----
@@ -888,8 +1065,10 @@ const playBtn = document.getElementById("playBtn");
 playBtn.addEventListener("click", () => {
   running = !running;
   playBtn.innerHTML = running ? ic("pause") : ic("play");
+  playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");   // B9: dynamisches Label
   document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
 });
+playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");
 const speedsEl = document.getElementById("speeds");
 [["langsam",3],["normal",8],["schnell",22]].forEach(([lbl,v]) => {
   const b=document.createElement("button"); b.className="speed"+(v===gensPerSec?" active":""); b.textContent=lbl;
@@ -897,12 +1076,22 @@ const speedsEl = document.getElementById("speeds");
   speedsEl.appendChild(b);
 });
 document.getElementById("newLifeBtn").addEventListener("click", () => {
-  if(!confirm("Neues Leben starten? Dein jetziges Wesen geht dabei verloren.")) return;
+  if(!confirm("Neues Leben als Nachkomme starten? Das jetzige Wesen zieht in die Ahnenlinie.")) return;
+  // A4: aktuelles Wesen als Ahne aufzeichnen (Linie ueberlebt "Neues Leben").
+  ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
+  if(ancestry.length > 12) ancestry = ancestry.slice(-12);
   newLineage();
   document.getElementById("reveal").hidden = true;
   document.getElementById("biomeTag").textContent = lastBiome;
   document.getElementById("genReadout").textContent = "Generation 0";
-  updatePanels(); saveState();
+  updatePanels(); updateBonding(); saveState();
+});
+// A4: Wesen benennen.
+document.getElementById("nameBtn").addEventListener("click", () => {
+  const v = prompt("Wie soll dein Wesen heißen?", creatureName || "");
+  if(v === null) return;
+  creatureName = v.trim().slice(0, 24);
+  updateBonding(); saveState();
 });
 document.getElementById("revealX").addEventListener("click", () => { document.getElementById("reveal").hidden = true; });
 // Speicher-Kadenz
@@ -944,6 +1133,8 @@ function drawHabitat(){
   ctx.beginPath(); ctx.ellipse(CW/2, CH*0.94, CW*0.6, CH*0.14, 0,0,Math.PI*2); ctx.fill();
 }
 
+// B5: prefers-reduced-motion -> Canvas-Animation (Atem, Partikel) beruhigen.
+const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let motes = [];
 function initMotes(){ motes = Array.from({length:26},()=>({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.6+0.4,s:Math.random()*0.3+0.05,ph:Math.random()*6})); }
 function drawMotes(time){
@@ -962,12 +1153,15 @@ function drawCreature(g, time, a){
   // Form-Details aus lineageSeed (stabil pro Leben) statt aus dem driftenden Genom
   // -> die Silhouette zappelt nicht mehr Frame fuer Frame.
   const rnd = mulberry32((lineageSeed ^ 0x5bd1e995) >>> 0);
-  const breath = 1 + 0.025*Math.sin(time*0.0016);
+  const breath = reduceMotion ? 1 : 1 + 0.025*Math.sin(time*0.0016);
   const cx = CW/2;
   ctx.save();
   ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
 
-  if(a.k==="Pflanze"){
+  const sessileAnimal = a.e==="🪸" || a.e==="🧽";   // Koralle / Schwamm: Tiere, aber bodenstaendig
+  if(sessileAnimal){
+    drawSessile(g, cx, CH*0.9, breath, time, rnd, a);
+  } else if(a.k==="Pflanze"){
     drawPlant(g, cx, CH*0.9, breath, time, rnd, a);
   } else if(a.k==="Tier"){
     drawAnimal(g, cx, CH*0.6, breath, time, rnd, a);
@@ -1170,6 +1364,51 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
   const dark = body.map(c=>c*0.7);
 
   // ===== Eigene Koerperbauplaene (kein Vierbeiner) =====
+  // ---- Schnecke: Schleimfuss + Spiralhaus + Fuehler ----
+  if(kind==="🐌"){
+    const L=R*2.2, foot=rgb(mix(body,[150,175,155],0.4));
+    ctx.fillStyle=foot;
+    ctx.beginPath(); ctx.moveTo(cx-L*0.5,cy+R*0.5); ctx.quadraticCurveTo(cx-L*0.55,cy+R*0.1, cx-L*0.3,cy+R*0.1);
+    ctx.lineTo(cx+L*0.35,cy+R*0.1); ctx.quadraticCurveTo(cx+L*0.55,cy+R*0.15, cx+L*0.5,cy+R*0.5); ctx.closePath(); ctx.fill();
+    const hx=cx+L*0.42, hy=cy+R*0.12;
+    ctx.beginPath(); ctx.ellipse(hx,hy,R*0.3,R*0.34,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=foot; ctx.lineWidth=R*0.09; ctx.lineCap="round";
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(hx+R*0.08,hy-R*0.2); ctx.lineTo(hx+R*0.28+o*R*0.05,hy-R*0.65); ctx.stroke();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx+R*0.28+o*R*0.05,hy-R*0.68,R*0.06,0,Math.PI*2); ctx.fill(); }
+    const shx=cx-L*0.1, shy=cy-R*0.2, sr=R*0.98;
+    ctx.fillStyle=rgb(mix(body,[185,145,95],armor));
+    ctx.beginPath(); ctx.arc(shx,shy,sr,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=R*0.11; ctx.lineCap="round"; ctx.beginPath();
+    for(let i=0;i<=44;i++){ const t=i/44, ang=t*Math.PI*5, rr=sr*(1-t*0.92); const x=shx+Math.cos(ang)*rr, y=shy+Math.sin(ang)*rr; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
+    return;
+  }
+  // ---- Kopffuesser: Mantel + Tentakel ----
+  if(kind==="🐙"){
+    const hr=R*0.95;
+    ctx.fillStyle=rgb(body);
+    ctx.beginPath(); ctx.ellipse(cx,cy-R*0.2,hr,hr*1.15,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(body); ctx.lineWidth=R*0.26; ctx.lineCap="round";
+    const nT=6;
+    for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5); const sx=cx+t*hr*1.4, sway=Math.sin(time*0.004+i)*R*0.25;
+      ctx.beginPath(); ctx.moveTo(sx,cy+hr*0.4); ctx.quadraticCurveTo(sx+sway,cy+hr*1.0, sx+t*R*0.6+sway, cy+hr*1.5); ctx.stroke(); }
+    for(const o of [-1,1]){ ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4,cy-R*0.25,R*0.17,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4-R*0.04,cy-R*0.31,R*0.06,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+  // ---- Amphibie: gedrungen, gespreizte Beine, Augen oben ----
+  if(kind==="🐸"){
+    const W=R*1.3, H=R*0.9, amb=rgb(mix(body,[110,170,110],0.55));
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=R*0.2; ctx.lineCap="round";
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+o*W*0.5,cy+H*0.15);
+      ctx.quadraticCurveTo(cx+o*W*1.05,cy+H*0.25, cx+o*W*0.9,cy+H*0.9); ctx.lineTo(cx+o*W*1.2,cy+H*0.98); ctx.stroke(); }
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+o*W*0.3,cy+H*0.5); ctx.lineTo(cx+o*W*0.5,cy+H*1.02); ctx.stroke(); }
+    ctx.fillStyle=amb; ctx.beginPath(); ctx.ellipse(cx,cy,W,H,0,0,Math.PI*2); ctx.fill();
+    for(const o of [-1,1]){ ctx.fillStyle=amb; ctx.beginPath(); ctx.arc(cx+o*W*0.42,cy-H*0.72,R*0.3,0,Math.PI*2); ctx.fill();
+      const blink=(Math.sin(time*0.0011)>0.97)?0.15:1;
+      ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(cx+o*W*0.42,cy-H*0.72,R*0.15,R*0.15*blink,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*W*0.42-R*0.04,cy-H*0.8,R*0.05,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
   // ---- Wurm: gegliederter Schlauch ----
   if(kind==="🪱"){
     const segs=7+Math.round(size*6), L=R*2.6, seg=L/segs;
@@ -1469,6 +1708,35 @@ function drawProtist(g, cx, cy, breath, time, rnd, a){
   ctx.restore();
 }
 
+// ===== Sessile Tiere (Koralle / Schwamm): bodenstaendig, aber Reich Tier =====
+function drawSessile(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind=a.e;
+  if(kind==="🪸"){ // Koralle: verzweigte Aeste + Polypen, gruenlich (Symbiose)
+    const col=mix([180,120,110],[150,175,135],photo);
+    const branch=(x,y,ang,len,w,depth)=>{
+      if(depth<=0||len<7){ ctx.fillStyle=rgb(mix(col,[120,205,155],0.55)); ctx.beginPath(); ctx.arc(x,y,Math.max(2,w*0.6),0,Math.PI*2); ctx.fill(); return; }
+      const ex=x+Math.cos(ang)*len, ey=y+Math.sin(ang)*len;
+      ctx.strokeStyle=rgb(col); ctx.lineWidth=w; ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(ex,ey); ctx.stroke();
+      branch(ex,ey,ang-0.5-rnd()*0.25,len*0.72,w*0.7,depth-1);
+      branch(ex,ey,ang+0.5+rnd()*0.25,len*0.72,w*0.7,depth-1);
+    };
+    const base=(55+size*95)*breath;
+    branch(bx,by,-Math.PI/2,base*0.5,6+struct*9,4);
+    return;
+  }
+  // Schwamm: fassfoermiger Filtrierer mit Oskulum + Poren
+  const h=(50+size*95)*breath, w=22+size*30;
+  const col=mix([170,140,120],[150,165,145],photo);
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath(); ctx.moveTo(bx-w,by); ctx.quadraticCurveTo(bx-w*1.15,by-h, bx-w*0.5,by-h);
+  ctx.lineTo(bx+w*0.5,by-h); ctx.quadraticCurveTo(bx+w*1.15,by-h, bx+w,by); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="rgba(10,26,24,.85)"; ctx.beginPath(); ctx.ellipse(bx,by-h,w*0.32,w*0.13,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(10,26,24,.5)";
+  for(let i=0;i<16;i++){ const px=bx+(rnd()-0.5)*w*1.5, py=by-rnd()*h*0.9; ctx.beginPath(); ctx.arc(px,py,1.5+rnd()*2,0,Math.PI*2); ctx.fill(); }
+}
+
 // ======================= Loop =======================
 let lastTime = null, acc = 0;
 function frame(time){
@@ -1499,7 +1767,7 @@ function frame(time){
   updatePanels(displayGenome, committedArch);
   updateDisc();
   drawHabitat();
-  drawMotes(time);
+  if(!reduceMotion) drawMotes(time);   // B5: keine schwebenden Partikel bei reduced-motion
   drawCreature(displayGenome, time, committedArch);
   requestAnimationFrame(frame);
 }
@@ -1509,7 +1777,7 @@ document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neues Leben";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
 playBtn.innerHTML = ic("pause");
-resize(); initMotes(); updatePanels(); updateDisc();
+resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
 boot();
 requestAnimationFrame(frame);
 </script>
