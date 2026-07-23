@@ -87,6 +87,13 @@
   .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
   .gene .track { height: 6px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
   .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
+  .gene.muted { opacity: .32; }
+  .gene.muted .lbl::after { content: " ·"; }
+  /* ---- Vitalitäts-Anzeige (A3) ---- */
+  .vitality { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
+  .vit-track { flex: 1; height: 8px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+  .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); transition: width .25s ease, background .4s ease; }
+  .vit-num { min-width: 34px; text-align: right; color: var(--text); font-weight: 700; }
   .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
 
   /* ---- Konsole ---- */
@@ -249,6 +256,11 @@
         <div class="kingdom" id="kingdom">—</div>
         <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
+        <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
+          <span class="vit-label" id="vitLabel">Vitalität</span>
+          <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
+          <span class="vit-num" id="vitNum">—</span>
+        </div>
         <div class="genes" id="genes"></div>
         <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
       </div>
@@ -912,10 +924,18 @@ BIOMES.forEach(b => {
 });
 const genesEl = document.getElementById("genes");
 GENE_LABELS.forEach((lbl,i) => {
-  const d=document.createElement("div"); d.className="gene";
+  const d=document.createElement("div"); d.className="gene"; d.id="gene-"+i;
   d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
   genesEl.appendChild(d);
 });
+// CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
+// Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct
+function mutedGenes(a){
+  if(a.e==="🪸"||a.e==="🧽") return [2,6];        // sessile Tiere: keine Gliedmassen/Mobilitaet
+  if(a.k==="Tier") return [5];                     // Tiere: keine Photosynthese
+  if(a.k==="Protist") return [];                   // Mischotroph: (fast) alles relevant
+  return [2,6];                                     // Pflanze/Pilz/Mikrobe: sessil -> Gliedmassen/Mobilitaet
+}
 
 function updatePanels(g, a){
   g = g || genome;
@@ -924,10 +944,24 @@ function updatePanels(g, a){
   document.getElementById("emoji").innerHTML = formIcon(a.n);
   document.getElementById("species").textContent = a.n;
   document.getElementById("bauplan").textContent = describe(g);
+  const muted = mutedGenes(a);
   for(let i=0;i<8;i++){
     document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
     document.getElementById("gn-"+i).textContent = g[i].toFixed(2);
+    document.getElementById("gene-"+i).classList.toggle("muted", muted.includes(i));
   }
+  // A3: Vitalitaet = wie gut passt das Wesen zur AKTUELLEN Umwelt (Fitness).
+  // Live -> dreht man einen Regler, sackt sie kurz ab und erholt sich beim Anpassen.
+  const fit = fitness(g, env);
+  const vit = clamp01((fit - 0.12) / 0.72);
+  const vf = document.getElementById("vitFill");
+  vf.style.width = (vit*100).toFixed(0) + "%";
+  vf.style.background = vit < 0.4 ? "linear-gradient(90deg,#9c5f33,#d08a44)"
+                     : vit < 0.7 ? "linear-gradient(90deg,#8a8a34,#cbc24a)"
+                     : "linear-gradient(90deg,var(--bio-dim),var(--bio))";
+  const word = vit<0.3 ? "kämpft" : vit<0.5 ? "hält sich" : vit<0.72 ? "gedeiht" : "blüht auf";
+  document.getElementById("vitLabel").textContent = "Vitalität · " + word;
+  document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
 }
 
 // ---- Zeit-Steuerung ----
