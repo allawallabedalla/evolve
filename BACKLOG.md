@@ -147,8 +147,12 @@ Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
 - **AXIS-3 · Ernährungsmodus** (Filtrierer/Aasfresser/Parasit) statt binärer Photo-vs-Jagd-Gabel.
   *Teilweise angestoßen:* der Absorptions-Kanal + die sessilen Filtrierer (Koralle/Schwamm)
   decken „sessiles Fressen" konzeptionell ab — ein eigenes Gen dafür fehlt noch.
-- **AXIS-4 · Aquatik/Habitat** (Land/Wasser/Tiefsee): Schwimmen, Stromlinienform, Kiemen,
-  Biolumineszenz bei Licht 0 → Fisch/Wal/Qualle als echte Habitat-Nische (heute nur interpretiert).
+- [x] **AXIS-4 · Aquatik** — *erledigt (v0.9.0)*: vierter Energieweg „aquatische Jagd" in der
+  Fitness (`physics.json` v5, gespiegelt in `engine/fitness.ts` + Orakel + App-Inline). Schwimmen
+  belohnt Mobilität + Stromlinienform (Gliedmaßen/Panzer = Drag), nur in tiefem Wasser, heterotroph.
+  Diagnose per `tools/divergence-audit.mjs`: vorher Fisch 0/500 (nur Drift), jetzt **Fisch 3,8 %**,
+  aquatische Formen 12→32/500; Biom „Offenes Meer" liefert zuverlässig einen Fisch. `parity` exakt
+  (1e-16), `ecology` C1–C6 grün. Kiemen/Biolumineszenz als eigene Gene bleiben offen (AXIS-5).
 - **AXIS-5 · Sinne/Tarnung/Gift/Biolumineszenz** — keine dieser Achsen existiert; „Tiefsee-Wesen"
   bleibt sonst ein generischer Klumpen.
 

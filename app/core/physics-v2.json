@@ -39,6 +39,11 @@
   "absorbBase": 0.4,
   "absorbMetabolism": 0.85,
   "absorbWaterFloor": 0.3,
+  "aquaticYield": 1.4,
+  "aquaticBase": 0.4,
+  "aquaticWaterFloor": 0.5,
+  "aquaticLimbDrag": 0.7,
+  "aquaticArmorDrag": 0.5,
   "maintenance": {
     "base": 0.05,
     "size": 0.14,

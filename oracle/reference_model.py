@@ -103,7 +103,25 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (1.0 - phys["exclusion"] * photo)
         * (1.0 - phys["exclusion"] * mobility)
     )
-    total_energy = energy_photo + energy_forage + energy_absorb
+    # d) Aquatische Jagd (AXIS-4): schwimmende Heterotrophie im Wasserkoerper.
+    #    Braucht KEINE Reichweite (Gliedmassen) - Nahrung wird erschwommen. Belohnt
+    #    Mobilitaet + STROMLINIENFOERMIGEN Koerper (Gliedmassen/Panzer = Drag), nur
+    #    im tiefen Wasser (aquaticWaterFloor), heterotroph (schliesst Photo aus).
+    #    Schafft den Gipfel "schlank + mobil im Wasser" = Fisch/Aal, Kopffuesser.
+    aqua_habitat = _clamp01(
+        (env["water"] - phys["aquaticWaterFloor"]) / (1.0 - phys["aquaticWaterFloor"])
+    )
+    streamline = _clamp01(1.0 - limb * phys["aquaticLimbDrag"] - armor * phys["aquaticArmorDrag"])
+    energy_aquatic = (
+        phys["aquaticYield"]
+        * mobility
+        * env["foodAbundance"]
+        * aqua_habitat
+        * streamline
+        * (phys["aquaticBase"] + (1.0 - phys["aquaticBase"]) * metabolism)
+        * (1.0 - phys["exclusion"] * photo)
+    )
+    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]
