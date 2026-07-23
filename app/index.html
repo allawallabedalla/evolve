@@ -505,7 +505,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.14.0";
+const APP_VERSION = "v0.15.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2201,6 +2201,18 @@ try {
     });
   }
 
+  // Dezenter Hintergrund-Ton je Ort aus seiner Umwelt: kalt(blau)↔warm(orange),
+  // heller bei viel Licht, ein Hauch Türkis bei viel Wasser. Gibt jeder Welt sofort
+  // sichtbare Vielfalt, ohne die Lesbarkeit zu stören.
+  function envTint(e) {
+    const T = e.temperature ?? .5, L = e.light ?? .5, W = e.water ?? .5;
+    const cold = [60,120,170], hot = [190,110,70];
+    const c = cold.map((v, k) => (v + (hot[k] - v) * T) | 0);
+    const a = (0.07 + 0.10 * L).toFixed(2);
+    const teal = W > 0.6 ? `, rgba(40,125,145,${(0.05 + 0.14 * (W - 0.6) / 0.4).toFixed(2)}) 100%` : "";
+    return `linear-gradient(150deg, rgba(${c[0]},${c[1]},${c[2]},${a}), var(--abyss) 62%${teal})`;
+  }
+
   function step() {
     if (paused || !world) return;
     world.step(); gen++;
@@ -2224,7 +2236,8 @@ try {
       const conn = mig > 0.05;
       const state = conn ? `<span class="wl-conn on">${ic("link")} verbunden</span>` : `<span class="wl-conn">${ic("island")} Insel</span>`;
       const fl = (flash && flash.idx === i) ? ` flash-${flash.tone}` : "";
-      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}" data-i="${i}">`+
+      const bg = isPet ? "" : ` style="background:${envTint(e)}"`;
+      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}" data-i="${i}"${bg}>`+
         `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
         `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
         `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)} · ${state}</div>`+
