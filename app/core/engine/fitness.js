@@ -22,6 +22,7 @@ const PHOTO = 5;
 const MOBILITY = 6;
 const STRUCTURE = 7;
 const WING = 8;
+const BIOLUM = 9;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -32,6 +33,7 @@ export function fitness(traits, env, phys) {
     const mobility = traits[MOBILITY];
     const structure = traits[STRUCTURE];
     const wing = traits[WING];
+    const biolum = traits[BIOLUM] ?? 0;
     // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Grosse Masse (size) macht
     // Fluegel wirkungslos, hoher Stoffwechsel treibt den Flug an. Zwei Auszahlungen
     // unten: (a) erreicht hohe Nahrung/Licht ohne Reichweiten-Strafe, (b) Flucht.
@@ -97,7 +99,20 @@ export function fitness(traits, env, phys) {
         streamline *
         (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
         (1 - phys.exclusion * photo);
-    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic;
+    //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
+    //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
+    //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.
+    //       Aktive Koerper nutzen es besser (Lockjagd), heterotroph (schliesst Photo aus).
+    // „Dunkel" nur unterhalb biolumDarkFloor (Tiefsee/Hoehle) — sonst ueberstrahlt Tageslicht
+    // das Leuchten und es bliebe reine Kostenlast. Haelt Leuchtwesen eine schmale Nische.
+    const dark = clamp01((phys.biolumDarkFloor - env.light) / phys.biolumDarkFloor);
+    const glow = biolum * dark;
+    const energyGlow = phys.biolumYield *
+        glow *
+        (phys.biolumMobFloor + (1 - phys.biolumMobFloor) * mobility) *
+        env.foodAbundance *
+        (1 - phys.exclusion * photo);
+    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow;
     //    Unterhaltskosten: jedes Merkmal kostet Energie.
     const m = phys.maintenance;
     const mq = phys.maintenanceQuad;
@@ -110,6 +125,7 @@ export function fitness(traits, env, phys) {
         mobility * m.mobility +
         structure * m.structure +
         wing * m.wing +
+        biolum * m.biolum +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -130,7 +146,9 @@ export function fitness(traits, env, phys) {
         structure * phys.defenseFromStructure +
         size * phys.defenseFromSize +
         mobility * phys.defenseFromMobility +
-        flight * phys.defenseFromFlight);
+        flight * phys.defenseFromFlight +
+        // Gegenbeleuchtung/Schreck-Leuchten: wirkt nur im echten Dunkeln (dark).
+        biolum * dark * phys.biolumDefense);
     const predSurvival = 1 - env.predation * (1 - defenseScore);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *

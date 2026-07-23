@@ -15,6 +15,7 @@ export const TRAITS = [
   "mobility",
   "structure",
   "wing",
+  "biolum",
 ] as const;
 export type TraitName = (typeof TRAITS)[number];
 
@@ -57,6 +58,10 @@ export interface Physics {
   aquaticWaterFloor: number;
   aquaticLimbDrag: number;
   aquaticArmorDrag: number;
+  biolumYield: number;
+  biolumMobFloor: number;
+  biolumDefense: number;
+  biolumDarkFloor: number;
   maintenance: {
     base: number;
     size: number;
@@ -67,6 +72,7 @@ export interface Physics {
     mobility: number;
     structure: number;
     wing: number;
+    biolum: number;
   };
   maintenanceQuad: {
     metabolism: number;
