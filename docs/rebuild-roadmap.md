@@ -122,5 +122,8 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
   über Orte aggregiert (die „Chronik/Beobachten"-Ebene). `npm run census-check` (vielfältige Welt →
   ≥3 benannte Arten inkl. Within-Place-Koexistenz; Verbindung senkt die Artenzahl). classify() am
   Welt-Level abgelöst; Anschluss an die App-Darstellung ist Teil von Stufe 7.
-- Stufe 7: UI — „Veränderung"-Knopf (Zustand-Regler vs. Ereignis-Knopf), Zoom Pet↔Welt, Chronik.
+- [x] **Stufe 7 (Prototyp)** — visueller Standalone-Viewer (`world/viewer.html`): rendert die
+  lebende Welt im Browser (Orte-Karte, emergente Chronik, Veränderung-Hebel), läuft den v2-Kern
+  live. `npm run serve` → `http://localhost:8000/world/viewer.html`. NICHT die Live-App, nicht deployt.
+- Offen (Stufe 7 voll): Zoom Pet↔Welt, „Veränderung"-Knopf mit progressiver Tiefe, Creature-Rendering.
 - Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.
