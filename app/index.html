@@ -106,6 +106,7 @@
   .lever .name { font-size: .82rem; }
   .lever .name .ico { margin-right: 6px; }
   .lever .val { font-family: var(--mono); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lever .ends { display: flex; justify-content: space-between; font-size: .62rem; color: var(--muted); margin-top: 3px; opacity: .75; }
   input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 999px; background: var(--line-soft); outline: none; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--bio); cursor: pointer; border: 2px solid var(--abyss); box-shadow: 0 0 8px var(--bio-dim); }
   input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--bio); cursor: pointer; border: 2px solid var(--abyss); }
@@ -128,8 +129,18 @@
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
   /* ---- Genbuch-Zähler ---- */
-  .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em; }
+  .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em; display: inline-block; }
   .disc span { color: var(--bio); font-weight: 700; }
+  .disc.pulse { animation: discpulse .6s ease; }
+  @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
+
+  /* ---- Entdeckungs-Toast ---- */
+  .toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6;
+    background: rgba(7,16,15,.92); border: 1px solid var(--bio-dim); color: var(--bio);
+    font-size: .85rem; padding: 8px 14px; border-radius: 999px; box-shadow: 0 4px 16px rgba(0,0,0,.45); backdrop-filter: blur(3px); }
+  .toast[hidden] { display: none; }
+  .toast.show { animation: toastin .35s ease; }
+  @keyframes toastin { from{opacity:0;transform:translate(-50%,10px)} to{opacity:1;transform:translate(-50%,0)} }
 
   /* ---- Auth ---- */
   .auth { margin-left: auto; font-size: .82rem; display: flex; align-items: center; gap: 8px; }
@@ -145,6 +156,7 @@
   #loginEmail, #loginPass { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; margin-bottom: 8px; }
   #loginEmail:focus, #loginPass:focus { outline: none; border-color: var(--bio-dim); }
   .login-row { display: flex; gap: 8px; margin-top: 12px; }
+  .login-links { display: flex; justify-content: space-between; margin-top: 12px; }
   .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio); min-height: 1.2em; }
 
   /* ---- Willkommen-zurück-Reveal ---- */
@@ -187,6 +199,7 @@
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <canvas id="habitat" width="720" height="560"></canvas>
+        <div class="toast" id="toast" hidden></div>
         <div class="reveal" id="reveal" hidden>
           <div class="reveal-card">
             <div class="reveal-eyebrow">Willkommen zurück</div>
@@ -232,9 +245,13 @@
       <div class="login-row">
         <button id="loginIn" class="reveal-x">Einloggen</button>
         <button id="loginUp" class="ctrl">Konto erstellen</button>
+        <button id="loginNewPw" class="reveal-x" hidden>Passwort setzen</button>
       </div>
       <div class="login-msg" id="loginMsg"></div>
-      <button id="loginClose" class="link" style="margin-top:10px">abbrechen</button>
+      <div class="login-links">
+        <button id="loginReset" class="link">Passwort vergessen?</button>
+        <button id="loginClose" class="link">abbrechen</button>
+      </div>
     </div>
   </div>
 </div>
@@ -281,7 +298,7 @@ function fitness(t, e){
 
 // Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
 // Ergebnis) -> jedes Leben ist einzigartig. Identisch zu engine/simulate.ts.
-const DRIFT_SCALE = 0.05;
+const DRIFT_SCALE = 0.03;
 function mulberry32(seed){ let a=seed>>>0; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
 
 // EINE Generation weiter (Basis der kontinuierlichen Zeit): passt das Genom ab
@@ -370,12 +387,14 @@ const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzeru
 
 let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
 let genome = new Array(8).fill(0.5);
+let displayGenome = new Array(8).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
 let rng, randn, lineageSeed = 0;
 let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
 function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
 function newLineage(){
   genome = new Array(8).fill(0.5); generation = 0;
+  displayGenome = genome.slice();
   lineageSeed = (Math.random()*4294967296)>>>0;
   rng = mulberry32(lineageSeed); randn = makeRandn();
 }
@@ -406,6 +425,14 @@ function saveState(){
   }
 }
 function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
+let toastTimer = null;
+function showToast(a){
+  const t = document.getElementById("toast");
+  t.textContent = "✨ Neue Form: " + a.e + " " + a.n;
+  t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  const d = document.querySelector(".disc"); if(d){ d.classList.remove("pulse"); void d.offsetWidth; d.classList.add("pulse"); }
+}
 function timeStr(ms){
   const min = Math.floor(ms/60000);
   if(min < 1) return "wenige Sekunden";
@@ -422,6 +449,7 @@ function applyState(s){
   discovered = new Set(s.discovered || []);
   lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
   rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
+  displayGenome = genome.slice();
 }
 function offlineCatchup(prevTs){
   const elapsed = Math.max(0, Date.now() - (prevTs || Date.now()));
@@ -431,6 +459,7 @@ function offlineCatchup(prevTs){
     for(let i=0;i<offGens;i++){ genome = stepGeneration(genome, env, randn); generation++; }
     showReveal(elapsed, offGens, beforeA, classify(genome), beforeG, genome);
   }
+  displayGenome = genome.slice();
 }
 async function restore(){
   if(session){
@@ -489,16 +518,59 @@ async function doAuth(kind){
       : "Fehler: " + error.message;
     return;
   }
-  if(!data.session){ msg.textContent = "Konto erstellt — jetzt einloggen."; return; }
+  if(!data.session){
+    if(kind === "up"){
+      // Mail-Bestaetigung evtl. noch aktiv -> direkt einloggen versuchen
+      const r2 = await sb.auth.signInWithPassword({ email, password: pass });
+      if(r2.error){
+        msg.textContent = /confirm/i.test(r2.error.message)
+          ? "Konto erstellt, aber E-Mail-Bestätigung ist in Supabase noch aktiv. Bitte dort Confirm email ausschalten, dann erneut einloggen."
+          : "Fehler: " + r2.error.message;
+        return;
+      }
+      msg.textContent = "angemeldet ✓"; return;
+    }
+    msg.textContent = "Konto erstellt — jetzt einloggen."; return;
+  }
   msg.textContent = "angemeldet ✓";   // onAuthStateChange laedt das Wesen
 }
 document.getElementById("loginIn").addEventListener("click", () => doAuth("in"));
 document.getElementById("loginUp").addEventListener("click", () => doAuth("up"));
 document.getElementById("loginPass").addEventListener("keydown", (e) => { if(e.key === "Enter") doAuth("in"); });
 document.getElementById("loginClose").addEventListener("click", () => { document.getElementById("login").hidden = true; });
-sb.auth.onAuthStateChange((_event, s) => {
+document.getElementById("loginReset").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const msg = document.getElementById("loginMsg");
+  if(!email){ msg.textContent = "Erst E-Mail eingeben, dann Reset anfordern."; return; }
+  msg.textContent = "sende Reset-Mail …";
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] });
+  msg.textContent = error ? ("Fehler: " + error.message) : "Reset-Mail gesendet — klick den Link in der Mail (prüf auch Spam).";
+});
+document.getElementById("loginNewPw").addEventListener("click", async () => {
+  const pass = document.getElementById("loginPass").value;
+  const msg = document.getElementById("loginMsg");
+  if(pass.length < 6){ msg.textContent = "Passwort mindestens 6 Zeichen."; return; }
+  const { error } = await sb.auth.updateUser({ password: pass });
+  if(error){ msg.textContent = "Fehler: " + error.message; return; }
+  msg.textContent = "Passwort geändert ✓";
+  await restore();
+  setTimeout(() => { document.getElementById("login").hidden = true; }, 1000);
+});
+sb.auth.onAuthStateChange((event, s) => {
   const was = !!session; session = s;
   updateAuthUI();
+  if(event === "PASSWORD_RECOVERY"){
+    // Nutzer kam ueber den Reset-Link -> neues Passwort setzen lassen
+    document.getElementById("login").hidden = false;
+    document.getElementById("loginEmail").hidden = true;
+    document.getElementById("loginIn").hidden = true;
+    document.getElementById("loginUp").hidden = true;
+    document.getElementById("loginReset").hidden = true;
+    document.getElementById("loginNewPw").hidden = false;
+    document.getElementById("loginMsg").textContent = "Neues Passwort eingeben und auf „Passwort setzen“ klicken.";
+    document.getElementById("loginPass").focus();
+    return;
+  }
   document.getElementById("login").hidden = true;
   if(s && !was) restore();   // gerade angemeldet -> Cloud-Wesen laden
 });
@@ -513,7 +585,8 @@ const leversEl = document.getElementById("levers");
 LEVERS.forEach(l => {
   const d = document.createElement("div"); d.className="lever";
   d.innerHTML = `<div class="row"><span class="name"><span class="ico">${l.ico}</span>${l.name}</span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
-    <input type="range" min="0" max="1" step="0.01" id="s-${l.key}" value="${env[l.key]}" aria-label="${l.name}">`;
+    <input type="range" min="0" max="1" step="0.01" id="s-${l.key}" value="${env[l.key]}" aria-label="${l.name}">
+    <div class="ends"><span>${l.lo}</span><span>${l.hi}</span></div>`;
   leversEl.appendChild(d);
   d.querySelector("input").addEventListener("input", ev => {
     env[l.key] = +ev.target.value;
@@ -539,18 +612,17 @@ GENE_LABELS.forEach((lbl,i) => {
   genesEl.appendChild(d);
 });
 
-function updatePanels(){
-  const a = classify(genome);
+function updatePanels(g){
+  g = g || genome;
+  const a = classify(g);
   document.getElementById("kingdom").textContent = a.k;
   document.getElementById("emoji").textContent = a.e;
   document.getElementById("species").textContent = a.n;
-  document.getElementById("bauplan").textContent = describe(genome);
+  document.getElementById("bauplan").textContent = describe(g);
   for(let i=0;i<8;i++){
-    document.getElementById("g-"+i).style.width = (genome[i]*100).toFixed(0)+"%";
-    document.getElementById("gn-"+i).textContent = genome[i].toFixed(2);
+    document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
+    document.getElementById("gn-"+i).textContent = g[i].toFixed(2);
   }
-  if(!discovered.has(a.n)){ discovered.add(a.n); saveState(); }
-  updateDisc();
 }
 
 // ---- Zeit-Steuerung ----
@@ -567,6 +639,7 @@ const speedsEl = document.getElementById("speeds");
   speedsEl.appendChild(b);
 });
 document.getElementById("newLifeBtn").addEventListener("click", () => {
+  if(!confirm("Neues Leben starten? Dein jetziges Wesen geht dabei verloren.")) return;
   newLineage();
   document.getElementById("reveal").hidden = true;
   document.getElementById("biomeTag").textContent = lastBiome;
@@ -746,13 +819,19 @@ function frame(time){
     if(steps>0){
       acc -= steps; steps = Math.min(steps, 40);   // Nachhol-Deckel
       for(let i=0;i<steps;i++){ genome = stepGeneration(genome, env, randn); generation++; }
-      updatePanels();
+      // Genbuch: was ist es tatsaechlich geworden? Neue Form -> Toast.
+      const a = classify(genome);
+      if(!discovered.has(a.n)){ discovered.add(a.n); saveState(); showToast(a); }
       document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");
     }
   }
+  // Geglaettete Anzeige: gleitender Mittelwert der 8 Merkmale -> kein Zappeln.
+  for(let i=0;i<8;i++) displayGenome[i] += (genome[i]-displayGenome[i])*0.045;
+  updatePanels(displayGenome);
+  updateDisc();
   drawHabitat();
   drawMotes(time);
-  drawCreature(genome, time);
+  drawCreature(displayGenome, time);
   requestAnimationFrame(frame);
 }
 
