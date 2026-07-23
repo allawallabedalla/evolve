@@ -381,14 +381,14 @@ const PHYS = {
   reachFromLimb: 0.65, reachFromSize: 0.35, heightPenalty: 1.5, forageBase: 0.55, forageMetabolism: 0.9,
   absorbYield: 1.3, absorbBase: 0.4, absorbMetabolism: 0.85, absorbWaterFloor: 0.3,
   maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15 },
-  maintenanceQuad: { metabolism:0.22, mobility:0.25 },
+  maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.8,0.6252119759050286,0.754660559217693,0.7458133463198826,0.8,0.5571880221210697,0.8,0.8],
-  mutationRate:0.027446998612103653, selectionStrength:0.3164032180897022, varianceWeight:1
+  responseRate:[0.5773746680464564,0.3749606254044794,0.4491816562385927,0.3994669753286272,0.3964781717596898,0.31887849445725047,0.47344527689320437,0.46162997440422615],
+  mutationRate:0.035941784657003116, selectionStrength:0.6799893932097313, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -493,7 +493,7 @@ function fitness(t, e){
   const energyAbsorb = PHYS.absorbYield*(PHYS.absorbBase+PHYS.absorbMetabolism*metabolism)*substrate*(1-PHYS.exclusion*photo)*(1-PHYS.exclusion*mobility);
   const total = energyPhoto+energyForage+energyAbsorb;
   const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility);
   const predSurv = 1-e.predation*(1-defense);
@@ -755,17 +755,12 @@ const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
 // 0% = nur ueber stochastische Drift erreichbar -> legendaerer "Fang".
 // Leitplanke: sanfte Anreize, kein Vollstaendigkeits-Zwang. Namen = classify().n.
 const RARITY = {
-  "Gepanzertes Beutetier":"haeufig","Bakterie":"haeufig","Krebstier · Arthropode":"haeufig","Archaee · Extremophil":"haeufig",
-  "Zunderschwamm":"gelegentlich","Protist · Amöbe":"gelegentlich","Gepanzerter Koloss":"gelegentlich","Hefe":"gelegentlich",
-  "Sukkulente · Kaktus":"gelegentlich","Koralle · Riffbildner":"gelegentlich","Euglenoid · Mixotroph":"gelegentlich",
-  "Kleines flinkes Tier":"gelegentlich","Fell-Warmblüter":"gelegentlich","Myzel · Pilzgeflecht":"gelegentlich","Baumpilz · Porling":"gelegentlich",
-  "Verholzter Strauch":"selten","Plankton":"selten","Flechte · Symbiose":"selten","Insekt · Gliederfüßer":"selten","Polster-Kältepflanze":"selten",
-  "Aktiver Großjäger":"selten","Kopffüßer · Tintenfisch":"selten","Laubbaum":"selten","Generalisten-Tier":"selten",
-  "Flatterer · Vogel":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Grünalge":"sehr-selten","Nadelbaum":"sehr-selten",
-  "Behänder Kletterer":"sehr-selten","Hutpilz":"sehr-selten","Schimmel · Fadenpilz":"sehr-selten","Fell-Großtier":"sehr-selten",
-  "Blütenkraut":"sehr-selten","Moos":"sehr-selten",
-  "Farn":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer",
-  "Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer",
+  "Bakterie":"haeufig","Archaee · Extremophil":"haeufig","Euglenoid · Mixotroph":"haeufig","Myzel · Pilzgeflecht":"haeufig","Fell-Warmblüter":"haeufig","Kleines flinkes Tier":"haeufig",
+  "Protist · Amöbe":"gelegentlich","Verholzter Strauch":"gelegentlich","Baumpilz · Porling":"gelegentlich","Flechte · Symbiose":"gelegentlich","Hefe":"gelegentlich","Koralle · Riffbildner":"gelegentlich",
+  "Krebstier · Arthropode":"gelegentlich","Insekt · Gliederfüßer":"gelegentlich","Gepanzertes Beutetier":"gelegentlich","Aktiver Großjäger":"gelegentlich","Gepanzerter Koloss":"gelegentlich","Generalisten-Tier":"gelegentlich",
+  "Plankton":"selten","Laubbaum":"selten","Nadelbaum":"selten","Sukkulente · Kaktus":"selten","Polster-Kältepflanze":"selten","Kopffüßer · Tintenfisch":"selten","Reptil · Echse":"selten","Flatterer · Vogel":"selten","Fell-Großtier":"selten",
+  "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Hutpilz":"sehr-selten","Schimmel · Fadenpilz":"sehr-selten","Behänder Kletterer":"sehr-selten",
+  "Moos":"legendaer","Farn":"legendaer","Zunderschwamm":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (subtiler Ramp, Gold = legendaer).
 const RARITY_META = {

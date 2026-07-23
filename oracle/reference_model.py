@@ -109,6 +109,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + structure * m["structure"]
         + metabolism * metabolism * mq["metabolism"]
         + mobility * mobility * mq["mobility"]
+        + armor * armor * mq["armor"]
     )
     raw_nutrition = _sigmoid((total_energy - maintenance) * phys["energyScale"])
     nutrition = phys["nutritionFloor"] + (1.0 - phys["nutritionFloor"]) * raw_nutrition

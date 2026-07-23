@@ -61,6 +61,12 @@ geräteübergreifend mit Account.
      absorbMetabolism 0.85, absorbWaterFloor 0.3`; dazu `maintenanceQuad.mobility 0.20→0.25`
      (ungenutzte Mobilität wird teurer). **Warum:** vorher war JEDE Nahrung an Mobilität
      gekoppelt → sessile Heterotrophe (Pilze) hatten null Einkommen, obwohl real hoch erfolgreich.
+- **BAL-5 · Panzer-Grenzkosten** (physics.json v3→v3.1): `maintenanceQuad.armor 0.15`. Zuvor
+  war „gepanzert + mobil" ein fast universeller Gewinner — die drei Panzer-Formen = ~30 % aller
+  Umwelten (derselbe Attraktor, nur nach Größe/Gliedmaßen getrennt). Mit Panzer-Grenzkosten
+  maximiert sich Panzer nicht mehr gratis → Verteilung entzerrt (Formen-Gini 0,61→0,50, Panzer-Trio
+  30 %→12 %), mittlere Umwelten bringen wieder Vielfalt; Reptil · Echse wieder Attraktor.
+  Re-Validierung: Parität exakt, Validität 86,0 %, Ökologie C1–C6 ✓.
 - **Pflanzen-Rezept:** viel Licht + viel Wasser + WENIG Nahrung; foodHeight steuert
   Kraut→Strauch→Baum.
 - **Ökologischer Plausibilitäts-Check (NEUE Validierungs-Ebene, neben der Orakel-Validität):**
@@ -172,7 +178,9 @@ geräteübergreifend mit Account.
   A5 Onboarding, A6 Reveal-Silhouette, B4 a11y (aria/Escape), B5 reduced-motion (Canvas),
   B6 Fußzeilen-Jargon → „ⓘ Über die Engine", B7 Sync-Status im Header, B9–B14 (Play-Label,
   Touch-Ziele, Login-Disabled, Copy), CLS-3 (Gen-Balken je Reich gedimmt). Backlog aktualisiert.
-  **Offen bleibt bewusst nur BAL-5** (Verteilung entzerren — Physik → Re-Validierung nötig).
+- **Engine-Pass BAL-5 (erledigt).** Panzer-Grenzkosten (`maintenanceQuad.armor`) entzerren die
+  Formen-Verteilung: die drei Panzer-Formen von ~30 % → 12 % aller Umwelten, Mitte wieder vielfältig.
+  Parität exakt, Validität 86,0 %, Ökologie C1–C6 ✓; `docs/rarity.json`+App-`RARITY` neu erzeugt.
 
 ## 6a. Produkt-Pfeiler (Leitplanken)
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang.**
@@ -183,14 +191,11 @@ geräteübergreifend mit Account.
   *Weckt es Staunen, oder nur Sammel-Druck?*
 
 ## 7. Nächste Schritte (Priorität)
-1. **BAL-5 / CLS-4 · Verteilung entzerren** — „Gepanzertes Beutetier" dominiert die mittleren
-   Einstellungen; weichere Übergänge. **Physik-Änderung → Re-Validierung nötig** (`parity`+`ecology`).
-   Als sauberer Engine-Pass geplant.
-2. **AXIS-1..5** — neue Gen-Achsen (Flug, Graben, Ernährungsmodus, Aquatik, Sinne/Tarnung);
+1. **AXIS-1..5** — neue Gen-Achsen (Flug, Graben, Ernährungsmodus, Aquatik, Sinne/Tarnung);
    je: neues Gen + Orakel-Spiegelung + Re-Validierung. Spätere Meilensteine.
-3. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
+2. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
    oder Renderer/Taxonomie in eine geteilte Datei auslagern.
-4. Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld), CLI-Bugs BUG-2/BUG-4/CLS-2.
+3. Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld), CLI-Bugs BUG-2/BUG-4/CLS-2.
    Volle Liste: `BACKLOG.md`.
 
 ## 8. Konventionen & Fallen (unbedingt beachten)
