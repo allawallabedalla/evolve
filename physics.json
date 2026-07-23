@@ -1,0 +1,48 @@
+{
+  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei. Version 2: Reich-Gabelung Pflanze<->Tier ueber die Achse Photosynthese/Mobilitaet (gegenseitige Ausschliessung 'exclusion' erzwingt Spezialisierung).",
+  "traits": ["insulation", "size", "limbLength", "metabolism", "armor", "photosynthesis", "mobility", "structure"],
+  "traitLabels": {
+    "insulation": "Fell / Isolation",
+    "size": "Koerpergroesse",
+    "limbLength": "Gliedmassenlaenge",
+    "metabolism": "Stoffwechsel",
+    "armor": "Panzerung",
+    "photosynthesis": "Photosynthese",
+    "mobility": "Mobilitaet",
+    "structure": "Stuetzgewebe / Verholzung"
+  },
+  "lightAccessBase": 0.4,
+  "structureLightFloor": 0.3,
+  "photoSizeFloor": 0.7,
+  "exclusion": 0.8,
+  "reachFromLimb": 0.65,
+  "reachFromSize": 0.35,
+  "heightPenalty": 1.5,
+  "forageBase": 0.55,
+  "forageMetabolism": 0.9,
+  "maintenance": {
+    "base": 0.05,
+    "size": 0.22,
+    "insulation": 0.12,
+    "armor": 0.15,
+    "metabolism": 0.16,
+    "photosynthesis": 0.14,
+    "mobility": 0.15,
+    "structure": 0.15
+  },
+  "maintenanceQuad": {
+    "metabolism": 0.22,
+    "mobility": 0.20
+  },
+  "nutritionFloor": 0.15,
+  "energyScale": 5.0,
+  "defenseFromArmor": 0.45,
+  "defenseFromStructure": 0.35,
+  "defenseFromSize": 0.25,
+  "defenseFromMobility": 0.35,
+  "wThermal": 1.0,
+  "wPred": 1.0,
+  "wNutrition": 1.2,
+  "floor": 0.02,
+  "eps": 0.02
+}
