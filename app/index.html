@@ -243,8 +243,8 @@
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <canvas id="habitat" width="720" height="560"></canvas>
-        <div class="toast" id="toast" hidden></div>
-        <div class="reveal" id="reveal" hidden>
+        <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+        <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-label="Willkommen zurück" hidden>
           <div class="reveal-card">
             <div class="reveal-eyebrow">Willkommen zurück</div>
             <div class="reveal-body" id="revealBody"></div>
@@ -285,12 +285,12 @@
     (Modell-Güte, nicht Bewertung deines Wesens). Früher Mockup — die Optik verfeinern wir noch.
   </p>
 
-  <div class="login" id="login" hidden>
+  <div class="login" id="login" role="dialog" aria-modal="true" aria-label="Geräte-Sync — Login" hidden>
     <div class="login-card">
       <div class="reveal-eyebrow">Geräte-Sync</div>
       <p class="login-p">E-Mail + Passwort — dann folgt dein Wesen dir auf jedes Gerät. Dasselbe Passwort überall = dasselbe Wesen. Neu hier? Einfach „Konto erstellen".</p>
-      <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" />
-      <input type="password" id="loginPass" placeholder="Passwort (min. 6 Zeichen)" autocomplete="current-password" />
+      <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" aria-label="E-Mail-Adresse" />
+      <input type="password" id="loginPass" placeholder="Passwort (min. 6 Zeichen)" autocomplete="current-password" aria-label="Passwort" />
       <div class="login-row">
         <button id="loginIn" class="reveal-x">Einloggen</button>
         <button id="loginUp" class="ctrl">Konto erstellen</button>
@@ -305,7 +305,7 @@
   </div>
 
   <!-- Genbuch: begehbarer Lebensbaum -->
-  <div class="genbook" id="genbook" hidden>
+  <div class="genbook" id="genbook" role="dialog" aria-modal="true" aria-label="Lebensbaum — Genbuch" hidden>
     <div class="gb-card">
       <div class="gb-head">
         <div class="gb-title">Lebensbaum</div>
@@ -740,6 +740,14 @@ gbBodyEl.addEventListener("mousemove", (e) => {
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
 });
 gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+// B4: Escape schliesst offene Overlays (Genbuch/Login/Reveal).
+document.addEventListener("keydown", (e) => {
+  if(e.key !== "Escape") return;
+  const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
+  if(!gb.hidden){ closeGenbook(); }
+  else if(!lg.hidden){ lg.hidden = true; }
+  else if(!rv.hidden){ rv.hidden = true; }
+});
 let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");
@@ -1025,6 +1033,8 @@ function drawHabitat(){
   ctx.beginPath(); ctx.ellipse(CW/2, CH*0.94, CW*0.6, CH*0.14, 0,0,Math.PI*2); ctx.fill();
 }
 
+// B5: prefers-reduced-motion -> Canvas-Animation (Atem, Partikel) beruhigen.
+const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let motes = [];
 function initMotes(){ motes = Array.from({length:26},()=>({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.6+0.4,s:Math.random()*0.3+0.05,ph:Math.random()*6})); }
 function drawMotes(time){
@@ -1043,7 +1053,7 @@ function drawCreature(g, time, a){
   // Form-Details aus lineageSeed (stabil pro Leben) statt aus dem driftenden Genom
   // -> die Silhouette zappelt nicht mehr Frame fuer Frame.
   const rnd = mulberry32((lineageSeed ^ 0x5bd1e995) >>> 0);
-  const breath = 1 + 0.025*Math.sin(time*0.0016);
+  const breath = reduceMotion ? 1 : 1 + 0.025*Math.sin(time*0.0016);
   const cx = CW/2;
   ctx.save();
   ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
@@ -1657,7 +1667,7 @@ function frame(time){
   updatePanels(displayGenome, committedArch);
   updateDisc();
   drawHabitat();
-  drawMotes(time);
+  if(!reduceMotion) drawMotes(time);   // B5: keine schwebenden Partikel bei reduced-motion
   drawCreature(displayGenome, time, committedArch);
   requestAnimationFrame(frame);
 }
