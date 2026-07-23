@@ -2100,6 +2100,10 @@ try {
     // Nur die Biome (Index 1..) schwach untereinander verbinden; deine Linie (0) bleibt
     // isoliert — ihre eigene Insel. (verbinden/trennen war als Hebel unverständlich.)
     for (let i = 1; i + 1 < world.places.length; i++) world.connect(i, i+1, 0.02);
+    // Aufwärmen: die Biome brauchen ~150 Generationen, um ihren je eigenen Weg zu gehen
+    // (allopatrische Divergenz). Vorlaufen lassen, damit die Welt bereits VIELFÄLTIG öffnet
+    // statt als lauter identische Generalisten. (Ort 0 wird beim Öffnen ohnehin neu gesetzt.)
+    for (let i = 0; i < 140; i++) world.step();
     // Emergente Rarität einmalig vorberechnen (Zufalls-Umwelt-Sweep), dann nur nachschlagen.
     rmap = rarityMap(phys, { samples: 50, gens: 120 });
     render();
