@@ -12,5 +12,5 @@
     "sourceMap": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["engine/**/*.ts", "training/**/*.ts", "cli/**/*.ts"]
+  "include": ["engine/**/*.ts", "training/**/*.ts", "cli/**/*.ts", "world/**/*.ts"]
 }
