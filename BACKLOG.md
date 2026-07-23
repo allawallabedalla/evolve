@@ -40,9 +40,24 @@ alle UX-Punkte (bewusst zurückgestellt).
 **Offen / gesammelt (neu):**
 - **UX-PLANT** Pflanzen sind schwer zu finden — Rezept „viel Licht + Wasser + WENIG
   Nahrung" ist nicht ersichtlich. Später: sichtbare Hinweise / „Rezept"-Presets.
-- **TIME-2** echte Offline-Zeit (Tamagotchi): Zustand + Zeitstempel speichern, bei
-  Rückkehr die vergangene Zeit nachsimulieren (braucht Account/Backend).
 - **STOCH-2** Drift-Stärke als spürbaren „Mutationsraten"-Regler exponieren (optional).
+
+## ✅ Erledigt: Meilenstein A1 (Lebender Begleiter — lokal)
+
+Plan: `docs/plan-A-lebender-begleiter.md`. Alles in `mockup/visual.html`.
+- **Persistenz** (`localStorage evolve_save_v1`): Genom/Umwelt/Generation/Seed/Genbuch +
+  Zeitstempel. Kadenz 4 s + `visibilitychange` + `pagehide`.
+- **Offline-Zeit-Nachsimulation**: beim Laden wird die vergangene reale Zeit simuliert
+  (1 Gen/Min, Deckel 240) — das Wesen hat sich weiterentwickelt.
+- **„Willkommen zurück"-Reveal**: zeigt vergangene Zeit, Generationen, Archetyp-Wechsel
+  und Top-Gen-Deltas (↑/↓). Der Wiederkomm-Anreiz.
+- **Genbuch-Grundstein**: entdeckte Formen werden gezählt (überlebt „Neues Leben").
+- Bugfix: `.reveal[hidden]` (CSS `display:grid` schlug sonst das `hidden`-Attribut).
+- Im echten Chromium getestet (frisch: kein Reveal; Rückkehr nach 2 h: Reveal + 120 Gen
+  nachsimuliert; keine Konsolenfehler).
+
+**Offen für A2/A3:** Supabase-Account + geräteübergreifend (A2), Web-Push (A3),
+volle Genbuch-Ansicht + Benennen + Ahnenlinie (Meilenstein B).
 
 ---
 

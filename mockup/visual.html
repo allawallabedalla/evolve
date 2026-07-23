@@ -124,6 +124,30 @@
   .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bio); box-shadow: 0 0 8px var(--bio); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
+  /* ---- Genbuch-Zähler ---- */
+  .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em; }
+  .disc span { color: var(--bio); font-weight: 700; }
+
+  /* ---- Willkommen-zurück-Reveal ---- */
+  .reveal {
+    position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
+    background: rgba(6,14,13,.82); backdrop-filter: blur(4px); border-radius: 16px 16px 0 0;
+    animation: fadein .4s ease;
+  }
+  .reveal[hidden] { display: none; }   /* sonst schlaegt display:grid das hidden-Attribut */
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .reveal-card { max-width: 82%; text-align: center; padding: 8px 14px; }
+  .reveal-eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .68rem; color: var(--bio); margin-bottom: 10px; }
+  .reveal-body { font-size: .96rem; line-height: 1.6; color: var(--text); }
+  .reveal-body b { color: var(--bio); font-weight: 700; }
+  .reveal-body .arrow { font-family: var(--serif); font-style: italic; }
+  .reveal-x {
+    margin-top: 16px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
+    font-family: var(--sans); font-size: .85rem; font-weight: 600; color: #06201a;
+    background: var(--bio); border: none;
+  }
+  .reveal-x:hover { filter: brightness(1.06); }
+
   .footnote { margin-top: 26px; color: var(--muted); font-size: .74rem; text-align: center; line-height: 1.6; }
   .footnote b { color: var(--text); font-weight: 600; }
   .chip-val { font-family: var(--mono); color: var(--bio); }
@@ -143,12 +167,20 @@
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <canvas id="habitat" width="720" height="560"></canvas>
+        <div class="reveal" id="reveal" hidden>
+          <div class="reveal-card">
+            <div class="reveal-eyebrow">Willkommen zurück</div>
+            <div class="reveal-body" id="revealBody"></div>
+            <button class="reveal-x" id="revealX">weiter beobachten →</button>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="kingdom" id="kingdom">—</div>
         <div class="species"><span class="emoji" id="emoji">🫧</span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
         <div class="genes" id="genes"></div>
+        <div class="disc">🧬 <span id="discCount">0</span> Formen entdeckt</div>
       </div>
     </div>
 
@@ -303,14 +335,70 @@ const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzeru
 let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
 let genome = new Array(8).fill(0.5);
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
-let rng, randn;
+let rng, randn, lineageSeed = 0;
+let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
+function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
 function newLineage(){
   genome = new Array(8).fill(0.5); generation = 0;
-  const seed = (Math.random()*4294967296)>>>0;
-  rng = mulberry32(seed);
-  randn = () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  lineageSeed = (Math.random()*4294967296)>>>0;
+  rng = mulberry32(lineageSeed); randn = makeRandn();
 }
 newLineage();
+
+// ======================= Persistenz + Offline-Zeit (Meilenstein A1) =======================
+const STORAGE_KEY = "evolve_save_v1";
+const OFFLINE_MS_PER_GEN = 60000;   // offline: 1 Generation je Minute
+const OFFLINE_CAP = 240;            // max. nachsimulierte Generationen pro Rueckkehr
+function saveState(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      genome, env, generation, lineageSeed, discovered:[...discovered], ts: Date.now()
+    }));
+  } catch(e) {}
+}
+function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
+function timeStr(ms){
+  const min = Math.floor(ms/60000);
+  if(min < 1) return "wenige Sekunden";
+  if(min < 60) return min + " Min";
+  const h = Math.floor(min/60), r = min%60;
+  if(h < 24) return h + " Std" + (r ? " "+r+" Min" : "");
+  const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
+}
+function maybeRestore(){
+  let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { return; }
+  if(!s || !Array.isArray(s.genome) || s.genome.length !== 8) return;
+  env = Object.assign(env, s.env||{});
+  LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
+  genome = s.genome.slice(); generation = s.generation||0;
+  discovered = new Set(s.discovered||[]);
+  lineageSeed = s.lineageSeed || ((Math.random()*4294967296)>>>0);
+  // rng aus Seed+Generation rekonstruieren (Drift bleibt stochastisch; kein rng-Zustand noetig)
+  rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
+  document.getElementById("biomeTag").textContent = "gespeicherte Welt";
+  // Offline vergangene Zeit nachsimulieren
+  const elapsed = Math.max(0, Date.now() - (s.ts || Date.now()));
+  const offGens = Math.min(OFFLINE_CAP, Math.floor(elapsed / OFFLINE_MS_PER_GEN));
+  if(offGens > 0){
+    const beforeA = classify(genome), beforeG = genome.slice();
+    for(let i=0;i<offGens;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+    showReveal(elapsed, offGens, beforeA, classify(genome), beforeG, genome);
+  }
+}
+function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
+  const parts = [];
+  parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
+  if(beforeA.n !== afterA.n){
+    parts.push(`<span class="arrow">Aus ${beforeA.e} ${beforeA.n} wurde ${afterA.e} ${afterA.n}.</span>`);
+  } else {
+    parts.push(`Immer noch ${afterA.e} <b>${afterA.n}</b> — aber im Detail verändert.`);
+  }
+  const deltas = afterG.map((x,i)=>({i, d:x-beforeG[i]})).filter(o=>Math.abs(o.d)>0.05)
+    .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
+  if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
+  document.getElementById("revealBody").innerHTML = parts.map(p=>`<div>${p}</div>`).join("");
+  document.getElementById("reveal").hidden = false;
+}
 
 // ---- UI aufbauen ----
 const leversEl = document.getElementById("levers");
@@ -353,6 +441,8 @@ function updatePanels(){
     document.getElementById("g-"+i).style.width = (genome[i]*100).toFixed(0)+"%";
     document.getElementById("gn-"+i).textContent = genome[i].toFixed(2);
   }
+  if(!discovered.has(a.n)){ discovered.add(a.n); saveState(); }
+  updateDisc();
 }
 
 // ---- Zeit-Steuerung ----
@@ -370,9 +460,16 @@ const speedsEl = document.getElementById("speeds");
 });
 document.getElementById("newLifeBtn").addEventListener("click", () => {
   newLineage();
+  document.getElementById("reveal").hidden = true;
+  document.getElementById("biomeTag").textContent = lastBiome;
   document.getElementById("genReadout").textContent = "Generation 0";
-  updatePanels();
+  updatePanels(); saveState();
 });
+document.getElementById("revealX").addEventListener("click", () => { document.getElementById("reveal").hidden = true; });
+// Speicher-Kadenz
+setInterval(saveState, 4000);
+document.addEventListener("visibilitychange", () => { if(document.hidden) saveState(); });
+window.addEventListener("pagehide", saveState);
 
 // ======================= Canvas-Renderer =======================
 const canvas = document.getElementById("habitat");
@@ -551,6 +648,6 @@ function frame(time){
   requestAnimationFrame(frame);
 }
 
-resize(); initMotes(); updatePanels();
+resize(); initMotes(); maybeRestore(); updatePanels(); updateDisc();
 requestAnimationFrame(frame);
 </script>
