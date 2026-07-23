@@ -153,6 +153,14 @@
   .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,230,176,.15), 0 0 14px rgba(95,230,176,.08); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
+  .gb-tile { cursor: help; }
+  #gbTip { position: fixed; z-index: 40; max-width: 250px; background: rgba(7,16,15,.97); border: 1px solid var(--bio-dim);
+    border-radius: 10px; padding: 9px 11px; font-size: .74rem; line-height: 1.45; color: var(--text);
+    box-shadow: var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
+  #gbTip.show { opacity: 1; }
+  #gbTip b { color: var(--bio); }
+  #gbTip .tip-clade { color: var(--muted); font-size: .68rem; }
+  #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
 
   /* ---- Flaches Icon-System ---- */
   .ic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.16em; fill: currentColor; }
@@ -378,6 +386,12 @@ const ICONS = {
   // Protisten
   euglena:`<ellipse cx="11" cy="12" rx="6" ry="3" transform="rotate(-15 11 12)"/><path d="M16.5 10.5c2-.5 2-2.5 4.5-2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
   radiolarian:`<circle cx="12" cy="12" r="4"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></g>`,
+  // Lueckenschluss: Weichtiere, Amphibien, sessile Tiere
+  snail:`<path d="M2 18c0-2 1.5-3 4-3h4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M3 15V12M5.5 15V11"/></g><path fill-rule="evenodd" d="M15 6.5a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 2.6a3.6 3.6 0 100 7.2 3.6 3.6 0 000-7.2z"/><circle cx="15" cy="12.7" r="1.3"/>`,
+  octopus:`<circle cx="12" cy="8" r="5"/><g stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M8.5 12C7 15 6.5 18 5 20M10.5 13C10 16 9.5 18.5 8.5 21M13.5 13c.5 3 1 5.5 2 8M15.5 12c1.5 3 2 6 3.5 8"/></g>`,
+  frog:`<ellipse cx="12" cy="14" rx="7" ry="4.5"/><circle cx="8.5" cy="9" r="2.4"/><circle cx="15.5" cy="9" r="2.4"/><g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M5 16l-3 3M19 16l3 3M8 18l-1 2M16 18l1 2"/></g>`,
+  coral:`<g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M12 21V7M12 15c0-2-2-3-2-5M12 15c0-2 2-3 2-5M10 10c0-1.5-1.5-2-1.5-3.5M14 10c0-1.5 1.5-2 1.5-3.5"/></g><circle cx="12" cy="6.5" r="1.1"/><circle cx="8.3" cy="6" r="1.1"/><circle cx="15.7" cy="6" r="1.1"/>`,
+  sponge:`<path fill-rule="evenodd" d="M5 10a7 6 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 8a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM14 9a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM11 13.5a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z"/>`,
 };
 function ic(name, cls){ return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.dot}</svg>`; }
 // Archetyp-Name -> Icon-Schluessel (Namen exakt = classify().n)
@@ -391,6 +405,8 @@ const FICON = {
   "Flechte · Symbiose":"lichen","Hefe":"yeast",
   "Bakterie":"rod","Archaee · Extremophil":"flagellum","Protist · Amöbe":"amoeba",
   "Euglenoid · Mixotroph":"euglena","Plankton":"radiolarian",
+  "Schnecke · Weichtier":"snail","Kopffüßer · Tintenfisch":"octopus","Amphibie · Lurch":"frog",
+  "Koralle · Riffbildner":"coral","Schwamm":"sponge",
 };
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
@@ -463,15 +479,18 @@ function classify(t){
     if(armor>0.55 && size>0.55)           return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
     if(armor>0.5 && limb>0.5)             return {k:"Tier",n:"Krebstier · Arthropode",e:"🦀"};
     if(armor>0.55)                        return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
+    if(armor>0.45 && limb<0.3 && mob<0.6) return {k:"Tier",n:"Schnecke · Weichtier",e:"🐌"};
     if(limb<0.3 && armor<0.32 && mob>0.6) return {k:"Tier",n:"Fisch · Aalform",e:"🐟"};
     if(limb<0.3 && size<0.35)             return {k:"Tier",n:"Wurm",e:"🪱"};
     if(limb>0.6 && size<0.32 && insul<0.4)return {k:"Tier",n:"Insekt · Gliederfüßer",e:"🐜"};
+    if(limb>0.55 && struct<0.32 && armor<0.32 && insul<0.35 && size>0.32) return {k:"Tier",n:"Kopffüßer · Tintenfisch",e:"🐙"};
     if(size>0.6 && metab>0.6)             return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
     if(insul>0.6 && size>0.52)            return {k:"Tier",n:"Fell-Großtier",e:"🐻"};
     if(insul>0.6)                         return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
     if(limb>0.6 && metab>0.55 && size<0.45)return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
     if(limb>0.6 && size<0.45)             return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
     if(size<0.28)                         return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
+    if(armor<0.32 && insul<0.32 && struct<0.35 && metab<0.5) return {k:"Tier",n:"Amphibie · Lurch",e:"🐸"};
     if(armor<0.32 && insul<0.32)          return {k:"Tier",n:"Reptil · Echse",e:"🦎"};
     return {k:"Tier",n:"Generalisten-Tier",e:"🦥"};
   }
@@ -484,7 +503,9 @@ function classify(t){
     }
     if(size<0.28 && struct<0.35)          return {k:"Mikrobe",n:"Protist · Amöbe",e:"🔬"};
     if(metab>0.55 && size<0.35)           return {k:"Pilz",n:"Hefe",e:"🫧"};
+    if(photo>0.28 && struct>0.5 && armor>0.4) return {k:"Tier",n:"Koralle · Riffbildner",e:"🪸"};
     if(photo>0.28)                        return {k:"Pilz",n:"Flechte · Symbiose",e:"🍥"};
+    if(struct<0.3 && armor<0.3 && metab<0.45 && size>0.38) return {k:"Tier",n:"Schwamm",e:"🧽"};
     if(struct>0.55 && size>0.4)           return {k:"Pilz",n:"Baumpilz · Porling",e:"🪵"};
     if(armor>0.5)                         return {k:"Pilz",n:"Zunderschwamm",e:"🟤"};
     if(struct<0.3 && size<0.42)           return {k:"Pilz",n:"Schimmel · Fadenpilz",e:"🧵"};
@@ -605,50 +626,55 @@ function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.
 // Blaetter. Namen MUESSEN exakt classify().n entsprechen. Quelle: docs/tree-of-life.json.
 const TREE = [
   {k:"Mikrobe", forms:[
-    {n:"Bakterie", e:"🧫", cl:"Bacteria"},
-    {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea"},
-    {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa"},
+    {n:"Bakterie", e:"🧫", cl:"Bacteria", era:"vor ~3,5 Mrd. J.", evo:"Frühestes Leben — einfache Zelle ohne Kern (Prokaryot)."},
+    {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea", era:"vor ~3,5 Mrd. J.", evo:"Extremophile Urzeller; eigene Domäne neben den Bakterien."},
+    {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa", era:"vor ~1,8 Mrd. J.", evo:"Erste Zelle mit echtem Kern (Eukaryot) — via Endosymbiose."},
   ]},
   {k:"Protist", forms:[
-    {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa"},
-    {n:"Plankton", e:"✨", cl:"Radiolaria"},
+    {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa", era:"vor ~1 Mrd. J.", evo:"Schluckte eine Alge → Photosynthese UND Beweglichkeit."},
+    {n:"Plankton", e:"✨", cl:"Radiolaria", era:"vor ~500 Mio. J.", evo:"Einzeller mit Mineralskelett; Basis der Meeres-Nahrungsnetze."},
   ]},
   {k:"Pflanze", forms:[
-    {n:"Grünalge", e:"🟢", cl:"Chlorophyta"},
-    {n:"Moos", e:"🌱", cl:"Bryophyta"},
-    {n:"Farn", e:"🌿", cl:"Farne"},
-    {n:"Kraut · niedrige Pflanze", e:"☘️", cl:"Angiospermen"},
-    {n:"Blütenkraut", e:"🌸", cl:"Angiospermen"},
-    {n:"Verholzter Strauch", e:"🪴", cl:"Angiospermen"},
-    {n:"Laubbaum", e:"🌳", cl:"Angiospermen"},
-    {n:"Nadelbaum", e:"🌲", cl:"Koniferen"},
-    {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen"},
-    {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine"},
+    {n:"Grünalge", e:"🟢", cl:"Chlorophyta", era:"vor ~1 Mrd. J.", evo:"Aquatische Algen — Vorläufer aller Landpflanzen."},
+    {n:"Moos", e:"🌱", cl:"Bryophyta", era:"vor ~470 Mio. J.", evo:"Erste Landpflanzen; noch ohne echte Leitgefäße."},
+    {n:"Farn", e:"🌿", cl:"Farne", era:"vor ~360 Mio. J.", evo:"Gefäßpflanzen der Karbon-Wälder; Sporen statt Samen."},
+    {n:"Kraut · niedrige Pflanze", e:"☘️", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Blütenpflanzen — Blüte lockt Bestäuber."},
+    {n:"Blütenkraut", e:"🌸", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Blüte als Fortpflanzungs-Innovation; Koevolution mit Insekten."},
+    {n:"Verholzter Strauch", e:"🪴", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Verholzte Blütenpflanzen — mehrjährig, stabil."},
+    {n:"Laubbaum", e:"🌳", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Hohe verholzte Blütenpflanzen im Lichtwettbewerb."},
+    {n:"Nadelbaum", e:"🌲", cl:"Koniferen", era:"vor ~300 Mio. J.", evo:"Nacktsamer — Samen ohne Frucht, kälteresistent."},
+    {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen", era:"vor ~35 Mio. J.", evo:"Junge Blütenpflanzen — Sukkulenz gegen Trockenheit."},
+    {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine", era:"jung (Eiszeiten)", evo:"Alpine Anpassung — Polsterwuchs gegen Kälte und Wind."},
   ]},
   {k:"Pilz", forms:[
-    {n:"Hutpilz", e:"🍄", cl:"Basidiomycota"},
-    {n:"Baumpilz · Porling", e:"🪵", cl:"Basidiomycota"},
-    {n:"Zunderschwamm", e:"🟤", cl:"Basidiomycota"},
-    {n:"Myzel · Pilzgeflecht", e:"🍂", cl:"Fungi"},
-    {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota"},
-    {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten"},
-    {n:"Hefe", e:"🫧", cl:"Ascomycota"},
+    {n:"Hutpilz", e:"🍄", cl:"Basidiomycota", era:"vor ~120 Mio. J.", evo:"Ständerpilze mit Fruchtkörper zur Sporenverbreitung."},
+    {n:"Baumpilz · Porling", e:"🪵", cl:"Basidiomycota", era:"vor ~300 Mio. J.", evo:"Holzzersetzer — verholzte Konsolen am Totholz."},
+    {n:"Zunderschwamm", e:"🟤", cl:"Basidiomycota", era:"vor ~300 Mio. J.", evo:"Harter mehrjähriger Porling am Stamm."},
+    {n:"Myzel · Pilzgeflecht", e:"🍂", cl:"Fungi", era:"vor ~1 Mrd. J.", evo:"Fädiges Geflecht — der eigentliche Pilzkörper im Boden."},
+    {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Schlauchpilze — schnelle Sporen auf Substrat."},
+    {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten", era:"vor ~400 Mio. J.", evo:"Symbiose Pilz + Alge — besiedelt nackten Fels."},
+    {n:"Hefe", e:"🫧", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Einzellige Schlauchpilze — Gärung als Nische."},
   ]},
   {k:"Tier", forms:[
-    {n:"Wurm", e:"🪱", cl:"Annelida"},
-    {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta"},
-    {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea"},
-    {n:"Fisch · Aalform", e:"🐟", cl:"Fische"},
-    {n:"Reptil · Echse", e:"🦎", cl:"Reptilia"},
-    {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia"},
-    {n:"Flatterer · Vogel", e:"🐦", cl:"Aves"},
-    {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia"},
-    {n:"Fell-Großtier", e:"🐻", cl:"Mammalia"},
-    {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia"},
-    {n:"Gepanzerter Koloss", e:"🦏", cl:"Mammalia"},
-    {n:"Behänder Kletterer", e:"🐒", cl:"Primaten"},
-    {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager"},
-    {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten"},
+    {n:"Schwamm", e:"🧽", cl:"Porifera", era:"vor ~600 Mio. J.", evo:"Früheste Tiere — sessile Filtrierer, noch ohne echte Organe."},
+    {n:"Koralle · Riffbildner", e:"🪸", cl:"Cnidaria", era:"vor ~540 Mio. J.", evo:"Nesseltiere — sessil, riffbildend, oft mit Symbiose-Algen."},
+    {n:"Wurm", e:"🪱", cl:"Annelida", era:"vor ~518 Mio. J.", evo:"Kambrium — gegliederter Körper, Bewegung im Sediment."},
+    {n:"Schnecke · Weichtier", e:"🐌", cl:"Mollusca", era:"vor ~500 Mio. J.", evo:"Weichtiere mit schützendem Kalkhaus."},
+    {n:"Kopffüßer · Tintenfisch", e:"🐙", cl:"Cephalopoda", era:"vor ~500 Mio. J.", evo:"Weichtiere mit Fangarmen — Räuber, hohe Intelligenz."},
+    {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea", era:"vor ~510 Mio. J.", evo:"Gliederfüßer mit Panzer und Scheren."},
+    {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta", era:"vor ~400 Mio. J.", evo:"Erste Landgliederfüßer; Flügel (~325 Mio.) → artenreichste Gruppe."},
+    {n:"Fisch · Aalform", e:"🐟", cl:"Fische", era:"vor ~530 Mio. J.", evo:"Erste Wirbeltiere — Wirbelsäule und Kiemen."},
+    {n:"Amphibie · Lurch", e:"🐸", cl:"Amphibia", era:"vor ~370 Mio. J.", evo:"Erste Landwirbeltiere — noch ans Wasser gebunden (Laich)."},
+    {n:"Reptil · Echse", e:"🦎", cl:"Reptilia", era:"vor ~320 Mio. J.", evo:"Amnioten — das Ei mit Schale löst vom Wasser."},
+    {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia", era:"vor ~230 Mio. J.", evo:"Panzer/Schild als Verteidigung gegen Räuber."},
+    {n:"Flatterer · Vogel", e:"🐦", cl:"Aves", era:"vor ~150 Mio. J.", evo:"Aus gefiederten Dinosauriern — Flug erobert die Luft."},
+    {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia", era:"vor ~210 Mio. J.", evo:"Säugetiere — Fell + Warmblütigkeit; Radiation nach 66 Mio."},
+    {n:"Fell-Großtier", e:"🐻", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Große Säuger nach dem Dino-Aussterben."},
+    {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Raubsäuger füllen frei gewordene Jäger-Nischen."},
+    {n:"Gepanzerter Koloss", e:"🦏", cl:"Mammalia", era:"vor ~66 Mio. J.", evo:"Mega-Pflanzenfresser mit Panzer/Horn zur Verteidigung."},
+    {n:"Behänder Kletterer", e:"🐒", cl:"Primaten", era:"vor ~55 Mio. J.", evo:"Primaten — Greifhände, Leben in den Bäumen."},
+    {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager", era:"vor ~66 Mio. J.", evo:"Nager — klein, schnell, extrem erfolgreich."},
+    {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten", era:"vor ~210 Mio. J.", evo:"Anpassungsfähiger Allrounder ohne Spezialisierung."},
   ]},
 ];
 const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
@@ -656,7 +682,7 @@ function renderGenbook(){
   const found = discovered.size;
   document.getElementById("gbSub").innerHTML =
     `<b class="chip-val" style="color:var(--bio)">${found}</b> von ${TREE_TOTAL} Formen entdeckt. ` +
-    `Forme neue Umwelten, um Äste des Lebensbaums freizuschalten — „???" wartet noch.`;
+    `Forme neue Umwelten, um Äste freizuschalten — „???" wartet noch. Fahr über eine Kachel: wann &amp; wie sie entstand.`;
   const body = document.getElementById("gbBody");
   body.innerHTML = "";
   for(const grp of TREE){
@@ -669,6 +695,10 @@ function renderGenbook(){
       const ok = discovered.has(f.n);
       const t = document.createElement("div");
       t.className = "gb-tile " + (ok?"found":"miss");
+      const title = ok ? f.n : "???";
+      const evo = ok ? (f.evo||"") : "Noch nicht entdeckt — forme die passende Umwelt.";
+      t.dataset.title = title; t.dataset.clade = f.cl; t.dataset.era = f.era||""; t.dataset.evo = evo;
+      t.title = `${title} · ${f.era||""} · ${evo}`;   // Fallback (Touch/a11y)
       t.innerHTML = `<div class="em">${ok?formIcon(f.n):ic("dot")}</div>`+
                     `<div class="nm">${ok?f.n:"???"}</div>`+
                     `<div class="cl">${f.cl}</div>`;
@@ -679,8 +709,25 @@ function renderGenbook(){
 }
 function openGenbook(){ renderGenbook(); document.getElementById("genbook").hidden = false; }
 document.getElementById("discBtn").addEventListener("click", openGenbook);
-document.getElementById("genbookClose").addEventListener("click", () => { document.getElementById("genbook").hidden = true; });
-document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") document.getElementById("genbook").hidden = true; });
+function closeGenbook(){ document.getElementById("genbook").hidden = true; gbTip.classList.remove("show"); }
+document.getElementById("genbookClose").addEventListener("click", closeGenbook);
+document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") closeGenbook(); });
+// Hover-Info: wann & wie sich die Art entwickelt hat
+const gbTip = document.createElement("div"); gbTip.id="gbTip"; document.body.appendChild(gbTip);
+const gbBodyEl = document.getElementById("gbBody");
+gbBodyEl.addEventListener("mousemove", (e) => {
+  const tile = e.target.closest(".gb-tile");
+  if(!tile){ gbTip.classList.remove("show"); return; }
+  gbTip.innerHTML = `<b>${tile.dataset.title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
+    `<div class="tip-era">${tile.dataset.era}</div><div>${tile.dataset.evo}</div>`;
+  gbTip.classList.add("show");
+  const pad=14, r=gbTip.getBoundingClientRect();
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+r.width>innerWidth) x=e.clientX-r.width-pad;
+  if(y+r.height>innerHeight) y=e.clientY-r.height-pad;
+  gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
+});
+gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
 let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");
@@ -967,7 +1014,10 @@ function drawCreature(g, time, a){
   ctx.save();
   ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
 
-  if(a.k==="Pflanze"){
+  const sessileAnimal = a.e==="🪸" || a.e==="🧽";   // Koralle / Schwamm: Tiere, aber bodenstaendig
+  if(sessileAnimal){
+    drawSessile(g, cx, CH*0.9, breath, time, rnd, a);
+  } else if(a.k==="Pflanze"){
     drawPlant(g, cx, CH*0.9, breath, time, rnd, a);
   } else if(a.k==="Tier"){
     drawAnimal(g, cx, CH*0.6, breath, time, rnd, a);
@@ -1170,6 +1220,51 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
   const dark = body.map(c=>c*0.7);
 
   // ===== Eigene Koerperbauplaene (kein Vierbeiner) =====
+  // ---- Schnecke: Schleimfuss + Spiralhaus + Fuehler ----
+  if(kind==="🐌"){
+    const L=R*2.2, foot=rgb(mix(body,[150,175,155],0.4));
+    ctx.fillStyle=foot;
+    ctx.beginPath(); ctx.moveTo(cx-L*0.5,cy+R*0.5); ctx.quadraticCurveTo(cx-L*0.55,cy+R*0.1, cx-L*0.3,cy+R*0.1);
+    ctx.lineTo(cx+L*0.35,cy+R*0.1); ctx.quadraticCurveTo(cx+L*0.55,cy+R*0.15, cx+L*0.5,cy+R*0.5); ctx.closePath(); ctx.fill();
+    const hx=cx+L*0.42, hy=cy+R*0.12;
+    ctx.beginPath(); ctx.ellipse(hx,hy,R*0.3,R*0.34,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=foot; ctx.lineWidth=R*0.09; ctx.lineCap="round";
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(hx+R*0.08,hy-R*0.2); ctx.lineTo(hx+R*0.28+o*R*0.05,hy-R*0.65); ctx.stroke();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx+R*0.28+o*R*0.05,hy-R*0.68,R*0.06,0,Math.PI*2); ctx.fill(); }
+    const shx=cx-L*0.1, shy=cy-R*0.2, sr=R*0.98;
+    ctx.fillStyle=rgb(mix(body,[185,145,95],armor));
+    ctx.beginPath(); ctx.arc(shx,shy,sr,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=R*0.11; ctx.lineCap="round"; ctx.beginPath();
+    for(let i=0;i<=44;i++){ const t=i/44, ang=t*Math.PI*5, rr=sr*(1-t*0.92); const x=shx+Math.cos(ang)*rr, y=shy+Math.sin(ang)*rr; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
+    return;
+  }
+  // ---- Kopffuesser: Mantel + Tentakel ----
+  if(kind==="🐙"){
+    const hr=R*0.95;
+    ctx.fillStyle=rgb(body);
+    ctx.beginPath(); ctx.ellipse(cx,cy-R*0.2,hr,hr*1.15,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(body); ctx.lineWidth=R*0.26; ctx.lineCap="round";
+    const nT=6;
+    for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5); const sx=cx+t*hr*1.4, sway=Math.sin(time*0.004+i)*R*0.25;
+      ctx.beginPath(); ctx.moveTo(sx,cy+hr*0.4); ctx.quadraticCurveTo(sx+sway,cy+hr*1.0, sx+t*R*0.6+sway, cy+hr*1.5); ctx.stroke(); }
+    for(const o of [-1,1]){ ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4,cy-R*0.25,R*0.17,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4-R*0.04,cy-R*0.31,R*0.06,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+  // ---- Amphibie: gedrungen, gespreizte Beine, Augen oben ----
+  if(kind==="🐸"){
+    const W=R*1.3, H=R*0.9, amb=rgb(mix(body,[110,170,110],0.55));
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=R*0.2; ctx.lineCap="round";
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+o*W*0.5,cy+H*0.15);
+      ctx.quadraticCurveTo(cx+o*W*1.05,cy+H*0.25, cx+o*W*0.9,cy+H*0.9); ctx.lineTo(cx+o*W*1.2,cy+H*0.98); ctx.stroke(); }
+    for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+o*W*0.3,cy+H*0.5); ctx.lineTo(cx+o*W*0.5,cy+H*1.02); ctx.stroke(); }
+    ctx.fillStyle=amb; ctx.beginPath(); ctx.ellipse(cx,cy,W,H,0,0,Math.PI*2); ctx.fill();
+    for(const o of [-1,1]){ ctx.fillStyle=amb; ctx.beginPath(); ctx.arc(cx+o*W*0.42,cy-H*0.72,R*0.3,0,Math.PI*2); ctx.fill();
+      const blink=(Math.sin(time*0.0011)>0.97)?0.15:1;
+      ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(cx+o*W*0.42,cy-H*0.72,R*0.15,R*0.15*blink,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*W*0.42-R*0.04,cy-H*0.8,R*0.05,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
   // ---- Wurm: gegliederter Schlauch ----
   if(kind==="🪱"){
     const segs=7+Math.round(size*6), L=R*2.6, seg=L/segs;
@@ -1467,6 +1562,35 @@ function drawProtist(g, cx, cy, breath, time, rnd, a){
   ctx.beginPath(); ctx.moveTo(R*1.35,0);
   for(let i=0;i<=14;i++){ ctx.lineTo(R*1.35+i*5, Math.sin(time*0.012+i*0.6)*7); } ctx.stroke();
   ctx.restore();
+}
+
+// ===== Sessile Tiere (Koralle / Schwamm): bodenstaendig, aber Reich Tier =====
+function drawSessile(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind=a.e;
+  if(kind==="🪸"){ // Koralle: verzweigte Aeste + Polypen, gruenlich (Symbiose)
+    const col=mix([180,120,110],[150,175,135],photo);
+    const branch=(x,y,ang,len,w,depth)=>{
+      if(depth<=0||len<7){ ctx.fillStyle=rgb(mix(col,[120,205,155],0.55)); ctx.beginPath(); ctx.arc(x,y,Math.max(2,w*0.6),0,Math.PI*2); ctx.fill(); return; }
+      const ex=x+Math.cos(ang)*len, ey=y+Math.sin(ang)*len;
+      ctx.strokeStyle=rgb(col); ctx.lineWidth=w; ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(ex,ey); ctx.stroke();
+      branch(ex,ey,ang-0.5-rnd()*0.25,len*0.72,w*0.7,depth-1);
+      branch(ex,ey,ang+0.5+rnd()*0.25,len*0.72,w*0.7,depth-1);
+    };
+    const base=(55+size*95)*breath;
+    branch(bx,by,-Math.PI/2,base*0.5,6+struct*9,4);
+    return;
+  }
+  // Schwamm: fassfoermiger Filtrierer mit Oskulum + Poren
+  const h=(50+size*95)*breath, w=22+size*30;
+  const col=mix([170,140,120],[150,165,145],photo);
+  ctx.fillStyle=rgb(col);
+  ctx.beginPath(); ctx.moveTo(bx-w,by); ctx.quadraticCurveTo(bx-w*1.15,by-h, bx-w*0.5,by-h);
+  ctx.lineTo(bx+w*0.5,by-h); ctx.quadraticCurveTo(bx+w*1.15,by-h, bx+w,by); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="rgba(10,26,24,.85)"; ctx.beginPath(); ctx.ellipse(bx,by-h,w*0.32,w*0.13,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(10,26,24,.5)";
+  for(let i=0;i<16;i++){ const px=bx+(rnd()-0.5)*w*1.5, py=by-rnd()*h*0.9; ctx.beginPath(); ctx.arc(px,py,1.5+rnd()*2,0,Math.PI*2); ctx.fill(); }
 }
 
 // ======================= Loop =======================

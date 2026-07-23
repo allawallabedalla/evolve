@@ -27,6 +27,30 @@
 
 ---
 
+## Gamification-Ideen (Diskussion)
+
+### 💡 Entstehungswahrscheinlichkeit als „Währung" / Unlock-Reihenfolge
+**Idee (Nutzer):** Häufige/leicht entstehende Arten früh freischalten, seltene/„unwahrscheinliche"
+spät — die Entstehungswahrscheinlichkeit als Fortschritts-Währung.
+
+**Einschätzung: sehr gut — und wir haben die Daten dafür schon.** Wir messen bereits die
+Erreichbarkeit jeder Form (Ökologie-Sweep, `tools/ecology-check.mjs`): `attractor` = stabiler
+Fitness-Gipfel (leicht/häufig), `drift` = nur über stochastische Drift (selten). Genau das ist
+eine natürliche Seltenheits-/Wahrscheinlichkeits-Achse. Umsetzungsideen:
+- **Rarität pro Form** aus dem Sweep ableiten (Anteil der Umwelten, die dorthin konvergieren →
+  „häufig/selten/legendär"). In `tree-of-life.json` als `rarity` ablegen.
+- **Genbuch**: seltene Formen als besondere „Fänge" hervorheben (Glow/Label), Rarität anzeigen.
+- **Sanfte Gates statt harter Sperren** (Pfeiler „Neugier, kein Zwang!): frühe Umwelten/Biome
+  führen zu häufigen Formen; seltene brauchen bewusstes Regler-Feintuning oder lange
+  Beobachtung (Drift). KEINE „erst X, dann Y"-Zwangskette.
+- **Schön kohärent:** Rarität ≈ reale Entstehungswahrscheinlichkeit ≈ Erdzeit-Reihenfolge
+  (frühe/leichte Baupläne zuerst) → passt zur Hover-Info „wann entstand die Art".
+
+**Risiko/Leitplanke:** Keine echte „Währung zum Kaufen" einführen (das wäre ein Skinner-Loop,
+gegen den Neugier-Pfeiler). Rarität = *Entdeckungs-Tiefe*, nicht Grind. → Backlog, nach A3/A4.
+
+---
+
 ## Frühere Playtest-Funde
 
 Konsolidiert aus 3 unabhängigen Spieltest-Personas (~95 Läufe zusammen):

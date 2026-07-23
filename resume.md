@@ -152,6 +152,17 @@ geräteübergreifend mit Account.
   (Play/Pause/Ei/DNA), alle 36 Archetyp-Symbole (`FICON`-Map). Karte/Toast/Reveal/Genbuch
   nutzen `formIcon(name)`. Die `e:`-Emoji in `classify()`/`TREE` sind nur noch interne
   Dispatch-/Datenschlüssel (nicht sichtbar). Nur `app/index.html`.
+- **Abdeckungs-Lücken geschlossen (erledigt).** 5 neue Formen → jetzt **41 Formen**: 🐌 Schnecke +
+  🐙 Kopffüßer (Weichtiere), 🐸 Amphibie (Lurch), 🪸 Koralle + 🧽 Schwamm (SESSILE Tiere — tierisches
+  Pendant zu Flechte/Pilz im heterotroph-sessilen Quadranten; `drawSessile` zeichnet sie am Boden).
+  `classify()`, Renderer, Icons, `TREE`, `tree-of-life.json` erweitert. Sessile Tiere sind `k:"Tier"`,
+  liegen aber im Pilz-Quadranten (Grenze: Koralle=Symbiose-Photo+Hartskelett, Schwamm=weich+groß+niedriger Metab).
+- **Genbuch-Hover-Info (erledigt).** Jede Kachel: Tooltip mit `era` (Erdzeitalter „wann") + `evo`
+  („wie entstanden"), Daten in `TREE`. Unentdeckt zeigt era+Teaser, entdeckt die volle Evo-Story
+  (Discovery-Reward). Schwebender `#gbTip` (fixed, folgt Cursor) + `title`-Fallback (Touch/a11y).
+- **Backlog-Idee dokumentiert:** Entstehungswahrscheinlichkeit als Rarität/Unlock-Achse
+  (`BACKLOG.md` → Gamification-Ideen) — nutzt die `reachable`-Daten (attractor/drift); sanfte Gates,
+  kein Grind-Zwang.
 
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —

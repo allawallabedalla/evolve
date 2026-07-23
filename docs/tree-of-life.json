@@ -68,19 +68,27 @@
     { "id": "actinopterygii", "parent": "chordata", "name": "Actinopterygii (Strahlenflosser/Fische)", "rank": "Klasse", "ourKingdom": "Tier",
       "describedSpecies": ">30.000 (alle Fische)", "ourForms": ["Fisch · Aalform"], "reachable": "drift" },
     { "id": "amphibia", "parent": "chordata", "name": "Amphibia (Amphibien)", "rank": "Klasse", "ourKingdom": "Tier",
-      "describedSpecies": "~9.000", "ourForms": [], "reachable": "none", "note": "Noch keine eigene Form (Lücke: Bindeglied Wasser/Land)." },
+      "describedSpecies": "~9.000", "ourForms": ["Amphibie · Lurch"], "reachable": "drift", "note": "Bindeglied Wasser/Land: weiche Haut, ans Wasser gebunden." },
     { "id": "reptilia", "parent": "chordata", "name": "Reptilia (Reptilien)", "rank": "Klasse", "ourKingdom": "Tier",
       "describedSpecies": "~12.000", "ourForms": ["Reptil · Echse", "Gepanzertes Beutetier"], "reachable": "attractor" },
     { "id": "aves", "parent": "chordata", "name": "Aves (Vögel)", "rank": "Klasse", "ourKingdom": "Tier",
       "describedSpecies": "~11.000", "ourForms": ["Flatterer · Vogel"], "reachable": "attractor" },
     { "id": "mammalia", "parent": "chordata", "name": "Mammalia (Säugetiere)", "rank": "Klasse", "ourKingdom": "Tier",
       "describedSpecies": "~6.400", "ourForms": ["Fell-Warmblüter", "Fell-Großtier", "Aktiver Großjäger", "Gepanzerter Koloss", "Behänder Kletterer", "Kleines flinkes Tier"],
-      "reachable": "attractor", "note": "Unsere Vierbeiner-Baupläne (FORM-Tabelle im Renderer)." }
+      "reachable": "attractor", "note": "Unsere Vierbeiner-Baupläne (FORM-Tabelle im Renderer)." },
+
+    { "id": "mollusca", "parent": "animalia", "name": "Mollusca (Weichtiere)", "rank": "Stamm", "ourKingdom": "Tier",
+      "describedSpecies": "~85.000 (zweitgrößter Stamm)", "ourForms": ["Schnecke · Weichtier"], "reachable": "attractor", "note": "Schnecke = Weichtier mit Kalkhaus (Panzer, langsam, ohne Gliedmaßen)." },
+    { "id": "cephalopoda", "parent": "mollusca", "name": "Cephalopoda (Kopffüßer)", "rank": "Klasse", "ourKingdom": "Tier",
+      "describedSpecies": "~800", "ourForms": ["Kopffüßer · Tintenfisch"], "reachable": "drift", "note": "Weichkörper (kein Skelett) + viele Fangarme; agiler Räuber." },
+    { "id": "cnidaria", "parent": "animalia", "name": "Cnidaria (Nesseltiere)", "rank": "Stamm", "ourKingdom": "Tier",
+      "describedSpecies": "~11.000", "ourForms": ["Koralle · Riffbildner"], "reachable": "attractor", "note": "SESSILES Tier: hartes Riffskelett + Symbiose-Algen (Photo) — tierisches Pendant zur Flechte." },
+    { "id": "porifera", "parent": "animalia", "name": "Porifera (Schwämme)", "rank": "Stamm", "ourKingdom": "Tier",
+      "describedSpecies": "~9.000", "ourForms": ["Schwamm"], "reachable": "drift", "note": "SESSILES Tier: weicher Filtrierer, älteste Tiergruppe — tierisches Pendant zum Pilz." }
   ],
   "coverageGaps": [
-    "Amphibien (Wasser↔Land-Übergang) - kein eigener Bauplan/Form",
-    "Weichtiere (Mollusca ~85k: Schnecken/Kopffüßer) - fehlt",
-    "Nesseltiere/Schwämme (Cnidaria/Porifera, sessile Tiere) - fehlt",
-    "Speziation: reale Arten-Radiation (Käfer!) nicht modellierbar ohne Nischen-Unterteilung"
+    "GESCHLOSSEN: Amphibien (Amphibie · Lurch), Weichtiere (Schnecke + Kopffüßer), sessile Tiere (Koralle + Schwamm).",
+    "Sessile Tiere teilen den Gen-Quadranten mit Pilzen/Mikroben (heterotroph+sessil) - Koralle via Symbiose-Photo+Hartskelett, Schwamm via weich+groß+niedriger Stoffwechsel abgegrenzt; bleibt eine feine Grenze.",
+    "Speziation: reale Arten-Radiation (Käfer!) nicht modellierbar ohne Nischen-Unterteilung (eigener Mechanismus, Backlog)."
   ]
 }
