@@ -169,8 +169,17 @@
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
   .worldbtn { display: block; margin-top: 8px; }
   .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: var(--abyss); background: var(--bio); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
-  .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(3,8,8,.86); backdrop-filter: blur(7px); animation: fadein .3s ease; }
+  .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(3,8,8,.86); backdrop-filter: blur(7px); animation: wl-bg-in .34s ease; }
   .world[hidden] { display: none; }
+  /* Echter Zoom: beim Öffnen zoomt die Weltkarte aus dem Wesen heraus, beim Schließen
+     wieder hinein — das „rauszoomen ↔ reinzoomen" der Pet-↔-Welt-Vision. */
+  @keyframes wl-bg-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes wl-zoom-in { from { transform: scale(.72); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes wl-zoom-out { from { transform: scale(1); opacity: 1; } to { transform: scale(.72); opacity: 0; } }
+  .world .wl-card { animation: wl-zoom-in .36s cubic-bezier(.18,.9,.28,1); }
+  .world.closing { animation: wl-bg-in .26s ease reverse forwards; }
+  .world.closing .wl-card { animation: wl-zoom-out .26s cubic-bezier(.5,0,.75,.4) forwards; }
+  @media (prefers-reduced-motion: reduce) { .world .wl-card, .world.closing .wl-card, .world.closing { animation-duration: .01s; } }
   /* Feste Höhe + interner Scroll: die Karte darf NICHT ihre Größe ändern, sonst
      zentriert place-items:center sie neu und das ganze Modal springt (Jitter-Fix). */
   .wl-card { width: min(96%, 940px); height: min(90vh, 660px); display: flex; flex-direction: column; overflow: hidden; background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); }
@@ -451,7 +460,7 @@
     <div class="wl-card">
       <div class="wl-head">
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
-        <button id="worldClose" class="link">schließen</button>
+        <button id="worldClose" class="link" title="Zurück zu deinem Wesen (reinzoomen)">↩ reinzoomen</button>
       </div>
       <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>provoziere</b> einen mit den Knöpfen und beobachte, was entsteht.</p>
       <div class="wl-grid">
@@ -495,7 +504,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.12.0";
+const APP_VERSION = "v0.13.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2122,7 +2131,7 @@ try {
   const el = (id) => document.getElementById(id);
   const overlay = el("world");
   const PET = 0; // Ort-Index deiner Linie
-  let world = null, rmap = null, sel = 0, paused = false, timer = null, booted = false;
+  let world = null, rmap = null, sel = 0, paused = false, timer = null, booted = false, closeTimer = null;
   let gen = 0, evCooldown = 14;      // Welt-Generation im Overlay + Vorlauf bis zum 1. Ereignis
   const evLog = [];                  // jüngste Ereignisse (max 5)
   let flash = null;                  // {idx, tone, ticks} — kurzes Aufblitzen am betroffenen Ort
@@ -2309,6 +2318,8 @@ try {
   }
 
   function openWorld() {
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    overlay.classList.remove("closing");
     overlay.hidden = false;
     window.__mainSim?.pause();   // Hintergrund-Zeit anhalten, solange das Modal offen ist
     boot().then(() => {
@@ -2320,8 +2331,10 @@ try {
     });
   }
   function closeWorld() {
-    overlay.hidden = true;
     if (timer) { clearInterval(timer); timer = null; }
+    // Zurück-Zoom ins Wesen abspielen, dann erst ausblenden.
+    overlay.classList.add("closing");
+    closeTimer = setTimeout(() => { overlay.hidden = true; overlay.classList.remove("closing"); closeTimer = null; }, 260);
     window.__mainSim?.resume();
   }
 

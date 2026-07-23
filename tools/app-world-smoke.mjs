@@ -55,8 +55,9 @@ try {
   await page.click("#wlCat");
   await page.waitForTimeout(300);
 
-  // 5) Schließen
+  // 5) Schließen (mit Zurück-Zoom-Animation -> hidden erst nach ~260ms)
   await page.click("#worldClose");
+  await page.waitForTimeout(400);
   const closed = await page.locator("#world").getAttribute("hidden");
   console.log(`  Overlay schließt:                 ${closed !== null ? "OK" : "FAIL"}`);
 
