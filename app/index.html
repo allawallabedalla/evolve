@@ -186,7 +186,11 @@
   .wl-place .nm .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
   .wl-place .nm { font-weight: 700; font-size: .82rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text); }
   .wl-place .env { color: var(--muted); font-family: var(--mono); font-size: .62rem; letter-spacing: 0; }
-  .wl-place .form { color: var(--bio); font-size: .78rem; margin: 6px 0 7px; min-height: 2.4em; line-height: 1.3; }
+  .wl-place .form { color: var(--bio); font-size: .78rem; margin: 6px 0 7px; min-height: 2.4em; line-height: 1.3; display: flex; align-items: center; gap: 8px; }
+  .wl-cre { flex-shrink: 0; color: var(--bio-dim); }
+  .wl-cre .ic { width: 2em; height: 2em; }
+  .wl-cre-sm { color: var(--bio-dim); }
+  .wl-cre-sm .ic { width: 1.05em; height: 1.05em; vertical-align: -.16em; }
   .wl-place .div { color: var(--muted); font-size: .62rem; font-family: var(--mono); }
   .wl-side { display: flex; flex-direction: column; gap: 14px; }
   .wl-panel { background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; }
@@ -2048,9 +2052,11 @@ try {
       const m = world.mean(i);
       const e = p.env;
       const isPet = i === PET;
+      const desc = describe(m);
+      const cre = realExample(desc);
       return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}" data-i="${i}">`+
         `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
-        `<div class="form">${describe(m)}</div>`+
+        `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
         `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)}</div>`+
       `</div>`;
     }).join("");
@@ -2064,7 +2070,7 @@ try {
       const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
       const ex = realExample(s.name);
       const real = `<a class="wl-real" href="${ex.wiki}" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen">≈ ${ex.name} ↗</a>`;
-      return `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span> ${real}</li>`;
+      return `<li><span class="wl-cre-sm">${ic(ex.icon)}</span> ${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span> ${real}</li>`;
     }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
   }
 

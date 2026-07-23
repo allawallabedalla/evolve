@@ -146,7 +146,12 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
   + `World.addPlace(seedGenome)` (getestet: `npm run seed-check`), Brücke `window.__evolvePet`.
   Damit ist die Zoom-Vision konkret: reinzoomen = dein Tamagotchi, rauszoomen = derselbe als eine
   Linie im Baum des Lebens.
+- [x] **Pfad A · Schritt 3 — Creature-Silhouetten je Ort**: jeder Ort (und jede Chronik-Zeile) zeigt
+  jetzt ein flaches Wesen-Icon der emergenten Form, konsistent mit der Genbuch-Ästhetik. Umsetzung:
+  `app/exemplar.js` liefert je Art zusätzlich einen Icon-Schlüssel aus dem App-Icon-Set (emergenz-
+  abgeleitet aus `describe()`, nicht `classify()`); `exemplar-check` prüft, dass jeder Schlüssel real
+  existiert. Vorbild-Icon + „≈ in echt"-Link zeigen dasselbe Wesen.
 - Offen (Pfad A weiter): echter Zoom Pet↔Welt als Navigation (statt Overlay); „Veränderung"-Knopf
-  mit progressiver Tiefe; Creature-Rendering je emergenter Form; Raum-Hebel (verbinden/isolieren)
-  mit klarer visueller Metapher zurückholen. Danach: die inline-v1-Mean-Field-Engine schrittweise
-  durch den Populations-Kern ablösen (ein Ort = die heutige Ansicht).
+  mit progressiver Tiefe; genom-spezifisches Canvas-Rendering (statt Icon) je Form; Raum-Hebel
+  (verbinden/isolieren) mit klarer visueller Metapher. Danach: die inline-v1-Mean-Field-Engine
+  schrittweise durch den Populations-Kern ablösen (ein Ort = die heutige Ansicht).
