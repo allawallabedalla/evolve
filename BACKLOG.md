@@ -17,6 +17,42 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ✅ Erledigt
 
+### 5-Agenten-Audit-Rollout (2026-07) — Usability / Design / Biologie / Evolution / Didaktik
+Fünf Fachagenten haben die Live-App geprüft; Befunde nach P0→P1→P2 abgearbeitet und
+jeweils einzeln nach `main` gemerged (Auto-Deploy):
+- **P0a (v0.20):** Fehlvorstellungs-Sprache (Selektion statt Umbau), „Baum" ehrlich als
+  Ähnlichkeits-Gruppierung (keine rekonstruierte Abstammung), Fitness als „Passung".
+- **P0b (v0.21):** WCAG-Kontrast (K2) — `--muted`/`--bio-dim` dunkler (AA auf Ocker),
+  ausgeblendete Gene `.32→.55` lesbar.
+- **P0c (v0.22):** Genbuch entgamifiziert (K3) — Rarität = **ökologische Häufigkeit**, kein
+  Sammel-Rang; „legendär"→„extrem selten"; Anti-Scala-Naturae-Hinweis (Reiche gruppiert,
+  nicht gereiht); Rarität-Chips AA-lesbar; Tooltip-Dunkeltheme-Bug behoben.
+- **P1a (v0.23):** Neon-Cyan-Reste raus (Augen-Glanzlichter/UI-Glows → warm/salbei),
+  Habitat-Helligkeitsboden 0.16→0.42 (dunkle Szenen bleiben pastellig), Regler-Label
+  „Nahrungshöhe", natives `confirm/prompt` → In-App-Dialog (Neomorph + Fokus).
+- **P1b (v0.24):** Layout in Grid-Bereiche (view/console/card) — Schnell-Einstiege unter dem
+  Bild „above the fold"; Mobil: Bild→Regler→Detailkarte; **aktives Biom markiert** (K5);
+  Fokus-Verwaltung für Genbuch-/Welt-Modal.
+- **P2a/b (v0.25):** **Endothermie-Kopplung** — Kälte-Anpassung braucht Isolation UND
+  Stoffwechsel (Warmblüter). Voll re-validiert (parity 1.1e-16, Ökologie C1–C6, pop-check
+  0.010, frisches Orakel). „Über die Engine" benennt Hauptansicht ehrlich als
+  Mittelfeld-Anpassungsbahn (echte Populationen → Lebende Welt).
+- **P2c (v0.26):** **Photosynthese-Temperatur-Abhängigkeit** — mildes Optimum (`photoTempOpt`
+  0.6, Strength 0.6); Kälte/Hitze senken die Enzym-Leistung (Tundra trägt weniger Pflanzen).
+  Voll re-validiert (Pflanzen-Anteil 4.0 %, > 2 %-Boden).
+
+#### Bewusst zurückgestellt (Audit-Befunde, die eine gezielte Design-Runde brauchen)
+- **Sympatrische Artbildung sichtbar machen:** empirisch geprüft — die aktuelle Dynamik
+  erzeugt **unimodale** Innerorts-Populationen (bei Radius 0.18: 0 echte Sub-Cluster). Ein
+  bloßes Absenken des Zensus-Radius zeigte nur Rauschen. Echte Aufspaltung bräuchte
+  **stärkere disruptive Konkurrenz** — ein Dynamik-Umbau mit eigener pop-check-Wirkung
+  (die „mittlere" Form wird bei Bimodalität bedeutungslos). Allopatrische Aufspaltung
+  (Isolation → verschiedene Arten je Ort) funktioniert bereits und ist im Overlay sichtbar.
+- **Kleiber-Allometrie (Stoffwechsel ∝ Masse^0.75):** geringe Anschaulichkeit für Laien,
+  hohes Tuning-Risiko — später, wenn überhaupt.
+- **Fisch-vs-Aal-Benennung (Flossen vs. flossenlos):** würde eine neue Form + Ripple durch
+  Rarität/Tree/Wiki/Icons erfordern; Nuance rechtfertigt den Aufwand (noch) nicht.
+
 ### Baum-des-Lebens- & Engine-Session (2026-07)
 - **Engine geschärft — Absorptions-Kanal (`physics.json` v2→v3):** dritter Ernährungsmodus
   `energyAbsorb` (sessile Heterotrophie/Osmotrophie). Diagnose: das Orakel teilt die

@@ -68,8 +68,14 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
   //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
   const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
+  //       Temperatur-Abhaengigkeit (Biologie-Audit): Photosynthese hat ein
+  //       Temperatur-Optimum; in starker Kaelte/Hitze sinkt die Enzym-Leistung.
+  //       Milde Glocke -> Kaelte-Standorte (Tundra) tragen weniger Pflanzen.
+  const photoThermal = clamp01(
+    1 - phys.photoTempStrength * (env.temperature - phys.photoTempOpt) * (env.temperature - phys.photoTempOpt)
+  );
   const energyPhoto =
-    photo * env.light * env.water * lightAccess * photoSize * (1 - phys.exclusion * mobility);
+    photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
 
   //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
   //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
