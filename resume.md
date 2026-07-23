@@ -227,9 +227,27 @@ rauszoomen = Baum des Lebens (Orte, Chronik + Rarität, Veränderung-Hebel),
 reinzoomen = das bestehende Einzel-Wesen (byte-identisch unberührt). Kern gebündelt
 unter `app/core/` (`npm run bundle-app`; Pages liefert nur `app/`). Eigenes
 `<script type=module>`, per try/catch entkoppelt. `npm run app-world-smoke` (Playwright).
-Nächste Pfad-A-Schritte: Einzel-Wesen als EINEN Ort verdrahten · echter Zoom Pet↔Welt ·
-progressiver „Veränderung"-Knopf · Creature-Rendering · dann inline-v1-Engine durch den
-Populations-Kern ablösen.
+**Pfad A ausgebaut (v0.8–v0.14, alle LIVE) + AXIS-4 Engine-Fix (v0.9):**
+- **AXIS-4 Aquatik (v0.9, physics.json v5):** vierter Energieweg „aquatische Jagd"
+  (schwimmende Heterotrophie: braucht keine Reichweite, belohnt Mobilität + Stromlinien-
+  form, nur in tiefem Wasser). Behebt „nie einen Fisch" (Audit: Fisch 0→3,8 %). Gespiegelt
+  in engine/fitness.ts + Orakel + App-Inline; `parity` exakt, `ecology` C1–C6 grün. Neues
+  App-Biom „Offenes Meer". Diagnose-Tool: `tools/divergence-audit.mjs`.
+- **Lebende Welt (Overlay) ist jetzt reich:** dein Wesen = Ort 0 („Dein Wesen", DU-Badge,
+  aus echtem Genom, `Population.seedFrom`/`seed-check`) · flache Creature-Silhouetten je Ort
+  + Wikipedia-„≈ in echt"-Links (auch neben dem Namen in der Hauptansicht; `app/exemplar.js`,
+  `exemplar-check`) · **autonome Ereignisse** (Vulkan/Meteor/Dürre/Flut/Kälte/Blüte) mit
+  Ereignis-Ticker + Aufblitzen · **prozedurale Orte** (Geografie×Klima×Isolation, „neue Welt"
+  würfelbar) · **mehrstufige Veränderung** (Knöpfe + aufklappbare Detail-Regler) · Raum-Hebel
+  „Insel/verbunden" mit sichtbarem Zustand · **echter Zoom** Pet↔Welt (Auf-/Zuzoomen) ·
+  Aufwärm-Lauf (öffnet vielfältig). Habitat wird auf dem Hauptbild schematisch gezeichnet
+  (Sonne/Wasser/Vegetation/Schnee). **Versionsnummer** im Footer (`APP_VERSION`, aktuell v0.14.0).
+- Gemessen & verworfen: „Hysterese/Einrasten" beim Biom-Wechsel ist KEIN echtes Problem
+  (Tier→Grünalge 12/12 bei genug Zeit) — nur langsame Umwandlung + Namens-Commit-Lag.
+
+Offen (substanziell): genom-genaues Canvas-Rendering je Ort (statt flachem Icon — größerer
+`drawCreature`-Umbau); tiefere Faktoren (über die 6 Umwelt-Regler hinaus, Richtung Katalog);
+langfristig die inline-v1-Mean-Field-Engine durch den Populations-Kern ablösen.
 
 ## 7. Nächste Schritte (Priorität)
 1. **AXIS-2..5** — weitere Gen-Achsen (Graben, Aquatik/Habitat, Ernährungsmodus, Sinne/Tarnung);
