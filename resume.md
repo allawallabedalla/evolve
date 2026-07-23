@@ -60,12 +60,13 @@ geräteübergreifend mit Account.
   (NIE service_role/DB-Passwort in Client/Repo.)
 - **Schema:** `supabase/schema.sql` (Tabelle `creatures`, ein Wesen pro Nutzer, RLS:
   jeder nur sein eigenes; `last_seen` für Offline-Zeit). Wurde im SQL-Editor ausgeführt.
-- **Auth:** E-Mail + Passwort (signUp/signInWithPassword). **„Confirm email" muss OFF
-  sein** (Authentication → Providers → Email), sonst loggt „Konto erstellen" nicht
-  sofort ein. Passwort-Reset via `resetPasswordForEmail` ist eingebaut (braucht aber
-  E-Mail-Zustellung — auf Gratis-Tarif unzuverlässig; später echter SMTP/Resend).
-- **Bekanntes offenes Problem:** Login-Fehler „Invalid login credentials" tritt auf,
-  wenn Konto/Passwort nicht matcht oder Confirm-email noch AN.
+- **Auth:** E-Mail + Passwort (signUp/signInWithPassword). **Status: funktioniert** ✅
+  (Login getestet, geräteübergreifend). Voraussetzung: **„Confirm email" = OFF**
+  (Authentication → Providers → Email) — ist gesetzt. Passwort-Reset via
+  `resetPasswordForEmail` eingebaut (braucht E-Mail-Zustellung — auf Gratis-Tarif
+  unzuverlässig; später echter SMTP/Resend).
+- **Falls je „Invalid login credentials":** Konto/Passwort matcht nicht oder Confirm-
+  email wurde wieder aktiviert → „Konto erstellen" statt „Einloggen", oder frische E-Mail.
 
 ## 6. Erledigte Meilensteine
 - Engine + Orakel + Training validiert (~82 %), Parität exakt.
