@@ -429,8 +429,8 @@
       </div>
       <!-- Schnell-Einstiege direkt unter dem Bild — auf Desktop UND Mobil „above the fold" -->
       <div class="entry-row">
-        <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
-        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, viele Arten">🌍 Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
+        <button class="disc" id="discBtn" title="Lebensbaum öffnen — die entdeckten Formen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
+        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, viele Arten">Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
       </div>
     </div>
 
@@ -443,7 +443,7 @@
       <div class="controls">
         <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter"></button>
         <div class="speeds" id="speeds"></div>
-        <button class="ctrl newlife" id="newLifeBtn">Neues Leben</button>
+        <button class="ctrl newlife" id="newLifeBtn">Neu beginnen</button>
       </div>
     </div>
 
@@ -536,7 +536,7 @@
         <div>
           <div class="wl-map" id="wlMap"><div class="wl-loading" id="wlLoading">Welt erwacht … (berechne emergente Rarität)</div></div>
           <div class="wl-panel" style="margin-top:14px">
-            <h3 id="wlVerHead">Veränderung — Ort: <span id="wlSelName" style="color:var(--bio)">–</span></h3>
+            <h3 id="wlVerHead">Eingreifen — Ort: <span id="wlSelName" style="color:var(--bio-dim)">–</span></h3>
             <div class="wl-btns">
               <button id="wlCat">Katastrophe</button>
               <button id="wlWet">feucht &amp; kühl</button>
@@ -574,7 +574,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.26.0";
+const APP_VERSION = "v0.27.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -858,25 +858,25 @@ function describe(t){
 // ======================= Umwelt / Regler =======================
 const LEVERS = [
   {key:"temperature", ico:"temp", name:"Temperatur", lo:"kalt", hi:"heiß"},
-  {key:"predation",   ico:"fang", name:"Räuberdruck", lo:"keine", hi:"extrem"},
-  {key:"foodAbundance",ico:"grain", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
-  {key:"foodHeight",  ico:"height", name:"Nahrungshöhe", lo:"am Boden", hi:"in der Höhe"},
-  {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"sonnig"},
-  {key:"water",       ico:"drop", name:"Wasser", lo:"Dürre", hi:"feucht"},
+  {key:"predation",   ico:"fang", name:"Räuber", lo:"sicher", hi:"tödlich"},
+  {key:"foodAbundance",ico:"grain", name:"Nahrungsmenge", lo:"knapp", hi:"üppig"},
+  {key:"foodHeight",  ico:"height", name:"Höhe des Futters", lo:"am Boden", hi:"hoch oben"},
+  {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"hell"},
+  {key:"water",       ico:"drop", name:"Wasser", lo:"trocken", hi:"unter Wasser"},
 ];
 const BIOMES = [
   {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
   {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.6}},
-  {n:"Hohe Nahrung", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
+  {n:"Reiche Kronen", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
   {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
   {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
-  {n:"Lichtkampf", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
+  {n:"Dichter Wald", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
   {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
   {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
-  {n:"Plankton-See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
-  {n:"Algen-Riff", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
+  {n:"Trüber See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
+  {n:"Sonniges Flachmeer", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
-  {n:"Leuchtende Tiefe", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
+  {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
 const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
@@ -2235,9 +2235,10 @@ function frame(time){
 }
 
 // Statische Emoji durch flache Icons ersetzen
-document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neues Leben";
+document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neu beginnen";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
-document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
+document.getElementById("discBtn").innerHTML = ic("dna") + ' Lebensbaum · <span id="discCount">0</span> entdeckt ↗';
+document.getElementById("worldBtn").innerHTML = ic("globe") + ' Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗';
 playBtn.innerHTML = ic("pause");
 const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
@@ -2331,12 +2332,12 @@ try {
 
   // Detail-Ebene (progressive Tiefe): die 6 echten Umwelt-Regler des gewählten Orts.
   const FACTORS = [
-    { k:"temperature",  n:"Temperatur",   ic:"temp"   },
-    { k:"water",        n:"Wasser",       ic:"drop"   },
-    { k:"light",        n:"Licht",        ic:"sun"    },
-    { k:"foodAbundance",n:"Nahrung",      ic:"grain"  },
-    { k:"foodHeight",   n:"Nahrungshöhe", ic:"height" },
-    { k:"predation",    n:"Räuberdruck",  ic:"fang"   },
+    { k:"temperature",  n:"Temperatur",       ic:"temp"   },
+    { k:"water",        n:"Wasser",           ic:"drop"   },
+    { k:"light",        n:"Licht",            ic:"sun"    },
+    { k:"foodAbundance",n:"Nahrungsmenge",    ic:"grain"  },
+    { k:"foodHeight",   n:"Höhe des Futters", ic:"height" },
+    { k:"predation",    n:"Räuber",           ic:"fang"   },
   ];
   function renderSliders() {
     const box = el("wlSliders"); if (!box || !world) return;
