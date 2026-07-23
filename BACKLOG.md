@@ -1,5 +1,34 @@
 # Backlog — aus Playtests
 
+## Live-App (A2) — Funde & Audit
+
+**Nutzer-Funde:**
+- ✅ **JITTER** „zappelt zu viel" → geglättete Anzeige (gleitender Mittelwert der 8 Merkmale) + Drift 0.05→0.03.
+- ⬜ **VARIETY** „nur Baum oder X-beiniges Tier" → prozeduraler Renderer vielfältiger (nächster Deploy).
+
+**UX/Gamification-Audit (eigene Instanz) — erledigt in diesem Deploy:**
+- ✅ A2 Entdeckung belohnen → Toast „✨ Neue Form: …" + Zähler-Puls.
+- ✅ B1 Regler-Richtung sichtbar → lo/hi-Labels unter jedem Slider.
+- ✅ B3 Passwort-Reset → „Passwort vergessen?" + Recovery-Modus.
+- ✅ B2 „Neues Leben" ohne Rückfrage → Bestätigungsdialog.
+- ✅ Auth: Auto-Login-Fallback nach „Konto erstellen".
+
+**UX/Gamification-Audit — offen (priorisiert):**
+- ⬜ A1 **Genbuch begehbar** (Kachel-Galerie aller Archetypen, entdeckt/„???") — der eigentliche Neugier-Loop.
+- ⬜ A3 **Live-Vitalitätsanzeige** (aus `fitness()`) → Ursache→Wirkung sofort spürbar.
+- ⬜ A4 **Bindung**: Name vergeben, Ahnenlinie/Meilenstein-Historie; „Neues Leben" als Nachkomme.
+- ⬜ A5 Onboarding-Startimpuls (Biom-Chip pulsiert + Hinweis beim 1. Besuch).
+- ⬜ A6 Reveal: Vorher/Nachher-Silhouette + „🧬 neue Form" wenn zutreffend.
+- ⬜ B4 a11y: aria-Labels an Login-Feldern, `role="dialog"` + Escape an Overlays, `aria-live`.
+- ⬜ B5 `prefers-reduced-motion` stoppt auch Canvas (Atem/Motes), nicht nur CSS.
+- ⬜ B6 Fußzeile: „Mockup"/„82 %"-Jargon raus → optionales „ⓘ Über die Engine".
+- ⬜ B7 Sync-Status gehört in den Header, nicht in den Biom-Tag („Cloud-Welt" überschreibt Biom).
+- ⬜ B9–B14 Kleinkram (Play-Label dynamisch, Touch-Ziele ≥44px, Kontrast, autocomplete, Login-Disabled-State, Copy „Nahrungs-/Lichthöhe").
+
+---
+
+## Frühere Playtest-Funde
+
 Konsolidiert aus 3 unabhängigen Spieltest-Personas (~95 Läufe zusammen):
 neugieriger Laie, Ziel-Jäger, Grenzgänger. Rohberichte unter `playtest/`.
 Priorität: **P0** = Korrektheit/Bug, **P1** = Kern-Erlebnis/Balance, **P2** = Ausbau.
