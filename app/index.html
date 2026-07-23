@@ -183,6 +183,16 @@
   .wl-map { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
   .wl-place { flex: 1 1 200px; min-width: 180px; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 11px 12px; cursor: pointer; transition: border-color .15s; }
   .wl-place.sel { border-color: var(--bio); box-shadow: 0 0 0 1px rgba(95,230,176,.2); }
+  .wl-place.flash-hit { border-color: var(--danger) !important; box-shadow: 0 0 0 2px var(--danger), 0 0 20px rgba(255,122,107,.45); }
+  .wl-place.flash-shift { border-color: #6fd0ff !important; box-shadow: 0 0 0 2px #6fd0ff, 0 0 20px rgba(111,208,255,.4); }
+  .wl-place.flash-bio { border-color: var(--bio) !important; box-shadow: 0 0 0 2px var(--bio), 0 0 20px rgba(95,230,176,.4); }
+  .wl-events #wlEvLog { margin: 0; padding: 0; }
+  .wl-events li { list-style: none; font-size: .74rem; margin: 0 0 5px; color: var(--text); display: flex; align-items: baseline; gap: 6px; }
+  .wl-events li .ev-gen { font-family: var(--mono); font-size: .62rem; color: var(--muted); flex-shrink: 0; }
+  .wl-events li .ev-pl { color: var(--muted); }
+  .wl-events .ev-hit { color: var(--danger); } .wl-events .ev-shift { color: #6fd0ff; } .wl-events .ev-bio { color: var(--bio); }
+  .wl-events .ev-ic .ic { width: .95em; height: .95em; vertical-align: -.15em; }
+  .wl-ev-empty { color: var(--muted); font-style: italic; }
   .wl-place--pet { background: linear-gradient(180deg, rgba(95,230,176,.06), var(--abyss)); border-color: var(--bio-dim); }
   .wl-you { font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: var(--abyss); background: var(--bio); border-radius: 4px; padding: 1px 5px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
   .wl-place .nm .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
@@ -448,6 +458,10 @@
           </div>
         </div>
         <div class="wl-side">
+          <div class="wl-panel wl-events">
+            <h3 id="wlEvHead">Ereignisse</h3>
+            <ul id="wlEvLog"><li class="wl-ev-empty">— die Welt ist ruhig … Ereignisse geschehen von selbst —</li></ul>
+          </div>
           <div class="wl-panel wl-chronik">
             <h3 id="wlChronHead">Chronik — Baum des Lebens</h3>
             <ul id="wlChronik"></ul>
@@ -463,7 +477,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.9.0";
+const APP_VERSION = "v0.10.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2098,6 +2112,39 @@ try {
   const overlay = el("world");
   const PET = 0; // Ort-Index deiner Linie
   let world = null, rmap = null, sel = 0, paused = false, timer = null, booted = false;
+  let gen = 0, evCooldown = 14;      // Welt-Generation im Overlay + Vorlauf bis zum 1. Ereignis
+  const evLog = [];                  // jüngste Ereignisse (max 5)
+  let flash = null;                  // {idx, tone, ticks} — kurzes Aufblitzen am betroffenen Ort
+
+  // Autonome Welt-Ereignisse: ein kurzer Trigger, lange Folgen (der Ort entwickelt sich
+  // danach unter neuen Bedingungen weiter). Feuern VON SELBST über die Zeit.
+  const EVENTS = [
+    { label:"Vulkanausbruch",      icon:"meteor", tone:"hit",   apply:(w,i)=>w.triggerEvent(i,{type:"catastrophe",survivorFraction:0.04}) },
+    { label:"Meteoriteneinschlag", icon:"meteor", tone:"hit",   apply:(w,i)=>w.triggerEvent(i,{type:"catastrophe",survivorFraction:0.06}) },
+    { label:"Dürre",               icon:"flame",  tone:"shift", apply:(w,i)=>w.triggerEvent(i,{type:"climateShift",to:{water:0.12,temperature:0.85,light:0.9,foodAbundance:0.25}}) },
+    { label:"Große Flut",          icon:"drop",   tone:"shift", apply:(w,i)=>w.triggerEvent(i,{type:"climateShift",to:{water:0.96,foodHeight:0.1,foodAbundance:0.6}}) },
+    { label:"Kälteeinbruch",       icon:"snow",   tone:"shift", apply:(w,i)=>w.triggerEvent(i,{type:"climateShift",to:{temperature:0.08,foodAbundance:0.4}}) },
+    { label:"Warmzeit & Blüte",    icon:"sun",    tone:"bio",   apply:(w,i)=>w.triggerEvent(i,{type:"climateShift",to:{temperature:0.6,foodAbundance:0.85,light:0.7}}) },
+  ];
+  function logEvent(idx, label, icon, tone) {
+    if (!world) return;
+    evLog.unshift({ gen, place: world.places[idx].name, label, icon, tone });
+    if (evLog.length > 5) evLog.pop();
+    flash = { idx, tone, ticks: 5 };
+    renderEvents();
+  }
+  function fireAuto() {
+    const evt = EVENTS[(Math.random() * EVENTS.length) | 0];
+    const idx = (Math.random() * world.places.length) | 0;
+    evt.apply(world, idx);
+    logEvent(idx, evt.label, evt.icon, evt.tone);
+  }
+  function renderEvents() {
+    const box = el("wlEvLog"); if (!box) return;
+    box.innerHTML = evLog.length ? evLog.map((e) =>
+      `<li><span class="ev-gen">Gen ${e.gen}</span><span class="ev-ic ev-${e.tone}">${ic(e.icon)}</span><span class="ev-${e.tone}">${e.label}</span> <span class="ev-pl">${e.place}</span></li>`
+    ).join("") : `<li class="wl-ev-empty">— die Welt ist ruhig … Ereignisse geschehen von selbst —</li>`;
+  }
 
   // Flache Icons einsetzen (Icon-Policy: keine bunten Emoji) — einmalig beim Laden.
   el("wlTitle").insertAdjacentHTML("afterbegin", ic("globe") + " ");
@@ -2109,8 +2156,17 @@ try {
   el("wlConnect").innerHTML = ic("link") + " mit Nachbarn verbinden";
   el("wlIsolate").innerHTML = ic("island") + " als Insel abtrennen";
   el("wlPause").innerHTML = ic("pause") + " Pause";
+  el("wlEvHead").insertAdjacentHTML("afterbegin", ic("meteor") + " ");
 
-  function step() { if (!paused && world) { world.step(); render(); } }
+  function step() {
+    if (paused || !world) return;
+    world.step(); gen++;
+    if (flash && --flash.ticks <= 0) flash = null;
+    // Autonom: nach dem Vorlauf mit kleiner Wahrscheinlichkeit je Schritt ein Ereignis.
+    if (evCooldown > 0) evCooldown--;
+    else if (Math.random() < 0.09) { fireAuto(); evCooldown = 8; }
+    render();
+  }
 
   function render() {
     if (!world) return;
@@ -2124,7 +2180,8 @@ try {
       const mig = (world.migration[i] || []).reduce((a, b) => a + b, 0);
       const conn = mig > 0.05;
       const state = conn ? `<span class="wl-conn on">${ic("link")} verbunden</span>` : `<span class="wl-conn">${ic("island")} Insel</span>`;
-      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}" data-i="${i}">`+
+      const fl = (flash && flash.idx === i) ? ` flash-${flash.tone}` : "";
+      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}" data-i="${i}">`+
         `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
         `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
         `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)} · ${state}</div>`+
@@ -2186,7 +2243,7 @@ try {
       refreshPet();               // Ort 0 auf das aktuelle Wesen synchronisieren
       sel = PET;
       el("wlSelName").textContent = world.places[PET].name;
-      render();
+      render(); renderEvents();
       if (!timer) timer = setInterval(step, 500);   // ruhiges Tempo (~2/s)
     });
   }
@@ -2201,9 +2258,9 @@ try {
   overlay.addEventListener("click", (e) => { if (e.target.id === "world") closeWorld(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeWorld(); });
 
-  el("wlCat").addEventListener("click", () => { world?.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 }); render(); });
-  el("wlWet").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } }); render(); });
-  el("wlDry").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } }); render(); });
+  el("wlCat").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 }); logEvent(sel, "Katastrophe (von dir)", "meteor", "hit"); render(); });
+  el("wlWet").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } }); logEvent(sel, "Klima: feucht & kühl (von dir)", "drop", "shift"); render(); });
+  el("wlDry").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } }); logEvent(sel, "Klima: heiß & trocken (von dir)", "flame", "shift"); render(); });
   // Raum-Hebel je ausgewähltem Ort: Nachbarn = angrenzende Orte in der Reihe.
   const neighbors = (i) => [i - 1, i + 1].filter((j) => j >= 0 && world && j < world.places.length);
   el("wlConnect").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.connect(sel, j, 0.28); render(); });
