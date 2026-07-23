@@ -160,9 +160,13 @@ geräteübergreifend mit Account.
 - **Genbuch-Hover-Info (erledigt).** Jede Kachel: Tooltip mit `era` (Erdzeitalter „wann") + `evo`
   („wie entstanden"), Daten in `TREE`. Unentdeckt zeigt era+Teaser, entdeckt die volle Evo-Story
   (Discovery-Reward). Schwebender `#gbTip` (fixed, folgt Cursor) + `title`-Fallback (Touch/a11y).
-- **Backlog-Idee dokumentiert:** Entstehungswahrscheinlichkeit als Rarität/Unlock-Achse
-  (`BACKLOG.md` → Gamification-Ideen) — nutzt die `reachable`-Daten (attractor/drift); sanfte Gates,
-  kein Grind-Zwang.
+- **Rarität / Entdeckungs-Tiefe (erledigt).** Je Form ein Seltenheits-Rang aus dem
+  deterministischen Ökologie-Sweep (`docs/rarity.json`, 5⁶-Gitter, Konvergenz-Anteil →
+  `haeufig/gelegentlich/selten/sehr-selten/legendaer`). 7 legendäre „Fänge" nur über Drift.
+  App-inline: `RARITY`-Map + `RARITY_META` (Label/Farbe/Rang). Genbuch zeigt Badge + Farb-Ramp,
+  seltene entdeckte Formen leuchten (Glow), Legende, „x/7 legendär"-Zähler, Hover-Rang; Toast
+  hebt seltene/legendäre Funde hervor. **Leitplanke gehalten:** Rarität = Entdeckungs-Tiefe,
+  keine Währung/kein Grind.
 - **UX-Feinschliff-Bündel (erledigt).** Fast alle offenen Live-App-Backlog-Punkte abgearbeitet:
   A3 Vitalitätsanzeige (`fitness(g,env)`, live), A4 Bindung (Name + Ahnenlinie + Nachkomme),
   A5 Onboarding, A6 Reveal-Silhouette, B4 a11y (aria/Escape), B5 reduced-motion (Canvas),
@@ -170,14 +174,23 @@ geräteübergreifend mit Account.
   Touch-Ziele, Login-Disabled, Copy), CLS-3 (Gen-Balken je Reich gedimmt). Backlog aktualisiert.
   **Offen bleibt bewusst nur BAL-5** (Verteilung entzerren — Physik → Re-Validierung nötig).
 
+## 6a. Produkt-Pfeiler (Leitplanken)
+- **Neugier + Bindung, KEIN Vollständigkeits-Zwang.**
+- **Rarität = Entdeckungs-Tiefe**, keine kaufbare Währung / kein Grind.
+- **Wertschätzung für die Natur als positives Neben-Ziel** *(Nutzer, 2026-07)* — **implizit**:
+  über glaubwürdige Baupläne, echte Erdzeit-Reihenfolge, reale Klade-Namen soll Staunen über
+  die Vielfalt des Lebens mitschwingen, ohne belehrenden Ton. Prüf-Frage für neue Features:
+  *Weckt es Staunen, oder nur Sammel-Druck?*
+
 ## 7. Nächste Schritte (Priorität)
-1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
-   oder Renderer/Taxonomie in eine geteilte Datei auslagern (Backlog: vereinheitlichen).
-2. **Abdeckungs-Lücken** (aus `docs/tree-of-life.json`): Amphibien, Weichtiere, sessile Tiere
-   (Schwämme/Nesseltiere) als neue Formen/Nischen — letzteres schärft den Absorptions-Kanal.
-3. **A3 Vitalitäts-Anzeige** (aus `fitness(genome,env)`) → Ursache→Wirkung sofort spürbar.
-4. **A4 Bindung** (Name, Ahnenlinie/Historie; „Neues Leben" als Nachkomme).
-5. Weitere Audit-Punkte (a11y B4, reduced-motion Canvas B5, Fußzeilen-Copy B6, Sync-Tag B7).
+1. **BAL-5 / CLS-4 · Verteilung entzerren** — „Gepanzertes Beutetier" dominiert die mittleren
+   Einstellungen; weichere Übergänge. **Physik-Änderung → Re-Validierung nötig** (`parity`+`ecology`).
+   Als sauberer Engine-Pass geplant.
+2. **AXIS-1..5** — neue Gen-Achsen (Flug, Graben, Ernährungsmodus, Aquatik, Sinne/Tarnung);
+   je: neues Gen + Orakel-Spiegelung + Re-Validierung. Spätere Meilensteine.
+3. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
+   oder Renderer/Taxonomie in eine geteilte Datei auslagern.
+4. Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld), CLI-Bugs BUG-2/BUG-4/CLS-2.
    Volle Liste: `BACKLOG.md`.
 
 ## 8. Konventionen & Fallen (unbedingt beachten)
