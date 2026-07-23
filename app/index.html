@@ -181,6 +181,18 @@
   /* ---- Genbuch (begehbarer Lebensbaum) ---- */
   .genbook { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(74,60,36,.34); backdrop-filter: blur(6px); animation: fadein .3s ease; }
   .genbook[hidden] { display: none; }
+  /* In-App-Dialog (ersetzt natives confirm/prompt — passt zur Pastell-Optik) */
+  .dlg { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .25s ease; }
+  .dlg[hidden] { display: none; }
+  .dlg-card { width: min(92%, 420px); background: var(--chamber); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .dlg-msg { margin: 0 0 14px; font-size: .95rem; line-height: 1.5; color: var(--text); }
+  .dlg-input { width: 100%; margin-bottom: 14px; padding: 9px 12px; font: inherit; color: var(--text);
+    background: var(--abyss); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-inset); }
+  .dlg-input[hidden] { display: none; }
+  .dlg-input:focus { outline: none; border-color: var(--bio-dim); }
+  .dlg-btns { display: flex; justify-content: flex-end; gap: 10px; }
+  .dlg-btns .ctrl { min-width: 96px; }
+  .dlg-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
   .worldbtn { display: block; margin-top: 8px; }
   .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
@@ -206,10 +218,10 @@
   @media (max-width: 760px) { .wl-grid { grid-template-columns: 1fr; } }
   .wl-map { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
   .wl-place { flex: 1 1 200px; min-width: 180px; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 11px 12px; cursor: pointer; transition: border-color .15s; }
-  .wl-place.sel { border-color: var(--bio); box-shadow: 0 0 0 1px rgba(95,230,176,.2); }
+  .wl-place.sel { border-color: var(--bio); box-shadow: 0 0 0 1px rgba(95,156,131,.28); }
   .wl-place.flash-hit { border-color: var(--danger) !important; box-shadow: 0 0 0 2px var(--danger), 0 0 20px rgba(255,122,107,.45); }
   .wl-place.flash-shift { border-color: #6fd0ff !important; box-shadow: 0 0 0 2px #6fd0ff, 0 0 20px rgba(111,208,255,.4); }
-  .wl-place.flash-bio { border-color: var(--bio) !important; box-shadow: 0 0 0 2px var(--bio), 0 0 20px rgba(95,230,176,.4); }
+  .wl-place.flash-bio { border-color: var(--bio) !important; box-shadow: 0 0 0 2px var(--bio), 0 0 20px rgba(95,156,131,.45); }
   .wl-events #wlEvLog { margin: 0; padding: 0; }
   .wl-events li { list-style: none; font-size: .74rem; margin: 0 0 5px; color: var(--text); display: flex; align-items: baseline; gap: 6px; }
   .wl-events li .ev-gen { font-family: var(--mono); font-size: .62rem; color: var(--muted); flex-shrink: 0; }
@@ -217,7 +229,7 @@
   .wl-events .ev-hit { color: var(--danger); } .wl-events .ev-shift { color: #6fd0ff; } .wl-events .ev-bio { color: var(--bio-dim); }
   .wl-events .ev-ic .ic { width: .95em; height: .95em; vertical-align: -.15em; }
   .wl-ev-empty { color: var(--muted); font-style: italic; }
-  .wl-place--pet { background: linear-gradient(180deg, rgba(95,230,176,.06), var(--abyss)); border-color: var(--bio-dim); }
+  .wl-place--pet { background: linear-gradient(180deg, rgba(95,156,131,.09), var(--abyss)); border-color: var(--bio-dim); }
   .wl-you { font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
   .wl-place .nm .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
   .wl-place .nm { font-weight: 700; font-size: .82rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text); }
@@ -357,14 +369,14 @@
   .rf-ic .ic { width: 2.5rem; height: 2.5rem; }
   .rf-nm { line-height: 1.15; text-align: center; }
   .rf-new { color: var(--bio-dim); }
-  .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,230,176,.55)); }
+  .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,156,131,.6)); }
   .rf-arrow { color: var(--bio-dim); font-size: 1.4rem; }
   /* ---- Onboarding-Startimpuls (A5) ---- */
   .onboard { background: rgba(95,156,131,.10); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio-dim); line-height: 1.5; }
   .onboard[hidden] { display: none; }
   .onboard b { color: var(--text); }
   .biomes.hint .biome:first-child { border-color: var(--bio); animation: biomepulse 1.6s ease-in-out infinite; }
-  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(95,230,176,0); } 50%{ box-shadow: 0 0 0 4px rgba(95,230,176,.18); } }
+  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(95,156,131,0); } 50%{ box-shadow: 0 0 0 4px rgba(95,156,131,.22); } }
   @media (prefers-reduced-motion: reduce) { .biomes.hint .biome:first-child { animation: none; } }
   .reveal-x {
     margin-top: 16px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
@@ -480,6 +492,17 @@
     </div>
   </div>
 
+  <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgMsg" hidden>
+    <div class="dlg-card">
+      <p class="dlg-msg" id="dlgMsg">—</p>
+      <input class="dlg-input" id="dlgInput" type="text" hidden>
+      <div class="dlg-btns">
+        <button class="ctrl" id="dlgCancel">Abbrechen</button>
+        <button class="ctrl dlg-ok" id="dlgOk">OK</button>
+      </div>
+    </div>
+  </div>
+
   <div class="world" id="world" role="dialog" aria-modal="true" aria-label="Lebende Welt — Arten & Ähnlichkeits-Baum" hidden>
     <div class="wl-card">
       <div class="wl-head">
@@ -530,7 +553,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.22.0";
+const APP_VERSION = "v0.23.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -809,7 +832,7 @@ const LEVERS = [
   {key:"temperature", ico:"temp", name:"Temperatur", lo:"kalt", hi:"heiß"},
   {key:"predation",   ico:"fang", name:"Räuberdruck", lo:"keine", hi:"extrem"},
   {key:"foodAbundance",ico:"grain", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
-  {key:"foodHeight",  ico:"height", name:"Höhe (Nahrung/Licht)", lo:"Boden", hi:"hoch"},
+  {key:"foodHeight",  ico:"height", name:"Nahrungshöhe", lo:"am Boden", hi:"in der Höhe"},
   {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"sonnig"},
   {key:"water",       ico:"drop", name:"Wasser", lo:"Dürre", hi:"feucht"},
 ];
@@ -1336,8 +1359,43 @@ const speedsEl = document.getElementById("speeds");
   b.addEventListener("click", () => { gensPerSec=v; [...speedsEl.children].forEach(c=>c.classList.remove("active")); b.classList.add("active"); });
   speedsEl.appendChild(b);
 });
-document.getElementById("newLifeBtn").addEventListener("click", () => {
-  if(!confirm("Neues Leben als Nachkomme starten? Das jetzige Wesen zieht in die Ahnenlinie.")) return;
+// ---- In-App-Dialog (ersetzt natives confirm/prompt; mit Fokus-Verwaltung) ----
+const _dlg = {
+  el: document.getElementById("dlg"), msg: document.getElementById("dlgMsg"),
+  input: document.getElementById("dlgInput"), ok: document.getElementById("dlgOk"),
+  cancel: document.getElementById("dlgCancel"), prev: null, resolve: null,
+};
+function _dlgClose(val){
+  _dlg.el.hidden = true; _dlg.input.hidden = true;
+  const r = _dlg.resolve; _dlg.resolve = null;
+  if(_dlg.prev && _dlg.prev.focus) _dlg.prev.focus();   // Fokus zurück zum Auslöser
+  if(r) r(val);
+}
+function _dlgOpen({ message, withInput, initial, okLabel }){
+  return new Promise(res => {
+    _dlg.prev = document.activeElement;
+    _dlg.resolve = res;
+    _dlg.msg.textContent = message;
+    _dlg.ok.textContent = okLabel || "OK";
+    if(withInput){ _dlg.input.hidden = false; _dlg.input.value = initial || ""; }
+    else { _dlg.input.hidden = true; }
+    _dlg.el.hidden = false;
+    (withInput ? _dlg.input : _dlg.ok).focus();
+    if(withInput) _dlg.input.select();
+  });
+}
+function uiConfirm(message, okLabel){ return _dlgOpen({ message, okLabel }); }
+function uiPrompt(message, initial){ return _dlgOpen({ message, withInput:true, initial }).then(v => v); }
+_dlg.ok.addEventListener("click", () => _dlgClose(_dlg.input.hidden ? true : _dlg.input.value));
+_dlg.cancel.addEventListener("click", () => _dlgClose(_dlg.input.hidden ? false : null));
+_dlg.el.addEventListener("click", e => { if(e.target === _dlg.el) _dlg.cancel.click(); });
+_dlg.el.addEventListener("keydown", e => {
+  if(e.key === "Escape"){ e.preventDefault(); _dlg.cancel.click(); }
+  else if(e.key === "Enter" && !_dlg.input.hidden){ e.preventDefault(); _dlg.ok.click(); }
+});
+
+document.getElementById("newLifeBtn").addEventListener("click", async () => {
+  if(!await uiConfirm("Neues Leben als Nachkomme starten? Das jetzige Wesen zieht in die Ahnenlinie.", "Neues Leben")) return;
   // A4: aktuelles Wesen als Ahne aufzeichnen (Linie ueberlebt "Neues Leben").
   ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
   if(ancestry.length > 12) ancestry = ancestry.slice(-12);
@@ -1348,8 +1406,8 @@ document.getElementById("newLifeBtn").addEventListener("click", () => {
   updatePanels(); updateBonding(); saveState();
 });
 // A4: Wesen benennen.
-document.getElementById("nameBtn").addEventListener("click", () => {
-  const v = prompt("Wie soll dein Wesen heißen?", creatureName || "");
+document.getElementById("nameBtn").addEventListener("click", async () => {
+  const v = await uiPrompt("Wie soll dein Wesen heißen?", creatureName || "");
   if(v === null) return;
   creatureName = v.trim().slice(0, 24);
   updateBonding(); saveState();
@@ -1386,7 +1444,9 @@ function drawHabitat(){
   const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
   // Pastell-Tag-Szene (Design v2): Himmel kühl-pastellblau(kalt)↔pfirsich(warm), Helligkeit
   // nach Licht. Sehr wenig Licht -> tief & dunkelblau (Tiefsee/Höhle), dort sticht Leuchten hervor.
-  const bright = lerp(0.16, 1, L);
+  // Helligkeits-Boden angehoben (0.42): auch dunkle Szenen bleiben pastellig statt
+  // fast schwarz (Design-Audit) — Tiefsee/Höhle signalisiert sich über kühlen Blauton.
+  const bright = lerp(0.42, 1, L);
   const sky = mix([150,192,214],[236,206,170], T);
   const top = sky.map(c=>12+c*bright);
   const hor = mix(sky,[246,228,190],0.45).map(c=>10+c*Math.max(bright,0.14)*0.95);
@@ -1694,7 +1754,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     ctx.beginPath(); ctx.ellipse(hx,hy,R*0.3,R*0.34,0,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle=foot; ctx.lineWidth=R*0.09; ctx.lineCap="round";
     for(const o of [-1,1]){ ctx.beginPath(); ctx.moveTo(hx+R*0.08,hy-R*0.2); ctx.lineTo(hx+R*0.28+o*R*0.05,hy-R*0.65); ctx.stroke();
-      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx+R*0.28+o*R*0.05,hy-R*0.68,R*0.06,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(hx+R*0.28+o*R*0.05,hy-R*0.68,R*0.06,0,Math.PI*2); ctx.fill(); }
     const shx=cx-L*0.1, shy=cy-R*0.2, sr=R*0.98;
     ctx.fillStyle=rgb(mix(body,[185,145,95],armor));
     ctx.beginPath(); ctx.arc(shx,shy,sr,0,Math.PI*2); ctx.fill();
@@ -1712,7 +1772,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5); const sx=cx+t*hr*1.4, sway=Math.sin(time*0.004+i)*R*0.25;
       ctx.beginPath(); ctx.moveTo(sx,cy+hr*0.4); ctx.quadraticCurveTo(sx+sway,cy+hr*1.0, sx+t*R*0.6+sway, cy+hr*1.5); ctx.stroke(); }
     for(const o of [-1,1]){ ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4,cy-R*0.25,R*0.17,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4-R*0.04,cy-R*0.31,R*0.06,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx+o*hr*0.4-R*0.04,cy-R*0.31,R*0.06,0,Math.PI*2); ctx.fill(); }
     return;
   }
   // ---- Amphibie: gedrungen, gespreizte Beine, Augen oben ----
@@ -1726,7 +1786,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     for(const o of [-1,1]){ ctx.fillStyle=amb; ctx.beginPath(); ctx.arc(cx+o*W*0.42,cy-H*0.72,R*0.3,0,Math.PI*2); ctx.fill();
       const blink=(Math.sin(time*0.0011)>0.97)?0.15:1;
       ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(cx+o*W*0.42,cy-H*0.72,R*0.15,R*0.15*blink,0,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+o*W*0.42-R*0.04,cy-H*0.8,R*0.05,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx+o*W*0.42-R*0.04,cy-H*0.8,R*0.05,0,Math.PI*2); ctx.fill(); }
     return;
   }
   // ---- Wurm: gegliederter Schlauch ----
@@ -1756,7 +1816,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
       for(let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(cx+L*0.4-i*L*0.25, cy, H*0.7, -0.9,0.9); ctx.stroke(); } }
     ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx-L*0.35,cy,H*0.5,-0.7,0.7); ctx.stroke();
     ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-L*0.62,cy-H*0.15,R*0.12,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-L*0.66,cy-H*0.2,R*0.05,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx-L*0.66,cy-H*0.2,R*0.05,0,Math.PI*2); ctx.fill();
     return;
   }
   // ---- Insekt: 3 Segmente, 6 Beine, Fuehler ----
@@ -1774,7 +1834,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx-s*1.05,cy-s*0.3);
       ctx.quadraticCurveTo(cx-s*1.5,cy-s*0.9, cx-s*1.25+sd*s*0.3,cy-s*1.1); ctx.stroke(); }
     if(armor>0.5){ ctx.strokeStyle="rgba(20,30,30,.4)"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx+s*0.95,cy,s*0.85,-1.2,1.2); ctx.stroke(); }
-    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-s*1.05,cy-s*0.2,s*0.12,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx-s*1.05,cy-s*0.2,s*0.12,0,Math.PI*2); ctx.fill();
     return;
   }
   // ---- Krebstier: breiter Panzer + Scheren ----
@@ -1791,7 +1851,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
       ctx.strokeStyle=rgb(dark); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cxx-R*0.22,cyy-R*0.28); ctx.lineTo(cxx+R*0.22,cyy-R*0.1); ctx.stroke(); }
     for(const sd of [-1,1]){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(cx+sd*R*0.2,cy-H*0.7); ctx.lineTo(cx+sd*R*0.25,cy-H*1.05); ctx.stroke();
-      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.25,cy-H*1.12,R*0.1,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.25,cy-H*1.12,R*0.1,0,Math.PI*2); ctx.fill(); }
     return;
   }
 
@@ -1809,7 +1869,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     ctx.fillStyle=rgb(dark); ctx.beginPath(); ctx.ellipse(cx,cy,R*0.16,R*0.62,0,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.5; ctx.lineCap="round";
     for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+sd*R*0.06,cy-R*0.5); ctx.quadraticCurveTo(cx+sd*R*0.3,cy-R*0.95, cx+sd*R*0.46,cy-R*0.82); ctx.stroke();
-      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.46,cy-R*0.84,R*0.05,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.46,cy-R*0.84,R*0.05,0,Math.PI*2); ctx.fill(); }
     return;
   }
   // ---- Vogel: Rumpf + spitze schlagende Fluegel + Schnabel + Schwanz ----
@@ -1824,7 +1884,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.arc(cx-R*0.72,cy-R*0.32,R*0.42,0,Math.PI*2); ctx.fill();
     ctx.fillStyle=rgb(mix(body,[215,165,60],0.75)); ctx.beginPath(); ctx.moveTo(cx-R*1.05,cy-R*0.36); ctx.lineTo(cx-R*1.45,cy-R*0.24); ctx.lineTo(cx-R*1.05,cy-R*0.12); ctx.closePath(); ctx.fill();
     ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-R*0.82,cy-R*0.4,R*0.1,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-R*0.85,cy-R*0.44,R*0.04,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(cx-R*0.85,cy-R*0.44,R*0.04,0,Math.PI*2); ctx.fill();
     return;
   }
   // ---- Fledermaus: dunkler Rumpf + Hautfluegel (gefingert) + Ohren ----
@@ -1841,7 +1901,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     ctx.fillStyle=rgb(mix(body,[55,48,66],0.6)); ctx.beginPath(); ctx.ellipse(cx,cy,R*0.32,R*0.5,0,0,Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(cx,cy-R*0.5,R*0.28,0,Math.PI*2); ctx.fill();
     for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx+sd*R*0.1,cy-R*0.68); ctx.lineTo(cx+sd*R*0.3,cy-R*1.06); ctx.lineTo(cx+sd*R*0.02,cy-R*0.78); ctx.closePath(); ctx.fill(); }
-    ctx.fillStyle="rgba(95,230,176,.9)"; for(const sd of [-1,1]){ ctx.beginPath(); ctx.arc(cx+sd*R*0.11,cy-R*0.52,R*0.06,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle="rgba(250,247,236,.9)"; for(const sd of [-1,1]){ ctx.beginPath(); ctx.arc(cx+sd*R*0.11,cy-R*0.52,R*0.06,0,Math.PI*2); ctx.fill(); }
     return;
   }
 
@@ -1943,7 +2003,7 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
   // Auge
   const blink = (Math.sin(time*0.0009)>0.985)?0.1:1;
   ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(hx-R*0.15, hy-R*0.05, R*0.11, R*0.13*blink, 0,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx-R*0.18, hy-R*0.09, R*0.04, 0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(250,247,236,.9)"; ctx.beginPath(); ctx.arc(hx-R*0.18, hy-R*0.09, R*0.04, 0,Math.PI*2); ctx.fill();
 }
 
 // ===== Reich PILZE: bodenstaendige Fruchtkoerper =====
