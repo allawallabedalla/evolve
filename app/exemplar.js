@@ -33,6 +33,7 @@ const ARCH_WIKI = {
   "Plankton": ["Plankton","Plankton"], "Schnecke · Weichtier": ["Schnecke","Schnecken"],
   "Kopffüßer · Tintenfisch": ["Tintenfisch","Kopffüßer"], "Amphibie · Lurch": ["Amphibie","Amphibien"],
   "Koralle · Riffbildner": ["Koralle","Korallen"], "Schwamm": ["Schwamm","Schwämme"],
+  "Leuchtwesen · Tiefsee": ["Anglerfisch","Tiefseeanglerfische"],
 };
 
 /** Reales Vorbild + Wikipedia-URL zu einem konkreten App-Archetyp-Namen (Hauptansicht). */
@@ -55,6 +56,7 @@ export function realExample(name) {
 
   switch (kingdom) {
     case "Tier":
+      if (has("leuchtend")) return { name: "Anglerfisch", wiki: W("Tiefseeanglerfische"), icon: "jelly" };
       if (has("geflügelt") && has("groß")) return { name: "Fledermaus", wiki: W("Fledertiere"), icon: "bat" };
       if (has("geflügelt")) return { name: "Schmetterling", wiki: W("Schmetterlinge"), icon: "butterfly" };
       if (has("gepanzert") && has("groß")) return { name: "Schildkröte", wiki: W("Schildkröten"), icon: "turtle" };
@@ -79,6 +81,7 @@ export function realExample(name) {
       if (has("gliedmaßenreich")) return { name: "Kieselalge", wiki: W("Kieselalgen"), icon: "alga" };
       return { name: "Bakterie", wiki: W("Bakterien"), icon: "cell" };
     case "Protist":
+      if (has("leuchtend")) return { name: "Leuchtplankton", wiki: W("Meeresleuchten"), icon: "radiolarian" };
       if (has("geflügelt")) return { name: "Strahlentierchen", wiki: W("Radiolarien"), icon: "flower" };
       if (has("gliedmaßenreich")) return { name: "Pantoffeltierchen", wiki: W("Pantoffeltierchen"), icon: "worm" };
       return { name: "Amöbe", wiki: W("Amöben"), icon: "lichen" };

@@ -13,7 +13,7 @@ const AXES: { idx: number; hi: string; lo?: string; hiT: number; loT?: number }[
   { idx: 7, hi: "verholzt", hiT: 0.62 },
   { idx: 3, hi: "hochaktiv", lo: "träge", hiT: 0.72, loT: 0.18 },
   { idx: 2, hi: "gliedmaßenreich", hiT: 0.66 },
-  { idx: 9, hi: "grabend", hiT: 0.55 },
+  { idx: 9, hi: "leuchtend", hiT: 0.5 },
 ];
 
 export function kingdomOf(g: number[]): string {

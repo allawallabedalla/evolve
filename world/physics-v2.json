@@ -9,7 +9,8 @@
     "photosynthesis",
     "mobility",
     "structure",
-    "wing"
+    "wing",
+    "biolum"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -44,6 +45,10 @@
   "aquaticWaterFloor": 0.5,
   "aquaticLimbDrag": 0.7,
   "aquaticArmorDrag": 0.5,
+  "biolumYield": 0.72,
+  "biolumMobFloor": 0.62,
+  "biolumDefense": 0.3,
+  "biolumDarkFloor": 0.3,
   "maintenance": {
     "base": 0.05,
     "size": 0.14,
@@ -53,7 +58,8 @@
     "photosynthesis": 0.14,
     "mobility": 0.15,
     "structure": 0.15,
-    "wing": 0.16
+    "wing": 0.16,
+    "biolum": 0.14
   },
   "maintenanceQuad": {
     "metabolism": 0.22,

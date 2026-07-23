@@ -505,7 +505,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.15.0";
+const APP_VERSION = "v0.16.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -513,14 +513,15 @@ const PHYS = {
   flightSizePenalty: 1.5, flightMetabFloor: 0.35, flightReach: 0.75, defenseFromFlight: 0.2,
   absorbYield: 1.3, absorbBase: 0.4, absorbMetabolism: 0.85, absorbWaterFloor: 0.3,
   aquaticYield: 1.4, aquaticBase: 0.4, aquaticWaterFloor: 0.5, aquaticLimbDrag: 0.7, aquaticArmorDrag: 0.5,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16 },
+  biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838],
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -600,6 +601,7 @@ const ICONS = {
   frog:`<ellipse cx="12" cy="14" rx="7" ry="4.5"/><circle cx="8.5" cy="9" r="2.4"/><circle cx="15.5" cy="9" r="2.4"/><g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M5 16l-3 3M19 16l3 3M8 18l-1 2M16 18l1 2"/></g>`,
   coral:`<g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M12 21V7M12 15c0-2-2-3-2-5M12 15c0-2 2-3 2-5M10 10c0-1.5-1.5-2-1.5-3.5M14 10c0-1.5 1.5-2 1.5-3.5"/></g><circle cx="12" cy="6.5" r="1.1"/><circle cx="8.3" cy="6" r="1.1"/><circle cx="15.7" cy="6" r="1.1"/>`,
   sponge:`<path fill-rule="evenodd" d="M5 10a7 6 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 8a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM14 9a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM11 13.5a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z"/>`,
+  jelly:`<path d="M5 11a7 6 0 0 1 14 0z"/><g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"><path d="M7.5 11.6c.2 3-.8 5-.4 8.4M11 12c-.1 3.6-.5 5.6 0 8.4M13 12c.1 3.6.5 5.6 0 8.4M16.5 11.6c-.2 3 .8 5 .4 8.4"/></g>`,
 };
 function ic(name, cls){ return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.dot}</svg>`; }
 // Archetyp-Name -> Icon-Schluessel (Namen exakt = classify().n)
@@ -613,13 +615,13 @@ const FICON = {
   "Flechte · Symbiose":"lichen","Hefe":"yeast",
   "Bakterie":"rod","Archaee · Extremophil":"flagellum","Protist · Amöbe":"amoeba",
   "Euglenoid · Mixotroph":"euglena","Plankton":"radiolarian",
-  "Schnecke · Weichtier":"snail","Kopffüßer · Tintenfisch":"octopus","Amphibie · Lurch":"frog",
+  "Schnecke · Weichtier":"snail","Kopffüßer · Tintenfisch":"octopus","Amphibie · Lurch":"frog","Leuchtwesen · Tiefsee":"jelly",
   "Koralle · Riffbildner":"coral","Schwamm":"sponge",
 };
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0]=t;
   const dT = insulation-(1-e.temperature);
   const thermal = 1-dT*dT;
   // Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
@@ -639,11 +641,15 @@ function fitness(t, e){
   const aquaHabitat = clamp01((e.water-PHYS.aquaticWaterFloor)/(1-PHYS.aquaticWaterFloor));
   const streamline = clamp01(1-limb*PHYS.aquaticLimbDrag-armor*PHYS.aquaticArmorDrag);
   const energyAquatic = PHYS.aquaticYield*mobility*e.foodAbundance*aquaHabitat*streamline*(PHYS.aquaticBase+(1-PHYS.aquaticBase)*metabolism)*(1-PHYS.exclusion*photo);
-  const total = energyPhoto+energyForage+energyAbsorb+energyAquatic;
+  // Biolumineszenz (AXIS-5): Leuchten lockt/beleuchtet Beute — nur im ECHTEN Dunkeln
+  // (unterhalb biolumDarkFloor; sonst überstrahlt Tageslicht das Leuchten).
+  const dark = clamp01((PHYS.biolumDarkFloor-e.light)/PHYS.biolumDarkFloor), glow = biolum*dark;
+  const energyGlow = PHYS.biolumYield*glow*(PHYS.biolumMobFloor+(1-PHYS.biolumMobFloor)*mobility)*e.foodAbundance*(1-PHYS.exclusion*photo);
+  const total = energyPhoto+energyForage+energyAbsorb+energyAquatic+energyGlow;
   const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
-  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight);
+  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense);
   const predSurv = 1-e.predation*(1-defense);
   return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition), PHYS.floor);
 }
@@ -673,7 +679,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0;
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -691,6 +697,8 @@ function classify(t){
 
   // ===== Reich TIERE — heterotroph + mobil =====
   if(mob>0.45 && photo<0.4){
+    // Biolumineszenz (AXIS-5): Leuchtorgan -> Tiefsee-Leuchtwesen (Anglerfisch/Qualle).
+    if(biolum>0.55)                       return {k:"Tier",n:"Leuchtwesen · Tiefsee",e:"🪼"};
     // Flug-Baupläne (AXIS-1): hohe Flügelfläche + leichter, waffenloser Körper.
     if(wing>0.5 && size<0.34 && armor<0.4){
       if(metab>0.7 && insul>0.62)         return {k:"Tier",n:"Flugsäuger · Fledermaus",e:"🦇"};
@@ -792,8 +800,9 @@ const BIOMES = [
   {n:"Plankton-See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
   {n:"Algen-Riff", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
+  {n:"Leuchtende Tiefe", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche"];
+const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
@@ -1420,7 +1429,16 @@ function drawCreature(g, time, a){
   const breath = reduceMotion ? 1 : 1 + 0.025*Math.sin(time*0.0016);
   const cx = CW/2;
   ctx.save();
-  ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
+  // Biolumineszenz (AXIS-5): leuchtende Wesen bekommen einen kräftigen, pulsierenden
+  // Cyan-Schein — sichtbar besonders in dunklen Umwelten.
+  const bl = g[9]||0;
+  if(bl>0.4){
+    const pulse = reduceMotion ? 1 : 0.75+0.25*Math.sin(time*0.003);
+    ctx.shadowColor = `rgba(120,232,255,${(0.35+0.5*bl*pulse).toFixed(3)})`;
+    ctx.shadowBlur = 24+bl*30*pulse;
+  } else {
+    ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
+  }
 
   const sessileAnimal = a.e==="🪸" || a.e==="🧽";   // Koralle / Schwamm: Tiere, aber bodenstaendig
   if(sessileAnimal){

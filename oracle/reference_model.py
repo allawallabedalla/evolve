@@ -31,8 +31,9 @@ TRAITS = [
     "mobility",
     "structure",
     "wing",
+    "biolum",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING = 0, 1, 2, 3, 4, 5, 6, 7, 8
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
 
 def _clamp01(x: float) -> float:
@@ -54,6 +55,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     mobility = traits[MOBILITY]
     structure = traits[STRUCTURE]
     wing = traits[WING]
+    biolum = traits[BIOLUM] if len(traits) > BIOLUM else 0.0
 
     # Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
     flight = (
@@ -121,7 +123,19 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["aquaticBase"] + (1.0 - phys["aquaticBase"]) * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic
+    # e) Biolumineszenz (AXIS-5): Leuchtorgan lockt/beleuchtet Beute, NUR im Dunkeln
+    #    (dark = 1-light). Nahrungs-Einkommen dort, wo Photo tot ist; aktive Koerper
+    #    nutzen es besser; heterotroph (schliesst Photo aus). Kosten: maintenance.biolum.
+    dark = _clamp01((phys["biolumDarkFloor"] - env["light"]) / phys["biolumDarkFloor"])
+    glow = biolum * dark
+    energy_glow = (
+        phys["biolumYield"]
+        * glow
+        * (phys["biolumMobFloor"] + (1.0 - phys["biolumMobFloor"]) * mobility)
+        * env["foodAbundance"]
+        * (1.0 - phys["exclusion"] * photo)
+    )
+    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]
@@ -135,6 +149,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + mobility * m["mobility"]
         + structure * m["structure"]
         + wing * m["wing"]
+        + biolum * m["biolum"]
         + metabolism * metabolism * mq["metabolism"]
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -149,6 +164,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + size * phys["defenseFromSize"]
         + mobility * phys["defenseFromMobility"]
         + flight * phys["defenseFromFlight"]
+        + biolum * dark * phys["biolumDefense"]
     )
     pred_survival = 1.0 - env["predation"] * (1.0 - defense)
 
