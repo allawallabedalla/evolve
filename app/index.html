@@ -166,14 +166,17 @@
   .genbook[hidden] { display: none; }
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
   .worldbtn { display: block; margin-top: 8px; }
-  .worldbtn .beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: var(--abyss); background: var(--bio); border-radius: 4px; padding: 1px 5px; font-weight: 700; }
+  .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: var(--abyss); background: var(--bio); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
   .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(3,8,8,.86); backdrop-filter: blur(7px); animation: fadein .3s ease; }
   .world[hidden] { display: none; }
-  .wl-card { width: min(96%, 940px); max-height: 90vh; overflow-y: auto; background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); }
+  /* Feste Höhe + interner Scroll: die Karte darf NICHT ihre Größe ändern, sonst
+     zentriert place-items:center sie neu und das ganze Modal springt (Jitter-Fix). */
+  .wl-card { width: min(96%, 940px); height: min(90vh, 660px); display: flex; flex-direction: column; overflow: hidden; background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .wl-head, .wl-sub { flex-shrink: 0; }
   .wl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .wl-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .wl-sub { color: var(--muted); font-size: .78rem; margin: 6px 0 12px; line-height: 1.55; }
-  .wl-grid { display: grid; grid-template-columns: 1fr 264px; gap: 16px; }
+  .wl-grid { display: grid; grid-template-columns: 1fr 264px; gap: 16px; flex: 1; min-height: 0; overflow-y: auto; align-content: start; }
   @media (max-width: 760px) { .wl-grid { grid-template-columns: 1fr; } }
   .wl-map { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
   .wl-place { flex: 1 1 200px; min-width: 180px; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 11px 12px; cursor: pointer; transition: border-color .15s; }
@@ -185,7 +188,8 @@
   .wl-side { display: flex; flex-direction: column; gap: 14px; }
   .wl-panel { background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; }
   .wl-panel h3 { margin: 0 0 8px; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio); }
-  .wl-chronik li { list-style: none; font-size: .78rem; margin: 0 0 7px; padding: 0; color: var(--text); }
+  .wl-chronik li { list-style: none; font-size: .78rem; margin: 0 0 7px; padding: 0; color: var(--text); min-height: 2.7em; }
+  .wl-panel h3 .ic, .wl-title .ic { width: 1em; height: 1em; vertical-align: -.12em; margin-right: 5px; }
   .wl-chronik .pct { color: var(--gold); font-family: var(--mono); font-size: .72rem; }
   .wl-chronik .rar { font-size: .64rem; font-family: var(--mono); }
   .wl-chronik .pl { color: var(--muted); font-size: .66rem; }
@@ -407,29 +411,27 @@
   <div class="world" id="world" role="dialog" aria-modal="true" aria-label="Lebende Welt — Baum des Lebens" hidden>
     <div class="wl-card">
       <div class="wl-head">
-        <div class="wl-title">🌍 Lebende Welt <span style="font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;color:var(--abyss);background:var(--bio);border-radius:4px;padding:1px 5px;font-weight:700;vertical-align:middle;">Beta</span></div>
+        <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
         <button id="worldClose" class="link">schließen</button>
       </div>
-      <p class="wl-sub">Viele Orte, jeder geht seinen eigenen Weg. Arten entstehen als <b>Cluster</b> — nicht aus einer Tabelle, sondern aus Selektion, Isolation und Zufall. Wähle einen Ort und <b>provoziere</b> Evolution. Dein Wesen oben ist <b>eine</b> Linie in dieser Welt.</p>
+      <p class="wl-sub">Viele Orte, jeder geht seinen eigenen Weg. Arten entstehen als <b>Cluster</b> — nicht aus einer Tabelle, sondern aus Selektion und Zufall. Wähle einen Ort und <b>provoziere</b> seine Evolution. <span style="color:var(--muted)">Rauszoomen = der Baum des Lebens · reinzoomen = dein Wesen oben.</span></p>
       <div class="wl-grid">
         <div>
           <div class="wl-map" id="wlMap"><div class="wl-loading" id="wlLoading">Welt erwacht … (berechne emergente Rarität)</div></div>
           <div class="wl-panel" style="margin-top:14px">
-            <h3>🔧 Veränderung — Ort: <span id="wlSelName" style="color:var(--bio)">–</span></h3>
+            <h3 id="wlVerHead">Veränderung — Ort: <span id="wlSelName" style="color:var(--bio)">–</span></h3>
             <div class="wl-btns">
-              <button id="wlCat">☄️ Katastrophe</button>
-              <button id="wlWet">💧 feucht &amp; kühl</button>
-              <button id="wlDry">🔥 heiß &amp; trocken</button>
-              <button id="wlConnect">🔗 verbinden</button>
-              <button id="wlIsolate">✂️ trennen</button>
-              <button id="wlPause">⏸ Pause</button>
+              <button id="wlCat">Katastrophe</button>
+              <button id="wlWet">feucht &amp; kühl</button>
+              <button id="wlDry">heiß &amp; trocken</button>
+              <button id="wlPause">Pause</button>
             </div>
-            <p class="wl-hint">Klick auf einen Ort wählt ihn. „Katastrophe" setzt einen Ort zurück (Founder-Effekt); Klima-Regler provozieren neue Formen. Verbinden homogenisiert, trennen lässt divergieren.</p>
+            <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück — was danach nachwächst, ist ungewiss (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt dauerhaft und locken neue Formen hervor.</p>
           </div>
         </div>
         <div class="wl-side">
           <div class="wl-panel wl-chronik">
-            <h3>👁️ Chronik — Baum des Lebens</h3>
+            <h3 id="wlChronHead">Chronik — Baum des Lebens</h3>
             <ul id="wlChronik"></ul>
             <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = wie leicht eine Form entsteht (häufig … <span style="color:var(--gold)">legendär</span>).</p>
           </div>
@@ -480,6 +482,10 @@ const ICONS = {
   pause:`<rect x="7" y="5" width="3.6" height="14" rx="1"/><rect x="13.4" y="5" width="3.6" height="14" rx="1"/>`,
   egg:`<ellipse cx="12" cy="13.5" rx="6" ry="8"/>`,
   dna:`<g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M8 3c0 5 8 7 8 9s-8 4-8 9M16 3c0 5-8 7-8 9s8 4 8 9"/><path stroke-width="1.3" d="M9 6h6M9.5 9.2h5M9.5 14.8h5M9 18h6"/></g>`,
+  // Welt-Overlay
+  globe:`<g fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path stroke-width="1.4" d="M3 12h18M4.7 7.2h14.6M4.7 16.8h14.6"/></g>`,
+  meteor:`<circle cx="15.5" cy="8.5" r="3.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M10.5 12.5L4 19M13 8L6.5 14.5M9 12L5 16"/></g>`,
+  tune:`<g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g><g fill="var(--abyss)" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="7" r="2.3"/><circle cx="15" cy="12" r="2.3"/><circle cx="8" cy="17" r="2.3"/></g>`,
   // Pflanzen
   alga:`<circle cx="9" cy="10" r="3.2"/><circle cx="14.5" cy="8.3" r="2.7"/><circle cx="13.6" cy="13" r="2.5"/>`,
   moss:`<g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M6 20v-4M9 20v-6M12 20v-5M15 20v-6M18 20v-4"/></g><ellipse cx="12" cy="20.5" rx="8" ry="1.2"/>`,
@@ -1971,6 +1977,16 @@ document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
 playBtn.innerHTML = ic("pause");
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
+
+// Brücken für das entkoppelte Welt-Overlay-Modul (<script type=module> unten):
+// flaches Icon-System teilen und die Haupt-Sim anhalten, solange das Modal offen ist
+// (etabliertes Modal-Muster — kein Weiterlaufen der Zeit im Hintergrund).
+window.__ic = ic;
+window.__mainSim = {
+  pause(){ if(this._prev===undefined){ this._prev = running; running = false; } },
+  resume(){ if(this._prev!==undefined){ running = this._prev; this._prev = undefined; } },
+};
+
 boot();
 requestAnimationFrame(frame);
 </script>
@@ -1998,10 +2014,20 @@ try {
     ["Savanne",   { temperature:.7,  predation:.6,  foodAbundance:.6,  foodHeight:.3,  light:.7,  water:.4  }],
   ];
   const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio)", "selten":"#6fd0ff", "sehr selten":"#b98cff", "legendär":"var(--gold)" };
+  const ic = window.__ic || (() => "");
 
   const el = (id) => document.getElementById(id);
   const overlay = el("world");
   let world = null, rmap = null, sel = 0, paused = false, timer = null, booted = false;
+
+  // Flache Icons einsetzen (Icon-Policy: keine bunten Emoji) — einmalig beim Laden.
+  el("wlTitle").insertAdjacentHTML("afterbegin", ic("globe") + " ");
+  el("wlVerHead").insertAdjacentHTML("afterbegin", ic("tune") + " ");
+  el("wlChronHead").insertAdjacentHTML("afterbegin", ic("dna") + " ");
+  el("wlCat").innerHTML = ic("meteor") + " Katastrophe";
+  el("wlWet").innerHTML = ic("drop") + " feucht &amp; kühl";
+  el("wlDry").innerHTML = ic("flame") + " heiß &amp; trocken";
+  el("wlPause").innerHTML = ic("pause") + " Pause";
 
   function step() { if (!paused && world) { world.step(); render(); } }
 
@@ -2020,7 +2046,9 @@ try {
     map.querySelectorAll(".wl-place").forEach((n) => n.onclick = () => {
       sel = +n.dataset.i; el("wlSelName").textContent = world.places[sel].name; render();
     });
-    const sp = census(world, rmap ? { rarityMap: rmap } : {});
+    // Stabile Sortierung nach Identität (Schlüssel) statt nach schwankender Häufigkeit —
+    // so springen die Zeilen nicht (Jitter-Fix); nur Zahlen/Rarität aktualisieren sich.
+    const sp = census(world, rmap ? { rarityMap: rmap } : {}).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
     el("wlChronik").innerHTML = sp.map((s) => {
       const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
       return `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
@@ -2033,6 +2061,8 @@ try {
     const NG = phys.traits.length;
     world = new World({ phys, popConfig: { numGenes: NG }, seed: 20240808 });
     for (const [n, e] of BIOMES) world.addPlace(n, e);
+    // Schwache Nachbarschafts-Verbindung (etwas Genfluss, aber Divergenz bleibt) — fix,
+    // kein Nutzer-Hebel mehr (verbinden/trennen war unverständlich, später mit Metapher zurück).
     for (let i = 0; i + 1 < BIOMES.length; i++) world.connect(i, i+1, 0.02);
     // Emergente Rarität einmalig vorberechnen (Zufalls-Umwelt-Sweep), dann nur nachschlagen.
     rmap = rarityMap(phys, { samples: 50, gens: 120 });
@@ -2042,9 +2072,14 @@ try {
 
   function openWorld() {
     overlay.hidden = false;
-    boot().then(() => { if (!timer) timer = setInterval(step, 110); });
+    window.__mainSim?.pause();   // Hintergrund-Zeit anhalten, solange das Modal offen ist
+    boot().then(() => { if (!timer) timer = setInterval(step, 500); });   // ruhiges Tempo (~2/s)
   }
-  function closeWorld() { overlay.hidden = true; if (timer) { clearInterval(timer); timer = null; } }
+  function closeWorld() {
+    overlay.hidden = true;
+    if (timer) { clearInterval(timer); timer = null; }
+    window.__mainSim?.resume();
+  }
 
   el("worldBtn").addEventListener("click", openWorld);
   el("worldClose").addEventListener("click", closeWorld);
@@ -2054,9 +2089,7 @@ try {
   el("wlCat").addEventListener("click", () => { world?.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 }); render(); });
   el("wlWet").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } }); render(); });
   el("wlDry").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } }); render(); });
-  el("wlConnect").addEventListener("click", () => { if (world) for (let i=0;i+1<world.places.length;i++) world.connect(i,i+1,0.3); });
-  el("wlIsolate").addEventListener("click", () => { if (world) for (let i=0;i+1<world.places.length;i++) world.isolate(i,i+1); });
-  el("wlPause").addEventListener("click", (e) => { paused = !paused; e.target.textContent = paused ? "▶ Weiter" : "⏸ Pause"; });
+  el("wlPause").addEventListener("click", (e) => { paused = !paused; e.currentTarget.innerHTML = (paused ? ic("play") + " Weiter" : ic("pause") + " Pause"); });
 } catch (err) {
   console.error("Lebende Welt (Beta) konnte nicht geladen werden:", err);
   const b = document.getElementById("worldBtn"); if (b) b.style.display = "none";
