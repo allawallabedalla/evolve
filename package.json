@@ -19,6 +19,7 @@
     "rarity-check": "npm run build && node tools/rarity-check.mjs",
     "bundle-app": "npm run build && node tools/bundle-app-core.mjs",
     "app-world-smoke": "npm run bundle-app && node tools/app-world-smoke.mjs",
+    "exemplar-check": "node tools/exemplar-check.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"
   },

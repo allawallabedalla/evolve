@@ -193,6 +193,8 @@
   .wl-chronik .pct { color: var(--gold); font-family: var(--mono); font-size: .72rem; }
   .wl-chronik .rar { font-size: .64rem; font-family: var(--mono); }
   .wl-chronik .pl { color: var(--muted); font-size: .66rem; }
+  .wl-real { color: var(--bio-dim); font-size: .66rem; text-decoration: none; white-space: nowrap; }
+  .wl-real:hover { color: var(--bio); text-decoration: underline; }
   .wl-chronik ul { margin: 0; padding: 0; }
   .wl-btns { display: flex; flex-wrap: wrap; gap: 6px; }
   .wl-btns button { background: var(--chamber-2); color: var(--text); border: 1px solid var(--bio-dim); border-radius: 8px; padding: 6px 9px; font-size: .72rem; cursor: pointer; }
@@ -2005,6 +2007,7 @@ try {
   const { census } = await import("./core/world/census.js");
   const { describe } = await import("./core/world/describe.js");
   const { rarityMap } = await import("./core/world/rarity.js");
+  const { realExample } = await import("./exemplar.js");
 
   const BIOMES = [
     ["Eiszeit",   { temperature:.08, predation:.15, foodAbundance:.55, foodHeight:.15, light:.4,  water:.5  }],
@@ -2051,7 +2054,9 @@ try {
     const sp = census(world, rmap ? { rarityMap: rmap } : {}).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
     el("wlChronik").innerHTML = sp.map((s) => {
       const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
-      return `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
+      const ex = realExample(s.name);
+      const real = `<a class="wl-real" href="${ex.wiki}" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen">≈ ${ex.name} ↗</a>`;
+      return `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span> ${real}</li>`;
     }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
   }
 
