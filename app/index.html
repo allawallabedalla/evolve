@@ -216,6 +216,20 @@
   .reveal-body { font-size: .96rem; line-height: 1.6; color: var(--text); }
   .reveal-body b { color: var(--bio); font-weight: 700; }
   .reveal-body .arrow { font-family: var(--serif); font-style: italic; }
+  .reveal-forms { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 14px; }
+  .rf { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: .7rem; max-width: 112px; }
+  .rf-ic .ic { width: 2.5rem; height: 2.5rem; }
+  .rf-nm { line-height: 1.15; text-align: center; }
+  .rf-new { color: var(--bio); }
+  .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,230,176,.55)); }
+  .rf-arrow { color: var(--bio-dim); font-size: 1.4rem; }
+  /* ---- Onboarding-Startimpuls (A5) ---- */
+  .onboard { background: rgba(95,230,176,.08); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio); line-height: 1.5; }
+  .onboard[hidden] { display: none; }
+  .onboard b { color: var(--text); }
+  .biomes.hint .biome:first-child { border-color: var(--bio); animation: biomepulse 1.6s ease-in-out infinite; }
+  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(95,230,176,0); } 50%{ box-shadow: 0 0 0 4px rgba(95,230,176,.18); } }
+  @media (prefers-reduced-motion: reduce) { .biomes.hint .biome:first-child { animation: none; } }
   .reveal-x {
     margin-top: 16px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
     font-family: var(--sans); font-size: .85rem; font-weight: 600; color: #06201a;
@@ -269,6 +283,7 @@
     <!-- Konsole -->
     <div class="panel console">
       <h2>Umwelt formen</h2>
+      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — dein Wesen passt sich <b>live</b> an.</div>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
       <div class="controls">
@@ -744,6 +759,17 @@ gbBodyEl.addEventListener("mousemove", (e) => {
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
 });
 gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+// A5: Onboarding-Startimpuls fuer echte Erstbesucher.
+function dismissOnboard(){ const o=document.getElementById("onboard"); if(!o||o.hidden) return;
+  o.hidden=true; document.getElementById("biomes").classList.remove("hint");
+  try{ localStorage.setItem("evolve_seen","1"); }catch(e){} }
+function maybeOnboard(){
+  let hasSave=false, seen=false;
+  try{ hasSave=!!localStorage.getItem(STORAGE_KEY); seen=!!localStorage.getItem("evolve_seen"); }catch(e){}
+  if(seen || hasSave || session) return;   // nur wer noch nie hier war
+  document.getElementById("onboard").hidden=false;
+  document.getElementById("biomes").classList.add("hint");
+}
 // B6: "Über die Engine" ein-/ausklappen (Jargon nur auf Wunsch).
 document.getElementById("engineInfoBtn").addEventListener("click", (e) => {
   const d=document.getElementById("engineDetail"); const open=d.hidden;
@@ -810,19 +836,24 @@ async function restore(){
     if(s && Array.isArray(s.genome) && s.genome.length===8){ applyState(s); offlineCatchup(s.ts); }
   }
   updatePanels(); updateDisc();
+  maybeOnboard();
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
+  const changed = beforeA.n !== afterA.n;
+  // A6: prominente Vorher -> Nachher-Silhouetten-Zeile.
+  const formsRow = `<div class="reveal-forms">`+
+    `<span class="rf"><span class="rf-ic">${formIcon(beforeA.n)}</span><span class="rf-nm">${beforeA.n}</span></span>`+
+    `<span class="rf-arrow">→</span>`+
+    `<span class="rf ${changed?'rf-new':''}"><span class="rf-ic">${formIcon(afterA.n)}</span><span class="rf-nm">${afterA.n}</span></span>`+
+    `</div>`;
   const parts = [];
   parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
-  if(beforeA.n !== afterA.n){
-    parts.push(`<span class="arrow">Aus ${formIcon(beforeA.n)} ${beforeA.n} wurde ${formIcon(afterA.n)} ${afterA.n}.</span>`);
-  } else {
-    parts.push(`Immer noch ${formIcon(afterA.n)} <b>${afterA.n}</b> — aber im Detail verändert.`);
-  }
+  parts.push(changed ? `Aus <b>${beforeA.n}</b> wurde <b>${afterA.n}</b>.`
+                     : `Immer noch <b>${afterA.n}</b> — aber im Detail verändert.`);
   const deltas = afterG.map((x,i)=>({i, d:x-beforeG[i]})).filter(o=>Math.abs(o.d)>0.05)
     .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
   if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
-  document.getElementById("revealBody").innerHTML = parts.map(p=>`<div>${p}</div>`).join("");
+  document.getElementById("revealBody").innerHTML = formsRow + parts.map(p=>`<div>${p}</div>`).join("");
   document.getElementById("reveal").hidden = false;
 }
 // ---- Auth-UI ----
@@ -927,6 +958,7 @@ LEVERS.forEach(l => {
     env[l.key] = +ev.target.value;
     document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
     lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+    dismissOnboard();
   });
 });
 const biomesEl = document.getElementById("biomes");
@@ -936,6 +968,7 @@ BIOMES.forEach(b => {
     Object.assign(env, b.env);
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
+    dismissOnboard();
     // Kein Neustart: die laufende Evolution reagiert ab dem aktuellen Zustand.
   });
   biomesEl.appendChild(btn);
