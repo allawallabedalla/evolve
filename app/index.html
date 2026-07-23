@@ -142,8 +142,8 @@
   .login[hidden] { display: none; }
   .login-card { width: min(90%, 380px); background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
   .login-p { color: var(--muted); font-size: .85rem; line-height: 1.55; margin: 8px 0 16px; }
-  #loginEmail { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; }
-  #loginEmail:focus { outline: none; border-color: var(--bio-dim); }
+  #loginEmail, #loginPass { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; margin-bottom: 8px; }
+  #loginEmail:focus, #loginPass:focus { outline: none; border-color: var(--bio-dim); }
   .login-row { display: flex; gap: 8px; margin-top: 12px; }
   .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio); min-height: 1.2em; }
 
@@ -225,14 +225,16 @@
 
   <div class="login" id="login" hidden>
     <div class="login-card">
-      <div class="reveal-eyebrow">Geräte-Sync anmelden</div>
-      <p class="login-p">Gib deine E-Mail ein — wir schicken dir einen Anmelde-Link (kein Passwort). Dann folgt dein Wesen dir auf jedes Gerät.</p>
+      <div class="reveal-eyebrow">Geräte-Sync</div>
+      <p class="login-p">E-Mail + Passwort — dann folgt dein Wesen dir auf jedes Gerät. Dasselbe Passwort überall = dasselbe Wesen. Neu hier? Einfach „Konto erstellen".</p>
       <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" />
+      <input type="password" id="loginPass" placeholder="Passwort (min. 6 Zeichen)" autocomplete="current-password" />
       <div class="login-row">
-        <button id="loginSend" class="reveal-x">Link senden</button>
-        <button id="loginClose" class="ctrl">abbrechen</button>
+        <button id="loginIn" class="reveal-x">Einloggen</button>
+        <button id="loginUp" class="ctrl">Konto erstellen</button>
       </div>
       <div class="login-msg" id="loginMsg"></div>
+      <button id="loginClose" class="link" style="margin-top:10px">abbrechen</button>
     </div>
   </div>
 </div>
@@ -471,14 +473,28 @@ function updateAuthUI(){
     document.getElementById("signIn").addEventListener("click", () => { document.getElementById("login").hidden = false; document.getElementById("loginEmail").focus(); });
   }
 }
-document.getElementById("loginSend").addEventListener("click", async () => {
+async function doAuth(kind){
   const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value;
   const msg = document.getElementById("loginMsg");
-  if(!email){ msg.textContent = "Bitte E-Mail eingeben."; return; }
-  msg.textContent = "sende Link …";
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: location.href.split("#")[0] } });
-  msg.textContent = error ? ("Fehler: " + error.message) : "Prüf deine E-Mail — klick den Link, dann bist du auf jedem Gerät angemeldet.";
-});
+  if(!email || !pass){ msg.textContent = "E-Mail und Passwort eingeben."; return; }
+  if(pass.length < 6){ msg.textContent = "Passwort mindestens 6 Zeichen."; return; }
+  msg.textContent = kind === "up" ? "erstelle Konto …" : "melde an …";
+  const { data, error } = kind === "up"
+    ? await sb.auth.signUp({ email, password: pass })
+    : await sb.auth.signInWithPassword({ email, password: pass });
+  if(error){
+    msg.textContent = kind === "in" && /invalid login/i.test(error.message)
+      ? "E-Mail oder Passwort falsch. Neu hier? Dann Konto erstellen."
+      : "Fehler: " + error.message;
+    return;
+  }
+  if(!data.session){ msg.textContent = "Konto erstellt — jetzt einloggen."; return; }
+  msg.textContent = "angemeldet ✓";   // onAuthStateChange laedt das Wesen
+}
+document.getElementById("loginIn").addEventListener("click", () => doAuth("in"));
+document.getElementById("loginUp").addEventListener("click", () => doAuth("up"));
+document.getElementById("loginPass").addEventListener("keydown", (e) => { if(e.key === "Enter") doAuth("in"); });
 document.getElementById("loginClose").addEventListener("click", () => { document.getElementById("login").hidden = true; });
 sb.auth.onAuthStateChange((_event, s) => {
   const was = !!session; session = s;
