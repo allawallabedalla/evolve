@@ -460,6 +460,7 @@
     <div class="wl-card">
       <div class="wl-head">
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
+        <button id="wlReroll" class="link" title="Andere Welt würfeln — neue Orte" style="margin-right:14px">neue Welt</button>
         <button id="worldClose" class="link" title="Zurück zu deinem Wesen (reinzoomen)">↩ reinzoomen</button>
       </div>
       <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>provoziere</b> einen mit den Knöpfen und beobachte, was entsteht.</p>
@@ -504,7 +505,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.13.0";
+const APP_VERSION = "v0.14.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2294,27 +2295,35 @@ try {
     p.pop.seedFrom(pet.genome);
   }
 
-  async function boot() {
-    if (booted) return; booted = true;
-    const phys = await fetch("./core/physics-v2.json").then((r) => r.json());
-    const NG = phys.traits.length;
-    world = new World({ phys, popConfig: { numGenes: NG }, seed: (Math.random() * 4294967296) >>> 0 });
-    // Ort 0 = dein Wesen (aus dem echten Genom).
+  let PHYS2 = null, NG2 = 0;
+  // Eine (neue) Welt bauen: dein Wesen als Ort 0 + prozedural gezogene Orte, aufgewärmt.
+  function buildWorld() {
+    world = new World({ phys: PHYS2, popConfig: { numGenes: NG2 }, seed: (Math.random() * 4294967296) >>> 0 });
     const pet = petState();
     world.addPlace(petName(pet), pet ? pet.env : { temperature:.5, predation:.3, foodAbundance:.5, foodHeight:.2, light:.5, water:.6 }, 0.5, pet ? pet.genome : undefined);
-    // Prozedural gezogene Orte (Geografie × Klima × Isolation) — jede Welt einzigartig.
     const drawn = generatePlaces(5);
     for (const pl of drawn) world.addPlace(pl.name, pl.env);
-    // Nicht-isolierte Orte schwach untereinander verbinden (Kette); Inseln bleiben getrennt.
     const chain = drawn.map((pl, k) => ({ i: k + 1, iso: pl.isolated })).filter((x) => !x.iso).map((x) => x.i);
     for (let a = 0; a + 1 < chain.length; a++) world.connect(chain[a], chain[a + 1], 0.12);
-    // Aufwärmen: die Biome brauchen ~150 Generationen, um ihren je eigenen Weg zu gehen
-    // (allopatrische Divergenz). Vorlaufen lassen, damit die Welt bereits VIELFÄLTIG öffnet
-    // statt als lauter identische Generalisten. (Ort 0 wird beim Öffnen ohnehin neu gesetzt.)
+    // Aufwärmen: ~150 Generationen, damit jeder Ort schon VIELFÄLTIG öffnet (allopatr. Divergenz).
     for (let i = 0; i < 140; i++) world.step();
-    // Emergente Rarität einmalig vorberechnen (Zufalls-Umwelt-Sweep), dann nur nachschlagen.
-    rmap = rarityMap(phys, { samples: 50, gens: 120 });
+    gen = 0; evLog.length = 0; flash = null; evCooldown = 14; sel = PET;
+  }
+  async function boot() {
+    if (booted) return; booted = true;
+    PHYS2 = await fetch("./core/physics-v2.json").then((r) => r.json());
+    NG2 = PHYS2.traits.length;
+    buildWorld();
+    // Emergente Rarität einmalig vorberechnen (Landschafts-Eigenschaft, welt-unabhängig).
+    rmap = rarityMap(PHYS2, { samples: 50, gens: 120 });
     render();
+  }
+  // „Neue Welt": frisch würfeln (andere Orte), Wesen wieder als Ort 0 setzen.
+  function reroll() {
+    if (!booted) return;
+    buildWorld(); refreshPet();
+    el("wlSelName").textContent = world.places[PET].name;
+    render(); renderEvents(); renderSliders();
   }
 
   function openWorld() {
@@ -2338,6 +2347,8 @@ try {
     window.__mainSim?.resume();
   }
 
+  el("wlReroll").insertAdjacentHTML("afterbegin", ic("globe") + " ");
+  el("wlReroll").addEventListener("click", reroll);
   el("worldBtn").addEventListener("click", openWorld);
   el("worldClose").addEventListener("click", closeWorld);
   overlay.addEventListener("click", (e) => { if (e.target.id === "world") closeWorld(); });
