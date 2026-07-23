@@ -118,6 +118,9 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
 - [x] **Stufe 5** — biotische Interaktion: Räuber-Beute-Koevolution (`world/coevolution.ts`).
   `npm run coevolution-check`: mit Räubern **Red Queen** (kein Stillstand, zeitl. SD 10× höher
   als ohne), endogener Räuberdruck 0,28. Praedation ist jetzt *emergent*, kein Regler mehr.
-- [ ] Stufe 6: emergente Benennung/Darstellung; `describe.ts` → volles prozedurales Naming; `classify()` ablösen.
+- [x] **Stufe 6** — emergenter Arten-Zensus (`world/census.ts`): Arten = Cluster, prozedural benannt,
+  über Orte aggregiert (die „Chronik/Beobachten"-Ebene). `npm run census-check` (vielfältige Welt →
+  ≥3 benannte Arten inkl. Within-Place-Koexistenz; Verbindung senkt die Artenzahl). classify() am
+  Welt-Level abgelöst; Anschluss an die App-Darstellung ist Teil von Stufe 7.
 - Stufe 7: UI — „Veränderung"-Knopf (Zustand-Regler vs. Ereignis-Knopf), Zoom Pet↔Welt, Chronik.
 - Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.

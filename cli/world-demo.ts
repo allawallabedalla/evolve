@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { World } from "../world/world.js";
 import { describe } from "../world/describe.js";
+import { census, formatSpecies } from "../world/census.js";
 import type { Physics } from "../engine/types.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -65,9 +66,9 @@ function run() {
   for (let gen = 1; gen <= 150; gen++) world.step();
   console.log("  Ergebnis:       " + snapshot(world));
 
-  const forms = new Set(world.places.map((_, i) => formOf(world.mean(i))));
-  console.log(`\nEmergente Formen in der Welt: ${forms.size} verschiedene (${[...forms].join(", ")}).`);
-  console.log("Jeder Ort ging seinen eigenen Weg — Vielfalt aus Raum, Isolation und Ereignissen.");
+  console.log("\n=== Chronik: emergenter Baum des Lebens (Arten-Zensus) ===");
+  for (const s of census(world)) console.log("  • " + formatSpecies(s));
+  console.log("\nJeder Ort ging seinen eigenen Weg — Vielfalt aus Raum, Isolation und Ereignissen.");
 }
 
 run();
