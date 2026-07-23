@@ -15,6 +15,7 @@
     "branching-check": "npm run build && node tools/branching-check.mjs",
     "world-check": "npm run build && node tools/world-check.mjs",
     "coevolution-check": "npm run build && node tools/coevolution-check.mjs",
+    "census-check": "npm run build && node tools/census-check.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"
   },
