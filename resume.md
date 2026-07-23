@@ -127,6 +127,13 @@ geräteübergreifend mit Account.
   82 %→86 %, Parität weiter exakt. Neue Validierungs-Ebene „ökologische Plausibilität" eingeführt
   (`scratchpad`-Probes: landscape/eco/balance). Übrige seltene Zwischennischen (Fisch, Wurm, Moos,
   Farn, Schimmel) bleiben Drift-Fänge fürs Genbuch.
+- **Biodiversitäts-Referenz + Ökologie-Abgleich (Meilenstein).** Recherche „was hat die meisten
+  Arten hervorgebracht?" → `docs/biodiversity-reference.md` (Käfer/Coleoptera artenreichste Gruppe;
+  Tiere artenreichstes Reich nach *beschriebenen*, Pilze evtl. nach *geschätzten* Arten; Quellen).
+  **Kernpunkt:** Artenzahl ≠ Biomasse ≠ Nischen-Besetzung — unsere Engine misst Nischen-Besetzung
+  (~Ubiquität), NICHT Artenzahl (kein Speziations-Mechanismus). Daraus 6 falsifizierbare Kriterien
+  (C1–C6) in `tools/ecology-check.mjs` (`npm run ecology`, auch Teil von `npm run all`). Aktueller
+  Stand: alle 6 ✓ (Tier 38 %, Mikrobe 29 %, Pilz 22 %, Pflanze 7 %, Protist 4 %).
 
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
@@ -149,7 +156,11 @@ geräteübergreifend mit Account.
   HTTP-Server: `python3 -m http.server PORT --directory app`.
 - **Commits:** enden mit `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` und
   `Claude-Session: …`. Push mit Retry/Backoff.
-- **Pipeline:** `npm run all` (build+oracle+train), `npm run parity`, `npm run demo`, `npm run serve`.
+- **Pipeline:** `npm run all` (build+oracle+train+**ecology**), `npm run parity`, `npm run ecology`,
+  `npm run demo`, `npm run serve`. **Zwei Validierungs-Ebenen:** (1) `parity`+Orakel-Validität =
+  Dynamik-Treue Engine↔Orakel; (2) `ecology` = Struktur-Treue Engine↔REALITÄT
+  (`tools/ecology-check.mjs` vs `docs/biodiversity-reference.md`). Immer BEIDE prüfen — sonst
+  optimiert man gegen ein Orakel, das denselben Biologie-Fehler teilt.
 
 ## 9. Dateibaum (Kurz)
 ```
