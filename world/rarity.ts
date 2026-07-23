@@ -10,14 +10,14 @@ import { Population, mulberry32 } from "./population.js";
 import { formKey } from "./describe.js";
 import type { Environment, Physics } from "../engine/types.js";
 
-export type RarityTier = "häufig" | "gelegentlich" | "selten" | "sehr selten" | "legendär";
+export type RarityTier = "häufig" | "gelegentlich" | "selten" | "sehr selten" | "extrem selten";
 
 export function rarityTier(fraction: number): RarityTier {
   if (fraction >= 0.15) return "häufig";
   if (fraction >= 0.05) return "gelegentlich";
   if (fraction >= 0.02) return "selten";
   if (fraction > 0) return "sehr selten";
-  return "legendär";
+  return "extrem selten";
 }
 
 export interface RarityOptions {
