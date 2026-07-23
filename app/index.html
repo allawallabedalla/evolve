@@ -574,7 +574,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.28.0";
+const APP_VERSION = "v0.29.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -778,8 +778,11 @@ function classify(t){
 
   // ===== Reich TIERE — heterotroph + mobil =====
   if(mob>0.45 && photo<0.4){
-    // Biolumineszenz (AXIS-5): Leuchtorgan -> Tiefsee-Leuchtwesen (Anglerfisch/Qualle).
-    if(biolum>0.55)                       return {k:"Tier",n:"Leuchtwesen · Tiefsee",e:"🪼"};
+    // Biolumineszenz (AXIS-5) -> Tiefsee-Leuchtwesen (Anglerfisch/Qualle), aber NUR
+    // wenn stromlinienförmig (Tiefsee-Schwimmer). Ein beiniger/geflügelter Leuchter an
+    // dunklem Land (Glühwürmchen/Leuchtkäfer) fällt unten in seine Landform — sonst
+    // hieße ein Landtier fälschlich „Tiefsee".
+    if(biolum>0.55 && limb<0.3 && armor<0.35) return {k:"Tier",n:"Leuchtwesen · Tiefsee",e:"🪼"};
     // Flug-Baupläne (AXIS-1): hohe Flügelfläche + leichter, waffenloser Körper.
     if(wing>0.5 && size<0.34 && armor<0.4){
       if(metab>0.7 && insul>0.62)         return {k:"Tier",n:"Flugsäuger · Fledermaus",e:"🦇"};
