@@ -43,8 +43,13 @@ export function fitness(traits, env, phys) {
     // 1) Thermoregulation (universell): ideale Isolation = Kaelte.
     //    Quadratisch (glatter Peak, kein Knick) - verhindert das Ueberschwingen /
     //    die Oszillation der gradientenbasierten Engine bei mittlerer Temperatur.
+    //    Endothermie (Biologie-Audit): Fell HAELT Waerme, aber ohne metabolischen
+    //    "Ofen" gibt es kaum Koerperwaerme zu halten -> Kaelte-Anpassung braucht
+    //    Isolation UND Stoffwechsel (echte Warmblueter = Fell + hoher Stoffwechsel).
+    const endoFactor = phys.endothermyMetabFloor + (1 - phys.endothermyMetabFloor) * metabolism;
+    const effInsulation = insulation * endoFactor;
     const thermalIdeal = 1 - env.temperature;
-    const dT = insulation - thermalIdeal;
+    const dT = effInsulation - thermalIdeal;
     const thermal = 1 - dT * dT;
     // 2) Energie - zwei Strategien, gegenseitig ausschliessend.
     //    a) Photosynthese: braucht Licht UND Wasser.

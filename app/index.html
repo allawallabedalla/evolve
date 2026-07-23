@@ -473,9 +473,13 @@
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
   <p class="footnote" id="engineDetail" hidden>
-    Dieselbe Evolutions-Engine ist gegen ein wissenschaftliches Referenzmodell auf
-    <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die <b>Modell-Güte</b> (wie gut die
-    schlanke Browser-Engine das schwere Referenzmodell trifft), <b>keine Bewertung deines Wesens</b>.
+    Diese Hauptansicht zeigt die <b>Anpassungs-Bahn einer Linie</b> — die mittlere Form, auf die
+    sich eine ganze Population über Generationen zubewegt (eine geglättete Näherung, nicht ein
+    einzelnes Lebewesen). Echte Populationen mit <b>Streuung, Zufalls-Drift und Aufspaltung</b>
+    in mehrere Arten siehst du in der <b>Lebenden Welt</b>. Die Engine ist gegen ein
+    wissenschaftliches Referenzmodell auf <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die
+    <b>Modell-Güte</b> (wie gut die schlanke Browser-Engine das schwere Referenzmodell trifft),
+    <b>keine Bewertung deines Wesens</b>.
   </p>
 
   <div class="login" id="login" role="dialog" aria-modal="true" aria-label="Geräte-Sync — Login" hidden>
@@ -570,7 +574,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.24.0";
+const APP_VERSION = "v0.25.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -579,6 +583,7 @@ const PHYS = {
   absorbYield: 1.3, absorbBase: 0.4, absorbMetabolism: 0.85, absorbWaterFloor: 0.3,
   aquaticYield: 1.4, aquaticBase: 0.4, aquaticWaterFloor: 0.5, aquaticLimbDrag: 0.7, aquaticArmorDrag: 0.5,
   biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
+  endothermyMetabFloor: 0.5,
   maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
@@ -687,7 +692,10 @@ function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
   const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0]=t;
-  const dT = insulation-(1-e.temperature);
+  // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
+  // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
+  const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
+  const dT = insulation*endoFactor-(1-e.temperature);
   const thermal = 1-dT*dT;
   // Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
   const flight = wing*clamp01(1-size*PHYS.flightSizePenalty)*(PHYS.flightMetabFloor+(1-PHYS.flightMetabFloor)*metabolism);

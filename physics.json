@@ -39,6 +39,7 @@
   "biolumMobFloor": 0.62,
   "biolumDefense": 0.3,
   "biolumDarkFloor": 0.3,
+  "endothermyMetabFloor": 0.5,
   "maintenance": {
     "base": 0.05,
     "size": 0.22,
