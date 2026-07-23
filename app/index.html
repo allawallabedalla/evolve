@@ -129,6 +129,12 @@
   .ctrl:active { transform: translateY(1px); }
   .ctrl.play { font-size: 1rem; min-width: 44px; }
   .ctrl.newlife { margin-left: auto; }
+  /* B10: groessere Touch-Ziele auf Touch-Geraeten */
+  @media (pointer: coarse) {
+    .biome, .ctrl, .speed { min-height: 44px; }
+    .speed { padding: 10px 14px; }
+    .link { padding: 8px 4px; min-height: 40px; }
+  }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
   .speed { font-size: .78rem; color: var(--muted); background: transparent; border: none; border-radius: 7px; padding: 5px 9px; cursor: pointer; }
   .speed.active { background: var(--bio-dim); color: #06201a; font-weight: 700; }
@@ -587,7 +593,7 @@ const LEVERS = [
   {key:"temperature", ico:"temp", name:"Temperatur", lo:"kalt", hi:"heiß"},
   {key:"predation",   ico:"fang", name:"Räuberdruck", lo:"keine", hi:"extrem"},
   {key:"foodAbundance",ico:"grain", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
-  {key:"foodHeight",  ico:"height", name:"Nahrungs-/Lichthöhe", lo:"Boden", hi:"hoch"},
+  {key:"foodHeight",  ico:"height", name:"Höhe (Nahrung/Licht)", lo:"Boden", hi:"hoch"},
   {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"sonnig"},
   {key:"water",       ico:"drop", name:"Wasser", lo:"Dürre", hi:"feucht"},
 ];
@@ -875,6 +881,9 @@ async function doAuth(kind){
   if(!email || !pass){ msg.textContent = "E-Mail und Passwort eingeben."; return; }
   if(pass.length < 6){ msg.textContent = "Passwort mindestens 6 Zeichen."; return; }
   msg.textContent = kind === "up" ? "erstelle Konto …" : "melde an …";
+  const authBtns = [document.getElementById("loginIn"), document.getElementById("loginUp")];
+  authBtns.forEach(b => { if(b) b.disabled = true; });   // B13: kein Doppel-Submit
+  try {
   const { data, error } = kind === "up"
     ? await sb.auth.signUp({ email, password: pass })
     : await sb.auth.signInWithPassword({ email, password: pass });
@@ -899,6 +908,9 @@ async function doAuth(kind){
     msg.textContent = "Konto erstellt — jetzt einloggen."; return;
   }
   msg.textContent = "angemeldet ✓";   // onAuthStateChange laedt das Wesen
+  } finally {
+    authBtns.forEach(b => { if(b) b.disabled = false; });
+  }
 }
 document.getElementById("loginIn").addEventListener("click", () => doAuth("in"));
 document.getElementById("loginUp").addEventListener("click", () => doAuth("up"));
@@ -1020,8 +1032,10 @@ const playBtn = document.getElementById("playBtn");
 playBtn.addEventListener("click", () => {
   running = !running;
   playBtn.innerHTML = running ? ic("pause") : ic("play");
+  playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");   // B9: dynamisches Label
   document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
 });
+playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");
 const speedsEl = document.getElementById("speeds");
 [["langsam",3],["normal",8],["schnell",22]].forEach(([lbl,v]) => {
   const b=document.createElement("button"); b.className="speed"+(v===gensPerSec?" active":""); b.textContent=lbl;
