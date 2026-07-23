@@ -103,11 +103,19 @@ Biotik/Emergenz-Feinschliff (5–6) kommen darauf, wenn der Kern trägt.
 
 ## Fortschritt
 
-- [x] Phase 0 — Roadmap + Architektur
-- [ ] Phase 1 — Populations-Kern
-- [ ] Phase 2 — Frequenzabhängige Konkurrenz + Cluster
-- [ ] Phase 3 — Metapopulation
-- [ ] Phase 4 — Veränderung-Hebel + Demo + Realitäts-Check
+- [x] **Phase 0** — Roadmap + Architektur (`docs/rebuild-roadmap.md`, `architecture-v2.md`)
+- [x] **Phase 1** — Populations-Kern (`world/population.ts`) · `npm run pop-check` (|TS−Orakel| = 0,013)
+- [x] **Phase 2** — Frequenzabh. Konkurrenz + Cluster (`world/cluster.ts`) · `npm run branching-check` (Kontrolle 1 Modus, Konkurrenz 2 Modi, 2,9× Varianz)
+- [x] **Phase 3** — Metapopulation (`world/world.ts`) · `npm run world-check` (Divergenz 0,87 vs. Homogenisierung 0,31; Founder/Katastrophe → 0)
+- [x] **Phase 4** — Veränderung-Hebel + Demo + Realitäts-Check · `npm run world-demo`, `node tools/world-ecology-check.mjs` (C1 Arten-Areal, C2 Homogenisierung, C3 Gelegenheit ✓)
 
-*(Wird beim Abarbeiten aktualisiert. Prototyp lebt in `world/` + `tools/*-check.mjs`;
-die Live-App bleibt unberührt.)*
+**Fundament (Stufen 1–4) steht — headless, getestet, dokumentiert. Live-App unberührt.**
+
+Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-demo.ts`,
+`tools/{pop,branching,world}-check.mjs`, `tools/world-ecology-check.mjs`.
+
+### Nächste Stufen (später)
+- Stufe 5: biotische Interaktionen zwischen koexistierenden Arten (Räuber emergent).
+- Stufe 6: emergente Benennung/Darstellung; `describe.ts` → volles prozedurales Naming; `classify()` ablösen.
+- Stufe 7: UI — „Veränderung"-Knopf (Zustand-Regler vs. Ereignis-Knopf), Zoom Pet↔Welt, Chronik.
+- Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.

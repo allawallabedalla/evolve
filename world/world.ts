@@ -21,6 +21,12 @@ export interface Place {
   pop: Population;
 }
 
+/** „Ereignis auslösen" — die Ereignis-Typen des Veränderung-Backends. */
+export type WorldEvent =
+  | { type: "catastrophe"; survivorFraction?: number }
+  | { type: "colonize"; from: number; founders?: number }
+  | { type: "climateShift"; to: Partial<Environment> };
+
 export interface WorldConfig {
   phys: Physics;
   popConfig?: Partial<PopulationConfig>;
@@ -75,6 +81,24 @@ export class World {
   /** „Zustand ändern" — Umwelt-Regler eines Orts anpassen (provozieren). */
   setEnv(i: number, partial: Partial<Environment>): void {
     this.places[i].env = { ...this.places[i].env, ...partial };
+  }
+
+  /**
+   * „Ereignis auslösen" — der eine Backend-Einstiegspunkt fürs spätere
+   * Veränderung-UI (Ereignis-Knopf). Dispatcht auf die konkreten Aktionen.
+   */
+  triggerEvent(placeIdx: number, ev: WorldEvent): void {
+    switch (ev.type) {
+      case "catastrophe":
+        this.catastrophe(placeIdx, ev.survivorFraction ?? 0.05);
+        break;
+      case "colonize":
+        this.colonize(ev.from, placeIdx, ev.founders ?? 5);
+        break;
+      case "climateShift":
+        this.setEnv(placeIdx, ev.to);
+        break;
+    }
   }
 
   /** Ein Welt-Schritt: lokale Evolution, dann Migration. */
