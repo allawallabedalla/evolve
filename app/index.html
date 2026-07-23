@@ -226,6 +226,10 @@
   .wl-chronik .pl { color: var(--muted); font-size: .66rem; }
   .wl-real { color: var(--bio-dim); font-size: .66rem; text-decoration: none; white-space: nowrap; }
   .wl-real:hover { color: var(--bio); text-decoration: underline; }
+  .wl-chron-toggle { float: right; font-size: .58rem; background: var(--chamber-2); color: var(--bio-dim); border: 1px solid var(--bio-dim); border-radius: 6px; padding: 1px 6px; cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 600; }
+  .wl-chron-toggle:hover { color: var(--bio); border-color: var(--bio); }
+  #wlTree svg { width: 100%; height: auto; display: block; }
+  #wlTree text { font-family: system-ui, sans-serif; }
   .wl-chronik ul { margin: 0; padding: 0; }
   .wl-btns { display: flex; flex-wrap: wrap; gap: 6px; }
   .wl-btns button { background: var(--chamber-2); color: var(--text); border: 1px solid var(--bio-dim); border-radius: 8px; padding: 6px 9px; font-size: .72rem; cursor: pointer; }
@@ -491,8 +495,9 @@
             <ul id="wlEvLog"><li class="wl-ev-empty">— die Welt ist ruhig … Ereignisse geschehen von selbst —</li></ul>
           </div>
           <div class="wl-panel wl-chronik">
-            <h3 id="wlChronHead">Chronik — Baum des Lebens</h3>
+            <h3 id="wlChronHead">Chronik — Baum des Lebens <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Verwandtschafts-Baum wechseln">Baum ⇄</button></h3>
             <ul id="wlChronik"></ul>
+            <div id="wlTree" hidden></div>
             <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = wie leicht eine Form entsteht (häufig … <span style="color:var(--gold)">legendär</span>).</p>
           </div>
         </div>
@@ -505,7 +510,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.16.0";
+const APP_VERSION = "v0.17.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2151,6 +2156,7 @@ try {
   const overlay = el("world");
   const PET = 0; // Ort-Index deiner Linie
   let world = null, rmap = null, sel = 0, paused = false, timer = null, booted = false, closeTimer = null;
+  let chronMode = "list";            // Chronik-Ansicht: Liste oder Verwandtschafts-Baum
   let gen = 0, evCooldown = 14;      // Welt-Generation im Overlay + Vorlauf bis zum 1. Ereignis
   const evLog = [];                  // jüngste Ereignisse (max 5)
   let flash = null;                  // {idx, tone, ticks} — kurzes Aufblitzen am betroffenen Ort
@@ -2267,12 +2273,62 @@ try {
     // Stabile Sortierung nach Identität (Schlüssel) statt nach schwankender Häufigkeit —
     // so springen die Zeilen nicht (Jitter-Fix); nur Zahlen/Rarität aktualisieren sich.
     const sp = census(world, rmap ? { rarityMap: rmap } : {}).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
-    el("wlChronik").innerHTML = sp.map((s) => {
-      const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
-      const ex = realExample(s.name);
-      const real = `<a class="wl-real" href="${ex.wiki}" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen">≈ ${ex.name} ↗</a>`;
-      return `<li><span class="wl-cre-sm">${ic(ex.icon)}</span> ${s.name} ${real} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
-    }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
+    renderChron(sp);
+  }
+
+  const KCOL = { Tier:"#5fe6b0", Pflanze:"#7fd06f", Pilz:"#c9a24b", Mikrobe:"#6fd0ff", Protist:"#b98cff" };
+  function renderChron(sp) {
+    const ul = el("wlChronik"), tree = el("wlTree");
+    if (chronMode === "tree" && sp.length >= 2) {
+      ul.hidden = true; tree.hidden = false;
+      try { tree.innerHTML = dendrogram(sp); } catch (e) { chronMode = "list"; ul.hidden = false; tree.hidden = true; }
+    }
+    if (chronMode !== "tree" || sp.length < 2) {
+      tree.hidden = true; ul.hidden = false;
+      ul.innerHTML = sp.map((s) => {
+        const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
+        const ex = realExample(s.name);
+        const real = `<a class="wl-real" href="${ex.wiki}" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen">≈ ${ex.name} ↗</a>`;
+        return `<li><span class="wl-cre-sm">${ic(ex.icon)}</span> ${s.name} ${real} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
+      }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
+    }
+  }
+
+  // Verwandtschafts-Baum (Dendrogramm) der emergenten Arten aus Genom-Ähnlichkeit:
+  // agglomeratives Clustern (nächste Centroide zuerst verschmelzen, UPGMA-artig).
+  const vmean = (list) => { const L = list[0].length, o = new Array(L).fill(0); for (const g of list) for (let k = 0; k < L; k++) o[k] += g[k] / list.length; return o; };
+  const vdist = (a, b) => { let d = 0; for (let k = 0; k < a.length; k++) { const x = a[k] - b[k]; d += x * x; } return Math.sqrt(d); };
+  function dendrogram(sp) {
+    let nodes = sp.map((s) => ({ leaf: true, s, h: 0, c: s.centroid }));
+    while (nodes.length > 1) {
+      let bi = 0, bj = 1, bd = Infinity;
+      for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+        const d = vdist(nodes[i].c, nodes[j].c); if (d < bd) { bd = d; bi = i; bj = j; }
+      }
+      const a = nodes[bi], b = nodes[bj];
+      const merged = { leaf: false, left: a, right: b, h: bd, c: vmean([a.c, b.c]) };
+      nodes = nodes.filter((_, k) => k !== bi && k !== bj); nodes.push(merged);
+    }
+    const root = nodes[0];
+    const leaves = []; (function ord(n) { if (n.leaf) leaves.push(n); else { ord(n.left); ord(n.right); } })(root);
+    const rowH = 30, W = 300, padR = 205, padL = 6, H = leaves.length * rowH, maxH = root.h || 1;
+    leaves.forEach((lf, i) => { lf.y = i * rowH + rowH / 2; lf.x = W - padR; });
+    (function pos(n) { if (n.leaf) return; pos(n.left); pos(n.right); n.y = (n.left.y + n.right.y) / 2; n.x = (W - padR) - (n.h / maxH) * (W - padR - padL); })(root);
+    let paths = "", labels = "";
+    (function draw(n) { if (n.leaf) return;
+      paths += `<path d="M${n.x.toFixed(1)} ${n.left.y} H${n.left.x.toFixed(1)} M${n.x.toFixed(1)} ${n.right.y} H${n.right.x.toFixed(1)} M${n.x.toFixed(1)} ${n.left.y} V${n.right.y}" fill="none" stroke="var(--bio-dim)" stroke-width="1.2"/>`;
+      draw(n.left); draw(n.right);
+    })(root);
+    for (const lf of leaves) {
+      const col = KCOL[lf.s.kingdom] || "var(--muted)";
+      // Kompaktes Etikett: Reich + bis zu 2 Merkmale (voller Name in der Liste).
+      const parts = lf.s.name.split(" · ");
+      const traits = (parts[1] || "").split(", ").slice(0, 2).join(", ");
+      const nm = `${parts[0]}${traits ? " · " + traits : ""}`.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      labels += `<circle cx="${(lf.x + 6).toFixed(1)}" cy="${lf.y}" r="3" fill="${col}"/>` +
+        `<text x="${(lf.x + 13).toFixed(1)}" y="${lf.y + 3.5}" fill="var(--text)" font-size="10">${nm}</text>`;
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMin meet">${paths}${labels}</svg>`;
   }
 
   // Prozedurale Orte: ein Ort = gezogener RAHMEN aus Geografie × Klima. Die Geografie
@@ -2380,6 +2436,11 @@ try {
 
   el("wlReroll").insertAdjacentHTML("afterbegin", ic("globe") + " ");
   el("wlReroll").addEventListener("click", reroll);
+  el("wlChronToggle").addEventListener("click", () => {
+    chronMode = chronMode === "tree" ? "list" : "tree";
+    el("wlChronToggle").textContent = chronMode === "tree" ? "Liste ⇄" : "Baum ⇄";
+    render();
+  });
   el("worldBtn").addEventListener("click", openWorld);
   el("worldClose").addEventListener("click", closeWorld);
   overlay.addEventListener("click", (e) => { if (e.target.id === "world") closeWorld(); });
