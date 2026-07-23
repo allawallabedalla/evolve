@@ -163,6 +163,12 @@ geräteübergreifend mit Account.
 - **Backlog-Idee dokumentiert:** Entstehungswahrscheinlichkeit als Rarität/Unlock-Achse
   (`BACKLOG.md` → Gamification-Ideen) — nutzt die `reachable`-Daten (attractor/drift); sanfte Gates,
   kein Grind-Zwang.
+- **UX-Feinschliff-Bündel (erledigt).** Fast alle offenen Live-App-Backlog-Punkte abgearbeitet:
+  A3 Vitalitätsanzeige (`fitness(g,env)`, live), A4 Bindung (Name + Ahnenlinie + Nachkomme),
+  A5 Onboarding, A6 Reveal-Silhouette, B4 a11y (aria/Escape), B5 reduced-motion (Canvas),
+  B6 Fußzeilen-Jargon → „ⓘ Über die Engine", B7 Sync-Status im Header, B9–B14 (Play-Label,
+  Touch-Ziele, Login-Disabled, Copy), CLS-3 (Gen-Balken je Reich gedimmt). Backlog aktualisiert.
+  **Offen bleibt bewusst nur BAL-5** (Verteilung entzerren — Physik → Re-Validierung nötig).
 
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —

@@ -52,27 +52,34 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - UX-Quick-Wins: Entdeckungs-Toast, lo/hi-Regler-Labels, „Neues Leben"-Rückfrage,
   Passwort-Reset, Auto-Login-Fallback.
 
+### UX-Feinschliff (Session 2026-07)
+- **A3 · Live-Vitalitätsanzeige** aus `fitness(genome, env)` — Balken + Wort (kämpft/…/blüht auf);
+  reagiert sofort auf Regler (Nahrung→0 = 0 %). Macht Ursache→Wirkung spürbar.
+- **A4 · Bindung**: Wesen benennen (persistiert, Cloud-`name`-Spalte + lokal), „Neues Leben"
+  als Nachkomme (Ahnenlinie überlebt), Ahnen-Breadcrumb in der Karte. *(deckt UX-3)*
+- **A5 · Onboarding**: Erstbesucher-Hinweis + pulsierender Biom-Chip, weg bei 1. Interaktion.
+- **A6 · Reveal-Silhouette**: prominente Vorher→Nachher-Silhouetten im „Willkommen zurück". *(UX-4)*
+- **B4 · a11y**: `role="dialog"`+aria an Overlays, aria-Labels, `aria-live`-Toast, Escape schließt.
+- **B5 ·** `prefers-reduced-motion` beruhigt den Canvas (kein Atem/Partikel).
+- **B6 · Fußzeile** entschlackt; Jargon hinter „ⓘ Über die Engine". *(deckt UX-2)*
+- **B7 · Sync-Status** im Header (Biom-Tag zeigt wieder die echte Umwelt).
+- **B9–B14**: Play-Label dynamisch, Touch-Ziele ≥44 px (coarse pointer), Login-Disabled-State,
+  Copy „Höhe (Nahrung/Licht)".
+- **CLS-3 · Gen-Balken** je Reich kontextabhängig gedimmt.
+
 ---
 
-## ⬜ Offen — Live-App (priorisiert)
+## ⬜ Offen — Live-App
 
-- **A3 · Live-Vitalitätsanzeige** (aus `fitness(genome, env)`) → Ursache→Wirkung sofort spürbar.
-- **A4 · Bindung**: Wesen benennen, Ahnenlinie/Meilenstein-Historie, „Neues Leben" als Nachkomme.
-  *(deckt die alten Funde UX-3 „keine Bindung" ab)*
-- **A5 · Onboarding**-Startimpuls (Biom-Chip pulsiert + Hinweis beim 1. Besuch).
-- **A6 · Reveal-Silhouette**: Vorher/Nachher im „Willkommen zurück". *(deckt UX-4 „Kipppunkte
-  unsichtbar" ab — „schon bei Nahrung 0.60 wäre es … geworden")*
-- **B4 · a11y**: aria-Labels an Login-Feldern, `role="dialog"` + Escape an Overlays, `aria-live`.
-- **B5 ·** `prefers-reduced-motion` stoppt auch den Canvas (Atem/Motes), nicht nur CSS.
-- **B6 · Fußzeile**: „Mockup"/„~86 %"-Jargon raus → optionales „ⓘ Über die Engine".
-  *(deckt UX-2 „Validitäts-Balken verwirrt" ab)*
-- **B7 · Sync-Status** in den Header (statt den Biom-Tag mit „Cloud-Welt" zu überschreiben).
-- **B9–B14 · Kleinkram**: Play-Label dynamisch, Touch-Ziele ≥44 px, Kontrast, autocomplete,
-  Login-Disabled-State, Copy „Nahrungs-/Lichthöhe".
-- **CLS-3 · Gen-Balken kontextabhängig filtern** (Pflanze zeigt irrelevanten Gliedmaßen-Balken).
-- **BAL-5 / CLS-4 · Verteilung entzerren**: 🐢 „Gepanzertes Beutetier" dominiert die Mitte;
-  einige Formen hängen an schmalen Größenfenstern. Weichere Übergänge / mehr Zwischenformen.
-  *(Die Stabilitäts-Hysterese hat das „fühlt sich nach Glück an" schon gemildert.)*
+Fast alle UX-/Gamification-Punkte sind erledigt (s. „Erledigt" → UX-Feinschliff). Offen bleibt:
+
+- **BAL-5 / CLS-4 · Verteilung entzerren**: 🐢 „Gepanzertes Beutetier" dominiert die mittleren
+  Einstellungen; einige Formen hängen an schmalen Größenfenstern. Weichere Übergänge /
+  mehr Zwischenformen. **Physik-Änderung → Re-Validierung nötig** (`parity` + `ecology`),
+  daher bewusst zurückgestellt. *(Die Stabilitäts-Hysterese hat das „fühlt sich nach Glück an"
+  schon spürbar gemildert.)*
+- Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte; Inline-Namensfeld
+  statt `prompt()`); B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
 
 ---
 
