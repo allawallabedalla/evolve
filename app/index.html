@@ -574,7 +574,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.27.0";
+const APP_VERSION = "v0.28.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -698,15 +698,20 @@ function fitness(t, e){
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
   const dT = insulation*endoFactor-(1-e.temperature);
   const thermal = 1-dT*dT;
-  // Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
-  const flight = wing*clamp01(1-size*PHYS.flightSizePenalty)*(PHYS.flightMetabFloor+(1-PHYS.flightMetabFloor)*metabolism);
+  // „An Land" (0..1): 1 außerhalb tiefen Wassers, 0 im offenen Wasser. Landjagd UND
+  // Flug sind terrestrisch/aerisch — unter Wasser jagt man schwimmend (aquatisch).
+  const landFactor = 1-clamp01((e.water-PHYS.aquaticWaterFloor)/(1-PHYS.aquaticWaterFloor));
+  // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Unter Wasser kein Flug.
+  const flight = wing*clamp01(1-size*PHYS.flightSizePenalty)*(PHYS.flightMetabFloor+(1-PHYS.flightMetabFloor)*metabolism)*landFactor;
   const structureLight = PHYS.structureLightFloor+(1-PHYS.structureLightFloor)*e.foodHeight;
   const lightAccess = PHYS.lightAccessBase+(1-PHYS.lightAccessBase)*structure*structureLight;
   const photoSize = PHYS.photoSizeFloor+(1-PHYS.photoSizeFloor)*size;
   // Temperatur-Abhängigkeit (Biologie-Audit): Photosynthese hat ein Optimum; Kälte/Hitze senken sie.
   const _dtp = e.temperature-PHYS.photoTempOpt, photoThermal = clamp01(1-PHYS.photoTempStrength*_dtp*_dtp);
   const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*photoThermal*(1-PHYS.exclusion*mobility);
-  const reach = clamp01(limb*PHYS.reachFromLimb+size*PHYS.reachFromSize+flight*PHYS.flightReach);
+  // Biologie-Audit: Gliedmaßen erschließen hohes Futter nur an LAND (limb*landFactor).
+  // Unter Wasser schwimmt man hinauf — kein Tiefsee-Wesen mit langen Beinen/Flügeln.
+  const reach = clamp01(limb*PHYS.reachFromLimb*landFactor+size*PHYS.reachFromSize+flight*PHYS.flightReach);
   const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
   const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*(1-PHYS.exclusion*photo);
   // Absorption/Zersetzung (Osmotrophie): sessile Heterotrophie (Pilze/Mikroben).
@@ -838,7 +843,12 @@ function describe(t){
     if(struct>0.55 && size>0.4) parts.push("tragender Stamm");
     parts.push("Wurzelwerk");
   } else if(animal){
-    const legs=Math.round(clamp01(0.6*mob+0.4*limb)*8); if(legs>0) parts.push(legs+(limb>0.55?" lange Beine":" kurze Extremitäten"));
+    // Beine kommen aus den GLIEDMASSEN (limb), nicht aus der Mobilität — ein
+    // stromlinienförmiger Schwimmer (viel mob, wenig limb) hat keine Beine, sondern Flossen.
+    const swimmer = limb<0.25 && mob>0.55 && armor<0.4;
+    const legs=Math.round(limb*8);
+    if(swimmer) parts.push("flossenartige Fortsätze");
+    else if(legs>0) parts.push(legs+(limb>0.55?" lange Beine":" kurze Beine"));
     if(limb>0.5 && metab>0.4) parts.push("Greifwerkzeuge");
     if(armor>0.6) parts.push("Stacheln");
   } else if(fungus){
@@ -850,7 +860,7 @@ function describe(t){
     parts.push(struct<0.3?"nackte Einzelzelle":"Zellwand");
     if(metab>0.5) parts.push("aktiver Stoffwechsel");
   } else parts.push("Geißel + Chloroplast");
-  const loco = (plant||fungus)?"sessil":microbe?(mob>0.3?"driftend":"anhaftend"):mob<0.3?"kaum beweglich":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
+  const loco = (plant||fungus)?"sessil":microbe?(mob>0.3?"driftend":"anhaftend"):mob<0.3?"kaum beweglich":(limb<0.25&&mob>0.55&&armor<0.4)?"Schwimmer":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
   const energy = plant?"Photosynthese":animal?"Jäger/Sammler":fungus?"Zersetzer (Saprotroph)":protist?"Mischform (Photo + Beute)":"Absorption";
   return `${sz}, ${cover.join(" + ")}. ${parts.join(", ")}. Energie: ${energy}. Fortbewegung: ${loco}.`;
 }
