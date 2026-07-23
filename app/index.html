@@ -90,6 +90,13 @@
   .species-wiki:hover { color: var(--bio); text-decoration: underline; }
   .species .emoji { font-style: normal; font-size: 1.5rem; }
   .bauplan { color: var(--muted); font-size: .9rem; }
+  .how { margin-top: 8px; }
+  .how > summary { cursor: pointer; font-size: .74rem; color: var(--bio-dim); list-style: none; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
+  .how > summary::-webkit-details-marker { display: none; }
+  .how > summary::before { content: "▸ "; }
+  .how[open] > summary::before { content: "▾ "; }
+  .how > summary:hover { color: var(--bio); }
+  .how p { color: var(--text); font-size: .82rem; line-height: 1.55; margin: 8px 0 2px; }
 
   /* ---- Name & Ahnenlinie (A4) ---- */
   .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
@@ -399,15 +406,19 @@
         <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
         <div class="kingdom" id="kingdom">—</div>
         <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
-        <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
+        <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
+        <details class="how">
+          <summary>So funktioniert's</summary>
+          <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
+        </details>
         <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
-          <span class="vit-label" id="vitLabel">Vitalität</span>
+          <span class="vit-label" id="vitLabel">Passung zur Umwelt</span>
           <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
           <span class="vit-num" id="vitNum">—</span>
         </div>
         <div class="genes" id="genes"></div>
         <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
-        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, ein emergenter Baum des Lebens">🌍 Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
+        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, viele Arten">🌍 Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
         <div class="ancestry" id="ancestryRow" hidden></div>
       </div>
     </div>
@@ -415,7 +426,7 @@
     <!-- Konsole -->
     <div class="panel console">
       <h2>Umwelt formen</h2>
-      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — dein Wesen passt sich <b>live</b> an.</div>
+      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
       <div class="controls">
@@ -468,14 +479,14 @@
     </div>
   </div>
 
-  <div class="world" id="world" role="dialog" aria-modal="true" aria-label="Lebende Welt — Baum des Lebens" hidden>
+  <div class="world" id="world" role="dialog" aria-modal="true" aria-label="Lebende Welt — Arten & Ähnlichkeits-Baum" hidden>
     <div class="wl-card">
       <div class="wl-head">
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
         <button id="wlReroll" class="link" title="Andere Welt würfeln — neue Orte" style="margin-right:14px">neue Welt</button>
         <button id="worldClose" class="link" title="Zurück zu deinem Wesen (reinzoomen)">↩ reinzoomen</button>
       </div>
-      <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>provoziere</b> einen mit den Knöpfen und beobachte, was entsteht.</p>
+      <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>stör</b> einen mit den Knöpfen und sieh, welche Formen sich durchsetzen.</p>
       <div class="wl-grid">
         <div>
           <div class="wl-map" id="wlMap"><div class="wl-loading" id="wlLoading">Welt erwacht … (berechne emergente Rarität)</div></div>
@@ -489,11 +500,11 @@
               <button id="wlIsolate">als Insel abtrennen</button>
               <button id="wlPause">Pause</button>
             </div>
-            <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt und locken neue Formen. <b>Verbinden</b> lässt Nachbar-Orte Wesen austauschen — sie gleichen sich an; eine <b>Insel</b> geht ihren eigenen Weg (Artbildung durch Isolation).</p>
+            <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt — andere Formen setzen sich jetzt durch. <b>Verbinden</b> lässt Nachbar-Orte Wesen austauschen — sie gleichen sich an; eine <b>Insel</b> geht ihren eigenen Weg (Artbildung durch Isolation).</p>
             <details class="wl-fine">
               <summary id="wlFineSummary">feineinstellen — die einzelnen Umwelt-Regler dieses Orts</summary>
               <div class="wl-sliders" id="wlSliders"></div>
-              <p class="wl-hint">Jeder Regler verschiebt die Umwelt <b>dauerhaft</b> — das Wesen dort passt sich über die nächsten Generationen an.</p>
+              <p class="wl-hint">Jeder Regler verschiebt die Umwelt <b>dauerhaft</b> — dort setzen sich über die nächsten Generationen andere Formen durch.</p>
             </details>
           </div>
         </div>
@@ -503,7 +514,7 @@
             <ul id="wlEvLog"><li class="wl-ev-empty">— die Welt ist ruhig … Ereignisse geschehen von selbst —</li></ul>
           </div>
           <div class="wl-panel wl-chronik">
-            <h3 id="wlChronHead">Chronik — Baum des Lebens <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Verwandtschafts-Baum wechseln">Baum ⇄</button></h3>
+            <h3 id="wlChronHead">Chronik — Arten <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Ähnlichkeits-Baum wechseln">Baum ⇄</button></h3>
             <ul id="wlChronik"></ul>
             <div id="wlTree" hidden></div>
             <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = wie leicht eine Form entsteht (häufig … <span style="color:var(--gold)">legendär</span>).</p>
@@ -518,7 +529,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.19.0";
+const APP_VERSION = "v0.20.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1284,7 +1295,8 @@ function updatePanels(g, a){
                      : vit < 0.7 ? "linear-gradient(90deg,#8a8a34,#cbc24a)"
                      : "linear-gradient(90deg,var(--bio-dim),var(--bio))";
   const word = vit<0.3 ? "kämpft" : vit<0.5 ? "hält sich" : vit<0.72 ? "gedeiht" : "blüht auf";
-  document.getElementById("vitLabel").textContent = "Vitalität · " + word;
+  // „hier" macht klar: Fitness ist relativ zur Umwelt, kein Urteil über das Wesen (Didaktik-Audit).
+  document.getElementById("vitLabel").textContent = "Passung hier · " + word;
   document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
 }
 // A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
@@ -2295,7 +2307,10 @@ try {
     const ul = el("wlChronik"), tree = el("wlTree");
     if (chronMode === "tree" && sp.length >= 2) {
       ul.hidden = true; tree.hidden = false;
-      try { tree.innerHTML = dendrogram(sp); } catch (e) { chronMode = "list"; ul.hidden = false; tree.hidden = true; }
+      try {
+        tree.innerHTML = dendrogram(sp) +
+          `<p class="wl-hint">Nach Bauplan-<b>Ähnlichkeit</b> gruppiert — ähnlich heißt nicht immer näher verwandt (keine rekonstruierte Abstammung).</p>`;
+      } catch (e) { chronMode = "list"; ul.hidden = false; tree.hidden = true; }
     }
     if (chronMode !== "tree" || sp.length < 2) {
       tree.hidden = true; ul.hidden = false;
