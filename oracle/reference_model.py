@@ -78,7 +78,23 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = energy_photo + energy_forage
+
+    # c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
+    #    Waechst in sein Substrat (Totholz/Detritus), verdaut extrazellulaer ->
+    #    braucht KEINE Mobilitaet. heterotroph (schliesst Photo aus) + sessil
+    #    (schliesst Mobilitaet aus) + Enzyme (Stoffwechsel) + Feuchte (Nass-Prozess).
+    #    Ohne diesen Term hatten sessile Heterotrophe (Pilze) null Nahrungsenergie.
+    substrate = env["foodAbundance"] * (
+        phys["absorbWaterFloor"] + (1.0 - phys["absorbWaterFloor"]) * env["water"]
+    )
+    energy_absorb = (
+        phys["absorbYield"]
+        * (phys["absorbBase"] + phys["absorbMetabolism"] * metabolism)
+        * substrate
+        * (1.0 - phys["exclusion"] * photo)
+        * (1.0 - phys["exclusion"] * mobility)
+    )
+    total_energy = energy_photo + energy_forage + energy_absorb
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]

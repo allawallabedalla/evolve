@@ -2,24 +2,24 @@
   "_comment": "Automatisch von training/fit.ts erzeugt. Von Engine/Mockup gelesen. 'validityTest' (zurueckgehaltene Szenarien) treibt den Prozentbalken.",
   "params": {
     "responseRate": [
-      0.5571512061949792,
-      0.3932280521033467,
-      0.331079620555689,
-      0.27242700520566276,
-      0.4276526481693577,
-      0.35095724398392397,
-      0.4094134552801699,
-      0.4376337178885488
+      0.8,
+      0.6252119759050286,
+      0.754660559217693,
+      0.7458133463198826,
+      0.8,
+      0.5571880221210697,
+      0.8,
+      0.8
     ],
-    "mutationRate": 0.04486513941253964,
-    "selectionStrength": 1.02509910940179,
+    "mutationRate": 0.027446998612103653,
+    "selectionStrength": 0.3164032180897022,
     "varianceWeight": 1
   },
-  "validityTrain": 85.87612029188298,
-  "validityTest": 82.09350641699127,
-  "trainMAE": 0.03530969927029253,
-  "testMAE": 0.0447662339575218,
+  "validityTrain": 86.02961488262237,
+  "validityTest": 85.76502916903983,
+  "trainMAE": 0.0349259627934441,
+  "testMAE": 0.03558742707740039,
   "targetLow": 80,
   "targetHigh": 90,
-  "generatedAt": "2026-07-22T18:40:11.603Z"
+  "generatedAt": "2026-07-23T07:12:38.545Z"
 }
