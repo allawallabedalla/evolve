@@ -113,6 +113,22 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
 Offen bleibt nur noch Feinschliff:
 
+- **„Lebende Welt (Beta)"-Overlay — Nutzer-Feedback 2026-07 (Runde 1):**
+  - [x] **Zappeln/Jitter**: das Modal sprang, weil (a) `place-items:center` + variable Kartenhöhe
+    ständig neu zentrierte, (b) die Chronik jeden Step nach Häufigkeit umsortierte, (c) 9 Steps/s.
+    → feste Kartenhöhe, stabile Chronik-Sortierung (nach Schlüssel), ruhiges Tempo (~2 Steps/s),
+    interner Scroll statt Karten-Reflow.
+  - [x] **Hintergrund-Zeit anhalten bei offenem Modal** (etabliertes Muster): Haupt-Sim pausiert,
+    während das Welt-Overlay offen ist (`window.__mainSim.pause/resume`).
+  - [x] **Bunte Emoji statt flacher Icons** (verstößt gegen die Icon-Policy, Zeile ~1968): alle
+    Emoji im Overlay → flaches `ic()`-System (via `window.__ic`), inkl. neuer Icons globe/meteor/tune.
+  - [x] **„verbinden/trennen" unverständlich**: die beiden Raum-Hebel aus der Beta-Oberfläche
+    entfernt (progressive Disclosure — kommen später mit klarer visueller Metapher zurück).
+  - [ ] **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch): zu jeder emergenten Art ein
+    Link auf ein reales Vorbild, damit man sieht, wie so etwas in der Natur aussieht. Umsetzung:
+    Mapping (Reich + dominantes Merkmal) → repräsentatives Vorbild + Wikipedia-URL; didaktischer
+    Beistrich, nicht die Klassifikation selbst (Emergenz bleibt). Nächster Schritt nach der Politur.
+
 - **CLS-4-Rest · schmale Größenfenster**: einige seltene Formen (Nadelbaum, Blütenkraut,
   Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
   (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe Priorität.
