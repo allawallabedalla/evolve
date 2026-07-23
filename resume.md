@@ -140,6 +140,18 @@ geräteübergreifend mit Account.
   unentdeckt = „???" + reale Klade als lehrreicher Hinweis (Chlorophyta, Angiospermen, …).
   Pro-Reich-Fortschritt (z. B. Pilz 2/7), Neugier statt 100 %-Balken. Daten inline (`TREE`,
   Namen exakt = `classify().n`, gespiegelt aus `docs/tree-of-life.json`). Nur `app/index.html`.
+- **Stabilität (erledigt).** (1) Unlock nur bei STABIL erreichter Art: `committedArch` mit
+  Hysterese (`STABLE_GENS=15`) — Art/Zeichnung/Genbuch wechseln erst nach 15 stabilen
+  Generationen (vorher unlockte jede kurz überstreifte Form). (2) Kein Flackern: Anzeige +
+  Zeichnung nutzen `committedArch` statt `classify()` pro Frame; Form-Details aus `lineageSeed`
+  (nicht driftendes Genom); framerate-unabhängiges Glätten (τ≈0,6 s); `DRIFT_SCALE` 0,03→0,02.
+  Merksatz: Mitteln glättet die *Gene*, nicht die *Kategorie* — harte `classify()`-Schwellen
+  brauchen Hysterese.
+- **Flaches monochromes Icon-System (erledigt).** Alle bunten Emoji durch Inline-SVG ersetzt
+  (`ICONS`-Dict + `ic()`/`formIcon()`, erben `currentColor`): 6 Regler, 10 Biome, Steuerung
+  (Play/Pause/Ei/DNA), alle 36 Archetyp-Symbole (`FICON`-Map). Karte/Toast/Reveal/Genbuch
+  nutzen `formIcon(name)`. Die `e:`-Emoji in `classify()`/`TREE` sind nur noch interne
+  Dispatch-/Datenschlüssel (nicht sichtbar). Nur `app/index.html`.
 
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —

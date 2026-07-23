@@ -154,6 +154,15 @@
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
 
+  /* ---- Flaches Icon-System ---- */
+  .ic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.16em; fill: currentColor; }
+  .ico .ic { width: 1.15rem; height: 1.15rem; vertical-align: -0.24em; }
+  .biome .ic { width: 1rem; height: 1rem; vertical-align: -0.18em; margin-right: 3px; }
+  .ctrl .ic, .disc .ic, .gb-title .ic, .biome-tag .ic { vertical-align: -0.18em; }
+  #emoji .ic { width: 1.6rem; height: 1.6rem; vertical-align: -0.3em; }
+  .gb-tile .em .ic { width: 1.5rem; height: 1.5rem; vertical-align: 0; }
+  .toast .ic { width: 1.1rem; height: 1.1rem; vertical-align: -0.2em; margin-right: 2px; }
+
   /* ---- Entdeckungs-Toast ---- */
   .toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6;
     background: rgba(7,16,15,.92); border: 1px solid var(--bio-dim); color: var(--bio);
@@ -230,10 +239,10 @@
       </div>
       <div class="card">
         <div class="kingdom" id="kingdom">—</div>
-        <div class="species"><span class="emoji" id="emoji">🫧</span><span id="species">Ursprungszelle</span></div>
+        <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
         <div class="genes" id="genes"></div>
-        <button class="disc" id="discBtn" title="Genbuch öffnen">🧬 <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
+        <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
       </div>
     </div>
 
@@ -243,9 +252,9 @@
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
       <div class="controls">
-        <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter">⏸</button>
+        <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter"></button>
         <div class="speeds" id="speeds"></div>
-        <button class="ctrl newlife" id="newLifeBtn">🥚 Neues Leben</button>
+        <button class="ctrl newlife" id="newLifeBtn">Neues Leben</button>
       </div>
     </div>
   </div>
@@ -279,7 +288,7 @@
   <div class="genbook" id="genbook" hidden>
     <div class="gb-card">
       <div class="gb-head">
-        <div class="gb-title">🧬 Lebensbaum</div>
+        <div class="gb-title">Lebensbaum</div>
         <button id="genbookClose" class="link">schließen</button>
       </div>
       <p class="gb-sub" id="gbSub">—</p>
@@ -308,6 +317,82 @@ const PARAMS = {
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
+
+// ===== Flaches monochromes Icon-System (Inline-SVG, erbt currentColor) =====
+const ICONS = {
+  dot:`<circle cx="12" cy="12" r="3"/>`,
+  // Umwelt / Regler / Biome
+  temp:`<rect x="10" y="3" width="4" height="11" rx="2"/><circle cx="12" cy="17.5" r="4"/>`,
+  fang:`<path d="M5 6h5l-2.5 8zM14 6h5l-2.5 8z"/>`,
+  grain:`<rect x="11.3" y="11" width="1.4" height="10"/><ellipse cx="12" cy="5" rx="1.7" ry="3"/><ellipse cx="8.8" cy="8.5" rx="1.5" ry="2.7" transform="rotate(-35 8.8 8.5)"/><ellipse cx="15.2" cy="8.5" rx="1.5" ry="2.7" transform="rotate(35 15.2 8.5)"/>`,
+  height:`<polygon points="12,3 16,8 13,8 13,13 11,13 11,8 8,8"/><rect x="6" y="15.5" width="12" height="1.7" rx=".8"/><rect x="7" y="19" width="10" height="1.7" rx=".8"/>`,
+  sun:`<circle cx="12" cy="12" r="4.2"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7"/></g>`,
+  drop:`<path d="M12 3c-4 6-5 9-5 11.5a5 5 0 0 0 10 0C17 12 16 9 12 3z"/>`,
+  snow:`<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></g>`,
+  flame:`<path d="M12 2c1 4 4 5 4 9a4 4 0 0 1-8 0c0-1.5.5-2.5 1.5-3.5C10 9 11 6 12 2z"/>`,
+  waves:`<g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></g>`,
+  cell:`<path fill-rule="evenodd" d="M12 5a7 7 0 100 14 7 7 0 000-14zm0 2.4a4.6 4.6 0 110 9.2 4.6 4.6 0 010-9.2z"/><circle cx="13" cy="11.5" r="1.6"/>`,
+  // Steuerung
+  play:`<path d="M7 5l12 7-12 7z"/>`,
+  pause:`<rect x="7" y="5" width="3.6" height="14" rx="1"/><rect x="13.4" y="5" width="3.6" height="14" rx="1"/>`,
+  egg:`<ellipse cx="12" cy="13.5" rx="6" ry="8"/>`,
+  dna:`<g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M8 3c0 5 8 7 8 9s-8 4-8 9M16 3c0 5-8 7-8 9s8 4 8 9"/><path stroke-width="1.3" d="M9 6h6M9.5 9.2h5M9.5 14.8h5M9 18h6"/></g>`,
+  // Pflanzen
+  alga:`<circle cx="9" cy="10" r="3.2"/><circle cx="14.5" cy="8.3" r="2.7"/><circle cx="13.6" cy="13" r="2.5"/>`,
+  moss:`<g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M6 20v-4M9 20v-6M12 20v-5M15 20v-6M18 20v-4"/></g><ellipse cx="12" cy="20.5" rx="8" ry="1.2"/>`,
+  fern:`<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 21C12 13 9 7 5 4"/><path d="M11 18l-3-1.4M11.5 15l-2.7-1.4M12.2 12l-2.4-1.5M13.2 9.2l-1.9-1.6"/></g>`,
+  herb:`<rect x="11.3" y="11" width="1.4" height="10"/><path d="M12 12c-3.3 0-5.5-2.2-5.5-5.5C9.8 6.5 12 8.7 12 12zM12 10.5c3.3 0 5.5-2.2 5.5-5.5C14.2 5 12 7.2 12 10.5z"/>`,
+  flower:`<circle cx="12" cy="8.5" r="2.1"/><ellipse cx="12" cy="4" rx="1.7" ry="2.5"/><ellipse cx="16.4" cy="8.5" rx="2.5" ry="1.7"/><ellipse cx="12" cy="13" rx="1.7" ry="2.5"/><ellipse cx="7.6" cy="8.5" rx="2.5" ry="1.7"/><rect x="11.3" y="12" width="1.4" height="9"/>`,
+  shrub:`<rect x="11.3" y="13" width="1.4" height="8"/><circle cx="8.8" cy="11" r="3.4"/><circle cx="15.2" cy="11" r="3.4"/><circle cx="12" cy="8.4" r="3.6"/>`,
+  tree:`<rect x="11" y="13" width="2" height="8"/><circle cx="12" cy="8.5" r="6"/>`,
+  conifer:`<rect x="11" y="18" width="2" height="3"/><path d="M12 3l5.5 8H6.5zM12 8l6 8H6z"/>`,
+  cactus:`<rect x="10.5" y="4" width="3" height="17" rx="1.5"/><path d="M7 8v3a2 2 0 0 0 2 2h1.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M17 6v3a2 2 0 0 1-2 2h-1.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`,
+  cushion:`<path d="M3 18a9 6 0 0 1 18 0z"/>`,
+  // Tiere
+  worm:`<path d="M3 14c2-3 4-3 6 0s4 3 6 0 3-2.5 5-2" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`,
+  insect:`<ellipse cx="12" cy="16.5" rx="2.9" ry="3.4"/><circle cx="12" cy="11" r="2.1"/><circle cx="12" cy="6.8" r="1.9"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 11l-4-2M14 11l4-2M10 13l-4 1M14 13l4 1M10.5 15l-4 2M13.5 15l4 2M11 5.3l-1.8-2.2M13 5.3l1.8-2.2"/></g>`,
+  crab:`<ellipse cx="12" cy="14" rx="6" ry="4"/><circle cx="6.5" cy="9" r="2"/><circle cx="17.5" cy="9" r="2"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M6.5 11L7 9M17.5 11L17 9M6 14l-3-1M6 15.5l-3 1.5M18 14l3-1M18 15.5l3 1.5"/></g>`,
+  fish:`<path d="M3 12c4-5 11-5 15 0-4 5-11 5-15 0z"/><path d="M18 12l3.5-3.5v7z"/>`,
+  lizard:`<ellipse cx="11" cy="12" rx="5.2" ry="2.3"/><circle cx="6" cy="11.3" r="1.7"/><path d="M16 12c3.2-.6 4.4-2.6 3.4-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8.5 13.6l-2 3M11 14l-1 3.2M13.5 14l1 3.2"/></g>`,
+  turtle:`<path d="M5 15a7 5 0 0 1 14 0z"/><circle cx="20" cy="14" r="1.8"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 16.5l-1.2 2.2M16 16.5l1.2 2.2"/></g>`,
+  bird:`<path d="M4 9c4 .5 6-1 8-3 .5 2.5 2.5 3.5 5 3.5l-2 2 3 .5-3.5 2c-1 3-4 4.5-7 4 1-2.5.5-5-1-6.5C7.5 10 5.5 9.5 4 9z"/>`,
+  fox:`<ellipse cx="11" cy="12" rx="5.5" ry="2.8"/><circle cx="17.5" cy="10.5" r="2.3"/><path d="M16 9l1-2.5 1.3 2.2zM18.5 9l1.2-2.3.6 2.5z"/><ellipse cx="4.5" cy="12" rx="2.5" ry="1.8"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 14.5v3.5M14 14v3.5"/></g>`,
+  wolf:`<ellipse cx="11" cy="12" rx="6" ry="3"/><circle cx="17.8" cy="10.5" r="2.4"/><path d="M19.5 10l2.2-1-1 2.1z"/><path d="M16.4 9l1-2 1.1 2z"/><path d="M5 12c-2.5-.5-3.5-2-3-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 14.5v4M14 14.5v4"/></g>`,
+  bear:`<ellipse cx="11" cy="12.5" rx="6.5" ry="4"/><circle cx="18" cy="10" r="3"/><circle cx="16.5" cy="7.3" r="1.6"/><circle cx="19.5" cy="7.3" r="1.6"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 15.5v3M15 15.5v3"/></g>`,
+  rhino:`<ellipse cx="11" cy="12.5" rx="6.5" ry="3.6"/><circle cx="18" cy="11.5" r="2.8"/><path d="M20.6 9.8l1.4-3.2-.2 3.4z"/><g stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M7 15.5v3M15 15.5v3"/></g>`,
+  monkey:`<ellipse cx="11" cy="13" rx="3.8" ry="5"/><circle cx="11" cy="6" r="3"/><path d="M8 15c-3 1-4 4-2 6s4-1 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9 17.5v2.5M13 17.5v2.5"/></g>`,
+  mouse:`<ellipse cx="11" cy="13" rx="5" ry="3"/><circle cx="14.5" cy="8.7" r="1.9"/><circle cx="17.8" cy="9.2" r="1.9"/><circle cx="16.5" cy="12" r="2.4"/><path d="M6 13c-3 0-3.5 3-4 4.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 15.5v3M13 15.5v3"/></g>`,
+  quadruped:`<ellipse cx="11" cy="11" rx="6" ry="3.2"/><circle cx="18" cy="9.5" r="2.6"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 14v4M10 14.2v4M13 14.2v4M16 14v4"/></g>`,
+  // Pilze
+  agaric:`<path d="M4 11a8 5 0 0 1 16 0z"/><rect x="10.5" y="11" width="3" height="9" rx="1.2"/>`,
+  bracket:`<rect x="5" y="3" width="2.4" height="18"/><path d="M7 10a8 4 0 0 1 12 0z"/>`,
+  bracket2:`<path d="M5 16c0-4 4-7 9-7 3 0 5 1.5 5 3.5 0 3-4 5.5-9 5.5-3 0-5-.7-5-2z"/>`,
+  mycelium:`<g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M12 12l5-4M12 12l-5-3M12 12l4 5M12 12l-4 4M12 12v-6M12 12l6 1M12 12H6M12 12l-1 6"/></g><circle cx="12" cy="12" r="1.6"/>`,
+  mold:`<g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M6 20v-6M10 20v-8M14 20v-7M18 20v-5"/></g><circle cx="6" cy="13" r="1.8"/><circle cx="10" cy="11" r="2"/><circle cx="14" cy="12" r="1.8"/><circle cx="18" cy="14" r="1.8"/>`,
+  lichen:`<path d="M5 15c0-3 3-4 5-3 1-2 5-2 6 0 3 0 4 4 1 5-1 2-4 2-6 1-2 1-6 0-6-3z"/>`,
+  yeast:`<circle cx="10" cy="13" r="4"/><circle cx="15.5" cy="9.5" r="2.6"/><circle cx="16" cy="15" r="1.8"/>`,
+  // Mikroben
+  rod:`<rect x="4" y="9.5" width="16" height="5" rx="2.5"/>`,
+  flagellum:`<rect x="3" y="9.5" width="11" height="5" rx="2.5"/><path d="M14 12c2 0 2-2 4-2s2 2 3 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
+  amoeba:`<path d="M6 9c1-3 5-4 7-2s5-1 6 2 0 5-3 5c-1 3-6 3-8 0S3 15 4 12s1-2 2-3z"/>`,
+  // Protisten
+  euglena:`<ellipse cx="11" cy="12" rx="6" ry="3" transform="rotate(-15 11 12)"/><path d="M16.5 10.5c2-.5 2-2.5 4.5-2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
+  radiolarian:`<circle cx="12" cy="12" r="4"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></g>`,
+};
+function ic(name, cls){ return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.dot}</svg>`; }
+// Archetyp-Name -> Icon-Schluessel (Namen exakt = classify().n)
+const FICON = {
+  "Grünalge":"alga","Moos":"moss","Farn":"fern","Kraut · niedrige Pflanze":"herb","Blütenkraut":"flower",
+  "Verholzter Strauch":"shrub","Laubbaum":"tree","Nadelbaum":"conifer","Sukkulente · Kaktus":"cactus","Polster-Kältepflanze":"cushion",
+  "Wurm":"worm","Insekt · Gliederfüßer":"insect","Krebstier · Arthropode":"crab","Fisch · Aalform":"fish","Reptil · Echse":"lizard",
+  "Gepanzertes Beutetier":"turtle","Flatterer · Vogel":"bird","Fell-Warmblüter":"fox","Fell-Großtier":"bear","Aktiver Großjäger":"wolf",
+  "Gepanzerter Koloss":"rhino","Behänder Kletterer":"monkey","Kleines flinkes Tier":"mouse","Generalisten-Tier":"quadruped",
+  "Hutpilz":"agaric","Baumpilz · Porling":"bracket","Zunderschwamm":"bracket2","Myzel · Pilzgeflecht":"mycelium","Schimmel · Fadenpilz":"mold",
+  "Flechte · Symbiose":"lichen","Hefe":"yeast",
+  "Bakterie":"rod","Archaee · Extremophil":"flagellum","Protist · Amöbe":"amoeba",
+  "Euglenoid · Mixotroph":"euglena","Plankton":"radiolarian",
+};
+function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
   const [insulation,size,limb,metabolism,armor,photo,mobility,structure]=t;
@@ -447,24 +532,24 @@ function describe(t){
 
 // ======================= Umwelt / Regler =======================
 const LEVERS = [
-  {key:"temperature", ico:"🌡️", name:"Temperatur", lo:"kalt", hi:"heiß"},
-  {key:"predation",   ico:"🦖", name:"Räuberdruck", lo:"keine", hi:"extrem"},
-  {key:"foodAbundance",ico:"🍖", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
-  {key:"foodHeight",  ico:"🪜", name:"Nahrungs-/Lichthöhe", lo:"Boden", hi:"hoch"},
-  {key:"light",       ico:"☀️", name:"Licht", lo:"dunkel", hi:"sonnig"},
-  {key:"water",       ico:"💧", name:"Wasser", lo:"Dürre", hi:"feucht"},
+  {key:"temperature", ico:"temp", name:"Temperatur", lo:"kalt", hi:"heiß"},
+  {key:"predation",   ico:"fang", name:"Räuberdruck", lo:"keine", hi:"extrem"},
+  {key:"foodAbundance",ico:"grain", name:"Nahrung", lo:"Hunger", hi:"Überfluss"},
+  {key:"foodHeight",  ico:"height", name:"Nahrungs-/Lichthöhe", lo:"Boden", hi:"hoch"},
+  {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"sonnig"},
+  {key:"water",       ico:"drop", name:"Wasser", lo:"Dürre", hi:"feucht"},
 ];
 const BIOMES = [
-  {n:"❄️ Eiszeit", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
-  {n:"🦖 Räuberland", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.6}},
-  {n:"🌾 Hohe Nahrung", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
-  {n:"🏜️ Hitze-Dürre", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
-  {n:"☀️ Sonniger Sumpf", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
-  {n:"🌲 Lichtkampf", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
-  {n:"🍄 Moderwald", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
-  {n:"🧫 Urtümpel", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
-  {n:"🌊 Plankton-See", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
-  {n:"🟢 Algen-Riff", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
+  {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
+  {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.6}},
+  {n:"Hohe Nahrung", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
+  {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
+  {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
+  {n:"Lichtkampf", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
+  {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
+  {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
+  {n:"Plankton-See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
+  {n:"Algen-Riff", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
 ];
 const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe"];
 
@@ -584,7 +669,7 @@ function renderGenbook(){
       const ok = discovered.has(f.n);
       const t = document.createElement("div");
       t.className = "gb-tile " + (ok?"found":"miss");
-      t.innerHTML = `<div class="em">${ok?f.e:"❔"}</div>`+
+      t.innerHTML = `<div class="em">${ok?formIcon(f.n):ic("dot")}</div>`+
                     `<div class="nm">${ok?f.n:"???"}</div>`+
                     `<div class="cl">${f.cl}</div>`;
       grid.appendChild(t);
@@ -599,7 +684,7 @@ document.getElementById("genbook").addEventListener("click", (e) => { if(e.targe
 let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");
-  t.textContent = "✨ Neue Form: " + a.e + " " + a.n;
+  t.innerHTML = formIcon(a.n) + " Neue Form: " + a.n;
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
   const d = document.querySelector(".disc"); if(d){ d.classList.remove("pulse"); void d.offsetWidth; d.classList.add("pulse"); }
@@ -653,9 +738,9 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   const parts = [];
   parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
   if(beforeA.n !== afterA.n){
-    parts.push(`<span class="arrow">Aus ${beforeA.e} ${beforeA.n} wurde ${afterA.e} ${afterA.n}.</span>`);
+    parts.push(`<span class="arrow">Aus ${formIcon(beforeA.n)} ${beforeA.n} wurde ${formIcon(afterA.n)} ${afterA.n}.</span>`);
   } else {
-    parts.push(`Immer noch ${afterA.e} <b>${afterA.n}</b> — aber im Detail verändert.`);
+    parts.push(`Immer noch ${formIcon(afterA.n)} <b>${afterA.n}</b> — aber im Detail verändert.`);
   }
   const deltas = afterG.map((x,i)=>({i, d:x-beforeG[i]})).filter(o=>Math.abs(o.d)>0.05)
     .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
@@ -757,7 +842,7 @@ async function boot(){
 const leversEl = document.getElementById("levers");
 LEVERS.forEach(l => {
   const d = document.createElement("div"); d.className="lever";
-  d.innerHTML = `<div class="row"><span class="name"><span class="ico">${l.ico}</span>${l.name}</span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
+  d.innerHTML = `<div class="row"><span class="name"><span class="ico">${ic(l.ico)}</span>${l.name}</span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
     <input type="range" min="0" max="1" step="0.01" id="s-${l.key}" value="${env[l.key]}" aria-label="${l.name}">
     <div class="ends"><span>${l.lo}</span><span>${l.hi}</span></div>`;
   leversEl.appendChild(d);
@@ -769,7 +854,7 @@ LEVERS.forEach(l => {
 });
 const biomesEl = document.getElementById("biomes");
 BIOMES.forEach(b => {
-  const btn = document.createElement("button"); btn.className="biome"; btn.textContent=b.n;
+  const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
   btn.addEventListener("click", () => {
     Object.assign(env, b.env);
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
@@ -789,7 +874,7 @@ function updatePanels(g, a){
   g = g || genome;
   a = a || (typeof committedArch !== "undefined" && committedArch) || classify(g);
   document.getElementById("kingdom").textContent = a.k;
-  document.getElementById("emoji").textContent = a.e;
+  document.getElementById("emoji").innerHTML = formIcon(a.n);
   document.getElementById("species").textContent = a.n;
   document.getElementById("bauplan").textContent = describe(g);
   for(let i=0;i<8;i++){
@@ -802,7 +887,7 @@ function updatePanels(g, a){
 const playBtn = document.getElementById("playBtn");
 playBtn.addEventListener("click", () => {
   running = !running;
-  playBtn.textContent = running ? "⏸" : "▶";
+  playBtn.innerHTML = running ? ic("pause") : ic("play");
   document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
 });
 const speedsEl = document.getElementById("speeds");
@@ -1419,6 +1504,11 @@ function frame(time){
   requestAnimationFrame(frame);
 }
 
+// Statische Emoji durch flache Icons ersetzen
+document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neues Leben";
+document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
+document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
+playBtn.innerHTML = ic("pause");
 resize(); initMotes(); updatePanels(); updateDisc();
 boot();
 requestAnimationFrame(frame);
