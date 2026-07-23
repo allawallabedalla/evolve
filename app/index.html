@@ -461,7 +461,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.6.0";
+const APP_VERSION = "v0.7.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1289,17 +1289,61 @@ const rgb = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
 function seeded(g){ let s=0; for(let i=0;i<g.length;i++) s=(s*131+Math.floor(g[i]*997))>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
 
 function drawHabitat(){
-  // Umwelt-getoenter Hintergrund
+  // Schematisch angedeutetes Habitat aus den 6 Umwelt-Reglern — bewegt man einen
+  // Regler/wählt ein Biom, verändert sich das Bild sofort sichtbar (direktes Feedback).
+  const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
+  // Himmel-Grundton: kalt(blau)↔warm(rot), dunkler bei wenig Licht
   const cold=[18,44,58], hot=[54,32,26];
-  const base = mix(cold,hot,env.temperature);
-  const dark = lerp(0.45,1,env.light); // dunkler bei wenig Licht
+  const base = mix(cold,hot,T);
+  const dark = lerp(0.4,1,L);
   const top = base.map(c=>c*0.5*dark+6), bot=[7,16,15];
-  const grd = ctx.createRadialGradient(CW/2,CH*0.42,40, CW/2,CH*0.5,CH*0.9);
+  const grd = ctx.createRadialGradient(CW/2,CH*0.40,40, CW/2,CH*0.5,CH*0.95);
   grd.addColorStop(0, rgb(top)); grd.addColorStop(1, rgb(bot));
   ctx.fillStyle=grd; ctx.fillRect(0,0,CW,CH);
+
+  // Lichtquelle: hell & warm bei viel Licht, klein/erloschen bei wenig (Tiefsee/Nacht)
+  if(L>0.1){
+    const sx=CW*0.80, sy=CH*0.20, sr=lerp(12,42,L);
+    const sc=mix([150,205,255],[255,224,150],T);
+    const sg=ctx.createRadialGradient(sx,sy,0, sx,sy,sr*2.6);
+    sg.addColorStop(0,`rgba(${sc[0]|0},${sc[1]|0},${sc[2]|0},${0.45*L})`);
+    sg.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,sy,sr*2.6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=`rgba(${sc[0]|0},${sc[1]|0},${sc[2]|0},${0.2+0.5*L})`;
+    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+  }
+
+  const groundY=CH*0.82;
+  // Vegetation: Anzahl ~ Nahrungsfülle, Höhe ~ Nahrungshöhe (schematische Halme + Kronen)
+  const n=Math.round(lerp(0,9,FA));
+  ctx.save();
+  ctx.strokeStyle="rgba(46,125,99,.5)"; ctx.fillStyle="rgba(34,100,74,.5)";
+  ctx.lineWidth=Math.max(1.6,CW*0.006); ctx.lineCap="round";
+  for(let i=0;i<n;i++){
+    const fx=CW*(0.1+0.8*((i+0.5)/n));
+    const h=lerp(CH*0.05,CH*0.34,FH)*(0.7+0.6*(((i*37)%10)/10));
+    ctx.beginPath(); ctx.moveTo(fx,groundY); ctx.lineTo(fx,groundY-h); ctx.stroke();
+    ctx.beginPath(); ctx.arc(fx,groundY-h,lerp(3.5,15,FH),0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+
   // Boden
-  ctx.fillStyle="rgba(10,26,24,.9)";
-  ctx.beginPath(); ctx.ellipse(CW/2, CH*0.94, CW*0.6, CH*0.14, 0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(10,26,24,.92)";
+  ctx.beginPath(); ctx.ellipse(CW/2, CH*0.98, CW*0.62, CH*0.18, 0,0,Math.PI*2); ctx.fill();
+  // Schnee/Eis bei Kälte
+  if(T<0.28){
+    ctx.fillStyle=`rgba(216,232,238,${lerp(0,0.45,(0.28-T)/0.28)})`;
+    ctx.beginPath(); ctx.ellipse(CW/2, CH*0.965, CW*0.6, CH*0.12, 0,0,Math.PI*2); ctx.fill();
+  }
+
+  // Wasser: steigt mit env.water (Tiefsee = fast alles unter Wasser)
+  if(W>0.34){
+    const wl=lerp(CH*0.99,CH*0.24,(W-0.34)/0.66);
+    ctx.fillStyle=`rgba(42,112,152,${lerp(0.12,0.36,W)})`;
+    ctx.fillRect(0,wl,CW,CH-wl);
+    ctx.strokeStyle=`rgba(126,194,224,${0.28*W})`; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,wl); ctx.lineTo(CW,wl); ctx.stroke();
+  }
 }
 
 // B5: prefers-reduced-motion -> Canvas-Animation (Atem, Partikel) beruhigen.
