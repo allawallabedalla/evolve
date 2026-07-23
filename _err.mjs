@@ -1,0 +1,15 @@
+import { chromium } from 'playwright-core';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+const ROOT = dirname(fileURLToPath(import.meta.url));
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const p = await b.newPage();
+const errs = [];
+p.on('console', m => { if (m.type()==='error') errs.push('CONSOLE: '+m.text()); });
+p.on('pageerror', e => errs.push('PAGEERROR: '+e.message));
+await p.goto('file://' + join(ROOT, 'app', 'index.html'));
+await p.waitForTimeout(2500);
+const wb = await p.$eval('#worldBtn', el => getComputedStyle(el).display);
+console.log('worldBtn display:', wb);
+console.log(errs.length ? errs.join('\n') : 'no errors');
+await b.close();

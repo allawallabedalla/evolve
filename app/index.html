@@ -57,8 +57,13 @@
   .brand b { color: var(--bio-dim); font-style: normal; font-weight: 700; }
   .tagline { color: var(--muted); font-size: .9rem; max-width: 46ch; }
 
-  .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start; }
-  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+  .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start;
+    grid-template-areas: "view console" "card console"; }
+  .viewport-panel { grid-area: view; }
+  .creature-card { grid-area: card; }
+  .console { grid-area: console; }
+  /* Mobil: Bild → Regler (Konsole) → Detail-Karte, damit die Steuerung nah am Bild bleibt */
+  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; grid-template-areas: "view" "console" "card"; } }
 
   .panel {
     background: var(--chamber);
@@ -69,7 +74,12 @@
 
   /* ---- Habitat-Fenster ---- */
   .viewport { position: relative; padding: 0; overflow: hidden; }
-  .viewport canvas { display: block; width: 100%; height: auto; border-radius: 16px 16px 0 0; }
+  .viewport canvas { display: block; width: 100%; height: auto; border-radius: 16px; }
+  /* Schnell-Einstiege direkt unter dem Bild (gestapelt, volle Breite) */
+  .entry-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; }
+  .entry-row .disc { margin: 0; text-align: center; border-color: var(--line-soft);
+    box-shadow: var(--shadow-sm); padding: 8px 10px; }
+  .entry-row .disc:hover { border-color: var(--bio-dim); }
   .gen-readout {
     position: absolute; top: 12px; left: 14px;
     font-family: var(--mono); font-size: .74rem; letter-spacing: .05em;
@@ -83,7 +93,7 @@
   }
 
   /* ---- Identitaets-Karte ---- */
-  .card { padding: 16px 20px 20px; border-top: 1px solid var(--line-soft); }
+  .card { padding: 16px 20px 20px; }
   .kingdom { text-transform: uppercase; letter-spacing: .18em; font-size: .68rem; color: var(--bio-dim); }
   .species { font-family: var(--serif); font-style: italic; font-size: 1.55rem; text-wrap: balance; margin: 2px 0 6px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .species-wiki { font-family: var(--mono); font-style: normal; font-size: .68rem; color: var(--bio-dim); text-decoration: none; white-space: nowrap; }
@@ -136,6 +146,8 @@
   }
   .biome:hover { color: var(--bio-dim); }
   .biome:active { box-shadow: var(--shadow-inset); }
+  /* K5: aktuell gewähltes Biom — eingedrückt (Neomorph) + Salbei-Rand/Text */
+  .biome.active { color: var(--bio-dim); font-weight: 700; box-shadow: var(--shadow-inset), inset 0 0 0 1.5px var(--bio-dim); }
 
   .lever { margin-bottom: 13px; }
   .lever .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
@@ -194,7 +206,7 @@
   .dlg-btns .ctrl { min-width: 96px; }
   .dlg-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
-  .worldbtn { display: block; margin-top: 8px; }
+  .worldbtn { display: block; }
   .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
   .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(74,60,36,.38); backdrop-filter: blur(7px); animation: wl-bg-in .34s ease; }
   .world[hidden] { display: none; }
@@ -415,28 +427,14 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
-        <div class="kingdom" id="kingdom">—</div>
-        <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
-        <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
-        <details class="how">
-          <summary>So funktioniert's</summary>
-          <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
-        </details>
-        <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
-          <span class="vit-label" id="vitLabel">Passung zur Umwelt</span>
-          <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
-          <span class="vit-num" id="vitNum">—</span>
-        </div>
-        <div class="genes" id="genes"></div>
+      <!-- Schnell-Einstiege direkt unter dem Bild — auf Desktop UND Mobil „above the fold" -->
+      <div class="entry-row">
         <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
         <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, viele Arten">🌍 Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
-        <div class="ancestry" id="ancestryRow" hidden></div>
       </div>
     </div>
 
-    <!-- Konsole -->
+    <!-- Konsole (auf Mobil direkt unter dem Bild, vor der Detail-Karte) -->
     <div class="panel console">
       <h2>Umwelt formen</h2>
       <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
@@ -447,6 +445,25 @@
         <div class="speeds" id="speeds"></div>
         <button class="ctrl newlife" id="newLifeBtn">Neues Leben</button>
       </div>
+    </div>
+
+    <!-- Identitaets-/Detail-Karte -->
+    <div class="panel card creature-card">
+      <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
+      <div class="kingdom" id="kingdom">—</div>
+      <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
+      <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
+      <details class="how">
+        <summary>So funktioniert's</summary>
+        <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
+      </details>
+      <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
+        <span class="vit-label" id="vitLabel">Passung zur Umwelt</span>
+        <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
+        <span class="vit-num" id="vitNum">—</span>
+      </div>
+      <div class="genes" id="genes"></div>
+      <div class="ancestry" id="ancestryRow" hidden></div>
     </div>
   </div>
 
@@ -553,7 +570,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.23.0";
+const APP_VERSION = "v0.24.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1037,9 +1054,10 @@ function renderGenbook(){
     body.appendChild(grid);
   }
 }
-function openGenbook(){ renderGenbook(); document.getElementById("genbook").hidden = false; }
+let _gbOpener = null;   // Fokus-Rückgabe beim Schließen
+function openGenbook(){ _gbOpener = document.activeElement; renderGenbook(); document.getElementById("genbook").hidden = false; document.getElementById("genbookClose").focus(); }
 document.getElementById("discBtn").addEventListener("click", openGenbook);
-function closeGenbook(){ document.getElementById("genbook").hidden = true; gbTip.classList.remove("show"); }
+function closeGenbook(){ document.getElementById("genbook").hidden = true; gbTip.classList.remove("show"); if(_gbOpener && _gbOpener.focus) _gbOpener.focus(); _gbOpener = null; }
 document.getElementById("genbookClose").addEventListener("click", closeGenbook);
 document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") closeGenbook(); });
 // Hover-Info: wann & wie sich die Art entwickelt hat
@@ -1271,6 +1289,7 @@ LEVERS.forEach(l => {
     env[l.key] = +ev.target.value;
     document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
     lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+    document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));  // K5: eigene Umwelt -> kein Preset aktiv
     dismissOnboard();
   });
 });
@@ -1281,6 +1300,8 @@ BIOMES.forEach(b => {
     Object.assign(env, b.env);
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
+    document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");   // K5: aktives Biom sichtbar markieren
     dismissOnboard();
     // Kein Neustart: die laufende Evolution reagiert ab dem aktuellen Zustand.
   });
@@ -2509,10 +2530,13 @@ try {
     render(); renderEvents(); renderSliders();
   }
 
+  let _worldOpener = null;   // Fokus-Rückgabe beim Schließen
   function openWorld() {
     if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    _worldOpener = document.activeElement;
     overlay.classList.remove("closing");
     overlay.hidden = false;
+    el("worldClose")?.focus();
     window.__mainSim?.pause();   // Hintergrund-Zeit anhalten, solange das Modal offen ist
     boot().then(() => {
       refreshPet();               // Ort 0 auf das aktuelle Wesen synchronisieren
@@ -2528,6 +2552,8 @@ try {
     overlay.classList.add("closing");
     closeTimer = setTimeout(() => { overlay.hidden = true; overlay.classList.remove("closing"); closeTimer = null; }, 260);
     window.__mainSim?.resume();
+    if (_worldOpener && _worldOpener.focus) _worldOpener.focus();   // Fokus zurück zum Auslöser
+    _worldOpener = null;
   }
 
   el("wlReroll").insertAdjacentHTML("afterbegin", ic("globe") + " ");
