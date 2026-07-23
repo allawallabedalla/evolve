@@ -26,7 +26,9 @@ function build(connect) {
 }
 
 const iso = census(build(0));
-const con = census(build(0.35));
+// Starke Verbindung: mit der aquatischen Nische sind die Biome eigenständiger,
+// darum braucht die Homogenisierung mehr Genfluss, um Arten zu verschmelzen.
+const con = census(build(0.6));
 
 console.log("Stufe 6 — emergenter Arten-Zensus (5 Orte)\n");
 console.log("  Isolierte Welt — Chronik:");

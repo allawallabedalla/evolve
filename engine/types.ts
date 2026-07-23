@@ -52,6 +52,11 @@ export interface Physics {
   absorbBase: number;
   absorbMetabolism: number;
   absorbWaterFloor: number;
+  aquaticYield: number;
+  aquaticBase: number;
+  aquaticWaterFloor: number;
+  aquaticLimbDrag: number;
+  aquaticArmorDrag: number;
   maintenance: {
     base: number;
     size: number;

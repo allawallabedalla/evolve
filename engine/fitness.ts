@@ -96,7 +96,25 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (1 - phys.exclusion * photo) *
     (1 - phys.exclusion * mobility);
 
-  const totalEnergy = energyPhoto + energyForage + energyAbsorb;
+  //    d) Aquatische Jagd (AXIS-4): schwimmende Heterotrophie im Wasserkoerper.
+  //       Anders als Landjagd braucht Schwimmen KEINE Reichweite (Gliedmassen) -
+  //       Nahrung wird im offenen Wasser erschwommen. Belohnt Mobilitaet, aber
+  //       einen STROMLINIENFOERMIGEN Koerper: Gliedmassen und Panzer erzeugen
+  //       Wasserwiderstand (Drag). Nur im tiefen Wasser wirksam (aquaticWaterFloor),
+  //       heterotroph -> schliesst Photosynthese aus. Schafft den Fitness-Gipfel
+  //       "schlank + mobil im Wasser" = Fisch/Aal, Kopffuesser, Amphibie.
+  const aquaHabitat = clamp01((env.water - phys.aquaticWaterFloor) / (1 - phys.aquaticWaterFloor));
+  const streamline = clamp01(1 - limb * phys.aquaticLimbDrag - armor * phys.aquaticArmorDrag);
+  const energyAquatic =
+    phys.aquaticYield *
+    mobility *
+    env.foodAbundance *
+    aquaHabitat *
+    streamline *
+    (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
+    (1 - phys.exclusion * photo);
+
+  const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;

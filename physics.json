@@ -1,5 +1,5 @@
 {
-  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei. Version 3: DRITTER Ernaehrungsmodus 'Absorption' (Osmotrophie/Zersetzung) - sessile Heterotrophie (Pilze/Mikroben). Belohnt niedrige Mobilitaet + Stoffwechsel + Feuchte, schliesst Photosynthese UND Mobilitaet aus. Behebt: vorher war jede Nahrung an Mobilitaet gekoppelt (energyForage prop. mobility) -> sessile Heterotrophe hatten null Einkommen, obwohl Pilze real hoch erfolgreich sind. Version 3.1 (BAL-5): maintenanceQuad.armor = steigende Grenzkosten der Panzerung. Zuvor war 'gepanzert + mobil' ein fast universeller Gewinner (~30% aller Umwelten drei Panzer-Formen); mit Panzer-Grenzkosten entzerrt sich die Verteilung, mittlere Umwelten bringen wieder vielfaeltige Baupläne. Version 4 (AXIS-1 Flug): neues Gen 'wing' (Fluegelflaeche). Flug = wing * (1 - size*flightSizePenalty) * Stoffwechsel-Anteil -> nur leichte, aktive Koerper fliegen. Zwei Effekte: (1) erschliesst hohe Nahrung/Licht ohne Reichweiten-Strafe (flightReach addiert zur Reichweite), (2) Flucht vor Raeubern (defenseFromFlight). Kosten: maintenance.wing (Fluegel kosten auch am Boden -> grosse/sessile Organismen verlieren sie). Eroeffnet den 3D-Nahrungsraum: Fluginsekt, Flugsaeuger/Fledermaus, Vogel als echte Flug-Nische.",
+  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei. Version 3: DRITTER Ernaehrungsmodus 'Absorption' (Osmotrophie/Zersetzung) - sessile Heterotrophie (Pilze/Mikroben). Belohnt niedrige Mobilitaet + Stoffwechsel + Feuchte, schliesst Photosynthese UND Mobilitaet aus. Behebt: vorher war jede Nahrung an Mobilitaet gekoppelt (energyForage prop. mobility) -> sessile Heterotrophe hatten null Einkommen, obwohl Pilze real hoch erfolgreich sind. Version 3.1 (BAL-5): maintenanceQuad.armor = steigende Grenzkosten der Panzerung. Zuvor war 'gepanzert + mobil' ein fast universeller Gewinner (~30% aller Umwelten drei Panzer-Formen); mit Panzer-Grenzkosten entzerrt sich die Verteilung, mittlere Umwelten bringen wieder vielfaeltige Baupläne. Version 4 (AXIS-1 Flug): neues Gen 'wing' (Fluegelflaeche). Flug = wing * (1 - size*flightSizePenalty) * Stoffwechsel-Anteil -> nur leichte, aktive Koerper fliegen. Zwei Effekte: (1) erschliesst hohe Nahrung/Licht ohne Reichweiten-Strafe (flightReach addiert zur Reichweite), (2) Flucht vor Raeubern (defenseFromFlight). Kosten: maintenance.wing (Fluegel kosten auch am Boden -> grosse/sessile Organismen verlieren sie). Eroeffnet den 3D-Nahrungsraum: Fluginsekt, Flugsaeuger/Fledermaus, Vogel als echte Flug-Nische. Version 5 (AXIS-4 Aquatik): vierter Energieweg 'aquatische Jagd' - schwimmende Heterotrophie im Wasserkoerper. Anders als Landjagd (energyForage) braucht Schwimmen KEINE Reichweite/Gliedmassen; Nahrung wird erschwommen. Belohnt Mobilitaet + einen STROMLINIENFOERMIGEN Koerper (Gliedmassen/Panzer = Wasserwiderstand/Drag), nur oberhalb aquaticWaterFloor wirksam, heterotroph (schliesst Photo aus). Behebt: die ganze Gilde der Wassertiere (Fisch/Aal, Kopffuesser, Amphibie, Schnecke) war per Selektion unerreichbar (Audit: 0/500) - es gab keine Nische, in der ein schlanker Schwimmer optimal ist. Jetzt entsteht 'schlank+mobil im Wasser' emergent.",
   "traits": ["insulation", "size", "limbLength", "metabolism", "armor", "photosynthesis", "mobility", "structure", "wing"],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -29,6 +29,11 @@
   "absorbBase": 0.4,
   "absorbMetabolism": 0.85,
   "absorbWaterFloor": 0.3,
+  "aquaticYield": 1.4,
+  "aquaticBase": 0.4,
+  "aquaticWaterFloor": 0.5,
+  "aquaticLimbDrag": 0.7,
+  "aquaticArmorDrag": 0.5,
   "maintenance": {
     "base": 0.05,
     "size": 0.22,
