@@ -129,10 +129,30 @@
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
   /* ---- Genbuch-Zähler ---- */
-  .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em; display: inline-block; }
+  .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em;
+    display: inline-block; background: none; border: 1px solid transparent; border-radius: 999px; padding: 4px 2px; cursor: pointer; font-family: var(--mono); }
+  .disc:hover { color: var(--bio); }
   .disc span { color: var(--bio); font-weight: 700; }
   .disc.pulse { animation: discpulse .6s ease; }
   @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
+
+  /* ---- Genbuch (begehbarer Lebensbaum) ---- */
+  .genbook { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(4,10,9,.82); backdrop-filter: blur(6px); animation: fadein .3s ease; }
+  .genbook[hidden] { display: none; }
+  .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto; background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .gb-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .gb-sub { color: var(--muted); font-size: .8rem; margin: 6px 0 4px; line-height: 1.55; }
+  .gb-kingdom { margin: 18px 0 8px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio); display: flex; justify-content: space-between; align-items: baseline; }
+  .gb-kingdom .cnt { color: var(--muted); font-family: var(--mono); font-size: .7rem; letter-spacing: 0; }
+  .gb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+  .gb-tile { border: 1px solid var(--line-soft); border-radius: 10px; padding: 9px 10px; background: var(--abyss); text-align: left; }
+  .gb-tile .em { font-size: 1.3rem; line-height: 1.1; }
+  .gb-tile .nm { font-size: .72rem; margin-top: 3px; color: var(--text); line-height: 1.2; }
+  .gb-tile .cl { font-size: .61rem; color: var(--muted); margin-top: 2px; }
+  .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,230,176,.15), 0 0 14px rgba(95,230,176,.08); }
+  .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
+  .gb-tile.miss .nm { color: var(--muted); }
 
   /* ---- Entdeckungs-Toast ---- */
   .toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6;
@@ -213,7 +233,7 @@
         <div class="species"><span class="emoji" id="emoji">🫧</span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
         <div class="genes" id="genes"></div>
-        <div class="disc">🧬 <span id="discCount">0</span> Formen entdeckt</div>
+        <button class="disc" id="discBtn" title="Genbuch öffnen">🧬 <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
       </div>
     </div>
 
@@ -252,6 +272,18 @@
         <button id="loginReset" class="link">Passwort vergessen?</button>
         <button id="loginClose" class="link">abbrechen</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Genbuch: begehbarer Lebensbaum -->
+  <div class="genbook" id="genbook" hidden>
+    <div class="gb-card">
+      <div class="gb-head">
+        <div class="gb-title">🧬 Lebensbaum</div>
+        <button id="genbookClose" class="link">schließen</button>
+      </div>
+      <p class="gb-sub" id="gbSub">—</p>
+      <div id="gbBody"></div>
     </div>
   </div>
 </div>
@@ -476,6 +508,88 @@ function saveState(){
   }
 }
 function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
+
+// ---- Genbuch: begehbarer Lebensbaum ----
+// Reale Aeste (Domaene->Reich->Stamm/Klasse) als Geruest; unsere Formen als
+// Blaetter. Namen MUESSEN exakt classify().n entsprechen. Quelle: docs/tree-of-life.json.
+const TREE = [
+  {k:"Mikrobe", forms:[
+    {n:"Bakterie", e:"🧫", cl:"Bacteria"},
+    {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea"},
+    {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa"},
+  ]},
+  {k:"Protist", forms:[
+    {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa"},
+    {n:"Plankton", e:"✨", cl:"Radiolaria"},
+  ]},
+  {k:"Pflanze", forms:[
+    {n:"Grünalge", e:"🟢", cl:"Chlorophyta"},
+    {n:"Moos", e:"🌱", cl:"Bryophyta"},
+    {n:"Farn", e:"🌿", cl:"Farne"},
+    {n:"Kraut · niedrige Pflanze", e:"☘️", cl:"Angiospermen"},
+    {n:"Blütenkraut", e:"🌸", cl:"Angiospermen"},
+    {n:"Verholzter Strauch", e:"🪴", cl:"Angiospermen"},
+    {n:"Laubbaum", e:"🌳", cl:"Angiospermen"},
+    {n:"Nadelbaum", e:"🌲", cl:"Koniferen"},
+    {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen"},
+    {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine"},
+  ]},
+  {k:"Pilz", forms:[
+    {n:"Hutpilz", e:"🍄", cl:"Basidiomycota"},
+    {n:"Baumpilz · Porling", e:"🪵", cl:"Basidiomycota"},
+    {n:"Zunderschwamm", e:"🟤", cl:"Basidiomycota"},
+    {n:"Myzel · Pilzgeflecht", e:"🍂", cl:"Fungi"},
+    {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota"},
+    {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten"},
+    {n:"Hefe", e:"🫧", cl:"Ascomycota"},
+  ]},
+  {k:"Tier", forms:[
+    {n:"Wurm", e:"🪱", cl:"Annelida"},
+    {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta"},
+    {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea"},
+    {n:"Fisch · Aalform", e:"🐟", cl:"Fische"},
+    {n:"Reptil · Echse", e:"🦎", cl:"Reptilia"},
+    {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia"},
+    {n:"Flatterer · Vogel", e:"🐦", cl:"Aves"},
+    {n:"Fell-Warmblüter", e:"🦊", cl:"Mammalia"},
+    {n:"Fell-Großtier", e:"🐻", cl:"Mammalia"},
+    {n:"Aktiver Großjäger", e:"🐺", cl:"Mammalia"},
+    {n:"Gepanzerter Koloss", e:"🦏", cl:"Mammalia"},
+    {n:"Behänder Kletterer", e:"🐒", cl:"Primaten"},
+    {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager"},
+    {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten"},
+  ]},
+];
+const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
+function renderGenbook(){
+  const found = discovered.size;
+  document.getElementById("gbSub").innerHTML =
+    `<b class="chip-val" style="color:var(--bio)">${found}</b> von ${TREE_TOTAL} Formen entdeckt. ` +
+    `Forme neue Umwelten, um Äste des Lebensbaums freizuschalten — „???" wartet noch.`;
+  const body = document.getElementById("gbBody");
+  body.innerHTML = "";
+  for(const grp of TREE){
+    const have = grp.forms.filter(f=>discovered.has(f.n)).length;
+    const h = document.createElement("div"); h.className="gb-kingdom";
+    h.innerHTML = `<span>${grp.k}</span><span class="cnt">${have}/${grp.forms.length}</span>`;
+    body.appendChild(h);
+    const grid = document.createElement("div"); grid.className="gb-grid";
+    for(const f of grp.forms){
+      const ok = discovered.has(f.n);
+      const t = document.createElement("div");
+      t.className = "gb-tile " + (ok?"found":"miss");
+      t.innerHTML = `<div class="em">${ok?f.e:"❔"}</div>`+
+                    `<div class="nm">${ok?f.n:"???"}</div>`+
+                    `<div class="cl">${f.cl}</div>`;
+      grid.appendChild(t);
+    }
+    body.appendChild(grid);
+  }
+}
+function openGenbook(){ renderGenbook(); document.getElementById("genbook").hidden = false; }
+document.getElementById("discBtn").addEventListener("click", openGenbook);
+document.getElementById("genbookClose").addEventListener("click", () => { document.getElementById("genbook").hidden = true; });
+document.getElementById("genbook").addEventListener("click", (e) => { if(e.target.id==="genbook") document.getElementById("genbook").hidden = true; });
 let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");

@@ -135,11 +135,17 @@ geräteübergreifend mit Account.
   (C1–C6) in `tools/ecology-check.mjs` (`npm run ecology`, auch Teil von `npm run all`). Aktueller
   Stand: alle 6 ✓ (Tier 38 %, Mikrobe 29 %, Pilz 22 %, Pflanze 7 %, Protist 4 %).
 
+- **Genbuch begehbar — „Lebensbaum" (erledigt).** Zähler öffnet ein Overlay (`#genbook`),
+  das die ~36 Formen nach Reich gruppiert zeigt: entdeckt = Emoji+Name+reale Klade leuchten,
+  unentdeckt = „???" + reale Klade als lehrreicher Hinweis (Chlorophyta, Angiospermen, …).
+  Pro-Reich-Fortschritt (z. B. Pilz 2/7), Neugier statt 100 %-Balken. Daten inline (`TREE`,
+  Namen exakt = `classify().n`, gespiegelt aus `docs/tree-of-life.json`). Nur `app/index.html`.
+
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
    oder Renderer/Taxonomie in eine geteilte Datei auslagern (Backlog: vereinheitlichen).
-2. **A1 Genbuch begehbar** (Kachel-Galerie aller ~36 Formen, entdeckt/„???"; die 8 seltenen
-   Zwischennischen als besondere „Fänge" hervorheben).
+2. **Abdeckungs-Lücken** (aus `docs/tree-of-life.json`): Amphibien, Weichtiere, sessile Tiere
+   (Schwämme/Nesseltiere) als neue Formen/Nischen — letzteres schärft den Absorptions-Kanal.
 3. **A3 Vitalitäts-Anzeige** (aus `fitness(genome,env)`) → Ursache→Wirkung sofort spürbar.
 4. **A4 Bindung** (Name, Ahnenlinie/Historie; „Neues Leben" als Nachkomme).
 5. Weitere Audit-Punkte (a11y B4, reduced-motion Canvas B5, Fußzeilen-Copy B6, Sync-Tag B7).
