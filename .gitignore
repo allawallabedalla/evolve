@@ -5,4 +5,5 @@ __pycache__/
 .DS_Store
 .parity.json
 scratch*.png
-_shot.mjs
+scratch*
+_*.mjs
