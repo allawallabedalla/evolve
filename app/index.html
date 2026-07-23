@@ -19,9 +19,9 @@
     --line: #cbb98f;
     --line-soft: #d8c8a0;
     --text: #4c3d27;         /* warmes Dunkelbraun */
-    --muted: #927e59;
-    --bio: #5f9c83;          /* Pastell-Salbei — Leben/Akzent */
-    --bio-dim: #4b8069;
+    --muted: #6b5836;        /* WCAG AA auf Ocker (K2): dunkler als Pastell-Muted */
+    --bio: #5f9c83;          /* Pastell-Salbei — Flächen/Punkte/Thumbs */
+    --bio-dim: #3d6b57;      /* dunkles Salbei — Text-Rolle, AA-Kontrast (K2) */
     --ember: #d69a6b;        /* Pastell-Terrakotta — Tier/Energie */
     --danger: #cf8975;
     --gold: #bf9636;         /* gedämpftes Ocker-Gold — Rarität */
@@ -54,7 +54,7 @@
     font-family: var(--serif); font-style: italic; font-size: 1.9rem; letter-spacing: .01em;
     color: var(--text);
   }
-  .brand b { color: var(--bio); font-style: normal; font-weight: 700; }
+  .brand b { color: var(--bio-dim); font-style: normal; font-weight: 700; }
   .tagline { color: var(--muted); font-size: .9rem; max-width: 46ch; }
 
   .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start; }
@@ -87,7 +87,7 @@
   .kingdom { text-transform: uppercase; letter-spacing: .18em; font-size: .68rem; color: var(--bio-dim); }
   .species { font-family: var(--serif); font-style: italic; font-size: 1.55rem; text-wrap: balance; margin: 2px 0 6px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .species-wiki { font-family: var(--mono); font-style: normal; font-size: .68rem; color: var(--bio-dim); text-decoration: none; white-space: nowrap; }
-  .species-wiki:hover { color: var(--bio); text-decoration: underline; }
+  .species-wiki:hover { color: var(--bio-dim); text-decoration: underline; }
   .species .emoji { font-style: normal; font-size: 1.5rem; }
   .bauplan { color: var(--muted); font-size: .9rem; }
   .how { margin-top: 8px; }
@@ -95,12 +95,12 @@
   .how > summary::-webkit-details-marker { display: none; }
   .how > summary::before { content: "▸ "; }
   .how[open] > summary::before { content: "▾ "; }
-  .how > summary:hover { color: var(--bio); }
+  .how > summary:hover { color: var(--bio-dim); }
   .how p { color: var(--text); font-size: .82rem; line-height: 1.55; margin: 8px 0 2px; }
 
   /* ---- Name & Ahnenlinie (A4) ---- */
   .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
-  .cname-txt { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--bio); }
+  .cname-txt { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--bio-dim); }
   .cname-txt.unnamed { font-family: var(--mono); font-style: normal; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   .cname-edit { font-size: .85rem; text-decoration: none; }
   .ancestry { margin-top: 10px; font-family: var(--mono); font-size: .66rem; color: var(--muted); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
@@ -116,7 +116,7 @@
   .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
   .gene .track { height: 7px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
   .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
-  .gene.muted { opacity: .32; }
+  .gene.muted { opacity: .55; }
   .gene.muted .lbl::after { content: " ·"; }
   /* ---- Vitalitäts-Anzeige (A3) ---- */
   .vitality { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
@@ -127,7 +127,7 @@
 
   /* ---- Konsole ---- */
   .console { padding: 18px 18px 20px; }
-  .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio); margin: 0 0 12px; }
+  .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio-dim); margin: 0 0 12px; }
   .biomes { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
   .biome {
     font-size: .8rem; color: var(--text); background: var(--chamber);
@@ -173,8 +173,8 @@
   /* ---- Genbuch-Zähler ---- */
   .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em;
     display: inline-block; background: none; border: 1px solid transparent; border-radius: 999px; padding: 4px 2px; cursor: pointer; font-family: var(--mono); }
-  .disc:hover { color: var(--bio); }
-  .disc span { color: var(--bio); font-weight: 700; }
+  .disc:hover { color: var(--bio-dim); }
+  .disc span { color: var(--bio-dim); font-weight: 700; }
   .disc.pulse { animation: discpulse .6s ease; }
   @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
 
@@ -214,7 +214,7 @@
   .wl-events li { list-style: none; font-size: .74rem; margin: 0 0 5px; color: var(--text); display: flex; align-items: baseline; gap: 6px; }
   .wl-events li .ev-gen { font-family: var(--mono); font-size: .62rem; color: var(--muted); flex-shrink: 0; }
   .wl-events li .ev-pl { color: var(--muted); }
-  .wl-events .ev-hit { color: var(--danger); } .wl-events .ev-shift { color: #6fd0ff; } .wl-events .ev-bio { color: var(--bio); }
+  .wl-events .ev-hit { color: var(--danger); } .wl-events .ev-shift { color: #6fd0ff; } .wl-events .ev-bio { color: var(--bio-dim); }
   .wl-events .ev-ic .ic { width: .95em; height: .95em; vertical-align: -.15em; }
   .wl-ev-empty { color: var(--muted); font-style: italic; }
   .wl-place--pet { background: linear-gradient(180deg, rgba(95,230,176,.06), var(--abyss)); border-color: var(--bio-dim); }
@@ -222,27 +222,27 @@
   .wl-place .nm .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
   .wl-place .nm { font-weight: 700; font-size: .82rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text); }
   .wl-place .env { color: var(--muted); font-family: var(--mono); font-size: .62rem; letter-spacing: 0; }
-  .wl-place .form { color: var(--bio); font-size: .78rem; margin: 6px 0 7px; min-height: 2.4em; line-height: 1.3; display: flex; align-items: center; gap: 8px; }
+  .wl-place .form { color: var(--bio-dim); font-size: .78rem; margin: 6px 0 7px; min-height: 2.4em; line-height: 1.3; display: flex; align-items: center; gap: 8px; }
   .wl-cre { flex-shrink: 0; color: var(--bio-dim); }
   .wl-cre .ic { width: 2em; height: 2em; }
   .wl-cre-sm { color: var(--bio-dim); }
   .wl-cre-sm .ic { width: 1.05em; height: 1.05em; vertical-align: -.16em; }
   .wl-place .div { color: var(--muted); font-size: .62rem; font-family: var(--mono); }
   .wl-conn { color: var(--muted); }
-  .wl-conn.on { color: var(--bio); }
+  .wl-conn.on { color: var(--bio-dim); }
   .wl-conn .ic { width: .95em; height: .95em; vertical-align: -.16em; }
   .wl-side { display: flex; flex-direction: column; gap: 14px; }
   .wl-panel { background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; }
-  .wl-panel h3 { margin: 0 0 8px; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio); }
+  .wl-panel h3 { margin: 0 0 8px; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-dim); }
   .wl-chronik li { list-style: none; font-size: .78rem; margin: 0 0 7px; padding: 0; color: var(--text); min-height: 2.7em; }
   .wl-panel h3 .ic, .wl-title .ic { width: 1em; height: 1em; vertical-align: -.12em; margin-right: 5px; }
   .wl-chronik .pct { color: var(--gold); font-family: var(--mono); font-size: .72rem; }
   .wl-chronik .rar { font-size: .64rem; font-family: var(--mono); }
   .wl-chronik .pl { color: var(--muted); font-size: .66rem; }
   .wl-real { color: var(--bio-dim); font-size: .66rem; text-decoration: none; white-space: nowrap; }
-  .wl-real:hover { color: var(--bio); text-decoration: underline; }
+  .wl-real:hover { color: var(--bio-dim); text-decoration: underline; }
   .wl-chron-toggle { float: right; font-size: .58rem; background: var(--chamber-2); color: var(--bio-dim); border: 1px solid var(--bio-dim); border-radius: 6px; padding: 1px 6px; cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 600; }
-  .wl-chron-toggle:hover { color: var(--bio); border-color: var(--bio); }
+  .wl-chron-toggle:hover { color: var(--bio-dim); border-color: var(--bio); }
   #wlTree svg { width: 100%; height: auto; display: block; }
   #wlTree text { font-family: system-ui, sans-serif; }
   .wl-chronik ul { margin: 0; padding: 0; }
@@ -255,7 +255,7 @@
   .wl-fine > summary::-webkit-details-marker { display: none; }
   .wl-fine > summary::before { content: "▸ "; }
   .wl-fine[open] > summary::before { content: "▾ "; }
-  .wl-fine > summary:hover { color: var(--bio); }
+  .wl-fine > summary:hover { color: var(--bio-dim); }
   .wl-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 10px 0 4px; }
   @media (max-width: 560px) { .wl-sliders { grid-template-columns: 1fr; } }
   .wl-slider { display: flex; align-items: center; gap: 6px; font-size: .66rem; color: var(--muted); }
@@ -263,12 +263,12 @@
   .wl-slider .wl-sl-lab .ic { width: .95em; height: .95em; }
   .wl-slider input[type=range] { flex: 1; accent-color: var(--bio); height: 3px; }
   .wl-slider .wl-sl-val { flex: 0 0 24px; text-align: right; font-family: var(--mono); color: var(--text); }
-  .wl-loading { color: var(--bio); font-size: .82rem; padding: 30px 0; text-align: center; }
+  .wl-loading { color: var(--bio-dim); font-size: .82rem; padding: 30px 0; text-align: center; }
   .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto; background: var(--chamber); border: none; border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
   .gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .gb-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .gb-sub { color: var(--muted); font-size: .8rem; margin: 6px 0 4px; line-height: 1.55; }
-  .gb-kingdom { margin: 18px 0 8px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio); display: flex; justify-content: space-between; align-items: baseline; }
+  .gb-kingdom { margin: 18px 0 8px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-dim); display: flex; justify-content: space-between; align-items: baseline; }
   .gb-kingdom .cnt { color: var(--muted); font-family: var(--mono); font-size: .7rem; letter-spacing: 0; }
   .gb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
   .gb-tile { border: 1px solid var(--line-soft); border-radius: 10px; padding: 9px 10px; background: var(--abyss); text-align: left; }
@@ -296,7 +296,7 @@
     border-radius: 10px; padding: 9px 11px; font-size: .74rem; line-height: 1.45; color: var(--text);
     box-shadow: var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
   #gbTip.show { opacity: 1; }
-  #gbTip b { color: var(--bio); }
+  #gbTip b { color: var(--bio-dim); }
   #gbTip .tip-clade { color: var(--muted); font-size: .68rem; }
   #gbTip .tip-rar { display: inline-flex; align-items: center; gap: 5px; font-size: .64rem; letter-spacing: .04em;
     text-transform: uppercase; margin: 3px 0 1px; }
@@ -324,7 +324,7 @@
   /* ---- Auth ---- */
   .auth { margin-left: auto; font-size: .82rem; display: flex; align-items: center; gap: 8px; }
   .auth-mail { color: var(--muted); font-family: var(--mono); font-size: .74rem; }
-  .link { background: none; border: none; color: var(--bio); cursor: pointer; font: inherit; padding: 4px 2px; text-decoration: underline; text-underline-offset: 3px; }
+  .link { background: none; border: none; color: var(--bio-dim); cursor: pointer; font: inherit; padding: 4px 2px; text-decoration: underline; text-underline-offset: 3px; }
   .link:hover { filter: brightness(1.1); }
 
   /* ---- Login-Overlay ---- */
@@ -336,7 +336,7 @@
   #loginEmail:focus, #loginPass:focus { outline: none; border-color: var(--bio-dim); }
   .login-row { display: flex; gap: 8px; margin-top: 12px; }
   .login-links { display: flex; justify-content: space-between; margin-top: 12px; }
-  .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio); min-height: 1.2em; }
+  .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio-dim); min-height: 1.2em; }
 
   /* ---- Willkommen-zurück-Reveal ---- */
   .reveal {
@@ -347,19 +347,19 @@
   .reveal[hidden] { display: none; }   /* sonst schlaegt display:grid das hidden-Attribut */
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
   .reveal-card { max-width: 82%; text-align: center; padding: 8px 14px; }
-  .reveal-eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .68rem; color: var(--bio); margin-bottom: 10px; }
+  .reveal-eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .68rem; color: var(--bio-dim); margin-bottom: 10px; }
   .reveal-body { font-size: .96rem; line-height: 1.6; color: var(--text); }
-  .reveal-body b { color: var(--bio); font-weight: 700; }
+  .reveal-body b { color: var(--bio-dim); font-weight: 700; }
   .reveal-body .arrow { font-family: var(--serif); font-style: italic; }
   .reveal-forms { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 14px; }
   .rf { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--muted); font-size: .7rem; max-width: 112px; }
   .rf-ic .ic { width: 2.5rem; height: 2.5rem; }
   .rf-nm { line-height: 1.15; text-align: center; }
-  .rf-new { color: var(--bio); }
+  .rf-new { color: var(--bio-dim); }
   .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,230,176,.55)); }
   .rf-arrow { color: var(--bio-dim); font-size: 1.4rem; }
   /* ---- Onboarding-Startimpuls (A5) ---- */
-  .onboard { background: rgba(95,230,176,.08); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio); line-height: 1.5; }
+  .onboard { background: rgba(95,156,131,.10); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio-dim); line-height: 1.5; }
   .onboard[hidden] { display: none; }
   .onboard b { color: var(--text); }
   .biomes.hint .biome:first-child { border-color: var(--bio); animation: biomepulse 1.6s ease-in-out infinite; }
@@ -375,7 +375,7 @@
   .footnote { margin-top: 26px; color: var(--muted); font-size: .74rem; text-align: center; line-height: 1.6; }
   .footnote b { color: var(--text); font-weight: 600; }
   .ver { display: block; margin-top: 6px; font-family: var(--mono); font-size: .66rem; color: var(--bio-dim); letter-spacing: .04em; opacity: .8; }
-  .chip-val { font-family: var(--mono); color: var(--bio); }
+  .chip-val { font-family: var(--mono); color: var(--bio-dim); }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 
@@ -529,7 +529,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.20.0";
+const APP_VERSION = "v0.21.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
