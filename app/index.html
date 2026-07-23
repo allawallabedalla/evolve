@@ -425,9 +425,10 @@ const BIOMES = [
   {n:"🏜️ Hitze-Dürre", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
   {n:"☀️ Sonniger Sumpf", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
   {n:"🌲 Lichtkampf", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
-  {n:"🍄 Moderwald", env:{temperature:.45,predation:.05,foodAbundance:.75,foodHeight:.08,light:.06,water:.75}},
-  {n:"🧫 Urtümpel", env:{temperature:.4,predation:.02,foodAbundance:.12,foodHeight:.05,light:.15,water:.7}},
-  {n:"🌊 Plankton-See", env:{temperature:.5,predation:.35,foodAbundance:.25,foodHeight:.05,light:.85,water:.98}},
+  {n:"🍄 Moderwald", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
+  {n:"🧫 Urtümpel", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
+  {n:"🌊 Plankton-See", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
+  {n:"🟢 Algen-Riff", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
 ];
 const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe"];
 
@@ -1041,43 +1042,57 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(tx+R*0.35,ty+R*0.4); ctx.stroke();
   }
   ctx.restore();
+  // Koerperproportionen je Archetyp: bw=Breite, bh=Hoehe, legL=Beinlaenge
+  const FORM = ({
+    "🐺":{bw:1.42,bh:0.72,legL:1.5}, "🦊":{bw:1.25,bh:0.8,legL:1.15},
+    "🐭":{bw:1.0,bh:0.95,legL:0.62}, "🐒":{bw:0.9,bh:1.12,legL:1.6},
+    "🐻":{bw:1.32,bh:1.04,legL:0.92}, "🦥":{bw:1.14,bh:0.92,legL:1.0},
+    "🦎":{bw:1.58,bh:0.56,legL:0.8}, "🐦":{bw:0.82,bh:1.02,legL:1.4},
+    "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
+  })[kind] || {bw:1.08,bh:0.98,legL:1.0};
+  const bw=FORM.bw, bh=FORM.bh;
   // Beine
-  const legs = 2 + Math.round((0.6*mob+0.4*limb)*5);
-  const legLen = 12 + limb*40;
-  ctx.strokeStyle = rgb(body.map(c=>c*0.7)); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
+  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.6*mob+0.4*limb)*5);
+  const legLen = (12 + limb*40)*FORM.legL;
+  ctx.strokeStyle = rgb(dark); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
   for(let i=0;i<legs;i++){
     const t = legs===1?0.5:i/(legs-1);
-    const lx = cx + (t-0.5)*R*1.4;
+    const lx = cx + (t-0.5)*R*bw*1.35;
     const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
-    ctx.beginPath(); ctx.moveTo(lx, cy+R*0.5);
-    ctx.quadraticCurveTo(lx+swing*0.4, cy+R*0.5+legLen*0.6, lx+swing, cy+R*0.5+legLen); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lx, cy+R*bh*0.5);
+    ctx.quadraticCurveTo(lx+swing*0.4, cy+R*bh*0.5+legLen*0.6, lx+swing, cy+R*bh*0.5+legLen); ctx.stroke();
   }
-  // Fell (Aura aus kurzen Strichen)
+  // Fell (Aura aus kurzen Strichen, folgt der Koerper-Ellipse)
   if(insul>0.4){ ctx.strokeStyle=`rgba(230,238,230,${0.25+insul*0.4})`; ctx.lineWidth=1.4;
     const n=Math.round(30+insul*50);
-    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2; const r1=R*0.92, r2=R*(1.05+insul*0.18+rnd()*0.06);
-      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1); ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2); ctx.stroke(); } }
+    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2; const r1=0.92, r2=(1.05+insul*0.18+rnd()*0.06);
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1*R*bw, cy+Math.sin(ang)*r1*R*bh);
+      ctx.lineTo(cx+Math.cos(ang)*r2*R*bw, cy+Math.sin(ang)*r2*R*bh); ctx.stroke(); } }
   // Koerper
   ctx.fillStyle = rgb(body);
-  ctx.beginPath(); ctx.ellipse(cx, cy, R*1.05, R, 0,0,Math.PI*2); ctx.fill();
-  // Vogel-Fluegel
-  if(kind==="🐦"){ ctx.fillStyle=rgb(mix(body,dark,0.35));
-    ctx.save(); ctx.translate(cx+R*0.1,cy-R*0.05); ctx.rotate(0.2+Math.sin(time*0.006)*0.18);
-    ctx.beginPath(); ctx.ellipse(0,0,R*0.72,R*0.4,0.3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, cy, R*bw, R*bh, 0,0,Math.PI*2); ctx.fill();
+  // Vogel-Fluegel + Schwanzfedern
+  if(kind==="🐦"){
+    ctx.fillStyle=rgb(mix(body,dark,0.45));
+    for(let i=-1;i<=1;i++){ ctx.save(); ctx.translate(cx+R*bw*0.7,cy+R*bh*0.2); ctx.rotate(0.5+i*0.28+Math.sin(time*0.005)*0.06);
+      ctx.beginPath(); ctx.ellipse(R*0.4,0,R*0.5,R*0.13,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+    ctx.fillStyle=rgb(mix(body,dark,0.35));
+    ctx.save(); ctx.translate(cx+R*0.1,cy-R*bh*0.05); ctx.rotate(0.2+Math.sin(time*0.006)*0.18);
+    ctx.beginPath(); ctx.ellipse(0,0,R*0.7,R*0.38,0.3,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle=rgb(dark); ctx.lineWidth=1;
-    for(let i=1;i<=3;i++){ ctx.beginPath(); ctx.ellipse(0,0,R*0.72*i/3.2,R*0.4*i/3.2,0.3,0,Math.PI*2); ctx.stroke(); }
+    for(let i=1;i<=3;i++){ ctx.beginPath(); ctx.ellipse(0,0,R*0.7*i/3.2,R*0.38*i/3.2,0.3,0,Math.PI*2); ctx.stroke(); }
     ctx.restore(); }
   // Panzer
   if(armor>0.5){ ctx.fillStyle=rgb(mix([90,100,110],[60,70,80],armor));
-    ctx.beginPath(); ctx.ellipse(cx, cy-R*0.15, R*0.95, R*0.8, 0, Math.PI*0.95, Math.PI*2.05); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy-R*bh*0.15, R*bw*0.9, R*bh*0.82, 0, Math.PI*0.95, Math.PI*2.05); ctx.fill();
     ctx.strokeStyle="rgba(20,30,30,.4)"; ctx.lineWidth=1.5;
-    for(let i=1;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx,cy-R*0.15,R*0.95*i/4,R*0.8*i/4,0,Math.PI,Math.PI*2); ctx.stroke(); } }
+    for(let i=1;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx,cy-R*bh*0.15,R*bw*0.9*i/4,R*bh*0.82*i/4,0,Math.PI,Math.PI*2); ctx.stroke(); } }
   // Stacheln
   if(armor>0.6){ ctx.fillStyle=rgb(mix([120,130,140],[80,90,100],armor));
-    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*0.32, ay=cy-R*0.8;
+    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*bw*0.3, ay=cy-R*bh*0.82;
       ctx.beginPath(); ctx.moveTo(ax-3,ay); ctx.lineTo(ax+3,ay); ctx.lineTo(ax, ay-8-armor*10); ctx.closePath(); ctx.fill(); } }
   // Kopf
-  const hx=cx-R*1.0, hy=cy-R*0.15;
+  const hx=cx-R*bw*0.92, hy=cy-R*bh*0.22;
   // Ohren (hinter/ueber dem Kopf) je Archetyp
   ctx.fillStyle=rgb(dark);
   const ear=(ex,ey,ew,eh,rot,round)=>{ ctx.save(); ctx.translate(ex,ey); ctx.rotate(rot);

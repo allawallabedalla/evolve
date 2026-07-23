@@ -95,12 +95,21 @@ geräteübergreifend mit Account.
   (🍄 Moderwald → Pilze, 🧫 Urtümpel → Mikroben, 🌊 Plankton-See → Protisten). Erreichbarkeit
   aller Reiche per Sweep verifiziert. **Nur in `app/index.html`** (mockup/ noch nicht nachgezogen).
 
+   Vierbeiner-Silhouetten differenziert (`FORM`-Tabelle: bw/bh/legL je Archetyp — langer Wolf,
+   flaches Reptil, aufrechter Vogel mit Flügel+Schwanzfedern, hoher Kletterer, bulliger Bär);
+   4 Reich-Biome auf bestätigte Fitness-Attraktoren getunt (Moderwald→Pilz, Urtümpel→Bakterie,
+   Plankton-See→Euglenoid, Algen-Riff→Grünalge).
+- **Modell-Erkenntnis:** 28 der 36 Formen sind stabile Fitness-Attraktoren; die 8 Zwischennischen
+  (Fisch, Wurm, Hutpilz, Baumpilz, Schimmel, Hefe, Moos, Farn) haben KEINEN festen Gipfel, werden
+  aber im Spiel-Modus durch die stochastische Drift (`randn`) transient erreicht → Genbuch-Fänge.
+  Ursache: `energyForage ∝ mobility` → Heterotrophe steigern Mobilität immer, außer Nahrung ist knapp
+  (dann Pilz/sessil). Große Pilze bräuchten viel Nahrung UND wenig Nahrung → Widerspruch.
+
 ## 7. Nächste Schritte (Priorität)
-1. **Renderer verfeinern (Rest von #Vielfalt):** Säugetier-Vierbeiner (🦊🐭🐺🐒🐻🦥🦎🐦)
-   teilen noch stark denselben Körper — stärker differenzieren; einige Nischen (Fisch, Wurm,
-   Moos, Farn, Hutpilz, Schimmel) brauchen gezielte Biome, um evolutionär erreichbar zu sein;
-   `mockup/visual.html` auf denselben Stand nachziehen (oder Renderer vereinheitlichen).
-2. **A1 Genbuch begehbar** (Kachel-Galerie aller ~36 Formen, entdeckt/„???").
+1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
+   oder Renderer/Taxonomie in eine geteilte Datei auslagern (Backlog: vereinheitlichen).
+2. **A1 Genbuch begehbar** (Kachel-Galerie aller ~36 Formen, entdeckt/„???"; die 8 seltenen
+   Zwischennischen als besondere „Fänge" hervorheben).
 3. **A3 Vitalitäts-Anzeige** (aus `fitness(genome,env)`) → Ursache→Wirkung sofort spürbar.
 4. **A4 Bindung** (Name, Ahnenlinie/Historie; „Neues Leben" als Nachkomme).
 5. Weitere Audit-Punkte (a11y B4, reduced-motion Canvas B5, Fußzeilen-Copy B6, Sync-Tag B7).
