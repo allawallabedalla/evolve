@@ -1,6 +1,6 @@
 {
-  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei. Version 3: DRITTER Ernaehrungsmodus 'Absorption' (Osmotrophie/Zersetzung) - sessile Heterotrophie (Pilze/Mikroben). Belohnt niedrige Mobilitaet + Stoffwechsel + Feuchte, schliesst Photosynthese UND Mobilitaet aus. Behebt: vorher war jede Nahrung an Mobilitaet gekoppelt (energyForage prop. mobility) -> sessile Heterotrophe hatten null Einkommen, obwohl Pilze real hoch erfolgreich sind. Version 3.1 (BAL-5): maintenanceQuad.armor = steigende Grenzkosten der Panzerung. Zuvor war 'gepanzert + mobil' ein fast universeller Gewinner (~30% aller Umwelten drei Panzer-Formen); mit Panzer-Grenzkosten entzerrt sich die Verteilung, mittlere Umwelten bringen wieder vielfaeltige Baupläne.",
-  "traits": ["insulation", "size", "limbLength", "metabolism", "armor", "photosynthesis", "mobility", "structure"],
+  "_comment": "Geteilte Fitness-Landschaft ('Physik'). Engine (TS) UND Orakel (Python) lesen exakt diese Datei. Version 3: DRITTER Ernaehrungsmodus 'Absorption' (Osmotrophie/Zersetzung) - sessile Heterotrophie (Pilze/Mikroben). Belohnt niedrige Mobilitaet + Stoffwechsel + Feuchte, schliesst Photosynthese UND Mobilitaet aus. Behebt: vorher war jede Nahrung an Mobilitaet gekoppelt (energyForage prop. mobility) -> sessile Heterotrophe hatten null Einkommen, obwohl Pilze real hoch erfolgreich sind. Version 3.1 (BAL-5): maintenanceQuad.armor = steigende Grenzkosten der Panzerung. Zuvor war 'gepanzert + mobil' ein fast universeller Gewinner (~30% aller Umwelten drei Panzer-Formen); mit Panzer-Grenzkosten entzerrt sich die Verteilung, mittlere Umwelten bringen wieder vielfaeltige Baupläne. Version 4 (AXIS-1 Flug): neues Gen 'wing' (Fluegelflaeche). Flug = wing * (1 - size*flightSizePenalty) * Stoffwechsel-Anteil -> nur leichte, aktive Koerper fliegen. Zwei Effekte: (1) erschliesst hohe Nahrung/Licht ohne Reichweiten-Strafe (flightReach addiert zur Reichweite), (2) Flucht vor Raeubern (defenseFromFlight). Kosten: maintenance.wing (Fluegel kosten auch am Boden -> grosse/sessile Organismen verlieren sie). Eroeffnet den 3D-Nahrungsraum: Fluginsekt, Flugsaeuger/Fledermaus, Vogel als echte Flug-Nische.",
+  "traits": ["insulation", "size", "limbLength", "metabolism", "armor", "photosynthesis", "mobility", "structure", "wing"],
   "traitLabels": {
     "insulation": "Fell / Isolation",
     "size": "Koerpergroesse",
@@ -9,7 +9,8 @@
     "armor": "Panzerung",
     "photosynthesis": "Photosynthese",
     "mobility": "Mobilitaet",
-    "structure": "Stuetzgewebe / Verholzung"
+    "structure": "Stuetzgewebe / Verholzung",
+    "wing": "Fluegelflaeche"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -20,6 +21,10 @@
   "heightPenalty": 1.5,
   "forageBase": 0.55,
   "forageMetabolism": 0.9,
+  "flightSizePenalty": 1.5,
+  "flightMetabFloor": 0.35,
+  "flightReach": 0.75,
+  "defenseFromFlight": 0.2,
   "absorbYield": 1.3,
   "absorbBase": 0.4,
   "absorbMetabolism": 0.85,
@@ -32,7 +37,8 @@
     "metabolism": 0.16,
     "photosynthesis": 0.14,
     "mobility": 0.15,
-    "structure": 0.15
+    "structure": 0.15,
+    "wing": 0.16
   },
   "maintenanceQuad": {
     "metabolism": 0.22,

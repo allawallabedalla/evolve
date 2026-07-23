@@ -4,32 +4,32 @@
   "forms": [
     {
       "name": "Bakterie",
-      "convergencePct": 12.96,
+      "convergencePct": 12.608,
       "tier": "haeufig"
     },
     {
       "name": "Archaee · Extremophil",
-      "convergencePct": 6.65,
+      "convergencePct": 9.331,
       "tier": "haeufig"
     },
     {
       "name": "Protist · Amöbe",
-      "convergencePct": 4.525,
+      "convergencePct": 3.859,
       "tier": "gelegentlich"
     },
     {
       "name": "Euglenoid · Mixotroph",
-      "convergencePct": 6.714,
+      "convergencePct": 8.813,
       "tier": "haeufig"
     },
     {
       "name": "Plankton",
-      "convergencePct": 1.613,
-      "tier": "selten"
+      "convergencePct": 2.317,
+      "tier": "gelegentlich"
     },
     {
       "name": "Grünalge",
-      "convergencePct": 0.288,
+      "convergencePct": 0.269,
       "tier": "sehr-selten"
     },
     {
@@ -44,7 +44,7 @@
     },
     {
       "name": "Kraut · niedrige Pflanze",
-      "convergencePct": 0.461,
+      "convergencePct": 0.48,
       "tier": "sehr-selten"
     },
     {
@@ -54,62 +54,62 @@
     },
     {
       "name": "Verholzter Strauch",
-      "convergencePct": 2.912,
+      "convergencePct": 2.758,
       "tier": "gelegentlich"
     },
     {
       "name": "Laubbaum",
-      "convergencePct": 1.978,
+      "convergencePct": 1.69,
       "tier": "selten"
     },
     {
       "name": "Nadelbaum",
-      "convergencePct": 0.614,
+      "convergencePct": 0.55,
       "tier": "selten"
     },
     {
       "name": "Sukkulente · Kaktus",
-      "convergencePct": 0.614,
-      "tier": "selten"
+      "convergencePct": 0.384,
+      "tier": "sehr-selten"
     },
     {
       "name": "Polster-Kältepflanze",
-      "convergencePct": 1.44,
+      "convergencePct": 1.299,
       "tier": "selten"
     },
     {
       "name": "Hutpilz",
-      "convergencePct": 0.192,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Baumpilz · Porling",
-      "convergencePct": 2.336,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Zunderschwamm",
       "convergencePct": 0,
       "tier": "legendaer"
     },
     {
+      "name": "Baumpilz · Porling",
+      "convergencePct": 0.128,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Zunderschwamm",
+      "convergencePct": 0.058,
+      "tier": "sehr-selten"
+    },
+    {
       "name": "Myzel · Pilzgeflecht",
-      "convergencePct": 7.27,
+      "convergencePct": 6.33,
       "tier": "haeufig"
     },
     {
       "name": "Schimmel · Fadenpilz",
-      "convergencePct": 0.013,
-      "tier": "sehr-selten"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Flechte · Symbiose",
-      "convergencePct": 2.17,
-      "tier": "gelegentlich"
+      "convergencePct": 1.734,
+      "tier": "selten"
     },
     {
       "name": "Hefe",
-      "convergencePct": 4.25,
+      "convergencePct": 4.09,
       "tier": "gelegentlich"
     },
     {
@@ -119,8 +119,8 @@
     },
     {
       "name": "Koralle · Riffbildner",
-      "convergencePct": 2.029,
-      "tier": "gelegentlich"
+      "convergencePct": 1.562,
+      "tier": "selten"
     },
     {
       "name": "Wurm",
@@ -134,17 +134,17 @@
     },
     {
       "name": "Kopffüßer · Tintenfisch",
-      "convergencePct": 0.928,
-      "tier": "selten"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Krebstier · Arthropode",
-      "convergencePct": 4.147,
-      "tier": "gelegentlich"
+      "convergencePct": 7.597,
+      "tier": "haeufig"
     },
     {
       "name": "Insekt · Gliederfüßer",
-      "convergencePct": 2.829,
+      "convergencePct": 3.462,
       "tier": "gelegentlich"
     },
     {
@@ -159,53 +159,63 @@
     },
     {
       "name": "Reptil · Echse",
-      "convergencePct": 0.742,
-      "tier": "selten"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Gepanzertes Beutetier",
-      "convergencePct": 4.634,
+      "convergencePct": 5.357,
       "tier": "gelegentlich"
     },
     {
+      "name": "Fluginsekt · Segler",
+      "convergencePct": 0.448,
+      "tier": "sehr-selten"
+    },
+    {
       "name": "Flatterer · Vogel",
-      "convergencePct": 1.088,
+      "convergencePct": 4.224,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Flugsäuger · Fledermaus",
+      "convergencePct": 1.549,
       "tier": "selten"
     },
     {
       "name": "Fell-Warmblüter",
-      "convergencePct": 6.752,
+      "convergencePct": 7.014,
       "tier": "haeufig"
     },
     {
       "name": "Fell-Großtier",
-      "convergencePct": 0.915,
-      "tier": "selten"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Aktiver Großjäger",
-      "convergencePct": 4.064,
-      "tier": "gelegentlich"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Gepanzerter Koloss",
-      "convergencePct": 3.226,
-      "tier": "gelegentlich"
+      "convergencePct": 0,
+      "tier": "legendaer"
     },
     {
       "name": "Behänder Kletterer",
-      "convergencePct": 0.173,
-      "tier": "sehr-selten"
+      "convergencePct": 1.088,
+      "tier": "selten"
     },
     {
       "name": "Kleines flinkes Tier",
-      "convergencePct": 7.456,
+      "convergencePct": 10.771,
       "tier": "haeufig"
     },
     {
       "name": "Generalisten-Tier",
-      "convergencePct": 3.994,
-      "tier": "gelegentlich"
+      "convergencePct": 0.205,
+      "tier": "sehr-selten"
     }
   ]
 }

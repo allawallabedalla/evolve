@@ -30,8 +30,9 @@ TRAITS = [
     "photosynthesis",
     "mobility",
     "structure",
+    "wing",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE = 0, 1, 2, 3, 4, 5, 6, 7
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING = 0, 1, 2, 3, 4, 5, 6, 7, 8
 
 
 def _clamp01(x: float) -> float:
@@ -52,6 +53,14 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     photo = traits[PHOTO]
     mobility = traits[MOBILITY]
     structure = traits[STRUCTURE]
+    wing = traits[WING]
+
+    # Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
+    flight = (
+        wing
+        * _clamp01(1.0 - size * phys["flightSizePenalty"])
+        * (phys["flightMetabFloor"] + (1.0 - phys["flightMetabFloor"]) * metabolism)
+    )
 
     # 1) Thermoregulation (quadratisch, glatter Peak)
     thermal_ideal = 1.0 - env["temperature"]
@@ -66,7 +75,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         photo * env["light"] * env["water"] * light_access * photo_size * (1.0 - phys["exclusion"] * mobility)
     )
 
-    reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"])
+    reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"] + flight * phys["flightReach"])
     if env["foodHeight"] <= reach:
         access = 1.0
     else:
@@ -107,6 +116,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + photo * m["photosynthesis"]
         + mobility * m["mobility"]
         + structure * m["structure"]
+        + wing * m["wing"]
         + metabolism * metabolism * mq["metabolism"]
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -120,6 +130,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + structure * phys["defenseFromStructure"]
         + size * phys["defenseFromSize"]
         + mobility * phys["defenseFromMobility"]
+        + flight * phys["defenseFromFlight"]
     )
     pred_survival = 1.0 - env["predation"] * (1.0 - defense)
 

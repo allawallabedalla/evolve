@@ -14,6 +14,7 @@ export const TRAITS = [
   "photosynthesis",
   "mobility",
   "structure",
+  "wing",
 ] as const;
 export type TraitName = (typeof TRAITS)[number];
 
@@ -43,6 +44,10 @@ export interface Physics {
   heightPenalty: number;
   forageBase: number;
   forageMetabolism: number;
+  flightSizePenalty: number;
+  flightMetabFloor: number;
+  flightReach: number;
+  defenseFromFlight: number;
   absorbYield: number;
   absorbBase: number;
   absorbMetabolism: number;
@@ -56,6 +61,7 @@ export interface Physics {
     photosynthesis: number;
     mobility: number;
     structure: number;
+    wing: number;
   };
   maintenanceQuad: {
     metabolism: number;
@@ -90,7 +96,7 @@ export interface EngineParams {
 }
 
 export const DEFAULT_ENGINE_PARAMS: EngineParams = {
-  responseRate: [0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15],
+  responseRate: [0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15],
   mutationRate: 0.03,
   selectionStrength: 1.5,
   varianceWeight: 0.5,
