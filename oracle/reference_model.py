@@ -57,11 +57,16 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     wing = traits[WING]
     biolum = traits[BIOLUM] if len(traits) > BIOLUM else 0.0
 
-    # Flug (AXIS-1): nur leichte, aktive Koerper fliegen.
+    # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
+    # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
+    land_factor = 1.0 - _clamp01((env["water"] - phys["aquaticWaterFloor"]) / (1.0 - phys["aquaticWaterFloor"]))
+
+    # Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Unter Wasser kein Flug.
     flight = (
         wing
         * _clamp01(1.0 - size * phys["flightSizePenalty"])
         * (phys["flightMetabFloor"] + (1.0 - phys["flightMetabFloor"]) * metabolism)
+        * land_factor
     )
 
     # 1) Thermoregulation (quadratisch, glatter Peak)
@@ -86,7 +91,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         photo * env["light"] * env["water"] * light_access * photo_size * photo_thermal * (1.0 - phys["exclusion"] * mobility)
     )
 
-    reach = _clamp01(limb * phys["reachFromLimb"] + size * phys["reachFromSize"] + flight * phys["flightReach"])
+    # Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND
+    # (limb*land_factor). Unter Wasser schwimmt man hinauf (aquatische Jagd) -
+    # keine absurden Beine/Fluegel mehr beim Tiefsee-Schwimmer fuers "hohe" Futter.
+    reach = _clamp01(limb * phys["reachFromLimb"] * land_factor + size * phys["reachFromSize"] + flight * phys["flightReach"])
     if env["foodHeight"] <= reach:
         access = 1.0
     else:

@@ -34,12 +34,18 @@ export function fitness(traits, env, phys) {
     const structure = traits[STRUCTURE];
     const wing = traits[WING];
     const biolum = traits[BIOLUM] ?? 0;
+    // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
+    // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
+    // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
+    // bildete ein Tiefsee-Schwimmer absurde Beine/Fluegel fuers "hohe" Futter.
+    const landFactor = 1 - clamp01((env.water - phys.aquaticWaterFloor) / (1 - phys.aquaticWaterFloor));
     // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Grosse Masse (size) macht
-    // Fluegel wirkungslos, hoher Stoffwechsel treibt den Flug an. Zwei Auszahlungen
-    // unten: (a) erreicht hohe Nahrung/Licht ohne Reichweiten-Strafe, (b) Flucht.
+    // Fluegel wirkungslos, hoher Stoffwechsel treibt den Flug an. Unter Wasser kein
+    // Flug (landFactor). Zwei Auszahlungen: (a) erreicht hohe Nahrung, (b) Flucht.
     const flight = wing *
         clamp01(1 - size * phys.flightSizePenalty) *
-        (phys.flightMetabFloor + (1 - phys.flightMetabFloor) * metabolism);
+        (phys.flightMetabFloor + (1 - phys.flightMetabFloor) * metabolism) *
+        landFactor;
     // 1) Thermoregulation (universell): ideale Isolation = Kaelte.
     //    Quadratisch (glatter Peak, kein Knick) - verhindert das Ueberschwingen /
     //    die Oszillation der gradientenbasierten Engine bei mittlerer Temperatur.
@@ -68,7 +74,12 @@ export function fitness(traits, env, phys) {
     const energyPhoto = photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
     //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
     //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
-    const reach = clamp01(limb * phys.reachFromLimb + size * phys.reachFromSize + flight * phys.flightReach);
+    //       Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND
+    //       (limb*landFactor). Unter Wasser greift man hohes Futter nicht mit langen
+    //       Beinen - man schwimmt hinauf (aquatische Jagd). So bildet der Tiefsee-
+    //       Schwimmer keine absurden Beine/Fluegel mehr, nur weil das Futter "hoch"
+    //       stand. Groesse zaehlt weiter (grosse Koerper ragen ohnehin hoch).
+    const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
     const access = env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
     const energyForage = mobility *
         env.foodAbundance *
