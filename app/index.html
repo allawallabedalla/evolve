@@ -77,7 +77,9 @@
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; border-top: 1px solid var(--line-soft); }
   .kingdom { text-transform: uppercase; letter-spacing: .18em; font-size: .68rem; color: var(--bio-dim); }
-  .species { font-family: var(--serif); font-style: italic; font-size: 1.55rem; text-wrap: balance; margin: 2px 0 6px; display: flex; align-items: center; gap: 10px; }
+  .species { font-family: var(--serif); font-style: italic; font-size: 1.55rem; text-wrap: balance; margin: 2px 0 6px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .species-wiki { font-family: var(--mono); font-style: normal; font-size: .68rem; color: var(--bio-dim); text-decoration: none; white-space: nowrap; }
+  .species-wiki:hover { color: var(--bio); text-decoration: underline; }
   .species .emoji { font-style: normal; font-size: 1.5rem; }
   .bauplan { color: var(--muted); font-size: .9rem; }
 
@@ -352,7 +354,7 @@
       <div class="card">
         <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
         <div class="kingdom" id="kingdom">—</div>
-        <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span></div>
+        <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
         <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
           <span class="vit-label" id="vitLabel">Vitalität</span>
@@ -428,7 +430,7 @@
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
         <button id="worldClose" class="link">schließen</button>
       </div>
-      <p class="wl-sub">Der erste Ort ist <b>deine Linie</b> <span class="wl-you">du</span> — dasselbe Wesen wie oben, in die weite Welt entlassen. Die anderen Orte gehen ihren eigenen Weg; Arten entstehen als <b>Cluster</b> aus Selektion und Zufall. Wähle einen Ort und <b>provoziere</b> seine Evolution.</p>
+      <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>provoziere</b> einen mit den Knöpfen und beobachte, was entsteht.</p>
       <div class="wl-grid">
         <div>
           <div class="wl-map" id="wlMap"><div class="wl-loading" id="wlLoading">Welt erwacht … (berechne emergente Rarität)</div></div>
@@ -461,7 +463,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.7.0";
+const APP_VERSION = "v0.8.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2053,7 +2055,7 @@ window.__mainSim = {
 };
 // Aktueller Zustand der Spieler-Linie (Genom, Umwelt, Name) — damit das Welt-Overlay
 // „dein Wesen" als eigenen Ort in die Welt setzen kann (Zoom-Vision).
-window.__evolvePet = () => ({ genome: (displayGenome||genome).slice(), env: { ...env }, name: (creatureName||"").trim(), generation });
+window.__evolvePet = () => ({ genome: (displayGenome||genome).slice(), env: { ...env }, name: (creatureName||"").trim(), generation, form: committedArch && committedArch.n });
 
 boot();
 requestAnimationFrame(frame);
@@ -2073,7 +2075,7 @@ try {
   const { census } = await import("./core/world/census.js");
   const { describe } = await import("./core/world/describe.js");
   const { rarityMap } = await import("./core/world/rarity.js");
-  const { realExample } = await import("./exemplar.js");
+  const { realExample, archetypeWiki } = await import("./exemplar.js");
 
   const BIOMES = [
     ["Eiszeit",   { temperature:.08, predation:.15, foodAbundance:.55, foodHeight:.15, light:.4,  water:.5  }],
@@ -2131,12 +2133,12 @@ try {
       const badge = s.rarity ? ` <span class="rar" style="color:${RTONE[s.rarity]||'var(--muted)'}">● ${s.rarity}</span>` : "";
       const ex = realExample(s.name);
       const real = `<a class="wl-real" href="${ex.wiki}" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen">≈ ${ex.name} ↗</a>`;
-      return `<li><span class="wl-cre-sm">${ic(ex.icon)}</span> ${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span> ${real}</li>`;
+      return `<li><span class="wl-cre-sm">${ic(ex.icon)}</span> ${s.name} ${real} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
     }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
   }
 
   const petState = () => (window.__evolvePet && window.__evolvePet()) || null;
-  const petName = (p) => (p && p.name) ? p.name : "Deine Linie";
+  const petName = (p) => (p && p.name) ? p.name : "Dein Wesen";
 
   // Ort 0 (deine Linie) aus dem AKTUELLEN Wesen neu setzen — bei jedem Öffnen, damit
   // die Welt zeigt, was oben gerade lebt (das Wesen entwickelt sich zwischen Besuchen weiter).
@@ -2200,6 +2202,18 @@ try {
   el("wlConnect").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.connect(sel, j, 0.28); render(); });
   el("wlIsolate").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.isolate(sel, j); render(); });
   el("wlPause").addEventListener("click", (e) => { paused = !paused; e.currentTarget.innerHTML = (paused ? ic("play") + " Weiter" : ic("pause") + " Pause"); });
+
+  // „≈ in echt"-Link direkt neben dem Namen deines Wesens (Hauptansicht) — didaktischer
+  // Verweis aufs reale Vorbild, laufend an die aktuelle Form angepasst.
+  function updateSpeciesWiki() {
+    const a = el("speciesWiki"); const pet = petState();
+    if (!a || !pet) return;
+    // Exakt zum angezeigten Namen (classify) — fällt auf die emergente Form zurück.
+    const ex = (pet.form && archetypeWiki(pet.form)) || realExample(describe(pet.genome));
+    if (a.dataset.k !== ex.wiki) { a.href = ex.wiki; a.textContent = "≈ " + ex.name + " ↗"; a.hidden = false; a.dataset.k = ex.wiki; }
+  }
+  updateSpeciesWiki();
+  setInterval(updateSpeciesWiki, 700);
 } catch (err) {
   console.error("Lebende Welt (Beta) konnte nicht geladen werden:", err);
   const b = document.getElementById("worldBtn"); if (b) b.style.display = "none";

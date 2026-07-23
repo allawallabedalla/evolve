@@ -1,7 +1,7 @@
 // Test des „≈ in echt"-Mappings (app/exemplar.js): jede emergente Art bekommt ein
 // reales Vorbild + eine valide deutsche Wikipedia-URL. Deckt alle Reiche ab und prüft,
 // dass Merkmale die Wahl sinnvoll steuern (geflügeltes Tier -> Fledermaus/Schmetterling).
-import { realExample } from "../app/exemplar.js";
+import { realExample, archetypeWiki } from "../app/exemplar.js";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,5 +48,15 @@ console.log(`\n  ${iconKeys.size} Icon-Schlüssel im App-Set gefunden.`);
 console.log(`  Alle Vorbild-Icons existieren:    ${iconsOk ? "OK" : "FAIL"}`);
 console.log(`  Alle Reiche liefern ein Vorbild:  ${allKingdoms ? "OK" : "FAIL"}`);
 
-if (ok && iconsOk && allKingdoms) console.log("\nStatus: OK — jede Art hat Vorbild, Wikipedia-URL und ein existierendes flaches Icon.");
+// Jeder App-Archetyp (classify().n = FICON-Schlüssel) braucht ein Wikipedia-Vorbild
+// für den „≈ in echt"-Link neben dem Namen in der Hauptansicht.
+const ficonStart = html.indexOf("const FICON = {");
+const ficonBlock = html.slice(ficonStart, html.indexOf("\n};", ficonStart));
+const archNames = [...ficonBlock.matchAll(/"([^"]+)"\s*:/g)].map((m) => m[1]);
+const missing = archNames.filter((n) => !archetypeWiki(n));
+console.log(`\n  ${archNames.length} App-Archetypen; ohne Wikipedia-Vorbild: ${missing.length}`);
+if (missing.length) console.log("    FEHLT: " + missing.join(", "));
+const archOk = missing.length === 0 && archNames.length > 30;
+
+if (ok && iconsOk && allKingdoms && archOk) console.log("\nStatus: OK — Welt-Formen UND App-Archetypen haben Vorbild + Wikipedia + Icon.");
 else { console.log("\nStatus: FAIL."); process.exit(1); }
