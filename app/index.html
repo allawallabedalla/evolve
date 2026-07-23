@@ -80,6 +80,17 @@
   .species .emoji { font-style: normal; font-size: 1.5rem; }
   .bauplan { color: var(--muted); font-size: .9rem; }
 
+  /* ---- Name & Ahnenlinie (A4) ---- */
+  .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .cname-txt { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--bio); }
+  .cname-txt.unnamed { font-family: var(--mono); font-style: normal; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .cname-edit { font-size: .85rem; text-decoration: none; }
+  .ancestry { margin-top: 10px; font-family: var(--mono); font-size: .66rem; color: var(--muted); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ancestry[hidden] { display: none; }
+  .ancestry .anc { display: inline-flex; align-items: center; gap: 3px; }
+  .ancestry .anc .ic { width: .95rem; height: .95rem; }
+  .ancestry .sep { color: var(--bio-dim); }
+
   /* ---- Genom-Ausgabe ---- */
   .genes { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; margin-top: 16px; }
   @media (max-width: 400px) { .genes { grid-template-columns: 1fr; } }
@@ -273,6 +284,7 @@
         </div>
       </div>
       <div class="card">
+        <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
         <div class="kingdom" id="kingdom">—</div>
         <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span></div>
         <div class="bauplan" id="bauplan">Ein undifferenziertes Wesen. Stell eine Umwelt ein und lass es sich entwickeln.</div>
@@ -283,6 +295,7 @@
         </div>
         <div class="genes" id="genes"></div>
         <button class="disc" id="discBtn" title="Genbuch öffnen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
+        <div class="ancestry" id="ancestryRow" hidden></div>
       </div>
     </div>
 
@@ -617,6 +630,9 @@ let displayGenome = new Array(8).fill(0.5);   // geglaettete Anzeige (gleitender
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
 let rng, randn, lineageSeed = 0;
 let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
+// A4 Bindung: Name des aktuellen Wesens + Ahnenlinie (aelteste zuerst, gekappt).
+let creatureName = "";
+let ancestry = [];   // [{name, form, gen}]
 // Committed Archetyp mit Hysterese: Art/Zeichnung/Unlock wechseln erst, wenn eine
 // neue Form ~STABLE_GENS Generationen STABIL gehalten wird. Verhindert (a) Unlock
 // kurz ueberstreifter Formen und (b) spontanes Umschalten an classify()-Schwellen.
@@ -629,6 +645,7 @@ function newLineage(){
   lineageSeed = (Math.random()*4294967296)>>>0;
   rng = mulberry32(lineageSeed); randn = makeRandn();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  creatureName = "";
 }
 newLineage();
 
@@ -649,11 +666,11 @@ function saveState(){
     cloudTimer = setTimeout(async () => { cloudTimer = null;
       try { await sb.from("creatures").upsert({
         user_id: session.user.id, genome, env, generation,
-        lineage_seed: lineageSeed, discovered:[...discovered], last_seen: new Date().toISOString()
+        lineage_seed: lineageSeed, discovered:[...discovered], name: creatureName || null, last_seen: new Date().toISOString()
       }); } catch(e) { console.warn("save", e); }
     }, 2000);
   } else {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ genome, env, generation, lineageSeed, discovered:[...discovered], ts: now })); } catch(e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ genome, env, generation, lineageSeed, discovered:[...discovered], name: creatureName, ancestry, ts: now })); } catch(e) {}
   }
 }
 function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
@@ -811,6 +828,8 @@ function applyState(s){
     LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } }); }
   generation = s.generation || 0;
   discovered = new Set(s.discovered || []);
+  creatureName = s.name || "";
+  ancestry = Array.isArray(s.ancestry) ? s.ancestry : ancestry;   // Ahnenlinie: lokal (Cloud-Zeile hat keine Spalte)
   lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
   rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
   displayGenome = genome.slice();
@@ -841,7 +860,7 @@ async function restore(){
     let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { s = null; }
     if(s && Array.isArray(s.genome) && s.genome.length===8){ applyState(s); offlineCatchup(s.ts); }
   }
-  updatePanels(); updateDisc();
+  updatePanels(); updateDisc(); updateBonding();
   maybeOnboard();
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
@@ -1026,6 +1045,20 @@ function updatePanels(g, a){
   document.getElementById("vitLabel").textContent = "Vitalität · " + word;
   document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
 }
+// A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
+function updateBonding(){
+  const c = document.getElementById("cname");
+  if(creatureName){ c.textContent = creatureName; c.classList.remove("unnamed"); }
+  else { c.textContent = "Unbenannt"; c.classList.add("unnamed"); }
+  const row = document.getElementById("ancestryRow");
+  if(!ancestry.length){ row.hidden = true; row.innerHTML = ""; return; }
+  row.hidden = false;
+  const shown = ancestry.slice(-4);
+  const lead = ancestry.length > shown.length ? `<span class="sep">…›</span>` : `<span class="sep">Ahnen:</span>`;
+  row.innerHTML = lead + shown.map(a =>
+    `<span class="anc">${formIcon(a.form)}${a.name || a.form.split(" · ")[0]}</span>`
+  ).join(`<span class="sep">›</span>`);
+}
 
 // ---- Zeit-Steuerung ----
 const playBtn = document.getElementById("playBtn");
@@ -1043,12 +1076,22 @@ const speedsEl = document.getElementById("speeds");
   speedsEl.appendChild(b);
 });
 document.getElementById("newLifeBtn").addEventListener("click", () => {
-  if(!confirm("Neues Leben starten? Dein jetziges Wesen geht dabei verloren.")) return;
+  if(!confirm("Neues Leben als Nachkomme starten? Das jetzige Wesen zieht in die Ahnenlinie.")) return;
+  // A4: aktuelles Wesen als Ahne aufzeichnen (Linie ueberlebt "Neues Leben").
+  ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
+  if(ancestry.length > 12) ancestry = ancestry.slice(-12);
   newLineage();
   document.getElementById("reveal").hidden = true;
   document.getElementById("biomeTag").textContent = lastBiome;
   document.getElementById("genReadout").textContent = "Generation 0";
-  updatePanels(); saveState();
+  updatePanels(); updateBonding(); saveState();
+});
+// A4: Wesen benennen.
+document.getElementById("nameBtn").addEventListener("click", () => {
+  const v = prompt("Wie soll dein Wesen heißen?", creatureName || "");
+  if(v === null) return;
+  creatureName = v.trim().slice(0, 24);
+  updateBonding(); saveState();
 });
 document.getElementById("revealX").addEventListener("click", () => { document.getElementById("reveal").hidden = true; });
 // Speicher-Kadenz
@@ -1734,7 +1777,7 @@ document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neues Leben";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
 playBtn.innerHTML = ic("pause");
-resize(); initMotes(); updatePanels(); updateDisc();
+resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
 boot();
 requestAnimationFrame(frame);
 </script>
