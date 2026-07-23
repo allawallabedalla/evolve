@@ -8,6 +8,40 @@
 
 const W = (title) => "https://de.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_"));
 
+// Direkte, exakte Zuordnung der App-Archetyp-Namen (classify().n) auf ihr reales
+// Wikipedia-Vorbild — für den „≈ in echt"-Link neben dem Namen in der HAUPTansicht.
+// (Die Welt-Chronik nutzt realExample() für ihre EMERGENTEN Formen.)
+const ARCH_WIKI = {
+  "Grünalge": ["Grünalge","Grünalgen"], "Moos": ["Moos","Laubmoose"], "Farn": ["Farn","Farne"],
+  "Kraut · niedrige Pflanze": ["Kraut","Kräuter"], "Blütenkraut": ["Blütenpflanze","Blütenpflanzen"],
+  "Verholzter Strauch": ["Strauch","Strauch"], "Laubbaum": ["Laubbaum","Laubbäume"],
+  "Nadelbaum": ["Nadelbaum","Koniferen"], "Sukkulente · Kaktus": ["Kaktus","Kakteen"],
+  "Polster-Kältepflanze": ["Polsterpflanze","Polsterpflanze"],
+  "Wurm": ["Wurm","Würmer"], "Insekt · Gliederfüßer": ["Insekt","Insekten"],
+  "Krebstier · Arthropode": ["Krebstier","Krebstiere"], "Fisch · Aalform": ["Fisch","Fische"],
+  "Reptil · Echse": ["Echse","Echsen"], "Gepanzertes Beutetier": ["Schildkröte","Schildkröten"],
+  "Flatterer · Vogel": ["Vogel","Vögel"], "Fluginsekt · Segler": ["Fluginsekt","Fluginsekten"],
+  "Flugsäuger · Fledermaus": ["Fledermaus","Fledertiere"], "Fell-Warmblüter": ["Säugetier","Säugetiere"],
+  "Fell-Großtier": ["Bär","Bären"], "Aktiver Großjäger": ["Raubtier","Raubtiere"],
+  "Gepanzerter Koloss": ["Nashorn","Nashörner"], "Behänder Kletterer": ["Primat","Primaten"],
+  "Kleines flinkes Tier": ["Nagetier","Nagetiere"], "Generalisten-Tier": ["Säugetier","Säugetiere"],
+  "Hutpilz": ["Hutpilz","Ständerpilze"], "Baumpilz · Porling": ["Porling","Porlinge"],
+  "Zunderschwamm": ["Zunderschwamm","Zunderschwamm"], "Myzel · Pilzgeflecht": ["Myzel","Myzel"],
+  "Schimmel · Fadenpilz": ["Schimmelpilz","Schimmelpilze"], "Flechte · Symbiose": ["Flechte","Flechte"],
+  "Hefe": ["Hefe","Hefen"], "Bakterie": ["Bakterie","Bakterien"], "Archaee · Extremophil": ["Archaee","Archaeen"],
+  "Protist · Amöbe": ["Amöbe","Amöben"], "Euglenoid · Mixotroph": ["Augentierchen","Euglena"],
+  "Plankton": ["Plankton","Plankton"], "Schnecke · Weichtier": ["Schnecke","Schnecken"],
+  "Kopffüßer · Tintenfisch": ["Tintenfisch","Kopffüßer"], "Amphibie · Lurch": ["Amphibie","Amphibien"],
+  "Koralle · Riffbildner": ["Koralle","Korallen"], "Schwamm": ["Schwamm","Schwämme"],
+};
+
+/** Reales Vorbild + Wikipedia-URL zu einem konkreten App-Archetyp-Namen (Hauptansicht). */
+export function archetypeWiki(archName) {
+  const e = ARCH_WIKI[archName];
+  if (!e) return null;
+  return { name: e[0], wiki: W(e[1]) };
+}
+
 /**
  * Reales Vorbild zu einem emergenten Art-Namen: Anzeige-Name, Wikipedia-URL UND ein
  * passendes flaches Icon (Schlüssel aus dem App-Icon-Set) — damit die kleine Silhouette
