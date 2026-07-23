@@ -477,7 +477,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.10.0";
+const APP_VERSION = "v0.11.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2098,13 +2098,6 @@ try {
   const { rarityMap } = await import("./core/world/rarity.js");
   const { realExample, archetypeWiki } = await import("./exemplar.js");
 
-  const BIOMES = [
-    ["Eiszeit",   { temperature:.08, predation:.15, foodAbundance:.55, foodHeight:.15, light:.4,  water:.5  }],
-    ["Dschungel", { temperature:.6,  predation:.4,  foodAbundance:.85, foodHeight:.8,  light:.5,  water:.8  }],
-    ["Wüste",     { temperature:.92, predation:.1,  foodAbundance:.3,  foodHeight:.1,  light:.9,  water:.15 }],
-    ["Tiefsee",   { temperature:.35, predation:.5,  foodAbundance:.2,  foodHeight:.05, light:.05, water:1.  }],
-    ["Savanne",   { temperature:.7,  predation:.6,  foodAbundance:.6,  foodHeight:.3,  light:.7,  water:.4  }],
-  ];
   const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio)", "selten":"#6fd0ff", "sehr selten":"#b98cff", "legendär":"var(--gold)" };
   const ic = window.__ic || (() => "");
 
@@ -2201,6 +2194,43 @@ try {
     }).join("") || `<li class="pl">— noch keine Art gefestigt —</li>`;
   }
 
+  // Prozedurale Orte: ein Ort = gezogener RAHMEN aus Geografie × Klima. Die Geografie
+  // verschiebt das Klima (Deltas) und bestimmt, ob der Ort isoliert liegt (eigene Insel
+  // der Evolution) — z. B. „Hochplateau · Nebelwald (isoliert)". Jede Welt ist einzigartig.
+  const GEOS = [
+    { n:"Hochplateau",     iso:true,  d:{ temperature:-0.15, water:-0.20, light:+0.10, foodHeight:+0.10 } },
+    { n:"Insel",           iso:true,  d:{ water:+0.20, predation:-0.15 } },
+    { n:"Höhlensystem",    iso:true,  d:{ light:-0.45, temperature:-0.05, foodAbundance:-0.15 } },
+    { n:"Vulkankessel",    iso:true,  d:{ temperature:+0.28, water:-0.10, predation:+0.05 } },
+    { n:"Tiefseegraben",   iso:true,  d:{ water:+0.45, light:-0.50, temperature:-0.10 } },
+    { n:"Küste",           iso:false, d:{ water:+0.30, foodAbundance:+0.10 } },
+    { n:"Weite Ebene",     iso:false, d:{ foodHeight:-0.08, predation:+0.05 } },
+    { n:"Flussdelta",      iso:false, d:{ water:+0.20, foodAbundance:+0.20 } },
+  ];
+  const CLIMATES = [
+    { n:"Nebelwald",    e:{ temperature:.5, water:.8, light:.4, foodAbundance:.7, foodHeight:.7, predation:.3 } },
+    { n:"Regenwald",    e:{ temperature:.65,water:.85,light:.5, foodAbundance:.85,foodHeight:.8, predation:.4 } },
+    { n:"Wüste",        e:{ temperature:.9, water:.12,light:.95,foodAbundance:.25,foodHeight:.1, predation:.15 } },
+    { n:"Tundra",       e:{ temperature:.1, water:.4, light:.45,foodAbundance:.45,foodHeight:.15,predation:.2 } },
+    { n:"Steppe",       e:{ temperature:.6, water:.35,light:.7, foodAbundance:.55,foodHeight:.3, predation:.5 } },
+    { n:"Korallenriff", e:{ temperature:.5, water:.95,light:.6, foodAbundance:.6, foodHeight:.2, predation:.4 } },
+    { n:"Sumpfland",    e:{ temperature:.55,water:.9, light:.5, foodAbundance:.4, foodHeight:.2, predation:.35 } },
+    { n:"Savanne",      e:{ temperature:.7, water:.4, light:.75,foodAbundance:.6, foodHeight:.35,predation:.6 } },
+  ];
+  const clamp01x = (x) => x < 0.02 ? 0.02 : x > 1 ? 1 : x;
+  function generatePlaces(count) {
+    const geos = GEOS.slice(), clims = CLIMATES.slice(), out = [], seen = new Set();
+    while (out.length < count && (geos.length || clims.length)) {
+      const g = GEOS[(Math.random() * GEOS.length) | 0];
+      const c = CLIMATES[(Math.random() * CLIMATES.length) | 0];
+      const key = g.n + "|" + c.n; if (seen.has(key)) continue; seen.add(key);
+      const env = { ...c.e };
+      for (const k in (g.d || {})) env[k] = clamp01x((env[k] ?? 0.5) + g.d[k]);
+      out.push({ name: `${g.n} · ${c.n}`, env, isolated: g.iso });
+    }
+    return out;
+  }
+
   const petState = () => (window.__evolvePet && window.__evolvePet()) || null;
   const petName = (p) => (p && p.name) ? p.name : "Dein Wesen";
 
@@ -2219,14 +2249,16 @@ try {
     if (booted) return; booted = true;
     const phys = await fetch("./core/physics-v2.json").then((r) => r.json());
     const NG = phys.traits.length;
-    world = new World({ phys, popConfig: { numGenes: NG }, seed: 20240808 });
-    // Ort 0 = deine Linie (aus dem echten Genom), danach die festen Biome.
+    world = new World({ phys, popConfig: { numGenes: NG }, seed: (Math.random() * 4294967296) >>> 0 });
+    // Ort 0 = dein Wesen (aus dem echten Genom).
     const pet = petState();
     world.addPlace(petName(pet), pet ? pet.env : { temperature:.5, predation:.3, foodAbundance:.5, foodHeight:.2, light:.5, water:.6 }, 0.5, pet ? pet.genome : undefined);
-    for (const [n, e] of BIOMES) world.addPlace(n, e);
-    // Nur die Biome (Index 1..) schwach untereinander verbinden; deine Linie (0) bleibt
-    // isoliert — ihre eigene Insel. (verbinden/trennen war als Hebel unverständlich.)
-    for (let i = 1; i + 1 < world.places.length; i++) world.connect(i, i+1, 0.02);
+    // Prozedural gezogene Orte (Geografie × Klima × Isolation) — jede Welt einzigartig.
+    const drawn = generatePlaces(5);
+    for (const pl of drawn) world.addPlace(pl.name, pl.env);
+    // Nicht-isolierte Orte schwach untereinander verbinden (Kette); Inseln bleiben getrennt.
+    const chain = drawn.map((pl, k) => ({ i: k + 1, iso: pl.isolated })).filter((x) => !x.iso).map((x) => x.i);
+    for (let a = 0; a + 1 < chain.length; a++) world.connect(chain[a], chain[a + 1], 0.12);
     // Aufwärmen: die Biome brauchen ~150 Generationen, um ihren je eigenen Weg zu gehen
     // (allopatrische Divergenz). Vorlaufen lassen, damit die Welt bereits VIELFÄLTIG öffnet
     // statt als lauter identische Generalisten. (Ort 0 wird beim Öffnen ohnehin neu gesetzt.)
