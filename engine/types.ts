@@ -60,6 +60,7 @@ export interface Physics {
   maintenanceQuad: {
     metabolism: number;
     mobility: number;
+    armor: number;
   };
   nutritionFloor: number;
   energyScale: number;

@@ -99,10 +99,14 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     photo * m.photosynthesis +
     mobility * m.mobility +
     structure * m.structure +
-    // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet werden
+    // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
+    // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
+    // universeller Gewinner (~30% aller Umwelten drei Panzer-Formen) -> Verteilung
+    // entzerrt, mittlere Umwelten bringen wieder vielfaeltige Baupläne.
     metabolism * metabolism * mq.metabolism +
-    mobility * mobility * mq.mobility;
+    mobility * mobility * mq.mobility +
+    armor * armor * mq.armor;
 
   // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
   // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig

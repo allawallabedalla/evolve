@@ -52,6 +52,19 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - UX-Quick-Wins: Entdeckungs-Toast, lo/hi-Regler-Labels, „Neues Leben"-Rückfrage,
   Passwort-Reset, Auto-Login-Fallback.
 
+### Engine-Pass BAL-5 — Verteilung entzerrt (Session 2026-07)
+- **BAL-5 / CLS-4 · Panzer-Grenzkosten** (`physics.json` v3→v3.1): neuer Term
+  `maintenanceQuad.armor = 0.15` (steigende Grenzkosten der Panzerung, analog zu
+  Stoffwechsel/Mobilität). **Diagnose:** „gepanzert + mobil" war ein fast universeller
+  Gewinner — die **drei Panzer-Formen** (Gepanzertes Beutetier 13,7 % + Krebstier 11,5 %
+  + Koloss 5,2 %) = **~30 % aller Umwelten**, derselbe Attraktor nur nach Größe/Gliedmaßen
+  getrennt. **Fix:** Panzer maximiert sich nicht mehr gratis → mittlere Umwelten bringen
+  wieder vielfältige Baupläne (Kleines flinkes Tier, Fell-Warmblüter, Generalist …).
+  Gini der Formen-Verteilung **0,61 → 0,50**, Panzer-Trio **30 % → 12 %**, alle Formen
+  erhalten; **Reptil · Echse** wieder als Attraktor erreichbar. In alle drei Fitness-Kopien
+  gespiegelt. **Re-Validierung:** Parität exakt (1,1e-16), Validität **86,0 %** (im Band),
+  Ökologie C1–C6 ✓. `docs/rarity.json` + App-`RARITY` neu erzeugt (jetzt 8 legendäre Formen).
+
 ### Rarität / Entdeckungs-Tiefe (Session 2026-07)
 - **Rarität-Unlock** umgesetzt: je Form ein Seltenheits-Rang aus dem deterministischen
   Ökologie-Sweep (`docs/rarity.json`, 5⁶-Gitter → Konvergenz-Anteil). 5 Ränge
@@ -80,13 +93,12 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ⬜ Offen — Live-App
 
-Fast alle UX-/Gamification-Punkte sind erledigt (s. „Erledigt" → UX-Feinschliff). Offen bleibt:
+Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
+Offen bleibt nur noch Feinschliff:
 
-- **BAL-5 / CLS-4 · Verteilung entzerren**: 🐢 „Gepanzertes Beutetier" dominiert die mittleren
-  Einstellungen; einige Formen hängen an schmalen Größenfenstern. Weichere Übergänge /
-  mehr Zwischenformen. **Physik-Änderung → Re-Validierung nötig** (`parity` + `ecology`),
-  daher bewusst zurückgestellt. *(Die Stabilitäts-Hysterese hat das „fühlt sich nach Glück an"
-  schon spürbar gemildert.)*
+- **CLS-4-Rest · schmale Größenfenster**: einige seltene Formen (Nadelbaum, Blütenkraut,
+  Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
+  (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe Priorität.
 - Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte; Inline-Namensfeld
   statt `prompt()`); B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
 
