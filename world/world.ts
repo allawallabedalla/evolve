@@ -53,9 +53,14 @@ export class World {
     return (this.seedCounter = (this.seedCounter * 1103515245 + 12345) >>> 0);
   }
 
-  /** Neuen Ort anlegen (eigene Population, startet monomorph nahe `start`). */
-  addPlace(name: string, env: Environment, start = 0.5): Place {
+  /**
+   * Neuen Ort anlegen (eigene Population, startet monomorph nahe `start`).
+   * Mit `seedGenome` startet der Ort stattdessen aus einem konkreten Genom
+   * (z. B. der Linie des Spielers) — „dein Wesen als Ort in der Welt".
+   */
+  addPlace(name: string, env: Environment, start = 0.5, seedGenome?: number[]): Place {
     const pop = new Population(this.popConfig, this.nextSeed(), start);
+    if (seedGenome) pop.seedFrom(seedGenome);
     const place: Place = { name, env, pop };
     this.places.push(place);
     // Migrations-Matrix auf neue Groesse erweitern (Default: isoliert)

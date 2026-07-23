@@ -140,7 +140,13 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
   weil GitHub Pages nur `app/` ausliefert); eigenes `<script type=module>`, per try/catch entkoppelt
   (Ladefehler lässt die App intakt). Smoke-Test grün: `npm run app-world-smoke` (App bootet, Overlay
   rendert 5 Orte + emergente Arten + Rarität, Einzel-Wesen unberührt).
-- Offen (Pfad A weiter): das Einzel-Wesen als EINEN Ort dieser Welt verdrahten (die heutige Ansicht =
-  eine Linie im Baum); Zoom Pet↔Welt als echte Navigation; „Veränderung"-Knopf mit progressiver Tiefe;
-  Creature-Rendering je emergenter Form. Danach: die inline-v1-Mean-Field-Engine schrittweise durch
-  den Populations-Kern ablösen (ein Ort = die heutige Ansicht).
+- [x] **Pfad A · Schritt 2 — dein Wesen als Ort in der Welt**: die Spieler-Linie ist jetzt Ort 0
+  („Deine Linie" · DU-Badge), aus dem ECHTEN Genom + der aktuellen Umwelt besiedelt (bei jedem
+  Öffnen frisch synchronisiert) und mit den Veränderung-Hebeln bespielbar. Kern: `Population.seedFrom`
+  + `World.addPlace(seedGenome)` (getestet: `npm run seed-check`), Brücke `window.__evolvePet`.
+  Damit ist die Zoom-Vision konkret: reinzoomen = dein Tamagotchi, rauszoomen = derselbe als eine
+  Linie im Baum des Lebens.
+- Offen (Pfad A weiter): echter Zoom Pet↔Welt als Navigation (statt Overlay); „Veränderung"-Knopf
+  mit progressiver Tiefe; Creature-Rendering je emergenter Form; Raum-Hebel (verbinden/isolieren)
+  mit klarer visueller Metapher zurückholen. Danach: die inline-v1-Mean-Field-Engine schrittweise
+  durch den Populations-Kern ablösen (ein Ort = die heutige Ansicht).
