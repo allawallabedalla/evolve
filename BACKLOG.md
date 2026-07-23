@@ -52,6 +52,15 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - UX-Quick-Wins: Entdeckungs-Toast, lo/hi-Regler-Labels, „Neues Leben"-Rückfrage,
   Passwort-Reset, Auto-Login-Fallback.
 
+### Rarität / Entdeckungs-Tiefe (Session 2026-07)
+- **Rarität-Unlock** umgesetzt: je Form ein Seltenheits-Rang aus dem deterministischen
+  Ökologie-Sweep (`docs/rarity.json`, 5⁶-Gitter → Konvergenz-Anteil). 5 Ränge
+  (häufig→legendär); 7 legendäre „Fänge" nur über Drift erreichbar. **Genbuch:**
+  Raritäts-Badge + Farb-Ramp pro Kachel, seltene entdeckte Formen leuchten (Glow),
+  Legende, „x/7 legendär"-Zähler, Hover zeigt Rang. **Toast:** seltene/legendäre Funde
+  besonders hervorgehoben (Text + Gold-Glow, längere Standzeit). *Sanfte Anreize, keine
+  kaufbare Währung, kein Vollständigkeits-Zwang (Leitplanke gehalten).*
+
 ### UX-Feinschliff (Session 2026-07)
 - **A3 · Live-Vitalitätsanzeige** aus `fitness(genome, env)` — Balken + Wort (kämpft/…/blüht auf);
   reagiert sofort auf Regler (Nahrung→0 = 0 %). Macht Ursache→Wirkung spürbar.
@@ -113,24 +122,22 @@ Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
 
 ---
 
+## 🧭 Produkt-Pfeiler (Leitplanken)
+
+- **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
+- **Rarität = Entdeckungs-Tiefe**, keine kaufbare Währung / kein Grind (Skinner-Loop).
+- **Wertschätzung für die Natur als positives Neben-Ziel** *(Nutzer, 2026-07)* — **implizit,
+  nicht explizit**: über glaubwürdige Baupläne, echte Erdzeit-Reihenfolge (Hover „wann"),
+  reale Klade-Namen und die Referenz-gestützte Ökologie soll ein Staunen über die Vielfalt
+  des Lebens *mitschwingen* — ohne belehrenden Ton, ohne „Lern"-Overlay. Prüf-Frage für neue
+  Features: *Weckt es Staunen, oder nur Sammel-Druck?* (Ersteres fördern, Letzteres meiden.)
+
 ## 💡 Gamification-Ideen (Diskussion)
 
-### Entstehungswahrscheinlichkeit als Rarität / Unlock-Achse
-**Idee (Nutzer):** Häufige/leicht entstehende Arten früh freischalten, seltene spät — die
-Entstehungswahrscheinlichkeit als Fortschritts-Achse.
-
-**Einschätzung: sehr gut — die Daten liegen vor.** Der Ökologie-Sweep misst je Form die
-Erreichbarkeit: `attractor` = stabiler Fitness-Gipfel (häufig), `drift` = nur über stochastische
-Drift (selten). Das ist eine natürliche Seltenheits-Achse und fällt schön mit der realen
-Erdzeit-Reihenfolge zusammen (frühe/leichte Baupläne zuerst → passt zur Hover-Info „wann").
-- **Rarität pro Form** aus dem Sweep ableiten (Konvergenz-Anteil → häufig/selten/legendär),
-  in `tree-of-life.json` als `rarity` ablegen.
-- **Genbuch:** seltene Formen als „Fänge" hervorheben (Glow/Label), Rarität anzeigen.
-- **Sanfte Gates statt harter Sperren** — frühe Biome führen zu häufigen Formen; seltene
-  brauchen Regler-Feintuning oder lange Beobachtung. KEINE „erst X, dann Y"-Zwangskette.
-
-**Leitplanke:** keine kaufbare Währung/Grind (Skinner-Loop) — Rarität = *Entdeckungs-Tiefe*.
-Gegen den Pfeiler „Neugier, kein Vollständigkeits-Zwang" abwägen. → nach A3/A4.
+### ✅ Entstehungswahrscheinlichkeit als Rarität — umgesetzt (s. „Erledigt")
+Idee (Nutzer): seltene Arten spät, häufige früh. Umgesetzt als Entdeckungs-Tiefe über den
+Ökologie-Sweep. Offen als Feinschliff: sanfte Biom-Empfehlungen („in diese Richtung wohnt
+noch etwas Seltenes") statt harter Gates; Rarität optional auch in `tree-of-life.json` spiegeln.
 
 ---
 
