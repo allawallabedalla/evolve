@@ -198,6 +198,25 @@ geräteübergreifend mit Account.
   die Vielfalt des Lebens mitschwingen, ohne belehrenden Ton. Prüf-Frage für neue Features:
   *Weckt es Staunen, oder nur Sammel-Druck?*
 
+## 6b. v2-Umbau — lebende Metapopulation (Fundament steht, headless)
+
+Großer Umbau Richtung **emergente Vielfalt** (Vision: viele Orte, Isolation +
+Katastrophen als Regler, Baum des Lebens entsteht von selbst). Kern-Prinzip:
+**Emergenz statt Autorenschaft** — Arten = Cluster in einer Population, nicht
+`classify()`-Schwellen. Beweis: `spike/FINDINGS.md`. Plan: `docs/rebuild-roadmap.md`
++ `docs/architecture-v2.md`. Faktoren-Katalog: `docs/faktoren-katalog.md`. IA:
+„Veränderung"-Knopf (Zustand-Regler vs. Ereignis; Tun/Beobachten/Welt-Gesetze getrennt).
+
+**Fundament fertig (Stufen 1–4), rein headless in `world/` — Live-App UNBERÜHRT:**
+- `world/population.ts` — agentenbasierte Population (Orakel-Port). `npm run pop-check` (|TS−Orakel|=0,013).
+- `world/cluster.ts` — emergente Arten (modes1D/clusters). `npm run branching-check` (Frequenzabh.→Branching).
+- `world/world.ts` — Metapopulation: Orte, Migration, Founder, Katastrophe, `triggerEvent`. `npm run world-check`.
+- `world/describe.ts` — prozedurale (emergente) Art-Benennung aus dem Genom.
+- `cli/world-demo.ts` — `npm run world-demo`. `tools/world-ecology-check.mjs` — Makro-Realitäts-Check (Arten-Areal etc.).
+
+Nächste Stufen: 5 Biotik-Interaktionen · 6 volles emergentes Naming (classify ablösen)
+· 7 UI + Anschluss an die Live-App (Kern hinter die heutige UX, dann Karte).
+
 ## 7. Nächste Schritte (Priorität)
 1. **AXIS-2..5** — weitere Gen-Achsen (Graben, Aquatik/Habitat, Ernährungsmodus, Sinne/Tarnung);
    je: neues Gen + Orakel-Spiegelung + Re-Validierung. **AXIS-1 (Flug) erledigt.** AXIS-4 (Aquatik)
