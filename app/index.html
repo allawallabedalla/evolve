@@ -275,7 +275,7 @@
   .gb-tile .em { font-size: 1.3rem; line-height: 1.1; }
   .gb-tile .nm { font-size: .72rem; margin-top: 3px; color: var(--text); line-height: 1.2; }
   .gb-tile .cl { font-size: .61rem; color: var(--muted); margin-top: 2px; }
-  .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,230,176,.15), 0 0 14px rgba(95,230,176,.08); }
+  .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,156,131,.22), 0 0 14px rgba(95,156,131,.1); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
   .gb-tile { cursor: help; position: relative; }
@@ -285,14 +285,15 @@
   .gb-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
   .gb-tile.miss .gb-rar { opacity: .4; filter: grayscale(.5); }
   /* seltene entdeckte Formen leuchten in ihrer Rang-Farbe */
-  .gb-tile.rare.found.rar-selten       { border-color: rgba(111,208,255,.5); box-shadow: 0 0 0 1px rgba(111,208,255,.18), 0 0 16px rgba(111,208,255,.12); }
-  .gb-tile.rare.found.rar-sehr-selten  { border-color: rgba(185,140,255,.5); box-shadow: 0 0 0 1px rgba(185,140,255,.2), 0 0 18px rgba(185,140,255,.14); }
-  .gb-tile.rare.found.rar-legendaer    { border-color: rgba(255,216,95,.6);  box-shadow: 0 0 0 1px rgba(255,216,95,.28), 0 0 22px rgba(255,216,95,.2); }
+  .gb-tile.rare.found.rar-selten       { border-color: rgba(47,134,173,.55);  box-shadow: 0 0 0 1px rgba(47,134,173,.2),  0 0 16px rgba(47,134,173,.13); }
+  .gb-tile.rare.found.rar-sehr-selten  { border-color: rgba(125,85,196,.55);  box-shadow: 0 0 0 1px rgba(125,85,196,.22), 0 0 18px rgba(125,85,196,.15); }
+  .gb-tile.rare.found.rar-legendaer    { border-color: rgba(176,125,31,.6);   box-shadow: 0 0 0 1px rgba(176,125,31,.3),  0 0 22px rgba(176,125,31,.22); }
   .gb-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 2px 0 6px;
     font-size: .62rem; color: var(--muted); }
   .gb-leg-item { display: inline-flex; align-items: center; gap: 5px; }
   .gb-leg-note { flex-basis: 100%; color: var(--bio-dim); font-style: italic; font-size: .62rem; }
-  #gbTip { position: fixed; z-index: 40; max-width: 250px; background: rgba(7,16,15,.97); border: 1px solid var(--bio-dim);
+  .gb-order-note { color: var(--muted); font-size: .68rem; margin: 4px 0 2px; line-height: 1.5; }
+  #gbTip { position: fixed; z-index: 40; max-width: 250px; background: var(--chamber); border: 1px solid var(--line);
     border-radius: 10px; padding: 9px 11px; font-size: .74rem; line-height: 1.45; color: var(--text);
     box-shadow: var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
   #gbTip.show { opacity: 1; }
@@ -301,7 +302,7 @@
   #gbTip .tip-rar { display: inline-flex; align-items: center; gap: 5px; font-size: .64rem; letter-spacing: .04em;
     text-transform: uppercase; margin: 3px 0 1px; }
   #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
-  .toast.legendary { border-color: rgba(255,216,95,.55); box-shadow: 0 0 0 1px rgba(255,216,95,.3), 0 0 24px rgba(255,216,95,.22); }
+  .toast.legendary { border-color: rgba(176,125,31,.55); box-shadow: 0 0 0 1px rgba(176,125,31,.3), 0 0 24px rgba(176,125,31,.2); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
 
   /* ---- Flaches Icon-System ---- */
@@ -517,7 +518,7 @@
             <h3 id="wlChronHead">Chronik — Arten <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Ähnlichkeits-Baum wechseln">Baum ⇄</button></h3>
             <ul id="wlChronik"></ul>
             <div id="wlTree" hidden></div>
-            <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = wie leicht eine Form entsteht (häufig … <span style="color:var(--gold)">legendär</span>).</p>
+            <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = in wie vielen Umwelten diese Form gewinnt (häufig … <span style="color:var(--gold)">extrem selten</span>).</p>
           </div>
         </div>
       </div>
@@ -529,7 +530,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.21.0";
+const APP_VERSION = "v0.22.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -956,12 +957,14 @@ const RARITY = {
   "Moos":"legendaer","Farn":"legendaer","Hutpilz":"legendaer","Schimmel · Fadenpilz":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Kopffüßer · Tintenfisch":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer","Fell-Großtier":"legendaer","Aktiver Großjäger":"legendaer","Gepanzerter Koloss":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (subtiler Ramp, Gold = legendaer).
+// Rarität = ökologische Häufigkeit (in wie vielen Umwelten dieser Bauplan
+// gewinnt), kein Sammel-Rang. Farben AA-lesbar auf Ocker (Audit K2/K3).
 const RARITY_META = {
-  "legendaer":   {label:"Legendär",    col:"#ffd85f", rank:4},
-  "sehr-selten": {label:"Sehr selten", col:"#b98cff", rank:3},
-  "selten":      {label:"Selten",      col:"#6fd0ff", rank:2},
-  "gelegentlich":{label:"Gelegentlich",col:"#5fe6b0", rank:1},
-  "haeufig":     {label:"Häufig",      col:"#7f918a", rank:0},
+  "legendaer":   {label:"Extrem selten", col:"#b07d1f", rank:4},
+  "sehr-selten": {label:"Sehr selten",   col:"#7d55c4", rank:3},
+  "selten":      {label:"Selten",        col:"#2f86ad", rank:2},
+  "gelegentlich":{label:"Gelegentlich",  col:"#3d7d64", rank:1},
+  "haeufig":     {label:"Häufig",        col:"#6b5836", rank:0},
 };
 function rarityOf(name){ return RARITY[name] || "haeufig"; }
 
@@ -970,9 +973,9 @@ function renderGenbook(){
   const legendFound = [...discovered].filter(n=>rarityOf(n)==="legendaer").length;
   const legendTotal = Object.values(RARITY).filter(t=>t==="legendaer").length;
   document.getElementById("gbSub").innerHTML =
-    `<b class="chip-val" style="color:var(--bio)">${found}</b> von ${TREE_TOTAL} Formen entdeckt` +
-    ` · <b style="color:#ffd85f">${legendFound}/${legendTotal}</b> legendär. ` +
-    `Forme neue Umwelten, um Äste freizuschalten — „???" wartet noch. Fahr über eine Kachel: wann &amp; wie sie entstand.`;
+    `<b class="chip-val" style="color:var(--bio-dim)">${found}</b> von ${TREE_TOTAL} Formen in deinen Welten aufgetaucht` +
+    ` · <b style="color:var(--gold)">${legendFound}/${legendTotal}</b> extrem selten. ` +
+    `Seltene Formen gewinnen nur in engen Nischen — forme neue Umwelten, um andere zu sehen. „???" heißt: hier noch nicht gesehen. Fahr über eine Kachel: wann &amp; wie sie entstand.`;
   const body = document.getElementById("gbBody");
   body.innerHTML = "";
   // Raritaets-Legende: erklaert die Faerbung, ohne zum Sammeln zu zwingen.
@@ -980,8 +983,12 @@ function renderGenbook(){
   leg.innerHTML = Object.keys(RARITY_META).map(k=>{
     const m=RARITY_META[k];
     return `<span class="gb-leg-item"><i class="gb-dot" style="background:${m.col}"></i>${m.label}</span>`;
-  }).join("") + `<span class="gb-leg-note">seltene Formen leuchten als besondere Fänge — kein Muss</span>`;
+  }).join("") + `<span class="gb-leg-note">selten = gewinnt nur in wenigen Umwelten, kein Sammelziel</span>`;
   body.appendChild(leg);
+  // Anti-Scala-Naturae: die Reich-Reihenfolge ist Gruppierung, keine Rangleiter.
+  const ord = document.createElement("p"); ord.className="gb-order-note";
+  ord.innerHTML = "Die Reiche sind nur <b>gruppiert</b>, nicht gereiht — kein Reich ist „höher“ entwickelt als ein anderes.";
+  body.appendChild(ord);
   for(const grp of TREE){
     const have = grp.forms.filter(f=>discovered.has(f.n)).length;
     const h = document.createElement("div"); h.className="gb-kingdom";
@@ -994,7 +1001,7 @@ function renderGenbook(){
       const t = document.createElement("div");
       t.className = "gb-tile rar-"+rk + (ok?" found":" miss") + (ok&&rm.rank>=2?" rare":"");
       const title = ok ? f.n : "???";
-      const evo = ok ? (f.evo||"") : "Noch nicht entdeckt — forme die passende Umwelt.";
+      const evo = ok ? (f.evo||"") : "Hier noch nicht gesehen — forme die passende Umwelt.";
       t.dataset.title = title; t.dataset.clade = f.cl; t.dataset.era = f.era||""; t.dataset.evo = evo;
       t.dataset.rarity = rm.label; t.dataset.rcol = rm.col;
       t.title = `${title} · ${rm.label} · ${f.era||""} · ${evo}`;   // Fallback (Touch/a11y)
@@ -1057,7 +1064,7 @@ let toastTimer = null;
 function showToast(a){
   const t = document.getElementById("toast");
   const rk = rarityOf(a.n), rm = RARITY_META[rk], rare = rm.rank>=2;
-  const lead = rk==="legendaer" ? "Legendärer Fund" : rare ? ("Seltene Form ("+rm.label+")") : "Neue Form";
+  const lead = rk==="legendaer" ? "Extrem seltene Form" : rare ? ("Seltene Form · "+rm.label) : "Neue Form";
   t.innerHTML = formIcon(a.n) + " " + lead + ": " + a.n +
     (rare ? ` <span class="toast-rar" style="color:${rm.col}"><i class="gb-dot" style="background:${rm.col}"></i></span>` : "");
   t.classList.toggle("legendary", rk==="legendaer");
@@ -2175,7 +2182,7 @@ try {
   const { rarityMap } = await import("./core/world/rarity.js");
   const { realExample, archetypeWiki } = await import("./exemplar.js");
 
-  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#5a95b8", "sehr selten":"#9878b8", "legendär":"var(--gold)" };
+  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#2f86ad", "sehr selten":"#7d55c4", "extrem selten":"var(--gold)" };
   const ic = window.__ic || (() => "");
 
   const el = (id) => document.getElementById(id);

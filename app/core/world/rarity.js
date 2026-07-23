@@ -18,7 +18,7 @@ export function rarityTier(fraction) {
         return "selten";
     if (fraction > 0)
         return "sehr selten";
-    return "legendär";
+    return "extrem selten";
 }
 /** Häufigkeit je emergenter Form über einen Zufalls-Umwelt-Sweep (formKey → Anteil 0..1). */
 export function rarityMap(phys, opts = {}) {

@@ -20,7 +20,7 @@ console.log("Stufe 6+ — emergente Rarität\n");
 const tiers = [rarityTier(0.3), rarityTier(0.08), rarityTier(0.03), rarityTier(0.005), rarityTier(0)];
 const tiersOk =
   tiers[0] === "häufig" && tiers[1] === "gelegentlich" && tiers[2] === "selten" &&
-  tiers[3] === "sehr selten" && tiers[4] === "legendär";
+  tiers[3] === "sehr selten" && tiers[4] === "extrem selten";
 console.log(`  Schwellen 0.30/0.08/0.03/0.005/0 -> ${tiers.join(", ")}`);
 
 // 2) Der Sweep produziert eine echte Verteilung (nicht alles auf eine Form)
@@ -50,7 +50,7 @@ console.log("\n  Zensus mit Rarität:");
 for (const s of sp) console.log(`    • ${s.name}  —  ${s.rarity}  (${((s.rarityFraction ?? 0) * 100).toFixed(0)}%)`);
 
 const allAnnotated = sp.every((s) => s.rarity !== undefined);
-const legendaryFallback = rarityOf("Reich|gibtsnicht", rmap).tier === "legendär";
+const legendaryFallback = rarityOf("Reich|gibtsnicht", rmap).tier === "extrem selten";
 
 console.log("");
 console.log(`  Schwellen korrekt:                           ${tiersOk ? "OK" : "FAIL"}`);
