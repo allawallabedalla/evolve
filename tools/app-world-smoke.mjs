@@ -39,6 +39,11 @@ try {
   const places = await page.locator(".wl-place").count();
   console.log(`  Welt-Overlay: Orte gerendert:     ${places >= 3 ? "OK" : "FAIL"} (${places})`);
 
+  // 2b) Deine Linie als eigener Ort (Zoom-Vision)
+  const petPlace = await page.locator(".wl-place--pet").count();
+  const youBadge = await page.locator(".wl-place--pet .wl-you").count();
+  console.log(`  „Deine Linie" als Ort 0:          ${petPlace === 1 && youBadge >= 1 ? "OK" : "FAIL"} (${petPlace})`);
+
   // 3) Chronik nach ein paar Steps
   await page.waitForTimeout(1500);
   const species = await page.locator("#wlChronik li").count();

@@ -93,6 +93,19 @@ export class Population {
     return this.genomes.length;
   }
 
+  /**
+   * Population aus EINEM konkreten Genom neu befüllen (mit kleiner Streuung) —
+   * z. B. um einen Ort mit der Linie des Spielers zu besiedeln („dein Wesen als
+   * Ort in der Welt"). Fehlende/überzählige Gene werden auf numGenes normiert.
+   */
+  seedFrom(genome: number[], spread = this.cfg.startSpread): void {
+    const { size, numGenes } = this.cfg;
+    const base = Array.from({ length: numGenes }, (_, k) => clamp01(genome[k] ?? 0.5));
+    this.genomes = Array.from({ length: size }, () =>
+      base.map((v) => clamp01(v + this.randn() * spread)),
+    );
+  }
+
   /** Reproduktions-Gewichte je Individuum (Fitness^selPower, optional /Konkurrenz). */
   weights(env: Environment, phys: Physics): number[] {
     const { selPower, competition } = this.cfg;
