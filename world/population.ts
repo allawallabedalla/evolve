@@ -94,7 +94,7 @@ export class Population {
   }
 
   /** Reproduktions-Gewichte je Individuum (Fitness^selPower, optional /Konkurrenz). */
-  private weights(env: Environment, phys: Physics): number[] {
+  weights(env: Environment, phys: Physics): number[] {
     const { selPower, competition } = this.cfg;
     const base = this.genomes.map((g) => Math.pow(fitness(g, env, phys), selPower));
     if (!competition) return base;
@@ -134,8 +134,16 @@ export class Population {
 
   /** Eine Generation weiter: Selektion + Rekombination + Mutation. */
   step(env: Environment, phys: Physics): void {
+    this.reproduceWith(this.weights(env, phys));
+  }
+
+  /**
+   * Reproduktion mit EXTERN berechneten Gewichten — erlaubt biotische
+   * Interaktionen (Praedation, Konkurrenz zwischen Populationen), deren Fitness
+   * nicht allein aus der fixen Landschaft kommt (Stufe 5, world/coevolution.ts).
+   */
+  reproduceWith(w: number[]): void {
     const N = this.size;
-    const w = this.weights(env, phys);
     // kumulierte Gewichte
     const cum = new Array<number>(N);
     let total = 0;

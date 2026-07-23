@@ -114,8 +114,10 @@ Biotik/Emergenz-Feinschliff (5–6) kommen darauf, wenn der Kern trägt.
 Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-demo.ts`,
 `tools/{pop,branching,world}-check.mjs`, `tools/world-ecology-check.mjs`.
 
-### Nächste Stufen (später)
-- Stufe 5: biotische Interaktionen zwischen koexistierenden Arten (Räuber emergent).
-- Stufe 6: emergente Benennung/Darstellung; `describe.ts` → volles prozedurales Naming; `classify()` ablösen.
+### Weitere Stufen
+- [x] **Stufe 5** — biotische Interaktion: Räuber-Beute-Koevolution (`world/coevolution.ts`).
+  `npm run coevolution-check`: mit Räubern **Red Queen** (kein Stillstand, zeitl. SD 10× höher
+  als ohne), endogener Räuberdruck 0,28. Praedation ist jetzt *emergent*, kein Regler mehr.
+- [ ] Stufe 6: emergente Benennung/Darstellung; `describe.ts` → volles prozedurales Naming; `classify()` ablösen.
 - Stufe 7: UI — „Veränderung"-Knopf (Zustand-Regler vs. Ereignis-Knopf), Zoom Pet↔Welt, Chronik.
 - Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.
