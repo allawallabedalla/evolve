@@ -8,7 +8,7 @@ import { World } from "../dist/world/world.js";
 import { census, formatSpecies } from "../dist/world/census.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const phys = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
+const phys = JSON.parse(readFileSync(join(ROOT, "world", "physics-v2.json"), "utf-8"));
 const NG = phys.traits.length;
 const POOL = [
   ["Eiszeit",   { temperature: .08, predation: .15, foodAbundance: .55, foodHeight: .15, light: .4, water: .5 }],

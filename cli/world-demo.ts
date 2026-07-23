@@ -11,10 +11,11 @@ import { fileURLToPath } from "node:url";
 import { World } from "../world/world.js";
 import { describe } from "../world/describe.js";
 import { census, formatSpecies } from "../world/census.js";
+import { rarityMap } from "../world/rarity.js";
 import type { Physics } from "../engine/types.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const phys: Physics = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
+const phys: Physics = JSON.parse(readFileSync(join(ROOT, "world", "physics-v2.json"), "utf-8"));
 const NG = phys.traits.length;
 
 const BIOMES: Record<string, any> = {
@@ -67,8 +68,11 @@ function run() {
   console.log("  Ergebnis:       " + snapshot(world));
 
   console.log("\n=== Chronik: emergenter Baum des Lebens (Arten-Zensus) ===");
-  for (const s of census(world)) console.log("  • " + formatSpecies(s));
+  // Rarität = wie leicht entsteht eine Form über viele Zufalls-Umwelten? (emergent, keine Tabelle)
+  const rmap = rarityMap(phys, { samples: 80, gens: 150 });
+  for (const s of census(world, { rarityMap: rmap })) console.log("  • " + formatSpecies(s));
   console.log("\nJeder Ort ging seinen eigenen Weg — Vielfalt aus Raum, Isolation und Ereignissen.");
+  console.log("Rarität ist emergent: häufig = entsteht in vielen Umwelten, legendär = fast nie (nur seltene Nischen/Drift).");
 }
 
 run();

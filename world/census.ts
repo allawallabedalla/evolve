@@ -8,6 +8,7 @@
 import type { World } from "./world.js";
 import { clusters } from "./cluster.js";
 import { describe, formKey, kingdomOf } from "./describe.js";
+import { rarityOf, type RarityTier } from "./rarity.js";
 
 export interface Species {
   key: string; // Identitäts-Schlüssel (formKey)
@@ -16,11 +17,14 @@ export interface Species {
   centroid: number[]; // repräsentatives Genom
   places: string[]; // welche Orte diese Art beherbergen
   abundance: number; // Gesamt-Anteil über die Welt (0..1, Summe ~Anzahl Orte)
+  rarity?: RarityTier; // wie leicht entsteht diese Form? (nur mit rarityMap)
+  rarityFraction?: number; // Sweep-Häufigkeit dieser Form (0..1)
 }
 
 export interface CensusOptions {
   radius?: number; // Cluster-Radius im Genom-Raum
   minFraction?: number; // Mini-Cluster (Rauschen) verwerfen
+  rarityMap?: Map<string, number>; // optional: emergente Rarität (world/rarity.ts) annotieren
 }
 
 /** Arten-Zensus über alle Orte: Cluster je Ort → prozedural benannt → nach Identität aggregiert. */
@@ -45,6 +49,11 @@ export function census(world: World, opts: CensusOptions = {}): Species[] {
           places: [],
           abundance: 0,
         };
+        if (opts.rarityMap) {
+          const r = rarityOf(key, opts.rarityMap);
+          sp.rarity = r.tier;
+          sp.rarityFraction = r.fraction;
+        }
         byKey.set(key, sp);
       }
       if (!sp.places.includes(place.name)) sp.places.push(place.name);
@@ -57,5 +66,6 @@ export function census(world: World, opts: CensusOptions = {}): Species[] {
 /** Kompakte Zeile je Art (für Chronik-Ausgabe / Debug). */
 export function formatSpecies(s: Species): string {
   const pct = (s.abundance * 100).toFixed(0);
-  return `${s.name}  ·  ${pct}%  ·  [${s.places.join(", ")}]`;
+  const rar = s.rarity ? `  ·  ${s.rarity}` : "";
+  return `${s.name}  ·  ${pct}%  ·  [${s.places.join(", ")}]${rar}`;
 }

@@ -125,5 +125,12 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
 - [x] **Stufe 7 (Prototyp)** — visueller Standalone-Viewer (`world/viewer.html`): rendert die
   lebende Welt im Browser (Orte-Karte, emergente Chronik, Veränderung-Hebel), läuft den v2-Kern
   live. `npm run serve` → `http://localhost:8000/world/viewer.html`. NICHT die Live-App, nicht deployt.
+- [x] **Härtung „B"** — (a) getunte v2-Landschaft `world/physics-v2.json` (Größen-Kosten 0,22→0,14),
+  damit reichere Formen entstehen (nicht alles winzig: 42 % klein / 27 % mittel / 31 % groß statt
+  94 % winzig) — Live-`physics.json` unberührt. (b) **Emergente Rarität** (`world/rarity.ts`):
+  Seltenheit als LANDSCHAFTS-Eigenschaft (Sweep über Zufalls-Umwelten, formKey zählen), nicht als
+  Autoren-Label; der Zensus annotiert Arten mit ihrer Stufe (häufig … legendär). `npm run rarity-check`
+  (47 Formen, mehrere Stufen; nur-über-Ereignis entstandene Formen = legendär → „Entdeckungs-Tiefe,
+  keine Währung"). Chronik in Demo + Viewer zeigt Rarität.
 - Offen (Stufe 7 voll): Zoom Pet↔Welt, „Veränderung"-Knopf mit progressiver Tiefe, Creature-Rendering.
 - Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.

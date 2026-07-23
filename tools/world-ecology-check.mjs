@@ -10,7 +10,7 @@ import { World } from "../dist/world/world.js";
 import { formKey, describe } from "../dist/world/describe.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const phys = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
+const phys = JSON.parse(readFileSync(join(ROOT, "world", "physics-v2.json"), "utf-8"));
 const NG = phys.traits.length;
 
 const POOL = [

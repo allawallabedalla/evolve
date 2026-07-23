@@ -36,6 +36,7 @@
   .chronik li{list-style:none;font-size:.8rem;margin:0 0 6px;padding:0;}
   .chronik .pct{color:var(--gold);font-family:ui-monospace,monospace;}
   .chronik .pl{color:var(--muted);font-size:.68rem;}
+  .chronik .rar{font-size:.66rem;}
   .chronik ul{margin:0;padding:0;}
   button{background:#12211d;color:var(--text);border:1px solid var(--bio-dim);border-radius:8px;padding:7px 10px;font-size:.78rem;cursor:pointer;}
   button:hover{border-color:var(--bio);}
@@ -80,6 +81,7 @@
 import { World } from "../dist/world/world.js";
 import { census, formatSpecies } from "../dist/world/census.js";
 import { describe } from "../dist/world/describe.js";
+import { rarityMap } from "../dist/world/rarity.js";
 
 const GENES = ["Isol","Größe","Glieder","Stoffw","Panzer","Photo","Mobil","Struktur","Flügel","Graben"];
 const BIOMES = [
@@ -90,11 +92,16 @@ const BIOMES = [
   ["Savanne",   {temperature:.7, predation:.6, foodAbundance:.6, foodHeight:.3, light:.7,water:.4}],
 ];
 
-const phys = await fetch("../physics.json").then(r=>r.json());
+const phys = await fetch("./physics-v2.json").then(r=>r.json());
 const NG = phys.traits.length;
 const world = new World({ phys, popConfig:{ numGenes: NG }, seed: 20240808 });
 for (const [n,e] of BIOMES) world.addPlace(n, e);
 for (let i=0;i+1<BIOMES.length;i++) world.connect(i,i+1,0.02);
+
+// Emergente Rarität einmalig vorab berechnen (Zufalls-Umwelt-Sweep) und danach
+// nur noch nachschlagen — teuer genug, um es nicht je Frame zu tun.
+const RTONE = {"häufig":"#7f918a","gelegentlich":"#5fe6b0","selten":"#6fd0ff","sehr selten":"#b98cff","legendär":"#ffd85f"};
+const rmap = rarityMap(phys, { samples: 70, gens: 150 });
 
 let gen = 0, sel = 0, paused = false;
 
@@ -117,11 +124,13 @@ function renderMap(){
   });
 }
 function renderChronik(){
-  const sp = census(world);
+  const sp = census(world, { rarityMap: rmap });
   document.getElementById("spCount").textContent = sp.length + " Arten";
-  document.getElementById("chronik").innerHTML = sp.map(s =>
-    `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span><br><span class="pl">${s.places.join(", ")}</span></li>`
-  ).join("");
+  document.getElementById("chronik").innerHTML = sp.map(s => {
+    const tone = RTONE[s.rarity] || "var(--muted)";
+    const badge = s.rarity ? ` <span class="rar" style="color:${tone}">● ${s.rarity}</span>` : "";
+    return `<li>${s.name} <span class="pct">${(s.abundance*100).toFixed(0)}%</span>${badge}<br><span class="pl">${s.places.join(", ")}</span></li>`;
+  }).join("");
 }
 function render(){ document.getElementById("gen").textContent = gen; renderMap(); renderChronik(); }
 
