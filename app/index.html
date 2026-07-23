@@ -318,6 +318,7 @@
 
   .footnote { margin-top: 26px; color: var(--muted); font-size: .74rem; text-align: center; line-height: 1.6; }
   .footnote b { color: var(--text); font-weight: 600; }
+  .ver { display: block; margin-top: 6px; font-family: var(--mono); font-size: .66rem; color: var(--bio-dim); letter-spacing: .04em; opacity: .8; }
   .chip-val { font-family: var(--mono); color: var(--bio); }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
@@ -379,6 +380,7 @@
   <p class="footnote">
     Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern lebendig gezeichnet.
     <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
+    <span class="ver" id="appVer" title="App-Version"></span>
   </p>
   <p class="footnote" id="engineDetail" hidden>
     Dieselbe Evolutions-Engine ist gegen ein wissenschaftliches Referenzmodell auf
@@ -453,6 +455,8 @@
 <script src="./vendor/supabase.js"></script>
 <script>
 "use strict";
+// App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
+const APP_VERSION = "v0.5.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1985,6 +1989,7 @@ document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neues Leben";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' <span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗';
 playBtn.innerHTML = ic("pause");
+const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
 
 // Brücken für das entkoppelte Welt-Overlay-Modul (<script type=module> unten):
