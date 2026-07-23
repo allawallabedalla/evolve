@@ -43,6 +43,10 @@ export interface Physics {
   heightPenalty: number;
   forageBase: number;
   forageMetabolism: number;
+  absorbYield: number;
+  absorbBase: number;
+  absorbMetabolism: number;
+  absorbWaterFloor: number;
   maintenance: {
     base: number;
     size: number;

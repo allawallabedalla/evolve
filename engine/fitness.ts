@@ -65,7 +65,27 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (phys.forageBase + phys.forageMetabolism * metabolism) *
     (1 - phys.exclusion * photo);
 
-  const totalEnergy = energyPhoto + energyForage;
+  //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
+  //       Der Organismus waechst in sein Substrat (Totholz/Detritus) und verdaut
+  //       extrazellulaer - braucht daher KEINE Mobilitaet (Gegenteil der Jagd).
+  //       - heterotroph  -> schliesst Photosynthese aus (1 - exclusion*photo)
+  //       - sessil       -> schliesst Mobilitaet aus    (1 - exclusion*mobility)
+  //       - Enzyme       -> zahlt auf Stoffwechsel ein
+  //       - Zersetzung ist ein Nass-Prozess -> skaliert mit Feuchte (water)
+  //       - Substrat = totes organisches Material -> skaliert mit foodAbundance
+  //       Ohne diesen Term hatten Pilze/sessile Zersetzer null Nahrungsenergie -
+  //       biologisch falsch (Pilze sind hoch erfolgreich). Das schafft den
+  //       Fitness-Gipfel "heterotroph + sessil" = Reich der Pilze/Mikroben.
+  const substrate =
+    env.foodAbundance * (phys.absorbWaterFloor + (1 - phys.absorbWaterFloor) * env.water);
+  const energyAbsorb =
+    phys.absorbYield *
+    (phys.absorbBase + phys.absorbMetabolism * metabolism) *
+    substrate *
+    (1 - phys.exclusion * photo) *
+    (1 - phys.exclusion * mobility);
+
+  const totalEnergy = energyPhoto + energyForage + energyAbsorb;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;

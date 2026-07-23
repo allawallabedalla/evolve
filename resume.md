@@ -27,9 +27,12 @@ geräteübergreifend mit Account.
 - **Schlanke Engine** (Produkt, TS in `engine/`): fitness, simulate (stepGeneration +
   runSimulation), classify (Archetyp), develop (Bauplan), report. Läuft im Browser.
 - **Referenz-Orakel** (`oracle/`, Python): agentenbasiertes Populationsmodell = Ground
-  Truth. Erzeugt Benchmark-Trajektorien.
+  Truth. Erzeugt Benchmark-Trajektorien. **WICHTIG:** Das Orakel teilt die *identische*
+  Fitness-Funktion mit der Engine (nur die *Dynamik* unterscheidet sich). Die Validität misst
+  also Dynamik-Treue, NICHT ob die Biologie stimmt — dafür braucht es einen separaten
+  ökologischen Plausibilitäts-Check (siehe unten).
 - **Trainings-Schleife** (`training/fit.ts`): genetischer Algorithmus fittet die Engine
-  ans Orakel (Model Distillation). **Test-Validität ~82 %** (Ziel-Band 80–90 %,
+  ans Orakel (Model Distillation). **Test-Validität ~86 %** (Ziel-Band 80–90 %,
   bewusst nicht 100 %). Auf zurückgehaltenen Szenarien gemessen (kein Overfitting).
 - **Geteilte Physik:** `physics.json` (einzige Quelle der Wahrheit, von Engine UND
   Orakel gelesen). **Parität** TS↔Python exakt (`npm run parity`, ~1e-16).
@@ -42,15 +45,30 @@ geräteübergreifend mit Account.
   (`exclusion`-Term erzwingt Spezialisierung):
   - autotroph+sessil → **Pflanzen** (Alge, Moos, Farn, Kraut, Blüte, Strauch, Laub-/Nadelbaum, Kaktus, Polster)
   - heterotroph+mobil → **Tiere** (Wurm, Fisch, Insekt, Krebs, Reptil, Vogel, Fell-/Großtiere, Koloss, Schildkröte …)
-  - heterotroph+sessil → **Pilze** (Hutpilz, Baumpilz, Schimmel, Flechte, Hefe, Myzel, Zunderschwamm) — der vorher ungenutzte Quadrant
+  - heterotroph+sessil → **Pilze** (Hutpilz, Baumpilz, Schimmel, Flechte, Hefe, Myzel, Zunderschwamm) — jetzt echter Fitness-Gipfel (Absorptions-Kanal, s.u.)
   - winzig+heterotroph → **Mikroben** (Bakterie, Archaee, Protist/Amöbe)
   - schwimmt+Photosynthese → **Protisten** (Euglenoid, Plankton)
   `classify()` in `app/index.html` mappt ~36 benannte Formen; jede hat eine eigene Silhouette
   (`drawPlant/drawAnimal/drawFungus/drawMicrobe/drawProtist`). **Erreichbarkeit verifiziert**:
   Sweep über 2000 Zufallsumwelten → Konvergenz erzeugt alle 5 Reiche + 28/36 Formen spontan
   (Rest über gezielte Biome/Regler). Reine Interpretation+Renderer → **Engine/Validität unberührt**.
+- **DREI Energie-/Ernährungs-Kanäle** (physics.json v3):
+  1. `energyPhoto` — Photosynthese (autotroph, sessil): braucht Licht+Wasser.
+  2. `energyForage` — Nahrungssuche (heterotroph, mobil): ∝ Mobilität, braucht Futter.
+  3. `energyAbsorb` — **Absorption/Zersetzung (heterotroph, SESSIL)** — NEU: belohnt niedrige
+     Mobilität + Stoffwechsel (Enzyme) + Feuchte (`water`) + Substrat (`foodAbundance`),
+     schließt Photo UND Mobilität aus. Params: `absorbYield 1.3, absorbBase 0.4,
+     absorbMetabolism 0.85, absorbWaterFloor 0.3`; dazu `maintenanceQuad.mobility 0.20→0.25`
+     (ungenutzte Mobilität wird teurer). **Warum:** vorher war JEDE Nahrung an Mobilität
+     gekoppelt → sessile Heterotrophe (Pilze) hatten null Einkommen, obwohl real hoch erfolgreich.
 - **Pflanzen-Rezept:** viel Licht + viel Wasser + WENIG Nahrung; foodHeight steuert
   Kraut→Strauch→Baum.
+- **Ökologischer Plausibilitäts-Check (NEUE Validierungs-Ebene, neben der Orakel-Validität):**
+  Phänotyp-Fitness je Nische (`scratchpad/landscape.mjs`-Muster) — Pilz gewinnt die
+  feucht/dunkel/sicher/nahrungsreiche Nische (0,83 > Tier 0,81), Pflanze die hell/mager-Nische,
+  Tier die Räuber-Nische. Reich-Bilanz über 4096-Gitter: Tier 32 %, Mikrobe 39 %, Pilz 16 %,
+  Protist 7 %, Pflanze 5 %; unter hohem Räuberdruck werden 45 % Tiere. So testen wir, ob das
+  Modell mit der REALITÄT stimmt — nicht nur mit dem (gleich-fehlerhaften) Orakel.
 - **Stochastik (Spiel-Modus):** `stepGeneration(..., randn)` mit `DRIFT_SCALE=0.03` →
   jedes Leben einzigartig, mittelwertfrei (ohne Seed deterministisch → Validität unberührt).
 
@@ -78,7 +96,7 @@ geräteübergreifend mit Account.
   email wurde wieder aktiviert → „Konto erstellen" statt „Einloggen", oder frische E-Mail.
 
 ## 6. Erledigte Meilensteine
-- Engine + Orakel + Training validiert (~82 %), Parität exakt.
+- Engine + Orakel + Training validiert (~86 %), Parität exakt.
 - Reich-Gabelung, Archetypen, Bauplan-Schicht.
 - Engine-Optimierungs-Pass (Thermal glatt `1-d²`, Pflanzen-Reich, Dominanz, tote Zone via `nutritionFloor`).
 - Stochastische Individualität + kontinuierliche Zeit.
@@ -99,11 +117,16 @@ geräteübergreifend mit Account.
    flaches Reptil, aufrechter Vogel mit Flügel+Schwanzfedern, hoher Kletterer, bulliger Bär);
    4 Reich-Biome auf bestätigte Fitness-Attraktoren getunt (Moderwald→Pilz, Urtümpel→Bakterie,
    Plankton-See→Euglenoid, Algen-Riff→Grünalge).
-- **Modell-Erkenntnis:** 28 der 36 Formen sind stabile Fitness-Attraktoren; die 8 Zwischennischen
-  (Fisch, Wurm, Hutpilz, Baumpilz, Schimmel, Hefe, Moos, Farn) haben KEINEN festen Gipfel, werden
-  aber im Spiel-Modus durch die stochastische Drift (`randn`) transient erreicht → Genbuch-Fänge.
-  Ursache: `energyForage ∝ mobility` → Heterotrophe steigern Mobilität immer, außer Nahrung ist knapp
-  (dann Pilz/sessil). Große Pilze bräuchten viel Nahrung UND wenig Nahrung → Widerspruch.
+- **Engine geschärft — Absorptions-Kanal (physics.json v2→v3, Meilenstein).** Diagnose: (1) Das
+  Orakel ist KEIN unabhängiger Realitäts-Check — es teilt die identische Fitness mit der Engine,
+  die 82 % maßen nur Dynamik-Treue. (2) Biologie-Fehler: `energyForage ∝ mobility` → sessile
+  Heterotrophe (Pilze) hatten null Nahrungsenergie, obwohl real hoch erfolgreich → „wenn Mobilität
+  immer zahlt, gäbe es keine Pilze". Fix: dritter Energiekanal `energyAbsorb` (Osmotrophie, sessil)
+  in alle 3 Fitness-Kopien (engine/oracle/app) + physics.json. **Ergebnis:** Pilze sind jetzt echte
+  Attraktoren (Landschaft: Pilz schlägt Tier in feucht/sicher/nahrungsreicher Nische), Validität
+  82 %→86 %, Parität weiter exakt. Neue Validierungs-Ebene „ökologische Plausibilität" eingeführt
+  (`scratchpad`-Probes: landscape/eco/balance). Übrige seltene Zwischennischen (Fisch, Wurm, Moos,
+  Farn, Schimmel) bleiben Drift-Fänge fürs Genbuch.
 
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
