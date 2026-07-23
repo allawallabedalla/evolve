@@ -1,0 +1,221 @@
+{
+  "_comment": "Raritaet je Form = Anteil der Umwelten (5^6-Gitter, deterministische Konvergenz ohne Drift), die dort landen. 0% = nur ueber stochastische Drift (legendaer). Quelle: scratchpad/rarity2.mjs. Fuers Genbuch-Unlock (Fänge).",
+  "grid": 15625,
+  "forms": [
+    {
+      "name": "Bakterie",
+      "convergencePct": 12.608,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Archaee · Extremophil",
+      "convergencePct": 9.331,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Protist · Amöbe",
+      "convergencePct": 3.859,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Euglenoid · Mixotroph",
+      "convergencePct": 8.813,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Plankton",
+      "convergencePct": 2.317,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Grünalge",
+      "convergencePct": 0.269,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Moos",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Farn",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Kraut · niedrige Pflanze",
+      "convergencePct": 0.48,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Blütenkraut",
+      "convergencePct": 0.026,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Verholzter Strauch",
+      "convergencePct": 2.758,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Laubbaum",
+      "convergencePct": 1.69,
+      "tier": "selten"
+    },
+    {
+      "name": "Nadelbaum",
+      "convergencePct": 0.55,
+      "tier": "selten"
+    },
+    {
+      "name": "Sukkulente · Kaktus",
+      "convergencePct": 0.384,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Polster-Kältepflanze",
+      "convergencePct": 1.299,
+      "tier": "selten"
+    },
+    {
+      "name": "Hutpilz",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Baumpilz · Porling",
+      "convergencePct": 0.128,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Zunderschwamm",
+      "convergencePct": 0.058,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Myzel · Pilzgeflecht",
+      "convergencePct": 6.33,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Schimmel · Fadenpilz",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Flechte · Symbiose",
+      "convergencePct": 1.734,
+      "tier": "selten"
+    },
+    {
+      "name": "Hefe",
+      "convergencePct": 4.09,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Schwamm",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Koralle · Riffbildner",
+      "convergencePct": 1.562,
+      "tier": "selten"
+    },
+    {
+      "name": "Wurm",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Schnecke · Weichtier",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Kopffüßer · Tintenfisch",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Krebstier · Arthropode",
+      "convergencePct": 7.597,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Insekt · Gliederfüßer",
+      "convergencePct": 3.462,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Fisch · Aalform",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Amphibie · Lurch",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Reptil · Echse",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Gepanzertes Beutetier",
+      "convergencePct": 5.357,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Fluginsekt · Segler",
+      "convergencePct": 0.448,
+      "tier": "sehr-selten"
+    },
+    {
+      "name": "Flatterer · Vogel",
+      "convergencePct": 4.224,
+      "tier": "gelegentlich"
+    },
+    {
+      "name": "Flugsäuger · Fledermaus",
+      "convergencePct": 1.549,
+      "tier": "selten"
+    },
+    {
+      "name": "Fell-Warmblüter",
+      "convergencePct": 7.014,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Fell-Großtier",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Aktiver Großjäger",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Gepanzerter Koloss",
+      "convergencePct": 0,
+      "tier": "legendaer"
+    },
+    {
+      "name": "Behänder Kletterer",
+      "convergencePct": 1.088,
+      "tier": "selten"
+    },
+    {
+      "name": "Kleines flinkes Tier",
+      "convergencePct": 10.771,
+      "tier": "haeufig"
+    },
+    {
+      "name": "Generalisten-Tier",
+      "convergencePct": 0.205,
+      "tier": "sehr-selten"
+    }
+  ]
+}

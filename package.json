@@ -1,0 +1,28 @@
+{
+  "name": "evolve-sim-lab",
+  "version": "0.1.0",
+  "description": "Evolutionaeres Tamagotchi - Sim-Labor: schlanke Engine + Referenz-Orakel + Trainings-Schleife",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "oracle": "python3 oracle/generate_benchmark.py",
+    "train": "node dist/training/fit.js",
+    "demo": "node dist/cli/demo.js",
+    "ecology": "npm run build && node tools/ecology-check.mjs",
+    "all": "npm run build && npm run oracle && npm run train && node tools/ecology-check.mjs",
+    "parity": "npm run build && node tools/parity.mjs && python3 oracle/check_parity.py",
+    "pop-check": "npm run build && node tools/pop-check.mjs",
+    "branching-check": "npm run build && node tools/branching-check.mjs",
+    "world-check": "npm run build && node tools/world-check.mjs",
+    "coevolution-check": "npm run build && node tools/coevolution-check.mjs",
+    "census-check": "npm run build && node tools/census-check.mjs",
+    "rarity-check": "npm run build && node tools/rarity-check.mjs",
+    "world-demo": "npm run build && node dist/cli/world-demo.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}

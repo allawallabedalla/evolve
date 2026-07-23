@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evolve — Sim-Labor (Text-Mockup)</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e1116;
+        --panel: #161b22;
+        --border: #2b333e;
+        --text: #d6dee8;
+        --muted: #8b97a6;
+        --accent: #4ec9a5;
+        --accent2: #6ea8fe;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+      h1 { font-size: 1.4rem; margin: 0 0 4px; }
+      .sub { color: var(--muted); margin: 0 0 20px; font-size: 0.9rem; }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 18px;
+      }
+      .panel h2 { font-size: 0.95rem; margin: 0 0 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+      /* Validity bar */
+      .validity-track { background: #0a0d12; border: 1px solid var(--border); border-radius: 6px; height: 26px; position: relative; overflow: hidden; }
+      .validity-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); width: 0%; transition: width .4s ease; }
+      .validity-band { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.10); border-left: 1px dashed var(--muted); border-right: 1px dashed var(--muted); }
+      .validity-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+      .validity-num { font-weight: 700; color: var(--text); }
+      /* Controls */
+      .presets { display: flex; flex-wrap: wrap; gap: 8px; }
+      button {
+        background: #1e2733; color: var(--text); border: 1px solid var(--border);
+        border-radius: 6px; padding: 7px 12px; cursor: pointer; font-size: 0.85rem;
+      }
+      button:hover { border-color: var(--accent); }
+      button.run { background: var(--accent); color: #06231b; border-color: var(--accent); font-weight: 700; }
+      .sliders { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+      .slider-row { display: grid; grid-template-columns: 160px 1fr 46px; align-items: center; gap: 10px; }
+      .slider-row label { font-size: 0.85rem; color: var(--muted); }
+      input[type=range] { width: 100%; accent-color: var(--accent); }
+      .val { font-variant-numeric: tabular-nums; text-align: right; font-size: 0.85rem; }
+      .genrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+      .genrow label { font-size: 0.85rem; color: var(--muted); }
+      pre {
+        background: #0a0d12; border: 1px solid var(--border); border-radius: 8px;
+        padding: 16px; overflow-x: auto; font-size: 0.82rem; line-height: 1.45;
+        white-space: pre; margin: 0;
+      }
+      .hint { color: var(--muted); font-size: 0.8rem; margin-top: 8px; }
+      code { background: #0a0d12; padding: 1px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>🧬 Evolve — Sim-Labor</h1>
+      <p class="sub">
+        Text-Mockup. Stell die Umwelt ein, lass die Evolution laufen, lies warum sich das Wesen
+        so entwickelt. Der Balken zeigt, wie nah die schlanke Engine schon am Referenz-Orakel ist.
+      </p>
+
+      <div class="panel">
+        <h2>Validität gegen Referenz-Orakel</h2>
+        <div class="validity-track">
+          <div class="validity-band" id="band"></div>
+          <div class="validity-fill" id="vfill"></div>
+        </div>
+        <div class="validity-label">
+          <span id="vstatus">lädt …</span>
+          <span><span class="validity-num" id="vnum">–</span> &nbsp;(Ziel <span id="vband">80–90</span>%)</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Umwelt einstellen</h2>
+        <div class="presets" id="presets"></div>
+        <div class="sliders" id="sliders"></div>
+        <div class="genrow">
+          <label for="gens">Generationen</label>
+          <input type="range" id="gens" min="10" max="150" value="80" style="max-width:240px" />
+          <span class="val" id="gens-val">80</span>
+          <button class="run" id="run">▶ Evolution laufen lassen</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Verlauf &amp; Erklärung</h2>
+        <pre id="output">Wähle ein Preset oder stelle die Regler ein und drücke „Evolution laufen lassen".</pre>
+        <p class="hint">
+          Dieselbe Engine läuft auch im Terminal: <code>npm run demo</code>. Trainieren:
+          <code>npm run all</code>.
+        </p>
+      </div>
+    </div>
+
+    <script type="module">
+      import { runSimulation, formatRunReport, DEFAULT_ENGINE_PARAMS } from "../dist/engine/index.js";
+
+      const LEVERS = [
+        { key: "temperature", label: "Temperatur (kalt→heiß)" },
+        { key: "predation", label: "Prädationsdruck" },
+        { key: "foodAbundance", label: "Nahrungsfülle" },
+        { key: "foodHeight", label: "Nahrungshöhe (Boden→hoch)" },
+        { key: "light", label: "Licht (dunkel→sonnig)" },
+        { key: "water", label: "Wasser (trocken→feucht)" },
+      ];
+
+      let phys, scenarios, params, validity;
+
+      async function boot() {
+        phys = await (await fetch("../physics.json")).json();
+        scenarios = (await (await fetch("../scenarios.json")).json()).scenarios;
+        try {
+          const fitted = await (await fetch("../fitted-params.json")).json();
+          params = fitted.params;
+          validity = fitted;
+        } catch (e) {
+          // Noch nicht trainiert: saubere Default-Parameter (8 Gene + varianceWeight).
+          params = DEFAULT_ENGINE_PARAMS;
+        }
+        buildSliders();
+        buildPresets();
+        renderValidity();
+      }
+
+      function buildSliders() {
+        const box = document.getElementById("sliders");
+        box.innerHTML = "";
+        for (const lev of LEVERS) {
+          const row = document.createElement("div");
+          row.className = "slider-row";
+          row.innerHTML = `
+            <label>${lev.label}</label>
+            <input type="range" min="0" max="1" step="0.01" value="0.5" id="s-${lev.key}" />
+            <span class="val" id="v-${lev.key}">0.50</span>`;
+          box.appendChild(row);
+          const input = row.querySelector("input");
+          const val = row.querySelector(`#v-${lev.key}`);
+          input.addEventListener("input", () => (val.textContent = (+input.value).toFixed(2)));
+        }
+        const gens = document.getElementById("gens");
+        gens.addEventListener("input", () => (document.getElementById("gens-val").textContent = gens.value));
+      }
+
+      function buildPresets() {
+        const box = document.getElementById("presets");
+        box.innerHTML = "";
+        for (const sc of scenarios) {
+          const b = document.createElement("button");
+          b.textContent = `${sc.name}${sc.split === "test" ? " ·test" : ""}`;
+          b.title = sc.expectation || "";
+          b.addEventListener("click", () => {
+            for (const lev of LEVERS) {
+              document.getElementById(`s-${lev.key}`).value = sc.env[lev.key];
+              document.getElementById(`v-${lev.key}`).textContent = sc.env[lev.key].toFixed(2);
+            }
+            document.getElementById("gens").value = sc.generations;
+            document.getElementById("gens-val").textContent = sc.generations;
+            runNow(sc.name);
+          });
+          box.appendChild(b);
+        }
+      }
+
+      function renderValidity() {
+        const num = document.getElementById("vnum");
+        const status = document.getElementById("vstatus");
+        const fill = document.getElementById("vfill");
+        const band = document.getElementById("band");
+        if (!validity) {
+          status.textContent = "Noch nicht trainiert — Default-Parameter aktiv (npm run all).";
+          num.textContent = "n/a";
+          return;
+        }
+        const v = validity.validityTest;
+        fill.style.width = Math.max(0, Math.min(100, v)) + "%";
+        band.style.left = validity.targetLow + "%";
+        band.style.width = (validity.targetHigh - validity.targetLow) + "%";
+        document.getElementById("vband").textContent = `${validity.targetLow}–${validity.targetHigh}`;
+        num.textContent = v.toFixed(1) + "%";
+        const shown = Math.round(v * 10) / 10;
+        const inBand = shown >= validity.targetLow && shown <= validity.targetHigh;
+        status.textContent = inBand
+          ? "✅ im Ziel-Band — glaubwürdig & schlank"
+          : v > validity.targetHigh
+            ? "⚠️ über dem Band — evtl. zu nah am schweren Modell"
+            : "🔄 unter dem Ziel-Band — weiter trainieren";
+      }
+
+      function runNow(name) {
+        const env = {};
+        for (const lev of LEVERS) env[lev.key] = +document.getElementById(`s-${lev.key}`).value;
+        const gens = +document.getElementById("gens").value;
+        const result = runSimulation(env, gens, phys, params);
+        const vinfo = validity
+          ? { validityTest: validity.validityTest, validityTrain: validity.validityTrain, targetLow: validity.targetLow, targetHigh: validity.targetHigh }
+          : undefined;
+        document.getElementById("output").textContent = formatRunReport(name || "Freie Umwelt", env, result, phys, vinfo);
+      }
+
+      document.getElementById("run").addEventListener("click", () => runNow("Freie Umwelt"));
+      boot();
+    </script>
+  </body>
+</html>
