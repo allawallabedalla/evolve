@@ -222,6 +222,19 @@
   .wl-btns button { background: var(--chamber-2); color: var(--text); border: 1px solid var(--bio-dim); border-radius: 8px; padding: 6px 9px; font-size: .72rem; cursor: pointer; }
   .wl-btns button:hover { border-color: var(--bio); }
   .wl-hint { color: var(--muted); font-size: .66rem; margin: 8px 0 0; line-height: 1.5; }
+  .wl-fine { margin-top: 10px; border-top: 1px solid var(--line-soft); padding-top: 8px; }
+  .wl-fine > summary { cursor: pointer; font-size: .72rem; color: var(--bio-dim); list-style: none; user-select: none; }
+  .wl-fine > summary::-webkit-details-marker { display: none; }
+  .wl-fine > summary::before { content: "▸ "; }
+  .wl-fine[open] > summary::before { content: "▾ "; }
+  .wl-fine > summary:hover { color: var(--bio); }
+  .wl-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 10px 0 4px; }
+  @media (max-width: 560px) { .wl-sliders { grid-template-columns: 1fr; } }
+  .wl-slider { display: flex; align-items: center; gap: 6px; font-size: .66rem; color: var(--muted); }
+  .wl-slider .wl-sl-lab { flex: 0 0 78px; display: flex; align-items: center; gap: 4px; }
+  .wl-slider .wl-sl-lab .ic { width: .95em; height: .95em; }
+  .wl-slider input[type=range] { flex: 1; accent-color: var(--bio); height: 3px; }
+  .wl-slider .wl-sl-val { flex: 0 0 24px; text-align: right; font-family: var(--mono); color: var(--text); }
   .wl-loading { color: var(--bio); font-size: .82rem; padding: 30px 0; text-align: center; }
   .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto; background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); }
   .gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -455,6 +468,11 @@
               <button id="wlPause">Pause</button>
             </div>
             <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt und locken neue Formen. <b>Verbinden</b> lässt Nachbar-Orte Wesen austauschen — sie gleichen sich an; eine <b>Insel</b> geht ihren eigenen Weg (Artbildung durch Isolation).</p>
+            <details class="wl-fine">
+              <summary id="wlFineSummary">feineinstellen — die einzelnen Umwelt-Regler dieses Orts</summary>
+              <div class="wl-sliders" id="wlSliders"></div>
+              <p class="wl-hint">Jeder Regler verschiebt die Umwelt <b>dauerhaft</b> — das Wesen dort passt sich über die nächsten Generationen an.</p>
+            </details>
           </div>
         </div>
         <div class="wl-side">
@@ -477,7 +495,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.11.0";
+const APP_VERSION = "v0.12.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2150,6 +2168,28 @@ try {
   el("wlIsolate").innerHTML = ic("island") + " als Insel abtrennen";
   el("wlPause").innerHTML = ic("pause") + " Pause";
   el("wlEvHead").insertAdjacentHTML("afterbegin", ic("meteor") + " ");
+  el("wlFineSummary").insertAdjacentHTML("beforeend", " " + ic("tune"));
+
+  // Detail-Ebene (progressive Tiefe): die 6 echten Umwelt-Regler des gewählten Orts.
+  const FACTORS = [
+    { k:"temperature",  n:"Temperatur",   ic:"temp"   },
+    { k:"water",        n:"Wasser",       ic:"drop"   },
+    { k:"light",        n:"Licht",        ic:"sun"    },
+    { k:"foodAbundance",n:"Nahrung",      ic:"grain"  },
+    { k:"foodHeight",   n:"Nahrungshöhe", ic:"height" },
+    { k:"predation",    n:"Räuberdruck",  ic:"fang"   },
+  ];
+  function renderSliders() {
+    const box = el("wlSliders"); if (!box || !world) return;
+    const env = world.places[sel].env;
+    box.innerHTML = FACTORS.map((f) => {
+      const v = Math.round((env[f.k] ?? 0.5) * 100);
+      return `<label class="wl-slider"><span class="wl-sl-lab">${ic(f.ic)} ${f.n}</span><input type="range" min="0" max="100" value="${v}" data-k="${f.k}"><span class="wl-sl-val">${v}</span></label>`;
+    }).join("");
+    box.querySelectorAll("input").forEach((inp) => {
+      inp.oninput = () => { world.setEnv(sel, { [inp.dataset.k]: +inp.value / 100 }); inp.nextElementSibling.textContent = inp.value; };
+    });
+  }
 
   function step() {
     if (paused || !world) return;
@@ -2181,7 +2221,7 @@ try {
       `</div>`;
     }).join("");
     map.querySelectorAll(".wl-place").forEach((n) => n.onclick = () => {
-      sel = +n.dataset.i; el("wlSelName").textContent = world.places[sel].name; render();
+      sel = +n.dataset.i; el("wlSelName").textContent = world.places[sel].name; renderSliders(); render();
     });
     // Stabile Sortierung nach Identität (Schlüssel) statt nach schwankender Häufigkeit —
     // so springen die Zeilen nicht (Jitter-Fix); nur Zahlen/Rarität aktualisieren sich.
@@ -2275,7 +2315,7 @@ try {
       refreshPet();               // Ort 0 auf das aktuelle Wesen synchronisieren
       sel = PET;
       el("wlSelName").textContent = world.places[PET].name;
-      render(); renderEvents();
+      render(); renderEvents(); renderSliders();
       if (!timer) timer = setInterval(step, 500);   // ruhiges Tempo (~2/s)
     });
   }
