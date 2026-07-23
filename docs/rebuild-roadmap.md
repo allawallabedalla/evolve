@@ -151,7 +151,11 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
   `app/exemplar.js` liefert je Art zusätzlich einen Icon-Schlüssel aus dem App-Icon-Set (emergenz-
   abgeleitet aus `describe()`, nicht `classify()`); `exemplar-check` prüft, dass jeder Schlüssel real
   existiert. Vorbild-Icon + „≈ in echt"-Link zeigen dasselbe Wesen.
+- [x] **Pfad A · Schritt 5 — Raum-Hebel mit klarer Metapher**: „mit Nachbarn verbinden" / „als Insel
+  abtrennen" je ausgewähltem Ort, und JEDER Ort zeigt sichtbar seinen Zustand (⛰ Insel / 🔗 verbunden).
+  Verbinden lässt Nachbarn Wesen austauschen (Angleichung), Insel = eigener Weg (allopatrische
+  Artbildung). Das behebt die frühere Unverständlichkeit durch sichtbaren Zustand + klare Sprache.
+  Aufwärm-Lauf öffnet die Welt als lauter Inseln (divergent) — Verbinden zeigt Homogenisierung live.
 - Offen (Pfad A weiter): echter Zoom Pet↔Welt als Navigation (statt Overlay); „Veränderung"-Knopf
-  mit progressiver Tiefe; genom-spezifisches Canvas-Rendering (statt Icon) je Form; Raum-Hebel
-  (verbinden/isolieren) mit klarer visueller Metapher. Danach: die inline-v1-Mean-Field-Engine
-  schrittweise durch den Populations-Kern ablösen (ein Ort = die heutige Ansicht).
+  mit progressiver Tiefe; genom-spezifisches Canvas-Rendering (statt Icon) je Form. Danach: die
+  inline-v1-Mean-Field-Engine schrittweise durch den Populations-Kern ablösen.

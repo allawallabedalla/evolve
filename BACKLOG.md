@@ -122,8 +122,9 @@ Offen bleibt nur noch Feinschliff:
     während das Welt-Overlay offen ist (`window.__mainSim.pause/resume`).
   - [x] **Bunte Emoji statt flacher Icons** (verstößt gegen die Icon-Policy, Zeile ~1968): alle
     Emoji im Overlay → flaches `ic()`-System (via `window.__ic`), inkl. neuer Icons globe/meteor/tune.
-  - [x] **„verbinden/trennen" unverständlich**: die beiden Raum-Hebel aus der Beta-Oberfläche
-    entfernt (progressive Disclosure — kommen später mit klarer visueller Metapher zurück).
+  - [x] **„verbinden/trennen" unverständlich**: erst entfernt, dann mit klarer Metapher zurück —
+    „mit Nachbarn verbinden" / „als Insel abtrennen" je Ort, plus sichtbarer Zustand je Ort
+    (⛰ Insel / 🔗 verbunden). Effekt (Angleichung vs. eigener Weg) ist jetzt live sichtbar.
   - [ ] **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch): zu jeder emergenten Art ein
     Link auf ein reales Vorbild, damit man sieht, wie so etwas in der Natur aussieht. Umsetzung:
     Mapping (Reich + dominantes Merkmal) → repräsentatives Vorbild + Wikipedia-URL; didaktischer
