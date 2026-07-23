@@ -135,11 +135,29 @@ geräteübergreifend mit Account.
   (C1–C6) in `tools/ecology-check.mjs` (`npm run ecology`, auch Teil von `npm run all`). Aktueller
   Stand: alle 6 ✓ (Tier 38 %, Mikrobe 29 %, Pilz 22 %, Pflanze 7 %, Protist 4 %).
 
+- **Genbuch begehbar — „Lebensbaum" (erledigt).** Zähler öffnet ein Overlay (`#genbook`),
+  das die ~36 Formen nach Reich gruppiert zeigt: entdeckt = Emoji+Name+reale Klade leuchten,
+  unentdeckt = „???" + reale Klade als lehrreicher Hinweis (Chlorophyta, Angiospermen, …).
+  Pro-Reich-Fortschritt (z. B. Pilz 2/7), Neugier statt 100 %-Balken. Daten inline (`TREE`,
+  Namen exakt = `classify().n`, gespiegelt aus `docs/tree-of-life.json`). Nur `app/index.html`.
+- **Stabilität (erledigt).** (1) Unlock nur bei STABIL erreichter Art: `committedArch` mit
+  Hysterese (`STABLE_GENS=15`) — Art/Zeichnung/Genbuch wechseln erst nach 15 stabilen
+  Generationen (vorher unlockte jede kurz überstreifte Form). (2) Kein Flackern: Anzeige +
+  Zeichnung nutzen `committedArch` statt `classify()` pro Frame; Form-Details aus `lineageSeed`
+  (nicht driftendes Genom); framerate-unabhängiges Glätten (τ≈0,6 s); `DRIFT_SCALE` 0,03→0,02.
+  Merksatz: Mitteln glättet die *Gene*, nicht die *Kategorie* — harte `classify()`-Schwellen
+  brauchen Hysterese.
+- **Flaches monochromes Icon-System (erledigt).** Alle bunten Emoji durch Inline-SVG ersetzt
+  (`ICONS`-Dict + `ic()`/`formIcon()`, erben `currentColor`): 6 Regler, 10 Biome, Steuerung
+  (Play/Pause/Ei/DNA), alle 36 Archetyp-Symbole (`FICON`-Map). Karte/Toast/Reveal/Genbuch
+  nutzen `formIcon(name)`. Die `e:`-Emoji in `classify()`/`TREE` sind nur noch interne
+  Dispatch-/Datenschlüssel (nicht sichtbar). Nur `app/index.html`.
+
 ## 7. Nächste Schritte (Priorität)
 1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
    oder Renderer/Taxonomie in eine geteilte Datei auslagern (Backlog: vereinheitlichen).
-2. **A1 Genbuch begehbar** (Kachel-Galerie aller ~36 Formen, entdeckt/„???"; die 8 seltenen
-   Zwischennischen als besondere „Fänge" hervorheben).
+2. **Abdeckungs-Lücken** (aus `docs/tree-of-life.json`): Amphibien, Weichtiere, sessile Tiere
+   (Schwämme/Nesseltiere) als neue Formen/Nischen — letzteres schärft den Absorptions-Kanal.
 3. **A3 Vitalitäts-Anzeige** (aus `fitness(genome,env)`) → Ursache→Wirkung sofort spürbar.
 4. **A4 Bindung** (Name, Ahnenlinie/Historie; „Neues Leben" als Nachkomme).
 5. Weitere Audit-Punkte (a11y B4, reduced-motion Canvas B5, Fußzeilen-Copy B6, Sync-Tag B7).
