@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 <title>Evolve — Bio-Kammer</title>
 <style>
@@ -130,6 +131,22 @@
   .disc { margin-top: 14px; font-family: var(--mono); font-size: .72rem; color: var(--bio-dim); letter-spacing: .03em; }
   .disc span { color: var(--bio); font-weight: 700; }
 
+  /* ---- Auth ---- */
+  .auth { margin-left: auto; font-size: .82rem; display: flex; align-items: center; gap: 8px; }
+  .auth-mail { color: var(--muted); font-family: var(--mono); font-size: .74rem; }
+  .link { background: none; border: none; color: var(--bio); cursor: pointer; font: inherit; padding: 4px 2px; text-decoration: underline; text-underline-offset: 3px; }
+  .link:hover { filter: brightness(1.1); }
+
+  /* ---- Login-Overlay ---- */
+  .login { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(4,10,9,.7); backdrop-filter: blur(5px); animation: fadein .3s ease; }
+  .login[hidden] { display: none; }
+  .login-card { width: min(90%, 380px); background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
+  .login-p { color: var(--muted); font-size: .85rem; line-height: 1.55; margin: 8px 0 16px; }
+  #loginEmail { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; }
+  #loginEmail:focus { outline: none; border-color: var(--bio-dim); }
+  .login-row { display: flex; gap: 8px; margin-top: 12px; }
+  .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio); min-height: 1.2em; }
+
   /* ---- Willkommen-zurück-Reveal ---- */
   .reveal {
     position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
@@ -160,6 +177,7 @@
   <header class="top">
     <div class="brand"><b>Evolve</b> · Bio-Kammer</div>
     <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Die Zeit läuft ununterbrochen; dreh an der Umwelt und sieh zu, wie sich das Leben über Generationen anpasst.</div>
+    <div class="auth" id="authState"></div>
   </header>
 
   <div class="stage">
@@ -204,8 +222,22 @@
     gegen ein wissenschaftliches Referenzmodell auf <b class="chip-val">~82&nbsp;%</b> abgeglichen ist
     (Modell-Güte, nicht Bewertung deines Wesens). Früher Mockup — die Optik verfeinern wir noch.
   </p>
+
+  <div class="login" id="login" hidden>
+    <div class="login-card">
+      <div class="reveal-eyebrow">Geräte-Sync anmelden</div>
+      <p class="login-p">Gib deine E-Mail ein — wir schicken dir einen Anmelde-Link (kein Passwort). Dann folgt dein Wesen dir auf jedes Gerät.</p>
+      <input type="email" id="loginEmail" placeholder="du@beispiel.de" autocomplete="email" />
+      <div class="login-row">
+        <button id="loginSend" class="reveal-x">Link senden</button>
+        <button id="loginClose" class="ctrl">abbrechen</button>
+      </div>
+      <div class="login-msg" id="loginMsg"></div>
+    </div>
+  </div>
 </div>
 
+<script src="./vendor/supabase.js"></script>
 <script>
 "use strict";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
@@ -347,16 +379,29 @@ function newLineage(){
 }
 newLineage();
 
-// ======================= Persistenz + Offline-Zeit (Meilenstein A1) =======================
+// ======================= Persistenz · Cloud/Lokal · Auth (Meilenstein A2) =======================
+const SB_URL = "https://fysktruunypngghqdezy.supabase.co";
+const SB_KEY = "sb_publishable_ISQaEhpmcMGsfyABDWQMFA_thXfYlbf";  // oeffentlicher Client-Schluessel (RLS-geschuetzt)
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+let session = null;
+
 const STORAGE_KEY = "evolve_save_v1";
 const OFFLINE_MS_PER_GEN = 60000;   // offline: 1 Generation je Minute
 const OFFLINE_CAP = 240;            // max. nachsimulierte Generationen pro Rueckkehr
+let cloudTimer = null;
 function saveState(){
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      genome, env, generation, lineageSeed, discovered:[...discovered], ts: Date.now()
-    }));
-  } catch(e) {}
+  const now = Date.now();
+  if(session){
+    if(cloudTimer) return;   // entprellt Cloud-Schreibvorgaenge
+    cloudTimer = setTimeout(async () => { cloudTimer = null;
+      try { await sb.from("creatures").upsert({
+        user_id: session.user.id, genome, env, generation,
+        lineage_seed: lineageSeed, discovered:[...discovered], last_seen: new Date().toISOString()
+      }); } catch(e) { console.warn("save", e); }
+    }, 2000);
+  } else {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ genome, env, generation, lineageSeed, discovered:[...discovered], ts: now })); } catch(e) {}
+  }
 }
 function updateDisc(){ const el=document.getElementById("discCount"); if(el) el.textContent = discovered.size; }
 function timeStr(ms){
@@ -367,25 +412,38 @@ function timeStr(ms){
   if(h < 24) return h + " Std" + (r ? " "+r+" Min" : "");
   const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
 }
-function maybeRestore(){
-  let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { return; }
-  if(!s || !Array.isArray(s.genome) || s.genome.length !== 8) return;
-  env = Object.assign(env, s.env||{});
-  LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
-  genome = s.genome.slice(); generation = s.generation||0;
-  discovered = new Set(s.discovered||[]);
-  lineageSeed = s.lineageSeed || ((Math.random()*4294967296)>>>0);
-  // rng aus Seed+Generation rekonstruieren (Drift bleibt stochastisch; kein rng-Zustand noetig)
+function applyState(s){
+  if(Array.isArray(s.genome) && s.genome.length===8) genome = s.genome.slice();
+  if(s.env){ env = Object.assign(env, s.env);
+    LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } }); }
+  generation = s.generation || 0;
+  discovered = new Set(s.discovered || []);
+  lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
   rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
-  document.getElementById("biomeTag").textContent = "gespeicherte Welt";
-  // Offline vergangene Zeit nachsimulieren
-  const elapsed = Math.max(0, Date.now() - (s.ts || Date.now()));
+}
+function offlineCatchup(prevTs){
+  const elapsed = Math.max(0, Date.now() - (prevTs || Date.now()));
   const offGens = Math.min(OFFLINE_CAP, Math.floor(elapsed / OFFLINE_MS_PER_GEN));
   if(offGens > 0){
     const beforeA = classify(genome), beforeG = genome.slice();
     for(let i=0;i<offGens;i++){ genome = stepGeneration(genome, env, randn); generation++; }
     showReveal(elapsed, offGens, beforeA, classify(genome), beforeG, genome);
   }
+}
+async function restore(){
+  if(session){
+    document.getElementById("biomeTag").textContent = "Cloud-Welt";
+    let row = null;
+    try { const r = await sb.from("creatures").select("*").eq("user_id", session.user.id).maybeSingle(); row = r.data; }
+    catch(e) { console.warn("load", e); }
+    if(row){ const prevTs = row.last_seen ? new Date(row.last_seen).getTime() : Date.now();
+      applyState(row); offlineCatchup(prevTs); }
+    else { saveState(); }   // erstes Login: aktuelles Wesen in die Cloud uebernehmen
+  } else {
+    let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { s = null; }
+    if(s && Array.isArray(s.genome) && s.genome.length===8){ applyState(s); offlineCatchup(s.ts); }
+  }
+  updatePanels(); updateDisc();
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   const parts = [];
@@ -400,6 +458,38 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
   document.getElementById("revealBody").innerHTML = parts.map(p=>`<div>${p}</div>`).join("");
   document.getElementById("reveal").hidden = false;
+}
+// ---- Auth-UI ----
+function updateAuthUI(){
+  const el = document.getElementById("authState");
+  if(!el) return;
+  if(session){
+    el.innerHTML = `<span class="auth-mail">☁️ ${session.user.email || "angemeldet"}</span> <button class="link" id="signOut">abmelden</button>`;
+    document.getElementById("signOut").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+  } else {
+    el.innerHTML = `<button class="link" id="signIn">☁️ Anmelden für Geräte-Sync</button>`;
+    document.getElementById("signIn").addEventListener("click", () => { document.getElementById("login").hidden = false; document.getElementById("loginEmail").focus(); });
+  }
+}
+document.getElementById("loginSend").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const msg = document.getElementById("loginMsg");
+  if(!email){ msg.textContent = "Bitte E-Mail eingeben."; return; }
+  msg.textContent = "sende Link …";
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: location.href.split("#")[0] } });
+  msg.textContent = error ? ("Fehler: " + error.message) : "Prüf deine E-Mail — klick den Link, dann bist du auf jedem Gerät angemeldet.";
+});
+document.getElementById("loginClose").addEventListener("click", () => { document.getElementById("login").hidden = true; });
+sb.auth.onAuthStateChange((_event, s) => {
+  const was = !!session; session = s;
+  updateAuthUI();
+  document.getElementById("login").hidden = true;
+  if(s && !was) restore();   // gerade angemeldet -> Cloud-Wesen laden
+});
+async function boot(){
+  try { const { data } = await sb.auth.getSession(); session = data.session; } catch(e) { console.warn(e); }
+  updateAuthUI();
+  await restore();
 }
 
 // ---- UI aufbauen ----
@@ -650,6 +740,7 @@ function frame(time){
   requestAnimationFrame(frame);
 }
 
-resize(); initMotes(); maybeRestore(); updatePanels(); updateDisc();
+resize(); initMotes(); updatePanels(); updateDisc();
+boot();
 requestAnimationFrame(frame);
 </script>
