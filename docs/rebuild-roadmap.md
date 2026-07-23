@@ -132,5 +132,15 @@ Prototyp-Dateien: `world/{population,cluster,world,describe}.ts`, `cli/world-dem
   Autoren-Label; der Zensus annotiert Arten mit ihrer Stufe (häufig … legendär). `npm run rarity-check`
   (47 Formen, mehrere Stufen; nur-über-Ereignis entstandene Formen = legendär → „Entdeckungs-Tiefe,
   keine Währung"). Chronik in Demo + Viewer zeigt Rarität.
-- Offen (Stufe 7 voll): Zoom Pet↔Welt, „Veränderung"-Knopf mit progressiver Tiefe, Creature-Rendering.
-- Anschluss an die Live-App: den Kern hinter die bestehende UX schieben (ein Ort = die heutige Ansicht), dann Karte aufmachen.
+- [x] **Pfad A · Schritt 1 — Kern in der Live-App (additiv, Beta)**: der v2-Metapopulations-Kern
+  läuft jetzt IN der ausgelieferten App als Overlay „🌍 Lebende Welt (Beta)" (Knopf neben dem
+  Genbuch). Rauszoomen = der emergente Baum des Lebens (Orte-Karte, Chronik mit emergenter Rarität,
+  Veränderung-Hebel: Katastrophe/Klima/Verbinden/Trennen); reinzoomen = das bestehende Einzel-Wesen,
+  **byte-identisch unberührt**. Der Kern liegt gebündelt unter `app/core/` (`npm run bundle-app`,
+  weil GitHub Pages nur `app/` ausliefert); eigenes `<script type=module>`, per try/catch entkoppelt
+  (Ladefehler lässt die App intakt). Smoke-Test grün: `npm run app-world-smoke` (App bootet, Overlay
+  rendert 5 Orte + emergente Arten + Rarität, Einzel-Wesen unberührt).
+- Offen (Pfad A weiter): das Einzel-Wesen als EINEN Ort dieser Welt verdrahten (die heutige Ansicht =
+  eine Linie im Baum); Zoom Pet↔Welt als echte Navigation; „Veränderung"-Knopf mit progressiver Tiefe;
+  Creature-Rendering je emergenter Form. Danach: die inline-v1-Mean-Field-Engine schrittweise durch
+  den Populations-Kern ablösen (ein Ort = die heutige Ansicht).

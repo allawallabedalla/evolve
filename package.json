@@ -17,6 +17,8 @@
     "coevolution-check": "npm run build && node tools/coevolution-check.mjs",
     "census-check": "npm run build && node tools/census-check.mjs",
     "rarity-check": "npm run build && node tools/rarity-check.mjs",
+    "bundle-app": "npm run build && node tools/bundle-app-core.mjs",
+    "app-world-smoke": "npm run bundle-app && node tools/app-world-smoke.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"
   },
