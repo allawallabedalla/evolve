@@ -518,7 +518,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.18.0";
+const APP_VERSION = "v0.19.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1454,6 +1454,9 @@ function drawCreature(g, time, a){
     ctx.shadowBlur = 24+bl*30*pulse;
   } else {
     ctx.shadowColor = "rgba(80,60,34,.30)"; ctx.shadowBlur = 16;   // weicher warmer Schlagschatten
+    // Pastell-Tiere (Design v2): Kreatur-Farben entsättigen + leicht aufhellen — ein
+    // Filter über die ganze Zeichnung, ohne die verschachtelte Farb-Mathematik anzufassen.
+    ctx.filter = "saturate(0.68) brightness(1.08)";
   }
 
   const sessileAnimal = a.e==="🪸" || a.e==="🧽";   // Koralle / Schwamm: Tiere, aber bodenstaendig
