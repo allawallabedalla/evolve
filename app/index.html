@@ -192,6 +192,9 @@
   .wl-cre-sm { color: var(--bio-dim); }
   .wl-cre-sm .ic { width: 1.05em; height: 1.05em; vertical-align: -.16em; }
   .wl-place .div { color: var(--muted); font-size: .62rem; font-family: var(--mono); }
+  .wl-conn { color: var(--muted); }
+  .wl-conn.on { color: var(--bio); }
+  .wl-conn .ic { width: .95em; height: .95em; vertical-align: -.16em; }
   .wl-side { display: flex; flex-direction: column; gap: 14px; }
   .wl-panel { background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; }
   .wl-panel h3 { margin: 0 0 8px; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio); }
@@ -435,9 +438,11 @@
               <button id="wlCat">Katastrophe</button>
               <button id="wlWet">feucht &amp; kühl</button>
               <button id="wlDry">heiß &amp; trocken</button>
+              <button id="wlConnect">mit Nachbarn verbinden</button>
+              <button id="wlIsolate">als Insel abtrennen</button>
               <button id="wlPause">Pause</button>
             </div>
-            <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück — was danach nachwächst, ist ungewiss (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt dauerhaft und locken neue Formen hervor.</p>
+            <p class="wl-hint"><b>Katastrophe</b> setzt einen Ort fast auf null zurück (Founder-Effekt). Die <b>Klima</b>-Knöpfe verschieben die Umwelt und locken neue Formen. <b>Verbinden</b> lässt Nachbar-Orte Wesen austauschen — sie gleichen sich an; eine <b>Insel</b> geht ihren eigenen Weg (Artbildung durch Isolation).</p>
           </div>
         </div>
         <div class="wl-side">
@@ -456,7 +461,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.5.0";
+const APP_VERSION = "v0.6.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -498,6 +503,8 @@ const ICONS = {
   // Welt-Overlay
   globe:`<g fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path stroke-width="1.4" d="M3 12h18M4.7 7.2h14.6M4.7 16.8h14.6"/></g>`,
   meteor:`<circle cx="15.5" cy="8.5" r="3.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M10.5 12.5L4 19M13 8L6.5 14.5M9 12L5 16"/></g>`,
+  link:`<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9.8 14.2l4.4-4.4"/><path d="M8.5 11.5L6.7 13.3a3 3 0 0 0 4.2 4.2l1.8-1.8"/><path d="M15.5 12.5l1.8-1.8a3 3 0 0 0-4.2-4.2L11.3 8.3"/></g>`,
+  island:`<path d="M6 16c1.4-4.2 4.2-6.5 6-6.5s4.6 2.3 6 6.5z"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 19c1.8-1.4 3.6-1.4 5.4 0M15.6 19c1.8-1.4 3.6-1.4 5.4 0"/></g>`,
   tune:`<g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g><g fill="var(--abyss)" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="7" r="2.3"/><circle cx="15" cy="12" r="2.3"/><circle cx="8" cy="17" r="2.3"/></g>`,
   // Pflanzen
   alga:`<circle cx="9" cy="10" r="3.2"/><circle cx="14.5" cy="8.3" r="2.7"/><circle cx="13.6" cy="13" r="2.5"/>`,
@@ -2046,6 +2053,8 @@ try {
   el("wlCat").innerHTML = ic("meteor") + " Katastrophe";
   el("wlWet").innerHTML = ic("drop") + " feucht &amp; kühl";
   el("wlDry").innerHTML = ic("flame") + " heiß &amp; trocken";
+  el("wlConnect").innerHTML = ic("link") + " mit Nachbarn verbinden";
+  el("wlIsolate").innerHTML = ic("island") + " als Insel abtrennen";
   el("wlPause").innerHTML = ic("pause") + " Pause";
 
   function step() { if (!paused && world) { world.step(); render(); } }
@@ -2059,10 +2068,13 @@ try {
       const isPet = i === PET;
       const desc = describe(m);
       const cre = realExample(desc);
+      const mig = (world.migration[i] || []).reduce((a, b) => a + b, 0);
+      const conn = mig > 0.05;
+      const state = conn ? `<span class="wl-conn on">${ic("link")} verbunden</span>` : `<span class="wl-conn">${ic("island")} Insel</span>`;
       return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}" data-i="${i}">`+
         `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
         `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
-        `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)}</div>`+
+        `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)} · ${state}</div>`+
       `</div>`;
     }).join("");
     map.querySelectorAll(".wl-place").forEach((n) => n.onclick = () => {
@@ -2139,6 +2151,10 @@ try {
   el("wlCat").addEventListener("click", () => { world?.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 }); render(); });
   el("wlWet").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } }); render(); });
   el("wlDry").addEventListener("click", () => { world?.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } }); render(); });
+  // Raum-Hebel je ausgewähltem Ort: Nachbarn = angrenzende Orte in der Reihe.
+  const neighbors = (i) => [i - 1, i + 1].filter((j) => j >= 0 && world && j < world.places.length);
+  el("wlConnect").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.connect(sel, j, 0.28); render(); });
+  el("wlIsolate").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.isolate(sel, j); render(); });
   el("wlPause").addEventListener("click", (e) => { paused = !paused; e.currentTarget.innerHTML = (paused ? ic("play") + " Weiter" : ic("pause") + " Pause"); });
 } catch (err) {
   console.error("Lebende Welt (Beta) konnte nicht geladen werden:", err);
