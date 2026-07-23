@@ -280,9 +280,13 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern gezeichnet — dieselbe Evolutions-Engine, die
-    gegen ein wissenschaftliches Referenzmodell auf <b class="chip-val">~84&nbsp;%</b> abgeglichen ist
-    (Modell-Güte, nicht Bewertung deines Wesens). Früher Mockup — die Optik verfeinern wir noch.
+    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern lebendig gezeichnet.
+    <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
+  </p>
+  <p class="footnote" id="engineDetail" hidden>
+    Dieselbe Evolutions-Engine ist gegen ein wissenschaftliches Referenzmodell auf
+    <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die <b>Modell-Güte</b> (wie gut die
+    schlanke Browser-Engine das schwere Referenzmodell trifft), <b>keine Bewertung deines Wesens</b>.
   </p>
 
   <div class="login" id="login" role="dialog" aria-modal="true" aria-label="Geräte-Sync — Login" hidden>
@@ -740,6 +744,11 @@ gbBodyEl.addEventListener("mousemove", (e) => {
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
 });
 gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+// B6: "Über die Engine" ein-/ausklappen (Jargon nur auf Wunsch).
+document.getElementById("engineInfoBtn").addEventListener("click", (e) => {
+  const d=document.getElementById("engineDetail"); const open=d.hidden;
+  d.hidden=!open; e.target.setAttribute("aria-expanded", String(open));
+});
 // B4: Escape schliesst offene Overlays (Genbuch/Login/Reveal).
 document.addEventListener("keydown", (e) => {
   if(e.key !== "Escape") return;
@@ -788,7 +797,8 @@ function offlineCatchup(prevTs){
 }
 async function restore(){
   if(session){
-    document.getElementById("biomeTag").textContent = "Cloud-Welt";
+    // B7: Sync-Status gehoert in den Header (authState "☁️ E-Mail"), NICHT in den
+    // Biom-Tag - der zeigt weiter die echte Umwelt.
     let row = null;
     try { const r = await sb.from("creatures").select("*").eq("user_id", session.user.id).maybeSingle(); row = r.data; }
     catch(e) { console.warn("load", e); }
@@ -820,7 +830,7 @@ function updateAuthUI(){
   const el = document.getElementById("authState");
   if(!el) return;
   if(session){
-    el.innerHTML = `<span class="auth-mail">☁️ ${session.user.email || "angemeldet"}</span> <button class="link" id="signOut">abmelden</button>`;
+    el.innerHTML = `<span class="auth-mail" title="Cloud-Sync aktiv — dein Wesen folgt dir auf jedes Gerät">☁️ ${session.user.email || "angemeldet"}</span> <button class="link" id="signOut">abmelden</button>`;
     document.getElementById("signOut").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
   } else {
     el.innerHTML = `<button class="link" id="signIn">☁️ Anmelden für Geräte-Sync</button>`;
