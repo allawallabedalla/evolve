@@ -322,35 +322,70 @@ function stepGeneration(m, env, randn){
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
   const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
+
+  // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
-    if(struct>0.6 && size>0.45) return {k:"Pflanze",n:"Verholzt · baumartig",e:"🌳"};
-    if(struct>0.6)              return {k:"Pflanze",n:"Verholzter Strauch",e:"🪴"};
-    if(armor>0.5)               return {k:"Pflanze",n:"Bewehrte Pflanze",e:"🌵"};
-    if(insul>0.6)               return {k:"Pflanze",n:"Behaarte Kältepflanze",e:"🌿"};
+    if(size<0.18 && struct<0.32)          return {k:"Pflanze",n:"Grünalge",e:"🟢"};
+    if(struct<0.28 && size<0.42)          return {k:"Pflanze",n:"Moos",e:"🌱"};
+    if(armor>0.5)                         return {k:"Pflanze",n:"Sukkulente · Kaktus",e:"🌵"};
+    if(insul>0.6)                         return {k:"Pflanze",n:"Polster-Kältepflanze",e:"🏔️"};
+    if(struct>0.6 && size>0.5)            return insul>0.4 ? {k:"Pflanze",n:"Nadelbaum",e:"🌲"}
+                                                          : {k:"Pflanze",n:"Laubbaum",e:"🌳"};
+    if(struct>0.55)                       return {k:"Pflanze",n:"Verholzter Strauch",e:"🪴"};
+    if(photo>0.75 && struct<0.42)         return {k:"Pflanze",n:"Blütenkraut",e:"🌸"};
+    if(struct<0.42 && size>0.35)          return {k:"Pflanze",n:"Farn",e:"🌿"};
     return {k:"Pflanze",n:"Kraut · niedrige Pflanze",e:"☘️"};
   }
+
+  // ===== Reich TIERE — heterotroph + mobil =====
   if(mob>0.45 && photo<0.4){
-    if(armor>0.55 && size>0.55) return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
-    if(armor>0.55)              return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
-    if(size>0.6 && metab>0.6)   return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
-    if(limb>0.6 && size<0.45)   return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
-    if(insul>0.6)               return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
-    if(size<0.3)                return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
-    return {k:"Tier",n:"Generalisten-Tier",e:"🦎"};
+    if(armor>0.55 && size>0.55)           return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
+    if(armor>0.5 && limb>0.5)             return {k:"Tier",n:"Krebstier · Arthropode",e:"🦀"};
+    if(armor>0.55)                        return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
+    if(limb<0.3 && armor<0.32 && mob>0.6) return {k:"Tier",n:"Fisch · Aalform",e:"🐟"};
+    if(limb<0.3 && size<0.35)             return {k:"Tier",n:"Wurm",e:"🪱"};
+    if(limb>0.6 && size<0.32 && insul<0.4)return {k:"Tier",n:"Insekt · Gliederfüßer",e:"🐜"};
+    if(size>0.6 && metab>0.6)             return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
+    if(insul>0.6 && size>0.52)            return {k:"Tier",n:"Fell-Großtier",e:"🐻"};
+    if(insul>0.6)                         return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
+    if(limb>0.6 && metab>0.55 && size<0.45)return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
+    if(limb>0.6 && size<0.45)             return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
+    if(size<0.28)                         return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
+    if(armor<0.32 && insul<0.32)          return {k:"Tier",n:"Reptil · Echse",e:"🦎"};
+    return {k:"Tier",n:"Generalisten-Tier",e:"🦥"};
   }
-  if(size<0.25 && mob<0.35 && photo<0.35 && metab<0.35) return {k:"Übergangsform",n:"Zwerg- · Hungerform",e:"🫧"};
-  return {k:"Übergangsform",n:"Mischotroph",e:"🦠"};
+
+  // ===== Reich PILZE & MIKROBEN — heterotroph + sessil (fressen ohne Wandern) =====
+  if(photo<0.45 && mob<0.4){
+    if(size<0.16){
+      if(metab>0.6 || insul>0.6)          return {k:"Mikrobe",n:"Archaee · Extremophil",e:"🦠"};
+      return {k:"Mikrobe",n:"Bakterie",e:"🧫"};
+    }
+    if(size<0.28 && struct<0.35)          return {k:"Mikrobe",n:"Protist · Amöbe",e:"🔬"};
+    if(metab>0.55 && size<0.35)           return {k:"Pilz",n:"Hefe",e:"🫧"};
+    if(photo>0.28)                        return {k:"Pilz",n:"Flechte · Symbiose",e:"🍥"};
+    if(struct>0.55 && size>0.4)           return {k:"Pilz",n:"Baumpilz · Porling",e:"🪵"};
+    if(armor>0.5)                         return {k:"Pilz",n:"Zunderschwamm",e:"🟤"};
+    if(struct<0.3 && size<0.42)           return {k:"Pilz",n:"Schimmel · Fadenpilz",e:"🧵"};
+    if(size>0.45)                         return {k:"Pilz",n:"Hutpilz",e:"🍄"};
+    return {k:"Pilz",n:"Myzel · Pilzgeflecht",e:"🍂"};
+  }
+
+  // ===== Reich PROTISTEN — schwimmen UND Photosynthese (Mischotroph) =====
+  if(size<0.2)                            return {k:"Protist",n:"Plankton",e:"✨"};
+  return {k:"Protist",n:"Euglenoid · Mixotroph",e:"🦠"};
 }
 
 function describe(t){
   const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
-  const a=classify(t), plant=a.k==="Pflanze", animal=a.k==="Tier";
+  const a=classify(t);
+  const plant=a.k==="Pflanze", animal=a.k==="Tier", fungus=a.k==="Pilz", microbe=a.k==="Mikrobe", protist=a.k==="Protist";
   const sz = size<0.15?"winzig":size<0.35?"klein":size<0.6?"mittelgroß":size<0.8?"groß":"riesig";
   const cover=[];
-  if(insul>0.5) cover.push(plant?"isolierende Behaarung":"dichtes Fell");
-  if(armor>0.5) cover.push(plant?"harte Rinde":"Panzerplatten");
+  if(insul>0.5) cover.push(plant?"isolierende Behaarung":animal?"dichtes Fell":"schützende Hülle");
+  if(armor>0.5) cover.push(plant?"harte Rinde":animal?"Panzerplatten":fungus?"verhärteter Fruchtkörper":"feste Zellwand");
   if(plant && struct>0.6) cover.push("verholzte Achse");
-  if(!cover.length) cover.push(plant?"weiches Gewebe":"nackte Haut");
+  if(!cover.length) cover.push(plant?"weiches Gewebe":animal?"nackte Haut":fungus?"faseriges Geflecht":"dünne Membran");
   const parts=[];
   if(plant){
     const leaves=Math.round(photo*8); if(leaves>0) parts.push(leaves+" Photosynthese-Blätter");
@@ -360,9 +395,17 @@ function describe(t){
     const legs=Math.round(clamp01(0.6*mob+0.4*limb)*8); if(legs>0) parts.push(legs+(limb>0.55?" lange Beine":" kurze Extremitäten"));
     if(limb>0.5 && metab>0.4) parts.push("Greifwerkzeuge");
     if(armor>0.6) parts.push("Stacheln");
-  } else parts.push("reduzierte Fortsätze");
-  const loco = plant?"sessil":mob<0.3?"kaum beweglich":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
-  const energy = plant?"Photosynthese":animal?"Jäger/Sammler":"Mischform";
+  } else if(fungus){
+    if(struct>0.5) parts.push("verholzter Fruchtkörper");
+    else if(size>0.45) parts.push("Hut auf Stiel");
+    else parts.push("fädiges Myzel");
+    if(photo>0.28) parts.push("symbiotische Algen");
+  } else if(microbe){
+    parts.push(struct<0.3?"nackte Einzelzelle":"Zellwand");
+    if(metab>0.5) parts.push("aktiver Stoffwechsel");
+  } else parts.push("Geißel + Chloroplast");
+  const loco = (plant||fungus)?"sessil":microbe?(mob>0.3?"driftend":"anhaftend"):mob<0.3?"kaum beweglich":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
+  const energy = plant?"Photosynthese":animal?"Jäger/Sammler":fungus?"Zersetzer (Saprotroph)":protist?"Mischform (Photo + Beute)":"Absorption";
   return `${sz}, ${cover.join(" + ")}. ${parts.join(", ")}. Energie: ${energy}. Fortbewegung: ${loco}.`;
 }
 
@@ -382,6 +425,10 @@ const BIOMES = [
   {n:"🏜️ Hitze-Dürre", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
   {n:"☀️ Sonniger Sumpf", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
   {n:"🌲 Lichtkampf", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
+  {n:"🍄 Moderwald", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
+  {n:"🧫 Urtümpel", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
+  {n:"🌊 Plankton-See", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
+  {n:"🟢 Algen-Riff", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
 ];
 const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe"];
 
@@ -708,30 +755,174 @@ function drawCreature(g, time){
   ctx.shadowColor = "rgba(95,230,176,.28)"; ctx.shadowBlur = 22;
 
   if(a.k==="Pflanze"){
-    drawPlant(g, cx, CH*0.9, breath, time, rnd);
+    drawPlant(g, cx, CH*0.9, breath, time, rnd, a);
   } else if(a.k==="Tier"){
-    drawAnimal(g, cx, CH*0.6, breath, time, rnd);
+    drawAnimal(g, cx, CH*0.6, breath, time, rnd, a);
+  } else if(a.k==="Pilz"){
+    drawFungus(g, cx, CH*0.9, breath, time, rnd, a);
+  } else if(a.k==="Mikrobe"){
+    drawMicrobe(g, cx, CH*0.6, breath, time, rnd, a);
   } else {
-    drawDwarf(g, cx, CH*0.62, breath, time, rnd);
+    drawProtist(g, cx, CH*0.6, breath, time, rnd, a);
   }
   ctx.restore();
 }
 
-function drawPlant(g, bx, by, breath, time, rnd){
+function drawPlant(g, bx, by, breath, time, rnd, a){
   const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind = a.e;
+  const sway = Math.sin(time*0.0012)*(0.06+0.05*(1-struct));
+  // Individual-Faerbung: stabil pro Leben (aus lineageSeed) -> jede Pflanze leicht anders
+  const pr = mulberry32((lineageSeed^0x51ed2701)>>>0);
+  const hue = (pr()-0.5);
+  const leafBase = mix([70,150,80],[140,220,120],photo);
+  const leafCol = [leafBase[0]+hue*22, leafBase[1]+hue*46, leafBase[2]+hue*18];
+  const leafVar = () => leafCol.map(c=>c*(0.82+rnd()*0.32));
+  // Wurzeln (gemeinsam)
+  const roots = () => { ctx.strokeStyle="rgba(120,90,60,.5)"; ctx.lineWidth=2;
+    for(let i=0;i<4;i++){ const d=(i-1.5)*0.5; ctx.beginPath(); ctx.moveTo(bx,by);
+      ctx.quadraticCurveTo(bx+d*20,by+12,bx+d*40,by+26); ctx.stroke(); } };
+
+  // ---- Baum: Stamm + runde Krone aus Blattblobs ----
+  if(kind==="🌳"){
+    const h=(80+size*150+struct*60)*breath, w=6+struct*16;
+    const stemCol=mix([90,66,44],[120,92,60],photo);
+    ctx.strokeStyle=rgb(stemCol); ctx.lineWidth=w; ctx.lineCap="round";
+    const topX=bx+Math.sin(sway)*h*0.25, topY=by-h;
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.quadraticCurveTo(bx+Math.sin(sway)*h*0.1,by-h*0.5, topX,topY); ctx.stroke();
+    const cr=26+size*32;
+    const blobs=6+Math.round(photo*6);
+    for(let i=0;i<blobs;i++){ const ang=i/blobs*Math.PI*2;
+      const cxp=topX+Math.cos(ang)*cr*(0.5+rnd()*0.5), cyp=topY+Math.sin(ang)*cr*(0.4+rnd()*0.4)-cr*0.2;
+      ctx.fillStyle=rgb(leafVar()); ctx.beginPath(); ctx.arc(cxp,cyp, cr*(0.42+rnd()*0.3),0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle=rgb(leafCol); ctx.beginPath(); ctx.arc(topX,topY-size*18, cr*0.9,0,Math.PI*2); ctx.fill();
+    roots(); return;
+  }
+
+  // ---- Kaktus: Saeule + Ridges + Dornen + Bluete bei Wasser/Licht ----
+  if(kind==="🌵"){
+    const h=(70+size*120)*breath, w=13+struct*16;
+    const col=mix([56,110,66],[92,150,92],photo);
+    ctx.fillStyle=rgb(col);
+    ctx.beginPath(); ctx.moveTo(bx-w,by); ctx.lineTo(bx-w,by-h+w);
+    ctx.arc(bx,by-h+w,w,Math.PI,0); ctx.lineTo(bx+w,by); ctx.closePath(); ctx.fill();
+    if(size>0.4){ ctx.strokeStyle=rgb(col); ctx.lineWidth=w*0.9; ctx.lineCap="round";
+      const ay=by-h*0.5; ctx.beginPath(); ctx.moveTo(bx+w*0.4,ay);
+      ctx.quadraticCurveTo(bx+w*2.1,ay, bx+w*2.1,ay-h*0.26); ctx.stroke(); }
+    ctx.strokeStyle="rgba(20,50,30,.35)"; ctx.lineWidth=1.5;
+    for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(bx+i*w*0.42,by-w*0.4); ctx.lineTo(bx+i*w*0.42,by-h*0.92); ctx.stroke(); }
+    ctx.strokeStyle="rgba(232,236,210,.7)"; ctx.lineWidth=1;
+    for(let i=0;i<20;i++){ const t=rnd(); const y=by-w-t*(h-w*1.4); const s=(rnd()>0.5?1:-1);
+      ctx.beginPath(); ctx.moveTo(bx+s*w*0.55,y); ctx.lineTo(bx+s*(w*0.55+5),y+2); ctx.stroke(); }
+    if(env.water>0.6 && env.light>0.7){
+      ctx.fillStyle="rgba(240,150,180,.92)";
+      for(let k=0;k<5;k++){ const ang=k/5*Math.PI*2;
+        ctx.beginPath(); ctx.ellipse(bx+Math.cos(ang)*7, by-h+Math.sin(ang)*7, 5,3, ang,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle="rgba(250,220,120,.95)"; ctx.beginPath(); ctx.arc(bx,by-h,3.4,0,Math.PI*2); ctx.fill();
+    }
+    roots(); return;
+  }
+
+  // ---- Strauch: mehrere kurze Staemme mit Blattbuescheln ----
+  if(kind==="🪴"){
+    const stems=3+Math.round(struct*2);
+    const stemCol=mix([90,70,50],[120,95,62],photo);
+    for(let s=0;s<stems;s++){ const off=(s-(stems-1)/2)*14;
+      const h=(45+size*70+struct*30)*breath*(0.7+rnd()*0.5);
+      const tx=bx+off+Math.sin(sway+s)*8, ty=by-h;
+      ctx.strokeStyle=rgb(stemCol); ctx.lineWidth=4+struct*6; ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(bx+off*0.4,by); ctx.quadraticCurveTo(bx+off,by-h*0.5, tx,ty); ctx.stroke();
+      for(let l=0;l<4;l++){ const la=(l/4)*Math.PI*2; ctx.fillStyle=rgb(leafVar());
+        ctx.beginPath(); ctx.ellipse(tx+Math.cos(la)*10, ty+Math.sin(la)*10, 12+photo*8, 6+photo*4, la,0,Math.PI*2); ctx.fill(); } }
+    roots(); return;
+  }
+
+  // ---- Kraut: niedrige Boden-Rosette aus breiten Blaettern ----
+  if(kind==="☘️"){
+    const n=5+Math.round(photo*6);
+    for(let i=0;i<n;i++){ const spread=Math.PI*1.1;
+      const ang=-Math.PI/2 - spread/2 + (i/(n-1))*spread + Math.sin(time*0.002+i)*0.05;
+      const len=(26+size*36+photo*30)*breath*(0.8+rnd()*0.4);
+      ctx.save(); ctx.translate(bx,by); ctx.rotate(ang+Math.PI/2);
+      ctx.fillStyle=rgb(leafVar());
+      ctx.beginPath(); ctx.ellipse(0,-len*0.5, 7+photo*6, len*0.5, 0,0,Math.PI*2); ctx.fill();
+      ctx.restore(); }
+    roots(); return;
+  }
+
+  // ---- Nadelbaum: Stamm + gestaffelte Nadel-Dreiecke ----
+  if(kind==="🌲"){
+    const h=(90+size*150)*breath, w=6+struct*12;
+    ctx.strokeStyle=rgb(mix([84,60,42],[110,84,54],photo)); ctx.lineWidth=w; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+Math.sin(sway)*10,by-h); ctx.stroke();
+    const tiers=4+Math.round(size*3);
+    const needleCol=mix([40,95,70],[80,150,100],photo);
+    for(let i=0;i<tiers;i++){ const t=i/(tiers-1);
+      const ty=by-h*0.18-t*h*0.72, tw=(46+size*40)*(1-t*0.72), th=h*0.26;
+      ctx.fillStyle=rgb([needleCol[0]*(0.85+t*0.25),needleCol[1]*(0.85+t*0.25),needleCol[2]*(0.85+t*0.25)]);
+      ctx.beginPath(); ctx.moveTo(bx-tw/2+Math.sin(sway)*8*t, ty); ctx.lineTo(bx+tw/2+Math.sin(sway)*8*t, ty);
+      ctx.lineTo(bx+Math.sin(sway)*10*t, ty-th); ctx.closePath(); ctx.fill(); }
+    if(insul>0.5){ ctx.fillStyle="rgba(230,240,238,.55)";
+      for(let i=0;i<tiers;i++){ const t=i/(tiers-1); const ty=by-h*0.18-t*h*0.72-h*0.24;
+        ctx.beginPath(); ctx.arc(bx+Math.sin(sway)*10*t, ty, 3,0,Math.PI*2); ctx.fill(); } }
+    roots(); return;
+  }
+
+  // ---- Bluetenkraut: Stiel + Blueten ----
+  if(kind==="🌸"){
+    const h=(50+size*90+photo*40)*breath;
+    ctx.strokeStyle=rgb(mix([70,140,70],[110,180,90],photo)); ctx.lineWidth=3+struct*4; ctx.lineCap="round";
+    const topX=bx+Math.sin(sway)*h*0.3, topY=by-h;
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.quadraticCurveTo(bx+Math.sin(sway)*h*0.15,by-h*0.5,topX,topY); ctx.stroke();
+    for(let s=-1;s<=1;s+=2){ ctx.save(); ctx.translate(lerp(bx,topX,0.5),lerp(by,topY,0.5)); ctx.rotate(s*0.7);
+      ctx.fillStyle=rgb(leafVar()); ctx.beginPath(); ctx.ellipse(s*12,0,14,6,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+    const petals=5+Math.round(photo*4), pr2=mulberry32((lineageSeed^0xB5297A4D)>>>0);
+    const pc=[[240,150,180],[250,200,110],[180,150,240],[240,120,120],[150,200,240]][Math.floor(pr2()*5)];
+    for(let k=0;k<petals;k++){ const ang=k/petals*Math.PI*2 + Math.sin(time*0.002)*0.05;
+      ctx.fillStyle=rgb(pc); ctx.beginPath();
+      ctx.ellipse(topX+Math.cos(ang)*9, topY+Math.sin(ang)*9, 9,5, ang,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle="rgba(250,220,120,.95)"; ctx.beginPath(); ctx.arc(topX,topY,5.5,0,Math.PI*2); ctx.fill();
+    roots(); return;
+  }
+
+  // ---- Gruenalge / Moos: niedrige Boden-Polster ----
+  if(kind==="🟢"||kind==="🌱"){
+    const moss = kind==="🌱";
+    const blobs = moss? 16:10;
+    for(let i=0;i<blobs;i++){ const ang=Math.PI+ (i/(blobs-1))*Math.PI;
+      const rr=(18+size*40)*(0.6+rnd()*0.7);
+      const x=bx+Math.cos(ang)*rr*0.9, y=by+Math.sin(ang)*rr*0.35;
+      ctx.fillStyle=rgb(leafVar()); ctx.beginPath(); ctx.arc(x,y-(moss?4:2), moss?(4+rnd()*4):(6+rnd()*7),0,Math.PI*2); ctx.fill(); }
+    if(moss){ ctx.strokeStyle=rgb(leafCol.map(c=>c*0.8)); ctx.lineWidth=1;
+      for(let i=0;i<20;i++){ const x=bx+(rnd()-0.5)*70; ctx.beginPath(); ctx.moveTo(x,by); ctx.lineTo(x+(rnd()-0.5)*4,by-8-rnd()*8); ctx.stroke(); } }
+    return;
+  }
+
+  // ---- Farn: bogige Wedel mit Fiederblaettern ----
+  if(kind==="🌿" && struct<0.42){
+    const fronds=4+Math.round(photo*4);
+    for(let f=0;f<fronds;f++){ const dir=(f-(fronds-1)/2)/fronds;
+      const len=(60+size*80+photo*50)*breath*(0.8+rnd()*0.4);
+      ctx.strokeStyle=rgb(leafCol); ctx.lineWidth=2.5; ctx.lineCap="round";
+      const ex=bx+dir*len*1.1, ey=by-len*0.75;
+      ctx.beginPath(); ctx.moveTo(bx,by); ctx.quadraticCurveTo(bx+dir*len*0.4,by-len*0.7, ex,ey); ctx.stroke();
+      for(let s=1;s<=8;s++){ const t=s/9; const px=lerp(bx,ex,t)+ (0)*t, py=lerp(by,ey,t) - Math.sin(t*Math.PI)*8;
+        const pl=(6+photo*8)*(1-t*0.6);
+        for(const sd of [-1,1]){ ctx.fillStyle=rgb(leafVar());
+          ctx.beginPath(); ctx.ellipse(px+sd*pl*0.6, py, pl,2.5, dir*0.5,0,Math.PI*2); ctx.fill(); } } }
+    roots(); return;
+  }
+
+  // ---- Kaeltepflanze / generisch: schlanker Stamm + Blaetter + Behaarung ----
   const woody = struct>0.55;
   const h = (60 + size*150 + struct*70) * breath;
   const w = 5 + struct*16;
-  const sway = Math.sin(time*0.0012)*(0.06+0.05*(1-struct));
-  // Stamm
   const stemCol = woody ? mix([90,66,44],[120,92,60],photo) : mix([70,120,60],[120,170,90],photo);
   ctx.strokeStyle = rgb(stemCol); ctx.lineWidth=w; ctx.lineCap="round";
   ctx.beginPath(); ctx.moveTo(bx,by);
   const topX=bx+Math.sin(sway)*h*0.5, topY=by-h;
   ctx.quadraticCurveTo(bx+Math.sin(sway)*h*0.2, by-h*0.5, topX, topY); ctx.stroke();
-  // Blaetter
   const leaves = 3+Math.round(photo*9);
-  const leafCol = mix([70,150,80],[140,220,120],photo);
   for(let i=0;i<leaves;i++){
     const t=(i+1)/(leaves+1);
     const lx=lerp(bx,topX,t), ly=lerp(by,topY,t*0.98);
@@ -743,68 +934,326 @@ function drawPlant(g, bx, by, breath, time, rnd){
     ctx.beginPath(); ctx.ellipse(side*ls*0.8,0, ls, ls*0.42, 0,0,Math.PI*2); ctx.fill();
     ctx.restore();
   }
-  // Kaeltehaare
-  if(insul>0.5){ ctx.strokeStyle="rgba(220,235,225,.5)"; ctx.lineWidth=1;
-    for(let i=0;i<24;i++){ const t=rnd(); const x=lerp(bx,topX,t),y=lerp(by,topY,t); const d=rnd()*Math.PI*2;
-      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(d)*4,y+Math.sin(d)*4); ctx.stroke(); } }
-  // Wurzeln
-  ctx.strokeStyle="rgba(120,90,60,.5)"; ctx.lineWidth=2;
-  for(let i=0;i<4;i++){ const d=(i-1.5)*0.5; ctx.beginPath(); ctx.moveTo(bx,by);
-    ctx.quadraticCurveTo(bx+d*20,by+12,bx+d*40,by+26); ctx.stroke(); }
+  if(insul>0.5){ ctx.strokeStyle="rgba(220,235,225,.6)"; ctx.lineWidth=1;
+    for(let i=0;i<36;i++){ const t=rnd(); const x=lerp(bx,topX,t),y=lerp(by,topY,t); const d=rnd()*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(d)*5,y+Math.sin(d)*5); ctx.stroke(); } }
+  roots();
 }
 
-function drawAnimal(g, cx, cy, breath, time, rnd){
+function drawAnimal(g, cx, cy, breath, time, rnd, a){
   const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind = a.e;
   const R = (26 + size*46) * breath;
   const bob = Math.sin(time*0.0018)*3;
   cy += bob;
+  // Individual-Faerbung: stabil pro Leben (aus lineageSeed)
+  const pr = mulberry32((lineageSeed^0x9e3779b9)>>>0);
+  const dR=(pr()-0.5)*52, dG=(pr()-0.5)*44, dB=(pr()-0.5)*40;
+  const tint = c => [c[0]+dR, c[1]+dG, c[2]+dB];
   // Farbe: warm, bei Kaelte kuehler; Fell heller
   const warm = mix([150,120,90],[190,150,110], metab);
   const cool = mix([120,140,150],[150,120,90], env.temperature);
-  const body = mix(cool, warm, 0.5);
+  const body = tint(mix(cool, warm, 0.5));
+  const dark = body.map(c=>c*0.7);
+
+  // ===== Eigene Koerperbauplaene (kein Vierbeiner) =====
+  // ---- Wurm: gegliederter Schlauch ----
+  if(kind==="🪱"){
+    const segs=7+Math.round(size*6), L=R*2.6, seg=L/segs;
+    const wy=i=>cy+Math.sin(time*0.004+i*0.7)*R*0.25;
+    ctx.strokeStyle=rgb(mix(body,[190,120,130],0.4)); ctx.lineWidth=R*0.72; ctx.lineCap="round";
+    ctx.beginPath(); for(let i=0;i<=segs;i++){ const x=cx-L/2+seg*i; i?ctx.lineTo(x,wy(i)):ctx.moveTo(x,wy(i)); } ctx.stroke();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.2;
+    for(let i=1;i<segs;i++){ const x=cx-L/2+seg*i; ctx.beginPath(); ctx.moveTo(x,wy(i)-R*0.32); ctx.lineTo(x,wy(i)+R*0.32); ctx.stroke(); }
+    ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-L/2-R*0.05,wy(0)-R*0.1,R*0.08,0,Math.PI*2); ctx.fill();
+    return;
+  }
+  // ---- Fisch: Stromlinien-Koerper + Flossen ----
+  if(kind==="🐟"){
+    const L=R*1.7, H=R*0.85, sw=Math.sin(time*0.006)*0.3;
+    ctx.fillStyle=rgb(dark);
+    ctx.save(); ctx.translate(cx+L*0.9,cy); ctx.rotate(sw);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R*0.55,-R*0.5); ctx.lineTo(R*0.55,R*0.5); ctx.closePath(); ctx.fill(); ctx.restore();
+    ctx.fillStyle=rgb(mix(body,dark,0.4));
+    ctx.beginPath(); ctx.moveTo(cx,cy-H*0.95); ctx.lineTo(cx+R*0.5,cy-H*0.5); ctx.lineTo(cx-R*0.3,cy-H*0.5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.ellipse(cx,cy,L,H,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=rgb(mix(body,dark,0.4));
+    ctx.save(); ctx.translate(cx-L*0.2,cy+H*0.35); ctx.rotate(0.5+Math.sin(time*0.005)*0.2);
+    ctx.beginPath(); ctx.ellipse(0,R*0.2,R*0.35,R*0.16,0,0,Math.PI*2); ctx.fill(); ctx.restore();
+    if(armor>0.4){ ctx.strokeStyle="rgba(30,40,40,.35)"; ctx.lineWidth=1;
+      for(let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(cx+L*0.4-i*L*0.25, cy, H*0.7, -0.9,0.9); ctx.stroke(); } }
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx-L*0.35,cy,H*0.5,-0.7,0.7); ctx.stroke();
+    ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-L*0.62,cy-H*0.15,R*0.12,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-L*0.66,cy-H*0.2,R*0.05,0,Math.PI*2); ctx.fill();
+    return;
+  }
+  // ---- Insekt: 3 Segmente, 6 Beine, Fuehler ----
+  if(kind==="🐜"){
+    const s=R*0.62;
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=2; ctx.lineCap="round";
+    for(let i=0;i<3;i++){ for(const sd of [-1,1]){ const bx2=cx-s*0.5+i*s*0.5;
+      const sw=Math.sin(time*0.008+i+sd)*4;
+      ctx.beginPath(); ctx.moveTo(bx2,cy); ctx.quadraticCurveTo(bx2+sd*s*0.6,cy+s*0.3, bx2+sd*s*0.9+sw,cy+s*0.9); ctx.stroke(); } }
+    ctx.fillStyle=rgb(body);
+    ctx.beginPath(); ctx.arc(cx+s*0.95,cy,s*0.85,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,s*0.6,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx-s*0.9,cy-s*0.1,s*0.5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=1.5;
+    for(const sd of [-1,1]){ ctx.beginPath(); ctx.moveTo(cx-s*1.05,cy-s*0.3);
+      ctx.quadraticCurveTo(cx-s*1.5,cy-s*0.9, cx-s*1.25+sd*s*0.3,cy-s*1.1); ctx.stroke(); }
+    if(armor>0.5){ ctx.strokeStyle="rgba(20,30,30,.4)"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx+s*0.95,cy,s*0.85,-1.2,1.2); ctx.stroke(); }
+    ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx-s*1.05,cy-s*0.2,s*0.12,0,Math.PI*2); ctx.fill();
+    return;
+  }
+  // ---- Krebstier: breiter Panzer + Scheren ----
+  if(kind==="🦀"){
+    const W=R*1.3, H=R*0.78, shell=mix(body,[185,90,70],0.55);
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=3; ctx.lineCap="round";
+    for(let i=0;i<4;i++){ for(const sd of [-1,1]){ const ax=cx+sd*W*0.5, ay=cy-H*0.2+i*H*0.32;
+      const sw=Math.sin(time*0.006+i+sd)*3;
+      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.quadraticCurveTo(ax+sd*R*0.5,ay+R*0.1, ax+sd*R*0.85+sw,ay+R*0.4); ctx.stroke(); } }
+    ctx.fillStyle=rgb(shell); ctx.beginPath(); ctx.ellipse(cx,cy,W,H,0,0,Math.PI*2); ctx.fill();
+    for(const sd of [-1,1]){ const cxx=cx+sd*W*0.85, cyy=cy-H*0.7;
+      ctx.strokeStyle=rgb(dark); ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(cx+sd*W*0.6,cy-H*0.3); ctx.lineTo(cxx,cyy); ctx.stroke();
+      ctx.fillStyle=rgb(shell); ctx.beginPath(); ctx.ellipse(cxx,cyy-R*0.15,R*0.3,R*0.19,sd*0.5,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle=rgb(dark); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cxx-R*0.22,cyy-R*0.28); ctx.lineTo(cxx+R*0.22,cyy-R*0.1); ctx.stroke(); }
+    for(const sd of [-1,1]){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx+sd*R*0.2,cy-H*0.7); ctx.lineTo(cx+sd*R*0.25,cy-H*1.05); ctx.stroke();
+      ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(cx+sd*R*0.25,cy-H*1.12,R*0.1,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+
+  // Schwanz je Archetyp (hinter dem Koerper, rechts)
+  const tx=cx+R*0.95, ty=cy+R*0.12, wag=Math.sin(time*0.004)*0.22;
+  ctx.save();
+  if(kind==="🦊"){ ctx.fillStyle=rgb(tint(mix(body,[240,244,238],0.4)));
+    ctx.translate(tx,ty); ctx.rotate(0.5+wag);
+    ctx.beginPath(); ctx.ellipse(R*0.55,0,R*0.85,R*0.42,0,0,Math.PI*2); ctx.fill();
+  } else if(kind==="🐒"){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=4+size*3; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(tx,ty);
+    ctx.bezierCurveTo(tx+R*0.8,ty-R*0.3, tx+R*1.15,ty+R*0.8+wag*18, tx+R*0.5,ty+R*1.1); ctx.stroke();
+  } else if(kind==="🐺"||kind==="🦎"){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=6+size*5; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(tx,ty);
+    ctx.quadraticCurveTo(tx+R*0.7,ty+R*0.1+wag*14, tx+R*1.0,ty+R*0.5); ctx.stroke();
+  } else if(kind==="🐭"){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=2; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(tx,ty);
+    ctx.quadraticCurveTo(tx+R*0.9,ty-R*0.2, tx+R*1.25,ty+R*0.6+wag*16); ctx.stroke();
+  } else if(kind==="🦏"){ ctx.strokeStyle=rgb(dark); ctx.lineWidth=5; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(tx+R*0.35,ty+R*0.4); ctx.stroke();
+  }
+  ctx.restore();
+  // Koerperproportionen je Archetyp: bw=Breite, bh=Hoehe, legL=Beinlaenge
+  const FORM = ({
+    "🐺":{bw:1.42,bh:0.72,legL:1.5}, "🦊":{bw:1.25,bh:0.8,legL:1.15},
+    "🐭":{bw:1.0,bh:0.95,legL:0.62}, "🐒":{bw:0.9,bh:1.12,legL:1.6},
+    "🐻":{bw:1.32,bh:1.04,legL:0.92}, "🦥":{bw:1.14,bh:0.92,legL:1.0},
+    "🦎":{bw:1.58,bh:0.56,legL:0.8}, "🐦":{bw:0.82,bh:1.02,legL:1.4},
+    "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
+  })[kind] || {bw:1.08,bh:0.98,legL:1.0};
+  const bw=FORM.bw, bh=FORM.bh;
   // Beine
-  const legs = 2 + Math.round((0.6*mob+0.4*limb)*5);
-  const legLen = 12 + limb*40;
-  ctx.strokeStyle = rgb(body.map(c=>c*0.7)); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
+  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.6*mob+0.4*limb)*5);
+  const legLen = (12 + limb*40)*FORM.legL;
+  ctx.strokeStyle = rgb(dark); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
   for(let i=0;i<legs;i++){
     const t = legs===1?0.5:i/(legs-1);
-    const lx = cx + (t-0.5)*R*1.4;
+    const lx = cx + (t-0.5)*R*bw*1.35;
     const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
-    ctx.beginPath(); ctx.moveTo(lx, cy+R*0.5);
-    ctx.quadraticCurveTo(lx+swing*0.4, cy+R*0.5+legLen*0.6, lx+swing, cy+R*0.5+legLen); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lx, cy+R*bh*0.5);
+    ctx.quadraticCurveTo(lx+swing*0.4, cy+R*bh*0.5+legLen*0.6, lx+swing, cy+R*bh*0.5+legLen); ctx.stroke();
   }
-  // Fell (Aura aus kurzen Strichen)
+  // Fell (Aura aus kurzen Strichen, folgt der Koerper-Ellipse)
   if(insul>0.4){ ctx.strokeStyle=`rgba(230,238,230,${0.25+insul*0.4})`; ctx.lineWidth=1.4;
     const n=Math.round(30+insul*50);
-    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2; const r1=R*0.92, r2=R*(1.05+insul*0.18+rnd()*0.06);
-      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1); ctx.lineTo(cx+Math.cos(ang)*r2, cy+Math.sin(ang)*r2); ctx.stroke(); } }
+    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2; const r1=0.92, r2=(1.05+insul*0.18+rnd()*0.06);
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1*R*bw, cy+Math.sin(ang)*r1*R*bh);
+      ctx.lineTo(cx+Math.cos(ang)*r2*R*bw, cy+Math.sin(ang)*r2*R*bh); ctx.stroke(); } }
   // Koerper
   ctx.fillStyle = rgb(body);
-  ctx.beginPath(); ctx.ellipse(cx, cy, R*1.05, R, 0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, cy, R*bw, R*bh, 0,0,Math.PI*2); ctx.fill();
+  // Vogel-Fluegel + Schwanzfedern
+  if(kind==="🐦"){
+    ctx.fillStyle=rgb(mix(body,dark,0.45));
+    for(let i=-1;i<=1;i++){ ctx.save(); ctx.translate(cx+R*bw*0.7,cy+R*bh*0.2); ctx.rotate(0.5+i*0.28+Math.sin(time*0.005)*0.06);
+      ctx.beginPath(); ctx.ellipse(R*0.4,0,R*0.5,R*0.13,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+    ctx.fillStyle=rgb(mix(body,dark,0.35));
+    ctx.save(); ctx.translate(cx+R*0.1,cy-R*bh*0.05); ctx.rotate(0.2+Math.sin(time*0.006)*0.18);
+    ctx.beginPath(); ctx.ellipse(0,0,R*0.7,R*0.38,0.3,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=rgb(dark); ctx.lineWidth=1;
+    for(let i=1;i<=3;i++){ ctx.beginPath(); ctx.ellipse(0,0,R*0.7*i/3.2,R*0.38*i/3.2,0.3,0,Math.PI*2); ctx.stroke(); }
+    ctx.restore(); }
   // Panzer
   if(armor>0.5){ ctx.fillStyle=rgb(mix([90,100,110],[60,70,80],armor));
-    ctx.beginPath(); ctx.ellipse(cx, cy-R*0.15, R*0.95, R*0.8, 0, Math.PI*0.95, Math.PI*2.05); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy-R*bh*0.15, R*bw*0.9, R*bh*0.82, 0, Math.PI*0.95, Math.PI*2.05); ctx.fill();
     ctx.strokeStyle="rgba(20,30,30,.4)"; ctx.lineWidth=1.5;
-    for(let i=1;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx,cy-R*0.15,R*0.95*i/4,R*0.8*i/4,0,Math.PI,Math.PI*2); ctx.stroke(); } }
+    for(let i=1;i<4;i++){ ctx.beginPath(); ctx.ellipse(cx,cy-R*bh*0.15,R*bw*0.9*i/4,R*bh*0.82*i/4,0,Math.PI,Math.PI*2); ctx.stroke(); } }
   // Stacheln
   if(armor>0.6){ ctx.fillStyle=rgb(mix([120,130,140],[80,90,100],armor));
-    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*0.32, ay=cy-R*0.8;
+    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*bw*0.3, ay=cy-R*bh*0.82;
       ctx.beginPath(); ctx.moveTo(ax-3,ay); ctx.lineTo(ax+3,ay); ctx.lineTo(ax, ay-8-armor*10); ctx.closePath(); ctx.fill(); } }
-  // Kopf + Auge
-  const hx=cx-R*1.0, hy=cy-R*0.15;
+  // Kopf
+  const hx=cx-R*bw*0.92, hy=cy-R*bh*0.22;
+  // Ohren (hinter/ueber dem Kopf) je Archetyp
+  ctx.fillStyle=rgb(dark);
+  const ear=(ex,ey,ew,eh,rot,round)=>{ ctx.save(); ctx.translate(ex,ey); ctx.rotate(rot);
+    if(round){ ctx.beginPath(); ctx.ellipse(0,0,ew,eh,0,0,Math.PI*2); ctx.fill(); }
+    else { ctx.beginPath(); ctx.moveTo(-ew,eh); ctx.lineTo(ew,eh); ctx.lineTo(0,-eh); ctx.closePath(); ctx.fill(); }
+    ctx.restore(); };
+  if(kind==="🦊"){ ear(hx-R*0.1,hy-R*0.5,R*0.16,R*0.42,-0.2,false); ear(hx+R*0.28,hy-R*0.48,R*0.16,R*0.42,0.2,false); }
+  else if(kind==="🐭"){ ear(hx-R*0.02,hy-R*0.42,R*0.26,R*0.26,0,true); ear(hx+R*0.38,hy-R*0.4,R*0.26,R*0.26,0,true); }
+  else if(kind==="🐺"){ ear(hx+R*0.02,hy-R*0.5,R*0.14,R*0.32,-0.1,false); ear(hx+R*0.3,hy-R*0.48,R*0.14,R*0.32,0.1,false); }
+  else if(kind==="🐒"){ ear(hx-R*0.4,hy-R*0.02,R*0.16,R*0.18,0,true); ear(hx+R*0.4,hy-R*0.02,R*0.16,R*0.18,0,true); }
+  else if(kind==="🐻"){ ear(hx-R*0.05,hy-R*0.45,R*0.22,R*0.22,0,true); ear(hx+R*0.35,hy-R*0.43,R*0.22,R*0.22,0,true); }
+  // Kopf
   ctx.fillStyle=rgb(body); ctx.beginPath(); ctx.ellipse(hx,hy,R*0.5,R*0.45,0,0,Math.PI*2); ctx.fill();
+  // Schnauze je Archetyp (nach links)
+  const snout = kind==="🐺"?1.0 : kind==="🦊"?0.62 : kind==="🦏"?0.8 : kind==="🐻"?0.55 : kind==="🐒"?0.0 : kind==="🐦"?0.0 : kind==="🐭"?0.5 : 0.45;
+  if(snout>0.2){ ctx.fillStyle=rgb(body);
+    ctx.beginPath(); ctx.ellipse(hx-R*0.42*snout, hy+R*0.1, R*0.2*snout+R*0.12, R*0.22, 0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=rgb(dark); ctx.beginPath(); ctx.arc(hx-R*(0.4*snout+0.18), hy+R*0.1, R*0.06,0,Math.PI*2); ctx.fill(); }
+  // Vogel-Schnabel
+  if(kind==="🐦"){ ctx.fillStyle=rgb(mix([232,182,80],[240,140,60],metab));
+    ctx.beginPath(); ctx.moveTo(hx-R*0.48,hy+R*0.02); ctx.lineTo(hx-R*0.18,hy-R*0.08); ctx.lineTo(hx-R*0.18,hy+R*0.14); ctx.closePath(); ctx.fill(); }
+  // Nashorn-Horn
+  if(kind==="🦏"){ ctx.fillStyle=rgb(mix(body,[238,238,225],0.55));
+    const nx=hx-R*0.55, ny=hy+R*0.16;
+    ctx.beginPath(); ctx.moveTo(nx-R*0.06,ny); ctx.lineTo(nx+R*0.1,ny); ctx.lineTo(nx-R*0.02,ny-R*0.5); ctx.closePath(); ctx.fill(); }
+  // Auge
   const blink = (Math.sin(time*0.0009)>0.985)?0.1:1;
   ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.ellipse(hx-R*0.15, hy-R*0.05, R*0.11, R*0.13*blink, 0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle="rgba(95,230,176,.9)"; ctx.beginPath(); ctx.arc(hx-R*0.18, hy-R*0.09, R*0.04, 0,Math.PI*2); ctx.fill();
 }
 
-function drawDwarf(g, cx, cy, breath, time, rnd){
-  const R=(10+g[1]*22)*breath;
+// ===== Reich PILZE: bodenstaendige Fruchtkoerper =====
+function drawFungus(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind=a.e;
+  const pr=mulberry32((lineageSeed^0x27d4eb2f)>>>0);
+  const capTone=[[210,180,150],[200,120,90],[180,170,120],[150,110,150],[190,90,90]][Math.floor(pr()*5)];
+  // Myzel-Faeden am Boden (gemeinsam)
+  const myc=()=>{ ctx.strokeStyle="rgba(210,200,180,.28)"; ctx.lineWidth=1;
+    for(let i=0;i<10;i++){ const d=(rnd()-0.5); ctx.beginPath(); ctx.moveTo(bx,by);
+      ctx.quadraticCurveTo(bx+d*40,by+4,bx+d*80,by+2+rnd()*6); ctx.stroke(); } };
+
+  // ---- Hutpilz: Stiel + Kappe + Lamellen ----
+  if(kind==="🍄"){
+    const caps=1+Math.round(size*2);
+    for(let c=0;c<caps;c++){ const off=(c-(caps-1)/2)*22*(0.6+rnd()*0.5);
+      const h=(30+size*70)*breath*(0.7+rnd()*0.5), cw=16+size*30;
+      ctx.strokeStyle="rgb(224,214,196)"; ctx.lineWidth=5+size*6; ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(bx+off,by); ctx.quadraticCurveTo(bx+off+Math.sin(time*0.001+c)*4,by-h*0.6, bx+off,by-h); ctx.stroke();
+      ctx.fillStyle="rgba(235,228,210,.9)"; ctx.beginPath(); ctx.ellipse(bx+off,by-h+2,cw*0.8,4,0,0,Math.PI); ctx.fill();
+      ctx.fillStyle=rgb(capTone); ctx.beginPath(); ctx.ellipse(bx+off,by-h,cw,cw*0.62,0,Math.PI,0); ctx.fill();
+      ctx.fillStyle="rgba(255,255,255,.4)";
+      for(let d=0;d<5;d++){ ctx.beginPath(); ctx.arc(bx+off+(rnd()-0.5)*cw*1.3, by-h-rnd()*cw*0.4, 1.5+rnd()*2,0,Math.PI*2); ctx.fill(); } }
+    myc(); return;
+  }
+  // ---- Baumpilz / Zunderschwamm: gestapelte Konsolen am Substrat ----
+  if(kind==="🪵"||kind==="🟤"){
+    ctx.fillStyle="rgba(70,50,38,.9)"; ctx.fillRect(bx-6,by-90,12,92); // Totholz
+    const shelves=3+Math.round(size*4);
+    for(let i=0;i<shelves;i++){ const y=by-14-i*(16+size*10); const w=(20+size*30)*(1-i*0.08);
+      const side=i%2?1:-1;
+      ctx.fillStyle=rgb(mix(capTone,[120,90,70],0.5).map((c,j)=>c*(0.8+i*0.05)));
+      ctx.beginPath(); ctx.ellipse(bx+side*4,y,w,7+size*5,0,0,Math.PI); ctx.fill();
+      ctx.strokeStyle="rgba(30,24,18,.4)"; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(bx+side*4,y,w,7+size*5,0,0,Math.PI); ctx.stroke(); }
+    return;
+  }
+  // ---- Schimmel / Fadenpilz: Sporentraeger-Punkte auf Faeden ----
+  if(kind==="🧵"){
+    const n=14+Math.round(size*18);
+    for(let i=0;i<n;i++){ const x=bx+(rnd()-0.5)*120, h=10+rnd()*(30+size*40);
+      ctx.strokeStyle="rgba(200,205,190,.5)"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,by); ctx.quadraticCurveTo(x+Math.sin(time*0.002+i)*3,by-h*0.6,x,by-h); ctx.stroke();
+      ctx.fillStyle=rgb([mix(capTone,[120,130,120],0.4)[0],mix(capTone,[120,130,120],0.4)[1],mix(capTone,[120,130,120],0.4)[2]]);
+      ctx.beginPath(); ctx.arc(x,by-h,2+rnd()*2.5,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+  // ---- Flechte: krustige Lappen, halb Alge (gruenlich) ----
+  if(kind==="🍥"){
+    const lobes=8+Math.round(size*8);
+    for(let i=0;i<lobes;i++){ const ang=Math.PI+ (i/(lobes-1))*Math.PI;
+      const rr=(20+size*46)*(0.7+rnd()*0.6);
+      const x=bx+Math.cos(ang)*rr, y=by+Math.sin(ang)*rr*0.4;
+      ctx.fillStyle=rgb(mix([150,170,120],[120,160,140],rnd()));
+      ctx.beginPath(); ctx.ellipse(x,y-3, 8+rnd()*7, 5+rnd()*4, ang,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle="rgba(180,200,150,.5)";
+    for(let i=0;i<10;i++){ ctx.beginPath(); ctx.arc(bx+(rnd()-0.5)*70,by-2-rnd()*8,2,0,Math.PI*2); ctx.fill(); }
+    return;
+  }
+  // ---- Hefe / Myzel: knospende Zellhaufen ----
+  const cells=10+Math.round(size*14);
+  for(let i=0;i<cells;i++){ const ang=rnd()*Math.PI*2, rr=rnd()*(16+size*26);
+    const x=bx+Math.cos(ang)*rr, y=by-8-Math.abs(Math.sin(ang))*rr*0.5;
+    ctx.fillStyle=rgb(mix(capTone,[220,215,180],0.5).map(c=>c*(0.85+rnd()*0.25)));
+    const cr=4+rnd()*5; ctx.beginPath(); ctx.arc(x,y,cr,0,Math.PI*2); ctx.fill();
+    if(rnd()>0.5){ ctx.beginPath(); ctx.arc(x+cr*0.8,y-cr*0.6,cr*0.5,0,Math.PI*2); ctx.fill(); } }
+  myc();
+}
+
+// ===== Reich MIKROBEN: Einzeller =====
+function drawMicrobe(g, cx, cy, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind=a.e, name=a.n;
+  const R=(16+size*40)*breath;
   const bob=Math.sin(time*0.002)*2; cy+=bob;
-  ctx.fillStyle="rgb(120,150,145)";
-  ctx.beginPath(); ctx.ellipse(cx,cy,R*1.1,R,0,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="#0a1512"; ctx.beginPath(); ctx.arc(cx-R*0.25,cy-R*0.1,R*0.16,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="rgba(95,230,176,.8)"; ctx.beginPath(); ctx.arc(cx-R*0.3,cy-R*0.16,R*0.06,0,Math.PI*2); ctx.fill();
+  if(name.startsWith("Protist")){ // Amoebe mit wandernden Pseudopodien
+    ctx.fillStyle="rgb(150,175,150)";
+    ctx.beginPath();
+    for(let i=0;i<=20;i++){ const ang=i/20*Math.PI*2; const rr=R*(1+0.22*Math.sin(time*0.0025+i*1.7));
+      const x=cx+Math.cos(ang)*rr, y=cy+Math.sin(ang)*rr; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle="rgba(90,150,120,.75)"; ctx.beginPath(); ctx.arc(cx+R*0.2,cy,R*0.3,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(200,230,210,.5)"; ctx.beginPath(); ctx.arc(cx-R*0.3,cy-R*0.2,R*0.15,0,Math.PI*2); ctx.fill();
+    return;
+  }
+  if(name.startsWith("Archaee")){ // Extremophil: Stäbchen mit Geissel
+    const warm = env.temperature>0.5;
+    ctx.fillStyle= warm ? "rgb(200,120,90)" : "rgb(120,170,190)";
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(0.3);
+    ctx.beginPath(); ctx.ellipse(0,0,R*1.3,R*0.5,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=warm?"rgba(230,160,120,.7)":"rgba(150,200,220,.7)"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(R*1.3,0);
+    for(let i=0;i<=12;i++){ const x=R*1.3+i*6, y=Math.sin(time*0.01+i)*5; ctx.lineTo(x,y); } ctx.stroke();
+    ctx.restore();
+    return;
+  }
+  // Bakterie: Stäbchen/Kokken-Kolonie
+  const n=3+Math.round(size*5);
+  for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2+time*0.0004, rr=R*0.5;
+    const x=cx+Math.cos(ang)*rr, y=cy+Math.sin(ang)*rr;
+    ctx.fillStyle=rgb(mix([120,180,150],[150,200,170],rnd()));
+    ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+    ctx.beginPath(); ctx.ellipse(0,0,R*0.5,R*0.28,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle="rgb(140,195,165)"; ctx.beginPath(); ctx.arc(cx,cy,R*0.42,0,Math.PI*2); ctx.fill();
+}
+
+// ===== Reich PROTISTEN: Mischotrophe Schwimmer =====
+function drawProtist(g, cx, cy, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const R=(14+size*34)*breath;
+  const bob=Math.sin(time*0.002)*2; cy+=bob;
+  if(a.n.startsWith("Plankton")){ // Radiolarie: Stern mit Stacheln
+    ctx.strokeStyle="rgba(150,220,210,.7)"; ctx.lineWidth=1.4;
+    const spikes=10+Math.round(size*8);
+    for(let i=0;i<spikes;i++){ const ang=i/spikes*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*R*1.7,cy+Math.sin(ang)*R*1.7); ctx.stroke(); }
+    ctx.fillStyle="rgba(120,200,190,.55)"; ctx.beginPath(); ctx.arc(cx,cy,R*0.7,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle="rgba(180,240,230,.6)"; ctx.beginPath(); ctx.arc(cx,cy,R*0.7,0,Math.PI*2); ctx.stroke();
+    return;
+  }
+  // Euglenoid: gruene Spindel mit peitschender Geissel + Augenfleck
+  const wob=1+0.08*Math.sin(time*0.004);
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(Math.sin(time*0.0016)*0.2);
+  ctx.fillStyle="rgb(110,180,110)";
+  ctx.beginPath(); ctx.ellipse(0,0,R*1.4*wob,R*0.7,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(80,150,80,.7)";
+  for(let i=0;i<4;i++){ ctx.beginPath(); ctx.ellipse((i-1.5)*R*0.5,0,R*0.22,R*0.4,0,0,Math.PI*2); ctx.fill(); }
+  ctx.fillStyle="rgba(240,80,60,.9)"; ctx.beginPath(); ctx.arc(-R*1.0,-R*0.2,R*0.14,0,Math.PI*2); ctx.fill(); // Augenfleck
+  ctx.strokeStyle="rgba(150,210,150,.8)"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(R*1.35,0);
+  for(let i=0;i<=14;i++){ ctx.lineTo(R*1.35+i*5, Math.sin(time*0.012+i*0.6)*7); } ctx.stroke();
+  ctx.restore();
 }
 
 // ======================= Loop =======================

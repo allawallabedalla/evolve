@@ -38,8 +38,17 @@ geräteübergreifend mit Account.
 ### Modell
 - **8 Gene:** insulation, size, limbLength, metabolism, armor, photosynthesis, mobility, structure.
 - **6 Umwelt-Regler:** temperature, predation, foodAbundance, foodHeight, light, water.
-- **Reich-Gabelung Pflanze↔Tier** emergent über Photosynthese vs. Mobilität
-  (`exclusion`-Term erzwingt Spezialisierung). ~14 Archetypen, alle 5 Pflanzen erreichbar.
+- **Baum des Lebens — 5 Reiche** emergent aus den zwei Achsen Photosynthese × Mobilität
+  (`exclusion`-Term erzwingt Spezialisierung):
+  - autotroph+sessil → **Pflanzen** (Alge, Moos, Farn, Kraut, Blüte, Strauch, Laub-/Nadelbaum, Kaktus, Polster)
+  - heterotroph+mobil → **Tiere** (Wurm, Fisch, Insekt, Krebs, Reptil, Vogel, Fell-/Großtiere, Koloss, Schildkröte …)
+  - heterotroph+sessil → **Pilze** (Hutpilz, Baumpilz, Schimmel, Flechte, Hefe, Myzel, Zunderschwamm) — der vorher ungenutzte Quadrant
+  - winzig+heterotroph → **Mikroben** (Bakterie, Archaee, Protist/Amöbe)
+  - schwimmt+Photosynthese → **Protisten** (Euglenoid, Plankton)
+  `classify()` in `app/index.html` mappt ~36 benannte Formen; jede hat eine eigene Silhouette
+  (`drawPlant/drawAnimal/drawFungus/drawMicrobe/drawProtist`). **Erreichbarkeit verifiziert**:
+  Sweep über 2000 Zufallsumwelten → Konvergenz erzeugt alle 5 Reiche + 28/36 Formen spontan
+  (Rest über gezielte Biome/Regler). Reine Interpretation+Renderer → **Engine/Validität unberührt**.
 - **Pflanzen-Rezept:** viel Licht + viel Wasser + WENIG Nahrung; foodHeight steuert
   Kraut→Strauch→Baum.
 - **Stochastik (Spiel-Modus):** `stepGeneration(..., randn)` mit `DRIFT_SCALE=0.03` →
@@ -79,12 +88,28 @@ geräteübergreifend mit Account.
 - **Anzeige-Glättung** (gleitender Mittelwert `displayGenome`, kein Zappeln).
 - **UX/Gamification-Audit** durchgeführt (Ergebnisse in `BACKLOG.md`), Quick-Wins live:
   Entdeckungs-Toast, lo/hi-Regler-Labels, „Neues Leben"-Rückfrage, Passwort-Reset, Auto-Login-Fallback.
+- **Baum des Lebens (optische + taxonomische Vielfalt)** — `classify()` von ~14 auf ~36
+  benannte Formen über **5 Reiche** erweitert (Pflanzen/Tiere/Pilze/Mikroben/Protisten);
+  je eigene Silhouette (`drawPlant/drawAnimal/drawFungus/drawMicrobe/drawProtist`), stabile
+  Individual-Färbung pro Leben (aus `lineageSeed`, kein Flackern). 3 neue Biome
+  (🍄 Moderwald → Pilze, 🧫 Urtümpel → Mikroben, 🌊 Plankton-See → Protisten). Erreichbarkeit
+  aller Reiche per Sweep verifiziert. **Nur in `app/index.html`** (mockup/ noch nicht nachgezogen).
+
+   Vierbeiner-Silhouetten differenziert (`FORM`-Tabelle: bw/bh/legL je Archetyp — langer Wolf,
+   flaches Reptil, aufrechter Vogel mit Flügel+Schwanzfedern, hoher Kletterer, bulliger Bär);
+   4 Reich-Biome auf bestätigte Fitness-Attraktoren getunt (Moderwald→Pilz, Urtümpel→Bakterie,
+   Plankton-See→Euglenoid, Algen-Riff→Grünalge).
+- **Modell-Erkenntnis:** 28 der 36 Formen sind stabile Fitness-Attraktoren; die 8 Zwischennischen
+  (Fisch, Wurm, Hutpilz, Baumpilz, Schimmel, Hefe, Moos, Farn) haben KEINEN festen Gipfel, werden
+  aber im Spiel-Modus durch die stochastische Drift (`randn`) transient erreicht → Genbuch-Fänge.
+  Ursache: `energyForage ∝ mobility` → Heterotrophe steigern Mobilität immer, außer Nahrung ist knapp
+  (dann Pilz/sessil). Große Pilze bräuchten viel Nahrung UND wenig Nahrung → Widerspruch.
 
 ## 7. Nächste Schritte (Priorität)
-1. **#2 Optische Vielfalt** (Nutzer-Wunsch, NÄCHSTES): Renderer in `app/index.html`
-   (`drawAnimal`/`drawPlant`/`drawDwarf`) vielfältiger — eigene Silhouetten je Archetyp
-   (Ohren/Schwanz/Hörner/Schnauze; Kaktus/Blüte/Krone/Kraut), mehr Farb-/Formvariation.
-2. **A1 Genbuch begehbar** (Kachel-Galerie aller Archetypen, entdeckt/„???").
+1. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
+   oder Renderer/Taxonomie in eine geteilte Datei auslagern (Backlog: vereinheitlichen).
+2. **A1 Genbuch begehbar** (Kachel-Galerie aller ~36 Formen, entdeckt/„???"; die 8 seltenen
+   Zwischennischen als besondere „Fänge" hervorheben).
 3. **A3 Vitalitäts-Anzeige** (aus `fitness(genome,env)`) → Ursache→Wirkung sofort spürbar.
 4. **A4 Bindung** (Name, Ahnenlinie/Historie; „Neues Leben" als Nachkomme).
 5. Weitere Audit-Punkte (a11y B4, reduced-motion Canvas B5, Fußzeilen-Copy B6, Sync-Tag B7).
