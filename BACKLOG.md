@@ -130,7 +130,13 @@ Was im Katalog bleibt, ist bewusst KEIN weiteres Phänotyp-Gen:
   Wunsch pro benanntem Faktor nachrüstbar, aber ohne neue Mechanik.
 → Die genuin neuen Achsen sind erledigt; Weiteres wäre Duplikation oder außerhalb des Modells.
 
-**Belegter Kostenpunkt (Konsolidierungs-Aufgabe):** Bei 25 Genen ist die *committed*-Pflanzen-
+**✅ Konsolidierung erledigt (v0.59.0):** genetische Last der 10 Extremnischen-Stressor-Gene
+gesenkt (Wartung 0.11→0.07) → Voll-Gen-Modell wieder C1–C6-konform (Pflanze 0.5→3.0 %, Protist
+39→13 %), Reality 20/20 & App-Narrativ unverändert. Neues Gate `npm run ecology-full` testet
+künftige Änderungen gegen die REALE 25-Gen-Verteilung. Außerdem: Bauplan-Text archetyp-getrieben
+(Fledermaus-„7-Beine"-Widerspruch behoben). — Ursprünglicher Befund unten dokumentiert.
+
+**Belegter Kostenpunkt (jetzt gelöst):** Bei 25 Genen war die *committed*-Pflanzen-
 Nische enger geworden — in klar pflanzen-günstigen Umwelten entstehen weiter robuste Bäume
 (photo 0.91), aber in Grenzfällen gewinnt jetzt öfter ein Mixotroph-Protist. Ursache: jedes
 zusätzliche (auch neutrale) Gen trägt etwas Rest-Wartungslast (genetische Last), die die knapp
