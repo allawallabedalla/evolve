@@ -99,6 +99,9 @@ const RULES = [
   { name: "Feuer-Regime → Feuerresistenz", trait: "fireres", dir: "up",
     lo: mk({ fire: 0 }), hi: mk({ fire: 0.9 }),
     ctx: "wiederkehrende Braende selektieren Feuer-Anpassung (Pyrophyt)" },
+  { name: "Tiefer Frost → Frostschutz", trait: "frostres", dir: "up",
+    lo: mk({ frost: 0 }), hi: mk({ frost: 0.9 }),
+    ctx: "Gefrierschaden selektiert Kryoprotektion (Frostschutzproteine)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

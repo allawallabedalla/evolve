@@ -22,7 +22,8 @@
     "sense",
     "desicc",
     "radres",
-    "fireres"
+    "fireres",
+    "frostres"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -46,7 +47,8 @@
     "sense": "Sinne",
     "desicc": "Austrocknungs-Toleranz",
     "radres": "Strahlungsresistenz",
-    "fireres": "Feuerresistenz"
+    "fireres": "Feuerresistenz",
+    "frostres": "Frostschutz"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -99,7 +101,8 @@
     "sense": 0.12,
     "desicc": 0.11,
     "radres": 0.11,
-    "fireres": 0.11
+    "fireres": 0.11,
+    "frostres": 0.11
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -139,5 +142,7 @@
   "radLethality": 0.85,
   "wRad": 1.0,
   "fireLethality": 0.85,
-  "wFire": 1.0
+  "wFire": 1.0,
+  "frostLethality": 0.85,
+  "wFrost": 1.0
 }

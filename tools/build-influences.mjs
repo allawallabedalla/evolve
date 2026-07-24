@@ -61,7 +61,7 @@ const EFFECTS = {
   // 2.3 Klima-Puls
   "Dürre als Selektions-Episode": { tone: "hit", env: { water: 0.1, temperature: 0.82, foodAbundance: 0.3, aridity: 0.9 } },   // AXIS-14: Austrocknung
   // 2.4 Langzeit-Klima
-  "Eiszeit / Interglazial / abrupter Klimawechsel": { tone: "shift", env: { temperature: 0.06, foodAbundance: 0.35, water: 0.5 } },
+  "Eiszeit / Interglazial / abrupter Klimawechsel": { tone: "shift", env: { temperature: 0.06, foodAbundance: 0.35, water: 0.5, frost: 0.9 } },   // AXIS-17: Frost -> Kryoprotektion
   "Hyperthermal (PETM) / Schneeball-Erde": { tone: "bio", env: { temperature: 0.88, foodAbundance: 0.8, water: 0.7 } },
   "Meeresspiegel-Änderung (Transgression/Regression)": { tone: "shift", env: { water: 0.96, foodHeight: 0.1 } },
   "Aridifizierung / Grasland-Ausbreitung": { tone: "shift", env: { water: 0.35, foodHeight: 0.3, foodAbundance: 0.55, light: 0.78 } },
