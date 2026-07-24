@@ -151,8 +151,16 @@ export function describeMorphology(m: Morphology): string {
     m.kingdom === "Pflanze"
       ? `${m.segments} Verzweigungsebene(n)`
       : `${m.segments} Koerpersegment(e)`;
+  // "asymmetrisch" ist bereits ein vollstaendiges Wort — kein "symmetrisch" anhaengen
+  // (sonst "asymmetrischsymmetrisch"). Die anderen Achsen zum korrekten Fachwort ergaenzen.
+  const symLabel =
+    m.symmetry === "asymmetrisch"
+      ? "asymmetrisch"
+      : m.symmetry === "radiaer"
+        ? "radiaersymmetrisch"
+        : "bilateralsymmetrisch";
   return (
-    `${m.symmetry}symmetrisch, ${m.sizeClass}, ${segLabel}. ` +
+    `${symLabel}, ${m.sizeClass}, ${segLabel}. ` +
     `Bedeckung: ${m.covering.join(" + ")}. ` +
     `Anhaenge: ${app}. ` +
     `Energie: ${m.energyMode}. Fortbewegung: ${m.locomotion}.`
