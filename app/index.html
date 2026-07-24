@@ -52,7 +52,7 @@
   header.top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
   .brand {
     font-family: var(--serif); font-style: italic; font-size: 1.9rem; letter-spacing: .01em;
-    color: var(--text);
+    color: var(--text); margin: 0; font-weight: 400;
   }
   .brand b { color: var(--bio-dim); font-style: normal; font-weight: 700; }
   .tagline { color: var(--muted); font-size: .9rem; max-width: 46ch; }
@@ -198,6 +198,9 @@
     .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip { min-height: 44px; }
     .infl-quick-chip { padding: 8px 14px; }
     .speed { padding: 10px 14px; }
+    /* Größerer Schieberegler-Griff auf Touch (Audit): feine Umwelt-Justierung am Handy. */
+    input[type=range]::-webkit-slider-thumb { width: 26px; height: 26px; }
+    input[type=range]::-moz-range-thumb { width: 26px; height: 26px; }
     .link { padding: 8px 4px; min-height: 40px; }
   }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
@@ -225,7 +228,7 @@
   .dlg-input { width: 100%; margin-bottom: 14px; padding: 9px 12px; font: inherit; color: var(--text);
     background: var(--abyss); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-inset); }
   .dlg-input[hidden] { display: none; }
-  .dlg-input:focus { outline: none; border-color: var(--bio-dim); }
+  .dlg-input:focus { outline: 2px solid var(--bio-dim); outline-offset: 2px; border-color: var(--bio-dim); }
   .dlg-btns { display: flex; justify-content: flex-end; gap: 10px; }
   .dlg-btns .ctrl { min-width: 96px; }
   .dlg-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
@@ -457,7 +460,7 @@
   .login-card { width: min(90%, 380px); background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
   .login-p { color: var(--muted); font-size: .85rem; line-height: 1.55; margin: 8px 0 16px; }
   #loginEmail, #loginPass { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; margin-bottom: 8px; }
-  #loginEmail:focus, #loginPass:focus { outline: none; border-color: var(--bio-dim); }
+  #loginEmail:focus, #loginPass:focus { outline: 2px solid var(--bio-dim); outline-offset: 2px; border-color: var(--bio-dim); }
   .login-row { display: flex; gap: 8px; margin-top: 12px; }
   .login-links { display: flex; justify-content: space-between; margin-top: 12px; }
   .login-msg { margin-top: 12px; font-size: .8rem; color: var(--bio-dim); min-height: 1.2em; }
@@ -505,7 +508,7 @@
 
 <div class="wrap">
   <header class="top">
-    <div class="brand"><b>Evolve</b> · Bio-Kammer</div>
+    <h1 class="brand"><b>Evolve</b> · Bio-Kammer</h1>
     <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Die Zeit läuft ununterbrochen; dreh an der Umwelt und sieh zu, wie sich das Leben über Generationen anpasst.</div>
     <div class="auth" id="authState"></div>
   </header>
@@ -709,7 +712,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.44.0";
+const APP_VERSION = "v0.45.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1325,6 +1328,22 @@ document.addEventListener("keydown", (e) => {
   if(!gb.hidden){ closeGenbook(); }
   else if(!lg.hidden){ lg.hidden = true; }
   else if(!rv.hidden){ rv.hidden = true; }
+});
+// a11y (Audit): Tab-Fokus in einem offenen Modal halten (kein Wegtabben in den
+// unsichtbaren Hintergrund). Wirkt auf das oberste sichtbare aria-modal-Dialog.
+document.addEventListener("keydown", (e) => {
+  if(e.key !== "Tab") return;
+  const open = [...document.querySelectorAll('[role="dialog"][aria-modal="true"]')]
+    .filter(d => !d.hidden && d.getBoundingClientRect().width > 0);   // fixed-Modals: offsetParent ist null
+  if(!open.length) return;
+  const dlg = open[open.length - 1];   // oberstes (z. B. Sub-Modal über Modal)
+  const items = [...dlg.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => !el.disabled && el.offsetParent !== null);
+  if(!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if(!dlg.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+  else if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
 });
 let toastTimer = null;
 function showToast(a){
