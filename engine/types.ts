@@ -171,6 +171,11 @@ export interface EngineParams {
   varianceWeight: number; // 0..1: wie stark die Anpassung sich nahe Fixierung (Gen ->0/1) verlangsamt.
   // Modelliert die genetische Varianz x*(1-x): weniger Variation -> langsamere
   // Reaktion. Verhindert Uebersteuern ueber das Orakel-Gleichgewicht hinaus.
+  mutationAnchor?: number[]; // pro Gen: Ziel des Mutations-Ruecktriebs (Default 0.5).
+  // Fuer bedingte KOSTEN-Gene (Stressor-Resistenzen/Nischen-Mechaniken) ist der
+  // neutrale Ruhewert NICHT 0.5, sondern niedrig ("standardmaessig aus"): ohne den
+  // passenden Stressor kosten sie nur Unterhalt und werden im Orakel wegselektiert.
+  // Ein 0.5-Anker haelt sie faelschlich hoch -> Phantom-Unterhaltslast (siehe mf-fidelity).
 }
 
 export const DEFAULT_ENGINE_PARAMS: EngineParams = {

@@ -114,7 +114,10 @@ export function stepGeneration(
     const speedMod = params.varianceWeight * varFactor + (1 - params.varianceWeight);
 
     next[g] += params.responseRate[g] * params.selectionStrength * grad * speedMod;
-    next[g] += params.mutationRate * (0.5 - next[g]);
+    // Mutations-Ruecktrieb zu einem gen-spezifischen Anker (Default 0.5). Bedingte
+    // Kosten-Gene ankern niedrig -> werden ohne ihren Stressor abgeworfen (kein Phantom-Unterhalt).
+    const anchor = params.mutationAnchor ? params.mutationAnchor[g] : 0.5;
+    next[g] += params.mutationRate * (anchor - next[g]);
     // Stochastische Drift (nur wenn randn gegeben) - mittelwertfrei, skaliert mit
     // Varianz: stark selektierte Gene bleiben stabil, neutrale driften.
     if (randn) next[g] += randn() * DRIFT_SCALE * (0.35 + 0.65 * varFactor);
