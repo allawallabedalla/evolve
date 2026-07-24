@@ -34,8 +34,9 @@ TRAITS = [
     "biolum",
     "detox",
     "oxyEff",
+    "osmo",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
 
 def _clamp01(x: float) -> float:
@@ -60,6 +61,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     biolum = traits[BIOLUM] if len(traits) > BIOLUM else 0.0
     detox = traits[DETOX] if len(traits) > DETOX else 0.0
     oxy_eff = traits[OXYEFF] if len(traits) > OXYEFF else 0.0
+    osmo = traits[OSMO] if len(traits) > OSMO else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -175,6 +177,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + biolum * m["biolum"]
         + detox * m["detox"]
         + oxy_eff * m["oxyEff"]
+        + osmo * m["osmo"]
         + metabolism * metabolism * mq["metabolism"]
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -204,12 +207,19 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     oxygen = env.get("oxygen", 1.0)
     oxy_survival = _clamp01(1.0 - (1.0 - oxygen) * metabolism * (1.0 - oxy_eff) * phys["hypoxiaSeverity"])
 
+    # 6) Osmotischer Stress (AXIS-8): salzige Milieus ziehen osmotisch Wasser aus,
+    #    es sei denn osmo (Osmoregulation) puffert. salinity ist eine Umwelt-Dimension
+    #    jenseits der 6 Regler (Umwelt-Einfluesse: Salzsee/Brine, Aestuar, Salzboden).
+    salinity = env.get("salinity", 0.0)
+    osmo_survival = _clamp01(1.0 - salinity * (1.0 - osmo) * phys["salinityLethality"])
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
         * (nutrition ** phys["wNutrition"])
         * (tox_survival ** phys["wTox"])
         * (oxy_survival ** phys["wOxy"])
+        * (osmo_survival ** phys["wOsmo"])
     )
     return max(fit, phys["floor"])
 

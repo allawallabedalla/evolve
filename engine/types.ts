@@ -34,6 +34,8 @@ export interface Environment {
   //                    sondern ueber Umwelt-Einfluesse: Serpentin/Schwermetall, Schwefel/Saeure).
   oxygen?: number; // 1 = normaler O2-Gehalt (Meereshoehe), 0 = extreme Hypoxie (AXIS-7,
   //                  kommt ueber Umwelt-Einfluesse: Duenne Hoehenluft, sauerstoffarmes Wasser).
+  salinity?: number; // 0 = suess/salzarm, 1 = hypersalin (AXIS-8, kommt ueber Umwelt-
+  //                    Einfluesse: Salzsee/Brine, Aestuar, Salzboden, Meerspray).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -74,6 +76,8 @@ export interface Physics {
   insulWaterLoss: number;
   hypoxiaSeverity: number;
   wOxy: number;
+  salinityLethality: number;
+  wOsmo: number;
   maintenance: {
     base: number;
     size: number;
@@ -87,6 +91,7 @@ export interface Physics {
     biolum: number;
     detox: number;
     oxyEff: number;
+    osmo: number;
   };
   maintenanceQuad: {
     metabolism: number;
