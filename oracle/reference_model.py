@@ -42,8 +42,9 @@ TRAITS = [
     "baro",
     "sense",
     "desicc",
+    "radres",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 
 
 def _clamp01(x: float) -> float:
@@ -76,6 +77,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     baro = traits[BARO] if len(traits) > BARO else 0.0
     sense = traits[SENSE] if len(traits) > SENSE else 0.0
     desicc = traits[DESICC] if len(traits) > DESICC else 0.0
+    radres = traits[RADRES] if len(traits) > RADRES else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -214,6 +216,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + baro * m["baro"]
         + sense * m["sense"]
         + desicc * m["desicc"]
+        + radres * m["radres"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -263,6 +266,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     aridity = env.get("aridity", 0.0)
     desicc_survival = _clamp01(1.0 - aridity * (1.0 - desicc) * phys["desiccLethality"])
 
+    # 10) Ionisierende Strahlung (AXIS-15): radioaktive Milieus ohne Strahlungsresistenz toedlich.
+    radiation = env.get("radiation", 0.0)
+    rad_survival = _clamp01(1.0 - radiation * (1.0 - radres) * phys["radLethality"])
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
@@ -273,6 +280,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (uv_survival ** phys["wUv"])
         * (baro_survival ** phys["wBaro"])
         * (desicc_survival ** phys["wDesicc"])
+        * (rad_survival ** phys["wRad"])
     )
     return max(fit, phys["floor"])
 
