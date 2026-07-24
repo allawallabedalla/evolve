@@ -171,6 +171,7 @@
   .why b { color: var(--text); font-weight: 600; }
   .why .up { color: var(--bio-dim); font-weight: 700; }
   .why .down { color: #9c6f3a; font-weight: 700; }
+  .why .why-idea { display: inline-block; color: var(--bio-dim); font-style: italic; opacity: .92; }
   .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
   /* Progressive Disclosure: die genauen Zahlen sind standardmäßig aus (Rauschen für Laien),
      die Balken zeigen die Ausprägung. Über den Toggle einblendbar (Lab-Tiefe auf Wunsch). */
@@ -754,7 +755,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.67.0";
+const APP_VERSION = "v0.68.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1786,11 +1787,27 @@ function updatePanels(g, a){
   updateWhy(g);
 }
 // Live-„Warum": welche Merkmale die AKTUELLE Umwelt gerade AUSLIEST. Aus dem
+// Neugier-Anstöße für den „fertig angepasst"-Moment: leise Einladungen, die Ursache→Wirkung
+// lehren und zum Weiterspielen einladen — ohne Zwang, ohne Belohnung (Leitplanke: Staunen, kein Grind).
+const EXPLORE_IDEAS = [
+  "Probier: mach es kälter — dann lohnt sich Wärmedämmung.",
+  "Probier: viel Licht, wenig Nahrung — Photosynthese könnte übernehmen.",
+  "Probier: mehr Räuberdruck — Panzer, Flucht oder Tarnung werden zum Vorteil.",
+  "Probier: eine Tiefsee auslösen (Einfluss) — dort entsteht ganz anderes Leben.",
+  "Probier: Nahrung knapp und hoch — wer erreicht sie dann?",
+  "Probier: eine giftige oder salzige Welt (Einfluss) — Spezialisten tauchen auf.",
+  "Probier: das Licht herunter, das Wasser hoch — das Reich der Pilze wartet.",
+  "Probier: die Welt austrocknen (Einfluss) — Austrocknungs-Künstler entstehen.",
+];
 // Selektionsgradient ∂Fitness/∂Gen (dieselbe Größe, die die Evolution treibt) — so
 // sieht man live, WARUM sich das Wesen in diese Richtung verschiebt, nicht erst im Reveal.
 function updateWhy(g){
   const el = document.getElementById("whyLine"); if(!el) return;
   const eps = PHYS.eps, muted = mutedGenes(committedArch||classify(g));
+  // „Bewegt sich das Merkmal gerade?" = die NETTO-Änderung pro Generation (Selektion + Mutations-
+  // Rücktrieb, geklemmt), NICHT der rohe Fitness-Gradient. Nur so erreicht das Wesen ein echtes
+  // „fertig"-Gleichgewicht: am Attraktor hält die Mutation den Gradienten im Gleichgewicht, das Gen
+  // steht still — dann zeigen wir keine Pfeile mehr, sondern den Neugier-Anstoß.
   const press = [];
   for(let i=0;i<NG;i++){
     const ge = document.getElementById("gene-"+i);
@@ -1800,20 +1817,34 @@ function updateWhy(g){
     const up=g.slice(); up[i]=clamp01(up[i]+eps);
     const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
     const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
-    // nur echte, noch „offene" Selektion zeigen (Gen kann sich in die Richtung bewegen).
-    let dir=0, mag=0;
-    if(grad>0.02 && g[i]<0.9){ dir=1; mag=grad; press.push({i,dir:1,m:grad}); }
-    else if(grad<-0.02 && g[i]>0.1){ dir=-1; mag=-grad; press.push({i,dir:-1,m:-grad}); }
-    // Balken markieren + Richtungspfeil (Intensität ~ Selektionsstärke).
+    // Netto-Schritt = was stepGeneration deterministisch täte (inkl. Mutations-Rücktrieb + Klemmung).
+    const vf = 4*g[i]*(1-g[i]);
+    const speedMod = PARAMS.varianceWeight*vf + (1-PARAMS.varianceWeight);
+    const anchor = PARAMS.mutationAnchor ? PARAMS.mutationAnchor[i] : 0.5;
+    const raw = PARAMS.responseRate[i]*PARAMS.selectionStrength*grad*speedMod + PARAMS.mutationRate*(anchor - g[i]);
+    const net = clamp01(g[i] + raw) - g[i];   // tatsächliche Bewegung (am Rand geklemmt)
+    let dir=0, mag=Math.abs(net);
+    if(net > 0.0012){ dir=1; press.push({i,dir:1,m:mag}); }
+    else if(net < -0.0012){ dir=-1; press.push({i,dir:-1,m:mag}); }
+    // Balken markieren + Richtungspfeil (Intensität ~ Bewegungstempo).
     if(dir!==0 && ge){ ge.classList.add(dir>0?"sel-up":"sel-down");
-      if(gd){ gd.textContent = dir>0?"↑":"↓"; gd.style.opacity = Math.min(1, 0.45 + mag*5).toFixed(2); } }
+      if(gd){ gd.textContent = dir>0?"↑":"↓"; gd.style.opacity = Math.min(1, 0.4 + mag*60).toFixed(2); } }
     else if(gd){ gd.style.opacity=0; gd.textContent=""; }
   }
   press.sort((a,b)=>b.m-a.m);
-  const top = press.slice(0,3);
-  if(!top.length){ el.innerHTML = `<b>Im Gleichgewicht</b> mit dieser Umwelt — die Form ist angepasst.`; return; }
-  const chips = top.map(p=>`${GENE_LABELS[p.i]} <span class="${p.dir>0?"up":"down"}">${p.dir>0?"↑":"↓"}</span>`).join(" · ");
-  el.innerHTML = `Diese Umwelt fördert: ${chips}`;
+  // Bewegt sich nichts (mehr) nennenswert -> das Wesen ist angepasst -> Neugier-Anstoß.
+  const strong = press.slice(0,3);
+  if(!strong.length){
+    // Neugier-Anstoß (sanftes Ziel, KEIN Zwang): eine leise Einladung zum Weiterspielen, die
+    // zugleich Ursache→Wirkung lehrt. Stabil je Form (Hash) -> kein Flackern; wechselt bei Änderung.
+    const a = committedArch || classify(g);
+    let h = 0; for(let k=0;k<a.n.length;k++) h = (h*31 + a.n.charCodeAt(k)) & 0x7fffffff;
+    const idea = EXPLORE_IDEAS[h % EXPLORE_IDEAS.length];
+    el.innerHTML = `<b>Angepasst</b> an diese Umwelt — die Form steht.  <span class="why-idea">${idea}</span>`;
+    return;
+  }
+  const chips = strong.map(p=>`${GENE_LABELS[p.i]} <span class="${p.dir>0?"up":"down"}">${p.dir>0?"↑":"↓"}</span>`).join(" · ");
+  el.innerHTML = `Diese Umwelt formt gerade: ${chips}`;
 }
 // A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
 function updateBonding(){
