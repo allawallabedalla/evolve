@@ -37,9 +37,19 @@ Patterns: kein Streak-Zwang, kein Verfall-Schuldgefühl, kein Sammelzwang):
   klappen hinter einen Aufklapper („▸ N weitere aus dem Katalog · in Arbeit") — die aktiven
   Faktoren stehen sofort und ungestört da (statt „Museum mit 88 % geschlossenen Räumen").
 
-**Offen aus diesem Strang (braucht Richtungs-Entscheid):** sanfte, selbstgesetzte Ziele/Anstöße
-(„magst du eine Tiefsee versuchen?", Reich-Meilensteine statt Sammelzähler); teilbarer Wesen-
-Schnappschuss (soziale Verbreitung). Bewusst NICHT ohne Steuerung gebaut — Geschmacks-/Ethik-Fragen.
+- ✅ **Sanfte Ziele — Reich-Meilensteine (v0.67.0):** das erste Wesen jedes der 5 großen Reiche
+  löst einen warmen Staunens-Moment aus („Ein neues Reich: Tier … 3 der 5 großen Reiche erwacht")
+  statt des normalen Fund-Toasts. Kein Sammelzähler, kein „X fehlt"-Nag; aus dem discovered-Set
+  abgeleitet → keine rückwirkende Flut für Bestandsspieler.
+- ✅ **Sanfte Ziele — Neugier-Anstöße (v0.68.0):** im „fertig angepasst"-Moment lädt die Warum-Zeile
+  leise zum Weiterspielen ein und lehrt Ursache→Wirkung („Probier: mach es kälter — dann lohnt sich
+  Wärmedämmung"). **Dabei Korrektur-Upgrade:** Warum-Zeile + Selektions-Theater lesen jetzt die
+  NETTO-Änderung pro Generation (Selektion + Mutations-Rücktrieb, geklemmt) statt des rohen
+  Gradienten — am Attraktor steht das Gen wirklich still („Angepasst — die Form steht"), Pfeile
+  zeigen nur noch, was sich echt bewegt.
+
+**Offen aus diesem Strang (braucht Richtungs-Entscheid):** teilbarer Wesen-Schnappschuss (Bild +
+Name + Ministory; soziale Verbreitung). Bewusst NICHT ohne Steuerung gebaut — Scope/Geschmack.
 
 ### Evolutions-Validitäts-Audit + Mittelfeld-Fidelity-Fix (2026-07, v0.63.0)
 Prüfauftrag: „stimmt die Evolution — Abgleich mit Referenz UND anderen Algorithmen?"
@@ -374,8 +384,9 @@ Offen bleibt nur noch Feinschliff:
 - **CLS-4-Rest · schmale Größenfenster**: einige seltene Formen (Nadelbaum, Blütenkraut,
   Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
   (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe Priorität.
-- Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte; Inline-Namensfeld
-  statt `prompt()`); B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
+- Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht Supabase-
+  Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr); B-Reste
+  (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
 
 ---
 
