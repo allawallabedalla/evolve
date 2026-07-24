@@ -3,9 +3,10 @@
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
 Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
-**20 Gene** (Flug, Aquatik, Biolumineszenz, Entgiftung, Sauerstoff-Effizienz, Osmoregulation,
-Grabtrieb, Schutzpigment, Filterapparat, Tarnung, Druck-Toleranz, Sinne, Austrocknungs-Toleranz …)
-+ Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **15/15**.
+**25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
+Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken) sowie 8
+Extremnischen-Stressoren (Gift, Sauerstoff, Salz, UV, Druck, Austrocknung, Strahlung, Feuer,
+Frost, Wind) + Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **20/20**.
 App-Inline-Fitness gegen die Engine abgesichert (`npm run app-parity`, exakt).
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
@@ -128,6 +129,22 @@ Was im Katalog bleibt, ist bewusst KEIN weiteres Phänotyp-Gen:
   Hitze): würden das Muster nur duplizieren und je einen Katalog-Faktor „echt" machen — auf
   Wunsch pro benanntem Faktor nachrüstbar, aber ohne neue Mechanik.
 → Die genuin neuen Achsen sind erledigt; Weiteres wäre Duplikation oder außerhalb des Modells.
+
+**Belegter Kostenpunkt (Konsolidierungs-Aufgabe):** Bei 25 Genen ist die *committed*-Pflanzen-
+Nische enger geworden — in klar pflanzen-günstigen Umwelten entstehen weiter robuste Bäume
+(photo 0.91), aber in Grenzfällen gewinnt jetzt öfter ein Mixotroph-Protist. Ursache: jedes
+zusätzliche (auch neutrale) Gen trägt etwas Rest-Wartungslast (genetische Last), die die knapp
+kalkulierende Autotrophie zuerst trifft. Der offizielle 10-Gen-`npm run ecology` besteht weiter
+(Pflanze 4.5 %), aber die stärkere Voll-Gen-Probe zeigt die Drift. **Empfehlung statt eines 26.
+Gens:** genetische Last neutralisieren (z. B. Maintenance-Skalierung so, dass die Summe vieler
+schwach-selektierter Gene die Energie-Bilanz nicht drückt) ODER `ecology` auf den Voll-Gen-Kern
+umstellen, damit künftige Achsen gegen die REALE Verteilung getestet werden — nicht nur die
+10-Gen-Näherung.
+
+Vollständige Achsen-Liste dieses Durchlaufs (12): AXIS-9 Graben, 10 UV, 3 Filtrierer, 11 Tarnung,
+12 Druck, 13 Sinne, 14 Austrocknung, 15 Strahlung, 16 Feuer, 17 Frost, 18 Wind, 19 N-Fixierung.
+Dazu: kritischer NaN-Fix (App-Fitness, seit v0.42.0) + `app-parity`-Netz. Aktive Katalog-Faktoren
+27 → 35.
 
 #### Breiten-Ausbau: neue Mechanik- & Stressor-Achsen (2026-07, Batch AXIS-9..14)
 Volle Liste dieses Durchlaufs (je Two-Engines + Voll-Validierung + Reality-Regel):
