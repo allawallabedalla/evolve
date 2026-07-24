@@ -145,10 +145,20 @@
   /* ---- Genom-Ausgabe ---- */
   .genes { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; margin-top: 16px; }
   @media (max-width: 400px) { .genes { grid-template-columns: 1fr; } }
-  .gene { display: grid; grid-template-columns: 92px 1fr 30px; align-items: center; gap: 8px; }
+  .gene { display: grid; grid-template-columns: 92px 1fr 14px 30px; align-items: center; gap: 8px; }
   .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
-  .gene .track { height: 7px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
+  .gene .track { height: 7px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden;
+    transition: box-shadow .3s ease; }
   .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
+  /* Selektions-Theater: das Gen, das die AKTUELLE Umwelt gerade auslest, leuchtet + zeigt
+     die Richtung (↑ gefördert / ↓ zurückgedrängt). Macht die unsichtbare Evolution sichtbar —
+     dieselbe Größe (∂Fitness/∂Gen), die die Zahlen wirklich bewegt. */
+  .gene .dir { font-family: var(--mono); font-size: .72rem; font-weight: 700; text-align: center; opacity: 0; transition: opacity .3s ease; }
+  .gene.sel-up   .dir { color: var(--bio); }
+  .gene.sel-down .dir { color: #cc9a3f; }
+  .gene.sel-up   .track { box-shadow: var(--shadow-inset), 0 0 6px rgba(95,156,131,.5); }
+  .gene.sel-down .track { box-shadow: var(--shadow-inset), 0 0 6px rgba(204,154,63,.42); }
+  @media (prefers-reduced-motion: reduce) { .gene .track, .gene .dir { transition: none; } }
   .gene.muted { opacity: .55; }
   .gene.muted .lbl::after { content: " ·"; }
   /* ---- Vitalitäts-Anzeige (A3) ---- */
@@ -729,7 +739,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.63.0";
+const APP_VERSION = "v0.64.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1659,7 +1669,7 @@ GENE_LABELS.forEach((lbl,i) => {
   const d=document.createElement("div"); d.className="gene"; d.id="gene-"+i;
   d.setAttribute("role","meter"); d.setAttribute("aria-label",lbl);
   d.setAttribute("aria-valuemin","0"); d.setAttribute("aria-valuemax","1"); d.setAttribute("aria-valuenow","0.5");
-  d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
+  d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="dir" id="gd-${i}" aria-hidden="true"></span><span class="num" id="gn-${i}">0.50</span>`;
   genesEl.appendChild(d);
 });
 // Progressive Disclosure der Gen-Zahlen (Standard: aus; Zustand gespeichert).
@@ -1723,13 +1733,21 @@ function updateWhy(g){
   const eps = PHYS.eps, muted = mutedGenes(committedArch||classify(g));
   const press = [];
   for(let i=0;i<NG;i++){
-    if(muted.includes(i)) continue;   // für dieses Reich irrelevante Gene ausklammern
+    const ge = document.getElementById("gene-"+i);
+    const gd = document.getElementById("gd-"+i);
+    if(ge) ge.classList.remove("sel-up","sel-down");   // Selektions-Theater: erst zurücksetzen
+    if(muted.includes(i)){ if(gd){ gd.style.opacity=0; gd.textContent=""; } continue; }  // irrelevante Gene ausklammern
     const up=g.slice(); up[i]=clamp01(up[i]+eps);
     const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
     const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
     // nur echte, noch „offene" Selektion zeigen (Gen kann sich in die Richtung bewegen).
-    if(grad>0.02 && g[i]<0.9) press.push({i,dir:1,m:grad});
-    else if(grad<-0.02 && g[i]>0.1) press.push({i,dir:-1,m:-grad});
+    let dir=0, mag=0;
+    if(grad>0.02 && g[i]<0.9){ dir=1; mag=grad; press.push({i,dir:1,m:grad}); }
+    else if(grad<-0.02 && g[i]>0.1){ dir=-1; mag=-grad; press.push({i,dir:-1,m:-grad}); }
+    // Balken markieren + Richtungspfeil (Intensität ~ Selektionsstärke).
+    if(dir!==0 && ge){ ge.classList.add(dir>0?"sel-up":"sel-down");
+      if(gd){ gd.textContent = dir>0?"↑":"↓"; gd.style.opacity = Math.min(1, 0.45 + mag*5).toFixed(2); } }
+    else if(gd){ gd.style.opacity=0; gd.textContent=""; }
   }
   press.sort((a,b)=>b.m-a.m);
   const top = press.slice(0,3);
