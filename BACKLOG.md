@@ -21,6 +21,26 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ✅ Erledigt
 
+### Spiel-Motivation & Klarheit — Batch (2026-07, v0.64–v0.66)
+Nach dem Evolutions-Audit: Fokus-Wechsel von Simulations-**Breite** zu spürbarer **Klarheit &
+Bindung** (gesunder Suchtfaktor über Neugier/Meisterschaft/Bindung/Überraschung — keine Dark
+Patterns: kein Streak-Zwang, kein Verfall-Schuldgefühl, kein Sammelzwang):
+- ✅ **Selektions-Theater (v0.64.0):** die Gen-Balken zeigen live, welches Merkmal die aktuelle
+  Umwelt gerade auslest (↑ gefördert / ↓ zurückgedrängt, Intensität ~ Selektionsstärke) — aus
+  demselben Gradienten ∂Fitness/∂Gen, der die Zahlen bewegt. Macht die bisher unsichtbare
+  Evolution zum sichtbaren Drama (adressiert die Audit-Selbstkritik „Tiefe, die niemand sieht").
+- ✅ **Comeback-Moment (v0.65.0):** der „Willkommen zurück"-Reveal zeigt jetzt die **Passung
+  vorher → nachher** (unter der aktuellen Welt gemessen) mit ermutigendem Schluss — beantwortet
+  die Kern-Bindungsfrage „gedeiht mein Wesen?". Nur bei echter Fitness-Änderung (≥2 %), belohnt
+  Wiederkommen ohne Weggehen zu bestrafen.
+- ✅ **Katalog-Kuratierung (v0.66.0):** die vielen „kommt bald"-Faktoren im Einfluss-Sub-Modal
+  klappen hinter einen Aufklapper („▸ N weitere aus dem Katalog · in Arbeit") — die aktiven
+  Faktoren stehen sofort und ungestört da (statt „Museum mit 88 % geschlossenen Räumen").
+
+**Offen aus diesem Strang (braucht Richtungs-Entscheid):** sanfte, selbstgesetzte Ziele/Anstöße
+(„magst du eine Tiefsee versuchen?", Reich-Meilensteine statt Sammelzähler); teilbarer Wesen-
+Schnappschuss (soziale Verbreitung). Bewusst NICHT ohne Steuerung gebaut — Geschmacks-/Ethik-Fragen.
+
 ### Evolutions-Validitäts-Audit + Mittelfeld-Fidelity-Fix (2026-07, v0.63.0)
 Prüfauftrag: „stimmt die Evolution — Abgleich mit Referenz UND anderen Algorithmen?"
 - **Mechanik bestätigt:** die Kern-Schleife deckt sich mit **fünf** Standard-Frameworks — Orakel =
