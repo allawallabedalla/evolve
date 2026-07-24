@@ -729,7 +729,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.62.0";
+const APP_VERSION = "v0.63.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -764,6 +764,12 @@ const PHYS = {
 };
 const PARAMS = {
   responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
+  // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
+  // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
+  // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
+  // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
+  // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
+  mutationAnchor:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -963,7 +969,8 @@ function stepGeneration(m, env, randn){
     const varFactor=4*next[g]*(1-next[g]);
     const speedMod=PARAMS.varianceWeight*varFactor+(1-PARAMS.varianceWeight);
     next[g]+=PARAMS.responseRate[g]*PARAMS.selectionStrength*grad*speedMod;
-    next[g]+=PARAMS.mutationRate*(0.5-next[g]);
+    const anchor=PARAMS.mutationAnchor?PARAMS.mutationAnchor[g]:0.5;
+    next[g]+=PARAMS.mutationRate*(anchor-next[g]);
     if(randn) next[g]+=randn()*DRIFT_SCALE*(0.35+0.65*varFactor);
     next[g]=clamp01(next[g]);
   }
