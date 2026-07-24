@@ -246,6 +246,12 @@
   .wl-eingreifen .wl-busy { display: none; font-size: .8rem; color: var(--bio-dim); padding: 4px 0; min-height: 1.5em; }
   .wl-eingreifen.busy .wl-btns, .wl-eingreifen.busy > .wl-hint, .wl-eingreifen.busy .wl-fine { display: none; }
   .wl-eingreifen.busy .wl-busy { display: block; }
+  /* Tempo-Hinweis: sichtbarer Beschleunigungs-Schub nach Ereignissen */
+  .wl-tempo { font-size: .68rem; font-weight: 700; letter-spacing: .04em; color: #fbf3dd;
+    background: var(--ember); border-radius: 999px; padding: 2px 9px; margin-left: 10px;
+    align-self: center; animation: wlTempoPulse 1s ease-in-out infinite; }
+  .wl-tempo[hidden] { display: none; }
+  @keyframes wlTempoPulse { 0%,100%{ opacity: .78; } 50%{ opacity: 1; } }
   .wl-events #wlEvLog { margin: 0; padding: 0; }
   .wl-events li { list-style: none; font-size: .74rem; margin: 0 0 5px; color: var(--text); display: flex; align-items: baseline; gap: 6px; }
   .wl-events li .ev-gen { font-family: var(--mono); font-size: .62rem; color: var(--muted); flex-shrink: 0; }
@@ -540,6 +546,7 @@
     <div class="wl-card">
       <div class="wl-head">
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
+        <span id="wlTempo" class="wl-tempo" hidden>⏩ Evolution beschleunigt</span>
         <button id="wlReroll" class="link" title="Andere Welt würfeln — neue Orte" style="margin-right:14px">neue Welt</button>
         <button id="worldClose" class="link" title="Zurück zu deinem einzelnen Wesen">↩ zurück zum Wesen</button>
       </div>
@@ -2332,6 +2339,7 @@ try {
     evLog.unshift({ gen, place: world.places[idx].name, label, icon, tone });
     if (evLog.length > 5) evLog.pop();
     flash = { idx, tone, ticks: 5 };
+    boostNow(0.85);                    // Ereignis -> Beschleunigungs-Schub (Folge miterleben)
     renderEvents();
   }
   function fireAuto() {
@@ -2417,14 +2425,32 @@ try {
     }, 720);
   }
 
-  function step() {
-    if (paused || !world || fx) return;            // während des Eingriffs steht die Zeit
+  // Tempo & Rhythmus: die Welt tickt RUHIG (1 Generation/Takt). Nach einem Ereignis
+  // (Eingriff ODER autonom) gibt es einen Beschleunigungs-Schub — bis zu ~7 Generationen
+  // je Takt —, damit man die FOLGE schnell miterlebt; danach klingt es zurück auf ruhig.
+  let boost = 0;
+  function boostNow(amount) { boost = Math.min(1, boost + amount); }
+
+  function simStep() {                              // ein Generationsschritt (ohne Render)
     world.step(); gen++;
-    if (flash && --flash.ticks <= 0) flash = null;
-    // Autonom: nach dem Vorlauf mit kleiner Wahrscheinlichkeit je Schritt ein Ereignis.
     if (evCooldown > 0) evCooldown--;
     else if (Math.random() < 0.09) { fireAuto(); evCooldown = 8; }
-    render();
+  }
+  function tick() {
+    if (!paused && world && !fx) {                 // während des Eingriffs steht die Zeit
+      const k = 1 + Math.round(boost * 6);         // 1 (ruhig) … 7 (Schub) Generationen/Takt
+      for (let s = 0; s < k; s++) simStep();
+      if (flash && --flash.ticks <= 0) flash = null;
+      if (boost > 0) { boost *= 0.86; if (boost < 0.03) boost = 0; }
+      updateTempoCue(k);
+      render();
+    }
+    timer = setTimeout(tick, 470);
+  }
+  function updateTempoCue(k) {
+    const t = el("wlTempo"); if (!t) return;
+    if (k > 1) { t.hidden = false; t.textContent = "⏩ Evolution beschleunigt"; }
+    else t.hidden = true;
   }
 
   function render() {
@@ -2445,9 +2471,9 @@ try {
         : "";
       const bg = isPet ? "" : ` style="background:${envTint(e)}"`;
       return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}${fxc}" data-i="${i}"${bg}>`+
-        `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
+        `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}</div>`+
         `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
-        `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)} · ${state}</div>`+
+        `<div class="div">${state}</div>`+
       `</div>`;
     }).join("");
     map.querySelectorAll(".wl-place").forEach((n) => n.onclick = () => {
@@ -2613,11 +2639,11 @@ try {
       sel = PET;
       el("wlSelName").textContent = world.places[PET].name;
       render(); renderEvents(); renderSliders();
-      if (!timer) timer = setInterval(step, 500);   // ruhiges Tempo (~2/s)
+      if (!timer) tick();                           // ruhiger Takt + Ereignis-Schübe
     });
   }
   function closeWorld() {
-    if (timer) { clearInterval(timer); timer = null; }
+    if (timer) { clearTimeout(timer); timer = null; }
     // Zurück-Zoom ins Wesen abspielen, dann erst ausblenden.
     overlay.classList.add("closing");
     closeTimer = setTimeout(() => { overlay.hidden = true; overlay.classList.remove("closing"); closeTimer = null; }, 260);
