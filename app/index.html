@@ -739,7 +739,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.64.0";
+const APP_VERSION = "v0.65.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1507,6 +1507,14 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
   parts.push(changed ? `Aus <b>${beforeA.n}</b> wurde <b>${afterA.n}</b>.`
                      : `Immer noch <b>${afterA.n}</b> — aber im Detail verändert.`);
+  // Der Kern-Moment: WIE GUT passt das Wesen jetzt zu seiner Welt? (Passung vorher → nachher,
+  // beide unter der aktuellen Umwelt gemessen — so sieht man die Anpassung als Zahl.)
+  const vitOf = gm => Math.round(clamp01((fitness(gm, env) - 0.12) / 0.72) * 100);
+  const vB = vitOf(beforeG), vA = vitOf(afterG);
+  if(Math.abs(vA - vB) >= 2){
+    const tail = vA > vB ? " — besser an deine Welt angepasst." : " — deine Welt fordert es heraus.";
+    parts.push(`Passung hier: <b>${vB}%</b> <span class="arrow">→</span> <b>${vA}%</b>${tail}`);
+  }
   const deltas = afterG.map((x,i)=>({i, d:x-beforeG[i]})).filter(o=>Math.abs(o.d)>0.05)
     .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
   if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
