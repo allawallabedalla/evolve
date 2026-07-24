@@ -41,7 +41,7 @@ const EFFECTS = {
   "Gelöster Sauerstoff": { tone: "shift", env: { oxygen: 0.2, water: 0.92, temperature: 0.7 } },   // warmes, stehendes Wasser = O2-arm
   "Salinität + Salz-Gradienten": { tone: "shift", env: { salinity: 0.85, water: 0.9 } },   // AXIS-8: Salzsee/Brine/Ästuar -> Osmoregulation
   // 1.6 Boden
-  "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)": { tone: "shift", env: { foodAbundance: 0.2 } },
+  "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)": { tone: "shift", env: { foodAbundance: 0.12 } },   // AXIS-19: karg -> N-Fixierung lohnt
   "Serpentin/Schwermetall-Toxizität": { tone: "hit", env: { toxicity: 0.85, foodAbundance: 0.3 } },
   "Boden-Sauerstoff (Staunässe/anoxisch)": { tone: "shift", env: { oxygen: 0.18, water: 0.95, foodAbundance: 0.5 } },   // Staunässe/Sumpf: anoxischer Boden
   // 1.7 Terrain

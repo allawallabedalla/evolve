@@ -112,6 +112,8 @@ export interface Physics {
   wFrost: number;
   windLethality: number;
   wWind: number;
+  nfixYield: number;
+  nfixBase: number;
   maintenance: {
     base: number;
     size: number;
@@ -137,6 +139,7 @@ export interface Physics {
     fireres: number;
     frostres: number;
     windres: number;
+    nfix: number;
   };
   maintenanceQuad: {
     metabolism: number;

@@ -105,6 +105,10 @@ const RULES = [
   { name: "Wind-Exposition → Windhärte", trait: "windres", dir: "up",
     lo: mk({ wind: 0 }), hi: mk({ wind: 0.9 }),
     ctx: "mechanischer Dauerstress selektiert Windhaerte (Krueppelwuchs)" },
+  { name: "Armer Boden → Stickstoff-Fixierung", trait: "nfix", dir: "up",
+    lo: mk({ foodAbundance: 0.92, light: 0.7, water: 0.6, predation: 0.1 }),
+    hi: mk({ foodAbundance: 0.05, light: 0.7, water: 0.6, predation: 0.1 }),
+    ctx: "bei knappen Naehrstoffen lohnt N-Fixierung/Chemosynthese (Pionier auf armem Boden)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung
