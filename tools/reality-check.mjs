@@ -90,6 +90,9 @@ const RULES = [
     lo: mk({ foodAbundance: 0.9, predation: 0.5, water: 0.3 }),
     hi: mk({ foodAbundance: 0.12, predation: 0.5, water: 0.3 }),
     ctx: "bei knapper Beute lohnt geschaerfte Wahrnehmung (Sinnesjaeger)" },
+  { name: "Austrocknung → Austrocknungs-Toleranz", trait: "desicc", dir: "up",
+    lo: mk({ aridity: 0 }), hi: mk({ aridity: 0.9 }),
+    ctx: "extreme Trockenheit selektiert Anhydrobiose (Xerophyt/Baerentierchen)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

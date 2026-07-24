@@ -516,7 +516,8 @@ window.INFLUENCES = [
       "env": {
        "water": 0.1,
        "temperature": 0.82,
-       "foodAbundance": 0.3
+       "foodAbundance": 0.3,
+       "aridity": 0.9
       },
       "tone": "hit"
      }

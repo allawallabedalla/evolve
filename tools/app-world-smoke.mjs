@@ -35,6 +35,13 @@ try {
   console.log(`  App-Kernansicht (#kingdom):       ${hasKingdom ? "OK" : "FAIL"}`);
   console.log(`  Welt-Knopf sichtbar:              ${hasWorldBtn ? "OK" : "FAIL"}`);
 
+  // 1b) Vitalität ist eine ENDLICHE Zahl (fängt NaN-Fitness ab — z. B. eine im
+  //     App-Inline-PHYS fehlende Konstante, die parity/ecology NICHT prüfen, weil
+  //     die die Engine-Kopie testen, nicht die hand-gepflegte App-Inline-Kopie).
+  const vitRaw = (await page.locator("#vitNum").textContent().catch(() => "")).trim();
+  const vitFinite = Number.isFinite(parseFloat(vitRaw)) && !/nan/i.test(vitRaw);
+  console.log(`  Vitalität endlich (kein NaN):     ${vitFinite ? "OK" : "FAIL"} (${vitRaw})`);
+
   // 2) Einfluss-Modal öffnen (Kategorien)
   await page.click("#worldBtn");
   await page.waitForSelector("#infl:not([hidden]) .infl-cat", { timeout: 10000 });
@@ -66,7 +73,7 @@ try {
   console.log(`  Keine fatalen JS-Fehler:          ${fatal.length === 0 ? "OK" : "FAIL"}`);
   if (fatal.length) fatal.forEach((e) => console.log("      • " + e));
 
-  const ok = hasKingdom && hasWorldBtn && cats >= 8 && factors >= 3 && descs === factors && okEnabled && inflClosed !== null && tag === factorName && fatal.length === 0;
+  const ok = hasKingdom && hasWorldBtn && vitFinite && cats >= 8 && factors >= 3 && descs === factors && okEnabled && inflClosed !== null && tag === factorName && fatal.length === 0;
   await browser.close();
   console.log(ok ? "\nStatus: OK — App bootet, Umwelt-Einfluss-Modal wirkt aufs Wesen, keine fatalen Fehler." : "\nStatus: FAIL.");
   done(ok ? 0 : 1);

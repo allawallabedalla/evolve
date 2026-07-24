@@ -34,6 +34,7 @@ const FILTER = 15;
 const CAMO = 16;
 const BARO = 17;
 const SENSE = 18;
+const DESICC = 19;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -55,6 +56,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const camo = traits[CAMO] ?? 0;
   const baro = traits[BARO] ?? 0;
   const sense = traits[SENSE] ?? 0;
+  const desicc = traits[DESICC] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -231,6 +233,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     camo * m.camo +
     baro * m.baro +
     sense * m.sense +
+    desicc * m.desicc +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -315,6 +318,14 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const pressure = env.pressure ?? 0;
   const baroSurvival = clamp01(1 - pressure * (1 - baro) * phys.baroLethality);
 
+  // 9) Austrocknung (AXIS-14 Anhydrobiose): extreme Trockenheit/geringe Luftfeuchte
+  //    entzieht dem Gewebe Wasser, toedlich WENN keine Austrocknungs-Toleranz vorliegt
+  //    (kompatible Solute/Trehalose, Resurrektions-Physiologie). 'desicc' puffert,
+  //    kostet Unterhalt -> nur in ariden Nischen der Xerophyt/Anhydrobiont (Baerentierchen,
+  //    Auferstehungspflanze). aridity kommt ueber Umwelt-Einfluesse (Duerre/Aridifizierung).
+  const aridity = env.aridity ?? 0;
+  const desiccSurvival = clamp01(1 - aridity * (1 - desicc) * phys.desiccLethality);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
@@ -323,7 +334,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     Math.pow(oxySurvival, phys.wOxy) *
     Math.pow(osmoSurvival, phys.wOsmo) *
     Math.pow(uvSurvival, phys.wUv) *
-    Math.pow(baroSurvival, phys.wBaro);
+    Math.pow(baroSurvival, phys.wBaro) *
+    Math.pow(desiccSurvival, phys.wDesicc);
 
   return Math.max(fit, phys.floor);
 }
