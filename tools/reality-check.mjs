@@ -96,6 +96,9 @@ const RULES = [
   { name: "Ionisierende Strahlung → Strahlungsresistenz", trait: "radres", dir: "up",
     lo: mk({ radiation: 0 }), hi: mk({ radiation: 0.9 }),
     ctx: "starke Strahlung selektiert Strahlungsresistenz (Deinococcus)" },
+  { name: "Feuer-Regime → Feuerresistenz", trait: "fireres", dir: "up",
+    lo: mk({ fire: 0 }), hi: mk({ fire: 0.9 }),
+    ctx: "wiederkehrende Braende selektieren Feuer-Anpassung (Pyrophyt)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

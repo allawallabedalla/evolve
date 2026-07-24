@@ -44,6 +44,8 @@ export interface Environment {
   //                   Einfluesse: Duerre-Episode, Aridifizierung).
   radiation?: number; // 0 = normal, 1 = starke ionisierende Strahlung (AXIS-15, kommt ueber
   //                     Umwelt-Einfluesse: radioaktive Boeden/Radon, kosmische Strahlung).
+  fire?: number; // 0 = kein Feuer, 1 = haeufiges Feuer-Regime (AXIS-16, kommt ueber Umwelt-
+  //               Einfluesse: Feuer-Regime/Brand).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -100,6 +102,8 @@ export interface Physics {
   wDesicc: number;
   radLethality: number;
   wRad: number;
+  fireLethality: number;
+  wFire: number;
   maintenance: {
     base: number;
     size: number;
@@ -122,6 +126,7 @@ export interface Physics {
     sense: number;
     desicc: number;
     radres: number;
+    fireres: number;
   };
   maintenanceQuad: {
     metabolism: number;
