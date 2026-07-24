@@ -719,7 +719,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.57.0";
+const APP_VERSION = "v0.58.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1033,29 +1033,46 @@ function classify(t){
 }
 
 function describe(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7];
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0;
   const a=classify(t);
   const plant=a.k==="Pflanze", animal=a.k==="Tier", fungus=a.k==="Pilz", microbe=a.k==="Mikrobe", protist=a.k==="Protist";
+  // Morphologie AUS DEM ARCHETYP ableiten (denselben classify()-Signalen, die die Art
+  // benennen UND zeichnen) — so kann der Text der gezeigten Form nie widersprechen
+  // (früher: Flügel-Gen ignoriert -> Fledermaus als „7 Beine, Kletterer" beschrieben).
+  const flyer = a.e==="🦋"||a.e==="🐦"||a.e==="🦇";
+  const sessileAnimal = a.e==="🪸"||a.e==="🧽";
+  const swimmer = !flyer && limb<0.25 && mob>0.55 && armor<0.4;
   const sz = size<0.15?"winzig":size<0.35?"klein":size<0.6?"mittelgroß":size<0.8?"groß":"riesig";
   const cover=[];
-  if(insul>0.5) cover.push(plant?"isolierende Behaarung":animal?"dichtes Fell":"schützende Hülle");
+  if(insul>0.5) cover.push(plant?"isolierende Behaarung":a.e==="🐦"?"dichtes Gefieder":(swimmer||sessileAnimal||a.e==="🪼"||a.e==="🐟")?"isolierende Fettschicht":animal?"dichtes Fell":"schützende Hülle");
   if(armor>0.5) cover.push(plant?"harte Rinde":animal?"Panzerplatten":fungus?"verhärteter Fruchtkörper":"feste Zellwand");
   if(plant && struct>0.6) cover.push("verholzte Achse");
   if(!cover.length) cover.push(plant?"weiches Gewebe":animal?"nackte Haut":fungus?"faseriges Geflecht":"dünne Membran");
   const parts=[];
   if(plant){
-    const leaves=Math.round(photo*8); if(leaves>0) parts.push(leaves+" Photosynthese-Blätter");
+    if(photo>0.3) parts.push(size>0.55?"breite Blattkrone":"Photosynthese-Blätter");
     if(struct>0.55 && size>0.4) parts.push("tragender Stamm");
     parts.push("Wurzelwerk");
   } else if(animal){
-    // Beine kommen aus den GLIEDMASSEN (limb), nicht aus der Mobilität — ein
-    // stromlinienförmiger Schwimmer (viel mob, wenig limb) hat keine Beine, sondern Flossen.
-    const swimmer = limb<0.25 && mob>0.55 && armor<0.4;
-    const legs=Math.round(limb*8);
-    if(swimmer) parts.push("flossenartige Fortsätze");
-    else if(legs>0) parts.push(legs+(limb>0.55?" lange Beine":" kurze Beine"));
-    if(limb>0.5 && metab>0.4) parts.push("Greifwerkzeuge");
-    if(armor>0.6) parts.push("Stacheln");
+    if(flyer){
+      // Flug ist das prägende Merkmal — Flügel zuerst, KEINE absurde Beinzahl.
+      parts.push(a.e==="🐦"?"gefiederte Schwingen":a.e==="🦋"?"häutige Insektenflügel":"häutige Flughäute");
+      if(limb>0.35) parts.push("kleine Greiffüße");
+    } else if(swimmer){
+      parts.push("flossenartige Fortsätze");
+    } else if(sessileAnimal){
+      parts.push("festsitzender Filtrier-Körper");
+    } else {
+      // Landtier: QUALITATIVE Baupläne statt absurder Exakt-Zahlen (kein „7 Beine").
+      // Höhere Gliedmaßen = mehr/gegliederte Beine — deckt sich mit der Zeichnung.
+      if(limb<0.18) parts.push("kaum Gliedmaßen");
+      else if(limb<0.5) parts.push(limb>0.34?"vier kräftige Beine":"vier kurze Beine");
+      else if(limb<0.78) parts.push("sechs gegliederte Beine");
+      else parts.push("zahlreiche Beine (Vielfüßer)");
+      if(limb>0.5 && metab>0.45 && size<0.5) parts.push("Greifwerkzeuge");
+      if(armor>0.6) parts.push("Stacheln");
+    }
+    if(biolum>0.45) parts.push("Leuchtorgan");
   } else if(fungus){
     if(struct>0.5) parts.push("verholzter Fruchtkörper");
     else if(size>0.45) parts.push("Hut auf Stiel");
@@ -1065,7 +1082,10 @@ function describe(t){
     parts.push(struct<0.3?"nackte Einzelzelle":"Zellwand");
     if(metab>0.5) parts.push("aktiver Stoffwechsel");
   } else parts.push("Geißel + Chloroplast");
-  const loco = (plant||fungus)?"sessil":microbe?(mob>0.3?"driftend":"anhaftend"):mob<0.3?"kaum beweglich":(limb<0.25&&mob>0.55&&armor<0.4)?"Schwimmer":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
+  const loco = (plant||fungus)?"sessil":microbe?(mob>0.3?"driftend":"anhaftend")
+    :flyer?(a.e==="🦋"?"Flug-Segler":"Flieger")
+    :swimmer?"Schwimmer":sessileAnimal?"festsitzend"
+    :mob<0.3?"kaum beweglich":(limb>0.6&&size<0.45)?"Kletterer":size>0.6?"schwerer Läufer":"Läufer";
   const energy = plant?"Photosynthese":animal?"Jäger/Sammler":fungus?"Zersetzer (Saprotroph)":protist?"Mischform (Photo + Beute)":"Absorption";
   return `${sz}, ${cover.join(" + ")}. ${parts.join(", ")}. Energie: ${energy}. Fortbewegung: ${loco}.`;
 }
