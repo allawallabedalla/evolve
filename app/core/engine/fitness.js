@@ -23,6 +23,7 @@ const MOBILITY = 6;
 const STRUCTURE = 7;
 const WING = 8;
 const BIOLUM = 9;
+const DETOX = 10;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -34,6 +35,7 @@ export function fitness(traits, env, phys) {
     const structure = traits[STRUCTURE];
     const wing = traits[WING];
     const biolum = traits[BIOLUM] ?? 0;
+    const detox = traits[DETOX] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -146,6 +148,7 @@ export function fitness(traits, env, phys) {
         structure * m.structure +
         wing * m.wing +
         biolum * m.biolum +
+        detox * m.detox +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -170,8 +173,17 @@ export function fitness(traits, env, phys) {
         // Gegenbeleuchtung/Schreck-Leuchten: wirkt nur im echten Dunkeln (dark).
         biolum * dark * phys.biolumDefense);
     const predSurvival = 1 - env.predation * (1 - defenseScore);
+    // 4) Chemischer Stress (AXIS-6 Extremchemie): giftige Milieus (Schwermetalle,
+    //    Schwefel/Säure, Serpentin) töten, WENN keine Entgiftung vorliegt. Das Gen
+    //    'detox' neutralisiert den Toxin-Druck, kostet aber Unterhalt (maintenance.detox)
+    //    -> in sauberen Umwelten (toxicity 0) ist detox reine Last und wird wegselektiert;
+    //    nur in giftigen Nischen entsteht der Extremophile/Metallophyt. toxicity ist eine
+    //    Umwelt-Dimension, die NICHT über die 6 Regler kommt, sondern über Umwelt-Einflüsse.
+    const toxicity = env.toxicity ?? 0;
+    const toxSurvival = clamp01(1 - toxicity * (1 - detox) * phys.toxLethality);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *
-        Math.pow(nutrition, phys.wNutrition);
+        Math.pow(nutrition, phys.wNutrition) *
+        Math.pow(toxSurvival, phys.wTox);
     return Math.max(fit, phys.floor);
 }

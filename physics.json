@@ -10,7 +10,8 @@
     "mobility",
     "structure",
     "wing",
-    "biolum"
+    "biolum",
+    "detox"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -22,7 +23,8 @@
     "mobility": "Mobilitaet",
     "structure": "Stuetzgewebe / Verholzung",
     "wing": "Fluegelflaeche",
-    "biolum": "Biolumineszenz"
+    "biolum": "Biolumineszenz",
+    "detox": "Entgiftung"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -63,7 +65,8 @@
     "mobility": 0.15,
     "structure": 0.15,
     "wing": 0.16,
-    "biolum": 0.14
+    "biolum": 0.14,
+    "detox": 0.13
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -80,5 +83,7 @@
   "wPred": 1.0,
   "wNutrition": 1.2,
   "floor": 0.02,
-  "eps": 0.02
+  "eps": 0.02,
+  "toxLethality": 0.9,
+  "wTox": 1.0
 }

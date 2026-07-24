@@ -37,6 +37,7 @@ for (let i = 0; i < N; i++) {
     foodHeight: rng(),
     light: rng(),
     water: rng(),
+    toxicity: rng(),   // AXIS-6: giftiges Milieu (nur hier zufällig, um den toxSurvival-Term zu prüfen)
   };
   samples.push({ traits, env, tsFit: fitness(traits, env, phys) });
 }

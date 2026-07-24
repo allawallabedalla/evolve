@@ -17,6 +17,22 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ✅ Erledigt
 
+### Umwelt-Einfluss-Modal + AXIS-6 Toxin-Toleranz (2026-07)
+- **Umwelt-Einfluss-Modal** (Nutzer-Vision statt Metapopulations-Vorschau): geschachteltes
+  Modal (Kategorie → Faktor + Erklärsatz → Auslösen/Abbrechen) über `docs/faktoren-katalog.md`
+  (Sektion 1+2), das die Umwelt DES AKTUELLEN WESENS ändert (Cinematik + Anpassungs-Schub).
+  `app/influences.js`, 11 Kategorien. „Lebende Welt"-Overlay zurückgezogen (Code bleibt).
+- **AXIS-6 Toxin-Toleranz** — neues Gen `detox` + Umwelt-Dimension `toxicity`, die **nicht**
+  über die 6 Regler kommt, sondern über Umwelt-Einflüsse. `toxSurvival = 1 - toxicity·(1-detox)·
+  toxLethality`; detox kostet Unterhalt → in sauberen Milieus wegselektiert, in giftigen
+  (Serpentin/Schwermetall, Schwefel/Säure, saures Wasser) entsteht der Extremophil/Metallophyt.
+  Erste „kommt bald"-Einflüsse damit **echt** (nicht mehr kosmetisch). Voll re-validiert:
+  parity exakt (toxicity im Generator geprüft), Ökologie C1–C6 unverändert (detox neutral bei
+  toxicity 0), pop-check 0.010, Probe: detox 0→1 unter Gift. Toxischer Habitat-Schleier.
+- **Nebenbefund behoben:** APP_VERSION-Anzeige hing seit v0.29.0 fest (ein `pkill`-Exit-Code
+  hatte ein `sed` verschluckt; Folge-Bumps fanden den String nicht mehr) → auf echte Version
+  gesetzt; Fußnote „8 Gene/6 Regler" → „11 Gene & Umwelt-Einflüsse".
+
 ### 5-Agenten-Audit-Rollout (2026-07) — Usability / Design / Biologie / Evolution / Didaktik
 Fünf Fachagenten haben die Live-App geprüft; Befunde nach P0→P1→P2 abgearbeitet und
 jeweils einzeln nach `main` gemerged (Auto-Deploy):

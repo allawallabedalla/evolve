@@ -525,7 +525,7 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 8 Genen &amp; 6 Umwelt-Reglern lebendig gezeichnet.
+    Prozedural aus 11 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
     <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
@@ -661,7 +661,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.29.0";
+const APP_VERSION = "v0.36.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -672,14 +672,15 @@ const PHYS = {
   biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
   endothermyMetabFloor: 0.5,
   photoTempOpt: 0.6, photoTempStrength: 0.6,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14 },
+  toxLethality: 0.9, wTox: 1.0,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27],
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -782,7 +783,7 @@ const FICON = {
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0]=t;
   // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
   // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
@@ -818,11 +819,14 @@ function fitness(t, e){
   const energyGlow = PHYS.biolumYield*glow*(PHYS.biolumMobFloor+(1-PHYS.biolumMobFloor)*mobility)*e.foodAbundance*(1-PHYS.exclusion*photo);
   const total = energyPhoto+energyForage+energyAbsorb+energyAquatic+energyGlow;
   const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense);
   const predSurv = 1-e.predation*(1-defense);
-  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition), PHYS.floor);
+  // Chemischer Stress (AXIS-6): giftiges Milieu tötet ohne Entgiftung. toxicity kommt
+  // NICHT über die 6 Regler, sondern über Umwelt-Einflüsse (Serpentin, Schwefel/Säure).
+  const toxicity = e.toxicity||0, toxSurv = clamp01(1-toxicity*(1-detox)*PHYS.toxLethality);
+  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox), PHYS.floor);
 }
 
 // Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
@@ -850,7 +854,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0;
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -981,14 +985,14 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz"];
+const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
 const NG = GENE_LABELS.length;
 const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
-let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6};
+let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0};
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -1412,7 +1416,7 @@ const biomesEl = document.getElementById("biomes");
 BIOMES.forEach(b => {
   const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
   btn.addEventListener("click", () => {
-    Object.assign(env, b.env);
+    Object.assign(env, b.env); env.toxicity = 0;   // Biome sind saubere Milieus
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
     document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
@@ -1584,6 +1588,7 @@ function closeInflSub(){ _el("inflSub").hidden = true; inflSel = null; }
 function applyInfluence(f){
   if(!f || !f.env) return;
   Object.assign(env, f.env);
+  env.toxicity = f.env.toxicity || 0;   // Gift-Milieu nur, solange ein giftiger Einfluss aktiv ist
   LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
     if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
   lastBiome = f.name; _el("biomeTag").textContent = f.name;
@@ -1691,6 +1696,14 @@ function drawHabitat(){
     ctx.fillRect(0,wl,CW,CH-wl);
     ctx.strokeStyle=`rgba(210,230,242,${(0.35*W).toFixed(2)})`; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(0,wl); ctx.lineTo(CW,wl); ctx.stroke();
+  }
+  // Gift-Milieu (AXIS-6): kränklich-grüngelber Schleier über der ganzen Szene.
+  const tox = env.toxicity||0;
+  if(tox>0.05){
+    const tg=ctx.createLinearGradient(0,0,0,CH);
+    tg.addColorStop(0,`rgba(150,170,60,${(0.05+0.22*tox).toFixed(2)})`);
+    tg.addColorStop(1,`rgba(110,120,40,${(0.08+0.30*tox).toFixed(2)})`);
+    ctx.fillStyle=tg; ctx.fillRect(0,0,CW,CH);
   }
 }
 
