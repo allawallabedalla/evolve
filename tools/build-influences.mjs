@@ -51,7 +51,7 @@ const EFFECTS = {
   // 1.8 Energie & Extrem-Chemie
   "Primärproduktivität / Ressourcen-Fülle": { tone: "bio", env: { foodAbundance: 0.95 } },
   "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, salinity: 0.7, water: 0.6, light: 0.3 } },
-  "Natürliche Toxine / ionisierende Strahlung": { tone: "hit", env: { toxicity: 0.8 } },
+  "Natürliche Toxine / ionisierende Strahlung": { tone: "hit", env: { toxicity: 0.55, radiation: 0.9 } },   // AXIS-15: Radon/Uran-Boden -> Strahlungsresistenz
   // 1.9 Feuer
   "Feuer-Regime (Häufigkeit/Intensität/Saison)": { tone: "hit", env: { foodAbundance: 0.3, temperature: 0.72 } },
   // 2.2 Geophysikalisch

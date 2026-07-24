@@ -33,6 +33,7 @@ const CAMO = 16;
 const BARO = 17;
 const SENSE = 18;
 const DESICC = 19;
+const RADRES = 20;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -54,6 +55,7 @@ export function fitness(traits, env, phys) {
     const baro = traits[BARO] ?? 0;
     const sense = traits[SENSE] ?? 0;
     const desicc = traits[DESICC] ?? 0;
+    const radres = traits[RADRES] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -208,6 +210,7 @@ export function fitness(traits, env, phys) {
         baro * m.baro +
         sense * m.sense +
         desicc * m.desicc +
+        radres * m.radres +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -289,6 +292,13 @@ export function fitness(traits, env, phys) {
     //    Auferstehungspflanze). aridity kommt ueber Umwelt-Einfluesse (Duerre/Aridifizierung).
     const aridity = env.aridity ?? 0;
     const desiccSurvival = clamp01(1 - aridity * (1 - desicc) * phys.desiccLethality);
+    // 10) Ionisierende Strahlung (AXIS-15): radioaktive Boeden (Selen/Arsen/Radon, Uran-
+    //     Erz) und kosmische Strahlung erzeugen DNA-Doppelstrangbrueche, toedlich WENN
+    //     keine Strahlungsresistenz (redundante Genome, DNA-Reparatur wie bei Deinococcus,
+    //     Baertierchen). 'radres' puffert, kostet Unterhalt -> nur in Strahlungs-Nischen.
+    //     radiation kommt ueber Umwelt-Einfluesse, nicht die 6 Regler.
+    const radiation = env.radiation ?? 0;
+    const radSurvival = clamp01(1 - radiation * (1 - radres) * phys.radLethality);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *
         Math.pow(nutrition, phys.wNutrition) *
@@ -297,6 +307,7 @@ export function fitness(traits, env, phys) {
         Math.pow(osmoSurvival, phys.wOsmo) *
         Math.pow(uvSurvival, phys.wUv) *
         Math.pow(baroSurvival, phys.wBaro) *
-        Math.pow(desiccSurvival, phys.wDesicc);
+        Math.pow(desiccSurvival, phys.wDesicc) *
+        Math.pow(radSurvival, phys.wRad);
     return Math.max(fit, phys.floor);
 }

@@ -42,6 +42,8 @@ export interface Environment {
   //                    ueber Umwelt-Einfluesse: Tiefsee/Hadalzone).
   aridity?: number; // 0 = normal, 1 = extreme Austrocknung (AXIS-14, kommt ueber Umwelt-
   //                   Einfluesse: Duerre-Episode, Aridifizierung).
+  radiation?: number; // 0 = normal, 1 = starke ionisierende Strahlung (AXIS-15, kommt ueber
+  //                     Umwelt-Einfluesse: radioaktive Boeden/Radon, kosmische Strahlung).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -96,6 +98,8 @@ export interface Physics {
   senseForage: number;
   desiccLethality: number;
   wDesicc: number;
+  radLethality: number;
+  wRad: number;
   maintenance: {
     base: number;
     size: number;
@@ -117,6 +121,7 @@ export interface Physics {
     baro: number;
     sense: number;
     desicc: number;
+    radres: number;
   };
   maintenanceQuad: {
     metabolism: number;

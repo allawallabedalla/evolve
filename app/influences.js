@@ -392,7 +392,8 @@ window.INFLUENCES = [
       "name": "Natürliche Toxine / ionisierende Strahlung",
       "desc": "Selen/Arsen-Böden, Radon.",
       "env": {
-       "toxicity": 0.8
+       "toxicity": 0.55,
+       "radiation": 0.9
       },
       "tone": "hit"
      }

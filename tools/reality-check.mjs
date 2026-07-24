@@ -93,6 +93,9 @@ const RULES = [
   { name: "Austrocknung → Austrocknungs-Toleranz", trait: "desicc", dir: "up",
     lo: mk({ aridity: 0 }), hi: mk({ aridity: 0.9 }),
     ctx: "extreme Trockenheit selektiert Anhydrobiose (Xerophyt/Baerentierchen)" },
+  { name: "Ionisierende Strahlung → Strahlungsresistenz", trait: "radres", dir: "up",
+    lo: mk({ radiation: 0 }), hi: mk({ radiation: 0.9 }),
+    ctx: "starke Strahlung selektiert Strahlungsresistenz (Deinococcus)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung
