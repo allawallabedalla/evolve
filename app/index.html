@@ -113,6 +113,7 @@
   .stress-chip.rad { background: #6a8a4a; }
   .stress-chip.fir { background: #b5652f; }
   .stress-chip.frs { background: #5b83a6; }
+  .stress-chip.wnd { background: #7a8a92; }
 
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; }
@@ -579,7 +580,7 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 23 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
+    Prozedural aus 24 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
     <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
@@ -718,7 +719,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.55.0";
+const APP_VERSION = "v0.56.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -743,14 +744,15 @@ const PHYS = {
   radLethality: 0.85, wRad: 1.0,
   fireLethality: 0.85, wFire: 1.0,
   frostLethality: 0.85, wFrost: 1.0,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11, pigment:0.11, filter:0.12, camo:0.12, baro:0.11, sense:0.12, desicc:0.11, radres:0.11, fireres:0.11, frostres:0.11 },
+  windLethality: 0.85, wWind: 1.0,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11, pigment:0.11, filter:0.12, camo:0.12, baro:0.11, sense:0.12, desicc:0.11, radres:0.11, fireres:0.11, frostres:0.11, windres:0.11 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -853,7 +855,7 @@ const FICON = {
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0,filter=0,camo=0,baro=0,sense=0,desicc=0,radres=0,fireres=0,frostres=0]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0,filter=0,camo=0,baro=0,sense=0,desicc=0,radres=0,fireres=0,frostres=0,windres=0]=t;
   // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
   // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
@@ -900,7 +902,7 @@ function fitness(t, e){
   // (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten -> große
   // aktive Endotherme werden energetisch tragbar, ohne dass Masse selbst gratis wird.
   const kleiber = Math.pow(10, -0.25*PHYS.kleiberDecades*size);
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+filter*m.filter+camo*m.camo+baro*m.baro+sense*m.sense+desicc*m.desicc+radres*m.radres+fireres*m.fireres+frostres*m.frostres+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+filter*m.filter+camo*m.camo+baro*m.baro+sense*m.sense+desicc*m.desicc+radres*m.radres+fireres*m.fireres+frostres*m.frostres+windres*m.windres+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense+burrow*PHYS.defenseFromBurrow*landFactor+camo*PHYS.defenseFromCamo);
   const predSurv = 1-e.predation*(1-defense);
@@ -927,7 +929,9 @@ function fitness(t, e){
   const fire = e.fire||0, fireSurv = clamp01(1-fire*(1-fireres)*PHYS.fireLethality);
   // Frost (AXIS-17): tiefer Frost ohne Kryoprotektion tödlich.
   const frost = e.frost||0, frostSurv = clamp01(1-frost*(1-frostres)*PHYS.frostLethality);
-  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox)*Math.pow(oxySurv,PHYS.wOxy)*Math.pow(osmoSurv,PHYS.wOsmo)*Math.pow(uvSurv,PHYS.wUv)*Math.pow(baroSurv,PHYS.wBaro)*Math.pow(desiccSurv,PHYS.wDesicc)*Math.pow(radSurv,PHYS.wRad)*Math.pow(fireSurv,PHYS.wFire)*Math.pow(frostSurv,PHYS.wFrost), PHYS.floor);
+  // Wind (AXIS-18): mechanischer Dauerstress ohne Windhärte tödlich.
+  const wind = e.wind||0, windSurv = clamp01(1-wind*(1-windres)*PHYS.windLethality);
+  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox)*Math.pow(oxySurv,PHYS.wOxy)*Math.pow(osmoSurv,PHYS.wOsmo)*Math.pow(uvSurv,PHYS.wUv)*Math.pow(baroSurv,PHYS.wBaro)*Math.pow(desiccSurv,PHYS.wDesicc)*Math.pow(radSurv,PHYS.wRad)*Math.pow(fireSurv,PHYS.wFire)*Math.pow(frostSurv,PHYS.wFrost)*Math.pow(windSurv,PHYS.wWind), PHYS.floor);
 }
 
 // Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
@@ -955,7 +959,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0,filter=t[15]||0,camo=t[16]||0,baro=t[17]||0,sense=t[18]||0,desicc=t[19]||0,radres=t[20]||0,fireres=t[21]||0,frostres=t[22]||0;
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0,filter=t[15]||0,camo=t[16]||0,baro=t[17]||0,sense=t[18]||0,desicc=t[19]||0,radres=t[20]||0,fireres=t[21]||0,frostres=t[22]||0,windres=t[23]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -1086,14 +1090,14 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz"];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz","Windhärte"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
 const NG = GENE_LABELS.length;
 const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
-let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0,uv:0,pressure:0,aridity:0,radiation:0,fire:0,frost:0};
+let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0,uv:0,pressure:0,aridity:0,radiation:0,fire:0,frost:0,wind:0};
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -1118,7 +1122,7 @@ function newLineage(){
   creatureName = "";
   // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
   // Milieu (verborgene Stressoren haben keinen Regler) — sonst „strandet" das Neugeborene.
-  env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0;
+  env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;
   if(typeof renderStressChips === "function") renderStressChips();
 }
 newLineage();
@@ -1577,7 +1581,7 @@ LEVERS.forEach(l => {
 // Als Chips sichtbar machen + per Klick entfernbar (zugleich der fehlende „Reset").
 function renderStressChips(){
   const el = document.getElementById("stressChips"); if(!el) return;
-  const tox = env.toxicity||0, sal = env.salinity||0, oxy = (env.oxygen==null?1:env.oxygen), uvv = env.uv||0, prs = env.pressure||0, ard = env.aridity||0, rad = env.radiation||0, fir = env.fire||0, frs = env.frost||0;
+  const tox = env.toxicity||0, sal = env.salinity||0, oxy = (env.oxygen==null?1:env.oxygen), uvv = env.uv||0, prs = env.pressure||0, ard = env.aridity||0, rad = env.radiation||0, fir = env.fire||0, frs = env.frost||0, wnd = env.wind||0;
   const chips = [];
   if(tox>0.05) chips.push(`<button class="stress-chip tox" data-ax="toxicity" title="Giftiges Milieu — Entgiftung wird selektiert. Klicken zum Entfernen.">giftig ✕</button>`);
   if(oxy<0.95) chips.push(`<button class="stress-chip oxy" data-ax="oxygen" title="Sauerstoffarm — effiziente Atmung wird selektiert. Klicken zum Entfernen.">sauerstoffarm ✕</button>`);
@@ -1588,6 +1592,7 @@ function renderStressChips(){
   if(rad>0.05) chips.push(`<button class="stress-chip rad" data-ax="radiation" title="Ionisierende Strahlung — Strahlungsresistenz wird selektiert. Klicken zum Entfernen.">Strahlung ✕</button>`);
   if(fir>0.05) chips.push(`<button class="stress-chip fir" data-ax="fire" title="Feuer-Regime — Feuerresistenz wird selektiert. Klicken zum Entfernen.">Feuer ✕</button>`);
   if(frs>0.05) chips.push(`<button class="stress-chip frs" data-ax="frost" title="Tiefer Frost — Frostschutz wird selektiert. Klicken zum Entfernen.">Frost ✕</button>`);
+  if(wnd>0.05) chips.push(`<button class="stress-chip wnd" data-ax="wind" title="Wind-Exposition — Windhärte wird selektiert. Klicken zum Entfernen.">Wind ✕</button>`);
   el.innerHTML = chips.join("");
   el.hidden = chips.length===0;
   el.querySelectorAll(".stress-chip").forEach(b=> b.onclick = ()=>{
@@ -1598,7 +1603,7 @@ const biomesEl = document.getElementById("biomes");
 BIOMES.forEach(b => {
   const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
   btn.addEventListener("click", () => {
-    Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0;   // Biome sind saubere, geschützte Milieus
+    Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;   // Biome sind saubere, geschützte Milieus
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
@@ -1848,6 +1853,7 @@ function applyInfluence(f){
   env.radiation = f.env.radiation || 0;   // Strahlung nur, solange ein Strahlungs-Einfluss aktiv ist
   env.fire = f.env.fire || 0;   // Feuer nur, solange ein Feuer-Einfluss aktiv ist
   env.frost = f.env.frost || 0;   // Frost nur, solange ein Frost-Einfluss aktiv ist
+  env.wind = f.env.wind || 0;   // Wind nur, solange ein Wind-Einfluss aktiv ist
   LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
     if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
   renderStressChips();

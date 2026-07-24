@@ -45,8 +45,9 @@ TRAITS = [
     "radres",
     "fireres",
     "frostres",
+    "windres",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES, WINDRES = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
 
 
 def _clamp01(x: float) -> float:
@@ -82,6 +83,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     radres = traits[RADRES] if len(traits) > RADRES else 0.0
     fireres = traits[FIRERES] if len(traits) > FIRERES else 0.0
     frostres = traits[FROSTRES] if len(traits) > FROSTRES else 0.0
+    windres = traits[WINDRES] if len(traits) > WINDRES else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -223,6 +225,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + radres * m["radres"]
         + fireres * m["fireres"]
         + frostres * m["frostres"]
+        + windres * m["windres"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -284,6 +287,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     frost = env.get("frost", 0.0)
     frost_survival = _clamp01(1.0 - frost * (1.0 - frostres) * phys["frostLethality"])
 
+    # 13) Wind/Exposition (AXIS-18): mechanischer Dauerstress ohne Windhaerte toedlich.
+    wind = env.get("wind", 0.0)
+    wind_survival = _clamp01(1.0 - wind * (1.0 - windres) * phys["windLethality"])
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
@@ -297,6 +304,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (rad_survival ** phys["wRad"])
         * (fire_survival ** phys["wFire"])
         * (frost_survival ** phys["wFrost"])
+        * (wind_survival ** phys["wWind"])
     )
     return max(fit, phys["floor"])
 

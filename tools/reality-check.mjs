@@ -102,6 +102,9 @@ const RULES = [
   { name: "Tiefer Frost → Frostschutz", trait: "frostres", dir: "up",
     lo: mk({ frost: 0 }), hi: mk({ frost: 0.9 }),
     ctx: "Gefrierschaden selektiert Kryoprotektion (Frostschutzproteine)" },
+  { name: "Wind-Exposition → Windhärte", trait: "windres", dir: "up",
+    lo: mk({ wind: 0 }), hi: mk({ wind: 0.9 }),
+    ctx: "mechanischer Dauerstress selektiert Windhaerte (Krueppelwuchs)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

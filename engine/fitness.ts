@@ -38,6 +38,7 @@ const DESICC = 19;
 const RADRES = 20;
 const FIRERES = 21;
 const FROSTRES = 22;
+const WINDRES = 23;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -63,6 +64,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const radres = traits[RADRES] ?? 0;
   const fireres = traits[FIRERES] ?? 0;
   const frostres = traits[FROSTRES] ?? 0;
+  const windres = traits[WINDRES] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -243,6 +245,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     radres * m.radres +
     fireres * m.fireres +
     frostres * m.frostres +
+    windres * m.windres +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -358,6 +361,13 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const frost = env.frost ?? 0;
   const frostSurvival = clamp01(1 - frost * (1 - frostres) * phys.frostLethality);
 
+  // 13) Wind/Exposition (AXIS-18): Dauerwind/Sturm uebt mechanischen Stress aus (Austrocknung,
+  //     Abbrechen, Umwerfen) — abgefedert durch Windhaerte (biegsame/verholzte Stiele, Krueppel-
+  //     wuchs, Verankerung). 'windres' puffert, kostet Unterhalt -> nur an windexponierten
+  //     Standorten (Grat/Kueste/Steppe) der windharte Krueppel. wind kommt ueber Umwelt-Einfluesse.
+  const wind = env.wind ?? 0;
+  const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
@@ -370,7 +380,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     Math.pow(desiccSurvival, phys.wDesicc) *
     Math.pow(radSurvival, phys.wRad) *
     Math.pow(fireSurvival, phys.wFire) *
-    Math.pow(frostSurvival, phys.wFrost);
+    Math.pow(frostSurvival, phys.wFrost) *
+    Math.pow(windSurvival, phys.wWind);
 
   return Math.max(fit, phys.floor);
 }
