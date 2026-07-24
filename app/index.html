@@ -143,6 +143,12 @@
   .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); transition: width .25s ease, background .4s ease; }
   .vit-num { min-width: 34px; text-align: right; color: var(--text); font-weight: 700; }
   .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+  /* Progressive Disclosure: die genauen Zahlen sind standardmäßig aus (Rauschen für Laien),
+     die Balken zeigen die Ausprägung. Über den Toggle einblendbar (Lab-Tiefe auf Wunsch). */
+  .genes:not(.show-nums) .num { visibility: hidden; }
+  .gene-nums-toggle { margin-top: 10px; background: none; border: none; cursor: pointer; font: inherit;
+    font-size: .68rem; color: var(--muted); padding: 2px 0; text-decoration: underline; text-underline-offset: 3px; }
+  .gene-nums-toggle:hover { color: var(--bio-dim); }
 
   /* ---- Konsole ---- */
   .console { padding: 18px 18px 20px; }
@@ -361,7 +367,21 @@
   .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,156,131,.22), 0 0 14px rgba(95,156,131,.1); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
-  .gb-tile { cursor: help; position: relative; }
+  .gb-tile { position: relative; }
+  .gb-tile.found { cursor: pointer; }
+  .gb-tile.miss { cursor: help; }
+  /* Klick-Detailpanel im Genbuch (Wikipedia-Beschreibung) */
+  #gbDetail { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .2s ease; }
+  #gbDetail[hidden] { display: none; }
+  #gbDetail #gbdBody { width: min(92%, 460px); max-height: 84vh; overflow-y: auto; background: var(--chamber); border-radius: 18px; padding: 20px 22px 22px; box-shadow: var(--shadow); }
+  #gbDetail h3 { margin: 0 0 2px; font-family: var(--serif); font-style: italic; font-size: 1.25rem; color: var(--text); }
+  #gbDetail .gbd-meta { font-size: .72rem; color: var(--muted); font-family: var(--mono); margin-bottom: 10px; }
+  #gbDetail .gbd-evo { font-size: .86rem; color: var(--bio-dim); line-height: 1.5; margin: 0 0 12px; }
+  #gbDetail .gbd-wiki { font-size: .88rem; color: var(--text); line-height: 1.55; margin: 0 0 14px; }
+  #gbDetail .gbd-load { color: var(--muted); font-style: italic; }
+  #gbDetail .gbd-link { display: inline-block; font-size: .8rem; color: var(--bio-dim); text-decoration: underline; text-underline-offset: 3px; }
+  #gbDetail .gbd-x { position: absolute; top: 14px; right: 18px; z-index: 1; background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--muted); cursor: pointer; }
+  #gbDetail .gbd-x:hover { color: var(--text); }
   /* ---- Raritaet (Entdeckungs-Tiefe) ---- */
   .gb-tile .gb-rar { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-size: .56rem;
     letter-spacing: .04em; text-transform: uppercase; opacity: .9; }
@@ -523,6 +543,7 @@
         <span class="vit-num" id="vitNum">—</span>
       </div>
       <div class="genes" id="genes"></div>
+      <button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
     </div>
   </div>
@@ -664,7 +685,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.38.0";
+const APP_VERSION = "v0.39.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -991,7 +1012,7 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Isolation","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung"];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
@@ -1202,6 +1223,43 @@ gbBodyEl.addEventListener("mousemove", (e) => {
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
 });
 gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+
+// Klick auf eine entdeckte Form -> Detail-Panel mit Beschreibung (Wikipedia-Auszug).
+const gbDetail = document.createElement("div"); gbDetail.id="gbDetail"; gbDetail.hidden=true;
+gbDetail.innerHTML = `<div id="gbdBody"></div>`;
+document.body.appendChild(gbDetail);
+gbDetail.addEventListener("click", e=>{ if(e.target.id==="gbDetail" || e.target.closest(".gbd-x")) gbDetail.hidden=true; });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !gbDetail.hidden) gbDetail.hidden=true; });
+const _wikiCache = {};
+async function wikiExtract(title){
+  if(_wikiCache[title]!==undefined) return _wikiCache[title];
+  try{
+    const r = await fetch("https://de.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title), {headers:{accept:"application/json"}});
+    if(!r.ok) throw 0;
+    const j = await r.json();
+    const ex = (j.type==="disambiguation") ? null : (j.extract||null);
+    return _wikiCache[title]=ex;
+  }catch(e){ return _wikiCache[title]=null; }
+}
+gbBodyEl.addEventListener("click", async (e)=>{
+  const tile = e.target.closest(".gb-tile.found"); if(!tile) return;
+  gbTip.classList.remove("show");
+  const name = tile.dataset.title, clade = tile.dataset.clade, era = tile.dataset.era, evo = tile.dataset.evo;
+  const aw = window.__archetypeWiki ? window.__archetypeWiki(name) : null;
+  const title = aw ? decodeURIComponent(aw.wiki.split("/wiki/")[1]).replace(/_/g," ") : null;
+  document.getElementById("gbdBody").innerHTML =
+    `<button class="gbd-x" aria-label="schließen">×</button>`+
+    `<h3>${name}</h3><div class="gbd-meta">${clade}${era?" · "+era:""}</div>`+
+    `<p class="gbd-evo">${evo}</p>`+
+    (aw ? `<div class="gbd-wiki" id="gbdWiki"><span class="gbd-load">lädt Beschreibung …</span></div>`+
+          `<a class="gbd-link" href="${aw.wiki}" target="_blank" rel="noopener">≈ in echt: ${aw.name} — auf Wikipedia lesen ↗</a>` : "");
+  gbDetail.hidden=false;
+  if(aw){
+    const ex = await wikiExtract(title);
+    const box = document.getElementById("gbdWiki");
+    if(box) box.innerHTML = ex ? ex : `<span class="gbd-load">Keine Kurzbeschreibung gefunden — nutze den Link.</span>`;
+  }
+});
 // A5: Onboarding-Startimpuls fuer echte Erstbesucher.
 function dismissOnboard(){ const o=document.getElementById("onboard"); if(!o||o.hidden) return;
   o.hidden=true; document.getElementById("biomes").classList.remove("hint");
@@ -1438,6 +1496,16 @@ GENE_LABELS.forEach((lbl,i) => {
   d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
   genesEl.appendChild(d);
 });
+// Progressive Disclosure der Gen-Zahlen (Standard: aus; Zustand gespeichert).
+(function(){
+  const btn=document.getElementById("geneNumsBtn");
+  const on = localStorage.getItem("evolveGeneNums")==="1";
+  const apply = v => { genesEl.classList.toggle("show-nums", v); btn.setAttribute("aria-pressed", v?"true":"false");
+    btn.textContent = v ? "Zahlen ausblenden" : "Zahlen zeigen"; };
+  apply(on);
+  btn.addEventListener("click", ()=>{ const v=!genesEl.classList.contains("show-nums"); apply(v);
+    localStorage.setItem("evolveGeneNums", v?"1":"0"); });
+})();
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
 // Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct,8 wing
 function mutedGenes(a){
@@ -2467,6 +2535,7 @@ try {
   const { describe } = await import("./core/world/describe.js");
   const { rarityMap } = await import("./core/world/rarity.js");
   const { realExample, archetypeWiki } = await import("./exemplar.js");
+  window.__archetypeWiki = archetypeWiki;   // Brücke fürs Genbuch (Klick-Beschreibung)
 
   const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#2f86ad", "sehr selten":"#7d55c4", "extrem selten":"var(--gold)" };
   const ic = window.__ic || (() => "");
