@@ -82,7 +82,7 @@ npm run demo       # Text-Demo im Terminal (Standard: Eiszeit)
 npm run demo all   # alle Szenarien
 npm run demo "Raeuberland"
 npm run parity     # KRITISCH: prüft, dass TS- und Python-Fitness exakt identisch sind
-npm run serve      # dann http://localhost:8000/mockup/ im Browser öffnen
+npm run serve      # dann http://localhost:8000/app/ im Browser öffnen (die Live-App)
 ```
 
 Freie Umwelt im Terminal (`temp pred food height gens`):
@@ -102,7 +102,9 @@ engine/               schlanke Engine (TS): fitness, simulate, explain, report,
 oracle/               Referenz-Orakel (Python) + benchmark/ + check_parity.py
 training/             genetischer Algorithmus, der die Engine ans Orakel anpasst
 cli/                  Terminal-Text-Demo
-mockup/               Browser-Mockup (Text-I/O + Validitäts-Balken)
+app/                  DIE Live-App (deployt via GitHub Pages) — die maßgebliche Fassung
+mockup/               archivierter Single-File-Snapshot (Text-I/O + Validitäts-Balken),
+                        von app/ abgelöst; NICHT mehr gepflegt (kein Renderer/classify-Nachzug)
 tools/                parity.mjs (TS↔Python-Fitness-Paritätsprüfung)
 ```
 

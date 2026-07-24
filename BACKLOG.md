@@ -358,16 +358,23 @@ Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
 
 ---
 
-## ⬜ Offen — nur Engine/CLI (Live-App nutzt eigenen Inline-Code, dort kein Problem)
+## ✅ Engine/CLI (Live-App nutzt eigenen Inline-Code, dort kein Problem) — abgearbeitet
 
-- **BUG-2 ·** `explain.ts` `causeFor()` wählt Kausal-Texte an rohen Umwelt-Schwellen statt am
-  echten Grund (Energie-Pfad-Verdrängung, realer `foodAbundance`/`water`) → widersprüchliche
-  Erklärungen. Fix: Ursache aus `energyPhoto` vs. `energyForage` + realen Reglern ableiten.
-- **BUG-4 ·** „asymmetrischsymmetrisch": `develop()` setzt `asymmetrisch`, `describeMorphology`
-  hängt pauschal `symmetrisch` an. Quick-Win.
-- **CLS-2 ·** Mischotroph-Bauplan zeigt keine Photosynthese-Flächen (altes `mockup/visual.html`).
-- **mockup/ nachziehen**: Renderer/`classify` sind zwischen `app/` und `mockup/` dupliziert
-  (live zählt `app/`) — nachziehen oder in eine geteilte Datei auslagern.
+- ✅ **BUG-2 ·** `explain.ts` `causeFor()` wählte Kausal-Texte an rohen Umwelt-Schwellen statt am
+  echten Grund → widersprüchliche Erklärungen. **Behoben:** Ursache aus dem emergenten Archetyp
+  (`classify()` aufs Endgenom) + realen `env`-Werten abgeleitet — Photosynthese-↑ behauptet keine
+  Nahrungsknappheit mehr bei reichlichem Futter; Mobilität-↓ nennt die Photosynthese-Verdrängung
+  nur, wenn das Ergebnis wirklich eine Pflanze ist.
+- ✅ **BUG-4 ·** „asymmetrischsymmetrisch": `describeMorphology` hängte pauschal `symmetrisch` an.
+  **Behoben:** jede Achse aufs korrekte Fachwort abgebildet (asymmetrisch bleibt; radiär/bilateral
+  bekommen das Suffix).
+- ↩︎ **CLS-2 + mockup/ nachziehen** — *resolved-as-documented*: `mockup/` ist ein archivierter
+  Single-File-Snapshot, von `app/` (der Live-App) abgelöst. Renderer/`classify` in einen toten
+  Zweitzweig nachzuziehen würde genau die Mehrfach-Kopien-Drift schaffen, die das Projekt sonst
+  bekämpft. **`app/` ist die einzige maßgebliche Fassung**; `mockup/` bleibt als Artefakt-Snapshot
+  bestehen, wird aber nicht mehr gepflegt (README/resume entsprechend klargestellt, `npm run serve`
+  zeigt jetzt auf `/app/`). Damit ist auch CLS-2 (fehlende Photosynthese-Flächen im alten Mockup)
+  gegenstandslos für das gepflegte Produkt.
 
 ---
 
