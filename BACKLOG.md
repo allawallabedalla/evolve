@@ -40,14 +40,21 @@ Batches behoben (v0.44.0 + v0.45.0), je mit headless-Probe + Smoke:
 - **Klarheit**: „Naheliegend jetzt" → „Kleine Wechsel von hier aus"; Erklärzeile im Sub-Modal;
   „Photosynth." ausgeschrieben.
 
-**Offene Audit-Folgepunkte (dokumentiert, nicht blockierend):**
-- Klartext-Anzeigenamen für den GESAMTEN Faktoren-Katalog (wiss. Begriff als Untertitel) — größerer
-  Eingriff am generierten Artefakt (`tools/build-influences.mjs`).
-- Live-„Warum"-Zeile während des Spiels (kalt & trocken → Wärmedämmung ↑) — nicht nur im Reveal.
-- Framing-Zeile „Biome = fertige Welten · Regler = Feinjustierung · Einfluss = Ereignis"; Onboarding-
-  Hinweis um den Einfluss-Knopf ergänzen.
-- Dialog-Titel als echte Überschriften (`<h2>`) + `aria-labelledby`; reduced-motion: rAF nach
-  Konvergenz stoppen; Modal-Pause-Konsistenz (bewusst als Auto-Resume-bei-Auslösen gelöst).
+**Offene Audit-Folgepunkte — alle erledigt (v0.60–v0.62):**
+- ✅ Klartext-Anzeigenamen für den Faktoren-Katalog (v0.61.0): 35 aktive Faktoren + 10 Kategorien
+  haben jetzt Klartext-Namen (`PLAIN`/`CAT_PLAIN` in `tools/build-influences.mjs` → `.plain`-Feld
+  in `influences.js`); die App zeigt sie in Kategorie-Kacheln, Schnell-Chips, Sub-Modal-Titel,
+  Biom-Tag & Toast, mit dem wiss. Katalog-Namen als kleinem Untertitel (`.fsci`) je Faktor.
+- ✅ Live-„Warum"-Zeile während des Spiels (v0.60.0): `#whyLine` zeigt live den Selektionsgradient
+  („Diese Umwelt fördert: Wärmedämmung ↑ · …") bzw. „Im Gleichgewicht … die Form ist angepasst".
+- ✅ Framing-Zeile (v0.62.0): „**Biome** setzen eine fertige Welt · **Regler** justieren sie fein ·
+  **Umwelt-Einfluss ↗** löst ein einzelnes Ereignis aus" unter der Konsolen-Überschrift; Onboarding-
+  Hinweis nennt jetzt zusätzlich den Einfluss-Knopf.
+- ✅ Dialog-Titel als echte Überschriften (v0.62.0): Genbuch/Einfluss/Sub-Modal-Titel sind `<h2>`
+  mit `aria-labelledby` (statt `aria-label`). reduced-motion: die rAF-Schleife hält nach Konvergenz
+  bei pausierter Zeit an (kein Dauer-Repaint) und wird von jeder Interaktion wieder geweckt (`wake()`,
+  Probe: 0 Frames im eingeschwungenen Zustand, Wake nach Eingabe). Modal-Pause bewusst als
+  Auto-Resume-bei-Auslösen gelöst.
 
 ### Umwelt-Einfluss-Modal + AXIS-6 Toxin-Toleranz (2026-07)
 - **Umwelt-Einfluss-Modal** (Nutzer-Vision statt Metapopulations-Vorschau): geschachteltes

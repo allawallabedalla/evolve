@@ -172,7 +172,9 @@
   /* ---- Konsole ---- */
   .console { padding: 18px 18px 20px; }
   .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio-dim); margin: 0 0 4px; }
-  .console-sub { font-size: .92rem; color: var(--text); margin: 0 0 14px; line-height: 1.4; }
+  .console-sub { font-size: .92rem; color: var(--text); margin: 0 0 8px; line-height: 1.4; }
+  .console-framing { font-size: .78rem; color: var(--muted); margin: 0 0 14px; line-height: 1.5; }
+  .console-framing b { color: var(--bio-dim); font-weight: 700; }
   .biomes { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
   .biome {
     font-size: .8rem; color: var(--text); background: var(--chamber);
@@ -250,7 +252,7 @@
   .infl[hidden] { display: none; }
   .infl-card { width: min(94%, 640px); max-height: 88vh; display: flex; flex-direction: column; background: var(--chamber); border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
   .infl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-  .infl-title { font-family: var(--serif); font-style: italic; font-size: 1.3rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .infl-title { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.3rem; font-weight: 400; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .infl-title .ic { width: 1.05rem; height: 1.05rem; color: var(--bio-dim); }
   .infl-sub { color: var(--muted); font-size: .82rem; line-height: 1.5; margin: 6px 0 14px; }
   .infl-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 9px; overflow-y: auto; }
@@ -391,7 +393,7 @@
   .wl-loading { color: var(--bio-dim); font-size: .82rem; padding: 30px 0; text-align: center; }
   .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto; background: var(--chamber); border: none; border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
   .gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .gb-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .gb-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text); }
   .gb-sub { color: var(--muted); font-size: .8rem; margin: 6px 0 4px; line-height: 1.55; }
   .gb-kingdom { margin: 18px 0 8px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-dim); display: flex; justify-content: space-between; align-items: baseline; }
   .gb-kingdom .cnt { color: var(--muted); font-family: var(--mono); font-size: .7rem; letter-spacing: 0; }
@@ -554,7 +556,8 @@
     <div class="panel console">
       <h2>Umwelt formen</h2>
       <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
-      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
+      <p class="console-framing"><b>Biome</b> setzen eine fertige Welt · <b>Regler</b> justieren sie fein · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
+      <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b>, dreh einen <b>Regler</b> oder löse einen <b>Umwelt-Einfluss ↗</b> aus — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
       <div class="controls">
@@ -622,10 +625,10 @@
   </div>
 
   <!-- Genbuch: begehbarer Lebensbaum -->
-  <div class="genbook" id="genbook" role="dialog" aria-modal="true" aria-label="Lebensbaum — Genbuch" hidden>
+  <div class="genbook" id="genbook" role="dialog" aria-modal="true" aria-labelledby="gbTitle" hidden>
     <div class="gb-card">
       <div class="gb-head">
-        <div class="gb-title">Lebensbaum</div>
+        <h2 class="gb-title" id="gbTitle">Lebensbaum</h2>
         <button id="genbookClose" class="link">schließen</button>
       </div>
       <p class="gb-sub" id="gbSub">—</p>
@@ -645,10 +648,10 @@
   </div>
 
   <!-- Umwelt-Einflüsse: geschachteltes Modal (Kategorien) -> Sub-Modal (Faktoren) -->
-  <div class="infl" id="infl" role="dialog" aria-modal="true" aria-label="Umwelt-Einfluss wählen" hidden>
+  <div class="infl" id="infl" role="dialog" aria-modal="true" aria-labelledby="inflTitle" hidden>
     <div class="infl-card">
       <div class="infl-head">
-        <div class="infl-title" id="inflTitle">Umwelt-Einfluss auslösen</div>
+        <h2 class="infl-title" id="inflTitle">Umwelt-Einfluss auslösen</h2>
         <button class="link" id="inflClose">schließen</button>
       </div>
       <p class="infl-sub">Der vollständige Faktoren-Katalog. <b>Aktive</b> Faktoren verändern die Umwelt deines Wesens — es passt sich über Generationen an. <b>Grau (kommt bald)</b> = im Katalog erfasst, aber als echte Selektionskraft noch in Arbeit.</p>
@@ -656,10 +659,10 @@
       <div class="infl-cats" id="inflCats"></div>
     </div>
   </div>
-  <div class="infl inflsub" id="inflSub" role="dialog" aria-modal="true" aria-label="Einfluss wählen" hidden>
+  <div class="infl inflsub" id="inflSub" role="dialog" aria-modal="true" aria-labelledby="inflSubTitle" hidden>
     <div class="infl-card">
       <div class="infl-head">
-        <div class="infl-title" id="inflSubTitle">—</div>
+        <h2 class="infl-title" id="inflSubTitle">—</h2>
         <button class="link" id="inflBack">↩ zurück</button>
       </div>
       <p class="infl-sub">Wähle einen Faktor und drücke <b>Auslösen</b> — die Umwelt verschiebt sich, dein Wesen passt sich über Generationen an. <b>Naheliegend</b> = kleiner Schritt, <b>großer Sprung</b> = drastische Verschiebung.</p>
@@ -726,7 +729,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.61.0";
+const APP_VERSION = "v0.62.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1749,6 +1752,7 @@ playBtn.addEventListener("click", () => {
   playBtn.innerHTML = running ? ic("pause") : ic("play");
   playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");   // B9: dynamisches Label
   document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
+  wake();   // reduced-motion: Schleife nach dem Umschalten sicher wieder anstoßen
 });
 playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");
 const speedsEl = document.getElementById("speeds");
@@ -2740,6 +2744,11 @@ function drawSessile(g, bx, by, breath, time, rnd, a){
 
 // ======================= Loop =======================
 let lastTime = null, acc = 0;
+// reduced-motion: die rAF-Schleife läuft nicht dauerhaft. Sie hält an, sobald die Form
+// konvergiert & angezeigt ist und die Zeit steht — jede Interaktion weckt sie wieder.
+// (Nutzer mit voller Bewegung behalten die kontinuierliche Atem-/Partikel-Animation.)
+let rafOn = false;
+function wake(){ if(!rafOn){ rafOn = true; lastTime = null; requestAnimationFrame(frame); } }
 function frame(time){
   if(lastTime===null) lastTime=time;
   const dt = Math.min(0.1, (time-lastTime)/1000); lastTime=time;
@@ -2772,6 +2781,12 @@ function frame(time){
   drawHabitat();
   if(!reduceMotion) drawMotes(time);   // B5: keine schwebenden Partikel bei reduced-motion
   drawCreature(displayGenome, time, committedArch);
+  // reduced-motion & pausiert & Anzeige eingeschwungen -> Schleife anhalten (kein Dauer-Repaint).
+  if(reduceMotion && !running){
+    let settled = true;
+    for(let i=0;i<NG;i++){ if(Math.abs(genome[i]-displayGenome[i]) > 0.001){ settled = false; break; } }
+    if(settled){ rafOn = false; return; }
+  }
   requestAnimationFrame(frame);
 }
 
@@ -2798,6 +2813,13 @@ window.__mainSim = {
 window.__evolvePet = () => ({ genome: (displayGenome||genome).slice(), env: { ...env }, name: (creatureName||"").trim(), generation, form: committedArch && committedArch.n });
 
 boot();
+// reduced-motion: jede Nutzer-Interaktion weckt die (evtl. angehaltene) Render-Schleife.
+// wake() ist idempotent (No-op, wenn die Schleife schon läuft) — für Voll-Bewegung ohne Effekt.
+if(reduceMotion){
+  ["pointerdown","keydown","input","change","wheel","touchstart"].forEach(ev=>
+    document.addEventListener(ev, wake, {passive:true, capture:true}));
+}
+rafOn = true;
 requestAnimationFrame(frame);
 </script>
 
