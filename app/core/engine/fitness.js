@@ -146,11 +146,19 @@ export function fitness(traits, env, phys) {
     //    Unterhaltskosten: jedes Merkmal kostet Energie.
     const m = phys.maintenance;
     const mq = phys.maintenanceQuad;
+    // Kleibersche Allometrie (Biologie-Audit): die MASSENSPEZIFISCHen Stoffwechselkosten
+    // sinken mit der Koerpermasse (Gesamt-Stoffwechsel ~ Masse^0.75 -> pro Gramm ~
+    // Masse^-0.25). Grosse Koerper "verbrennen" pro Einheit Stoffwechsel weniger -
+    // Groessenoekonomie. size (0..1) spannt kleiberDecades Groessenordnungen an Masse
+    // auf; der Rabatt gilt NUR den Stoffwechsel-Kosten (nicht dem Grundpreis fuer Masse
+    // selbst, m.size). So werden grosse, aktive Endotherme energetisch ueberhaupt erst
+    // tragbar, ohne dass Masse "gratis" wird.
+    const kleiber = Math.pow(10, -0.25 * phys.kleiberDecades * size);
     const maintenance = m.base +
         size * m.size +
         insulation * m.insulation +
         armor * m.armor +
-        metabolism * m.metabolism +
+        metabolism * m.metabolism * kleiber +
         photo * m.photosynthesis +
         mobility * m.mobility +
         structure * m.structure +
@@ -164,7 +172,7 @@ export function fitness(traits, env, phys) {
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
         // universeller Gewinner (~30% aller Umwelten drei Panzer-Formen) -> Verteilung
         // entzerrt, mittlere Umwelten bringen wieder vielfaeltige Baupläne.
-        metabolism * metabolism * mq.metabolism +
+        metabolism * metabolism * mq.metabolism * kleiber +
         mobility * mobility * mq.mobility +
         armor * armor * mq.armor;
     // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.

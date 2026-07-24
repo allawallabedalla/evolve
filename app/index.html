@@ -685,7 +685,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.41.0";
+const APP_VERSION = "v0.42.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -848,7 +848,11 @@ function fitness(t, e){
   const energyGlow = PHYS.biolumYield*glow*(PHYS.biolumMobFloor+(1-PHYS.biolumMobFloor)*mobility)*e.foodAbundance*(1-PHYS.exclusion*photo);
   const total = energyPhoto+energyForage+energyAbsorb+energyAquatic+energyGlow;
   const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+metabolism*metabolism*mq.metabolism+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  // Kleibersche Allometrie: massenspezifische Stoffwechselkosten sinken mit der Masse
+  // (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten -> große
+  // aktive Endotherme werden energetisch tragbar, ohne dass Masse selbst gratis wird.
+  const kleiber = Math.pow(10, -0.25*PHYS.kleiberDecades*size);
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense);
   const predSurv = 1-e.predation*(1-defense);

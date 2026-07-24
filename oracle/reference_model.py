@@ -164,12 +164,15 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]
+    # Kleibersche Allometrie: massenspezifische Stoffwechselkosten ~ Masse^-0.25
+    # (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten.
+    kleiber = 10.0 ** (-0.25 * phys["kleiberDecades"] * size)
     maintenance = (
         m["base"]
         + size * m["size"]
         + insulation * m["insulation"]
         + armor * m["armor"]
-        + metabolism * m["metabolism"]
+        + metabolism * m["metabolism"] * kleiber
         + photo * m["photosynthesis"]
         + mobility * m["mobility"]
         + structure * m["structure"]
@@ -178,7 +181,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + detox * m["detox"]
         + oxy_eff * m["oxyEff"]
         + osmo * m["osmo"]
-        + metabolism * metabolism * mq["metabolism"]
+        + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
     )
