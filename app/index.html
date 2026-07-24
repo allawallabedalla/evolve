@@ -75,6 +75,15 @@
   /* ---- Habitat-Fenster ---- */
   .viewport { position: relative; padding: 0; overflow: hidden; }
   .viewport canvas { display: block; width: 100%; height: auto; border-radius: 16px; }
+  /* Umwelt-Einfluss-Cinematik: kurzer tongefärbter Blitz + leichtes Beben aufs Habitat */
+  .viewport::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; border-radius: 16px; z-index: 4; }
+  .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: vpShake .5s ease; }
+  .viewport.fx-hit::after   { background: radial-gradient(circle at 50% 45%, rgba(207,137,117,.6), transparent 68%); animation: vpFlash .95s ease; }
+  .viewport.fx-shift::after { background: radial-gradient(circle at 50% 45%, rgba(111,208,255,.55), transparent 68%); animation: vpFlash .95s ease; }
+  .viewport.fx-bio::after   { background: radial-gradient(circle at 50% 45%, rgba(95,156,131,.55), transparent 68%); animation: vpFlash .95s ease; }
+  @keyframes vpFlash { 0%{ opacity: 0; } 18%{ opacity: 1; } 100%{ opacity: 0; } }
+  @keyframes vpShake { 0%,100%{ transform: translateX(0); } 20%{ transform: translateX(-3px); } 40%{ transform: translateX(3px); } 60%{ transform: translateX(-2px); } 80%{ transform: translateX(2px); } }
+  @media (prefers-reduced-motion: reduce) { .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: none; } }
   /* Schnell-Einstiege direkt unter dem Bild (gestapelt, volle Breite) */
   .entry-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; }
   .entry-row .disc { margin: 0; text-align: center; border-color: var(--line-soft);
@@ -206,6 +215,34 @@
   .dlg-btns { display: flex; justify-content: flex-end; gap: 10px; }
   .dlg-btns .ctrl { min-width: 96px; }
   .dlg-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
+  /* ---- Umwelt-Einflüsse (geschachteltes Modal + Sub-Modal) ---- */
+  .infl { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .25s ease; z-index: 30; }
+  .infl.inflsub { z-index: 31; background: rgba(74,60,36,.28); }
+  .infl[hidden] { display: none; }
+  .infl-card { width: min(94%, 640px); max-height: 88vh; display: flex; flex-direction: column; background: var(--chamber); border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .infl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .infl-title { font-family: var(--serif); font-style: italic; font-size: 1.3rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .infl-title .ic { width: 1.05rem; height: 1.05rem; color: var(--bio-dim); }
+  .infl-sub { color: var(--muted); font-size: .82rem; line-height: 1.5; margin: 6px 0 14px; }
+  .infl-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 9px; overflow-y: auto; }
+  .infl-cat { display: flex; align-items: center; gap: 9px; text-align: left; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px;
+    padding: 11px 13px; cursor: pointer; font: inherit; color: var(--text); font-size: .9rem; box-shadow: var(--shadow-sm); transition: border-color .14s; }
+  .infl-cat:hover { border-color: var(--bio-dim); color: var(--bio-dim); }
+  .infl-cat .ic { width: 1.2rem; height: 1.2rem; color: var(--bio-dim); flex: 0 0 auto; }
+  .infl-cat .cnt { margin-left: auto; font-family: var(--mono); font-size: .64rem; color: var(--muted); }
+  .infl-factors { overflow-y: auto; display: flex; flex-direction: column; gap: 7px; margin: 4px 0 14px; }
+  .infl-factor { text-align: left; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 11px; padding: 10px 13px; cursor: pointer; font: inherit; color: var(--text); transition: border-color .12s, box-shadow .12s; }
+  .infl-factor:hover:not(.soon) { border-color: var(--bio-dim); }
+  .infl-factor.sel { border-color: var(--bio-dim); box-shadow: 0 0 0 1.5px var(--bio-dim), inset 0 0 22px rgba(95,156,131,.1); }
+  .infl-factor .fn { font-weight: 700; font-size: .9rem; display: flex; align-items: center; gap: 8px; }
+  .infl-factor .fd { color: var(--muted); font-size: .78rem; line-height: 1.45; margin-top: 3px; }
+  .infl-factor.soon { cursor: not-allowed; opacity: .6; }
+  .infl-factor.soon .fn::after { content: "kommt bald"; margin-left: auto; font-weight: 400; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
+    color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
+  .infl-foot { display: flex; justify-content: flex-end; gap: 10px; }
+  .infl-foot .ctrl { min-width: 110px; }
+  .infl-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
+  .infl-ok:disabled { background: var(--line); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
   .worldbtn { display: block; }
   .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
@@ -449,7 +486,7 @@
       <!-- Schnell-Einstiege direkt unter dem Bild — auf Desktop UND Mobil „above the fold" -->
       <div class="entry-row">
         <button class="disc" id="discBtn" title="Lebensbaum öffnen — die entdeckten Formen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
-        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte entwickeln gleichzeitig ihre eigenen Arten">Lebende Welt <span class="beta">Beta</span> · viele Orte &amp; Arten ↗</button>
+        <button class="disc worldbtn" id="worldBtn" title="Ein Umwelt-Ereignis auslösen, das die Welt deines Wesens verändert">Umwelt-Einfluss auslösen ↗</button>
       </div>
     </div>
 
@@ -544,6 +581,31 @@
     </div>
   </div>
 
+  <!-- Umwelt-Einflüsse: geschachteltes Modal (Kategorien) -> Sub-Modal (Faktoren) -->
+  <div class="infl" id="infl" role="dialog" aria-modal="true" aria-label="Umwelt-Einfluss wählen" hidden>
+    <div class="infl-card">
+      <div class="infl-head">
+        <div class="infl-title" id="inflTitle">Umwelt-Einfluss auslösen</div>
+        <button class="link" id="inflClose">schließen</button>
+      </div>
+      <p class="infl-sub">Wähle einen Einfluss — er verändert die Umwelt deines Wesens; es passt sich über Generationen an. Grau = im Katalog, aber als echte Selektionskraft noch in Arbeit.</p>
+      <div class="infl-cats" id="inflCats"></div>
+    </div>
+  </div>
+  <div class="infl inflsub" id="inflSub" role="dialog" aria-modal="true" aria-label="Einfluss wählen" hidden>
+    <div class="infl-card">
+      <div class="infl-head">
+        <div class="infl-title" id="inflSubTitle">—</div>
+        <button class="link" id="inflBack">↩ zurück</button>
+      </div>
+      <div class="infl-factors" id="inflFactors"></div>
+      <div class="infl-foot">
+        <button class="ctrl" id="inflCancel">Abbrechen</button>
+        <button class="ctrl infl-ok" id="inflOk" disabled>Auslösen</button>
+      </div>
+    </div>
+  </div>
+
   <div class="world" id="world" role="dialog" aria-modal="true" aria-label="Lebende Welt — Arten & Ähnlichkeits-Baum" hidden>
     <div class="wl-card">
       <div class="wl-head">
@@ -595,6 +657,7 @@
 </div>
 
 <script src="./vendor/supabase.js"></script>
+<script src="./influences.js"></script>
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
@@ -644,6 +707,9 @@ const ICONS = {
   // Welt-Overlay
   globe:`<g fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path stroke-width="1.4" d="M3 12h18M4.7 7.2h14.6M4.7 16.8h14.6"/></g>`,
   meteor:`<circle cx="15.5" cy="8.5" r="3.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M10.5 12.5L4 19M13 8L6.5 14.5M9 12L5 16"/></g>`,
+  wind:`<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8h9a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 12h13a2.5 2.5 0 1 1-2.5 2.5"/><path d="M3 16h7a2 2 0 1 1-2 2"/></g>`,
+  mineral:`<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l6 4-2 12H8L6 7z"/><path d="M6 7h12M12 3v16M9 7l3 12M15 7l-3 12"/></g>`,
+  mountain:`<path d="M2 19l6-11 4 6 2-3 6 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.6 13l1.4-2.5 1.4 2.5z"/>`,
   link:`<g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9.8 14.2l4.4-4.4"/><path d="M8.5 11.5L6.7 13.3a3 3 0 0 0 4.2 4.2l1.8-1.8"/><path d="M15.5 12.5l1.8-1.8a3 3 0 0 0-4.2-4.2L11.3 8.3"/></g>`,
   island:`<path d="M6 16c1.4-4.2 4.2-6.5 6-6.5s4.6 2.3 6 6.5z"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 19c1.8-1.4 3.6-1.4 5.4 0M15.6 19c1.8-1.4 3.6-1.4 5.4 0"/></g>`,
   tune:`<g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g><g fill="var(--abyss)" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="7" r="2.3"/><circle cx="15" cy="12" r="2.3"/><circle cx="8" cy="17" r="2.3"/></g>`,
@@ -926,6 +992,7 @@ let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,w
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
+let adaptBoost = 0;   // Umwelt-Einfluss -> kurzer Anpassungs-Schub (beschleunigt die Evolution, klingt ab)
 let rng, randn, lineageSeed = 0;
 let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, ueberlebt "Neues Leben")
 // A4 Bindung: Name des aktuellen Wesens + Ahnenlinie (aelteste zuerst, gekappt).
@@ -1482,6 +1549,63 @@ document.getElementById("nameBtn").addEventListener("click", async () => {
   updateBonding(); saveState();
 });
 document.getElementById("revealX").addEventListener("click", () => { document.getElementById("reveal").hidden = true; });
+
+// ======================= Umwelt-Einflüsse (geschachteltes Modal) =======================
+// Ein Trigger, der die UMWELT DES AKTUELLEN WESENS ändert. Kategorie-Modal -> Faktor-
+// Sub-Modal (jeder mit Erklärsatz) -> auswählen + Auslösen/Abbrechen. Faktoren aus
+// docs/faktoren-katalog.md (app/influences.js). Wirkt mit Cinematik aufs Hauptwesen.
+const INFL = window.INFLUENCES || [];
+let inflSel = null, inflOpener = null;
+const _el = (id) => document.getElementById(id);
+function openInfl(){
+  inflOpener = document.activeElement;
+  _el("inflCats").innerHTML = INFL.map((c,i)=>{
+    const ready = c.factors.filter(f=>!f.soon).length;
+    return `<button class="infl-cat" data-i="${i}">${ic(c.icon)}<span>${c.cat}</span><span class="cnt">${ready}/${c.factors.length}</span></button>`;
+  }).join("");
+  _el("inflCats").querySelectorAll(".infl-cat").forEach(b=> b.onclick = ()=> openInflSub(+b.dataset.i));
+  _el("infl").hidden = false; _el("inflClose").focus();
+}
+function closeInfl(){ _el("inflSub").hidden = true; _el("infl").hidden = true; inflSel = null;
+  if(inflOpener && inflOpener.focus) inflOpener.focus(); }
+function openInflSub(ci){
+  const c = INFL[ci]; inflSel = null;
+  _el("inflSubTitle").innerHTML = ic(c.icon) + " " + c.cat;
+  _el("inflFactors").innerHTML = c.factors.map((f,fi)=>
+    `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
+      `<div class="fn">${f.name}</div><div class="fd">${f.desc}</div></button>`).join("");
+  _el("inflFactors").querySelectorAll(".infl-factor:not(.soon)").forEach(b=> b.onclick = ()=>{
+    _el("inflFactors").querySelectorAll(".infl-factor.sel").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel"); inflSel = c.factors[+b.dataset.fi]; _el("inflOk").disabled = false;
+  });
+  _el("inflOk").disabled = true; _el("inflSub").hidden = false; _el("inflBack").focus();
+}
+function closeInflSub(){ _el("inflSub").hidden = true; inflSel = null; }
+function applyInfluence(f){
+  if(!f || !f.env) return;
+  Object.assign(env, f.env);
+  LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
+    if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
+  lastBiome = f.name; _el("biomeTag").textContent = f.name;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  dismissOnboard();
+  triggerHabitatFx(f.tone || "shift");   // Cinematik: Blitz + Anpassungs-Schub
+}
+function triggerHabitatFx(tone){
+  const vp = document.querySelector(".viewport");
+  if(vp){ vp.classList.remove("fx-hit","fx-shift","fx-bio"); void vp.offsetWidth;
+    vp.classList.add("fx-"+tone); setTimeout(()=>vp.classList.remove("fx-"+tone), 950); }
+  adaptBoost = 1;   // beschleunigte Anpassung (klingt in frame() ab)
+}
+_el("inflClose").addEventListener("click", closeInfl);
+_el("inflBack").addEventListener("click", closeInflSub);
+_el("inflCancel").addEventListener("click", closeInflSub);
+_el("inflOk").addEventListener("click", ()=>{ if(inflSel){ applyInfluence(inflSel); closeInfl(); } });
+_el("infl").addEventListener("click", e=>{ if(e.target.id==="infl") closeInfl(); });
+_el("inflSub").addEventListener("click", e=>{ if(e.target.id==="inflSub") closeInflSub(); });
+document.addEventListener("keydown", e=>{ if(e.key!=="Escape") return;
+  if(!_el("inflSub").hidden){ closeInflSub(); } else if(!_el("infl").hidden){ closeInfl(); } });
+
 // Speicher-Kadenz
 setInterval(saveState, 4000);
 document.addEventListener("visibilitychange", () => { if(document.hidden) saveState(); });
@@ -2244,7 +2368,9 @@ function frame(time){
   const dt = Math.min(0.1, (time-lastTime)/1000); lastTime=time;
   // Kontinuierliche Zeit: laufend Generationen weiterschieben (Tempo-abhaengig).
   if(running){
-    acc += dt*gensPerSec;
+    // Anpassungs-Schub nach einem Umwelt-Einfluss: kurz schnellere Evolution, dann ruhig.
+    if(adaptBoost > 0.002){ adaptBoost *= Math.exp(-dt/1.6); } else adaptBoost = 0;
+    acc += dt*gensPerSec*(1 + adaptBoost*5);
     let steps = Math.floor(acc);
     if(steps>0){
       acc -= steps; steps = Math.min(steps, 40);   // Nachhol-Deckel
@@ -2276,7 +2402,8 @@ function frame(time){
 document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neu beginnen";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' Lebensbaum · <span id="discCount">0</span> entdeckt ↗';
-document.getElementById("worldBtn").innerHTML = ic("globe") + ' Lebende Welt <span class="beta">Beta</span> · viele Orte &amp; Arten ↗';
+document.getElementById("worldBtn").innerHTML = ic("wind") + ' Umwelt-Einfluss auslösen ↗';
+document.getElementById("worldBtn").addEventListener("click", openInfl);
 playBtn.innerHTML = ic("pause");
 const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
@@ -2661,7 +2788,9 @@ try {
     el("wlChronToggle").textContent = chronMode === "tree" ? "Liste ⇄" : "Baum ⇄";
     render();
   });
-  el("worldBtn").addEventListener("click", openWorld);
+  // worldBtn öffnet jetzt das Umwelt-Einfluss-Modal (klassisches Skript). Das
+  // Metapopulations-Overlay ist auf Nutzer-Wunsch zurückgezogen (Code bleibt, nicht verdrahtet).
+  // el("worldBtn").addEventListener("click", openWorld);
   el("worldClose").addEventListener("click", closeWorld);
   overlay.addEventListener("click", (e) => { if (e.target.id === "world") closeWorld(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeWorld(); });
@@ -2690,7 +2819,8 @@ try {
   updateSpeciesWiki();
   setInterval(updateSpeciesWiki, 700);
 } catch (err) {
-  console.error("Lebende Welt (Beta) konnte nicht geladen werden:", err);
-  const b = document.getElementById("worldBtn"); if (b) b.style.display = "none";
+  // Der (zurückgezogene) Welt-Kern lädt nur noch für „≈ in echt"; scheitert er, bleibt
+  // der worldBtn trotzdem sichtbar — er öffnet ja jetzt das Umwelt-Einfluss-Modal.
+  console.warn("Welt-Kern (nur noch für Wiki-Link) nicht geladen:", err);
 }
 </script>
