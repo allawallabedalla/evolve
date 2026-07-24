@@ -96,5 +96,6 @@
   "hypoxiaSeverity": 0.9,
   "wOxy": 1.0,
   "salinityLethality": 0.85,
-  "wOsmo": 1.0
+  "wOsmo": 1.0,
+  "kleiberDecades": 0.6
 }

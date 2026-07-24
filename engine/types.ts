@@ -78,6 +78,7 @@ export interface Physics {
   wOxy: number;
   salinityLethality: number;
   wOsmo: number;
+  kleiberDecades: number;
   maintenance: {
     base: number;
     size: number;
