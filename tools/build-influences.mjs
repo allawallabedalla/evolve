@@ -71,6 +71,60 @@ const EFFECTS = {
   "Meteoriten-/Asteroiden-Einschlag + Impakt-Winter": { tone: "hit", env: { light: 0.1, temperature: 0.25, foodAbundance: 0.2 } },
 };
 
+// Klartext-Anzeigenamen (Usability-Audit): der Fachbegriff bleibt als Untertitel,
+// aber der fette Titel ist laienverständlich. Nur für die AKTIVEN Faktoren nötig —
+// die grauen „kommt bald" behalten den Katalognamen.
+const PLAIN = {
+  "Thermische Extreme (Hitze/Frost-Spitzen)": "Hitze- & Frost-Spitzen",
+  "Geothermie / Mikroklima-Refugien": "Warme Erdwärme-Zuflucht",
+  "Niederschlag / Feuchte": "Viel Regen & Feuchte",
+  "Schneedecke / subnivaler Raum": "Schnee & Leben darunter",
+  "Lichtintensität": "Grelles Sonnenlicht",
+  "Photische vs. aphotische Zone": "Lichtlose Tiefe (Dunkelheit)",
+  "Luftdruck / Höhe / Hypoxie": "Dünne Höhenluft",
+  "UV-Strahlung": "Starke UV-Strahlung",
+  "pH / Säure": "Saures Wasser",
+  "Trübung / Sediment": "Trübes, schlammiges Wasser",
+  "Nährstoffstatus (oligo→eutroph)": "Nährstoffreiches Wasser",
+  "Gelöster Sauerstoff": "Sauerstoffarmes Wasser",
+  "Salinität + Salz-Gradienten": "Salziges Wasser",
+  "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)": "Karger, nährstoffarmer Boden",
+  "Serpentin/Schwermetall-Toxizität": "Giftiger Schwermetall-Boden",
+  "Boden-Sauerstoff (Staunässe/anoxisch)": "Staunässe / Sumpfboden",
+  "Höhengradient": "Gebirgs-Höhenlage",
+  "Wind (Exposition + Ausbreitungs-Vektor)": "Dauerwind & Sturm",
+  "Habitat-Struktur-Komplexität / Deckung": "Dichtes Versteck-Gestrüpp",
+  "Höhlen / unterirdischer Raum": "Dunkle Höhle",
+  "Primärproduktivität / Ressourcen-Fülle": "Nahrungs-Überfluss",
+  "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": "Extremchemie (Schwefel, Salz, Säure)",
+  "Natürliche Toxine / ionisierende Strahlung": "Gift & radioaktive Strahlung",
+  "Feuer-Regime (Häufigkeit/Intensität/Saison)": "Häufige Brände",
+  "Vulkanausbruch / Flutbasalt (LIP)": "Vulkanausbruch",
+  "Vulkanwinter / Aschefall": "Vulkanwinter (Aschehimmel)",
+  "Erdbeben / Tsunami / Hangrutsch": "Erdbeben & Flutwelle",
+  "Dürre als Selektions-Episode": "Lange Dürre",
+  "Eiszeit / Interglazial / abrupter Klimawechsel": "Eiszeit",
+  "Hyperthermal (PETM) / Schneeball-Erde": "Extreme Warmzeit",
+  "Meeresspiegel-Änderung (Transgression/Regression)": "Steigender Meeresspiegel",
+  "Aridifizierung / Grasland-Ausbreitung": "Versteppung (Grasland breitet sich aus)",
+  "Tiefe / hydrostatischer Druck": "Tiefsee-Druck",
+  "Ozean-Anoxie / -Versauerung / Euxinie": "Sauerstofftotes, giftiges Meer",
+  "Meteoriten-/Asteroiden-Einschlag + Impakt-Winter": "Asteroiden-Einschlag",
+};
+// Klartext-Kategorienamen (Schlüssel = Title-Case-Ergebnis des Parsers).
+const CAT_PLAIN = {
+  "Ort-Parameter": "Ort & Klima",
+  "Welt-Events": "Katastrophen & Welt-Ereignisse",
+  "Raum, Isolation & Biogeografie": "Raum & Isolation",
+  "Biotische Interaktionen": "Leben mit anderen Arten",
+  "Genom-Achsen": "Körper & Gene",
+  "Fortpflanzung & Lebensgeschichte": "Fortpflanzung & Lebensweg",
+  "Evolutions-Mechanik": "Wie Evolution läuft",
+  "Stochastik & Kontingenz": "Zufall & Schicksal",
+  "Makro-Muster": "Große Muster der Vielfalt",
+  "Anthropogen / Moderne Ära": "Mensch & moderne Welt",
+};
+
 // ---- Parser ----
 const SKIP_HEAD = /^(Wie man liest|Priorisierung|Quellen)/;
 const sections = [];
@@ -87,7 +141,7 @@ for (const raw of md.split("\n")) {
     const raw = m[2].replace(/\s+—.*$/, "").trim();
     // ALL-CAPS-Titel des Katalogs in lesbares Title-Case wandeln.
     const title = raw.toLowerCase().replace(/(^|[\s\-,&/])([a-zäöü])/g, (_, p, c) => p + c.toUpperCase());
-    sec = { cat: title, icon: SEC_ICON[num] || "globe", groups: [] };
+    sec = { cat: title, plain: CAT_PLAIN[title] || title, icon: SEC_ICON[num] || "globe", groups: [] };
     sections.push(sec);
     group = { sub: "", factors: [] };
     sec.groups.push(group);
@@ -108,6 +162,7 @@ for (const raw of md.split("\n")) {
     const desc = stripInline(rest) || "—";
     const eff = EFFECTS[name];
     const f = { name, desc };
+    if (PLAIN[name]) f.plain = PLAIN[name];
     if (eff) { f.env = eff.env; f.tone = eff.tone; } else { f.soon = true; }
     group.factors.push(f);
   }

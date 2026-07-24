@@ -6,6 +6,7 @@
 window.INFLUENCES = [
  {
   "cat": "Ort-Parameter",
+  "plain": "Ort & Klima",
   "icon": "mountain",
   "groups": [
    {
@@ -29,6 +30,7 @@ window.INFLUENCES = [
      {
       "name": "Thermische Extreme (Hitze/Frost-Spitzen)",
       "desc": "Letalgrenzen, seltene Killer-Events.",
+      "plain": "Hitze- & Frost-Spitzen",
       "env": {
        "temperature": 0.96,
        "foodAbundance": 0.3
@@ -43,6 +45,7 @@ window.INFLUENCES = [
      {
       "name": "Geothermie / Mikroklima-Refugien",
       "desc": "lokale Wärme-Taschen (Quellen, Höhlen).",
+      "plain": "Warme Erdwärme-Zuflucht",
       "env": {
        "temperature": 0.62,
        "water": 0.75,
@@ -58,6 +61,7 @@ window.INFLUENCES = [
      {
       "name": "Niederschlag / Feuchte",
       "desc": "Wassermenge; Basis für Pflanzen.",
+      "plain": "Viel Regen & Feuchte",
       "env": {
        "water": 0.92
       },
@@ -86,6 +90,7 @@ window.INFLUENCES = [
      {
       "name": "Schneedecke / subnivaler Raum",
       "desc": "Isolation + Wasser-Speicher.",
+      "plain": "Schnee & Leben darunter",
       "env": {
        "temperature": 0.12,
        "water": 0.5,
@@ -101,6 +106,7 @@ window.INFLUENCES = [
      {
       "name": "Lichtintensität",
       "desc": "Photosynthese-Basis (schon drin).",
+      "plain": "Grelles Sonnenlicht",
       "env": {
        "light": 0.96
       },
@@ -114,6 +120,7 @@ window.INFLUENCES = [
      {
       "name": "UV-Strahlung",
       "desc": "DNA-Schaden → Schutzpigmente (Höhe, Ozonloch).",
+      "plain": "Starke UV-Strahlung",
       "env": {
        "uv": 0.9,
        "light": 0.92
@@ -128,6 +135,7 @@ window.INFLUENCES = [
      {
       "name": "Photische vs. aphotische Zone",
       "desc": "Dunkelheit → Biolumineszenz/Blindheit.",
+      "plain": "Lichtlose Tiefe (Dunkelheit)",
       "env": {
        "light": 0.02
       },
@@ -151,6 +159,7 @@ window.INFLUENCES = [
      {
       "name": "Luftdruck / Höhe / Hypoxie",
       "desc": "Höhen-Anpassung (Hämoglobin).",
+      "plain": "Dünne Höhenluft",
       "env": {
        "oxygen": 0.12,
        "temperature": 0.28,
@@ -163,6 +172,7 @@ window.INFLUENCES = [
      {
       "name": "Wind (Exposition + Ausbreitungs-Vektor)",
       "desc": "Krüppelwuchs; trägt Pollen/Samen.",
+      "plain": "Dauerwind & Sturm",
       "env": {
        "wind": 0.9,
        "water": 0.35,
@@ -183,6 +193,7 @@ window.INFLUENCES = [
      {
       "name": "Salinität + Salz-Gradienten",
       "desc": "Süß/Brack/Meer/hypersalin; Osmoregulation.",
+      "plain": "Salziges Wasser",
       "env": {
        "salinity": 0.85,
        "water": 0.9
@@ -192,6 +203,7 @@ window.INFLUENCES = [
      {
       "name": "pH / Säure",
       "desc": "saure Moore vs. alkalische Soda-Seen.",
+      "plain": "Saures Wasser",
       "env": {
        "toxicity": 0.7,
        "water": 0.85
@@ -201,6 +213,7 @@ window.INFLUENCES = [
      {
       "name": "Gelöster Sauerstoff",
       "desc": "kalt/schnell vs. warm/stehend.",
+      "plain": "Sauerstoffarmes Wasser",
       "env": {
        "oxygen": 0.2,
        "water": 0.92,
@@ -211,6 +224,7 @@ window.INFLUENCES = [
      {
       "name": "Tiefe / hydrostatischer Druck",
       "desc": "Tiefsee-Anpassung.",
+      "plain": "Tiefsee-Druck",
       "env": {
        "pressure": 0.9,
        "water": 0.98,
@@ -227,6 +241,7 @@ window.INFLUENCES = [
      {
       "name": "Trübung / Sediment",
       "desc": "Licht-Limit, Kiemen-Verstopfung; kann Artbildung *rückgängig* machen (Victoria-Cichliden).",
+      "plain": "Trübes, schlammiges Wasser",
       "env": {
        "water": 0.8,
        "light": 0.15
@@ -236,6 +251,7 @@ window.INFLUENCES = [
      {
       "name": "Nährstoffstatus (oligo→eutroph)",
       "desc": "klare Alpenseen vs. Algen-Teiche.",
+      "plain": "Nährstoffreiches Wasser",
       "env": {
        "water": 0.85,
        "foodAbundance": 0.85
@@ -270,14 +286,16 @@ window.INFLUENCES = [
      {
       "name": "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)",
       "desc": "P-arme Böden → Karnivoren.",
+      "plain": "Karger, nährstoffarmer Boden",
       "env": {
-       "foodAbundance": 0.2
+       "foodAbundance": 0.12
       },
       "tone": "shift"
      },
      {
       "name": "Serpentin/Schwermetall-Toxizität",
       "desc": "Metallophyten-Endemiten.",
+      "plain": "Giftiger Schwermetall-Boden",
       "env": {
        "toxicity": 0.85,
        "foodAbundance": 0.3
@@ -292,6 +310,7 @@ window.INFLUENCES = [
      {
       "name": "Boden-Sauerstoff (Staunässe/anoxisch)",
       "desc": "Mangroven-Atemwurzeln.",
+      "plain": "Staunässe / Sumpfboden",
       "env": {
        "oxygen": 0.18,
        "water": 0.95,
@@ -312,6 +331,7 @@ window.INFLUENCES = [
      {
       "name": "Höhengradient",
       "desc": "stapelt Klimabänder (Wald→Alpin→Schnee).",
+      "plain": "Gebirgs-Höhenlage",
       "env": {
        "temperature": 0.2,
        "foodHeight": 0.15,
@@ -333,6 +353,7 @@ window.INFLUENCES = [
      {
       "name": "Habitat-Struktur-Komplexität / Deckung",
       "desc": "Riff, Kronendach, Felsspalten (vertikale Schichten).",
+      "plain": "Dichtes Versteck-Gestrüpp",
       "env": {
        "foodHeight": 0.9,
        "foodAbundance": 0.7
@@ -342,6 +363,7 @@ window.INFLUENCES = [
      {
       "name": "Höhlen / unterirdischer Raum",
       "desc": "dunkel, stabil → Troglobiten.",
+      "plain": "Dunkle Höhle",
       "env": {
        "light": 0.02,
        "temperature": 0.45,
@@ -362,6 +384,7 @@ window.INFLUENCES = [
      {
       "name": "Primärproduktivität / Ressourcen-Fülle",
       "desc": "Auftriebs-reiche vs. karge Zonen.",
+      "plain": "Nahrungs-Überfluss",
       "env": {
        "foodAbundance": 0.95
       },
@@ -385,6 +408,7 @@ window.INFLUENCES = [
      {
       "name": "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)",
       "desc": "Extremophile.",
+      "plain": "Extremchemie (Schwefel, Salz, Säure)",
       "env": {
        "toxicity": 0.92,
        "salinity": 0.7,
@@ -396,6 +420,7 @@ window.INFLUENCES = [
      {
       "name": "Natürliche Toxine / ionisierende Strahlung",
       "desc": "Selen/Arsen-Böden, Radon.",
+      "plain": "Gift & radioaktive Strahlung",
       "env": {
        "toxicity": 0.55,
        "radiation": 0.9
@@ -410,6 +435,7 @@ window.INFLUENCES = [
      {
       "name": "Feuer-Regime (Häufigkeit/Intensität/Saison)",
       "desc": "Serotinie, Rinde, Wiederaustrieb, Pyrodiversität.",
+      "plain": "Häufige Brände",
       "env": {
        "foodAbundance": 0.3,
        "temperature": 0.72,
@@ -433,6 +459,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Welt-Events",
+  "plain": "Katastrophen & Welt-Ereignisse",
   "icon": "meteor",
   "groups": [
    {
@@ -471,6 +498,7 @@ window.INFLUENCES = [
      {
       "name": "Vulkanausbruch / Flutbasalt (LIP)",
       "desc": "zerstört + schafft Habitat; End-Perm-Auslöser.",
+      "plain": "Vulkanausbruch",
       "env": {
        "temperature": 0.8,
        "light": 0.25,
@@ -481,6 +509,7 @@ window.INFLUENCES = [
      {
       "name": "Vulkanwinter / Aschefall",
       "desc": "Sonnenlicht-Blockade, Abkühlung (Toba).",
+      "plain": "Vulkanwinter (Aschehimmel)",
       "env": {
        "light": 0.15,
        "temperature": 0.25,
@@ -491,6 +520,7 @@ window.INFLUENCES = [
      {
       "name": "Erdbeben / Tsunami / Hangrutsch",
       "desc": "Terrain-Reset, Sekundär-Gefahren.",
+      "plain": "Erdbeben & Flutwelle",
       "env": {
        "water": 0.75,
        "foodAbundance": 0.4
@@ -520,6 +550,7 @@ window.INFLUENCES = [
      {
       "name": "Dürre als Selektions-Episode",
       "desc": "Galápagos-Finken-Schnabel schwankt jahrweise.",
+      "plain": "Lange Dürre",
       "env": {
        "water": 0.1,
        "temperature": 0.82,
@@ -536,6 +567,7 @@ window.INFLUENCES = [
      {
       "name": "Eiszeit / Interglazial / abrupter Klimawechsel",
       "desc": "reorganisiert Biota (Pleistozän-Zyklen).",
+      "plain": "Eiszeit",
       "env": {
        "temperature": 0.06,
        "foodAbundance": 0.35,
@@ -547,6 +579,7 @@ window.INFLUENCES = [
      {
       "name": "Hyperthermal (PETM) / Schneeball-Erde",
       "desc": "globale Warm-/Kälte-Extreme.",
+      "plain": "Extreme Warmzeit",
       "env": {
        "temperature": 0.88,
        "foodAbundance": 0.8,
@@ -557,6 +590,7 @@ window.INFLUENCES = [
      {
       "name": "Meeresspiegel-Änderung (Transgression/Regression)",
       "desc": "Schelf-Habitat + Konnektivität.",
+      "plain": "Steigender Meeresspiegel",
       "env": {
        "water": 0.96,
        "foodHeight": 0.1
@@ -566,6 +600,7 @@ window.INFLUENCES = [
      {
       "name": "Ozean-Anoxie / -Versauerung / Euxinie",
       "desc": "marine Aussterbe-Treiber.",
+      "plain": "Sauerstofftotes, giftiges Meer",
       "env": {
        "oxygen": 0.08,
        "toxicity": 0.6,
@@ -582,6 +617,7 @@ window.INFLUENCES = [
      {
       "name": "Aridifizierung / Grasland-Ausbreitung",
       "desc": "Miozän → Grasfresser, Hominiden.",
+      "plain": "Versteppung (Grasland breitet sich aus)",
       "env": {
        "water": 0.35,
        "foodHeight": 0.3,
@@ -598,6 +634,7 @@ window.INFLUENCES = [
      {
       "name": "Meteoriten-/Asteroiden-Einschlag + Impakt-Winter",
       "desc": "Chicxulub → K-Pg.",
+      "plain": "Asteroiden-Einschlag",
       "env": {
        "light": 0.1,
        "temperature": 0.25,
@@ -661,6 +698,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Raum, Isolation & Biogeografie",
+  "plain": "Raum & Isolation",
   "icon": "island",
   "groups": [
    {
@@ -922,6 +960,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Biotische Interaktionen",
+  "plain": "Leben mit anderen Arten",
   "icon": "fang",
   "groups": [
    {
@@ -1208,6 +1247,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Genom-Achsen",
+  "plain": "Körper & Gene",
   "icon": "dna",
   "groups": [
    {
@@ -1279,6 +1319,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Fortpflanzung & Lebensgeschichte",
+  "plain": "Fortpflanzung & Lebensweg",
   "icon": "egg",
   "groups": [
    {
@@ -1475,6 +1516,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Evolutions-Mechanik",
+  "plain": "Wie Evolution läuft",
   "icon": "tune",
   "groups": [
    {
@@ -1666,6 +1708,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Stochastik & Kontingenz",
+  "plain": "Zufall & Schicksal",
   "icon": "waves",
   "groups": [
    {
@@ -1722,6 +1765,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Makro-Muster",
+  "plain": "Große Muster der Vielfalt",
   "icon": "globe",
   "groups": [
    {
@@ -1858,6 +1902,7 @@ window.INFLUENCES = [
  },
  {
   "cat": "Anthropogen / Moderne Ära",
+  "plain": "Mensch & moderne Welt",
   "icon": "flame",
   "groups": [
    {
