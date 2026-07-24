@@ -44,16 +44,18 @@ try {
   const youBadge = await page.locator(".wl-place--pet .wl-you").count();
   console.log(`  „Deine Linie" als Ort 0:          ${petPlace === 1 && youBadge >= 1 ? "OK" : "FAIL"} (${petPlace})`);
 
-  // 3) Chronik nach ein paar Steps
-  await page.waitForTimeout(1500);
-  const species = await page.locator("#wlChronik li").count();
-  const rarityBadges = await page.locator("#wlChronik .rar").count();
-  console.log(`  Welt-Overlay: Chronik-Arten:      ${species >= 1 ? "OK" : "FAIL"} (${species})`);
-  console.log(`  Rarität annotiert:                ${rarityBadges >= 1 ? "OK" : "FAIL"} (${rarityBadges})`);
-
-  // 4) Veränderung: Katastrophe klickt ohne Fehler
+  // 3) Cinematischer Eingriff: Katastrophe -> Anlauf (charge + busy) -> Einschlag (blast).
+  //    (Chronik wurde auf Nutzer-Wunsch aus der UI genommen; Code bleibt erhalten.)
+  await page.waitForTimeout(1200);
   await page.click("#wlCat");
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(220);                       // während des Anlaufs
+  const busy = await page.locator(".wl-eingreifen.busy").count();
+  const charging = await page.locator(".wl-place--charge").count();
+  console.log(`  Eingriff: Anlauf (busy + charge):  ${busy >= 1 && charging >= 1 ? "OK" : "FAIL"} (busy ${busy}, charge ${charging})`);
+  await page.waitForTimeout(650);                        // nach dem Einschlag
+  const blast = await page.locator(".wl-place--blast").count();
+  console.log(`  Eingriff: Einschlag (blast):      ${blast >= 1 ? "OK" : "FAIL"} (${blast})`);
+  await page.waitForTimeout(1100);                       // Cinematik abklingen lassen
 
   // 5) Schließen (mit Zurück-Zoom-Animation -> hidden erst nach ~260ms)
   await page.click("#worldClose");
@@ -65,7 +67,7 @@ try {
   console.log(`  Keine fatalen JS-Fehler:          ${fatal.length === 0 ? "OK" : "FAIL"}`);
   if (fatal.length) fatal.forEach((e) => console.log("      • " + e));
 
-  const ok = hasKingdom && hasWorldBtn && places >= 3 && species >= 1 && rarityBadges >= 1 && closed !== null && fatal.length === 0;
+  const ok = hasKingdom && hasWorldBtn && places >= 3 && busy >= 1 && charging >= 1 && blast >= 1 && closed !== null && fatal.length === 0;
   await browser.close();
   console.log(ok ? "\nStatus: OK — App bootet, Lebende Welt läuft im Overlay, Einzel-Wesen unberührt." : "\nStatus: FAIL.");
   done(ok ? 0 : 1);
