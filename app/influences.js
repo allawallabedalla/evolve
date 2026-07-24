@@ -407,7 +407,8 @@ window.INFLUENCES = [
       "desc": "Serotinie, Rinde, Wiederaustrieb, Pyrodiversität.",
       "env": {
        "foodAbundance": 0.3,
-       "temperature": 0.72
+       "temperature": 0.72,
+       "fire": 0.9
       },
       "tone": "hit"
      },

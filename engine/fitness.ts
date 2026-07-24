@@ -36,6 +36,7 @@ const BARO = 17;
 const SENSE = 18;
 const DESICC = 19;
 const RADRES = 20;
+const FIRERES = 21;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -59,6 +60,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const sense = traits[SENSE] ?? 0;
   const desicc = traits[DESICC] ?? 0;
   const radres = traits[RADRES] ?? 0;
+  const fireres = traits[FIRERES] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -237,6 +239,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     sense * m.sense +
     desicc * m.desicc +
     radres * m.radres +
+    fireres * m.fireres +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -337,6 +340,13 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const radiation = env.radiation ?? 0;
   const radSurvival = clamp01(1 - radiation * (1 - radres) * phys.radLethality);
 
+  // 11) Feuer (AXIS-16 Pyrophyt): wiederkehrende Braende (Savanne, mediterranes Buschland)
+  //     toeten, WENN keine Feuer-Anpassung vorliegt (Korkrinde, unterirdische Lignotuber,
+  //     serotine Zapfen). 'fireres' puffert, kostet Unterhalt -> nur in Feuer-Regimen der
+  //     Pyrophyt. fire kommt ueber Umwelt-Einfluesse (Feuer-Regime), nicht die 6 Regler.
+  const fire = env.fire ?? 0;
+  const fireSurvival = clamp01(1 - fire * (1 - fireres) * phys.fireLethality);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
@@ -347,7 +357,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     Math.pow(uvSurvival, phys.wUv) *
     Math.pow(baroSurvival, phys.wBaro) *
     Math.pow(desiccSurvival, phys.wDesicc) *
-    Math.pow(radSurvival, phys.wRad);
+    Math.pow(radSurvival, phys.wRad) *
+    Math.pow(fireSurvival, phys.wFire);
 
   return Math.max(fit, phys.floor);
 }

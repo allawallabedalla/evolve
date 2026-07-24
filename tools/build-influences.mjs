@@ -53,7 +53,7 @@ const EFFECTS = {
   "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, salinity: 0.7, water: 0.6, light: 0.3 } },
   "Natürliche Toxine / ionisierende Strahlung": { tone: "hit", env: { toxicity: 0.55, radiation: 0.9 } },   // AXIS-15: Radon/Uran-Boden -> Strahlungsresistenz
   // 1.9 Feuer
-  "Feuer-Regime (Häufigkeit/Intensität/Saison)": { tone: "hit", env: { foodAbundance: 0.3, temperature: 0.72 } },
+  "Feuer-Regime (Häufigkeit/Intensität/Saison)": { tone: "hit", env: { foodAbundance: 0.3, temperature: 0.72, fire: 0.9 } },   // AXIS-16: Pyrophyt
   // 2.2 Geophysikalisch
   "Vulkanausbruch / Flutbasalt (LIP)": { tone: "hit", env: { temperature: 0.8, light: 0.25, foodAbundance: 0.3 } },
   "Vulkanwinter / Aschefall": { tone: "hit", env: { light: 0.15, temperature: 0.25, foodAbundance: 0.35 } },
