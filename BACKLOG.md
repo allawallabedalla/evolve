@@ -58,6 +58,10 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
   Voll re-validiert (Pflanzen-Anteil 4.0 %, > 2 %-Boden).
 
 #### Offene Wünsche (Nutzer)
+- **Lebensbaum: Beschreibung bei Klick** *(Nutzer, 2026-07)* — im Genbuch/Lebensbaum soll
+  ein Klick auf eine Form eine kurze **Beschreibung** zeigen (evtl. von Wikipedia). Heute
+  gibt es nur den Hover-Tooltip (Ära/Evo-Notiz); gewünscht ist ein Klick-Panel mit mehr
+  Kontext — passt zum „≈ in echt"-Wiki-Feature (dieselbe Quelle/Verlinkung nutzen).
 - **Wikipedia-Link spezifischer** *(Nutzer, 2026-07)* — das „≈ in echt"-Feature funktioniert
   gut; es soll aber möglichst **tief** verlinken (konkrete Art/Klade statt Oberbegriff),
   **so spezifisch wie für das Wesen sicher belegbar** — ohne Risiko von Falschanzeigen.
