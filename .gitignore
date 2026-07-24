@@ -7,3 +7,6 @@ __pycache__/
 scratch*.png
 scratch*
 _*.mjs
+
+# Persönliche lokale Claude-Code-Einstellungen (nicht versionieren)
+.claude/settings.local.json
