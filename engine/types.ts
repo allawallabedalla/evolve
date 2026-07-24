@@ -79,6 +79,7 @@ export interface Physics {
   salinityLethality: number;
   wOsmo: number;
   kleiberDecades: number;
+  defenseFromBurrow: number;
   maintenance: {
     base: number;
     size: number;
@@ -93,6 +94,7 @@ export interface Physics {
     detox: number;
     oxyEff: number;
     osmo: number;
+    burrow: number;
   };
   maintenanceQuad: {
     metabolism: number;
