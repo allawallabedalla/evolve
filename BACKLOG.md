@@ -3,7 +3,8 @@
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
 Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
-**9 Gene** (inkl. Flügelfläche / Flug, AXIS-1).
+**13 Gene** (inkl. Flug/AXIS-1, Aquatik/AXIS-4, Biolumineszenz/AXIS-5, Entgiftung/AXIS-6,
+Sauerstoff-Effizienz/AXIS-7, Osmoregulation/AXIS-8) + Kleibersche Allometrie.
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -71,15 +72,34 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
 - ↩︎ **Übergangszonen-Sumpfflieger** (~2 %): niedriger Wert, biologisch vertretbar; eine
   eigene steilere Flug-Gate wäre eine Engine-Änderung mit Re-Validierung für Randfälle -> nein.
 
-#### Bewusst zurückgestellt (Audit-Befunde, die eine gezielte Design-Runde brauchen)
-- **Sympatrische Artbildung sichtbar machen:** empirisch geprüft — die aktuelle Dynamik
-  erzeugt **unimodale** Innerorts-Populationen (bei Radius 0.18: 0 echte Sub-Cluster). Ein
-  bloßes Absenken des Zensus-Radius zeigte nur Rauschen. Echte Aufspaltung bräuchte
-  **stärkere disruptive Konkurrenz** — ein Dynamik-Umbau mit eigener pop-check-Wirkung
-  (die „mittlere" Form wird bei Bimodalität bedeutungslos). Allopatrische Aufspaltung
-  (Isolation → verschiedene Arten je Ort) funktioniert bereits und ist im Overlay sichtbar.
-- **Kleiber-Allometrie (Stoffwechsel ∝ Masse^0.75):** geringe Anschaulichkeit für Laien,
-  hohes Tuning-Risiko — später, wenn überhaupt.
+#### Neue Selektionsachsen aus dem Faktoren-Katalog (2026-07, Batch AXIS-6..8)
+Die 257 „kommt bald"-Faktoren werden schrittweise zu ECHTEN Selektionsachsen (nicht kosmetisch).
+Jede spiegelt sich synchron in engine/oracle/app + volle Re-Validierung. Muster: neues Gen +
+neue Umwelt-Dimension (kommt NUR über Umwelt-Einflüsse, nicht über die 6 Regler) + multiplikativer
+Survival-Term; das Gen kostet Unterhalt → in benignen Milieus wegselektiert, nur in der Extremnische
+selektiert. Die Achsen sind **orthogonal** (Probe: Salz+giftig → osmo 0.90 UND detox 0.88 zugleich).
+- ✅ **AXIS-6 Entgiftung** (`detox` / `toxicity`) — Serpentin/Schwermetall, Schwefel/Säure.
+- ✅ **AXIS-7 Sauerstoff-Effizienz** (`oxyEff` / `oxygen`) — dünne Höhenluft/Hypoxie, gelöster O₂,
+  Boden-Anoxie, Ozean-Anoxie/Euxinie (koppelt mit AXIS-6). Fahler Höhenluft-Schleier im Habitat.
+- ✅ **AXIS-8 Osmoregulation** (`osmo` / `salinity`) — Salinität/Salz-Gradienten, hypersaline
+  Extrem-Chemie. Milchiger Salzschimmer im Habitat. Echte Faktoren im Modal: 27 → 32.
+
+#### ✅ Kleibersche Allometrie (#7) — erledigt (v0.42.0)
+Massenspezifische Stoffwechselkosten skalieren jetzt mit Masse^-0.25 (Gesamt-Stoffwechsel ∝
+Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten (`kleiberDecades` 0.6). Effekt (Probe, karge
+Nahrung): optimaler Stoffwechsel steigt mit Körpergröße (0.38 → 0.49 → 0.62 statt konstant 0.36).
+Ökologie C1–C6 blieb grün (Tier 43.9 → 45.4 %). Das anfängliche „hohe Tuning-Risiko" ließ sich mit
+mildem Exponenten kontrolliert landen.
+
+#### ✅ Sympatrische Artbildung — im Populations-Kern vorhanden & validiert (dokumentiert)
+`npm run branching-check` bestätigt: mit frequenzabhängiger Konkurrenz (σC<σK) spaltet EINE
+Population auf der Größen-Achse in **2 Cluster** (Modi [2,2,2,2,2]), disruptive Varianz **2.21×**;
+Kontrolle bleibt unimodal — Lehrbuch-Dieckmann/Doebeli. Der Mechanismus existiert also im Kern.
+Bewusst **nicht** in die Einzel-Wesen-Hauptansicht gehoben: der Nutzer hat die Populations-/
+Metapopulations-Ansicht („Lebende Welt") explizit zugunsten des Einzel-Wesen-Fokus verworfen;
+eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. → resolved-as-documented.
+
+#### Bewusst zurückgestellt
 - **Fisch-vs-Aal-Benennung (Flossen vs. flossenlos):** würde eine neue Form + Ripple durch
   Rarität/Tree/Wiki/Icons erfordern; Nuance rechtfertigt den Aufwand (noch) nicht.
 
