@@ -248,6 +248,16 @@
   .infl-factor.soon { cursor: not-allowed; opacity: .6; }
   .infl-factor.soon .fn::after { content: "kommt bald"; margin-left: auto; font-weight: 400; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
     color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
+  /* Milieu-Nähe (Nutzer-Wunsch): naheliegende Wechsel zuerst, große Sprünge weiter unten. */
+  .prox { margin-left: auto; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+  .prox.near { color: #1f3d30; background: var(--bio-dim); }
+  .prox.far { color: #fbf3dd; background: #9c7a4f; }
+  .infl-quick { display: flex; flex-wrap: wrap; gap: 7px; margin: 2px 0 14px; }
+  .infl-quick-h { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--bio-dim); width: 100%; margin-bottom: 1px; }
+  .infl-quick-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--abyss); border: 1px solid var(--line-soft);
+    border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: .8rem; color: var(--text); transition: border-color .12s, color .12s; }
+  .infl-quick-chip:hover { border-color: var(--bio-dim); color: var(--bio-dim); }
+  .infl-quick-chip .ic { width: 1rem; height: 1rem; color: var(--bio-dim); flex: 0 0 auto; }
   .infl-foot { display: flex; justify-content: flex-end; gap: 10px; }
   .infl-foot .ctrl { min-width: 110px; }
   .infl-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
@@ -613,6 +623,7 @@
         <button class="link" id="inflClose">schließen</button>
       </div>
       <p class="infl-sub">Der vollständige Faktoren-Katalog. <b>Aktive</b> Faktoren verändern die Umwelt deines Wesens — es passt sich über Generationen an. <b>Grau (kommt bald)</b> = im Katalog erfasst, aber als echte Selektionskraft noch in Arbeit.</p>
+      <div class="infl-quick" id="inflQuick"></div>
       <div class="infl-cats" id="inflCats"></div>
     </div>
   </div>
@@ -685,7 +696,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.42.0";
+const APP_VERSION = "v0.43.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1650,8 +1661,34 @@ const INFL = window.INFLUENCES || [];
 let inflSel = null, inflOpener = null;
 const _el = (id) => document.getElementById(id);
 const _inflFactors = (c)=> c.groups.flatMap(g=>g.factors);   // alle Faktoren einer Sektion, flach
+
+// Milieu-Nähe (Nutzer-Wunsch): wie weit ein Faktor die Umwelt vom AKTUELLEN Zustand
+// wegbewegt. Mittlere absolute Änderung über die Dimensionen, die der Faktor setzt (0..1).
+// So liegen naheliegende Wechsel oben/vorn (wenige Klicks), drastische weiter hinten.
+function factorDist(f){
+  if(!f || !f.env) return Infinity;
+  let s=0, n=0;
+  for(const k in f.env){ s += Math.abs((f.env[k]) - (env[k] ?? 0)); n++; }
+  return n ? s/n : Infinity;
+}
+const PROX_NEAR = 0.16, PROX_FAR = 0.5;
+function proxBadge(d){
+  if(d<=PROX_NEAR) return `<span class="prox near">naheliegend</span>`;
+  if(d>=PROX_FAR)  return `<span class="prox far">großer Sprung</span>`;
+  return "";
+}
 function openInfl(){
   inflOpener = document.activeElement;
+  // „Naheliegend jetzt": die dem aktuellen Milieu nächsten AKTIVEN Faktoren als Direkt-
+  // Chips — der kleine Wechsel ist damit nur zwei Klicks weit (Chip -> Auslösen).
+  const near = INFL.flatMap((c,ci)=> c.groups.flatMap(g=>g.factors.filter(f=>!f.soon).map(f=>({f,ci}))))
+    .map(o=>({...o,d:factorDist(o.f)})).sort((a,b)=>a.d-b.d).slice(0,5);
+  _el("inflQuick").innerHTML = near.length
+    ? `<div class="infl-quick-h">Naheliegend jetzt</div>` + near.map(o=>
+        `<button class="infl-quick-chip" data-ci="${o.ci}" data-fn="${encodeURIComponent(o.f.name)}">${ic(INFL[o.ci].icon)}${o.f.name}</button>`).join("")
+    : "";
+  _el("inflQuick").querySelectorAll(".infl-quick-chip").forEach(b=> b.onclick = ()=>
+    openInflSub(+b.dataset.ci, decodeURIComponent(b.dataset.fn)));
   _el("inflCats").innerHTML = INFL.map((c,i)=>{
     const all=_inflFactors(c), ready=all.filter(f=>!f.soon).length;
     return `<button class="infl-cat" data-i="${i}">${ic(c.icon)}<span>${c.cat}</span><span class="cnt">${ready}/${all.length}</span></button>`;
@@ -1661,25 +1698,37 @@ function openInfl(){
 }
 function closeInfl(){ _el("inflSub").hidden = true; _el("infl").hidden = true; inflSel = null;
   if(inflOpener && inflOpener.focus) inflOpener.focus(); }
-function openInflSub(ci){
+function openInflSub(ci, preselectName){
   const c = INFL[ci]; inflSel = null;
   _el("inflSubTitle").innerHTML = ic(c.icon) + " " + c.cat;
   const flat = [];   // flache Faktor-Liste der Sektion (für die Auswahl per Index)
   let html = "";
   for(const g of c.groups){
     if(g.sub) html += `<div class="infl-group">${g.sub}</div>`;
-    for(const f of g.factors){
+    // Innerhalb jeder Untergruppe: aktive Faktoren nach Milieu-Nähe (nah zuerst),
+    // dann die „kommt bald"-Faktoren in Katalog-Reihenfolge.
+    const real = g.factors.filter(f=>!f.soon).map(f=>({f,d:factorDist(f)})).sort((a,b)=>a.d-b.d);
+    const soon = g.factors.filter(f=>f.soon).map(f=>({f,d:Infinity}));
+    for(const {f,d} of [...real, ...soon]){
       const fi = flat.length; flat.push(f);
       html += `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
-        `<div class="fn">${f.name}</div><div class="fd">${f.desc}</div></button>`;
+        `<div class="fn">${f.name}${f.soon?'':proxBadge(d)}</div><div class="fd">${f.desc}</div></button>`;
     }
   }
   _el("inflFactors").innerHTML = html;
-  _el("inflFactors").querySelectorAll(".infl-factor:not(.soon)").forEach(b=> b.onclick = ()=>{
+  const pick = (b)=>{
     _el("inflFactors").querySelectorAll(".infl-factor.sel").forEach(x=>x.classList.remove("sel"));
     b.classList.add("sel"); inflSel = flat[+b.dataset.fi]; _el("inflOk").disabled = false;
-  });
-  _el("inflOk").disabled = true; _el("inflSub").hidden = false; _el("inflBack").focus();
+  };
+  _el("inflFactors").querySelectorAll(".infl-factor:not(.soon)").forEach(b=> b.onclick = ()=> pick(b));
+  _el("inflOk").disabled = true; _el("inflSub").hidden = false;
+  // Direkt aus einem „Naheliegend"-Chip vorausgewählt: markieren, sichtbar scrollen.
+  if(preselectName){
+    const idx = flat.findIndex(f=>f.name===preselectName);
+    const btn = idx>=0 && _el("inflFactors").querySelector(`.infl-factor[data-fi="${idx}"]`);
+    if(btn){ pick(btn); btn.scrollIntoView({block:"nearest"}); }
+  }
+  _el("inflBack").focus();
 }
 function closeInflSub(){ _el("inflSub").hidden = true; inflSel = null; }
 function applyInfluence(f){
