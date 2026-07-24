@@ -36,6 +36,8 @@ export interface Environment {
   //                  kommt ueber Umwelt-Einfluesse: Duenne Hoehenluft, sauerstoffarmes Wasser).
   salinity?: number; // 0 = suess/salzarm, 1 = hypersalin (AXIS-8, kommt ueber Umwelt-
   //                    Einfluesse: Salzsee/Brine, Aestuar, Salzboden, Meerspray).
+  uv?: number; // 0 = normal, 1 = extreme UV-Strahlung (AXIS-10, kommt ueber Umwelt-
+  //              Einfluesse: Hoehen-UV, Ozonloch, junge Atmosphaere).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -80,6 +82,8 @@ export interface Physics {
   wOsmo: number;
   kleiberDecades: number;
   defenseFromBurrow: number;
+  uvLethality: number;
+  wUv: number;
   maintenance: {
     base: number;
     size: number;
@@ -95,6 +99,7 @@ export interface Physics {
     oxyEff: number;
     osmo: number;
     burrow: number;
+    pigment: number;
   };
   maintenanceQuad: {
     metabolism: number;

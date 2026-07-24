@@ -32,6 +32,7 @@ const EFFECTS = {
   "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02 } },
   // 1.4 Atmosphäre — AXIS-7 Hypoxie (dünne Höhenluft): oxygen<1 stresst hohen Stoffwechsel
   "Luftdruck / Höhe / Hypoxie": { tone: "shift", env: { oxygen: 0.12, temperature: 0.28, light: 0.8, foodAbundance: 0.45, water: 0.4 } },
+  "UV-Strahlung": { tone: "hit", env: { uv: 0.9, light: 0.92 } },   // AXIS-10: DNA-Schaden -> Schutzpigment
   // 1.5 Aquatik
   "pH / Säure": { tone: "shift", env: { toxicity: 0.7, water: 0.85 } },
   "Trübung / Sediment": { tone: "shift", env: { water: 0.8, light: 0.15 } },

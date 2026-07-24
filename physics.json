@@ -14,7 +14,8 @@
     "detox",
     "oxyEff",
     "osmo",
-    "burrow"
+    "burrow",
+    "pigment"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -30,7 +31,8 @@
     "detox": "Entgiftung",
     "oxyEff": "Sauerstoff-Effizienz",
     "osmo": "Osmoregulation",
-    "burrow": "Grabtrieb"
+    "burrow": "Grabtrieb",
+    "pigment": "Schutzpigment"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -75,7 +77,8 @@
     "detox": 0.13,
     "oxyEff": 0.12,
     "osmo": 0.12,
-    "burrow": 0.11
+    "burrow": 0.11,
+    "pigment": 0.11
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -101,5 +104,7 @@
   "salinityLethality": 0.85,
   "wOsmo": 1.0,
   "kleiberDecades": 0.6,
-  "defenseFromBurrow": 0.4
+  "defenseFromBurrow": 0.4,
+  "uvLethality": 0.85,
+  "wUv": 1.0
 }

@@ -114,7 +114,11 @@ window.INFLUENCES = [
      {
       "name": "UV-Strahlung",
       "desc": "DNA-Schaden → Schutzpigmente (Höhe, Ozonloch).",
-      "soon": true
+      "env": {
+       "uv": 0.9,
+       "light": 0.92
+      },
+      "tone": "hit"
      },
      {
       "name": "Spektralqualität (Lichtfarbe)",
