@@ -21,6 +21,32 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ✅ Erledigt
 
+### Evolutions-Validitäts-Audit + Mittelfeld-Fidelity-Fix (2026-07, v0.63.0)
+Prüfauftrag: „stimmt die Evolution — Abgleich mit Referenz UND anderen Algorithmen?"
+- **Mechanik bestätigt:** die Kern-Schleife deckt sich mit **fünf** Standard-Frameworks — Orakel =
+  Wright-Fisher / genetischer Algorithmus (fitness²-proportionale Reproduktion + Rekombination +
+  Gauß-Mutation, endliches N→Drift); App/Engine-Mittelfeld = **Lande-/Breeder-Gleichung**
+  (`Δz̄ = G·β`, `G ≈ z̄(1−z̄)`); der `z̄(1−z̄)`-Term = **Replikator-Dynamik**; `world/population.ts`
+  Konkurrenz-Kern = **Dieckmann & Doebeli 1999** (evolutionäres Branching). Zwei unabhängige
+  Implementierungen, gegeneinander validiert. Alle Gates grün (parity 1e-17, ecology + ecology-full
+  C1–C6, reality 20/20, pop-check 0.034, branching 2 Cluster), Referenz-Verteilung passt.
+- **Ein echter Befund (unabhängiger Cross-Check):** das App-**Mittelfeld** (was der Nutzer sieht)
+  warf die Wartungslast der 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken)
+  in **gutartigen, produktiven** Biomen NICHT ab — sie hingen bei ~0.5 statt ~0.15. Die summierte
+  Phantom-Last drückte das Wesen in die flache (nahrungs-boden-gedeckelte) Region der Landschaft;
+  kein Einzel-Gen-Gradient kam heraus → angezeigte Vitalität auf bis zu **1/5** des Populations-
+  Attraktors (Warm-üppig 0.11 statt 0.51). Kern-Gene / Reich waren korrekt (Swap-Test lokalisierte
+  den Effekt vollständig auf Gene 10–24). Bisher **ungedeckt**, weil die Öko-Gates den agenten-
+  basierten Kern prüfen, nicht das Mittelfeld.
+- **Fix:** gen-spezifischer Mutations-Anker (`mutationAnchor`). Kern-Gene 0–9 ankern neutral bei
+  0.5; die 15 bedingten Kosten-Gene ankern niedrig (0.12) — „standardmäßig aus", ohne ihren
+  Stressor abgeworfen, unter ihm voll wieder auftauchend. Vitalität in reichen Biomen wieder
+  realistisch (Warm-üppig 0.11→0.63), jede Stressor-Anpassung emergiert weiter.
+- **Neues Gate `npm run mf-fidelity`:** rechnet die echte 25-Gen-App-Bahn (PARAMS aus `index.html`,
+  app-parity-gleiche Fitness) und prüft (A) bedingte Gene in benignen Biomen abgeworfen, (B) jede
+  Resistenz taucht unter ihrem Stressor auf. In `app-world-smoke` eingehängt — schließt den blinden
+  Fleck dauerhaft. Fitness unberührt (parity/app-parity exakt); Engine-Änderung abwärtskompatibel.
+
 ### Usability-Audit (3 Agenten, 2026-07) — Onboarding · Interaktion · Barrierefreiheit
 Drei Fachagenten prüften die Live-App heuristisch; die wertvollsten Befunde wurden in zwei
 Batches behoben (v0.44.0 + v0.45.0), je mit headless-Probe + Smoke:
