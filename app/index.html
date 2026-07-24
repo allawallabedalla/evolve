@@ -463,6 +463,13 @@
   #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
   .toast.legendary { border-color: rgba(176,125,31,.55); box-shadow: 0 0 0 1px rgba(176,125,31,.3), 0 0 24px rgba(176,125,31,.2); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
+  /* Reich-Meilenstein: mehrzeiliger, wärmerer Moment (kein Pill). */
+  .toast.milestone { border-radius: 14px; padding: 12px 18px; max-width: min(86%, 340px); text-align: center; line-height: 1.4;
+    box-shadow: 0 0 0 1px rgba(95,156,131,.4), 0 0 26px rgba(95,156,131,.22); }
+  .toast .toast-ms-h { font-size: .92rem; color: var(--text); font-weight: 700; }
+  .toast .toast-ms-h b { color: var(--bio); }
+  .toast .toast-ms-sub { font-size: .76rem; color: var(--muted); margin-top: 4px; }
+  .toast .toast-ms-prog { font-size: .72rem; color: var(--bio-dim); margin-top: 6px; letter-spacing: .02em; }
 
   /* ---- Flaches Icon-System ---- */
   .ic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.16em; fill: currentColor; }
@@ -747,7 +754,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.66.0";
+const APP_VERSION = "v0.67.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1271,6 +1278,28 @@ const TREE = [
 ];
 const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
 
+// Reich-Meilensteine (sanfte Ziele, KEIN Sammelzähler): das erste Wesen aus einem der
+// 5 großen Reiche des Lebens wird als Staunens-Moment gefeiert — Wertschätzung für die
+// Vielfalt, nicht „sammle alle". Quelle der Reich-Zuordnung = derselbe Baum wie das Genbuch.
+const FORM_KINGDOM = {};
+for(const grp of TREE) for(const f of grp.forms) FORM_KINGDOM[f.n] = grp.k;
+const KINGDOM_ORDER = ["Mikrobe","Protist","Pflanze","Pilz","Tier"];
+const KINGDOM_WONDER = {
+  "Mikrobe": "Das älteste, unsichtbare Leben — seit ~3,5 Milliarden Jahren.",
+  "Protist": "Einzeller zwischen den Reichen — Leben erfindet den Zellkern.",
+  "Pflanze": "Leben, das aus Licht wächst — die grünen Erbauer der Welt.",
+  "Pilz":    "Leben, das zersetzt und verbindet — das Netz unter dem Boden.",
+  "Tier":    "Leben, das sich bewegt, jagt und wahrnimmt.",
+};
+const kingdomOf = (name) => FORM_KINGDOM[name] || null;
+// Welche Reiche sind schon „erwacht" (mind. eine entdeckte Form)? Aus dem discovered-Set
+// abgeleitet — so bekommen Bestandsspieler NICHT rückwirkend eine Flut von Meilensteinen.
+function awakenedKingdoms(set){
+  const k = new Set();
+  for(const n of set){ const kd = kingdomOf(n); if(kd) k.add(kd); }
+  return k;
+}
+
 // Raritaet = Entdeckungs-Tiefe, KEINE kaufbare Waehrung. Quelle: docs/rarity.json
 // (Anteil der Umwelten im 5^6-Gitter, die deterministisch auf diese Form konvergieren).
 // 0% = nur ueber stochastische Drift erreichbar -> legendaerer "Fang".
@@ -1451,6 +1480,21 @@ function showToast(a){
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   // Seltene Fänge bleiben etwas länger stehen, damit der Moment sitzt.
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, rare?4600:3200);
+  const d = document.querySelector(".disc"); if(d){ d.classList.remove("pulse"); void d.offsetWidth; d.classList.add("pulse"); }
+}
+// Reich-Meilenstein: das erste Wesen eines Reiches. Ein wärmerer, längerer Moment als
+// der normale Fund-Toast — feiert das Erwachen eines der 5 großen Reiche des Lebens.
+function showKingdomMilestone(kd, a, awakenedCount){
+  const t = document.getElementById("toast");
+  const all = awakenedCount >= 5;
+  const prog = all ? "Alle 5 Reiche des Lebens erwacht — der ganze Baum lebt in deinem Genbuch."
+                   : `${awakenedCount} der 5 großen Reiche des Lebens erwacht.`;
+  t.innerHTML = `<div class="toast-ms-h">${formIcon(a.n)} Ein neues Reich: <b>${kd}</b></div>`+
+    `<div class="toast-ms-sub">${a.n} — ${KINGDOM_WONDER[kd]||""}</div>`+
+    `<div class="toast-ms-prog">${prog}</div>`;
+  t.classList.remove("legendary"); t.classList.add("milestone");
+  t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.hidden = true; t.classList.remove("milestone"); }, all?6400:5200);
   const d = document.querySelector(".disc"); if(d){ d.classList.remove("pulse"); void d.offsetWidth; d.classList.add("pulse"); }
 }
 function timeStr(ms){
@@ -2825,7 +2869,14 @@ function frame(time){
       else { candArch = cur.n; candCount = steps; }
       if(candCount >= STABLE_GENS){
         if(committedArch.n !== cur.n) committedArch = cur;
-        if(!discovered.has(cur.n)){ discovered.add(cur.n); saveState(); showToast(cur); }
+        if(!discovered.has(cur.n)){
+          // Erstes Wesen eines Reiches? -> Reich-Meilenstein statt normalem Fund-Toast.
+          const kd = kingdomOf(cur.n);
+          const newKingdom = kd && !awakenedKingdoms(discovered).has(kd);
+          discovered.add(cur.n); saveState();
+          if(newKingdom) showKingdomMilestone(kd, cur, awakenedKingdoms(discovered).size);
+          else showToast(cur);
+        }
       }
       document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");
     }
