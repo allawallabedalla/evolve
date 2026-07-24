@@ -86,6 +86,10 @@ const RULES = [
   { name: "Tiefsee-Druck → Druck-Toleranz", trait: "baro", dir: "up",
     lo: mk({ pressure: 0 }), hi: mk({ pressure: 0.9 }),
     ctx: "extremer hydrostatischer Druck selektiert Druck-Anpassung (Piezophile)" },
+  { name: "Karge Beute → Sinne", trait: "sense", dir: "up",
+    lo: mk({ foodAbundance: 0.9, predation: 0.5, water: 0.3 }),
+    hi: mk({ foodAbundance: 0.12, predation: 0.5, water: 0.3 }),
+    ctx: "bei knapper Beute lohnt geschaerfte Wahrnehmung (Sinnesjaeger)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

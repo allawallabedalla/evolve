@@ -33,6 +33,7 @@ const PIGMENT = 14;
 const FILTER = 15;
 const CAMO = 16;
 const BARO = 17;
+const SENSE = 18;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -53,6 +54,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const filter = traits[FILTER] ?? 0;
   const camo = traits[CAMO] ?? 0;
   const baro = traits[BARO] ?? 0;
+  const sense = traits[SENSE] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -114,11 +116,19 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
   const access =
     env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
+  //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
+  //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
+  //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
+  //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
+  //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
+  //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
+  const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
   const energyForage =
     mobility *
     env.foodAbundance *
     access *
     (phys.forageBase + phys.forageMetabolism * metabolism) *
+    senseBoost *
     (1 - phys.exclusion * photo);
 
   //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
@@ -220,6 +230,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     filter * m.filter +
     camo * m.camo +
     baro * m.baro +
+    sense * m.sense +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast

@@ -575,7 +575,7 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 18 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
+    Prozedural aus 19 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
     <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
@@ -714,7 +714,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.50.0";
+const APP_VERSION = "v0.51.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -733,14 +733,15 @@ const PHYS = {
   filterYield: 0.5, filterBase: 0.25,
   defenseFromCamo: 0.3,
   baroLethality: 0.85, wBaro: 1.0,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11, pigment:0.11, filter:0.12, camo:0.12, baro:0.11 },
+  senseForage: 0.3,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11, pigment:0.11, filter:0.12, camo:0.12, baro:0.11, sense:0.12 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -843,7 +844,7 @@ const FICON = {
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0,filter=0,camo=0,baro=0]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0,filter=0,camo=0,baro=0,sense=0]=t;
   // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
   // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
@@ -867,7 +868,8 @@ function fitness(t, e){
   // Unter Wasser schwimmt man hinauf — kein Tiefsee-Wesen mit langen Beinen/Flügeln.
   const reach = clamp01(limb*PHYS.reachFromLimb*landFactor+size*PHYS.reachFromSize+flight*PHYS.flightReach);
   const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
-  const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*(1-PHYS.exclusion*photo);
+  const senseBoost = 1+PHYS.senseForage*sense*(1-e.foodAbundance);   // Sinne (AXIS-13): findet knappe Beute
+  const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*senseBoost*(1-PHYS.exclusion*photo);
   // Absorption/Zersetzung (Osmotrophie): sessile Heterotrophie (Pilze/Mikroben).
   const substrate = e.foodAbundance*(PHYS.absorbWaterFloor+(1-PHYS.absorbWaterFloor)*e.water);
   const energyAbsorb = PHYS.absorbYield*(PHYS.absorbBase+PHYS.absorbMetabolism*metabolism)*substrate*(1-PHYS.exclusion*photo)*(1-PHYS.exclusion*mobility);
@@ -889,7 +891,7 @@ function fitness(t, e){
   // (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten -> große
   // aktive Endotherme werden energetisch tragbar, ohne dass Masse selbst gratis wird.
   const kleiber = Math.pow(10, -0.25*PHYS.kleiberDecades*size);
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+filter*m.filter+camo*m.camo+baro*m.baro+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+filter*m.filter+camo*m.camo+baro*m.baro+sense*m.sense+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense+burrow*PHYS.defenseFromBurrow*landFactor+camo*PHYS.defenseFromCamo);
   const predSurv = 1-e.predation*(1-defense);
@@ -936,7 +938,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0,filter=t[15]||0,camo=t[16]||0,baro=t[17]||0;
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0,filter=t[15]||0,camo=t[16]||0,baro=t[17]||0,sense=t[18]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -1067,7 +1069,7 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz"];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
@@ -1608,10 +1610,10 @@ GENE_LABELS.forEach((lbl,i) => {
 // Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct,8 wing,...,13 Grabtrieb
 function mutedGenes(a){
   const flyer = a.e==="🦋"||a.e==="🐦"||a.e==="🦇";
-  if(a.e==="🪸"||a.e==="🧽") return [2,6,8,13];    // sessile Tiere: keine Gliedmassen/Mobilitaet/Flug/Graben
+  if(a.e==="🪸"||a.e==="🧽") return [2,6,8,13,18];  // sessile Tiere: keine Gliedmassen/Mobilitaet/Flug/Graben/Sinne
   if(a.k==="Tier") return flyer ? [5,13,15] : [5,8];  // Tiere: keine Photosynthese; Flieger graben/filtern nicht
-  if(a.k==="Protist") return [8,13,16];            // Mischotroph: kein Flug/Graben/Tarnung
-  return [2,6,8,13,16];                            // Pflanze/Pilz/Mikrobe: sessil -> keine Gliedmassen/Mobilitaet/Flug/Graben/Tarnung
+  if(a.k==="Protist") return [8,13,16];             // Mischotroph: kein Flug/Graben/Tarnung
+  return [2,6,8,13,16,18];                         // Pflanze/Pilz/Mikrobe: sessil -> keine Gliedmassen/Mobilitaet/Flug/Graben/Tarnung/Sinne
 }
 
 function updatePanels(g, a){
