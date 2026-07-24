@@ -36,8 +36,9 @@ TRAITS = [
     "oxyEff",
     "osmo",
     "burrow",
+    "pigment",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 
 
 def _clamp01(x: float) -> float:
@@ -64,6 +65,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     oxy_eff = traits[OXYEFF] if len(traits) > OXYEFF else 0.0
     osmo = traits[OSMO] if len(traits) > OSMO else 0.0
     burrow = traits[BURROW] if len(traits) > BURROW else 0.0
+    pigment = traits[PIGMENT] if len(traits) > PIGMENT else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -184,6 +186,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + oxy_eff * m["oxyEff"]
         + osmo * m["osmo"]
         + burrow * m["burrow"]
+        + pigment * m["pigment"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -220,6 +223,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     salinity = env.get("salinity", 0.0)
     osmo_survival = _clamp01(1.0 - salinity * (1.0 - osmo) * phys["salinityLethality"])
 
+    # 7) UV-Stress (AXIS-10): starke UV-Strahlung schädigt DNA ohne Schutzpigment.
+    uv = env.get("uv", 0.0)
+    uv_survival = _clamp01(1.0 - uv * (1.0 - pigment) * phys["uvLethality"])
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
@@ -227,6 +234,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (tox_survival ** phys["wTox"])
         * (oxy_survival ** phys["wOxy"])
         * (osmo_survival ** phys["wOsmo"])
+        * (uv_survival ** phys["wUv"])
     )
     return max(fit, phys["floor"])
 

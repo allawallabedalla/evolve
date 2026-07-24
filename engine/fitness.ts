@@ -29,6 +29,7 @@ const DETOX = 10;
 const OXYEFF = 11;
 const OSMO = 12;
 const BURROW = 13;
+const PIGMENT = 14;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -45,6 +46,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const oxyEff = traits[OXYEFF] ?? 0;
   const osmo = traits[OSMO] ?? 0;
   const burrow = traits[BURROW] ?? 0;
+  const pigment = traits[PIGMENT] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -194,6 +196,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     oxyEff * m.oxyEff +
     osmo * m.osmo +
     burrow * m.burrow +
+    pigment * m.pigment +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -257,13 +260,22 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const salinity = env.salinity ?? 0;
   const osmoSurvival = clamp01(1 - salinity * (1 - osmo) * phys.salinityLethality);
 
+  // 7) UV-Stress (AXIS-10): starke UV-Strahlung (Höhe, Ozonloch, junge Atmosphäre)
+  //    schädigt die DNA, WENN keine Schutzpigmente (Melanin/Flavonoide/Sporopollenin)
+  //    vorliegen. Das Gen 'pigment' puffert den UV-Schaden, kostet aber Unterhalt
+  //    (maintenance.pigment) -> ohne UV reine Last, wird wegselektiert; nur unter UV
+  //    entsteht der pigmentierte Spezialist. uv kommt über Umwelt-Einflüsse, nicht die 6 Regler.
+  const uv = env.uv ?? 0;
+  const uvSurvival = clamp01(1 - uv * (1 - pigment) * phys.uvLethality);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
     Math.pow(nutrition, phys.wNutrition) *
     Math.pow(toxSurvival, phys.wTox) *
     Math.pow(oxySurvival, phys.wOxy) *
-    Math.pow(osmoSurvival, phys.wOsmo);
+    Math.pow(osmoSurvival, phys.wOsmo) *
+    Math.pow(uvSurvival, phys.wUv);
 
   return Math.max(fit, phys.floor);
 }

@@ -107,6 +107,7 @@
   .stress-chip.tox { background: #7d8a2f; }
   .stress-chip.oxy { background: #5a7fa6; }
   .stress-chip.sal { background: #7f93a6; }
+  .stress-chip.uv { background: #8a6ea6; }
 
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; }
@@ -573,7 +574,7 @@
   </div>
 
   <p class="footnote">
-    Prozedural aus 14 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
+    Prozedural aus 15 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
     <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
@@ -712,7 +713,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.46.0";
+const APP_VERSION = "v0.47.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -727,14 +728,15 @@ const PHYS = {
   hypoxiaSeverity: 0.9, wOxy: 1.0,
   salinityLethality: 0.85, wOsmo: 1.0,
   defenseFromBurrow: 0.4,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11 },
+  uvLethality: 0.85, wUv: 1.0,
+  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13, oxyEff:0.12, osmo:0.12, burrow:0.11, pigment:0.11 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27],
+  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27],
   mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -837,7 +839,7 @@ const FICON = {
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0]=t;
+  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0]=t;
   // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
   // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
@@ -880,7 +882,7 @@ function fitness(t, e){
   // (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten -> große
   // aktive Endotherme werden energetisch tragbar, ohne dass Masse selbst gratis wird.
   const kleiber = Math.pow(10, -0.25*PHYS.kleiberDecades*size);
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
+  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
   const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
   const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense+burrow*PHYS.defenseFromBurrow*landFactor);
   const predSurv = 1-e.predation*(1-defense);
@@ -895,7 +897,9 @@ function fitness(t, e){
   // aus dem Körper, außer osmo (Osmoregulation) puffert. salinity kommt NICHT über die 6
   // Regler, sondern über Umwelt-Einflüsse (Salinität/Brine).
   const salinity = e.salinity||0, osmoSurv = clamp01(1-salinity*(1-osmo)*PHYS.salinityLethality);
-  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox)*Math.pow(oxySurv,PHYS.wOxy)*Math.pow(osmoSurv,PHYS.wOsmo), PHYS.floor);
+  // UV-Stress (AXIS-10): starke UV-Strahlung schädigt DNA, außer Schutzpigment puffert.
+  const uv = e.uv||0, uvSurv = clamp01(1-uv*(1-pigment)*PHYS.uvLethality);
+  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox)*Math.pow(oxySurv,PHYS.wOxy)*Math.pow(osmoSurv,PHYS.wOsmo)*Math.pow(uvSurv,PHYS.wUv), PHYS.floor);
 }
 
 // Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
@@ -923,7 +927,7 @@ function stepGeneration(m, env, randn){
 
 // ---- Interpretation: Archetyp + Bauplan ----
 function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0;
+  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0;
 
   // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
   if(photo>0.45 && mob<0.4){
@@ -1054,14 +1058,14 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb"];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
 const NG = GENE_LABELS.length;
 const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
-let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0};
+let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0,uv:0};
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -1086,7 +1090,7 @@ function newLineage(){
   creatureName = "";
   // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
   // Milieu (verborgene Stressoren haben keinen Regler) — sonst „strandet" das Neugeborene.
-  env.toxicity = 0; env.oxygen = 1; env.salinity = 0;
+  env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0;
   if(typeof renderStressChips === "function") renderStressChips();
 }
 newLineage();
@@ -1545,11 +1549,12 @@ LEVERS.forEach(l => {
 // Als Chips sichtbar machen + per Klick entfernbar (zugleich der fehlende „Reset").
 function renderStressChips(){
   const el = document.getElementById("stressChips"); if(!el) return;
-  const tox = env.toxicity||0, sal = env.salinity||0, oxy = (env.oxygen==null?1:env.oxygen);
+  const tox = env.toxicity||0, sal = env.salinity||0, oxy = (env.oxygen==null?1:env.oxygen), uvv = env.uv||0;
   const chips = [];
   if(tox>0.05) chips.push(`<button class="stress-chip tox" data-ax="toxicity" title="Giftiges Milieu — Entgiftung wird selektiert. Klicken zum Entfernen.">giftig ✕</button>`);
   if(oxy<0.95) chips.push(`<button class="stress-chip oxy" data-ax="oxygen" title="Sauerstoffarm — effiziente Atmung wird selektiert. Klicken zum Entfernen.">sauerstoffarm ✕</button>`);
   if(sal>0.05) chips.push(`<button class="stress-chip sal" data-ax="salinity" title="Salziges Milieu — Osmoregulation wird selektiert. Klicken zum Entfernen.">salzig ✕</button>`);
+  if(uvv>0.05) chips.push(`<button class="stress-chip uv" data-ax="uv" title="Starke UV-Strahlung — Schutzpigment wird selektiert. Klicken zum Entfernen.">UV-Strahlung ✕</button>`);
   el.innerHTML = chips.join("");
   el.hidden = chips.length===0;
   el.querySelectorAll(".stress-chip").forEach(b=> b.onclick = ()=>{
@@ -1560,7 +1565,7 @@ const biomesEl = document.getElementById("biomes");
 BIOMES.forEach(b => {
   const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
   btn.addEventListener("click", () => {
-    Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0;   // Biome sind saubere, sauerstoffreiche Süßmilieus
+    Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0;   // Biome sind saubere, geschützte Milieus
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
@@ -1804,6 +1809,7 @@ function applyInfluence(f){
   env.toxicity = f.env.toxicity || 0;   // Gift-Milieu nur, solange ein giftiger Einfluss aktiv ist
   env.oxygen = f.env.oxygen == null ? 1 : f.env.oxygen;   // Hypoxie nur, solange ein O2-armer Einfluss aktiv ist
   env.salinity = f.env.salinity || 0;   // Salz-Milieu nur, solange ein salziger Einfluss aktiv ist
+  env.uv = f.env.uv || 0;   // UV nur, solange ein strahlungsstarker Einfluss aktiv ist
   LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
     if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
   renderStressChips();
@@ -1955,6 +1961,15 @@ function drawHabitat(){
     sg.addColorStop(0.4,`rgba(222,230,238,${(0.04+0.14*sal).toFixed(2)})`);
     sg.addColorStop(1,`rgba(210,222,232,0)`);
     ctx.fillStyle=sg; ctx.fillRect(0,0,CW,CH);
+  }
+  // UV-Strahlung (AXIS-10): violett-fahler, grelle Strahlungsschleier von oben.
+  const uvv = env.uv||0;
+  if(uvv>0.05){
+    const ug=ctx.createLinearGradient(0,0,0,CH);
+    ug.addColorStop(0,`rgba(196,170,222,${(0.08+0.30*uvv).toFixed(2)})`);
+    ug.addColorStop(0.5,`rgba(210,190,230,${(0.03+0.12*uvv).toFixed(2)})`);
+    ug.addColorStop(1,`rgba(220,205,235,0)`);
+    ctx.fillStyle=ug; ctx.fillRect(0,0,CW,CH);
   }
 }
 

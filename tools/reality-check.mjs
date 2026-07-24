@@ -73,6 +73,9 @@ const RULES = [
   { name: "Salz → Osmoregulation", trait: "osmo", dir: "up",
     lo: mk({ salinity: 0 }), hi: mk({ salinity: 0.9 }),
     ctx: "salziges Milieu selektiert Osmoregulation (Halophyt)" },
+  { name: "UV-Strahlung → Schutzpigment", trait: "pigment", dir: "up",
+    lo: mk({ uv: 0 }), hi: mk({ uv: 0.9 }),
+    ctx: "starke UV-Strahlung selektiert Schutzpigmentierung" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung
