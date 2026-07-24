@@ -11,7 +11,8 @@
     "structure",
     "wing",
     "biolum",
-    "detox"
+    "detox",
+    "oxyEff"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -24,7 +25,8 @@
     "structure": "Stuetzgewebe / Verholzung",
     "wing": "Fluegelflaeche",
     "biolum": "Biolumineszenz",
-    "detox": "Entgiftung"
+    "detox": "Entgiftung",
+    "oxyEff": "Sauerstoff-Effizienz"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -66,7 +68,8 @@
     "structure": 0.15,
     "wing": 0.16,
     "biolum": 0.14,
-    "detox": 0.13
+    "detox": 0.13,
+    "oxyEff": 0.12
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -86,5 +89,7 @@
   "eps": 0.02,
   "toxLethality": 0.9,
   "wTox": 1.0,
-  "insulWaterLoss": 1.0
+  "insulWaterLoss": 1.0,
+  "hypoxiaSeverity": 0.9,
+  "wOxy": 1.0
 }

@@ -147,7 +147,14 @@ window.INFLUENCES = [
      {
       "name": "Luftdruck / Höhe / Hypoxie",
       "desc": "Höhen-Anpassung (Hämoglobin).",
-      "soon": true
+      "env": {
+       "oxygen": 0.12,
+       "temperature": 0.28,
+       "light": 0.8,
+       "foodAbundance": 0.45,
+       "water": 0.4
+      },
+      "tone": "shift"
      },
      {
       "name": "Wind (Exposition + Ausbreitungs-Vektor)",
@@ -181,7 +188,12 @@ window.INFLUENCES = [
      {
       "name": "Gelöster Sauerstoff",
       "desc": "kalt/schnell vs. warm/stehend.",
-      "soon": true
+      "env": {
+       "oxygen": 0.2,
+       "water": 0.92,
+       "temperature": 0.7
+      },
+      "tone": "shift"
      },
      {
       "name": "Tiefe / hydrostatischer Druck",
@@ -261,7 +273,12 @@ window.INFLUENCES = [
      {
       "name": "Boden-Sauerstoff (Staunässe/anoxisch)",
       "desc": "Mangroven-Atemwurzeln.",
-      "soon": true
+      "env": {
+       "oxygen": 0.18,
+       "water": 0.95,
+       "foodAbundance": 0.5
+      },
+      "tone": "shift"
      },
      {
       "name": "Substrat-Stabilität / Erosion",
@@ -525,7 +542,13 @@ window.INFLUENCES = [
      {
       "name": "Ozean-Anoxie / -Versauerung / Euxinie",
       "desc": "marine Aussterbe-Treiber.",
-      "soon": true
+      "env": {
+       "oxygen": 0.08,
+       "toxicity": 0.6,
+       "water": 0.98,
+       "light": 0.25
+      },
+      "tone": "hit"
      },
      {
       "name": "Große Sauerstoff-Krise (GOE)",

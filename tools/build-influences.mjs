@@ -30,13 +30,17 @@ const EFFECTS = {
   // 1.3 Licht
   "Lichtintensität": { tone: "bio", env: { light: 0.96 } },
   "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02 } },
+  // 1.4 Atmosphäre — AXIS-7 Hypoxie (dünne Höhenluft): oxygen<1 stresst hohen Stoffwechsel
+  "Luftdruck / Höhe / Hypoxie": { tone: "shift", env: { oxygen: 0.12, temperature: 0.28, light: 0.8, foodAbundance: 0.45, water: 0.4 } },
   // 1.5 Aquatik
   "pH / Säure": { tone: "shift", env: { toxicity: 0.7, water: 0.85 } },
   "Trübung / Sediment": { tone: "shift", env: { water: 0.8, light: 0.15 } },
   "Nährstoffstatus (oligo→eutroph)": { tone: "bio", env: { water: 0.85, foodAbundance: 0.85 } },
+  "Gelöster Sauerstoff": { tone: "shift", env: { oxygen: 0.2, water: 0.92, temperature: 0.7 } },   // warmes, stehendes Wasser = O2-arm
   // 1.6 Boden
   "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)": { tone: "shift", env: { foodAbundance: 0.2 } },
   "Serpentin/Schwermetall-Toxizität": { tone: "hit", env: { toxicity: 0.85, foodAbundance: 0.3 } },
+  "Boden-Sauerstoff (Staunässe/anoxisch)": { tone: "shift", env: { oxygen: 0.18, water: 0.95, foodAbundance: 0.5 } },   // Staunässe/Sumpf: anoxischer Boden
   // 1.7 Terrain
   "Höhengradient": { tone: "shift", env: { temperature: 0.2, foodHeight: 0.15, light: 0.72, water: 0.4 } },
   "Habitat-Struktur-Komplexität / Deckung": { tone: "bio", env: { foodHeight: 0.9, foodAbundance: 0.7 } },
@@ -58,6 +62,7 @@ const EFFECTS = {
   "Hyperthermal (PETM) / Schneeball-Erde": { tone: "bio", env: { temperature: 0.88, foodAbundance: 0.8, water: 0.7 } },
   "Meeresspiegel-Änderung (Transgression/Regression)": { tone: "shift", env: { water: 0.96, foodHeight: 0.1 } },
   "Aridifizierung / Grasland-Ausbreitung": { tone: "shift", env: { water: 0.35, foodHeight: 0.3, foodAbundance: 0.55, light: 0.78 } },
+  "Ozean-Anoxie / -Versauerung / Euxinie": { tone: "hit", env: { oxygen: 0.08, toxicity: 0.6, water: 0.98, light: 0.25 } },   // AXIS-7×6: anoxisch + H2S-giftig
   // 2.5 Kosmisch
   "Meteoriten-/Asteroiden-Einschlag + Impakt-Winter": { tone: "hit", env: { light: 0.1, temperature: 0.25, foodAbundance: 0.2 } },
 };

@@ -26,6 +26,7 @@ const STRUCTURE = 7;
 const WING = 8;
 const BIOLUM = 9;
 const DETOX = 10;
+const OXYEFF = 11;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -39,6 +40,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const wing = traits[WING];
   const biolum = traits[BIOLUM] ?? 0;
   const detox = traits[DETOX] ?? 0;
+  const oxyEff = traits[OXYEFF] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -177,6 +179,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     wing * m.wing +
     biolum * m.biolum +
     detox * m.detox +
+    oxyEff * m.oxyEff +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -215,11 +218,22 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const toxicity = env.toxicity ?? 0;
   const toxSurvival = clamp01(1 - toxicity * (1 - detox) * phys.toxLethality);
 
+  // 5) Sauerstoffmangel (AXIS-7 Hypoxie): duenne Hoehenluft / sauerstoffarmes Wasser.
+  //    oxygen<1 bedeutet Unterversorgung. Wer viel Stoffwechsel faehrt (metabolism),
+  //    braucht viel O2 und leidet am staerksten; das Gen 'oxyEff' (effiziente Atmung/
+  //    Sauerstoffbindung, vgl. Hoehen-Haemoglobin) neutralisiert den Druck, kostet
+  //    aber Unterhalt (maintenance.oxyEff) -> auf Meereshoehe (oxygen=1) reine Last,
+  //    wird wegselektiert; nur in Hypoxie-Nischen entsteht der Hoehen-/Anoxie-Spezialist.
+  //    oxygen ist eine Umwelt-Dimension aus Umwelt-Einfluessen, NICHT aus den 6 Reglern.
+  const oxygen = env.oxygen ?? 1;
+  const oxySurvival = clamp01(1 - (1 - oxygen) * metabolism * (1 - oxyEff) * phys.hypoxiaSeverity);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
     Math.pow(nutrition, phys.wNutrition) *
-    Math.pow(toxSurvival, phys.wTox);
+    Math.pow(toxSurvival, phys.wTox) *
+    Math.pow(oxySurvival, phys.wOxy);
 
   return Math.max(fit, phys.floor);
 }
