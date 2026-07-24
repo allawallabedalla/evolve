@@ -35,6 +35,7 @@ const SENSE = 18;
 const DESICC = 19;
 const RADRES = 20;
 const FIRERES = 21;
+const FROSTRES = 22;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -58,6 +59,7 @@ export function fitness(traits, env, phys) {
     const desicc = traits[DESICC] ?? 0;
     const radres = traits[RADRES] ?? 0;
     const fireres = traits[FIRERES] ?? 0;
+    const frostres = traits[FROSTRES] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -214,6 +216,7 @@ export function fitness(traits, env, phys) {
         desicc * m.desicc +
         radres * m.radres +
         fireres * m.fireres +
+        frostres * m.frostres +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -308,6 +311,13 @@ export function fitness(traits, env, phys) {
     //     Pyrophyt. fire kommt ueber Umwelt-Einfluesse (Feuer-Regime), nicht die 6 Regler.
     const fire = env.fire ?? 0;
     const fireSurvival = clamp01(1 - fire * (1 - fireres) * phys.fireLethality);
+    // 12) Frost (AXIS-17 Kryoprotektion): tiefer Frost bildet Eiskristalle, die Zellen
+    //     zerreissen — toedlich OHNE Frostschutz (Frostschutzproteine, Glycerol, kontrolliertes
+    //     Ausfrieren wie beim Waldfrosch / antarktischen Eisfisch). Anders als Fell (das nur
+    //     Waerme haelt) verhindert 'frostres' den Gefrierschaden selbst. Kostet Unterhalt.
+    //     frost kommt ueber Umwelt-Einfluesse (Eiszeit/Permafrost), nicht die 6 Regler.
+    const frost = env.frost ?? 0;
+    const frostSurvival = clamp01(1 - frost * (1 - frostres) * phys.frostLethality);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *
         Math.pow(nutrition, phys.wNutrition) *
@@ -318,6 +328,7 @@ export function fitness(traits, env, phys) {
         Math.pow(baroSurvival, phys.wBaro) *
         Math.pow(desiccSurvival, phys.wDesicc) *
         Math.pow(radSurvival, phys.wRad) *
-        Math.pow(fireSurvival, phys.wFire);
+        Math.pow(fireSurvival, phys.wFire) *
+        Math.pow(frostSurvival, phys.wFrost);
     return Math.max(fit, phys.floor);
 }

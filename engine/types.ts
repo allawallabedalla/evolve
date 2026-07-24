@@ -46,6 +46,8 @@ export interface Environment {
   //                     Umwelt-Einfluesse: radioaktive Boeden/Radon, kosmische Strahlung).
   fire?: number; // 0 = kein Feuer, 1 = haeufiges Feuer-Regime (AXIS-16, kommt ueber Umwelt-
   //               Einfluesse: Feuer-Regime/Brand).
+  frost?: number; // 0 = kein Frost, 1 = tiefer Frost/Permafrost (AXIS-17, kommt ueber Umwelt-
+  //                Einfluesse: Eiszeit/Vereisung/Permafrost).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -104,6 +106,8 @@ export interface Physics {
   wRad: number;
   fireLethality: number;
   wFire: number;
+  frostLethality: number;
+  wFrost: number;
   maintenance: {
     base: number;
     size: number;
@@ -127,6 +131,7 @@ export interface Physics {
     desicc: number;
     radres: number;
     fireres: number;
+    frostres: number;
   };
   maintenanceQuad: {
     metabolism: number;

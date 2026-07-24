@@ -45,6 +45,7 @@ for (let i = 0; i < N; i++) {
     aridity: rng(),    // AXIS-14: Austrocknung (nur hier zufällig, um den desiccSurvival-Term zu prüfen)
     radiation: rng(),  // AXIS-15: ionisierende Strahlung (nur hier zufällig, um den radSurvival-Term zu prüfen)
     fire: rng(),       // AXIS-16: Feuer (nur hier zufällig, um den fireSurvival-Term zu prüfen)
+    frost: rng(),      // AXIS-17: Frost (nur hier zufällig, um den frostSurvival-Term zu prüfen)
   };
   samples.push({ traits, env, tsFit: fitness(traits, env, phys) });
 }
