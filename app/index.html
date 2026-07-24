@@ -1978,8 +1978,9 @@ function drawAnimal(g, cx, cy, breath, time, rnd, a){
     "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
   })[kind] || {bw:1.08,bh:0.98,legL:1.0};
   const bw=FORM.bw, bh=FORM.bh;
-  // Beine
-  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.6*mob+0.4*limb)*5);
+  // Beine: aus den GLIEDMASSEN (limb), nicht aus der Mobilität — ein flinkes Tier ist
+  // nicht vielbeinig. Grundwert 4 (Vierbeiner), mehr bei hohem limb (Richtung Arthropode).
+  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.3 + 0.7*limb)*5);
   const legLen = (12 + limb*40)*FORM.legL;
   ctx.strokeStyle = rgb(dark); ctx.lineWidth = 3+size*4; ctx.lineCap="round";
   for(let i=0;i<legs;i++){
