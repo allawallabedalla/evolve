@@ -46,6 +46,7 @@ const EFFECTS = {
   "Boden-Sauerstoff (Staunässe/anoxisch)": { tone: "shift", env: { oxygen: 0.18, water: 0.95, foodAbundance: 0.5 } },   // Staunässe/Sumpf: anoxischer Boden
   // 1.7 Terrain
   "Höhengradient": { tone: "shift", env: { temperature: 0.2, foodHeight: 0.15, light: 0.72, water: 0.4 } },
+  "Wind (Exposition + Ausbreitungs-Vektor)": { tone: "shift", env: { wind: 0.9, water: 0.35, temperature: 0.35 } },   // AXIS-18: Windhärte
   "Habitat-Struktur-Komplexität / Deckung": { tone: "bio", env: { foodHeight: 0.9, foodAbundance: 0.7 } },
   "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.45, water: 0.6 } },
   // 1.8 Energie & Extrem-Chemie

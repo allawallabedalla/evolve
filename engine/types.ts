@@ -48,6 +48,8 @@ export interface Environment {
   //               Einfluesse: Feuer-Regime/Brand).
   frost?: number; // 0 = kein Frost, 1 = tiefer Frost/Permafrost (AXIS-17, kommt ueber Umwelt-
   //                Einfluesse: Eiszeit/Vereisung/Permafrost).
+  wind?: number; // 0 = windstill, 1 = Dauerwind/Sturm-Exposition (AXIS-18, kommt ueber Umwelt-
+  //               Einfluesse: Wind/Exposition).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -108,6 +110,8 @@ export interface Physics {
   wFire: number;
   frostLethality: number;
   wFrost: number;
+  windLethality: number;
+  wWind: number;
   maintenance: {
     base: number;
     size: number;
@@ -132,6 +136,7 @@ export interface Physics {
     radres: number;
     fireres: number;
     frostres: number;
+    windres: number;
   };
   maintenanceQuad: {
     metabolism: number;

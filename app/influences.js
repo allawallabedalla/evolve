@@ -163,7 +163,12 @@ window.INFLUENCES = [
      {
       "name": "Wind (Exposition + Ausbreitungs-Vektor)",
       "desc": "Krüppelwuchs; trägt Pollen/Samen.",
-      "soon": true
+      "env": {
+       "wind": 0.9,
+       "water": 0.35,
+       "temperature": 0.35
+      },
+      "tone": "shift"
      },
      {
       "name": "Wetter-Stochastik",
