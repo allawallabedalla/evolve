@@ -179,6 +179,10 @@
   .gene-nums-toggle { margin-top: 10px; background: none; border: none; cursor: pointer; font: inherit;
     font-size: .68rem; color: var(--muted); padding: 2px 0; text-decoration: underline; text-underline-offset: 3px; }
   .gene-nums-toggle:hover { color: var(--bio-dim); }
+  .cshare { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: .74rem; color: var(--bio-dim); padding: 4px 0; }
+  .cshare:hover { color: var(--bio); }
+  .cshare .ic { width: .95rem; height: .95rem; }
 
   /* ---- Konsole ---- */
   .console { padding: 18px 18px 20px; }
@@ -612,6 +616,7 @@
       <div class="genes" id="genes"></div>
       <button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
+      <button class="link cshare" id="shareBtn" title="Ein Bild deines Wesens erstellen und teilen">Schnappschuss teilen ↗</button>
     </div>
   </div>
 
@@ -755,7 +760,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.68.0";
+const APP_VERSION = "v0.69.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -804,6 +809,7 @@ const sigmoid = x => 1/(1+Math.exp(-x));
 // ===== Flaches monochromes Icon-System (Inline-SVG, erbt currentColor) =====
 const ICONS = {
   dot:`<circle cx="12" cy="12" r="3"/>`,
+  share:`<path d="M11 4.6l-3.1 3.1 1.4 1.4L11 7.4V15h2V7.4l1.7 1.7 1.4-1.4L13 4.6a1.4 1.4 0 0 0-2 0z"/><path d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8h-2v7H7v-7z"/>`,
   // Umwelt / Regler / Biome
   temp:`<rect x="10" y="3" width="4" height="11" rx="2"/><circle cx="12" cy="17.5" r="4"/>`,
   fang:`<path d="M5 6h5l-2.5 8zM14 6h5l-2.5 8z"/>`,
@@ -1282,8 +1288,8 @@ const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
 // Reich-Meilensteine (sanfte Ziele, KEIN Sammelzähler): das erste Wesen aus einem der
 // 5 großen Reiche des Lebens wird als Staunens-Moment gefeiert — Wertschätzung für die
 // Vielfalt, nicht „sammle alle". Quelle der Reich-Zuordnung = derselbe Baum wie das Genbuch.
-const FORM_KINGDOM = {};
-for(const grp of TREE) for(const f of grp.forms) FORM_KINGDOM[f.n] = grp.k;
+const FORM_KINGDOM = {}, FORM_STORY = {};
+for(const grp of TREE) for(const f of grp.forms){ FORM_KINGDOM[f.n] = grp.k; FORM_STORY[f.n] = { era: f.era, evo: f.evo }; }
 const KINGDOM_ORDER = ["Mikrobe","Protist","Pflanze","Pilz","Tier"];
 const KINGDOM_WONDER = {
   "Mikrobe": "Das älteste, unsichtbare Leben — seit ~3,5 Milliarden Jahren.",
@@ -2067,6 +2073,68 @@ function showInfoToast(msg){
   t.textContent = msg;
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   infoToastTimer = setTimeout(()=>{ t.hidden = true; }, 2600);
+}
+// ---- Teilbarer Schnappschuss: Wesen im Habitat + Name + Ministory als Bild ----
+// Rein offline (Canvas → PNG). Web-Share-API, wo vorhanden (Mobil: native Teilen-Auswahl),
+// sonst Download-Fallback. Soziale Verbreitung als gesunde Motivation, kein Backend.
+function _wrapText(c, text, x, y, maxW, lh, maxLines){
+  const words = text.split(" "); let line = "", n = 0;
+  for(let i=0;i<words.length;i++){
+    const test = line ? line+" "+words[i] : words[i];
+    if(c.measureText(test).width > maxW && line){
+      c.fillText(line, x, y); y += lh; line = words[i];
+      if(++n >= maxLines-1){ // letzte Zeile: Rest ggf. kürzen
+        let rest = words.slice(i).join(" ");
+        while(c.measureText(rest+"…").width > maxW && rest.length) rest = rest.slice(0,-1);
+        c.fillText(rest+"…", x, y); return y;
+      }
+    } else line = test;
+  }
+  if(line) c.fillText(line, x, y);
+  return y;
+}
+async function shareSnapshot(){
+  const src = document.getElementById("habitat");
+  const W = src.width, capH = 210;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = src.height + capH;
+  const c = cv.getContext("2d");
+  c.fillStyle = "#0a1a18"; c.fillRect(0,0,cv.width,cv.height);
+  c.drawImage(src, 0, 0);                                  // das echte Habitat-Bild (Wesen in seiner Welt)
+  const y0 = src.height;
+  c.fillStyle = "#0c1c1a"; c.fillRect(0, y0, W, capH);
+  c.fillStyle = "rgba(95,156,131,.55)"; c.fillRect(0, y0, W, 2);   // Trennlinie
+  const SANS = 'ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif';
+  const SERIF = 'Georgia, "Times New Roman", serif';
+  const a = (typeof committedArch!=="undefined" && committedArch) || classify(genome);
+  const name = (creatureName||"").trim(), form = a.n;
+  const story = FORM_STORY[form] || {};
+  let ty = y0 + 48; const pad = 34;
+  c.textAlign = "left";
+  if(name){
+    c.fillStyle = "#eaf1ec"; c.font = `italic 700 34px ${SERIF}`; c.fillText(name, pad, ty); ty += 30;
+    c.fillStyle = "#7fb79b"; c.font = `500 20px ${SANS}`; c.fillText(a.k + " · " + form, pad, ty); ty += 30;
+  } else {
+    c.fillStyle = "#eaf1ec"; c.font = `italic 700 30px ${SERIF}`; c.fillText(form, pad, ty); ty += 26;
+    c.fillStyle = "#7fb79b"; c.font = `500 19px ${SANS}`; c.fillText(a.k, pad, ty); ty += 28;
+  }
+  if(story.evo){ c.fillStyle = "#9aa89f"; c.font = `400 18px ${SANS}`; ty = _wrapText(c, story.evo, pad, ty, W-2*pad, 24, 3) + 6; }
+  // Fußzeile: Ära links, Marke + Generation rechts
+  c.fillStyle = "#6f9c86"; c.font = `600 15px ${SANS}`;
+  if(story.era){ c.textAlign="left"; c.fillText(story.era, pad, cv.height-20); }
+  c.textAlign = "right"; c.fillText("Evolve · Generation " + generation.toLocaleString("de-DE"), W-pad, cv.height-20);
+  const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+  if(!blob){ showInfoToast("Schnappschuss fehlgeschlagen"); return; }
+  const file = new File([blob], "evolve-wesen.png", { type: "image/png" });
+  const shareData = { files:[file], title: "Mein Evolve-Wesen", text: (name?name+" — ":"") + a.k + " · " + form };
+  if(navigator.canShare && navigator.canShare(shareData)){
+    try { await navigator.share(shareData); return; }
+    catch(e){ if(e && e.name === "AbortError") return; }   // Nutzer hat abgebrochen
+  }
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement("a"); dl.href = url; dl.download = "evolve-wesen.png";
+  document.body.appendChild(dl); dl.click(); dl.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  showInfoToast("Bild gespeichert ↓");
 }
 function triggerHabitatFx(tone){
   const vp = document.querySelector(".viewport");
@@ -2935,6 +3003,8 @@ document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' Lebensbaum · <span id="discCount">0</span> entdeckt ↗';
 document.getElementById("worldBtn").innerHTML = ic("wind") + ' Umwelt-Einfluss auslösen ↗';
 document.getElementById("worldBtn").addEventListener("click", openInfl);
+(function(){ const sb=document.getElementById("shareBtn"); if(sb){ sb.innerHTML = ic("share") + " Schnappschuss teilen ↗";
+  sb.addEventListener("click", ()=>{ shareSnapshot().catch(()=>showInfoToast("Schnappschuss fehlgeschlagen")); }); } })();
 playBtn.innerHTML = ic("pause");
 const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
