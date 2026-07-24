@@ -28,6 +28,7 @@ const BIOLUM = 9;
 const DETOX = 10;
 const OXYEFF = 11;
 const OSMO = 12;
+const BURROW = 13;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -43,6 +44,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const detox = traits[DETOX] ?? 0;
   const oxyEff = traits[OXYEFF] ?? 0;
   const osmo = traits[OSMO] ?? 0;
+  const burrow = traits[BURROW] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -191,6 +193,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     detox * m.detox +
     oxyEff * m.oxyEff +
     osmo * m.osmo +
+    burrow * m.burrow +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -216,7 +219,12 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
       mobility * phys.defenseFromMobility +
       flight * phys.defenseFromFlight +
       // Gegenbeleuchtung/Schreck-Leuchten: wirkt nur im echten Dunkeln (dark).
-      biolum * dark * phys.biolumDefense,
+      biolum * dark * phys.biolumDefense +
+      // Graben (AXIS-9): fossoriale Flucht in den Boden — ein Bau/Versteck entzieht
+      // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
+      // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
+      // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
+      burrow * phys.defenseFromBurrow * landFactor,
   );
   const predSurvival = 1 - env.predation * (1 - defenseScore);
 

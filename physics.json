@@ -13,7 +13,8 @@
     "biolum",
     "detox",
     "oxyEff",
-    "osmo"
+    "osmo",
+    "burrow"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -28,7 +29,8 @@
     "biolum": "Biolumineszenz",
     "detox": "Entgiftung",
     "oxyEff": "Sauerstoff-Effizienz",
-    "osmo": "Osmoregulation"
+    "osmo": "Osmoregulation",
+    "burrow": "Grabtrieb"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -72,7 +74,8 @@
     "biolum": 0.14,
     "detox": 0.13,
     "oxyEff": 0.12,
-    "osmo": 0.12
+    "osmo": 0.12,
+    "burrow": 0.11
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -97,5 +100,6 @@
   "wOxy": 1.0,
   "salinityLethality": 0.85,
   "wOsmo": 1.0,
-  "kleiberDecades": 0.6
+  "kleiberDecades": 0.6,
+  "defenseFromBurrow": 0.4
 }
