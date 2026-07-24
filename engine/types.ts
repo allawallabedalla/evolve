@@ -40,6 +40,8 @@ export interface Environment {
   //              Einfluesse: Hoehen-UV, Ozonloch, junge Atmosphaere).
   pressure?: number; // 0 = normal, 1 = extremer Tiefsee-/Hadal-Druck (AXIS-12, kommt
   //                    ueber Umwelt-Einfluesse: Tiefsee/Hadalzone).
+  aridity?: number; // 0 = normal, 1 = extreme Austrocknung (AXIS-14, kommt ueber Umwelt-
+  //                   Einfluesse: Duerre-Episode, Aridifizierung).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -92,6 +94,8 @@ export interface Physics {
   baroLethality: number;
   wBaro: number;
   senseForage: number;
+  desiccLethality: number;
+  wDesicc: number;
   maintenance: {
     base: number;
     size: number;
@@ -112,6 +116,7 @@ export interface Physics {
     camo: number;
     baro: number;
     sense: number;
+    desicc: number;
   };
   maintenanceQuad: {
     metabolism: number;

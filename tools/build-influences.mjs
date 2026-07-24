@@ -59,7 +59,7 @@ const EFFECTS = {
   "Vulkanwinter / Aschefall": { tone: "hit", env: { light: 0.15, temperature: 0.25, foodAbundance: 0.35 } },
   "Erdbeben / Tsunami / Hangrutsch": { tone: "hit", env: { water: 0.75, foodAbundance: 0.4 } },
   // 2.3 Klima-Puls
-  "Dürre als Selektions-Episode": { tone: "hit", env: { water: 0.1, temperature: 0.82, foodAbundance: 0.3 } },
+  "Dürre als Selektions-Episode": { tone: "hit", env: { water: 0.1, temperature: 0.82, foodAbundance: 0.3, aridity: 0.9 } },   // AXIS-14: Austrocknung
   // 2.4 Langzeit-Klima
   "Eiszeit / Interglazial / abrupter Klimawechsel": { tone: "shift", env: { temperature: 0.06, foodAbundance: 0.35, water: 0.5 } },
   "Hyperthermal (PETM) / Schneeball-Erde": { tone: "bio", env: { temperature: 0.88, foodAbundance: 0.8, water: 0.7 } },

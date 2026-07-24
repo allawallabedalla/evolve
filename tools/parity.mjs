@@ -42,6 +42,7 @@ for (let i = 0; i < N; i++) {
     salinity: rng(),   // AXIS-8: Salinität (nur hier zufällig, um den osmoSurvival-Term zu prüfen)
     uv: rng(),         // AXIS-10: UV-Strahlung (nur hier zufällig, um den uvSurvival-Term zu prüfen)
     pressure: rng(),   // AXIS-12: Tiefsee-Druck (nur hier zufällig, um den baroSurvival-Term zu prüfen)
+    aridity: rng(),    // AXIS-14: Austrocknung (nur hier zufällig, um den desiccSurvival-Term zu prüfen)
   };
   samples.push({ traits, env, tsFit: fitness(traits, env, phys) });
 }
