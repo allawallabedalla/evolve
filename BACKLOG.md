@@ -3,9 +3,10 @@
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
 Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
-**15 Gene** (inkl. Flug/AXIS-1, Aquatik/AXIS-4, Biolumineszenz/AXIS-5, Entgiftung/AXIS-6,
-Sauerstoff-Effizienz/AXIS-7, Osmoregulation/AXIS-8, Grabtrieb/AXIS-9, Schutzpigment/AXIS-10)
-+ Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **10/10**.
+**20 Gene** (Flug, Aquatik, Biolumineszenz, Entgiftung, Sauerstoff-Effizienz, Osmoregulation,
+Grabtrieb, Schutzpigment, Filterapparat, Tarnung, Druck-Toleranz, Sinne, Austrocknungs-Toleranz …)
++ Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **15/15**.
+App-Inline-Fitness gegen die Engine abgesichert (`npm run app-parity`, exakt).
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -101,7 +102,39 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
 - ↩︎ **Übergangszonen-Sumpfflieger** (~2 %): niedriger Wert, biologisch vertretbar; eine
   eigene steilere Flug-Gate wäre eine Engine-Änderung mit Re-Validierung für Randfälle -> nein.
 
-#### Breiten-Ausbau: neue Mechanik- & Stressor-Achsen (2026-07, Batch AXIS-9..10)
+#### 🐛 Kritischer Fix + Absicherung (2026-07)
+- **App-Fitness war NaN seit v0.42.0** (`PHYS.kleiberDecades` fehlte im App-Inline-PHYS →
+  `Math.pow(10, -0.25·undefined·size)` = NaN → Evolution eingefroren, jedes Wesen der
+  generische Euglenoid mit „NaN %"). 10 Versionen live kaputt. parity/ecology fingen es NICHT,
+  weil sie die Engine/Orakel-Kopie testen, nicht die hand-gepflegte App-Inline-Kopie.
+- **Fix + Netz:** kleiberDecades im App-PHYS ergänzt (App-Fitness == Orakel, exakt). Neuer
+  `npm run app-parity` (tools/app-parity.mjs): App-Inline-fitness vs. Engine über 3000
+  Stichproben + NaN/Infinity-Wächter + „fehlende PHYS-Konstante"-Wächter. In `app-world-smoke`
+  eingehängt → läuft bei jeder Achse mit. Zusätzlich Smoke-Guard „Vitalität endlich". Die
+  App-Kopie ist damit erstmals so abgesichert wie Engine und Orakel.
+
+#### 🧭 Breiten-Feld — Stand: die DISTINKTEN Phänotyp-Achsen sind ausgeschöpft
+20 Gene decken jetzt die abgrenzbaren Einzel-Gen-Selektionsachsen ab, die das Fitness-Modell
+trägt: Thermoregulation; **6 Energiekanäle** (Photosynthese, Landjagd, Absorption, Aquatik,
+Biolumineszenz, Filtrieren) + Sinnes-Effizienz; **8 Verteidigungs-Beiträge** (Panzer, Stützgewebe,
+Größe, Mobilität, Flug, Gegenlicht, Graben, Tarnung); **6 Extremnischen-Stressoren** (Gift,
+Sauerstoff, Salz, UV, Druck, Austrocknung); Kleiber-Allometrie. Jede mit Reality-Regel (15/15).
+Was im Katalog bleibt, ist bewusst KEIN weiteres Phänotyp-Gen:
+- **Populations-/Life-History-Ebene** (r/K, Iteroparie, Dispersal, Sozialität, Generationszeit) —
+  keine Einzel-Gen-Phänotypen; gehören in den Populations-/Welt-Kern, nicht die Fitness.
+- **Inter-Organismus** (Symbiose, Parasitismus, Mutualismus, Räuber-Beute-Dynamik) — bereits im
+  Koevolutions-/Welt-Layer (Red Queen), nicht als Einzel-Gen abbildbar.
+- **Reine Stressor-Wiederholungen** (z. B. ionisierende Strahlung ≈ Gift+UV, Feuer ≈ episodische
+  Hitze): würden das Muster nur duplizieren und je einen Katalog-Faktor „echt" machen — auf
+  Wunsch pro benanntem Faktor nachrüstbar, aber ohne neue Mechanik.
+→ Die genuin neuen Achsen sind erledigt; Weiteres wäre Duplikation oder außerhalb des Modells.
+
+#### Breiten-Ausbau: neue Mechanik- & Stressor-Achsen (2026-07, Batch AXIS-9..14)
+Volle Liste dieses Durchlaufs (je Two-Engines + Voll-Validierung + Reality-Regel):
+AXIS-9 Graben (burrow), AXIS-10 UV (pigment), AXIS-3 Filtrierer (filter, neuer Energiekanal),
+AXIS-11 Tarnung (camo), AXIS-12 Druck (baro), AXIS-13 Sinne (sense), AXIS-14 Austrocknung (desicc).
+
+#### Breiten-Ausbau: neue Mechanik- & Stressor-Achsen (2026-07, Batch AXIS-9..10-ALT)
 Nutzer: „start with the biggest bucket" (Breite). Zwei weitere echte Achsen, voll validiert:
 - ✅ **AXIS-9 Graben** (`burrow`) — NEUE Mechanik (kein Stressor): fossoriale Räuber-Flucht,
   wirkt nur an Land (landFactor), billige Verteidigung ohne Panzer-Drag → Maulwurf/Wühlmaus-
