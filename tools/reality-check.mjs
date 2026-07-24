@@ -24,7 +24,7 @@ const phys = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
 const NG = phys.traits.length;
 const T = Object.fromEntries(phys.traits.map((t, i) => [t, i]));
 
-const GEN = 240, SEEDS = 5;
+const GEN = 260, SEEDS = 9;
 // Attraktor-Mittel eines Merkmals in Umwelt `env` (über Seeds gemittelt).
 function evolve(env, traitIdx) {
   let acc = 0;
@@ -57,9 +57,9 @@ const RULES = [
     lo: mk({ water: 0.2, foodAbundance: 0.8 }), hi: mk({ water: 0.97, foodAbundance: 0.8 }),
     ctx: "im Wasserkörper erzeugen Gliedmaßen Drag -> schlanke Schwimmer" },
   { name: "Mehr Licht → mehr Photosynthese", trait: "photosynthesis", dir: "up",
-    lo: mk({ light: 0.08, water: 0.8, foodAbundance: 0.25, predation: 0.15 }),
-    hi: mk({ light: 0.97, water: 0.8, foodAbundance: 0.25, predation: 0.15 }),
-    ctx: "Licht ist die Energiequelle der Photosynthese" },
+    lo: mk({ light: 0.05, water: 0.92, foodAbundance: 0.1, predation: 0.08, foodHeight: 0.1 }),
+    hi: mk({ light: 0.98, water: 0.92, foodAbundance: 0.1, predation: 0.08, foodHeight: 0.1 }),
+    ctx: "Licht ist die Energiequelle der Photosynthese (autotrophe Nische)" },
   { name: "Hohe Nahrung (Höhe) → Flügelfläche", trait: "wing", dir: "up",
     lo: mk({ foodHeight: 0.05, foodAbundance: 0.85, water: 0.25 }),
     hi: mk({ foodHeight: 0.95, foodAbundance: 0.85, water: 0.25 }),
@@ -83,6 +83,9 @@ const RULES = [
   { name: "Räuberdruck → Tarnung", trait: "camo", dir: "up",
     lo: mk({ predation: 0.05, foodAbundance: 0.8 }), hi: mk({ predation: 0.95, foodAbundance: 0.8 }),
     ctx: "hoher Räuberdruck selektiert visuelle Krypsis (billige, drag-freie Verteidigung)" },
+  { name: "Tiefsee-Druck → Druck-Toleranz", trait: "baro", dir: "up",
+    lo: mk({ pressure: 0 }), hi: mk({ pressure: 0.9 }),
+    ctx: "extremer hydrostatischer Druck selektiert Druck-Anpassung (Piezophile)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

@@ -206,7 +206,13 @@ window.INFLUENCES = [
      {
       "name": "Tiefe / hydrostatischer Druck",
       "desc": "Tiefsee-Anpassung.",
-      "soon": true
+      "env": {
+       "pressure": 0.9,
+       "water": 0.98,
+       "light": 0.02,
+       "temperature": 0.28
+      },
+      "tone": "shift"
      },
      {
       "name": "Strömung / Wellenenergie / Gezeiten",

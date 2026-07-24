@@ -30,6 +30,7 @@ const BURROW = 13;
 const PIGMENT = 14;
 const FILTER = 15;
 const CAMO = 16;
+const BARO = 17;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -48,6 +49,7 @@ export function fitness(traits, env, phys) {
     const pigment = traits[PIGMENT] ?? 0;
     const filter = traits[FILTER] ?? 0;
     const camo = traits[CAMO] ?? 0;
+    const baro = traits[BARO] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -191,6 +193,7 @@ export function fitness(traits, env, phys) {
         pigment * m.pigment +
         filter * m.filter +
         camo * m.camo +
+        baro * m.baro +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -258,12 +261,20 @@ export function fitness(traits, env, phys) {
     //    entsteht der pigmentierte Spezialist. uv kommt über Umwelt-Einflüsse, nicht die 6 Regler.
     const uv = env.uv ?? 0;
     const uvSurvival = clamp01(1 - uv * (1 - pigment) * phys.uvLethality);
+    // 8) Druck-Stress (AXIS-12 Tiefsee): extremer hydrostatischer Druck der Tiefsee/Tiefe
+    //    zerstört Membranen/Proteine, WENN keine Druck-Anpassung (piezolyte Solute, druck-
+    //    stabile Enzyme) vorliegt. Das Gen 'baro' puffert, kostet aber Unterhalt -> ohne
+    //    Druck reine Last (wegselektiert), nur in der Tiefsee der Piezophile. pressure kommt
+    //    über Umwelt-Einflüsse (Tiefsee/Hadal), nicht die 6 Regler.
+    const pressure = env.pressure ?? 0;
+    const baroSurvival = clamp01(1 - pressure * (1 - baro) * phys.baroLethality);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *
         Math.pow(nutrition, phys.wNutrition) *
         Math.pow(toxSurvival, phys.wTox) *
         Math.pow(oxySurvival, phys.wOxy) *
         Math.pow(osmoSurvival, phys.wOsmo) *
-        Math.pow(uvSurvival, phys.wUv);
+        Math.pow(uvSurvival, phys.wUv) *
+        Math.pow(baroSurvival, phys.wBaro);
     return Math.max(fit, phys.floor);
 }
