@@ -37,8 +37,9 @@ TRAITS = [
     "osmo",
     "burrow",
     "pigment",
+    "filter",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 
 
 def _clamp01(x: float) -> float:
@@ -66,6 +67,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     osmo = traits[OSMO] if len(traits) > OSMO else 0.0
     burrow = traits[BURROW] if len(traits) > BURROW else 0.0
     pigment = traits[PIGMENT] if len(traits) > PIGMENT else 0.0
+    filter_ = traits[FILTER] if len(traits) > FILTER else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -164,7 +166,16 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * env["foodAbundance"]
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow
+    # f) Filtrieren / Suspensionsfressen (AXIS-3): sessiles Sieben schwebender Partikel
+    #    im Wasser, braucht weder Mobilitaet noch Stromlinie; heterotroph.
+    energy_filter = (
+        phys["filterYield"]
+        * filter_
+        * aqua_habitat
+        * (phys["filterBase"] + (1.0 - phys["filterBase"]) * env["foodAbundance"])
+        * (1.0 - phys["exclusion"] * photo)
+    )
+    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow + energy_filter
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]
@@ -187,6 +198,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + osmo * m["osmo"]
         + burrow * m["burrow"]
         + pigment * m["pigment"]
+        + filter_ * m["filter"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]

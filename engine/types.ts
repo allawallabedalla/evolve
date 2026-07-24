@@ -84,6 +84,8 @@ export interface Physics {
   defenseFromBurrow: number;
   uvLethality: number;
   wUv: number;
+  filterYield: number;
+  filterBase: number;
   maintenance: {
     base: number;
     size: number;
@@ -100,6 +102,7 @@ export interface Physics {
     osmo: number;
     burrow: number;
     pigment: number;
+    filter: number;
   };
   maintenanceQuad: {
     metabolism: number;
