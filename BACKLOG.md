@@ -18,6 +18,34 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ## ✅ Erledigt
 
+### Usability-Audit (3 Agenten, 2026-07) — Onboarding · Interaktion · Barrierefreiheit
+Drei Fachagenten prüften die Live-App heuristisch; die wertvollsten Befunde wurden in zwei
+Batches behoben (v0.44.0 + v0.45.0), je mit headless-Probe + Smoke:
+- **Verborgene Stressoren sichtbar** (P1, Kern-Loop): `toxicity/oxygen/salinity` (AXIS-6..8) haben
+  keinen Regler → ein Wesen hing unerklärt bei ~2 % Passung. Jetzt Chips „giftig/sauerstoffarm/
+  salzig ✕" neben dem Biom-Tag, per Klick entfernbar (= der fehlende Umwelt-Reset). Reset auch in
+  `newLineage()` + beim State-Laden.
+- **„Auslösen" bei pausierter Zeit** setzt die Sim automatisch fort (vorher nur Cinematik, keine
+  Anpassung — Wirkung vorgetäuscht) + Info-Toast als Bestätigung (v. a. reduced-motion).
+- **Sackgassen-Kategorien**: „nur kommt bald"-Kategorien deaktiviert, mit „bald"-Pille markiert,
+  nach unten sortiert.
+- **Veraltete „Lebende Welt"-Fußnote** entschärft (Feature nicht mehr erreichbar).
+- **WCAG-AA**: `--muted` (#6b5836→#5c4a2c) + `--bio-dim` (#3d6b57→#356152) auch auf `--abyss`/bei
+  kleinem Text; Prox-Badges + aktiver Speed-Toggle auf AA; Canvas `role=img`+aria-label; Gen-Balken
+  `role=meter`+aria-valuenow; **Fokus-Falle** in allen Modalen (Tab bleibt im Dialog, 14/14 Probe);
+  Marke → `<h1>`; sichtbare Fokus-Ringe; größerer Regler-Griff auf Touch; Touch-Ziele ≥44 px.
+- **Klarheit**: „Naheliegend jetzt" → „Kleine Wechsel von hier aus"; Erklärzeile im Sub-Modal;
+  „Photosynth." ausgeschrieben.
+
+**Offene Audit-Folgepunkte (dokumentiert, nicht blockierend):**
+- Klartext-Anzeigenamen für den GESAMTEN Faktoren-Katalog (wiss. Begriff als Untertitel) — größerer
+  Eingriff am generierten Artefakt (`tools/build-influences.mjs`).
+- Live-„Warum"-Zeile während des Spiels (kalt & trocken → Wärmedämmung ↑) — nicht nur im Reveal.
+- Framing-Zeile „Biome = fertige Welten · Regler = Feinjustierung · Einfluss = Ereignis"; Onboarding-
+  Hinweis um den Einfluss-Knopf ergänzen.
+- Dialog-Titel als echte Überschriften (`<h2>`) + `aria-labelledby`; reduced-motion: rAF nach
+  Konvergenz stoppen; Modal-Pause-Konsistenz (bewusst als Auto-Resume-bei-Auslösen gelöst).
+
 ### Umwelt-Einfluss-Modal + AXIS-6 Toxin-Toleranz (2026-07)
 - **Umwelt-Einfluss-Modal** (Nutzer-Vision statt Metapopulations-Vorschau): geschachteltes
   Modal (Kategorie → Faktor + Erklärsatz → Auslösen/Abbrechen) über `docs/faktoren-katalog.md`
