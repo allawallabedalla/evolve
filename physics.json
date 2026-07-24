@@ -15,7 +15,8 @@
     "oxyEff",
     "osmo",
     "burrow",
-    "pigment"
+    "pigment",
+    "filter"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -32,7 +33,8 @@
     "oxyEff": "Sauerstoff-Effizienz",
     "osmo": "Osmoregulation",
     "burrow": "Grabtrieb",
-    "pigment": "Schutzpigment"
+    "pigment": "Schutzpigment",
+    "filter": "Filterapparat"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -78,7 +80,8 @@
     "oxyEff": 0.12,
     "osmo": 0.12,
     "burrow": 0.11,
-    "pigment": 0.11
+    "pigment": 0.11,
+    "filter": 0.12
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -106,5 +109,7 @@
   "kleiberDecades": 0.6,
   "defenseFromBurrow": 0.4,
   "uvLethality": 0.85,
-  "wUv": 1.0
+  "wUv": 1.0,
+  "filterYield": 0.5,
+  "filterBase": 0.25
 }

@@ -76,6 +76,10 @@ const RULES = [
   { name: "UV-Strahlung → Schutzpigment", trait: "pigment", dir: "up",
     lo: mk({ uv: 0 }), hi: mk({ uv: 0.9 }),
     ctx: "starke UV-Strahlung selektiert Schutzpigmentierung" },
+  { name: "Wasser + Partikel → Filterapparat", trait: "filter", dir: "up",
+    lo: mk({ water: 0.2, foodAbundance: 0.85, predation: 0.1 }),
+    hi: mk({ water: 0.97, foodAbundance: 0.85, predation: 0.1 }),
+    ctx: "im partikelreichen Wasserkörper lohnt Suspensionsfressen (sessiler Filtrierer)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

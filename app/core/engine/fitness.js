@@ -28,6 +28,7 @@ const OXYEFF = 11;
 const OSMO = 12;
 const BURROW = 13;
 const PIGMENT = 14;
+const FILTER = 15;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -44,6 +45,7 @@ export function fitness(traits, env, phys) {
     const osmo = traits[OSMO] ?? 0;
     const burrow = traits[BURROW] ?? 0;
     const pigment = traits[PIGMENT] ?? 0;
+    const filter = traits[FILTER] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -146,7 +148,19 @@ export function fitness(traits, env, phys) {
         (phys.biolumMobFloor + (1 - phys.biolumMobFloor) * mobility) *
         env.foodAbundance *
         (1 - phys.exclusion * photo);
-    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow;
+    //    f) Filtrieren / Suspensionsfressen (AXIS-3): schwebende Partikel (Plankton,
+    //       Detritus) aus dem Wasser sieben. Anders als die aktive Jagd braucht das WEDER
+    //       Mobilitaet NOCH Stromlinienform — ein SESSILER Filtrierer (Schwamm, Koralle,
+    //       Muschel, Seepocke) pumpt Wasser durch Filterstrukturen. Rewards das Gen 'filter',
+    //       skaliert mit Wasserkoerper (aquaHabitat) + Partikel-Angebot (foodAbundance),
+    //       heterotroph (schliesst Photosynthese aus). Schafft die aquatische Sessil-
+    //       Filtrier-Nische als eigenen Energieweg (bisher nur schwach ueber Absorption).
+    const energyFilter = phys.filterYield *
+        filter *
+        aquaHabitat *
+        (phys.filterBase + (1 - phys.filterBase) * env.foodAbundance) *
+        (1 - phys.exclusion * photo);
+    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter;
     //    Unterhaltskosten: jedes Merkmal kostet Energie.
     const m = phys.maintenance;
     const mq = phys.maintenanceQuad;
@@ -173,6 +187,7 @@ export function fitness(traits, env, phys) {
         osmo * m.osmo +
         burrow * m.burrow +
         pigment * m.pigment +
+        filter * m.filter +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
