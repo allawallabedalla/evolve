@@ -80,6 +80,9 @@ const RULES = [
     lo: mk({ water: 0.2, foodAbundance: 0.85, predation: 0.1 }),
     hi: mk({ water: 0.97, foodAbundance: 0.85, predation: 0.1 }),
     ctx: "im partikelreichen Wasserkörper lohnt Suspensionsfressen (sessiler Filtrierer)" },
+  { name: "Räuberdruck → Tarnung", trait: "camo", dir: "up",
+    lo: mk({ predation: 0.05, foodAbundance: 0.8 }), hi: mk({ predation: 0.95, foodAbundance: 0.8 }),
+    ctx: "hoher Räuberdruck selektiert visuelle Krypsis (billige, drag-freie Verteidigung)" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

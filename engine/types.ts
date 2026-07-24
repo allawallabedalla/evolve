@@ -86,6 +86,7 @@ export interface Physics {
   wUv: number;
   filterYield: number;
   filterBase: number;
+  defenseFromCamo: number;
   maintenance: {
     base: number;
     size: number;
@@ -103,6 +104,7 @@ export interface Physics {
     burrow: number;
     pigment: number;
     filter: number;
+    camo: number;
   };
   maintenanceQuad: {
     metabolism: number;

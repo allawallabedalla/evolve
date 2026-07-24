@@ -38,8 +38,9 @@ TRAITS = [
     "burrow",
     "pigment",
     "filter",
+    "camo",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 
 
 def _clamp01(x: float) -> float:
@@ -68,6 +69,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     burrow = traits[BURROW] if len(traits) > BURROW else 0.0
     pigment = traits[PIGMENT] if len(traits) > PIGMENT else 0.0
     filter_ = traits[FILTER] if len(traits) > FILTER else 0.0
+    camo = traits[CAMO] if len(traits) > CAMO else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -199,6 +201,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + burrow * m["burrow"]
         + pigment * m["pigment"]
         + filter_ * m["filter"]
+        + camo * m["camo"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -215,6 +218,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + flight * phys["defenseFromFlight"]
         + biolum * dark * phys["biolumDefense"]
         + burrow * phys["defenseFromBurrow"] * land_factor  # AXIS-9: fossoriale Flucht, nur an Land
+        + camo * phys["defenseFromCamo"]  # AXIS-11: visuelle Krypsis, drag-frei
     )
     pred_survival = 1.0 - env["predation"] * (1.0 - defense)
 
