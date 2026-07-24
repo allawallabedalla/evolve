@@ -31,6 +31,7 @@ const OSMO = 12;
 const BURROW = 13;
 const PIGMENT = 14;
 const FILTER = 15;
+const CAMO = 16;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -49,6 +50,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const burrow = traits[BURROW] ?? 0;
   const pigment = traits[PIGMENT] ?? 0;
   const filter = traits[FILTER] ?? 0;
+  const camo = traits[CAMO] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -214,6 +216,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     burrow * m.burrow +
     pigment * m.pigment +
     filter * m.filter +
+    camo * m.camo +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -244,7 +247,12 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
       // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
       // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
       // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
-      burrow * phys.defenseFromBurrow * landFactor,
+      burrow * phys.defenseFromBurrow * landFactor +
+      // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
+      // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
+      // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe
+      // -> eigene, billige Verteidigungs-Nische (Stabschrecke, Gespenstschrecke, Chamäleon).
+      camo * phys.defenseFromCamo,
   );
   const predSurvival = 1 - env.predation * (1 - defenseScore);
 
