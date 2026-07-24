@@ -1,9 +1,10 @@
 // Klartext-Erklaerungen: WARUM entwickelt sich das Wesen so?
 // Das ist das Herz der Text-Demo - die Ursache-Wirkung-Kette sichtbar machen.
 
-import type { Environment, Physics } from "./types.js";
+import type { Environment, Physics, TraitVector } from "./types.js";
 import { TRAITS } from "./types.js";
 import type { SimResult } from "./simulate.js";
+import { classify } from "./archetype.js";
 
 export interface ExplainEvent {
   trait: string;
@@ -18,8 +19,13 @@ export interface ExplainEvent {
 const DISCOVERY_THRESHOLD = 0.7;
 const MOVE_THRESHOLD = 0.05;
 
-function causeFor(trait: string, delta: number, env: Environment): string {
+// Der WAHRE Grund haengt am emergenten Ernaehrungs-Pfad, nicht an rohen Umwelt-Schwellen.
+// Wir lesen ihn aus dem FERTIGEN Genom (classify = kanonischer Archetyp-Benenner) statt aus
+// isolierten `env`-Vergleichen — sonst behauptet die Erklaerung z. B. "knappes Futter", obwohl
+// Nahrung reichlich ist (BUG-2). `final` = Endgenom des Laufs, `env` liefert die Randbedingungen.
+function causeFor(trait: string, delta: number, env: Environment, final: TraitVector): string {
   const up = delta > 0;
+  const isPlant = classify(final).kingdom === "Pflanze";
   switch (trait) {
     case "insulation":
       return up
@@ -50,13 +56,18 @@ function causeFor(trait: string, delta: number, env: Environment): string {
         ? "hoher Praedationsdruck selektiert fuer Panzerung"
         : "ohne Raeuber ist Panzerung nur teurer Ballast und wird abgebaut";
     case "photosynthesis":
-      if (up) return "viel Licht bei knappem Futter macht Photosynthese zur besten Energiequelle (Pflanzen-Pfad)";
+      if (up)
+        return env.foodAbundance < 0.4
+          ? "viel Licht bei knappem Futter macht Photosynthese zur besten Energiequelle (Pflanzen-Pfad)"
+          : "reichlich Licht traegt Photosynthese als Hauptquelle (Pflanzen-Pfad)";
       if (env.light < 0.3 || env.water < 0.3) return "ohne Licht bzw. Wasser traegt Photosynthese nicht";
       return "reichliche Nahrung macht die Nahrungssuche lohnender als Photosynthese";
     case "mobility":
       if (up) return "erreichbares Futter belohnt aktive Fortbewegung (Tier-Pfad)";
-      if (env.light > 0.6 && env.foodAbundance < 0.4)
-        return "Photosynthese verdraengt die teure Mobilitaet (Pflanzen-Pfad)";
+      // Faellt: ist der emergente Weg wirklich der Pflanzen-Pfad, verdraengt Photosynthese die
+      // Mobilitaet — sonst ist schlicht kein Futter erreichbar (kein Verdraengungs-Argument).
+      if (isPlant)
+        return "der Photosynthese-Pfad (Pflanze) verdraengt die teure Mobilitaet";
       return "kaum erreichbare Nahrung macht aktive Fortbewegung unrentabel (Energie sparen)";
     case "structure":
       return up
@@ -88,7 +99,7 @@ export function explainRun(
       from,
       to,
       delta,
-      cause: causeFor(trait, delta, env),
+      cause: causeFor(trait, delta, env, result.final),
       newlyDiscovered: from < DISCOVERY_THRESHOLD && to >= DISCOVERY_THRESHOLD,
     });
   }

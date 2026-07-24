@@ -253,10 +253,11 @@ langfristig die inline-v1-Mean-Field-Engine durch den Populations-Kern ablösen.
 1. **AXIS-2..5** — weitere Gen-Achsen (Graben, Aquatik/Habitat, Ernährungsmodus, Sinne/Tarnung);
    je: neues Gen + Orakel-Spiegelung + Re-Validierung. **AXIS-1 (Flug) erledigt.** AXIS-4 (Aquatik)
    holt die Wasser-Formen (Fisch/Schnecke/Kopffüßer/Amphibie) aus drift-only zurück.
-2. **`mockup/visual.html` nachziehen** (Renderer/classify dupliziert; live zählt `app/`) —
-   oder Renderer/Taxonomie in eine geteilte Datei auslagern.
-3. Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld), CLI-Bugs BUG-2/BUG-4/CLS-2.
-   Volle Liste: `BACKLOG.md`.
+2. **`mockup/visual.html`** — *archiviert* (Single-File-Snapshot, von `app/` abgelöst; NICHT mehr
+   gepflegt). `app/` ist die einzige maßgebliche Fassung; kein Renderer/classify-Nachzug (würde nur
+   Mehrfach-Kopien-Drift schaffen). CLS-2 damit gegenstandslos.
+3. CLI-Bugs BUG-2 (Kausal-Text aus emergentem Archetyp) + BUG-4 (Symmetrie-Label) **erledigt**.
+   Reste: A4-Feinschliff (Ahnenlinie cloud-sync, Inline-Namensfeld). Volle Liste: `BACKLOG.md`.
 
 ## 8. Konventionen & Fallen (unbedingt beachten)
 - **Nur auf dem Feature-Branch entwickeln**, Deploy via PR→merge nach `main`.
