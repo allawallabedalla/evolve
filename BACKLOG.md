@@ -48,8 +48,14 @@ Patterns: kein Streak-Zwang, kein Verfall-Schuldgefühl, kein Sammelzwang):
   Gradienten — am Attraktor steht das Gen wirklich still („Angepasst — die Form steht"), Pfeile
   zeigen nur noch, was sich echt bewegt.
 
-**Offen aus diesem Strang (braucht Richtungs-Entscheid):** teilbarer Wesen-Schnappschuss (Bild +
-Name + Ministory; soziale Verbreitung). Bewusst NICHT ohne Steuerung gebaut — Scope/Geschmack.
+- ✅ **Teilbarer Schnappschuss (v0.69.0):** Knopf „Schnappschuss teilen ↗" in der Wesen-Karte
+  rendert offline ein PNG (Habitat-Bild + Name + Reich·Form + Evo-Ministory aus dem Lebensbaum +
+  „Evolve · Generation N"). Geteilt über die Web-Share-API (Mobil: native Auswahl), Download-
+  Fallback (Desktop). Selbst-enthalten, kein Backend — soziale Verbreitung als gesunde Motivation.
+
+**Damit ist der Motivations-Strang vollständig** (Selektions-Theater, Comeback-Moment, Katalog-
+Kuratierung, Reich-Meilensteine, Neugier-Anstöße, Schnappschuss). Nur noch Rest-Politur offen
+(CLS-4-Klassifikations-Fenster, Cloud-Ahnenlinie via Supabase-Schema, Kontrast-Feintuning).
 
 ### Evolutions-Validitäts-Audit + Mittelfeld-Fidelity-Fix (2026-07, v0.63.0)
 Prüfauftrag: „stimmt die Evolution — Abgleich mit Referenz UND anderen Algorithmen?"
