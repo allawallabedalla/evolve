@@ -17,7 +17,8 @@
     "burrow",
     "pigment",
     "filter",
-    "camo"
+    "camo",
+    "baro"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -36,7 +37,8 @@
     "burrow": "Grabtrieb",
     "pigment": "Schutzpigment",
     "filter": "Filterapparat",
-    "camo": "Tarnung"
+    "camo": "Tarnung",
+    "baro": "Druck-Toleranz"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -84,7 +86,8 @@
     "burrow": 0.11,
     "pigment": 0.11,
     "filter": 0.12,
-    "camo": 0.12
+    "camo": 0.12,
+    "baro": 0.11
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -115,5 +118,7 @@
   "wUv": 1.0,
   "filterYield": 0.5,
   "filterBase": 0.25,
-  "defenseFromCamo": 0.3
+  "defenseFromCamo": 0.3,
+  "baroLethality": 0.85,
+  "wBaro": 1.0
 }

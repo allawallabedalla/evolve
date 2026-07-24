@@ -38,6 +38,8 @@ export interface Environment {
   //                    Einfluesse: Salzsee/Brine, Aestuar, Salzboden, Meerspray).
   uv?: number; // 0 = normal, 1 = extreme UV-Strahlung (AXIS-10, kommt ueber Umwelt-
   //              Einfluesse: Hoehen-UV, Ozonloch, junge Atmosphaere).
+  pressure?: number; // 0 = normal, 1 = extremer Tiefsee-/Hadal-Druck (AXIS-12, kommt
+  //                    ueber Umwelt-Einfluesse: Tiefsee/Hadalzone).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -87,6 +89,8 @@ export interface Physics {
   filterYield: number;
   filterBase: number;
   defenseFromCamo: number;
+  baroLethality: number;
+  wBaro: number;
   maintenance: {
     base: number;
     size: number;
@@ -105,6 +109,7 @@ export interface Physics {
     pigment: number;
     filter: number;
     camo: number;
+    baro: number;
   };
   maintenanceQuad: {
     metabolism: number;

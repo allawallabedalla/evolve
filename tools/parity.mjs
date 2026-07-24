@@ -41,6 +41,7 @@ for (let i = 0; i < N; i++) {
     oxygen: rng(),     // AXIS-7: Sauerstoffgehalt (nur hier zufällig, um den oxySurvival-Term zu prüfen)
     salinity: rng(),   // AXIS-8: Salinität (nur hier zufällig, um den osmoSurvival-Term zu prüfen)
     uv: rng(),         // AXIS-10: UV-Strahlung (nur hier zufällig, um den uvSurvival-Term zu prüfen)
+    pressure: rng(),   // AXIS-12: Tiefsee-Druck (nur hier zufällig, um den baroSurvival-Term zu prüfen)
   };
   samples.push({ traits, env, tsFit: fitness(traits, env, phys) });
 }
