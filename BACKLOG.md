@@ -41,6 +41,13 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
   0.6, Strength 0.6); Kälte/Hitze senken die Enzym-Leistung (Tundra trägt weniger Pflanzen).
   Voll re-validiert (Pflanzen-Anteil 4.0 %, > 2 %-Boden).
 
+#### Offene Wünsche (Nutzer)
+- **Wikipedia-Link spezifischer** *(Nutzer, 2026-07)* — das „≈ in echt"-Feature funktioniert
+  gut; es soll aber möglichst **tief** verlinken (konkrete Art/Klade statt Oberbegriff),
+  **so spezifisch wie für das Wesen sicher belegbar** — ohne Risiko von Falschanzeigen.
+  D. h. nur weiter runter, wo die Zuordnung eindeutig ist; im Zweifel lieber die
+  allgemeinere, sichere Ebene.
+
 #### Bewusst zurückgestellt (Audit-Befunde, die eine gezielte Design-Runde brauchen)
 - **Sympatrische Artbildung sichtbar machen:** empirisch geprüft — die aktuelle Dynamik
   erzeugt **unimodale** Innerorts-Populationen (bei Radius 0.18: 0 echte Sub-Cluster). Ein

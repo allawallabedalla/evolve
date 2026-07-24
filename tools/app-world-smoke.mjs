@@ -1,7 +1,9 @@
-// Smoke-Test der Live-App inkl. der neuen „Lebende Welt (Beta)":
+// Smoke-Test der Live-App inkl. des neuen Umwelt-Einfluss-Modals:
 //  1. App bootet ohne (fatale) Konsolen-Fehler; das Einzel-Wesen rendert.
-//  2. Der Welt-Knopf existiert und öffnet das Overlay.
-//  3. Nach Boot zeigt die Welt Orte (Karte) und emergente Arten (Chronik).
+//  2. Der Knopf „Umwelt-Einfluss auslösen" öffnet das geschachtelte Modal.
+//  3. Kategorie -> Sub-Modal (Faktoren + Erklärsatz) -> echten Faktor wählen -> Auslösen
+//     ändert die Umwelt DES WESENS (biomeTag = Faktorname). Das alte Metapopulations-
+//     Overlay ist zurückgezogen (Code bleibt, nicht verdrahtet).
 // Läuft headless via playwright-core + vorinstalliertem Chromium.
 import { chromium } from "playwright-core";
 import { spawn } from "node:child_process";
@@ -33,43 +35,40 @@ try {
   console.log(`  App-Kernansicht (#kingdom):       ${hasKingdom ? "OK" : "FAIL"}`);
   console.log(`  Welt-Knopf sichtbar:              ${hasWorldBtn ? "OK" : "FAIL"}`);
 
-  // 2) Overlay öffnen
+  // 2) Einfluss-Modal öffnen (Kategorien)
   await page.click("#worldBtn");
-  await page.waitForSelector(".wl-place", { timeout: 20000 });
-  const places = await page.locator(".wl-place").count();
-  console.log(`  Welt-Overlay: Orte gerendert:     ${places >= 3 ? "OK" : "FAIL"} (${places})`);
+  await page.waitForSelector("#infl:not([hidden]) .infl-cat", { timeout: 10000 });
+  const cats = await page.locator(".infl-cat").count();
+  console.log(`  Einfluss-Modal: Kategorien:       ${cats >= 8 ? "OK" : "FAIL"} (${cats})`);
 
-  // 2b) Deine Linie als eigener Ort (Zoom-Vision)
-  const petPlace = await page.locator(".wl-place--pet").count();
-  const youBadge = await page.locator(".wl-place--pet .wl-you").count();
-  console.log(`  „Deine Linie" als Ort 0:          ${petPlace === 1 && youBadge >= 1 ? "OK" : "FAIL"} (${petPlace})`);
+  // 3) Kategorie -> Sub-Modal mit Faktoren (jeder mit Erklärsatz)
+  await page.locator(".infl-cat").first().click();
+  await page.waitForSelector("#inflSub:not([hidden]) .infl-factor", { timeout: 5000 });
+  const factors = await page.locator("#inflFactors .infl-factor").count();
+  const descs = await page.locator("#inflFactors .infl-factor .fd").count();
+  console.log(`  Sub-Modal: Faktoren + Erklärung:  ${factors >= 3 && descs === factors ? "OK" : "FAIL"} (${factors})`);
 
-  // 3) Cinematischer Eingriff: Katastrophe -> Anlauf (charge + busy) -> Einschlag (blast).
-  //    (Chronik wurde auf Nutzer-Wunsch aus der UI genommen; Code bleibt erhalten.)
-  await page.waitForTimeout(1200);
-  await page.click("#wlCat");
-  await page.waitForTimeout(220);                       // während des Anlaufs
-  const busy = await page.locator(".wl-eingreifen.busy").count();
-  const charging = await page.locator(".wl-place--charge").count();
-  console.log(`  Eingriff: Anlauf (busy + charge):  ${busy >= 1 && charging >= 1 ? "OK" : "FAIL"} (busy ${busy}, charge ${charging})`);
-  await page.waitForTimeout(650);                        // nach dem Einschlag
-  const blast = await page.locator(".wl-place--blast").count();
-  console.log(`  Eingriff: Einschlag (blast):      ${blast >= 1 ? "OK" : "FAIL"} (${blast})`);
-  await page.waitForTimeout(1100);                       // Cinematik abklingen lassen
+  // 4) echten Faktor wählen -> OK aktiv
+  const factorName = (await page.locator("#inflFactors .infl-factor:not(.soon) .fn").first().textContent()).trim();
+  await page.locator("#inflFactors .infl-factor:not(.soon)").first().click();
+  const okEnabled = await page.locator("#inflOk").isEnabled();
+  console.log(`  Faktor wählbar, OK aktiv:         ${okEnabled ? "OK" : "FAIL"}`);
 
-  // 5) Schließen (mit Zurück-Zoom-Animation -> hidden erst nach ~260ms)
-  await page.click("#worldClose");
-  await page.waitForTimeout(400);
-  const closed = await page.locator("#world").getAttribute("hidden");
-  console.log(`  Overlay schließt:                 ${closed !== null ? "OK" : "FAIL"}`);
+  // 5) Auslösen -> Modal schließt, Umwelt DES WESENS geändert (biomeTag = Faktorname)
+  await page.click("#inflOk");
+  await page.waitForTimeout(300);
+  const inflClosed = await page.locator("#infl").getAttribute("hidden");
+  const tag = (await page.locator("#biomeTag").textContent()).trim();
+  console.log(`  Auslösen schließt Modal:          ${inflClosed !== null ? "OK" : "FAIL"}`);
+  console.log(`  Umwelt des Wesens geändert:       ${tag === factorName ? "OK" : "FAIL"} (${tag})`);
 
   const fatal = errors.filter((e) => !/supabase|fetch|network|Failed to load resource|ERR_/i.test(e));
   console.log(`  Keine fatalen JS-Fehler:          ${fatal.length === 0 ? "OK" : "FAIL"}`);
   if (fatal.length) fatal.forEach((e) => console.log("      • " + e));
 
-  const ok = hasKingdom && hasWorldBtn && places >= 3 && busy >= 1 && charging >= 1 && blast >= 1 && closed !== null && fatal.length === 0;
+  const ok = hasKingdom && hasWorldBtn && cats >= 8 && factors >= 3 && descs === factors && okEnabled && inflClosed !== null && tag === factorName && fatal.length === 0;
   await browser.close();
-  console.log(ok ? "\nStatus: OK — App bootet, Lebende Welt läuft im Overlay, Einzel-Wesen unberührt." : "\nStatus: FAIL.");
+  console.log(ok ? "\nStatus: OK — App bootet, Umwelt-Einfluss-Modal wirkt aufs Wesen, keine fatalen Fehler." : "\nStatus: FAIL.");
   done(ok ? 0 : 1);
 } catch (err) {
   console.error("Smoke-Test-Fehler:", err.message);
