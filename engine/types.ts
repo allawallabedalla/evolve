@@ -69,6 +69,7 @@ export interface Physics {
   photoTempStrength: number;
   toxLethality: number;
   wTox: number;
+  insulWaterLoss: number;
   maintenance: {
     base: number;
     size: number;

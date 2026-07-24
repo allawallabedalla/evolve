@@ -76,7 +76,9 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     #    "Ofen" gibt es kaum Koerperwaerme zu halten -> Kaelte braucht Isolation
     #    UND Stoffwechsel (Warmblueter = Fell + hoher Stoffwechsel).
     endo_factor = phys["endothermyMetabFloor"] + (1.0 - phys["endothermyMetabFloor"]) * metabolism
-    eff_insulation = insulation * endo_factor
+    # Fell wirkt unter Wasser kaum (Luft-Einschluss wird verdraengt) -> keine pelzigen
+    # Tiefsee-Warmblueter; die Tiefsee ist Fisch/Kopffuesser-Land.
+    eff_insulation = insulation * endo_factor * (1.0 - phys["insulWaterLoss"] * env["water"])
     thermal_ideal = 1.0 - env["temperature"]
     d_t = eff_insulation - thermal_ideal
     thermal = 1.0 - d_t * d_t

@@ -664,7 +664,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.37.0";
+const APP_VERSION = "v0.38.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -675,7 +675,7 @@ const PHYS = {
   biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
   endothermyMetabFloor: 0.5,
   photoTempOpt: 0.6, photoTempStrength: 0.6,
-  toxLethality: 0.9, wTox: 1.0,
+  toxLethality: 0.9, wTox: 1.0, insulWaterLoss: 1.0,
   maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.13 },
   maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
   nutritionFloor: 0.15, energyScale: 5.0,
@@ -790,7 +790,10 @@ function fitness(t, e){
   // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
   // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
   const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
-  const dT = insulation*endoFactor-(1-e.temperature);
+  // Fell wirkt unter Wasser kaum (Luft-Einschluss wird verdrängt) -> keine pelzigen
+  // Tiefsee-Warmblüter; die Tiefsee gehört Fischen/Kopffüßern.
+  const effInsul = insulation*endoFactor*(1-PHYS.insulWaterLoss*e.water);
+  const dT = effInsul-(1-e.temperature);
   const thermal = 1-dT*dT;
   // „An Land" (0..1): 1 außerhalb tiefen Wassers, 0 im offenen Wasser. Landjagd UND
   // Flug sind terrestrisch/aerisch — unter Wasser jagt man schwimmend (aquatisch).

@@ -55,7 +55,11 @@ export function fitness(traits, env, phys) {
     //    "Ofen" gibt es kaum Koerperwaerme zu halten -> Kaelte-Anpassung braucht
     //    Isolation UND Stoffwechsel (echte Warmblueter = Fell + hoher Stoffwechsel).
     const endoFactor = phys.endothermyMetabFloor + (1 - phys.endothermyMetabFloor) * metabolism;
-    const effInsulation = insulation * endoFactor;
+    //    Fell wirkt UNTER WASSER kaum (Biologie): Isolation hält warm, indem sie Luft
+    //    einschliesst - Wasser verdrängt die Luft. Darum ist die Tiefsee voller Fische
+    //    und Kopffuesser, nicht pelziger Warmblueter. Ohne diese Kopplung zuechtete die
+    //    Engine „Fell-Wesen unter Wasser". effInsulation sinkt mit dem Wasser.
+    const effInsulation = insulation * endoFactor * (1 - phys.insulWaterLoss * env.water);
     const thermalIdeal = 1 - env.temperature;
     const dT = effInsulation - thermalIdeal;
     const thermal = 1 - dT * dT;

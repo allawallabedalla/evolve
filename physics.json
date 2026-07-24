@@ -85,5 +85,6 @@
   "floor": 0.02,
   "eps": 0.02,
   "toxLethality": 0.9,
-  "wTox": 1.0
+  "wTox": 1.0,
+  "insulWaterLoss": 1.0
 }
