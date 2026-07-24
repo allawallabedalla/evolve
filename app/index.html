@@ -156,6 +156,11 @@
   .vit-track { flex: 1; height: 9px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
   .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); transition: width .25s ease, background .4s ease; }
   .vit-num { min-width: 34px; text-align: right; color: var(--text); font-weight: 700; }
+  /* Live-„Warum": welche Merkmale die aktuelle Umwelt gerade auslest (Selektionsgradient). */
+  .why { margin-top: 7px; font-size: .74rem; line-height: 1.5; color: var(--muted); min-height: 1.1em; }
+  .why b { color: var(--text); font-weight: 600; }
+  .why .up { color: var(--bio-dim); font-weight: 700; }
+  .why .down { color: #9c6f3a; font-weight: 700; }
   .gene .num { font-family: var(--mono); font-size: .66rem; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
   /* Progressive Disclosure: die genauen Zahlen sind standardmäßig aus (Rauschen für Laien),
      die Balken zeigen die Ausprägung. Über den Toggle einblendbar (Lab-Tiefe auf Wunsch). */
@@ -573,6 +578,7 @@
         <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
         <span class="vit-num" id="vitNum">—</span>
       </div>
+      <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausleset — daran passt sich das Wesen über Generationen an."></div>
       <div class="genes" id="genes"></div>
       <button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
@@ -719,7 +725,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.59.0";
+const APP_VERSION = "v0.60.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1696,6 +1702,29 @@ function updatePanels(g, a){
   // „hier" macht klar: Fitness ist relativ zur Umwelt, kein Urteil über das Wesen (Didaktik-Audit).
   document.getElementById("vitLabel").textContent = "Passung hier · " + word;
   document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
+  updateWhy(g);
+}
+// Live-„Warum": welche Merkmale die AKTUELLE Umwelt gerade AUSLIEST. Aus dem
+// Selektionsgradient ∂Fitness/∂Gen (dieselbe Größe, die die Evolution treibt) — so
+// sieht man live, WARUM sich das Wesen in diese Richtung verschiebt, nicht erst im Reveal.
+function updateWhy(g){
+  const el = document.getElementById("whyLine"); if(!el) return;
+  const eps = PHYS.eps, muted = mutedGenes(committedArch||classify(g));
+  const press = [];
+  for(let i=0;i<NG;i++){
+    if(muted.includes(i)) continue;   // für dieses Reich irrelevante Gene ausklammern
+    const up=g.slice(); up[i]=clamp01(up[i]+eps);
+    const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
+    const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
+    // nur echte, noch „offene" Selektion zeigen (Gen kann sich in die Richtung bewegen).
+    if(grad>0.02 && g[i]<0.9) press.push({i,dir:1,m:grad});
+    else if(grad<-0.02 && g[i]>0.1) press.push({i,dir:-1,m:-grad});
+  }
+  press.sort((a,b)=>b.m-a.m);
+  const top = press.slice(0,3);
+  if(!top.length){ el.innerHTML = `<b>Im Gleichgewicht</b> mit dieser Umwelt — die Form ist angepasst.`; return; }
+  const chips = top.map(p=>`${GENE_LABELS[p.i]} <span class="${p.dir>0?"up":"down"}">${p.dir>0?"↑":"↓"}</span>`).join(" · ");
+  el.innerHTML = `Diese Umwelt fördert: ${chips}`;
 }
 // A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
 function updateBonding(){
