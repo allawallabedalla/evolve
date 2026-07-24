@@ -3,8 +3,9 @@
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
 Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
-**13 Gene** (inkl. Flug/AXIS-1, Aquatik/AXIS-4, Biolumineszenz/AXIS-5, Entgiftung/AXIS-6,
-Sauerstoff-Effizienz/AXIS-7, Osmoregulation/AXIS-8) + Kleibersche Allometrie.
+**15 Gene** (inkl. Flug/AXIS-1, Aquatik/AXIS-4, Biolumineszenz/AXIS-5, Entgiftung/AXIS-6,
+Sauerstoff-Effizienz/AXIS-7, Osmoregulation/AXIS-8, Grabtrieb/AXIS-9, Schutzpigment/AXIS-10)
++ Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **10/10**.
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -99,6 +100,23 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
   eigene Flossen-Fisch-Form wäre im Modell suboptimal/selten -> kein neuer Ripple nötig.
 - ↩︎ **Übergangszonen-Sumpfflieger** (~2 %): niedriger Wert, biologisch vertretbar; eine
   eigene steilere Flug-Gate wäre eine Engine-Änderung mit Re-Validierung für Randfälle -> nein.
+
+#### Breiten-Ausbau: neue Mechanik- & Stressor-Achsen (2026-07, Batch AXIS-9..10)
+Nutzer: „start with the biggest bucket" (Breite). Zwei weitere echte Achsen, voll validiert:
+- ✅ **AXIS-9 Graben** (`burrow`) — NEUE Mechanik (kein Stressor): fossoriale Räuber-Flucht,
+  wirkt nur an Land (landFactor), billige Verteidigung ohne Panzer-Drag → Maulwurf/Wühlmaus-
+  Nische. Nutzt bestehende Regler (predation+water), sofort im Spiel erlebbar. Reality-Regel
+  „Räuberdruck an Land → Grabtrieb". Tier-Anteil unverändert (45.4 %).
+- ✅ **AXIS-10 UV-Strahlung** (`pigment` / `uv`) — Stressor: UV schädigt DNA ohne Schutzpigment.
+  Aktiviert Katalog-Faktor „UV-Strahlung"; violetter UV-Schleier + Stress-Chip. Reality-Regel
+  „UV → Schutzpigment".
+
+**Nächste Breiten-Kandidaten (höherer Aufwand/Risiko):**
+- **AXIS-3 Ernährungsmodus / Filtrierer** (neuer ENERGIE-Kanal, nicht nur Survival-Term) — der
+  riskanteste, weil er die fein austarierte Ökologie-Verteilung verschieben kann; braucht eine
+  eigene Tuning-Runde gegen C1–C6. Höchster Einzel-Mehrwert der offenen Achsen.
+- Weitere Stressor-Paare (Druck/Tiefsee, Wind/Strömung) — je ein Gen; geringeres Risiko, aber
+  abnehmender Grenznutzen (Muster-Wiederholung). Nur wenn ein konkreter Katalog-Faktor es lohnt.
 
 #### Neue Selektionsachsen aus dem Faktoren-Katalog (2026-07, Batch AXIS-6..8)
 Die 257 „kommt bald"-Faktoren werden schrittweise zu ECHTEN Selektionsachsen (nicht kosmetisch).
