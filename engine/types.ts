@@ -91,6 +91,7 @@ export interface Physics {
   defenseFromCamo: number;
   baroLethality: number;
   wBaro: number;
+  senseForage: number;
   maintenance: {
     base: number;
     size: number;
@@ -110,6 +111,7 @@ export interface Physics {
     filter: number;
     camo: number;
     baro: number;
+    sense: number;
   };
   maintenanceQuad: {
     metabolism: number;

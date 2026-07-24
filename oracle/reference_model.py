@@ -40,8 +40,9 @@ TRAITS = [
     "filter",
     "camo",
     "baro",
+    "sense",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
 
 
 def _clamp01(x: float) -> float:
@@ -72,6 +73,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     filter_ = traits[FILTER] if len(traits) > FILTER else 0.0
     camo = traits[CAMO] if len(traits) > CAMO else 0.0
     baro = traits[BARO] if len(traits) > BARO else 0.0
+    sense = traits[SENSE] if len(traits) > SENSE else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -117,11 +119,14 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         access = 1.0
     else:
         access = _clamp01(1.0 - (env["foodHeight"] - reach) * phys["heightPenalty"])
+    # Sinne (AXIS-13): geschaerfte Wahrnehmung findet knappe Beute; Bonus ~ (1-food).
+    sense_boost = 1.0 + phys["senseForage"] * sense * (1.0 - env["foodAbundance"])
     energy_forage = (
         mobility
         * env["foodAbundance"]
         * access
         * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
+        * sense_boost
         * (1.0 - phys["exclusion"] * photo)
     )
 
@@ -205,6 +210,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + filter_ * m["filter"]
         + camo * m["camo"]
         + baro * m["baro"]
+        + sense * m["sense"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
