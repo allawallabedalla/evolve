@@ -11,6 +11,11 @@ const W = (title) => "https://de.wikipedia.org/wiki/" + encodeURIComponent(title
 // Direkte, exakte Zuordnung der App-Archetyp-Namen (classify().n) auf ihr reales
 // Wikipedia-Vorbild — für den „≈ in echt"-Link neben dem Namen in der HAUPTansicht.
 // (Die Welt-Chronik nutzt realExample() für ihre EMERGENTEN Formen.)
+// Spezifitäts-Prinzip (Nutzer-Wunsch): so TIEF verlinken, wie für die Form sicher
+// belegbar — konkrete Klade statt Oberbegriff, ABER nie ins Risiko einer Falschanzeige.
+// Generische Archetypen (z. B. „Fell-Warmblüter" = irgendein kleines Säugetier) bleiben
+// bewusst auf der sicheren allgemeinen Ebene; nur wo der Name die Klade eindeutig nennt
+// (z. B. „Aalform" -> Aal), geht es konkreter.
 const ARCH_WIKI = {
   "Grünalge": ["Grünalge","Grünalgen"], "Moos": ["Moos","Laubmoose"], "Farn": ["Farn","Farne"],
   "Kraut · niedrige Pflanze": ["Kraut","Kräuter"], "Blütenkraut": ["Blütenpflanze","Blütenpflanzen"],
@@ -18,7 +23,7 @@ const ARCH_WIKI = {
   "Nadelbaum": ["Nadelbaum","Koniferen"], "Sukkulente · Kaktus": ["Kaktus","Kakteen"],
   "Polster-Kältepflanze": ["Polsterpflanze","Polsterpflanze"],
   "Wurm": ["Wurm","Würmer"], "Insekt · Gliederfüßer": ["Insekt","Insekten"],
-  "Krebstier · Arthropode": ["Krebstier","Krebstiere"], "Fisch · Aalform": ["Fisch","Fische"],
+  "Krebstier · Arthropode": ["Krebstier","Krebstiere"], "Fisch · Aalform": ["Aal","Aale"],
   "Reptil · Echse": ["Echse","Echsen"], "Gepanzertes Beutetier": ["Schildkröte","Schildkröten"],
   "Flatterer · Vogel": ["Vogel","Vögel"], "Fluginsekt · Segler": ["Fluginsekt","Fluginsekten"],
   "Flugsäuger · Fledermaus": ["Fledermaus","Fledertiere"], "Fell-Warmblüter": ["Säugetier","Säugetiere"],

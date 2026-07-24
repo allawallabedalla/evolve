@@ -57,16 +57,19 @@ jeweils einzeln nach `main` gemerged (Auto-Deploy):
   0.6, Strength 0.6); Kälte/Hitze senken die Enzym-Leistung (Tundra trägt weniger Pflanzen).
   Voll re-validiert (Pflanzen-Anteil 4.0 %, > 2 %-Boden).
 
-#### Offene Wünsche (Nutzer)
-- **Lebensbaum: Beschreibung bei Klick** *(Nutzer, 2026-07)* — im Genbuch/Lebensbaum soll
-  ein Klick auf eine Form eine kurze **Beschreibung** zeigen (evtl. von Wikipedia). Heute
-  gibt es nur den Hover-Tooltip (Ära/Evo-Notiz); gewünscht ist ein Klick-Panel mit mehr
-  Kontext — passt zum „≈ in echt"-Wiki-Feature (dieselbe Quelle/Verlinkung nutzen).
-- **Wikipedia-Link spezifischer** *(Nutzer, 2026-07)* — das „≈ in echt"-Feature funktioniert
-  gut; es soll aber möglichst **tief** verlinken (konkrete Art/Klade statt Oberbegriff),
-  **so spezifisch wie für das Wesen sicher belegbar** — ohne Risiko von Falschanzeigen.
-  D. h. nur weiter runter, wo die Zuordnung eindeutig ist; im Zweifel lieber die
-  allgemeinere, sichere Ebene.
+#### Offene Wünsche (Nutzer) — Stand des Backlog-Durchlaufs 2026-07
+- ✅ **Lebensbaum: Beschreibung bei Klick** — Klick auf entdeckte Form öffnet Detail-Panel
+  mit Ära/Evo-Notiz + **Wikipedia-Kurzbeschreibung** (REST-Summary-API, mit Fallback) + Link.
+- ✅ **Wikipedia-Link spezifischer** — Spezifitäts-Prinzip dokumentiert; „Aalform" → Aal
+  (statt generisch „Fische"). Generische Archetypen bleiben bewusst auf sicherer Ebene.
+- ✅ **`Isolation`-Genlabel** → „Wärmedämmung" (eindeutig, nicht mehr als „Einsamkeit" lesbar).
+- ✅ **Rohzahlen-Progressive-Disclosure** — Gen-Zahlen standardmäßig aus, Toggle „Zahlen
+  zeigen" (Zustand in localStorage). Balken zeigen die Ausprägung; Lab-Tiefe auf Wunsch.
+- ↩︎ **Fisch-vs-Aal-Benennung:** als *erledigt-wie-ist* eingestuft — die emergente Aquatik-
+  Form ist per Selektion flossenlos (aquaticLimbDrag), „Aalform" ist also korrekt; eine
+  eigene Flossen-Fisch-Form wäre im Modell suboptimal/selten -> kein neuer Ripple nötig.
+- ↩︎ **Übergangszonen-Sumpfflieger** (~2 %): niedriger Wert, biologisch vertretbar; eine
+  eigene steilere Flug-Gate wäre eine Engine-Änderung mit Re-Validierung für Randfälle -> nein.
 
 #### Bewusst zurückgestellt (Audit-Befunde, die eine gezielte Design-Runde brauchen)
 - **Sympatrische Artbildung sichtbar machen:** empirisch geprüft — die aktuelle Dynamik
