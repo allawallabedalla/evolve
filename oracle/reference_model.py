@@ -46,8 +46,9 @@ TRAITS = [
     "fireres",
     "frostres",
     "windres",
+    "nfix",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES, WINDRES = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES, WINDRES, NFIX = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 
 
 def _clamp01(x: float) -> float:
@@ -84,6 +85,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     fireres = traits[FIRERES] if len(traits) > FIRERES else 0.0
     frostres = traits[FROSTRES] if len(traits) > FROSTRES else 0.0
     windres = traits[WINDRES] if len(traits) > WINDRES else 0.0
+    nfix = traits[NFIX] if len(traits) > NFIX else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -194,7 +196,15 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["filterBase"] + (1.0 - phys["filterBase"]) * env["foodAbundance"])
         * (1.0 - phys["exclusion"] * photo)
     )
-    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow + energy_filter
+    # g) Stickstoff-Fixierung/Chemosynthese (AXIS-19): naehrstoff-unabhaengige Energie,
+    #    zaehlt v.a. bei knappen Naehrstoffen; sessil (schliesst Mobilitaet aus).
+    energy_nfix = (
+        phys["nfixYield"]
+        * nfix
+        * (phys["nfixBase"] + (1.0 - phys["nfixBase"]) * (1.0 - env["foodAbundance"]))
+        * (1.0 - phys["exclusion"] * mobility)
+    )
+    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow + energy_filter + energy_nfix
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]
@@ -226,6 +236,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + fireres * m["fireres"]
         + frostres * m["frostres"]
         + windres * m["windres"]
+        + nfix * m["nfix"]
         + metabolism * metabolism * mq["metabolism"] * kleiber
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]

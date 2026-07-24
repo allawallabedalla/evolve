@@ -37,6 +37,7 @@ const RADRES = 20;
 const FIRERES = 21;
 const FROSTRES = 22;
 const WINDRES = 23;
+const NFIX = 24;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -62,6 +63,7 @@ export function fitness(traits, env, phys) {
     const fireres = traits[FIRERES] ?? 0;
     const frostres = traits[FROSTRES] ?? 0;
     const windres = traits[WINDRES] ?? 0;
+    const nfix = traits[NFIX] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -184,7 +186,17 @@ export function fitness(traits, env, phys) {
         aquaHabitat *
         (phys.filterBase + (1 - phys.filterBase) * env.foodAbundance) *
         (1 - phys.exclusion * photo);
-    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter;
+    //    g) Stickstoff-Fixierung / Chemosynthese (AXIS-19): manche Organismen erschliessen
+    //       Naehrstoffe unabhaengig vom Futter-Angebot — Rhizobien/Cyanobakterien fixieren
+    //       Luft-Stickstoff, Chemolithotrophe oxidieren Mineralien. Der Gewinn zaehlt VOR ALLEM
+    //       bei KNAPPEN Naehrstoffen (1 - foodAbundance): Pionier auf armem Boden (Erle/Klee,
+    //       mikrobielle Krusten). Metabolisch teuer -> sessil/langsam (schliesst Mobilitaet aus),
+    //       kostet Unterhalt (maintenance.nfix). Kein Universal-Bonus, sondern eine Armut-Nische.
+    const energyNfix = phys.nfixYield *
+        nfix *
+        (phys.nfixBase + (1 - phys.nfixBase) * (1 - env.foodAbundance)) *
+        (1 - phys.exclusion * mobility);
+    const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix;
     //    Unterhaltskosten: jedes Merkmal kostet Energie.
     const m = phys.maintenance;
     const mq = phys.maintenanceQuad;
@@ -220,6 +232,7 @@ export function fitness(traits, env, phys) {
         fireres * m.fireres +
         frostres * m.frostres +
         windres * m.windres +
+        nfix * m.nfix +
         // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
         // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
         // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast

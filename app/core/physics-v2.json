@@ -24,7 +24,8 @@
     "radres",
     "fireres",
     "frostres",
-    "windres"
+    "windres",
+    "nfix"
   ],
   "traitLabels": {
     "insulation": "Fell / Isolation",
@@ -50,7 +51,8 @@
     "radres": "Strahlungsresistenz",
     "fireres": "Feuerresistenz",
     "frostres": "Frostschutz",
-    "windres": "Windhärte"
+    "windres": "Windhärte",
+    "nfix": "Stickstoff-Fixierung"
   },
   "lightAccessBase": 0.4,
   "structureLightFloor": 0.3,
@@ -105,7 +107,8 @@
     "radres": 0.11,
     "fireres": 0.11,
     "frostres": 0.11,
-    "windres": 0.11
+    "windres": 0.11,
+    "nfix": 0.12
   },
   "maintenanceQuad": {
     "metabolism": 0.22,
@@ -149,5 +152,7 @@
   "frostLethality": 0.85,
   "wFrost": 1.0,
   "windLethality": 0.85,
-  "wWind": 1.0
+  "wWind": 1.0,
+  "nfixYield": 0.35,
+  "nfixBase": 0.2
 }
