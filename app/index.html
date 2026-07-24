@@ -19,9 +19,9 @@
     --line: #cbb98f;
     --line-soft: #d8c8a0;
     --text: #4c3d27;         /* warmes Dunkelbraun */
-    --muted: #6b5836;        /* WCAG AA auf Ocker (K2): dunkler als Pastell-Muted */
+    --muted: #5c4a2c;        /* WCAG AA auch auf der --abyss-Fläche (Audit): ~4.6:1 */
     --bio: #5f9c83;          /* Pastell-Salbei — Flächen/Punkte/Thumbs */
-    --bio-dim: #3d6b57;      /* dunkles Salbei — Text-Rolle, AA-Kontrast (K2) */
+    --bio-dim: #356152;      /* dunkles Salbei — Text-Rolle, AA auch bei kleinem Text (Audit) */
     --ember: #d69a6b;        /* Pastell-Terrakotta — Tier/Energie */
     --danger: #cf8975;
     --gold: #bf9636;         /* gedämpftes Ocker-Gold — Rarität */
@@ -100,6 +100,13 @@
     font-size: .74rem; color: var(--text); background: rgba(245,235,205,.7);
     border: 1px solid var(--line-soft); padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(3px);
   }
+  /* Verborgene Stressoren (AXIS-6..8): sonst unsichtbar & „klebrig" — als Chips zeigen. */
+  .stress-chips { position: absolute; top: 40px; right: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .stress-chip { font-size: .7rem; font-weight: 700; color: #fbf3dd; border-radius: 999px; padding: 2px 9px 2px 8px;
+    display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 4px rgba(40,30,10,.18); }
+  .stress-chip.tox { background: #7d8a2f; }
+  .stress-chip.oxy { background: #5a7fa6; }
+  .stress-chip.sal { background: #7f93a6; }
 
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; }
@@ -188,13 +195,14 @@
   .ctrl.newlife { margin-left: auto; }
   /* B10: groessere Touch-Ziele auf Touch-Geraeten */
   @media (pointer: coarse) {
-    .biome, .ctrl, .speed { min-height: 44px; }
+    .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip { min-height: 44px; }
+    .infl-quick-chip { padding: 8px 14px; }
     .speed { padding: 10px 14px; }
     .link { padding: 8px 4px; min-height: 40px; }
   }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
   .speed { font-size: .78rem; color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-  .speed.active { background: var(--bio); color: var(--nm-light); font-weight: 700; box-shadow: var(--shadow-sm); }
+  .speed.active { background: var(--bio); color: #06201a; font-weight: 700; box-shadow: var(--shadow-sm); }   /* dunkle Schrift -> AA auf Salbei (Audit) */
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bio); box-shadow: 0 0 6px var(--bio-dim); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
@@ -236,6 +244,8 @@
   .infl-cat:hover { border-color: var(--bio-dim); color: var(--bio-dim); }
   .infl-cat .ic { width: 1.2rem; height: 1.2rem; color: var(--bio-dim); flex: 0 0 auto; }
   .infl-cat .cnt { margin-left: auto; font-family: var(--mono); font-size: .64rem; color: var(--muted); }
+  .infl-cat.soon { cursor: not-allowed; opacity: .55; }
+  .infl-cat .cnt.bald { color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 8px; font-family: inherit; text-transform: uppercase; letter-spacing: .05em; }
   .infl-factors { overflow-y: auto; display: flex; flex-direction: column; gap: 7px; margin: 4px 0 14px; }
   .infl-group { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--bio-dim);
     font-weight: 700; margin: 10px 2px 1px; }
@@ -250,8 +260,8 @@
     color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
   /* Milieu-Nähe (Nutzer-Wunsch): naheliegende Wechsel zuerst, große Sprünge weiter unten. */
   .prox { margin-left: auto; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
-  .prox.near { color: #1f3d30; background: var(--bio-dim); }
-  .prox.far { color: #fbf3dd; background: #9c7a4f; }
+  .prox.near { color: #f4faf6; background: var(--bio-dim); }   /* helle Schrift -> AA auf bio-dim (Audit) */
+  .prox.far { color: #fbf3dd; background: #7d5f38; }           /* dunkler Grund -> AA (Audit) */
   .infl-quick { display: flex; flex-wrap: wrap; gap: 7px; margin: 2px 0 14px; }
   .infl-quick-h { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--bio-dim); width: 100%; margin-bottom: 1px; }
   .infl-quick-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--abyss); border: 1px solid var(--line-soft);
@@ -506,7 +516,8 @@
       <div class="viewport">
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
-        <canvas id="habitat" width="720" height="560"></canvas>
+        <div class="stress-chips" id="stressChips" hidden></div>
+        <canvas id="habitat" width="720" height="560" role="img" aria-label="Lebewesen in seiner Umwelt"></canvas>
         <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
         <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-label="Willkommen zurück" hidden>
           <div class="reveal-card">
@@ -566,8 +577,9 @@
   <p class="footnote" id="engineDetail" hidden>
     Diese Hauptansicht zeigt die <b>Anpassungs-Bahn einer Linie</b> — die mittlere Form, auf die
     sich eine ganze Population über Generationen zubewegt (eine geglättete Näherung, nicht ein
-    einzelnes Lebewesen). Echte Populationen mit <b>Streuung, Zufalls-Drift und Aufspaltung</b>
-    in mehrere Arten siehst du in der <b>Lebenden Welt</b>. Die Engine ist gegen ein
+    einzelnes Lebewesen). Unter der Haube trägt der Populations-Kern echte <b>Streuung, Zufalls-Drift
+    und sogar Aufspaltung in mehrere Cluster</b> (sympatrische Konkurrenz) — die Hauptansicht fokussiert
+    bewusst auf dein eines Wesen. Die Engine ist gegen ein
     wissenschaftliches Referenzmodell auf <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die
     <b>Modell-Güte</b> (wie gut die schlanke Browser-Engine das schwere Referenzmodell trifft),
     <b>keine Bewertung deines Wesens</b>.
@@ -633,6 +645,7 @@
         <div class="infl-title" id="inflSubTitle">—</div>
         <button class="link" id="inflBack">↩ zurück</button>
       </div>
+      <p class="infl-sub">Wähle einen Faktor und drücke <b>Auslösen</b> — die Umwelt verschiebt sich, dein Wesen passt sich über Generationen an. <b>Naheliegend</b> = kleiner Schritt, <b>großer Sprung</b> = drastische Verschiebung.</p>
       <div class="infl-factors" id="inflFactors"></div>
       <div class="infl-foot">
         <button class="ctrl" id="inflCancel">Abbrechen</button>
@@ -696,7 +709,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.43.0";
+const APP_VERSION = "v0.44.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1037,7 +1050,7 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
 ];
-const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynth.","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation"];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
@@ -1067,6 +1080,10 @@ function newLineage(){
   rng = mulberry32(lineageSeed); randn = makeRandn();
   committedArch = classify(genome); candArch = null; candCount = 0;
   creatureName = "";
+  // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
+  // Milieu (verborgene Stressoren haben keinen Regler) — sonst „strandet" das Neugeborene.
+  env.toxicity = 0; env.oxygen = 1; env.salinity = 0;
+  if(typeof renderStressChips === "function") renderStressChips();
 }
 newLineage();
 
@@ -1333,7 +1350,8 @@ function timeStr(ms){
 function applyState(s){
   if(Array.isArray(s.genome) && s.genome.length>=6) genome = padGenome(s.genome);
   if(s.env){ env = Object.assign(env, s.env);
-    LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } }); }
+    LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
+    if(typeof renderStressChips === "function") renderStressChips(); }
   generation = s.generation || 0;
   discovered = new Set(s.discovered || []);
   creatureName = s.name || "";
@@ -1501,12 +1519,30 @@ LEVERS.forEach(l => {
     dismissOnboard();
   });
 });
+
+// Verborgene Stressoren (toxicity/oxygen/salinity kommen NUR über Umwelt-Einflüsse,
+// haben also keinen Regler). Ohne Anzeige blieb ein Wesen unerklärt bei ~2 % Passung.
+// Als Chips sichtbar machen + per Klick entfernbar (zugleich der fehlende „Reset").
+function renderStressChips(){
+  const el = document.getElementById("stressChips"); if(!el) return;
+  const tox = env.toxicity||0, sal = env.salinity||0, oxy = (env.oxygen==null?1:env.oxygen);
+  const chips = [];
+  if(tox>0.05) chips.push(`<button class="stress-chip tox" data-ax="toxicity" title="Giftiges Milieu — Entgiftung wird selektiert. Klicken zum Entfernen.">giftig ✕</button>`);
+  if(oxy<0.95) chips.push(`<button class="stress-chip oxy" data-ax="oxygen" title="Sauerstoffarm — effiziente Atmung wird selektiert. Klicken zum Entfernen.">sauerstoffarm ✕</button>`);
+  if(sal>0.05) chips.push(`<button class="stress-chip sal" data-ax="salinity" title="Salziges Milieu — Osmoregulation wird selektiert. Klicken zum Entfernen.">salzig ✕</button>`);
+  el.innerHTML = chips.join("");
+  el.hidden = chips.length===0;
+  el.querySelectorAll(".stress-chip").forEach(b=> b.onclick = ()=>{
+    const ax = b.dataset.ax; env[ax] = ax==="oxygen" ? 1 : 0; renderStressChips();
+  });
+}
 const biomesEl = document.getElementById("biomes");
 BIOMES.forEach(b => {
   const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
   btn.addEventListener("click", () => {
     Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0;   // Biome sind saubere, sauerstoffreiche Süßmilieus
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
+    renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
     document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
     btn.classList.add("active");   // K5: aktives Biom sichtbar markieren
@@ -1518,6 +1554,8 @@ BIOMES.forEach(b => {
 const genesEl = document.getElementById("genes");
 GENE_LABELS.forEach((lbl,i) => {
   const d=document.createElement("div"); d.className="gene"; d.id="gene-"+i;
+  d.setAttribute("role","meter"); d.setAttribute("aria-label",lbl);
+  d.setAttribute("aria-valuemin","0"); d.setAttribute("aria-valuemax","1"); d.setAttribute("aria-valuenow","0.5");
   d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="num" id="gn-${i}">0.50</span>`;
   genesEl.appendChild(d);
 });
@@ -1552,8 +1590,13 @@ function updatePanels(g, a){
   for(let i=0;i<NG;i++){
     document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
     document.getElementById("gn-"+i).textContent = g[i].toFixed(2);
-    document.getElementById("gene-"+i).classList.toggle("muted", muted.includes(i));
+    const ge = document.getElementById("gene-"+i);
+    ge.classList.toggle("muted", muted.includes(i));
+    ge.setAttribute("aria-valuenow", g[i].toFixed(2));   // a11y: Wert auch ohne sichtbare Zahl
   }
+  // a11y: Canvas-Text-Alternative pro Aktualisierung (Form + Passung).
+  const cv = document.getElementById("habitat");
+  if(cv) cv.setAttribute("aria-label", `Generation ${generation}, Form: ${a.n}`);
   // A3: Vitalitaet = wie gut passt das Wesen zur AKTUELLEN Umwelt (Fitness).
   // Live -> dreht man einen Regler, sackt sie kurz ab und erholt sich beim Anpassen.
   const fit = fitness(g, env);
@@ -1684,16 +1727,20 @@ function openInfl(){
   const near = INFL.flatMap((c,ci)=> c.groups.flatMap(g=>g.factors.filter(f=>!f.soon).map(f=>({f,ci}))))
     .map(o=>({...o,d:factorDist(o.f)})).sort((a,b)=>a.d-b.d).slice(0,5);
   _el("inflQuick").innerHTML = near.length
-    ? `<div class="infl-quick-h">Naheliegend jetzt</div>` + near.map(o=>
+    ? `<div class="infl-quick-h">Kleine Wechsel von hier aus — nah an deiner jetzigen Umwelt</div>` + near.map(o=>
         `<button class="infl-quick-chip" data-ci="${o.ci}" data-fn="${encodeURIComponent(o.f.name)}">${ic(INFL[o.ci].icon)}${o.f.name}</button>`).join("")
     : "";
   _el("inflQuick").querySelectorAll(".infl-quick-chip").forEach(b=> b.onclick = ()=>
     openInflSub(+b.dataset.ci, decodeURIComponent(b.dataset.fn)));
   _el("inflCats").innerHTML = INFL.map((c,i)=>{
     const all=_inflFactors(c), ready=all.filter(f=>!f.soon).length;
-    return `<button class="infl-cat" data-i="${i}">${ic(c.icon)}<span>${c.cat}</span><span class="cnt">${ready}/${all.length}</span></button>`;
-  }).join("");
-  _el("inflCats").querySelectorAll(".infl-cat").forEach(b=> b.onclick = ()=> openInflSub(+b.dataset.i));
+    return {i, c, all: all.length, ready};
+  }).sort((a,b)=> (b.ready>0)-(a.ready>0))   // aktive Kategorien zuerst, „nur bald" nach unten
+    .map(o=> o.ready>0
+      ? `<button class="infl-cat" data-i="${o.i}">${ic(o.c.icon)}<span>${o.c.cat}</span><span class="cnt">${o.ready}/${o.all}</span></button>`
+      : `<button class="infl-cat soon" data-i="${o.i}" disabled>${ic(o.c.icon)}<span>${o.c.cat}</span><span class="cnt bald">bald</span></button>`
+    ).join("");
+  _el("inflCats").querySelectorAll(".infl-cat:not(.soon)").forEach(b=> b.onclick = ()=> openInflSub(+b.dataset.i));
   _el("infl").hidden = false; _el("inflClose").focus();
 }
 function closeInfl(){ _el("inflSub").hidden = true; _el("infl").hidden = true; inflSel = null;
@@ -1739,10 +1786,27 @@ function applyInfluence(f){
   env.salinity = f.env.salinity || 0;   // Salz-Milieu nur, solange ein salziger Einfluss aktiv ist
   LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
     if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
+  renderStressChips();
   lastBiome = f.name; _el("biomeTag").textContent = f.name;
   document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
   dismissOnboard();
+  // Bei pausierter Zeit passt sich nichts an — der Blitz allein täuscht Wirkung vor.
+  // Darum automatisch fortsetzen, damit die Anpassung wirklich läuft.
+  if(!running){ running = true; playBtn.innerHTML = ic("pause");
+    playBtn.setAttribute("aria-label","Pause"); }
   triggerHabitatFx(f.tone || "shift");   // Cinematik: Blitz + Anpassungs-Schub
+  // Bestätigung (v. a. für prefers-reduced-motion, wo Blitz/Beben fehlen).
+  showInfoToast("Ausgelöst: " + f.name);
+}
+// Schlichter Info-Toast (kein Form-Fund) — nutzt dasselbe Toast-Element.
+let infoToastTimer = null;
+function showInfoToast(msg){
+  const t = document.getElementById("toast");
+  clearTimeout(toastTimer); clearTimeout(infoToastTimer);
+  t.classList.remove("legendary");
+  t.textContent = msg;
+  t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  infoToastTimer = setTimeout(()=>{ t.hidden = true; }, 2600);
 }
 function triggerHabitatFx(tone){
   const vp = document.querySelector(".viewport");
