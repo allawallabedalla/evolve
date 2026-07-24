@@ -39,6 +39,7 @@ for (let i = 0; i < N; i++) {
     water: rng(),
     toxicity: rng(),   // AXIS-6: giftiges Milieu (nur hier zufällig, um den toxSurvival-Term zu prüfen)
     oxygen: rng(),     // AXIS-7: Sauerstoffgehalt (nur hier zufällig, um den oxySurvival-Term zu prüfen)
+    salinity: rng(),   // AXIS-8: Salinität (nur hier zufällig, um den osmoSurvival-Term zu prüfen)
   };
   samples.push({ traits, env, tsFit: fitness(traits, env, phys) });
 }

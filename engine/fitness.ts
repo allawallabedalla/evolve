@@ -27,6 +27,7 @@ const WING = 8;
 const BIOLUM = 9;
 const DETOX = 10;
 const OXYEFF = 11;
+const OSMO = 12;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -41,6 +42,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const biolum = traits[BIOLUM] ?? 0;
   const detox = traits[DETOX] ?? 0;
   const oxyEff = traits[OXYEFF] ?? 0;
+  const osmo = traits[OSMO] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -180,6 +182,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     biolum * m.biolum +
     detox * m.detox +
     oxyEff * m.oxyEff +
+    osmo * m.osmo +
     // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
     // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
     // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
@@ -228,12 +231,23 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const oxygen = env.oxygen ?? 1;
   const oxySurvival = clamp01(1 - (1 - oxygen) * metabolism * (1 - oxyEff) * phys.hypoxiaSeverity);
 
+  // 6) Osmotischer Stress (AXIS-8 Salinitaet): salzige Milieus (Salzsee/Brine, Aestuar,
+  //    Salzboden, Meerspray) ziehen dem Koerper osmotisch Wasser aus - toedlich, WENN
+  //    keine Osmoregulation (Ionenpumpen/kompatible Solute) vorliegt. Das Gen 'osmo'
+  //    neutralisiert den Salzdruck, kostet aber Unterhalt (maintenance.osmo) -> in
+  //    Suesswasser/Nicht-Salz-Milieus (salinity 0) reine Last, wird wegselektiert; nur
+  //    in salzigen Nischen entsteht der Halophyt/Salzspezialist (Salzkrebschen, Queller).
+  //    salinity ist eine Umwelt-Dimension aus Umwelt-Einfluessen, NICHT aus den 6 Reglern.
+  const salinity = env.salinity ?? 0;
+  const osmoSurvival = clamp01(1 - salinity * (1 - osmo) * phys.salinityLethality);
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
     Math.pow(nutrition, phys.wNutrition) *
     Math.pow(toxSurvival, phys.wTox) *
-    Math.pow(oxySurvival, phys.wOxy);
+    Math.pow(oxySurvival, phys.wOxy) *
+    Math.pow(osmoSurvival, phys.wOsmo);
 
   return Math.max(fit, phys.floor);
 }

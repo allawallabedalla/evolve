@@ -37,6 +37,7 @@ const EFFECTS = {
   "Trübung / Sediment": { tone: "shift", env: { water: 0.8, light: 0.15 } },
   "Nährstoffstatus (oligo→eutroph)": { tone: "bio", env: { water: 0.85, foodAbundance: 0.85 } },
   "Gelöster Sauerstoff": { tone: "shift", env: { oxygen: 0.2, water: 0.92, temperature: 0.7 } },   // warmes, stehendes Wasser = O2-arm
+  "Salinität + Salz-Gradienten": { tone: "shift", env: { salinity: 0.85, water: 0.9 } },   // AXIS-8: Salzsee/Brine/Ästuar -> Osmoregulation
   // 1.6 Boden
   "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)": { tone: "shift", env: { foodAbundance: 0.2 } },
   "Serpentin/Schwermetall-Toxizität": { tone: "hit", env: { toxicity: 0.85, foodAbundance: 0.3 } },
@@ -47,7 +48,7 @@ const EFFECTS = {
   "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.45, water: 0.6 } },
   // 1.8 Energie & Extrem-Chemie
   "Primärproduktivität / Ressourcen-Fülle": { tone: "bio", env: { foodAbundance: 0.95 } },
-  "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, water: 0.6, light: 0.3 } },
+  "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, salinity: 0.7, water: 0.6, light: 0.3 } },
   "Natürliche Toxine / ionisierende Strahlung": { tone: "hit", env: { toxicity: 0.8 } },
   // 1.9 Feuer
   "Feuer-Regime (Häufigkeit/Intensität/Saison)": { tone: "hit", env: { foodAbundance: 0.3, temperature: 0.72 } },

@@ -174,7 +174,11 @@ window.INFLUENCES = [
      {
       "name": "Salinität + Salz-Gradienten",
       "desc": "Süß/Brack/Meer/hypersalin; Osmoregulation.",
-      "soon": true
+      "env": {
+       "salinity": 0.85,
+       "water": 0.9
+      },
+      "tone": "shift"
      },
      {
       "name": "pH / Säure",
@@ -368,6 +372,7 @@ window.INFLUENCES = [
       "desc": "Extremophile.",
       "env": {
        "toxicity": 0.92,
+       "salinity": 0.7,
        "water": 0.6,
        "light": 0.3
       },
