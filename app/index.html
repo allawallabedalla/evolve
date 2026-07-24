@@ -286,6 +286,14 @@
   .infl-factor.soon { cursor: not-allowed; opacity: .6; }
   .infl-factor.soon .fn::after { content: "kommt bald"; margin-left: auto; font-weight: 400; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
     color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
+  /* Kuratierung: „kommt bald"-Faktoren gesammelt hinter einem Aufklapper, damit die aktiven glänzen. */
+  .infl-soon-toggle { text-align: left; width: 100%; margin-top: 4px; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: .76rem; color: var(--muted); padding: 8px 2px; display: flex; align-items: center; gap: 7px; }
+  .infl-soon-toggle:hover { color: var(--text); }
+  .infl-soon-toggle .chev { font-size: .7rem; color: var(--bio-dim); }
+  .infl-soon-toggle .muted-inline { opacity: .75; }
+  .infl-soon-wrap { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .infl-soon-wrap[hidden] { display: none; }
   /* Milieu-Nähe (Nutzer-Wunsch): naheliegende Wechsel zuerst, große Sprünge weiter unten. */
   .prox { margin-left: auto; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
   .prox.near { color: #f4faf6; background: var(--bio-dim); }   /* helle Schrift -> AA auf bio-dim (Audit) */
@@ -739,7 +747,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.65.0";
+const APP_VERSION = "v0.66.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1902,21 +1910,37 @@ function openInflSub(ci, preselectName){
   const c = INFL[ci]; inflSel = null;
   _el("inflSubTitle").innerHTML = ic(c.icon) + " " + (c.plain||c.cat);
   const flat = [];   // flache Faktor-Liste der Sektion (für die Auswahl per Index)
+  const factorHtml = (f, fi, d) => {
+    const sci = f.plain ? `<div class="fsci">${f.name}</div>` : "";
+    return `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
+      `<div class="fn">${f.plain||f.name}${f.soon?'':proxBadge(d)}</div>${sci}<div class="fd">${f.desc}</div></button>`;
+  };
+  // AKTIVE Faktoren zuerst und sichtbar (nach Milieu-Nähe); die vielen „kommt bald"-
+  // Faktoren wandern gesammelt in einen eingeklappten „in Arbeit"-Block, damit die
+  // handelbaren Einflüsse nicht im Katalog-Rauschen untergehen (Kuratierung).
   let html = "";
+  const soonAll = [];
   for(const g of c.groups){
-    if(g.sub) html += `<div class="infl-group">${g.sub}</div>`;
-    // Innerhalb jeder Untergruppe: aktive Faktoren nach Milieu-Nähe (nah zuerst),
-    // dann die „kommt bald"-Faktoren in Katalog-Reihenfolge.
     const real = g.factors.filter(f=>!f.soon).map(f=>({f,d:factorDist(f)})).sort((a,b)=>a.d-b.d);
-    const soon = g.factors.filter(f=>f.soon).map(f=>({f,d:Infinity}));
-    for(const {f,d} of [...real, ...soon]){
-      const fi = flat.length; flat.push(f);
-      const sci = f.plain ? `<div class="fsci">${f.name}</div>` : "";
-      html += `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
-        `<div class="fn">${f.plain||f.name}${f.soon?'':proxBadge(d)}</div>${sci}<div class="fd">${f.desc}</div></button>`;
-    }
+    soonAll.push(...g.factors.filter(f=>f.soon));
+    if(!real.length) continue;
+    if(g.sub) html += `<div class="infl-group">${g.sub}</div>`;
+    for(const {f,d} of real){ const fi = flat.length; flat.push(f); html += factorHtml(f, fi, d); }
+  }
+  if(soonAll.length){
+    html += `<button type="button" class="infl-soon-toggle" id="inflSoonToggle" aria-expanded="false" aria-controls="inflSoonWrap">`+
+      `<span class="chev">▸</span> ${soonAll.length} weitere aus dem Katalog · <span class="muted-inline">in Arbeit</span></button>`;
+    html += `<div class="infl-soon-wrap" id="inflSoonWrap" hidden>`;
+    for(const f of soonAll){ const fi = flat.length; flat.push(f); html += factorHtml(f, fi, Infinity); }
+    html += `</div>`;
   }
   _el("inflFactors").innerHTML = html;
+  const soonToggle = _el("inflFactors").querySelector("#inflSoonToggle");
+  if(soonToggle) soonToggle.onclick = () => {
+    const wrap = _el("inflSoonWrap"); const open = wrap.hidden;
+    wrap.hidden = !open; soonToggle.setAttribute("aria-expanded", open?"true":"false");
+    soonToggle.querySelector(".chev").textContent = open ? "▾" : "▸";
+  };
   const pick = (b)=>{
     _el("inflFactors").querySelectorAll(".infl-factor.sel").forEach(x=>x.classList.remove("sel"));
     b.classList.add("sel"); inflSel = flat[+b.dataset.fi]; _el("inflOk").disabled = false;
