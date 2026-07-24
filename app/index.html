@@ -430,7 +430,7 @@
       <!-- Schnell-Einstiege direkt unter dem Bild — auf Desktop UND Mobil „above the fold" -->
       <div class="entry-row">
         <button class="disc" id="discBtn" title="Lebensbaum öffnen — die entdeckten Formen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
-        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte, viele Arten">Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗</button>
+        <button class="disc worldbtn" id="worldBtn" title="Die lebende Welt öffnen — viele Orte entwickeln gleichzeitig ihre eigenen Arten">Lebende Welt <span class="beta">Beta</span> · viele Orte &amp; Arten ↗</button>
       </div>
     </div>
 
@@ -529,7 +529,7 @@
       <div class="wl-head">
         <div class="wl-title" id="wlTitle">Lebende Welt <span class="wl-beta">Beta</span></div>
         <button id="wlReroll" class="link" title="Andere Welt würfeln — neue Orte" style="margin-right:14px">neue Welt</button>
-        <button id="worldClose" class="link" title="Zurück zu deinem Wesen (reinzoomen)">↩ reinzoomen</button>
+        <button id="worldClose" class="link" title="Zurück zu deinem einzelnen Wesen">↩ zurück zum Wesen</button>
       </div>
       <p class="wl-sub">Oben pflegst du <b>ein</b> Wesen. Hier siehst du, wie es — und viele andere — sich über Generationen in verschiedenen Welten entwickeln. Der erste Ort <span class="wl-you">dein Wesen</span> ist dasselbe wie oben, in diese Welt gesetzt. Jeder Ort geht seinen eigenen Weg; <b>stör</b> einen mit den Knöpfen und sieh, welche Formen sich durchsetzen.</p>
       <div class="wl-grid">
@@ -2252,7 +2252,7 @@ function frame(time){
 document.getElementById("newLifeBtn").innerHTML = ic("egg") + " Neu beginnen";
 document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' Lebensbaum · <span id="discCount">0</span> entdeckt ↗';
-document.getElementById("worldBtn").innerHTML = ic("globe") + ' Lebende Welt <span class="beta">Beta</span> · rauszoomen ↗';
+document.getElementById("worldBtn").innerHTML = ic("globe") + ' Lebende Welt <span class="beta">Beta</span> · viele Orte &amp; Arten ↗';
 playBtn.innerHTML = ic("pause");
 const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
