@@ -32,6 +32,8 @@ export interface Environment {
   water: number; // 0 = Duerre, 1 = feucht (Photosynthese braucht Wasser)
   toxicity?: number; // 0 = sauber, 1 = giftig (AXIS-6, kommt NICHT ueber die 6 Regler,
   //                    sondern ueber Umwelt-Einfluesse: Serpentin/Schwermetall, Schwefel/Saeure).
+  oxygen?: number; // 1 = normaler O2-Gehalt (Meereshoehe), 0 = extreme Hypoxie (AXIS-7,
+  //                  kommt ueber Umwelt-Einfluesse: Duenne Hoehenluft, sauerstoffarmes Wasser).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -70,6 +72,8 @@ export interface Physics {
   toxLethality: number;
   wTox: number;
   insulWaterLoss: number;
+  hypoxiaSeverity: number;
+  wOxy: number;
   maintenance: {
     base: number;
     size: number;
@@ -82,6 +86,7 @@ export interface Physics {
     wing: number;
     biolum: number;
     detox: number;
+    oxyEff: number;
   };
   maintenanceQuad: {
     metabolism: number;
