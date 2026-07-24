@@ -231,6 +231,9 @@
   .infl-cat .ic { width: 1.2rem; height: 1.2rem; color: var(--bio-dim); flex: 0 0 auto; }
   .infl-cat .cnt { margin-left: auto; font-family: var(--mono); font-size: .64rem; color: var(--muted); }
   .infl-factors { overflow-y: auto; display: flex; flex-direction: column; gap: 7px; margin: 4px 0 14px; }
+  .infl-group { font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; color: var(--bio-dim);
+    font-weight: 700; margin: 10px 2px 1px; }
+  .infl-group:first-child { margin-top: 2px; }
   .infl-factor { text-align: left; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 11px; padding: 10px 13px; cursor: pointer; font: inherit; color: var(--text); transition: border-color .12s, box-shadow .12s; }
   .infl-factor:hover:not(.soon) { border-color: var(--bio-dim); }
   .infl-factor.sel { border-color: var(--bio-dim); box-shadow: 0 0 0 1.5px var(--bio-dim), inset 0 0 22px rgba(95,156,131,.1); }
@@ -588,7 +591,7 @@
         <div class="infl-title" id="inflTitle">Umwelt-Einfluss auslösen</div>
         <button class="link" id="inflClose">schließen</button>
       </div>
-      <p class="infl-sub">Wähle einen Einfluss — er verändert die Umwelt deines Wesens; es passt sich über Generationen an. Grau = im Katalog, aber als echte Selektionskraft noch in Arbeit.</p>
+      <p class="infl-sub">Der vollständige Faktoren-Katalog. <b>Aktive</b> Faktoren verändern die Umwelt deines Wesens — es passt sich über Generationen an. <b>Grau (kommt bald)</b> = im Katalog erfasst, aber als echte Selektionskraft noch in Arbeit.</p>
       <div class="infl-cats" id="inflCats"></div>
     </div>
   </div>
@@ -661,7 +664,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.36.0";
+const APP_VERSION = "v0.37.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1561,11 +1564,12 @@ document.getElementById("revealX").addEventListener("click", () => { document.ge
 const INFL = window.INFLUENCES || [];
 let inflSel = null, inflOpener = null;
 const _el = (id) => document.getElementById(id);
+const _inflFactors = (c)=> c.groups.flatMap(g=>g.factors);   // alle Faktoren einer Sektion, flach
 function openInfl(){
   inflOpener = document.activeElement;
   _el("inflCats").innerHTML = INFL.map((c,i)=>{
-    const ready = c.factors.filter(f=>!f.soon).length;
-    return `<button class="infl-cat" data-i="${i}">${ic(c.icon)}<span>${c.cat}</span><span class="cnt">${ready}/${c.factors.length}</span></button>`;
+    const all=_inflFactors(c), ready=all.filter(f=>!f.soon).length;
+    return `<button class="infl-cat" data-i="${i}">${ic(c.icon)}<span>${c.cat}</span><span class="cnt">${ready}/${all.length}</span></button>`;
   }).join("");
   _el("inflCats").querySelectorAll(".infl-cat").forEach(b=> b.onclick = ()=> openInflSub(+b.dataset.i));
   _el("infl").hidden = false; _el("inflClose").focus();
@@ -1575,12 +1579,20 @@ function closeInfl(){ _el("inflSub").hidden = true; _el("infl").hidden = true; i
 function openInflSub(ci){
   const c = INFL[ci]; inflSel = null;
   _el("inflSubTitle").innerHTML = ic(c.icon) + " " + c.cat;
-  _el("inflFactors").innerHTML = c.factors.map((f,fi)=>
-    `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
-      `<div class="fn">${f.name}</div><div class="fd">${f.desc}</div></button>`).join("");
+  const flat = [];   // flache Faktor-Liste der Sektion (für die Auswahl per Index)
+  let html = "";
+  for(const g of c.groups){
+    if(g.sub) html += `<div class="infl-group">${g.sub}</div>`;
+    for(const f of g.factors){
+      const fi = flat.length; flat.push(f);
+      html += `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
+        `<div class="fn">${f.name}</div><div class="fd">${f.desc}</div></button>`;
+    }
+  }
+  _el("inflFactors").innerHTML = html;
   _el("inflFactors").querySelectorAll(".infl-factor:not(.soon)").forEach(b=> b.onclick = ()=>{
     _el("inflFactors").querySelectorAll(".infl-factor.sel").forEach(x=>x.classList.remove("sel"));
-    b.classList.add("sel"); inflSel = c.factors[+b.dataset.fi]; _el("inflOk").disabled = false;
+    b.classList.add("sel"); inflSel = flat[+b.dataset.fi]; _el("inflOk").disabled = false;
   });
   _el("inflOk").disabled = true; _el("inflSub").hidden = false; _el("inflBack").focus();
 }
