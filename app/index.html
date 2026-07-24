@@ -137,7 +137,8 @@
 
   /* ---- Konsole ---- */
   .console { padding: 18px 18px 20px; }
-  .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio-dim); margin: 0 0 12px; }
+  .console h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--bio-dim); margin: 0 0 4px; }
+  .console-sub { font-size: .92rem; color: var(--text); margin: 0 0 14px; line-height: 1.4; }
   .biomes { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
   .biome {
     font-size: .8rem; color: var(--text); background: var(--chamber);
@@ -455,6 +456,7 @@
     <!-- Konsole (auf Mobil direkt unter dem Bild, vor der Detail-Karte) -->
     <div class="panel console">
       <h2>Umwelt formen</h2>
+      <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
       <div class="onboard" id="onboard" hidden>👋 Wähle ein <b>Biom</b> oder dreh einen <b>Regler</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
       <div class="biomes" id="biomes"></div>
       <div id="levers"></div>
