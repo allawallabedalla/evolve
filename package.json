@@ -10,6 +10,7 @@
     "demo": "node dist/cli/demo.js",
     "ecology": "npm run build && node tools/ecology-check.mjs",
     "reality": "npm run build && node tools/reality-check.mjs",
+    "ecology-full": "npm run build && node tools/ecology-full.mjs",
     "all": "npm run build && npm run oracle && npm run train && node tools/ecology-check.mjs && node tools/reality-check.mjs",
     "parity": "npm run build && node tools/parity.mjs && python3 oracle/check_parity.py",
     "app-parity": "npm run build && node tools/app-parity.mjs",
