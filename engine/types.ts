@@ -30,6 +30,8 @@ export interface Environment {
   foodHeight: number; // 0 = Boden, 1 = hoch/schwer erreichbar
   light: number; // 0 = dunkel, 1 = volles Sonnenlicht (fuer Photosynthese)
   water: number; // 0 = Duerre, 1 = feucht (Photosynthese braucht Wasser)
+  toxicity?: number; // 0 = sauber, 1 = giftig (AXIS-6, kommt NICHT ueber die 6 Regler,
+  //                    sondern ueber Umwelt-Einfluesse: Serpentin/Schwermetall, Schwefel/Saeure).
 }
 
 /** Die geteilte Fitness-Landschaft (aus physics.json). */
@@ -65,6 +67,8 @@ export interface Physics {
   endothermyMetabFloor: number;
   photoTempOpt: number;
   photoTempStrength: number;
+  toxLethality: number;
+  wTox: number;
   maintenance: {
     base: number;
     size: number;
@@ -76,6 +80,7 @@ export interface Physics {
     structure: number;
     wing: number;
     biolum: number;
+    detox: number;
   };
   maintenanceQuad: {
     metabolism: number;

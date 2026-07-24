@@ -32,8 +32,9 @@ TRAITS = [
     "structure",
     "wing",
     "biolum",
+    "detox",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 
 
 def _clamp01(x: float) -> float:
@@ -56,6 +57,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     structure = traits[STRUCTURE]
     wing = traits[WING]
     biolum = traits[BIOLUM] if len(traits) > BIOLUM else 0.0
+    detox = traits[DETOX] if len(traits) > DETOX else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -167,6 +169,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + structure * m["structure"]
         + wing * m["wing"]
         + biolum * m["biolum"]
+        + detox * m["detox"]
         + metabolism * metabolism * mq["metabolism"]
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
@@ -185,10 +188,16 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     )
     pred_survival = 1.0 - env["predation"] * (1.0 - defense)
 
+    # 4) Chemischer Stress (AXIS-6): giftige Milieus toeten ohne Entgiftung (detox).
+    #    toxicity ist eine Umwelt-Dimension jenseits der 6 Regler (Umwelt-Einfluesse).
+    toxicity = env.get("toxicity", 0.0)
+    tox_survival = _clamp01(1.0 - toxicity * (1.0 - detox) * phys["toxLethality"])
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
         * (nutrition ** phys["wNutrition"])
+        * (tox_survival ** phys["wTox"])
     )
     return max(fit, phys["floor"])
 
