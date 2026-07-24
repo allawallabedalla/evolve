@@ -234,6 +234,18 @@
   .wl-place.flash-hit { border-color: var(--danger) !important; box-shadow: 0 0 0 2px var(--danger), 0 0 20px rgba(255,122,107,.45); }
   .wl-place.flash-shift { border-color: #6fd0ff !important; box-shadow: 0 0 0 2px #6fd0ff, 0 0 20px rgba(111,208,255,.4); }
   .wl-place.flash-bio { border-color: var(--bio) !important; box-shadow: 0 0 0 2px var(--bio), 0 0 20px rgba(95,156,131,.45); }
+  /* ---- Cinematischer Eingriff: Anlauf (charge) -> Einschlag (blast) ---- */
+  .wl-place--charge { animation: wlCharge .34s ease-in-out infinite; box-shadow: var(--shadow-inset); z-index: 2; }
+  @keyframes wlCharge { 0%,100%{ filter: brightness(1); transform: scale(1); } 50%{ filter: brightness(.8); transform: scale(.985); } }
+  .wl-place--blast { animation: wlBlast .55s cubic-bezier(.2,.9,.25,1.25); z-index: 3; }
+  @keyframes wlBlast { 0%{ transform: scale(1); } 18%{ transform: scale(1.07) rotate(-.4deg); } 45%{ transform: scale(.975) rotate(.3deg); } 70%{ transform: scale(1.015); } 100%{ transform: scale(1); } }
+  .wl-blast-hit   { border-color: var(--danger) !important; box-shadow: 0 0 0 3px var(--danger), 0 0 36px 8px rgba(207,137,117,.7); }
+  .wl-blast-shift { border-color: #6fd0ff !important;      box-shadow: 0 0 0 3px #6fd0ff, 0 0 36px 8px rgba(111,208,255,.6); }
+  .wl-blast-bio   { border-color: var(--bio) !important;   box-shadow: 0 0 0 3px var(--bio), 0 0 36px 8px rgba(95,156,131,.65); }
+  /* Steuerung während des Eingriffs einklappen — Blick geht auf die Karte */
+  .wl-eingreifen .wl-busy { display: none; font-size: .8rem; color: var(--bio-dim); padding: 4px 0; min-height: 1.5em; }
+  .wl-eingreifen.busy .wl-btns, .wl-eingreifen.busy > .wl-hint, .wl-eingreifen.busy .wl-fine { display: none; }
+  .wl-eingreifen.busy .wl-busy { display: block; }
   .wl-events #wlEvLog { margin: 0; padding: 0; }
   .wl-events li { list-style: none; font-size: .74rem; margin: 0 0 5px; color: var(--text); display: flex; align-items: baseline; gap: 6px; }
   .wl-events li .ev-gen { font-family: var(--mono); font-size: .62rem; color: var(--muted); flex-shrink: 0; }
@@ -535,8 +547,9 @@
       <div class="wl-grid">
         <div>
           <div class="wl-map" id="wlMap"><div class="wl-loading" id="wlLoading">Welt erwacht … (berechne emergente Rarität)</div></div>
-          <div class="wl-panel" style="margin-top:14px">
+          <div class="wl-panel wl-eingreifen" style="margin-top:14px">
             <h3 id="wlVerHead">Eingreifen — Ort: <span id="wlSelName" style="color:var(--bio-dim)">–</span></h3>
+            <div class="wl-busy" id="wlBusy">…</div>
             <div class="wl-btns">
               <button id="wlCat">Katastrophe</button>
               <button id="wlWet">feucht &amp; kühl</button>
@@ -558,7 +571,9 @@
             <h3 id="wlEvHead">Ereignisse</h3>
             <ul id="wlEvLog"><li class="wl-ev-empty">— die Welt ist ruhig … Ereignisse geschehen von selbst —</li></ul>
           </div>
-          <div class="wl-panel wl-chronik">
+          <!-- Chronik (Arten-Liste/Baum) auf Nutzer-Wunsch aus der UI genommen —
+               Code (census/renderChron/dendrogram) bleibt erhalten, nur ausgeblendet. -->
+          <div class="wl-panel wl-chronik" hidden>
             <h3 id="wlChronHead">Chronik — Arten <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Ähnlichkeits-Baum wechseln">Baum ⇄</button></h3>
             <ul id="wlChronik"></ul>
             <div id="wlTree" hidden></div>
@@ -2300,6 +2315,7 @@ try {
   let gen = 0, evCooldown = 14;      // Welt-Generation im Overlay + Vorlauf bis zum 1. Ereignis
   const evLog = [];                  // jüngste Ereignisse (max 5)
   let flash = null;                  // {idx, tone, ticks} — kurzes Aufblitzen am betroffenen Ort
+  let fx = null;                      // {idx, phase:'charge'|'blast', tone} — cinematischer Eingriff
 
   // Autonome Welt-Ereignisse: ein kurzer Trigger, lange Folgen (der Ort entwickelt sich
   // danach unter neuen Bedingungen weiter). Feuern VON SELBST über die Zeit.
@@ -2377,8 +2393,32 @@ try {
     return `linear-gradient(150deg, rgba(${c[0]},${c[1]},${c[2]},${a}), var(--abyss) 62%${teal})`;
   }
 
+  // Cinematischer Eingriff: Klick -> Steuerung einklappen + Ort „lädt auf" (Anlauf)
+  // -> kurze Pause (Spannung) -> Einschlag: evolutionärer Effekt + visueller Knall.
+  // Die Welt friert während der Inszenierung ein, damit der Moment sitzt.
+  function stageIntervention(idx, label, icon, tone, applyFn) {
+    if (!world || fx) return;
+    sel = idx; el("wlSelName").textContent = world.places[idx].name;
+    const busy = el("wlBusy"), panel = document.querySelector(".wl-eingreifen");
+    fx = { idx, phase: "charge", tone };
+    if (panel) panel.classList.add("busy");
+    if (busy) busy.textContent = label + " …";
+    render();
+    setTimeout(() => {
+      applyFn();                                   // evolutionärer Effekt
+      fx = { idx, phase: "blast", tone };
+      logEvent(idx, label, icon, tone);            // Log + flash-Zustand
+      render();
+      setTimeout(() => {
+        fx = null;
+        if (panel) panel.classList.remove("busy");
+        render();
+      }, 950);
+    }, 720);
+  }
+
   function step() {
-    if (paused || !world) return;
+    if (paused || !world || fx) return;            // während des Eingriffs steht die Zeit
     world.step(); gen++;
     if (flash && --flash.ticks <= 0) flash = null;
     // Autonom: nach dem Vorlauf mit kleiner Wahrscheinlichkeit je Schritt ein Ereignis.
@@ -2400,8 +2440,11 @@ try {
       const conn = mig > 0.05;
       const state = conn ? `<span class="wl-conn on">${ic("link")} verbunden</span>` : `<span class="wl-conn">${ic("island")} Insel</span>`;
       const fl = (flash && flash.idx === i) ? ` flash-${flash.tone}` : "";
+      const fxc = (fx && fx.idx === i)
+        ? (fx.phase === "charge" ? " wl-place--charge" : ` wl-place--blast wl-blast-${fx.tone}`)
+        : "";
       const bg = isPet ? "" : ` style="background:${envTint(e)}"`;
-      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}" data-i="${i}"${bg}>`+
+      return `<div class="wl-place${i===sel?' sel':''}${isPet?' wl-place--pet':''}${fl}${fxc}" data-i="${i}"${bg}>`+
         `<div class="nm">${isPet?ic("dna")+' ':''}${p.name}${isPet?' <span class="wl-you">du</span>':''}<span class="env">T${(e.temperature*100|0)} W${(e.water*100|0)} L${(e.light*100|0)}</span></div>`+
         `<div class="form"><span class="wl-cre" title="≈ ${cre.name}">${ic(cre.icon)}</span><span>${desc}</span></div>`+
         `<div class="div">Diversität ${world.diversityNN(i).toFixed(3)} · ${state}</div>`+
@@ -2410,10 +2453,11 @@ try {
     map.querySelectorAll(".wl-place").forEach((n) => n.onclick = () => {
       sel = +n.dataset.i; el("wlSelName").textContent = world.places[sel].name; renderSliders(); render();
     });
-    // Stabile Sortierung nach Identität (Schlüssel) statt nach schwankender Häufigkeit —
-    // so springen die Zeilen nicht (Jitter-Fix); nur Zahlen/Rarität aktualisieren sich.
-    const sp = census(world, rmap ? { rarityMap: rmap } : {}).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
-    renderChron(sp);
+    // Chronik auf Nutzer-Wunsch aus der UI genommen — census/renderChron bleiben im
+    // Code, werden aber nicht mehr aufgerufen (spart Rechenzeit + Zeilen-Jitter).
+    // Zum Reaktivieren: Panel-`hidden` entfernen und die zwei Zeilen unten einkommentieren.
+    // const sp = census(world, rmap ? { rarityMap: rmap } : {}).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
+    // renderChron(sp);
   }
 
   const KCOL = { Tier:"#5f9c83", Pflanze:"#7ba24f", Pilz:"#b98a3c", Mikrobe:"#5a95b8", Protist:"#9878b8" };
@@ -2594,9 +2638,12 @@ try {
   overlay.addEventListener("click", (e) => { if (e.target.id === "world") closeWorld(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeWorld(); });
 
-  el("wlCat").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 }); logEvent(sel, "Katastrophe (von dir)", "meteor", "hit"); render(); });
-  el("wlWet").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } }); logEvent(sel, "Klima: feucht & kühl (von dir)", "drop", "shift"); render(); });
-  el("wlDry").addEventListener("click", () => { if(!world) return; world.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } }); logEvent(sel, "Klima: heiß & trocken (von dir)", "flame", "shift"); render(); });
+  el("wlCat").addEventListener("click", () => stageIntervention(sel, "Katastrophe", "meteor", "hit",
+    () => world.triggerEvent(sel, { type:"catastrophe", survivorFraction:0.05 })));
+  el("wlWet").addEventListener("click", () => stageIntervention(sel, "Klima: feucht & kühl", "drop", "shift",
+    () => world.triggerEvent(sel, { type:"climateShift", to:{ water:0.9, temperature:0.5, foodAbundance:0.7 } })));
+  el("wlDry").addEventListener("click", () => stageIntervention(sel, "Klima: heiß & trocken", "flame", "shift",
+    () => world.triggerEvent(sel, { type:"climateShift", to:{ water:0.15, temperature:0.9, light:0.9 } })));
   // Raum-Hebel je ausgewähltem Ort: Nachbarn = angrenzende Orte in der Reihe.
   const neighbors = (i) => [i - 1, i + 1].filter((j) => j >= 0 && world && j < world.places.length);
   el("wlConnect").addEventListener("click", () => { if (!world) return; for (const j of neighbors(sel)) world.connect(sel, j, 0.28); render(); });
