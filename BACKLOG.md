@@ -422,13 +422,22 @@ Drei Punkte aus dem Spielen der v0.70.0:
   **Messung:** Zeile 19×/8 s → 4×/12 s, Pfeile 35×/12 s → 4×/12 s (≈10× ruhiger).
   `npm run ui-calm-check` hält das fest (Richtwert: höchstens 6 Wechsel je 12 s).
 
-- [ ] **Chronik-Ton: weniger lyrisch, mehr prosaisch.** *(Nutzer)* Der generierte Text soll
+- [x] **Chronik-Ton: weniger lyrisch, mehr prosaisch — umgesetzt (v0.70.2).** *(Nutzer)* Der generierte Text soll
   eine **persönliche Beziehung zum Wesen** ermöglichen — „kein Gedicht". Der aktuelle Katalog
   ist aphoristisch („die Auslese hat kein Ziel, nur eine Richtung") und spricht über Evolution
   im Allgemeinen statt über **dieses** Tier. Umbau: konkrete, nüchterne Sätze; Name und Form
   des Wesens benennen; beobachtbare Tatsachen statt Sentenzen; Vergleich mit dem früheren
   Zustand („trägt jetzt dichteres Fell als vor hundert Generationen"). Betrifft vor allem die
   `AUSKLANG`-Bausteine (die tragen den lyrischen Ton) und die Satz-Schablonen.
+  **Umgesetzt:** Der ganze `AUSKLANG`-Pool (48 Aphorismen wie „kein einzelnes Wesen erlebt
+  diesen Satz" — Sätze, die den Spieler bewusst auf Distanz schoben) ist durch 39 konkrete
+  Nachsätze ersetzt: was man sehen wird, was es kostet, wovon es abhängt, wie es vorher war.
+  Dazu **Name des Wesens** als Platzhalter (`{wesen}`, `{demwesen}`) — benannte Wesen werden
+  beim Namen genannt, sonst „dein Wesen"; nie mehr „die Linie" als anonyme Abstraktion.
+  24 weitere sentenzhafte Bausteine in Auftakt/Kern konkretisiert, 23 persönliche ergänzt.
+  **Messbar gemacht:** `story-check` prüft jetzt den Tonfall über die ganze Lagen-Suite —
+  Anteil Sätze mit Bezug zum Wesen **13 % → 27 %** (Mindestwert 20 %), Sentenz-Vokabular
+  **6 %** (Höchstwert 12 %). Vorrat dabei von ~142.000 auf ~150.000 Sätze gewachsen.
   → `docs/storytelling.md` (Abschnitt „Wie man den Vorrat erweitert") gilt weiter.
 
 - [ ] **Nutzerbindung / Spieltiefe.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar

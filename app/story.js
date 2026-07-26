@@ -181,10 +181,13 @@
     ["die Welt ringsum bleibt, wie sie ist", ""],
     ["die Bedingungen sind gesetzt", ""],
     ["so steht die Welt gerade", ""],
-    ["die Umgebung stellt ihre Rechnung", ""],
-    ["hier gilt, was hier zählt", ""],
-    ["die Umstände sind eindeutig", ""],
-    ["nichts davon ist Absicht, alles davon ist Ursache", ""],
+    ["das ist die Welt, in die du {wesen} gestellt hast", ""],
+    ["hier lebt {wesen} gerade", ""],
+    ["die Umgebung, die du eingestellt hast, wirkt", ""],
+    ["die Umgebung macht {demwesen} das Leben nicht leicht", "!bluete"],
+    ["so, wie es hier steht, muss {wesen} damit zurechtkommen", ""],
+    ["an dieser Umgebung gibt es nichts zu deuteln", ""],
+    ["hier zählt nur, was durchkommt", ""],
     // Die MITTE ist keine Lücke, sondern ein Zustand: milde Welten müssen
     // genauso viele Bilder haben wie die Extreme, sonst wird der Auftakt-Pool
     // dort dünn und die Wiederholung spürbar (Befund des Prüfstands).
@@ -215,60 +218,63 @@
     ["das eigene Licht ist das einzige weit und breit", "leuchtend"],
     ["das Grün trägt hier die ganze Rechnung", "gruen"],
     ["dieser Bau ist auf Bewegung gerechnet", "mobil"],
-    ["die Linie ist alt genug, um Muster zu haben", "uralt"],
-    ["die Linie ist noch jung", "jung"],
+    ["{wesen} stammt aus einer sehr langen Reihe von Vorfahren", "uralt"],
+    ["{wesen} hat erst wenige Generationen hinter sich", "jung"],
   ];
 
   // #ausklang# — der Nachhall: was das Gesagte über Evolution bedeutet
+  // #ausklang# — der Nachsatz. NEU (Nutzer 2026-07): nüchtern und konkret statt
+  // sentenzhaft. Der alte Pool war ein Aphorismen-Buch über Evolution im Allgemeinen
+  // („kein einzelnes Wesen erlebt diesen Satz") — das schob den Spieler weg von SEINEM
+  // Tier. Der Nachsatz sagt jetzt, was das für dieses Wesen bedeutet, was es kostet,
+  // was man sehen wird und was passiert, wenn man die Welt wieder ändert.
+  // {wesen} = Name oder „dein Wesen"; {demwesen} = Dativ; {gen} = Generation.
   const AUSKLANG = [
-    ["was bleibt, ist geerbt", ""],
-    ["das Übrige verliert sich", ""],
-    ["nichts davon wurde beschlossen", ""],
-    ["der Rest ist Buchhaltung über Generationen", ""],
-    ["so rechnet eine Welt", ""],
-    ["gezählt wird nur in Nachkommen", ""],
-    ["die Bilanz entscheidet, nicht die Form", ""],
-    ["die Linie merkt davon nichts", ""],
-    ["kein einzelnes Wesen erlebt diesen Satz", ""],
-    ["sichtbar wird das erst über hunderte Generationen", ""],
-    ["was zu teuer ist, verschwindet leise", ""],
-    ["Vorteile sind hier winzig und unerbittlich", ""],
-    ["das ist keine Verwandlung, das ist eine Verschiebung", ""],
-    ["die Auslese hat kein Ziel, nur eine Richtung", ""],
-    ["jede Generation stimmt neu ab", ""],
-    ["die Rechnung geht am Ende immer auf", ""],
-    ["die Toten sind der eigentliche Text", "jagd"],
-    ["die Kälte führt die Liste", "kalt"],
-    ["die Hitze streicht durch, wer zu viel trägt", "heiss"],
-    ["der Hunger sortiert schneller als jeder Jäger", "hunger"],
-    ["im Überfluss wird selbst Verschwendung verziehen", "fuelle"],
-    ["im Dunkeln zählt anderes als im Licht", "dunkel"],
-    ["das Licht bezahlt zuverlässiger als jede Beute", "hell"],
-    ["Wasser ist hier die eigentliche Währung", "trocken"],
-    ["hier unten misst niemand die Zeit", "tiefe"],
-    ["dieses Milieu verzeiht keinen Fehler", "extrem"],
-    ["wer das übersteht, hat den Rest hinter sich", "extrem"],
+    // — was man sehen wird
+    ["am Umriss ist davon schon etwas zu erkennen", ""],
+    ["du siehst es am Bild, wenn du eine Weile zuschaust", ""],
+    ["noch ist es kaum zu sehen", ""],
+    ["in ein paar hundert Generationen sieht {wesen} anders aus als jetzt", ""],
+    ["die nächsten Generationen zeigen, ob das reicht", ""],
+    ["bei {demwesen} ist es schon angelegt", ""],
+    ["viel schneller geht das nicht", ""],
+    ["das braucht Zeit, keine Entscheidung", ""],
+    // — was es kostet
+    ["billig ist das nicht", ""],
+    ["die Energie dafür fehlt an anderer Stelle", ""],
+    ["{wesen} bezahlt das woanders", ""],
+    ["jeder Vorteil hier kostet etwas dort", ""],
+    ["dafür bleibt weniger für alles andere übrig", ""],
+    // — Abhängigkeit von DEINER Welt
+    ["solange du die Welt so lässt, bleibt das so", ""],
+    ["drehst du wieder daran, dreht sich auch das zurück", ""],
+    ["stell die Welt anders ein, und es gilt nicht mehr", ""],
+    ["das gilt hier und an keinem anderen Ort", ""],
+    ["eine andere Umgebung hätte etwas anderes hervorgebracht", ""],
+    // — Bezug zur Vorgeschichte des Wesens
+    ["am Anfang war davon nichts da", ""],
+    ["vor hundert Generationen sah das noch anders aus", ""],
+    ["das ist der Stand nach {gen} Generationen", ""],
+    ["die Nachkommen tragen mehr davon als die Eltern", ""],
+    ["Schritt für Schritt, seit dem ersten Vorfahren dieser Linie", ""],
+    // — nüchterne Mechanik, ohne Sentenz
+    ["nicht das einzelne Tier ändert sich, sondern was von Generation zu Generation übrig bleibt", ""],
+    ["die Nachkommen mit dem Merkmal werden einfach mehr", ""],
+    ["wer hier besser zurechtkommt, hinterlässt mehr Junge", ""],
+    ["der Unterschied ist winzig und wirkt trotzdem", ""],
+    // — lagebezogen
+    ["die Kälte lässt kaum eine andere Wahl", "kalt"],
+    ["in der Hitze wird jedes Gramm zu viel zum Problem", "heiss"],
+    ["bei so wenig Nahrung zählt jede eingesparte Kalorie", "hunger"],
+    ["bei so viel Nahrung fällt Verschwendung nicht ins Gewicht", "fuelle"],
+    ["im Dunkeln nützt {demwesen} kein grünes Blatt", "dunkel"],
+    ["das Licht liefert hier zuverlässiger als jede Beute", "hell"],
+    ["Wasser ist hier das knappste Gut", "trocken"],
+    ["mit Jägern draußen zählt vor allem, nicht aufzufallen", "jagd"],
+    ["hier draußen verzeiht nichts einen Fehler", "extrem"],
     ["mehr ist aus dieser Welt nicht herauszuholen", "not"],
-    ["nichts davon ist verschwendet", "bluete"],
-    ["es passt, solange die Welt so bleibt", "bluete"],
-    ["das ist der Preis dieser Nische", ""],
-    ["ein anderer Ort hätte anderes ausgelesen", ""],
-    ["dieselbe Physik, ein anderer Ausgang", ""],
-    ["so entstehen Zweige, nicht Absichten", ""],
-    ["die Form ist nur die Spur davon", ""],
-    ["niemand hier weiß, dass er ausgewählt wird", ""],
-    ["Vererbung ist das einzige Gedächtnis dieser Welt", ""],
-    ["der Vorteil muss nur minimal sein, nicht sichtbar", ""],
-    ["hinter jedem Merkmal steht eine bezahlte Rechnung", ""],
-    ["die Umwelt schreibt, der Körper ist das Papier", ""],
-    ["was hier zählt, zählt anderswo nichts", ""],
-    ["das Ergebnis ist alt, der Weg dorthin jedes Mal neu", ""],
-    ["kein Plan, nur ein Filter", ""],
-    ["das Grün rechnet sich, solange die Sonne steht", "k-pflanze"],
-    ["Bewegung bleibt teuer, auch wenn sie sich lohnt", "k-tier"],
-    ["Zersetzen ist die geduldigste Art zu leben", "k-pilz"],
-    ["im Kleinsten ist jede Änderung sofort da", "k-mikrobe"],
-    ["das Alter dieser Linie ist ihr einziger Beweis", "uralt"],
+    ["besser wird es hier kaum noch", "bluete"],
+    ["{wesen} kommt damit gut durch", "bluete"],
   ];
 
   // #zeit# — Zeitmaß als nachgestelltes Adverbial oder Vorspann
@@ -309,7 +315,7 @@
     ["was daraus wird, entscheidet die Welt ringsum", ""],
     ["noch ist nichts entschieden", ""],
     ["eine neue Linie beginnt bei null", ""],
-    ["dieselbe Physik, ein neuer Wurf", ""],
+    ["dieselben Regeln wie beim letzten Mal, ein anderer Ausgang", ""],
     ["diese Bahn wird sich nie genau wiederholen", ""],
     ["die erste Generation kennt noch keinen Vorteil", ""],
     ["die Kälte wird die erste Frage stellen", "kalt"],
@@ -319,6 +325,9 @@
     ["ein gefährlicher Anfang, gleich unter Jägern", "jagd"],
     ["ein sanfter Anfang, ohne Feinde", "sicher"],
     ["ein karger Anfang, an dem Sparsamkeit zählt", "hunger"],
+    ["{wesen} fängt bei null an", ""],
+    ["was aus {demwesen} wird, hängt jetzt an dir", ""],
+    ["du bestimmst die Welt, nicht das Tier darin", ""],
   ];
 
   // --- heimkehr (Offline-Zeit) --------------------------------------------
@@ -385,28 +394,30 @@
   };
   const WELT_ALLGEMEIN = [
     ["die Welt ist eine andere", ""],
-    ["die Auslese richtet sich neu aus", ""],
-    ["was gestern Vorteil war, wird jetzt gegengerechnet", ""],
+    ["was jetzt zählt, ist ein anderes als vorhin", ""],
+    ["was eben noch geholfen hat, hilft {demwesen} jetzt nicht mehr", ""],
     ["die Bedingungen haben sich verschoben", ""],
+    ["du hast die Regeln geändert, unter denen {wesen} lebt", ""],
+    ["{wesen} muss sich jetzt auf etwas anderes einstellen", ""],
   ];
 
   // --- druck: EIN Merkmal steht anhaltend unter Auslese --------------------
   // Pro Gen und Richtung mehrere Bilder. Das ist die dichteste Salienz-Quelle:
   // hier redet der Text über genau das Gen, das der Gradient gerade auslest.
   const DRUCK = {
-    0:  { auf: ["dichteres Fell trägt sich hier", "wer die Wärme hält, gibt sie weiter", "die Dämmung wächst mit jedem Nachwuchs"],
+    0:  { auf: ["dichteres Fell trägt sich hier", "die wärmer eingepackten Jungen überleben den Winter häufiger", "die Dämmung wächst mit jedem Nachwuchs"],
           ab:  ["die dünner Bedeckten kommen besser durch", "Dämmung wird zur Last", "das Fell wird lichter"] },
     1:  { auf: ["die größeren Nachkommen setzen sich durch", "Masse rechnet sich hier", "der Körper wächst über die Generationen"],
           ab:  ["große Körper kosten hier zu viel", "die Kleineren bleiben übrig", "die Linie schrumpft"] },
     2:  { auf: ["wer weiter reicht, frisst öfter", "die Gliedmaßen werden länger", "Reichweite zahlt sich aus"],
           ab:  ["lange Gliedmaßen tragen sich nicht mehr", "was nicht gebraucht wird, wird abgebaut", "der Bau wird gedrungener"] },
-    3:  { auf: ["ein heißer Stoffwechsel setzt sich durch", "schnelles Leben schlägt sparsames Leben", "der Umsatz steigt"],
+    3:  { auf: ["ein heißer Stoffwechsel setzt sich durch", "wer mehr verbrennt, wächst hier schneller heran", "der Umsatz steigt"],
           ab:  ["die Sparsamen bleiben übrig", "der Stoffwechsel fährt herunter", "das Leben wird langsamer und billiger"] },
     4:  { auf: ["Panzer zahlt sich aus", "was nicht durchdrungen wird, hinterlässt Nachkommen", "die Hülle wird härter"],
           ab:  ["ohne Jäger ist Panzer nur Gewicht", "die Leichteren haben mehr übrig", "der Panzer wird dünner"] },
-    5:  { auf: ["Grün wird zum Vorteil", "wer Licht in Leben umsetzt, braucht niemanden zu jagen", "die Photosynthese greift durch"],
+    5:  { auf: ["Grün wird zum Vorteil", "{wesen} deckt einen Teil des Bedarfs jetzt selbst aus Licht", "die Photosynthese greift durch"],
           ab:  ["das Licht reicht nicht mehr aus", "die Photosynthese verblasst", "Grün bringt hier nichts mehr ein"] },
-    6:  { auf: ["Bewegung lohnt sich", "wer sucht, findet", "die Beweglicheren geben es weiter"],
+    6:  { auf: ["Bewegung lohnt sich", "wer weiter herumkommt, findet mehr", "die Beweglicheren geben es weiter"],
           ab:  ["Laufen kostet mehr, als es einbringt", "die Linie wird ruhiger", "Bewegung wird zum Luxus"] },
     7:  { auf: ["das Stützgewebe verholzt", "Höhe braucht ein Gerüst", "der Bau wird tragfähiger"],
           ab:  ["das Gerüst wird überflüssig", "Stützgewebe kostet, ohne zu tragen"] },
@@ -424,10 +435,10 @@
           ab:  ["der Grabtrieb bringt hier nichts mehr"] },
     14: { auf: ["Farbe wird zum Schutzschild", "dunkles Pigment fängt die Strahlung ab"],
           ab:  ["das Schutzpigment verliert seinen Wert"] },
-    15: { auf: ["filtern schlägt jagen", "wer aus dem Wasser siebt, spart den Weg"],
-          ab:  ["der Filterapparat lohnt sich nicht mehr"] },
+    15: { auf: ["aus dem Wasser sieben ist hier ergiebiger als jagen", "wer aus dem Wasser siebt, spart den Weg"],
+          ab:  ["der Filterapparat bringt hier nichts mehr ein"] },
     16: { auf: ["unsichtbar zu sein schlägt jeden Panzer", "Tarnung setzt sich durch"],
-          ab:  ["Tarnung nützt nichts, wo niemand jagt"] },
+          ab:  ["ohne Jäger bringt Tarnung {demwesen} keinen Vorteil mehr"] },
     17: { auf: ["der Körper hält dem Gewicht des Wassers stand", "Druck-Toleranz entscheidet hier unten"],
           ab:  ["die Druck-Toleranz wird überflüssig"] },
     18: { auf: ["schärfere Sinne kaufen Sekunden", "wer früher merkt, lebt länger"],
@@ -448,9 +459,13 @@
   // Rückfall für jedes Gen ohne eigenes Bild (Platzhalter aus dem Lexikon).
   const DRUCK_ALLGEMEIN = {
     auf: [["{merkmal} steigt, weil die Träger mehr Nachkommen hinterlassen", ""],
+          ["bei {demwesen} nimmt {merkmal} zu", ""],
+          ["du wirst sehen, wie {merkmal} bei {demwesen} weiter steigt", ""],
           ["diese Welt liest {merkmal} heraus", ""],
           ["der Vorteil von {merkmal} ist winzig, die Generationen sind viele", ""]],
     ab:  [["{merkmal} wird zurückgedrängt", ""],
+          ["bei {demwesen} geht {merkmal} zurück", ""],
+          ["{wesen} legt {merkmal} nach und nach ab", ""],
           ["{merkmal} kostet hier mehr, als es einbringt", ""],
           ["die Linie legt {merkmal} ab", ""]],
   };
@@ -459,13 +474,13 @@
   const WANDEL = {
     "Pflanze": ["die Linie hat das Suchen aufgegeben", "hier steht jetzt etwas still und lebt vom Licht", "aus Bewegtem wurde Verwurzeltes"],
     "Tier":    ["aus Verwurzeltem wird Bewegtes", "von hier an wird das Futter selbst geholt", "hier bewegt sich etwas aus eigener Kraft"],
-    "Pilz":    ["kein Licht, keine Jagd — geblieben ist das Zersetzen", "die Linie lebt jetzt von dem, was andere zurücklassen", "das Leben zieht sich in den Boden"],
+    "Pilz":    ["ohne Licht und ohne Jagd bleibt {demwesen} nur das Zersetzen", "die Linie lebt jetzt von dem, was andere zurücklassen", "das Leben zieht sich in den Boden"],
     "Mikrobe": ["zurück ins Winzige", "wer fast nichts braucht, übersteht fast alles", "die Form fällt auf das Nötigste zusammen"],
-    "Protist": ["schwimmen und zugleich vom Licht leben", "die Linie steht zwischen den Reichen", "beides halb, nichts ganz"],
-    "intern":  ["derselbe Ast, ein anderer Zweig", "die Schwelle ist überschritten", "aus {vorher} wurde {form}"],
+    "Protist": ["schwimmen und zugleich vom Licht leben", "die Linie steht zwischen den Reichen", "{wesen} kann beides ein wenig und nichts davon ganz"],
+    "intern":  ["derselbe Ast, ein anderer Zweig", "die Schwelle ist überschritten", "was eben noch {vorher} war, ist jetzt {form}"],
   };
   const WANDEL_ALLGEMEIN = [
-    ["kein einzelnes Wesen hat sich verwandelt, verschoben hat sich die Linie", ""],
+    ["nicht ein Tier hat sich verwandelt — die ganze Linie hat sich verschoben", ""],
     ["was hier lebt, ist nicht mehr dasselbe wie vorher", ""],
     ["die Grenze zwischen zwei Bauplänen ist gefallen", ""],
   ];
@@ -482,9 +497,9 @@
 
   // --- fund ----------------------------------------------------------------
   const FUND = {
-    "legendaer":   ["diese Form gewinnt fast nirgends", "das hier ist ein schmaler Zufall der Drift", "kaum eine Welt führt zu diesem Bauplan"],
-    "sehr-selten": ["eine Form für eine sehr enge Nische", "sie passt hier und fast nirgends sonst", "nur wenige Umwelten bringen so etwas hervor"],
-    "selten":      ["selten gesehen", "nur wenige Welten führen überhaupt hierher"],
+    "legendaer":   ["diese Form gewinnt fast nirgends", "dass {wesen} hier gelandet ist, war ein schmaler Zufall", "kaum eine Welt führt zu diesem Bauplan"],
+    "sehr-selten": ["eine Form für eine sehr enge Nische", "sie passt in diese Welt und in fast keine andere", "nur wenige Umwelten bringen so etwas hervor"],
+    "selten":      ["selten gesehen", "nur wenige Umgebungen führen überhaupt zu dieser Form"],
     "gelegentlich":["eine Form, die es in deinem Lebensbaum noch nicht gab", "neu in deiner Sammlung von Welten", "diesen Bauplan hattest du noch nicht"],
     "haeufig":     ["ein Bauplan, den viele Welten hervorbringen", "ein Bauplan, der oft gewinnt und selten auffällt", "hier taucht etwas zum ersten Mal auf"],
   };
@@ -501,11 +516,15 @@
     ["kaum ein Bauplan würde hier besser passen", "bluete"],
     ["Stillstand, aber kein Sieg", "not"],
     ["das Gleichgewicht ist erreicht, nicht das Optimum", ""],
+    ["{wesen} hat gefunden, was in dieser Welt geht", ""],
+    ["du kannst {demwesen} jetzt lange zusehen, ohne dass sich viel ändert", ""],
+    ["so bleibt {wesen}, bis du etwas an der Welt änderst", ""],
+    ["hier ist {wesen} angekommen", ""],
   ];
   const NOT = [
     ["die Welt verlangt mehr, als dieser Körper hergibt", ""],
     ["jede Generation verliert mehr, als sie gewinnt", ""],
-    ["die Auslese wird hart", ""],
+    ["die Auslese greift jetzt hart durch", ""],
     ["der Bauplan passt nicht zu dem, was hier gilt", ""],
     ["es kommt nur ein Rest durch", ""],
     ["die Kälte nimmt mehr, als nachwächst", "kalt"],
@@ -513,6 +532,10 @@
     ["der Hunger ist der eigentliche Jäger dieser Welt", "hunger"],
     ["zu viele Jäger, zu wenig Deckung", "jagd"],
     ["dieses Milieu ist schneller als jede Anpassung", "extrem"],
+    ["{wesen} kommt hier schlecht zurecht", ""],
+    ["du siehst es an der Passung: viel fehlt", ""],
+    ["so wie die Welt jetzt steht, hat {wesen} es schwer", ""],
+    ["ein Regler in die richtige Richtung würde {demwesen} sehr helfen", ""],
   ];
   const BLUETE = [
     ["alles passt", ""],
@@ -523,14 +546,17 @@
     ["hier wird nichts verschwendet", ""],
     ["das Grün deckt die ganze Rechnung", "k-pflanze"],
     ["die Jagd zahlt sich aus", "k-tier"],
+    ["{wesen} ist hier goldrichtig", ""],
+    ["besser könnte {wesen} diese Welt kaum treffen", ""],
+    ["du hast {demwesen} eine Welt gebaut, die passt", ""],
   ];
 
   // --- zeit (Generationen-Marken) ------------------------------------------
   const MARK = {
     100:    ["hundert Generationen sind gefallen", "so lange braucht es in der Natur, bis Farbe oder Größe kippen"],
     500:    ["fünfhundert Generationen", "bei Mäusen wäre das ein Jahrhundert"],
-    1000:   ["tausend Generationen", "kein Vorfahr vom Anfang hätte diese Welt je gesehen"],
-    5000:   ["fünftausend Generationen ununterbrochener Vererbung", "keine einzige davon durfte ausfallen"],
+    1000:   ["tausend Generationen", "vom ersten Vorfahren ist außer der Linie nichts übrig"],
+    5000:   ["fünftausend Generationen ununterbrochener Vererbung", "keine einzige Generation davon ist ausgefallen"],
     10000:  ["zehntausend Generationen", "in dieser Spanne sind aus Wölfen Hunde geworden, mehrfach"],
     50000:  ["fünfzigtausend Generationen", "solche Ketten trennen ganze Arten voneinander"],
     100000: ["hunderttausend Generationen, eine ungebrochene Linie", "genau so alt ist jedes Lebewesen"],
@@ -635,8 +661,15 @@
         for (const w of sets[i]) if (sets[j].has(w)) return true;
     return false;
   }
+  // Der Name des Wesens macht den Unterschied zwischen „eine Linie" und „meine Linie".
+  // Ohne Namen bleibt es beim schlichten „dein Wesen" — nie beim abstrakten „die Linie".
+  const wesen  = ctx => (ctx.name && String(ctx.name).trim() ? String(ctx.name).trim() : "dein Wesen");
+  const demWesen = ctx => (ctx.name && String(ctx.name).trim() ? String(ctx.name).trim() : "deinem Wesen");
   function fill(text, ctx) {
     return text
+      .replace(/\{wesen\}/g, wesen(ctx))
+      .replace(/\{demwesen\}/g, demWesen(ctx))
+      .replace(/\{gen\}/g, ctx.gen == null ? "vielen" : Number(ctx.gen).toLocaleString("de-DE"))
       .replace(/\{merkmal\}/g, ctx.merkmal || "dieses Merkmal")
       .replace(/\{form\}/g, ctx.to || ctx.form || "diese Form")
       .replace(/\{vorher\}/g, ctx.vorher || ctx.from || "der Vorgänger")
@@ -680,7 +713,7 @@
     if (b === "bluete") return BLUETE;
     if (b === "zeit") {
       const spec = wrap(MARK[ctx.mark] || []);
-      return spec.concat(dim([["wieder eine Marke gefallen", ""], ["die Linie zählt nicht mit, sie läuft einfach weiter", ""]]));
+      return spec.concat(dim([["wieder eine Marke gefallen", ""], ["gezählt hast das nur du — {wesen} läuft einfach weiter", ""]]));
     }
     return [];
   }

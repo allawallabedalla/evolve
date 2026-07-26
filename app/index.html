@@ -785,7 +785,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.70.1";
+const APP_VERSION = "v0.70.2";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2029,6 +2029,7 @@ function storyLine(beat, extra){
   // Alles, was der Generator über die Lage wissen muss — je mehr davon, desto
   // spezifischer (und damit weniger austauschbar) wird der Satz.
   const ctx = Object.assign({ beat, env, genome, form: a.n, kingdom: a.k, gen: generation,
+    name: creatureName,   // benannte Wesen werden beim Namen genannt — sonst „dein Wesen"
     vit: clamp01((fitness(genome, env) - 0.12) / 0.72), seed: lineageSeed >>> 0, key: "" }, extra || {});
   // _story.recent ist das Gedächtnis des Generators (Bausteine + Zeilen-Hashes);
   // gepflegt wird es DORT — hier nur durchreichen.
