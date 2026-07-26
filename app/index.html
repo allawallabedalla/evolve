@@ -785,7 +785,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.70.0";
+const APP_VERSION = "v0.70.1";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1848,8 +1848,23 @@ const EXPLORE_IDEAS = [
 ];
 // Selektionsgradient ∂Fitness/∂Gen (dieselbe Größe, die die Evolution treibt) — so
 // sieht man live, WARUM sich das Wesen in diese Richtung verschiebt, nicht erst im Reveal.
-function updateWhy(g){
+//
+// RUHE (Nutzer-Rückmeldung 2026-07): diese Zeile und die Gen-Pfeile liefen im Takt der
+// Bildrate und sprangen im Sekundenbruchteil. Drei Bremsen, alle nötig:
+//   1. Takt — neu gerechnet wird nur alle WHY_MS, nicht 60×/s.
+//   2. Trägheit — die Netto-Bewegung je Gen wird geglättet (gleitender Mittelwert),
+//      damit ein Wert an der Schwelle nicht hin- und herkippt.
+//   3. Schwellen-Hysterese — ein Merkmal muss deutlich über EIN, aber weit unter AUS
+//      fallen, um wieder zu verschwinden. Dazwischen bleibt die Anzeige, wie sie ist.
+// Zusätzlich wird das DOM nur angefasst, wenn sich das ANGEZEIGTE Ergebnis ändert.
+const WHY_MS = 900, WHY_SMOOTH = 0.28, WHY_ENTER = 0.0022, WHY_LEAVE = 0.0010, WHY_STICKY = 1.35, WHY_HOLD = 2;
+const _why = { t: 0, ema: new Array(NG).fill(0), on: new Array(NG).fill(0), sig: "", shown: [],
+               hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null) };
+function updateWhy(g, force){
   const el = document.getElementById("whyLine"); if(!el) return;
+  const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
+  if(!force && now - _why.t < WHY_MS) return;   // Takt: höchstens alle WHY_MS
+  _why.t = now;
   const eps = PHYS.eps, muted = mutedGenes(committedArch||classify(g));
   // „Bewegt sich das Merkmal gerade?" = die NETTO-Änderung pro Generation (Selektion + Mutations-
   // Rücktrieb, geklemmt), NICHT der rohe Fitness-Gradient. Nur so erreicht das Wesen ein echtes
@@ -1857,10 +1872,7 @@ function updateWhy(g){
   // steht still — dann zeigen wir keine Pfeile mehr, sondern den Neugier-Anstoß.
   const press = [];
   for(let i=0;i<NG;i++){
-    const ge = document.getElementById("gene-"+i);
-    const gd = document.getElementById("gd-"+i);
-    if(ge) ge.classList.remove("sel-up","sel-down");   // Selektions-Theater: erst zurücksetzen
-    if(muted.includes(i)){ if(gd){ gd.style.opacity=0; gd.textContent=""; } continue; }  // irrelevante Gene ausklammern
+    if(muted.includes(i)){ _why.ema[i] = 0; _why.on[i] = 0; continue; }   // irrelevante Gene ausklammern
     const up=g.slice(); up[i]=clamp01(up[i]+eps);
     const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
     const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
@@ -1868,19 +1880,75 @@ function updateWhy(g){
     const vf = 4*g[i]*(1-g[i]);
     const speedMod = PARAMS.varianceWeight*vf + (1-PARAMS.varianceWeight);
     const anchor = PARAMS.mutationAnchor ? PARAMS.mutationAnchor[i] : 0.5;
-    const raw = PARAMS.responseRate[i]*PARAMS.selectionStrength*grad*speedMod + PARAMS.mutationRate*(anchor - g[i]);
-    const net = clamp01(g[i] + raw) - g[i];   // tatsächliche Bewegung (am Rand geklemmt)
-    let dir=0, mag=Math.abs(net);
-    if(net > 0.0012){ dir=1; press.push({i,dir:1,m:mag}); }
-    else if(net < -0.0012){ dir=-1; press.push({i,dir:-1,m:mag}); }
-    // Balken markieren + Richtungspfeil (Intensität ~ Bewegungstempo).
-    if(dir!==0 && ge){ ge.classList.add(dir>0?"sel-up":"sel-down");
-      if(gd){ gd.textContent = dir>0?"↑":"↓"; gd.style.opacity = Math.min(1, 0.4 + mag*60).toFixed(2); } }
-    else if(gd){ gd.style.opacity=0; gd.textContent=""; }
+    // ZWEI Größen, die vorher vermengt waren:
+    //   sel  = was die UMWELT tut (Selektion) — nur das ist „diese Umwelt formt gerade"
+    //   pull = Mutations-Rücktrieb zum Ruhewert — das tut ein ungenutztes Gen von selbst,
+    //          auch in einer völlig reizlosen Welt. 15 der 25 Gene ankern niedrig, fielen
+    //          also dauernd mit winzigen, fast gleich großen Beträgen — daraus entstand
+    //          das Ranking-Geflacker in der Zeile.
+    const sel  = PARAMS.responseRate[i]*PARAMS.selectionStrength*grad*speedMod;
+    const pull = PARAMS.mutationRate*(anchor - g[i]);
+    const net  = clamp01(g[i] + sel + pull) - g[i];   // tatsächliche Bewegung (am Rand geklemmt)
+    // Trägheit: gleitender Mittelwert der SELEKTION statt Momentaufnahme.
+    _why.ema[i] += (sel - _why.ema[i]) * WHY_SMOOTH;
+    if(Math.abs(net) < 0.0002) { _why.on[i] = 0; continue; }   // steht am Rand/still: kein Pfeil
+    const v = _why.ema[i], mag = Math.abs(v);
+    // Hysterese: rein erst über EIN, raus erst unter AUS — dazwischen bleibt der Zustand.
+    let want = _why.on[i];
+    if(_why.on[i] === 0){ if(mag > WHY_ENTER) want = v > 0 ? 1 : -1; }
+    else if(mag < WHY_LEAVE) want = 0;
+    else want = v > 0 ? 1 : -1;
+    // Haltezeit: ein Wechsel muss sich über zwei Takte behaupten. Ein Merkmal, das an der
+    // Schwelle pendelt, schaltet damit nicht mehr im Sekundentakt hin und her.
+    if(want !== _why.on[i]){
+      if(++_why.hold[i] >= WHY_HOLD){ _why.on[i] = want; _why.hold[i] = 0; }
+    } else _why.hold[i] = 0;
+    if(_why.on[i] !== 0) press.push({ i, dir: _why.on[i], m: mag });
   }
   press.sort((a,b)=>b.m-a.m);
+  // Klebrige Auswahl: wer schon dasteht, bleibt stehen — ein Herausforderer muss
+  // deutlich (Faktor WHY_STICKY) stärker sein, um zu verdrängen. Ohne das tauschen
+  // fast gleich starke Merkmale im Sekundentakt die Plätze.
+  const magOf = i => Math.abs(_why.ema[i]);
+  const keep = _why.shown.filter(i => _why.on[i] !== 0);
+  const sel3 = keep.slice(0, 3);
+  for(const p of press){ if(sel3.length >= 3) break; if(!sel3.includes(p.i)) sel3.push(p.i); }
+  if(sel3.length === 3){
+    const chall = press.find(p => !sel3.includes(p.i));
+    if(chall){
+      let wi = sel3[0]; for(const i of sel3) if(magOf(i) < magOf(wi)) wi = i;
+      if(chall.m > magOf(wi) * WHY_STICKY) sel3[sel3.indexOf(wi)] = chall.i;
+    }
+  }
+  _why.shown = sel3;
+  const strong = sel3.map(i => ({ i, dir: _why.on[i], m: magOf(i) }));
+  // Signatur des ANGEZEIGTEN Zustands — ändert sie sich nicht, bleibt das DOM unberührt
+  // (die Pfeil-Deckkraft wird dafür auf drei Stufen gerastert, sonst flimmert sie weiter).
+  // Gen-Balken + Richtungspfeile: JE ELEMENT vergleichen und nur schreiben, was sich
+  // wirklich ändert. (Vorher schrieb eine Neuberechnung in alle 25 Zeilen — gemessen
+  // ~37 DOM-Änderungen/s, obwohl nur alle 700 ms gerechnet wurde.)
+  // KEINE Intensitäts-Abstufung mehr: die Deckkraft nach Selektionsstärke zu staffeln
+  // war die letzte große Flacker-Quelle und für sich kaum lesbar. Ein Pfeil sagt jetzt
+  // nur noch: dieses Merkmal wird gerade ausgelesen — in diese Richtung.
+  for(let i=0;i<NG;i++){
+    // NUR die drei Merkmale, die auch in der Zeile stehen, werden markiert. Vorher trug
+    // jedes der 25 Gene seinen eigenen Pfeil, und die schwachen am unteren Ende schalteten
+    // dauernd — 25 zuckende Anzeigen statt einer Aussage. Zeile und Balken sagen jetzt
+    // dasselbe, und beide wechseln nur, wenn die klebrige Auswahl wirklich wechselt.
+    const on = _why.shown.includes(i) ? _why.on[i] : 0;
+    const txt = on === 0 ? "" : (on > 0 ? "↑" : "↓");
+    if(_why.wTxt[i] === txt) continue;
+    _why.wTxt[i] = txt;
+    const ge = document.getElementById("gene-"+i), gd = document.getElementById("gd-"+i);
+    if(ge){ ge.classList.toggle("sel-up", on > 0); ge.classList.toggle("sel-down", on < 0); }
+    if(gd){ gd.textContent = txt; gd.style.opacity = on === 0 ? "0" : "0.85"; }
+  }
+  // Die Textzeile hängt NUR an den drei stärksten — Zappeln weiter unten im Feld
+  // darf sie nicht neu schreiben.
+  const sig = strong.map(p=>p.i+":"+p.dir).join(",");
+  if(sig === _why.sig && !force){ _pressTop = strong.length ? { i: strong[0].i, dir: strong[0].dir } : null; return; }
+  _why.sig = sig;
   // Bewegt sich nichts (mehr) nennenswert -> das Wesen ist angepasst -> Neugier-Anstoß.
-  const strong = press.slice(0,3);
   if(!strong.length){
     // Neugier-Anstoß (sanftes Ziel, KEIN Zwang): eine leise Einladung zum Weiterspielen, die
     // zugleich Ursache→Wirkung lehrt. Stabil je Form (Hash) -> kein Flackern; wechselt bei Änderung.
@@ -1974,6 +2042,7 @@ function storyLine(beat, extra){
 // Der Spieler hat die Umwelt verändert (Regler/Biom/Einfluss). Entprellt, damit das
 // Schieben eines Reglers EINE Zeile ergibt — und Mikro-Justagen gar keine.
 function storyEnvChanged(){
+  _why.t = 0;   // Umwelt geändert -> Warum-Zeile darf sofort neu rechnen (sonst wirkt sie taub)
   clearTimeout(_story.envTimer);
   _story.envTimer = setTimeout(() => {
     const prev = _story.lastEnv || {};

@@ -402,6 +402,43 @@ eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. 
 
 ---
 
+## ⬜ Offen — Nutzer-Rückmeldung 2026-07-26 (Abend)
+
+Drei Punkte aus dem Spielen der v0.70.0:
+
+- [x] **Zappelnde Anzeige — behoben (v0.70.1).** „Diese Umwelt formt gerade …" und die
+  Gen-Pfeile wechselten im Sekundenbruchteil („das geht so nicht"). Ursachen waren vier,
+  alle gemessen statt geraten (`tools/ui-calm-check.mjs`, neu):
+  1. **Takt:** die Zeile wurde im Bildtakt (60/s) neu gerechnet → jetzt höchstens alle 900 ms.
+  2. **Begriffsfehler:** gezeigt wurde die NETTO-Bewegung, also Selektion **plus** den
+     Mutations-Rücktrieb zum Ruhewert. 15 der 25 Gene ankern bei 0,12 und rutschten deshalb
+     dauernd mit fast gleich großen Minibeträgen — daraus entstand das Ranking-Geflacker.
+     Die Zeile zeigt jetzt nur noch die **Selektion** („was diese Umwelt auswählt").
+  3. **Ranking-Rauschen:** klebrige Auswahl — ein Merkmal verdrängt ein angezeigtes erst,
+     wenn es 1,35× stärker ist; dazu Hysterese + Haltezeit von zwei Takten.
+  4. **DOM:** jede Neuberechnung schrieb in alle 25 Zeilen (gemessen ~37 Änderungen/s).
+     Jetzt wird je Element verglichen, die Intensitäts-Abstufung der Pfeile ist entfallen,
+     und markiert werden nur noch die **drei Merkmale, die auch in der Zeile stehen**.
+  **Messung:** Zeile 19×/8 s → 4×/12 s, Pfeile 35×/12 s → 4×/12 s (≈10× ruhiger).
+  `npm run ui-calm-check` hält das fest (Richtwert: höchstens 6 Wechsel je 12 s).
+
+- [ ] **Chronik-Ton: weniger lyrisch, mehr prosaisch.** *(Nutzer)* Der generierte Text soll
+  eine **persönliche Beziehung zum Wesen** ermöglichen — „kein Gedicht". Der aktuelle Katalog
+  ist aphoristisch („die Auslese hat kein Ziel, nur eine Richtung") und spricht über Evolution
+  im Allgemeinen statt über **dieses** Tier. Umbau: konkrete, nüchterne Sätze; Name und Form
+  des Wesens benennen; beobachtbare Tatsachen statt Sentenzen; Vergleich mit dem früheren
+  Zustand („trägt jetzt dichteres Fell als vor hundert Generationen"). Betrifft vor allem die
+  `AUSKLANG`-Bausteine (die tragen den lyrischen Ton) und die Satz-Schablonen.
+  → `docs/storytelling.md` (Abschnitt „Wie man den Vorrat erweitert") gilt weiter.
+
+- [ ] **Nutzerbindung / Spieltiefe.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar
+  immer wieder neue Wesen, aber es hat keine Verbindlichkeit." Es fehlt der Schritt vom
+  Spielzeug zum **Spiel**. Recherche, wie moderne Spiele das lösen, dann ein Konzept, das zu
+  den Produkt-Pfeilern passt (Neugier + Bindung, **keine** Dark Patterns: kein Streak-Zwang,
+  kein Verfall-Schuldgefühl, kein Sammelzwang). Ergebnis gehört in ein eigenes Dokument.
+
+---
+
 ## ⬜ Offen — Live-App
 
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
