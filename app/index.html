@@ -131,6 +131,25 @@
   .how > summary:hover { color: var(--bio-dim); }
   .how p { color: var(--text); font-size: .82rem; line-height: 1.55; margin: 8px 0 2px; }
 
+  /* ---- Chronik: die Erzählstimme (deterministischer Katalog, app/story.js) ---- */
+  .chron-line { margin: 10px 0 2px; padding: 2px 0 2px 11px; border-left: 2px solid var(--line);
+    font-family: var(--serif); font-style: italic; font-size: .92rem; line-height: 1.5;
+    color: var(--bio-dim); opacity: 0; transition: opacity .55s ease; min-height: 1.4em; }
+  .chron-line.show { opacity: 1; }
+  .chron-line[hidden] { display: none; }
+  .chron-log { margin-top: 10px; }
+  .chron-log[hidden] { display: none; }
+  .chron-log > summary { cursor: pointer; font-size: .7rem; color: var(--muted); list-style: none; user-select: none; }
+  .chron-log > summary::-webkit-details-marker { display: none; }
+  .chron-log > summary::before { content: "▸ "; }
+  .chron-log[open] > summary::before { content: "▾ "; }
+  .chron-log ol { margin: 8px 0 0; padding: 0; list-style: none; max-height: 190px; overflow-y: auto; }
+  .chron-log li { display: flex; gap: 8px; padding: 4px 0; border-top: 1px solid var(--line-soft); font-size: .78rem; line-height: 1.45; }
+  .chron-log li:first-child { border-top: 0; }
+  .chron-log .cg { flex: 0 0 auto; font-family: var(--mono); font-size: .62rem; color: var(--muted); padding-top: .22em; }
+  .chron-log .ct { color: var(--text); font-family: var(--serif); font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { .chron-line { transition: none; } }
+
   /* ---- Name & Ahnenlinie (A4) ---- */
   .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
   .cname-txt { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--bio-dim); }
@@ -603,6 +622,7 @@
       <div class="kingdom" id="kingdom">—</div>
       <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
       <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
+      <div class="chron-line" id="chronLine" role="status" aria-live="polite" hidden></div>
       <details class="how">
         <summary>So funktioniert's</summary>
         <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
@@ -616,6 +636,10 @@
       <div class="genes" id="genes"></div>
       <button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
+      <details class="chron-log" id="chronLog" hidden>
+        <summary id="chronLogSum">Chronik dieses Lebens</summary>
+        <ol id="chronList"></ol>
+      </details>
       <button class="link cshare" id="shareBtn" title="Ein Bild deines Wesens erstellen und teilen">Schnappschuss teilen ↗</button>
     </div>
   </div>
@@ -757,10 +781,11 @@
 
 <script src="./vendor/supabase.js"></script>
 <script src="./influences.js"></script>
+<script src="./story.js"></script>
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.69.0";
+const APP_VERSION = "v0.70.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1179,6 +1204,12 @@ let discovered = new Set();   // Genbuch: entdeckte Archetypen (Spieler-Ebene, u
 // A4 Bindung: Name des aktuellen Wesens + Ahnenlinie (aelteste zuerst, gekappt).
 let creatureName = "";
 let ancestry = [];   // [{name, form, gen}]
+// Chronik (Erzählstimme): die Phrasen dieses Lebens, [{t,g}] — lokal (die Cloud-Zeile
+// hat keine Spalte dafür, wie bei der Ahnenlinie). Katalog + Auswahl: app/story.js.
+let chronicle = [];
+// Stärkster gerade wirkender Selektionsdruck {i,dir} — von updateWhy() gesetzt, von der
+// Chronik gelesen (erzählt erst, wenn derselbe Druck lange genug anhält).
+let _pressTop = null;
 // Committed Archetyp mit Hysterese: Art/Zeichnung/Unlock wechseln erst, wenn eine
 // neue Form ~STABLE_GENS Generationen STABIL gehalten wird. Verhindert (a) Unlock
 // kurz ueberstreifter Formen und (b) spontanes Umschalten an classify()-Schwellen.
@@ -1553,6 +1584,13 @@ async function restore(){
   }
   updatePanels(); updateDisc(); updateBonding();
   maybeOnboard();
+  // Chronik: Ausgangslage merken (sonst meldet der erste Regler-Ruck einen Riesen-Sprung),
+  // gespeicherte Zeilen zeigen — und wer ganz neu ist, bekommt die Anfangs-Zeile.
+  _story.lastEnv = Object.assign({}, env);
+  _story.lastForm = committedArch || classify(genome);
+  loadChron();
+  if(chronicle.length) renderChron(null);
+  else storyLine("anfang", { key: "start" });
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   const changed = beforeA.n !== afterA.n;
@@ -1579,6 +1617,8 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   if(deltas.length) parts.push(deltas.map(o=>`${GENE_LABELS[o.i]} ${o.d>0?"↑":"↓"}`).join("  ·  "));
   document.getElementById("revealBody").innerHTML = formsRow + parts.map(p=>`<div>${p}</div>`).join("");
   document.getElementById("reveal").hidden = false;
+  // Chronik: die Rückkehr ist einer der großen Momente — sie darf ohne Wartezeit erzählen.
+  if(typeof storyLine === "function") storyLine("heimkehr", { gens, changed, elapsed, key: "hk" + gens });
 }
 // ---- Auth-UI ----
 function updateAuthUI(){
@@ -1689,7 +1729,7 @@ LEVERS.forEach(l => {
     document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
     lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
     document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));  // K5: eigene Umwelt -> kein Preset aktiv
-    dismissOnboard();
+    dismissOnboard(); storyEnvChanged();
   });
 });
 
@@ -1714,6 +1754,7 @@ function renderStressChips(){
   el.hidden = chips.length===0;
   el.querySelectorAll(".stress-chip").forEach(b=> b.onclick = ()=>{
     const ax = b.dataset.ax; env[ax] = ax==="oxygen" ? 1 : 0; renderStressChips();
+    if(typeof storyEnvChanged === "function") storyEnvChanged();
   });
 }
 const biomesEl = document.getElementById("biomes");
@@ -1726,7 +1767,7 @@ BIOMES.forEach(b => {
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
     document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
     btn.classList.add("active");   // K5: aktives Biom sichtbar markieren
-    dismissOnboard();
+    dismissOnboard(); storyEnvChanged();
     // Kein Neustart: die laufende Evolution reagiert ab dem aktuellen Zustand.
   });
   biomesEl.appendChild(btn);
@@ -1847,8 +1888,10 @@ function updateWhy(g){
     let h = 0; for(let k=0;k<a.n.length;k++) h = (h*31 + a.n.charCodeAt(k)) & 0x7fffffff;
     const idea = EXPLORE_IDEAS[h % EXPLORE_IDEAS.length];
     el.innerHTML = `<b>Angepasst</b> an diese Umwelt — die Form steht.  <span class="why-idea">${idea}</span>`;
+    _pressTop = null;   // Chronik: nichts bewegt sich -> Gleichgewichts-Zeile wird möglich
     return;
   }
+  _pressTop = { i: strong[0].i, dir: strong[0].dir };   // Chronik: stärkster Druck
   const chips = strong.map(p=>`${GENE_LABELS[p.i]} <span class="${p.dir>0?"up":"down"}">${p.dir>0?"↑":"↓"}</span>`).join(" · ");
   el.innerHTML = `Diese Umwelt formt gerade: ${chips}`;
 }
@@ -1865,6 +1908,139 @@ function updateBonding(){
   row.innerHTML = lead + shown.map(a =>
     `<span class="anc">${formIcon(a.form)}${a.name || a.form.split(" · ")[0]}</span>`
   ).join(`<span class="sep">›</span>`);
+}
+
+// ================= Chronik — die Erzählstimme =================
+// Der Katalog (app/story.js) liefert zu einer Lage eine kurze Phrase; hier steht nur,
+// WANN gefragt wird. Regeln: immer nur EINE Zeile, Ruhepausen je Beat, große Momente
+// (Anfang/Heimkehr/Reich/Fund/Formwechsel) dürfen ohne Wartezeit sprechen, kleine nicht.
+// Die Zeile ERZÄHLT (Bild), die Warum-Zeile darüber ERKLÄRT (Mechanik) — bewusst getrennt.
+const CHRON_MAX = 24, CHRON_KEY = "evolve_chron_v1";
+const STORY_MARKS = [100, 500, 1000, 5000, 10000, 50000, 100000];
+const STORY_ENV_KEYS = ["temperature","predation","foodAbundance","foodHeight","light","water",
+  "toxicity","oxygen","salinity","uv","pressure","aridity","radiation","fire","frost","wind"];
+const _story = { last: 0, recent: [], lastForm: null, lastEnv: null, envTimer: null,
+  pressKey: null, pressGens: 0, pressDone: false, calmGens: 0, calmDone: false,
+  lowGens: 0, lowDone: false, highGens: 0, highDone: false, marks: new Set() };
+const _esc = s => String(s).replace(/[&<>]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[ch]));
+// Mitgespeichert wird auch das Bausteine-Gedächtnis des Generators: sonst
+// beginnt nach jedem Neuladen die Anti-Wiederholung von vorn und alte Zeilen
+// kommen zurück, obwohl der Vorrat riesig ist.
+function saveChron(){ try{ localStorage.setItem(CHRON_KEY, JSON.stringify({ v:2, lines:chronicle, mem:_story.recent })); }catch(e){} }
+function loadChron(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(CHRON_KEY));
+    if(Array.isArray(raw)) chronicle = raw.slice(-CHRON_MAX);            // altes Format (v1)
+    else if(raw && Array.isArray(raw.lines)){
+      chronicle = raw.lines.slice(-CHRON_MAX);
+      if(Array.isArray(raw.mem)) _story.recent = raw.mem;
+    }
+  }catch(e){}
+}
+function renderChron(newText){
+  const line = document.getElementById("chronLine");
+  if(line && newText){
+    line.hidden = false; line.classList.remove("show"); void line.offsetWidth;
+    line.textContent = newText; line.classList.add("show");
+  } else if(line && !newText && chronicle.length){
+    line.hidden = false; line.classList.add("show"); line.textContent = chronicle[chronicle.length-1].t;
+  }
+  const log = document.getElementById("chronLog"), list = document.getElementById("chronList");
+  if(!log || !list) return;
+  log.hidden = chronicle.length < 2;   // eine einzelne Zeile braucht noch kein Archiv
+  document.getElementById("chronLogSum").textContent = "Chronik dieses Lebens · " + chronicle.length;
+  list.innerHTML = chronicle.slice().reverse().map(e =>
+    `<li><span class="cg">${(e.g||0).toLocaleString("de-DE")}</span><span class="ct">${_esc(e.t)}</span></li>`).join("");
+}
+function storyLine(beat, extra){
+  const S = window.EvolveStory; if(!S) return;
+  const gap = S.BEATS[beat] ? S.BEATS[beat].gap : 15000;
+  const now = Date.now();
+  if(now - _story.last < gap) return;   // Ruhe bewahren: lieber schweigen als plappern
+  const a = (typeof committedArch !== "undefined" && committedArch) || classify(genome);
+  // Alles, was der Generator über die Lage wissen muss — je mehr davon, desto
+  // spezifischer (und damit weniger austauschbar) wird der Satz.
+  const ctx = Object.assign({ beat, env, genome, form: a.n, kingdom: a.k, gen: generation,
+    vit: clamp01((fitness(genome, env) - 0.12) / 0.72), seed: lineageSeed >>> 0, key: "" }, extra || {});
+  // _story.recent ist das Gedächtnis des Generators (Bausteine + Zeilen-Hashes);
+  // gepflegt wird es DORT — hier nur durchreichen.
+  let r = null; try { r = S.pick(ctx, _story.recent); } catch(e){ return; }
+  if(!r) return;
+  _story.last = now;
+  chronicle.push({ t: r.text, g: generation });
+  if(chronicle.length > CHRON_MAX) chronicle.shift();
+  renderChron(r.text); saveChron();
+}
+// Der Spieler hat die Umwelt verändert (Regler/Biom/Einfluss). Entprellt, damit das
+// Schieben eines Reglers EINE Zeile ergibt — und Mikro-Justagen gar keine.
+function storyEnvChanged(){
+  clearTimeout(_story.envTimer);
+  _story.envTimer = setTimeout(() => {
+    const prev = _story.lastEnv || {};
+    const dflt = k => (k === "oxygen" ? 1 : 0);
+    let key = null, dv = 0, sum = 0;
+    for(const k of STORY_ENV_KEYS){
+      const before = prev[k] === undefined ? dflt(k) : prev[k];
+      const after  = env[k]  === undefined ? dflt(k) : env[k];
+      const d = after - before; sum += Math.abs(d);
+      if(Math.abs(d) > Math.abs(dv)){ dv = d; key = k; }
+    }
+    _story.lastEnv = Object.assign({}, env);
+    if(!key || sum < 0.1) return;
+    storyLine("welt", { chg: { key, d: dv, dir: dv > 0 ? 1 : -1 }, key: key + (dv > 0 ? "+" : "-") });
+  }, 900);
+}
+// Pro Generationen-Schritt: erkennt Formwechsel, anhaltenden Druck, Gleichgewicht,
+// Not/Blüte und Generationen-Marken. Bewusst mit Schwellen in GENERATIONEN (nicht in
+// Sekunden) — bei „schnell" erzählt es also nicht häufiger, sondern gleich viel.
+function storyTick(steps){
+  if(!steps || !window.EvolveStory) return;
+  const a = committedArch;
+  if(a && _story.lastForm && a.n !== _story.lastForm.n){
+    storyLine("wandel", { from: _story.lastForm.n, vorher: _story.lastForm.n, to: a.n,
+      fromK: _story.lastForm.k, toK: a.k, key: _story.lastForm.n + ">" + a.n });
+  }
+  if(a) _story.lastForm = a;
+  const p = _pressTop, pk = p ? p.i + ":" + p.dir : null;
+  if(pk && pk === _story.pressKey){
+    _story.pressGens += steps;
+    if(_story.pressGens >= 60 && !_story.pressDone){
+      _story.pressDone = true;
+      storyLine("druck", { gene: p.i, dir: p.dir, merkmal: GENE_LABELS[p.i], key: pk });
+    }
+  } else { _story.pressKey = pk; _story.pressGens = steps; _story.pressDone = false; }
+  if(!p){
+    _story.calmGens += steps;
+    if(_story.calmGens >= 120 && !_story.calmDone){ _story.calmDone = true; storyLine("ruhe", { key: "ruhe" }); }
+  } else { _story.calmGens = 0; _story.calmDone = false; }
+  const vit = clamp01((fitness(genome, env) - 0.12) / 0.72);
+  if(vit < 0.32){
+    _story.highGens = 0; _story.highDone = false; _story.lowGens += steps;
+    if(_story.lowGens >= 60 && !_story.lowDone){ _story.lowDone = true; storyLine("not", { vit, key: "not" }); }
+  } else if(vit > 0.82){
+    _story.lowGens = 0; _story.lowDone = false; _story.highGens += steps;
+    if(_story.highGens >= 80 && !_story.highDone){ _story.highDone = true; storyLine("bluete", { vit, key: "bluete" }); }
+  } else { _story.lowGens = 0; _story.highGens = 0; _story.lowDone = false; _story.highDone = false; }
+  for(const m of STORY_MARKS){
+    if(generation >= m && generation - steps < m && !_story.marks.has(m)){
+      _story.marks.add(m); storyLine("zeit", { mark: m, key: "m" + m });
+    }
+  }
+}
+// Frisches Leben: eigene Chronik, eigener Anfang.
+function storyReset(){
+  chronicle = []; saveChron();
+  // Das Gedächtnis überlebt bewusst den Neustart: die Chronik gehört dem Leben,
+  // die Vermeidung von Wiederholung gehört dem SPIELER.
+  _story.last = 0; _story.lastForm = committedArch || null;
+  _story.lastEnv = Object.assign({}, env); _story.marks = new Set();
+  _story.pressKey = null; _story.pressGens = 0; _story.pressDone = false;
+  _story.calmGens = 0; _story.calmDone = false;
+  _story.lowGens = 0; _story.lowDone = false; _story.highGens = 0; _story.highDone = false;
+  const line = document.getElementById("chronLine");
+  if(line){ line.hidden = true; line.classList.remove("show"); line.textContent = ""; }
+  renderChron(null);
+  storyLine("anfang", { key: "start" });
 }
 
 // ---- Zeit-Steuerung ----
@@ -1928,6 +2104,7 @@ document.getElementById("newLifeBtn").addEventListener("click", async () => {
   document.getElementById("biomeTag").textContent = lastBiome;
   document.getElementById("genReadout").textContent = "Generation 0";
   updatePanels(); updateBonding(); saveState();
+  storyReset();   // Chronik: neues Leben, neue Chronik — beginnt mit der Anfangs-Zeile
 });
 // A4: Wesen benennen.
 document.getElementById("nameBtn").addEventListener("click", async () => {
@@ -2063,6 +2240,7 @@ function applyInfluence(f){
   triggerHabitatFx(f.tone || "shift");   // Cinematik: Blitz + Anpassungs-Schub
   // Bestätigung (v. a. für prefers-reduced-motion, wo Blitz/Beben fehlen).
   showInfoToast("Ausgelöst: " + (f.plain||f.name));
+  storyEnvChanged();   // Chronik: der Einfluss bekommt seine Erzähl-Zeile
 }
 // Schlichter Info-Toast (kein Form-Fund) — nutzt dasselbe Toast-Element.
 let infoToastTimer = null;
@@ -2975,9 +3153,13 @@ function frame(time){
           discovered.add(cur.n); saveState();
           if(newKingdom) showKingdomMilestone(kd, cur, awakenedKingdoms(discovered).size);
           else showToast(cur);
+          // Chronik: der Fund bekommt seine Erzähl-Zeile (Reich schlägt Einzelfund).
+          if(newKingdom) storyLine("reich", { kingdom: kd, kingdomCount: awakenedKingdoms(discovered).size, key: "k" + kd });
+          else storyLine("fund", { rarity: rarityOf(cur.n), key: "f" + cur.n });
         }
       }
       document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");
+      storyTick(steps);
     }
   }
   // Geglaettete Anzeige: framerate-unabhaengiger gleitender Mittelwert (Zeitkonstante ~0.6s).

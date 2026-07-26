@@ -57,6 +57,43 @@ Patterns: kein Streak-Zwang, kein Verfall-Schuldgefühl, kein Sammelzwang):
 Kuratierung, Reich-Meilensteine, Neugier-Anstöße, Schnappschuss). Nur noch Rest-Politur offen
 (CLS-4-Klassifikations-Fenster, Cloud-Ahnenlinie via Supabase-Schema, Kontrast-Feintuning).
 
+### Erzählwerk — Chronik-Stimme mit „unendlichem" Satzvorrat (2026-07, v0.70.0)
+
+Nutzer-Wunsch: kurze Phrasen begleiten die Evolution an sinnvollen Stellen, deterministisch
+aus einem Katalog. Nachgeschärfte Frage: **wie erzeugt man das Gefühl eines UNENDLICHEN
+Vorrats ohne externe LLM-Werkzeuge?**
+
+- ✅ **Recherche + Architektur-Entscheidung** (`docs/storytelling.md`): fester Phrasen-Katalog
+  scheitert an Erschöpfung, wortweiser Baukasten an deutscher Kongruenz, reiner Zufall am
+  „10.000 Schüsseln Haferbrei"-Problem (Compton). Rabii & Cook (FDG 2023): die Komplexität
+  der Ausgabe ist durch das **im Generator kodierte Wissen** begrenzt — mehr Würfel helfen
+  nicht. Emily Shorts Antwort für Text: **Salienz** (wie viel Weltmodell steckt im Satz).
+  → **Unser Wissen ist die Simulation** (25 Gene, 16 Umwelt-Achsen, 43 Formen, 5 Reiche,
+  Fitness, Selektionsgradient). Bauform nach Bruno Dias' „Improv": Modell → Tags → Grammatik.
+- ✅ **`app/story.js`** — 444 Bausteine, 10 Satz-Schablonen, Tag-Filter, gewichtete
+  deterministische Auswahl, Zwei-Ebenen-Gedächtnis (90 Bausteine / 160 Zeilen, überlebt
+  Neuladen und „Neues Leben"). Deutsche Grammatik-Falle umgangen durch **Kombination auf
+  SATZEBENE** (jedes Fragment = vollständiger Hauptsatz in V2-Stellung) — kein
+  Morphologie-Modul nötig.
+- ✅ **11 Beats** verdrahtet: anfang · heimkehr (Offline-Reveal) · welt (Regler/Biom/Einfluss,
+  entprellt) · druck (60 Gen. gleicher Selektionsdruck) · wandel · reich · fund · ruhe
+  (Attraktor) · not · bluete · zeit (Generationen-Marken). Schwellen zählen in
+  **Generationen**, nicht Sekunden → Tempo „schnell" erzählt nicht häufiger.
+- ✅ **UI:** ruhige Serifen-Zeile unter der Art + aufklappbares Archiv „Chronik dieses Lebens".
+  Getrennte Stimmen: die Chronik **erzählt**, die Warum-Zeile **erklärt**.
+- ✅ **`npm run story-check`** — Prüfstand nach dem Muster der Expressive Range Analysis
+  (Smith & Whitehead 2010): 166 Lagen, ~10.000 erzeugte Sätze, 9 Prüfungen inkl.
+  Widerspruchs-Test, tote Bausteine, Chao1-Vorratsschätzer, **Sitzungs-Simulation** und
+  Haferbrei-Index (gzip). `--sample N` als Autoren-Schleife.
+- **Messstand:** ~142.000 verschiedene Sätze aus 444 Bausteinen (Hebel ×320); in der
+  Sitzungs-Simulation 120/120 Zeilen verschieden; Haferbrei-Index 34× über dem Boden.
+- **Vom Prüfstand gefundene Fehler** (alle behoben, in den Docs dokumentiert): schwächstes
+  Glied lag in *milden* Welten (Auftakt-Pool 40→6); eigener Dopplungs-Filter tötete
+  „Generation für Generation"; allgemeine Rückfall-Sätze verdrängten die spezifischen
+  (Salienz-Verlust); Zeitangaben widersprachen dem Anlass.
+- **Leitplanken maschinell erzwungen:** keine Absichts-Sprache („will/versucht/lernt") —
+  erzählt wird Auslese; kein Ausrufezeichen, kein Emoji, max. 120 Zeichen, kein Sammel-Nag.
+
 ### Evolutions-Validitäts-Audit + Mittelfeld-Fidelity-Fix (2026-07, v0.63.0)
 Prüfauftrag: „stimmt die Evolution — Abgleich mit Referenz UND anderen Algorithmen?"
 - **Mechanik bestätigt:** die Kern-Schleife deckt sich mit **fünf** Standard-Frameworks — Orakel =
