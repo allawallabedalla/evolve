@@ -52,7 +52,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       (keine zwei Faktoren mit fast gleichem Achsen-Fingerabdruck), Abdeckungs-Bericht.
 - [x] **S1 · Sektion 1 + Räuberdruck** (28 offene Faktoren) — jeder mit Achsen-Mapping,
       Klartextnamen, Ton; danach `influence-check` grün.
-- [ ] **S2 · Sektion 2 vervollständigen** (17 offene) — Katastrophen/Zyklen/Massenaussterben,
+- [x] **S2 · Sektion 2** (17 offene → 5 abbildbar) — Katastrophen/Zyklen/Massenaussterben,
       soweit als Umwelt-Zustand darstellbar.
 - [ ] **S3 · Sektion 10 anthropogen** (11 offene) — Habitatverlust, Verschmutzung, Klimawandel,
       Lichtverschmutzung, Urbanisierung, Übernutzung …
@@ -146,3 +146,29 @@ Alles, was echte Nachbar-Arten braucht (Koevolution, Symbiose, Epidemien), bleib
 
 **Messwerte danach:** Ø L1-Verschiebung 2,91 · erreichte Formen 11 → **13** ·
 **keine ungenutzte Umwelt-Achse mehr** (vorher fehlte `predation` komplett).
+
+### S2 · Sektion 2 — erledigt
+**5 neue Faktoren** (aktiv 54 → **59**, Sektion 2 jetzt 15/27), alle beim ersten Lauf wirksam
+und nicht redundant: Lücke im Bestand (Störung) · Eissturm (Frost & Sturm) · Gammablitz
+(Ozonschicht weg) · Schwache Sonnenphase · Das Große Sterben (Perm).
+
+Bewusst gewählt wurden **neue Achsen-Kombinationen**, keine Varianten des Vorhandenen:
+Frost × Sturm gab es noch nicht, UV × ionisierende Strahlung ohne Gift auch nicht, und die
+Bestandslücke (wenig Nahrung bei *viel* Bodenlicht) ist ein eigener Zustand, kein Nahrungsmangel.
+
+**Die übrigen 12 bleiben aus vier Gründen inaktiv** (Etikett folgt in S4):
+- **Zeitachse/Zyklen:** Störungs-Regime, Umwelt-Stochastik, Tag-Nacht/Gezeiten/Jahreszeit,
+  ENSO/NAO, Milanković-Zyklen.
+- **Lebende Welt:** Tektonik/Rifting, Landbrücken (beides Ortschafts-Eigenschaften).
+- **fehlende Achse:** Große Sauerstoff-Krise (GOE) — unsere `oxygen`-Achse endet bei „normal",
+  eine O₂-Vergiftung von Anaerobiern ist damit nicht darstellbar.
+- **schon abgedeckt:** Press vs. Pulse (Begriffspaar, kein Zustand), Auslöser-Bündel und
+  Intermediate-Disturbance (beides Zusammenfassungen vorhandener Einzel-Faktoren), „freie
+  Nischen nach dem Aussterben" (deckt sich mit dem Faktor „Freie Nische" aus S1b —
+  der Redundanz-Test hätte es sonst gefangen).
+
+**Nebenbefund — Fehler in der Quelle:** Der Katalog-Eintrag `Die „Big Five"` schloss das
+typografische `„` mit einem **ASCII-`"`**. Das ist genau die in `resume.md` dokumentierte
+Falle und hat den Generator mit `SyntaxError: Unexpected string` abbrechen lassen. In
+`docs/faktoren-katalog.md` korrigiert (Schlusszeichen `“`), im Generator zusätzlich auf
+einfache Anführungszeichen umgestellt.

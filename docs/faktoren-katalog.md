@@ -138,7 +138,7 @@ jeder Ort eine eigene Linie sein darf. Die [Z]-Ebene ist der beste erste Schritt
 - **Milankovitch-Zyklen** — Orbital-Taktung der Eiszeiten (→ „Arten-Pumpe", s. 3.6). [Z]
 
 ### 2.7 Massenaussterben (als Design-Regler)
-- **Die „Big Five"** — Ordovizium, Devon, Perm (Great Dying), Trias, Kreide. [Z]
+- **Die „Big Five“** — Ordovizium, Devon, Perm (Great Dying), Trias, Kreide. [Z]
 - **Auslöser-Bündel** — Vulkanismus+Warming+Anoxie+Versauerung; Impakt; Vereisung+Meeresspiegel. [Z]
 - **Freie Nischen → adaptive Radiation danach** — Säuger nach den Dinos. **Der Diversitäts-Motor schlechthin.** [Z→P]
 

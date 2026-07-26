@@ -90,6 +90,16 @@ const EFFECTS = {
   "Mesopredator-Release / trophic downgrading": { tone: "hit", env: {"predation": 0.76, "foodAbundance": 0.62, "foodHeight": 0.3} },
   "Trophische Kaskade (top-down) / Bottom-up-Kontrolle": { tone: "shift", env: {"predation": 0.85, "foodAbundance": 0.8, "light": 0.6} },
   "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art": { tone: "bio", env: {"water": 0.9, "foodAbundance": 0.72, "foodHeight": 0.15, "light": 0.55} },
+  // ---- S2: Sektion 2, soweit als Umwelt-ZUSTAND darstellbar (2026-07) -----
+  // Von 17 offenen sind fünf ehrlich abbildbar. Der Rest braucht eine Zeitachse
+  // (Zyklen, Störungs-Regime, Stochastik), gehört in die Lebende Welt (Tektonik,
+  // Landbrücken) oder ist schon durch Einzel-Faktoren abgedeckt (Auslöser-Bündel,
+  // freie Nischen nach dem Aussterben). Etikett dafür in S4.
+  "Störung (disturbance)": { tone: "shift", env: {"foodAbundance": 0.3, "light": 0.88, "foodHeight": 0.12, "predation": 0.12, "water": 0.5} },
+  "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm": { tone: "hit", env: {"temperature": 0.08, "frost": 0.85, "wind": 0.9, "foodAbundance": 0.2, "water": 0.4} },
+  "Supernova / Gammablitz (hypothetisch)": { tone: "hit", env: {"uv": 0.95, "radiation": 0.7, "light": 0.8, "foodAbundance": 0.35, "temperature": 0.45} },
+  "Sonnen-Variabilität / Weltraumwetter": { tone: "shift", env: {"light": 0.38, "temperature": 0.26, "water": 0.55, "foodAbundance": 0.4} },
+  'Die „Big Five“': { tone: "hit", env: {"temperature": 0.93, "aridity": 0.55, "foodAbundance": 0.1, "oxygen": 0.3, "toxicity": 0.45, "light": 0.4, "water": 0.25} },
   // 2.2 Geophysikalisch
   "Vulkanausbruch / Flutbasalt (LIP)": { tone: "hit", env: { temperature: 0.8, light: 0.25, foodAbundance: 0.3 } },
   "Vulkanwinter / Aschefall": { tone: "hit", env: { light: 0.15, temperature: 0.25, foodAbundance: 0.35 } },
@@ -153,6 +163,11 @@ const PLAIN = {
   "Mesopredator-Release / trophic downgrading": "Kleinräuber-Schwemme",
   "Trophische Kaskade (top-down) / Bottom-up-Kontrolle": "Räuber steuern alles (Top-down)",
   "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art": "Ökosystem-Ingenieur (Biber staut)",
+  "Störung (disturbance)": "Lücke im Bestand (Störung)",
+  "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm": "Eissturm (Frost & Sturm)",
+  "Supernova / Gammablitz (hypothetisch)": "Gammablitz (Ozonschicht weg)",
+  "Sonnen-Variabilität / Weltraumwetter": "Schwache Sonnenphase",
+  'Die „Big Five“': "Das Große Sterben (Perm)",
   "Vulkanausbruch / Flutbasalt (LIP)": "Vulkanausbruch",
   "Vulkanwinter / Aschefall": "Vulkanwinter (Aschehimmel)",
   "Erdbeben / Tsunami / Hangrutsch": "Erdbeben & Flutwelle",

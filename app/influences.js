@@ -579,7 +579,15 @@ window.INFLUENCES = [
      {
       "name": "Störung (disturbance)",
       "desc": "entfernt Biomasse, öffnet Nischen.",
-      "soon": true
+      "plain": "Lücke im Bestand (Störung)",
+      "env": {
+       "foodAbundance": 0.3,
+       "light": 0.88,
+       "foodHeight": 0.12,
+       "predation": 0.12,
+       "water": 0.5
+      },
+      "tone": "shift"
      },
      {
       "name": "Störungs-Regime",
@@ -656,7 +664,15 @@ window.INFLUENCES = [
      {
       "name": "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm",
       "desc": "akute Massen-Mortalität, Lücken.",
-      "soon": true
+      "plain": "Eissturm (Frost & Sturm)",
+      "env": {
+       "temperature": 0.08,
+       "frost": 0.85,
+       "wind": 0.9,
+       "foodAbundance": 0.2,
+       "water": 0.4
+      },
+      "tone": "hit"
      },
      {
       "name": "Dürre als Selektions-Episode",
@@ -756,12 +772,27 @@ window.INFLUENCES = [
      {
       "name": "Supernova / Gammablitz (hypothetisch)",
       "desc": "Ozon-Strippen (Ordovizium?).",
-      "soon": true
+      "plain": "Gammablitz (Ozonschicht weg)",
+      "env": {
+       "uv": 0.95,
+       "radiation": 0.7,
+       "light": 0.8,
+       "foodAbundance": 0.35,
+       "temperature": 0.45
+      },
+      "tone": "hit"
      },
      {
       "name": "Sonnen-Variabilität / Weltraumwetter",
       "desc": "Langzeit-Klima-Forcing.",
-      "soon": true
+      "plain": "Schwache Sonnenphase",
+      "env": {
+       "light": 0.38,
+       "temperature": 0.26,
+       "water": 0.55,
+       "foodAbundance": 0.4
+      },
+      "tone": "shift"
      }
     ]
    },
@@ -789,9 +820,19 @@ window.INFLUENCES = [
     "sub": "Massenaussterben (als Design-Regler)",
     "factors": [
      {
-      "name": "Die „Big Five\"",
+      "name": "Die „Big Five“",
       "desc": "Ordovizium, Devon, Perm (Great Dying), Trias, Kreide.",
-      "soon": true
+      "plain": "Das Große Sterben (Perm)",
+      "env": {
+       "temperature": 0.93,
+       "aridity": 0.55,
+       "foodAbundance": 0.1,
+       "oxygen": 0.3,
+       "toxicity": 0.45,
+       "light": 0.4,
+       "water": 0.25
+      },
+      "tone": "hit"
      },
      {
       "name": "Auslöser-Bündel",
