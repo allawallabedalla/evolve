@@ -50,7 +50,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       Vollständigkeit (env/plain/desc/tone), **Wirksamkeit** (Konvergenz-Lauf: verschiebt der
       Faktor Genom/Archetyp messbar gegenüber dem Ausgangsmilieu?), **Redundanz**
       (keine zwei Faktoren mit fast gleichem Achsen-Fingerabdruck), Abdeckungs-Bericht.
-- [ ] **S1 · Sektion 1 vervollständigen** (28 offene Faktoren) — jeder mit Achsen-Mapping,
+- [x] **S1 · Sektion 1 + Räuberdruck** (28 offene Faktoren) — jeder mit Achsen-Mapping,
       Klartextnamen, Ton; danach `influence-check` grün.
 - [ ] **S2 · Sektion 2 vervollständigen** (17 offene) — Katastrophen/Zyklen/Massenaussterben,
       soweit als Umwelt-Zustand darstellbar.
@@ -107,3 +107,42 @@ wird die L1-Verschiebung des Endgenoms gegen das neutrale Ausgangsmilieu.
 - Mehrere Katastrophen enden bei 3–9 % Passung (Eiszeit, Dürre, Extremchemie). Das ist für
   Katastrophen plausibel, sollte aber in S1 im Blick bleiben: eine Welt, in der nichts mehr
   gedeiht, erzählt keine Geschichte.
+
+### 2026-07-26 · Einschub — drei Nutzer-Rückmeldungen vorgezogen
+Der Nutzer meldete während der Arbeit drei Punkte. Zwei betrafen bereits Ausgeliefertes und
+gingen deshalb vor die Katalog-Arbeit:
+1. **Zappelnde Warum-Zeile** → behoben (v0.70.1), Messwerkzeug `tools/ui-calm-check.mjs`.
+   Zeile 19×/8 s → 4×/12 s, Pfeile 35×/12 s → 4×/12 s.
+2. **Chronik-Ton zu lyrisch** → umgebaut (v0.70.2), Tonfall-Kennzahl im `story-check`:
+   Bezug zum Wesen 13 % → 27 %, Sentenz-Vokabular 6 %.
+3. **Nutzerbindung** → Recherche + Konzept in `docs/bindung-konzept.md`; Empfehlung V1
+   („Herausforderungen"). Umsetzung bewusst NICHT eigenmächtig — Produktentscheidung.
+Danach zurück zu S1.
+
+### S1 · Sektion 1 + Räuberdruck — erledigt
+**19 neue Faktoren, alle beim ersten Prüflauf wirksam und nicht redundant.** Aktiv: 35 → **54**.
+
+**Sektion 1 (13 neu, jetzt 38/53):** Moorboden · Wüstenrand · Nebelwüste · blaugrünes
+Tiefwasser-Licht · Brandungszone · Brackwasser-Ästuar · austrocknender Tümpel · Sandboden ·
+saurer Heideboden · nackter Fels · schattiger Nordhang · chemische Grenzschicht ·
+heiße Tiefsee-Quelle.
+
+**Die restlichen 15 aus Sektion 1 wurden bewusst NICHT aktiviert**, weil sie sich nicht
+ehrlich als Umwelt-Zustand abbilden lassen. Vier Gründe, die in S4 als Etikett sichtbar werden:
+- **braucht eine Zeitachse/Zyklen** (Tag-Nacht-Spanne, Saisonalität, thermische Stabilität,
+  Niederschlags-Saisonalität, Photoperiode, Wetter-Stochastik, Ressourcen-Pulse) — ein
+  schwankender Zustand ist etwas anderes als ein hoher oder tiefer Zustand.
+- **braucht eine Achse, die es nicht gibt** (O₂ über Normalniveau wie im Karbon, CO₂,
+  Gravitation, Magnetfeld).
+- **gehört in die Lebende Welt** (topografische Komplexität, Küstengeometrie — beides
+  sind Eigenschaften einer Ortschaft, nicht eines Milieus).
+- **ist schon ein Regler** (Mitteltemperatur).
+
+**Räuberdruck-Lücke geschlossen (6 neu aus Sektion 4):** Räuber tauchen auf · Konkurrenz um
+Nahrung · freie Nische · Kleinräuber-Schwemme · Top-down-Kontrolle · Ökosystem-Ingenieur.
+Begründung: die Engine modelliert Prädation ohnehin als **Umweltdruck auf die eigene Linie**
+(Achse `predation`), nicht als zweite Population — diese sechs sind also keine Attrappen.
+Alles, was echte Nachbar-Arten braucht (Koevolution, Symbiose, Epidemien), bleibt offen.
+
+**Messwerte danach:** Ø L1-Verschiebung 2,91 · erreichte Formen 11 → **13** ·
+**keine ungenutzte Umwelt-Achse mehr** (vorher fehlte `predation` komplett).
