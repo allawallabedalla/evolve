@@ -108,9 +108,13 @@ window.INFLUENCES = [
       "desc": "Photosynthese-Basis (schon drin).",
       "plain": "Grelles Sonnenlicht",
       "env": {
-       "light": 0.96
+       "light": 0.97,
+       "temperature": 0.74,
+       "water": 0.38,
+       "foodAbundance": 0.3,
+       "aridity": 0.3
       },
-      "tone": "bio"
+      "tone": "shift"
      },
      {
       "name": "Photoperiode / Tageslänge",
@@ -137,7 +141,11 @@ window.INFLUENCES = [
       "desc": "Dunkelheit → Biolumineszenz/Blindheit.",
       "plain": "Lichtlose Tiefe (Dunkelheit)",
       "env": {
-       "light": 0.02
+       "light": 0.02,
+       "water": 0.98,
+       "pressure": 0.45,
+       "temperature": 0.3,
+       "foodAbundance": 0.35
       },
       "tone": "shift"
      }
@@ -366,8 +374,10 @@ window.INFLUENCES = [
       "plain": "Dunkle Höhle",
       "env": {
        "light": 0.02,
-       "temperature": 0.45,
-       "water": 0.6
+       "temperature": 0.46,
+       "water": 0.55,
+       "foodAbundance": 0.22,
+       "oxygen": 0.82
       },
       "tone": "shift"
      },

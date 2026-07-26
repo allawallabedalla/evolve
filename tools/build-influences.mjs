@@ -28,8 +28,8 @@ const EFFECTS = {
   "Niederschlag / Feuchte": { tone: "bio", env: { water: 0.92 } },
   "Schneedecke / subnivaler Raum": { tone: "shift", env: { temperature: 0.12, water: 0.5, light: 0.4 } },
   // 1.3 Licht
-  "Lichtintensität": { tone: "bio", env: { light: 0.96 } },
-  "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02 } },
+  "Lichtintensität": { tone: "shift", env: { light: 0.97, temperature: 0.74, water: 0.38, foodAbundance: 0.3, aridity: 0.3 } },   // volle Sonne = auch Hitze + Verdunstung; Licht allein verschiebt nichts (influence-check)
+  "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02, water: 0.98, pressure: 0.45, temperature: 0.3, foodAbundance: 0.35 } },   // lichtlose Wassersäule (nicht Höhle — influence-check fand die Dublette)
   // 1.4 Atmosphäre — AXIS-7 Hypoxie (dünne Höhenluft): oxygen<1 stresst hohen Stoffwechsel
   "Luftdruck / Höhe / Hypoxie": { tone: "shift", env: { oxygen: 0.12, temperature: 0.28, light: 0.8, foodAbundance: 0.45, water: 0.4 } },
   "UV-Strahlung": { tone: "hit", env: { uv: 0.9, light: 0.92 } },   // AXIS-10: DNA-Schaden -> Schutzpigment
@@ -48,7 +48,7 @@ const EFFECTS = {
   "Höhengradient": { tone: "shift", env: { temperature: 0.2, foodHeight: 0.15, light: 0.72, water: 0.4 } },
   "Wind (Exposition + Ausbreitungs-Vektor)": { tone: "shift", env: { wind: 0.9, water: 0.35, temperature: 0.35 } },   // AXIS-18: Windhärte
   "Habitat-Struktur-Komplexität / Deckung": { tone: "bio", env: { foodHeight: 0.9, foodAbundance: 0.7 } },
-  "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.45, water: 0.6 } },
+  "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.46, water: 0.55, foodAbundance: 0.22, oxygen: 0.82 } },   // Fels statt Wassersäule: konstant, nahrungsarm, schlecht belüftet
   // 1.8 Energie & Extrem-Chemie
   "Primärproduktivität / Ressourcen-Fülle": { tone: "bio", env: { foodAbundance: 0.95 } },
   "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, salinity: 0.7, water: 0.6, light: 0.3 } },
