@@ -440,11 +440,24 @@ Drei Punkte aus dem Spielen der v0.70.0:
   **6 %** (Höchstwert 12 %). Vorrat dabei von ~142.000 auf ~150.000 Sätze gewachsen.
   → `docs/storytelling.md` (Abschnitt „Wie man den Vorrat erweitert") gilt weiter.
 
-- [ ] **Nutzerbindung / Spieltiefe.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar
+- [~] **Nutzerbindung / Spieltiefe — Konzept liegt vor, Entscheidung offen.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar
   immer wieder neue Wesen, aber es hat keine Verbindlichkeit." Es fehlt der Schritt vom
   Spielzeug zum **Spiel**. Recherche, wie moderne Spiele das lösen, dann ein Konzept, das zu
   den Produkt-Pfeilern passt (Neugier + Bindung, **keine** Dark Patterns: kein Streak-Zwang,
   kein Verfall-Schuldgefühl, kein Sammelzwang). Ergebnis gehört in ein eigenes Dokument.
+  **→ `docs/bindung-konzept.md`** (Recherche + Diagnose + fünf Vorschläge).
+  **Kern der Diagnose:** Das Problem ist nicht zu wenig Inhalt, sondern **zu wenig Widerstand**.
+  Gemessen an der Selbstbestimmungstheorie steht Evolve extrem ungleich: Autonomie maximal
+  (alles sofort, gratis und *umkehrbar* einstellbar), **Kompetenz fast null** (man kann in
+  Evolve nicht besser werden — es gibt nichts zu lösen und nichts zu scheitern), Verbundenheit
+  null. Ein Regler ohne Kosten macht jede Handlung folgenlos: keine Entscheidung, kein
+  kostbarer Zustand, kein Plan, keine Geschichte. Das ist die Grenze zwischen Spielzeug und
+  Spiel. **Empfehlung: V1 „Herausforderungen der Natur"** (Ziel + Beschränkung + Scheitern
+  möglich, additiv zur Sandkiste, keine Engine-Änderung) — schließt genau die Kompetenz-Lücke,
+  und was man dabei lernt, ist genau das, was das Spiel ohnehin lehren will. Danach V4
+  (Wissen als Meta-Fortschritt). V2 (Trägheit der Welt) und V3 (Aussterben nur unter deinen
+  Augen, nie offline) verändern das Grundgefühl → **Produktentscheidung des Nutzers**, nicht
+  eigenmächtig umsetzen.
 
 ---
 
