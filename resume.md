@@ -190,6 +190,16 @@ geräteübergreifend mit Account.
   → parity → App-PARAMS syncen → Rarität neu → testen. *Nebeneffekt:* 14 legendäre Formen (extreme
   + Wasser-Formen); AXIS-4 (Aquatik) holt die Wasser-Formen als Attraktoren zurück.
 
+- **Erzählwerk / Chronik (v0.70.0, erledigt).** Kurze Phrasen begleiten die Evolution an 11
+  sinnvollen Stellen (Beats). Kern-Frage war „unendlicher Vorrat ohne LLM": gelöst über einen
+  **salienz-getriebenen Grammatik-Generator** (`app/story.js`) statt eines festen Katalogs —
+  Tags aus dem Simulationszustand filtern Kern- und Textur-Bausteine, kombiniert wird auf
+  SATZEBENE (umgeht deutsche Kongruenz). Deterministisch (kein Math.random/Uhr),
+  Zwei-Ebenen-Anti-Wiederholung. ~142.000 mögliche Sätze aus 444 Bausteinen.
+  Prüfstand `npm run story-check` (Expressive Range Analysis: Determinismus, Ausgaben-Lint,
+  Widerspruchs-Test, Chao1-Vorrat, Sitzungs-Simulation, Haferbrei-Index).
+  Recherche + Autoren-Anleitung: `docs/storytelling.md`.
+
 ## 6a. Produkt-Pfeiler (Leitplanken)
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang.**
 - **Rarität = Entdeckungs-Tiefe**, keine kaufbare Währung / kein Grind.

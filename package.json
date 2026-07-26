@@ -25,6 +25,7 @@
     "bundle-app": "npm run build && node tools/bundle-app-core.mjs",
     "app-world-smoke": "npm run bundle-app && node tools/app-parity.mjs && node tools/mf-fidelity.mjs && node tools/app-world-smoke.mjs",
     "exemplar-check": "node tools/exemplar-check.mjs",
+    "story-check": "node tools/story-check.mjs",
     "build-influences": "node tools/build-influences.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"
