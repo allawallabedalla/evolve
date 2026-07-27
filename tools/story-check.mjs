@@ -295,6 +295,28 @@ const report = [];
 }
 
 // ---------------------------------------------------------------------------
+// 7b. TONFALL — nüchtern und persönlich statt sentenzhaft (Nutzer-Vorgabe 2026-07:
+//     „weniger lyrisch, mehr prosaisch … eine persönliche Beziehung zum Wesen
+//     ermöglichen, kein Gedicht"). Zwei Kennzahlen, beide über die ganze Suite:
+//       · Anteil der Sätze, die das WESEN ansprechen (Name/„dein Wesen"/„du").
+//       · Anteil mit Sentenz-Vokabular (allgemeine Rede über Evolution).
+// ---------------------------------------------------------------------------
+{
+  const PERSON = /\b(dein|deinem|deine|du|dir|Nebel)\b/;
+  const APHOR = /\b(die Auslese|Vererbung|die Physik|Buchhaltung|die Bilanz|niemand hier|kein Plan|die Spur|das Papier|Absichten)\b/i;
+  const withName = [];
+  for (const s of SIT) {
+    const { lines } = drawMany({ ...s.ctx, name: "Nebel" }, 40, false);
+    withName.push(...lines);
+  }
+  const pers = withName.filter(t => PERSON.test(t)).length / withName.length;
+  const aph  = withName.filter(t => APHOR.test(t)).length / withName.length;
+  console.log(`\n  Tonfall: ${Math.round(pers * 100)} % der Sätze sprechen das Wesen/den Spieler an · ${Math.round(aph * 100)} % Sentenz-Vokabular`);
+  if (pers < 0.20) fail.push(`nur ${Math.round(pers * 100)} % der Sätze haben Bezug zum Wesen — zu unpersönlich (Ziel: ≥20 %)`);
+  if (aph > 0.12) fail.push(`${Math.round(aph * 100)} % Sentenz-Vokabular — zu lyrisch (Ziel: ≤12 %)`);
+}
+
+// ---------------------------------------------------------------------------
 // 8. Haferbrei-Index — Komprimierbarkeit als Näherung an gefühlte Gleichheit.
 //    Absolut ist die Zahl bedeutungslos; sie taugt als VERHÄLTNIS zum Boden
 //    („immer derselbe Satz") und als Regressionswächter über die Zeit.

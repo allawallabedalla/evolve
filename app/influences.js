@@ -75,17 +75,41 @@ window.INFLUENCES = [
      {
       "name": "Bodenfeuchte / Wasserspeicher",
       "desc": "Sand (trocken) vs. Ton/Torf (nass).",
-      "soon": true
+      "plain": "Moorboden (hält Wasser)",
+      "env": {
+       "water": 0.9,
+       "toxicity": 0.25,
+       "foodAbundance": 0.3,
+       "oxygen": 0.5,
+       "temperature": 0.42
+      },
+      "tone": "shift"
      },
      {
       "name": "Ariditäts-Index (Verdunstungs-Nachfrage)",
       "desc": "Wüsten-Rand-Effekt.",
-      "soon": true
+      "plain": "Wüstenrand (dauerhaft trocken)",
+      "env": {
+       "aridity": 0.7,
+       "water": 0.22,
+       "temperature": 0.68,
+       "foodAbundance": 0.42,
+       "light": 0.85
+      },
+      "tone": "shift"
      },
      {
       "name": "Nebel/Tau-Interzeption",
       "desc": "Wasser aus Luft (Küstennebel-Wüsten).",
-      "soon": true
+      "plain": "Nebelwüste (Wasser aus der Luft)",
+      "env": {
+       "water": 0.72,
+       "aridity": 0.45,
+       "light": 0.35,
+       "temperature": 0.44,
+       "foodAbundance": 0.4
+      },
+      "tone": "bio"
      },
      {
       "name": "Schneedecke / subnivaler Raum",
@@ -108,9 +132,13 @@ window.INFLUENCES = [
       "desc": "Photosynthese-Basis (schon drin).",
       "plain": "Grelles Sonnenlicht",
       "env": {
-       "light": 0.96
+       "light": 0.97,
+       "temperature": 0.74,
+       "water": 0.38,
+       "foodAbundance": 0.3,
+       "aridity": 0.3
       },
-      "tone": "bio"
+      "tone": "shift"
      },
      {
       "name": "Photoperiode / Tageslänge",
@@ -130,14 +158,26 @@ window.INFLUENCES = [
      {
       "name": "Spektralqualität (Lichtfarbe)",
       "desc": "Tiefwasser filtert Rot → Blau-Grün-Pigmente.",
-      "soon": true
+      "plain": "Blaugrünes Tiefwasser-Licht",
+      "env": {
+       "light": 0.33,
+       "water": 0.95,
+       "pressure": 0.22,
+       "temperature": 0.38,
+       "foodAbundance": 0.45
+      },
+      "tone": "shift"
      },
      {
       "name": "Photische vs. aphotische Zone",
       "desc": "Dunkelheit → Biolumineszenz/Blindheit.",
       "plain": "Lichtlose Tiefe (Dunkelheit)",
       "env": {
-       "light": 0.02
+       "light": 0.02,
+       "water": 0.98,
+       "pressure": 0.45,
+       "temperature": 0.3,
+       "foodAbundance": 0.35
       },
       "tone": "shift"
      }
@@ -236,7 +276,15 @@ window.INFLUENCES = [
      {
       "name": "Strömung / Wellenenergie / Gezeiten",
       "desc": "Stromlinie, Haftorgane, Intertidal-Zonierung.",
-      "soon": true
+      "plain": "Brandungszone (Wellen & Gezeiten)",
+      "env": {
+       "water": 0.95,
+       "wind": 0.85,
+       "foodAbundance": 0.62,
+       "light": 0.72,
+       "temperature": 0.45
+      },
+      "tone": "shift"
      },
      {
       "name": "Trübung / Sediment",
@@ -261,12 +309,26 @@ window.INFLUENCES = [
      {
       "name": "Süß- vs. Meerwasser-Habitatklasse",
       "desc": "fundamentale Barriere.",
-      "soon": true
+      "plain": "Brackwasser-Ästuar",
+      "env": {
+       "salinity": 0.45,
+       "water": 0.92,
+       "foodAbundance": 0.7,
+       "light": 0.55
+      },
+      "tone": "shift"
      },
      {
       "name": "Wasser-Permanenz (Hydroperiode)",
       "desc": "Tümpel trocknen aus → Dormanz-Eier.",
-      "soon": true
+      "plain": "Austrocknender Tümpel",
+      "env": {
+       "water": 0.42,
+       "aridity": 0.62,
+       "temperature": 0.72,
+       "foodAbundance": 0.5
+      },
+      "tone": "hit"
      }
     ]
    },
@@ -276,12 +338,27 @@ window.INFLUENCES = [
      {
       "name": "Bodentyp / Textur",
       "desc": "Sand/Schluff/Ton → Drainage, Wurzelzugang.",
-      "soon": true
+      "plain": "Sandboden (Wasser versickert)",
+      "env": {
+       "water": 0.2,
+       "foodAbundance": 0.32,
+       "light": 0.8,
+       "temperature": 0.6,
+       "aridity": 0.35
+      },
+      "tone": "shift"
      },
      {
       "name": "Boden-pH & -Chemie",
       "desc": "sauer (Heide) vs. alkalisch (Kalk).",
-      "soon": true
+      "plain": "Saurer Heideboden",
+      "env": {
+       "toxicity": 0.4,
+       "foodAbundance": 0.28,
+       "water": 0.55,
+       "light": 0.7
+      },
+      "tone": "shift"
      },
      {
       "name": "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)",
@@ -305,7 +382,15 @@ window.INFLUENCES = [
      {
       "name": "Fels/Sand/Karst als Substrat",
       "desc": "Grab-, Kletter-, Haft-Baupläne.",
-      "soon": true
+      "plain": "Nackter Fels",
+      "env": {
+       "foodAbundance": 0.1,
+       "water": 0.25,
+       "light": 0.88,
+       "temperature": 0.55,
+       "wind": 0.4
+      },
+      "tone": "shift"
      },
      {
       "name": "Boden-Sauerstoff (Staunässe/anoxisch)",
@@ -343,7 +428,14 @@ window.INFLUENCES = [
      {
       "name": "Hangneigung & Exposition",
       "desc": "Sonn-/Schatthang.",
-      "soon": true
+      "plain": "Schattiger Nordhang",
+      "env": {
+       "light": 0.25,
+       "temperature": 0.32,
+       "water": 0.78,
+       "foodAbundance": 0.5
+      },
+      "tone": "shift"
      },
      {
       "name": "Rauigkeit / topografische Komplexität",
@@ -366,8 +458,10 @@ window.INFLUENCES = [
       "plain": "Dunkle Höhle",
       "env": {
        "light": 0.02,
-       "temperature": 0.45,
-       "water": 0.6
+       "temperature": 0.46,
+       "water": 0.55,
+       "foodAbundance": 0.22,
+       "oxygen": 0.82
       },
       "tone": "shift"
      },
@@ -398,12 +492,29 @@ window.INFLUENCES = [
      {
       "name": "Chemische Gradienten (Redox/Chemokline)",
       "desc": "Mikroben-Grenzschichten.",
-      "soon": true
+      "plain": "Chemische Grenzschicht",
+      "env": {
+       "oxygen": 0.35,
+       "toxicity": 0.35,
+       "water": 0.9,
+       "light": 0.45,
+       "foodAbundance": 0.62
+      },
+      "tone": "shift"
      },
      {
       "name": "Energiequelle: photo- vs. chemosynthetisch",
       "desc": "Vent-/Seep-Ökosysteme.",
-      "soon": true
+      "plain": "Heiße Tiefsee-Quelle",
+      "env": {
+       "light": 0,
+       "toxicity": 0.6,
+       "pressure": 0.85,
+       "temperature": 0.78,
+       "water": 1,
+       "foodAbundance": 0.55
+      },
+      "tone": "shift"
      },
      {
       "name": "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)",
@@ -468,7 +579,15 @@ window.INFLUENCES = [
      {
       "name": "Störung (disturbance)",
       "desc": "entfernt Biomasse, öffnet Nischen.",
-      "soon": true
+      "plain": "Lücke im Bestand (Störung)",
+      "env": {
+       "foodAbundance": 0.3,
+       "light": 0.88,
+       "foodHeight": 0.12,
+       "predation": 0.12,
+       "water": 0.5
+      },
+      "tone": "shift"
      },
      {
       "name": "Störungs-Regime",
@@ -545,7 +664,15 @@ window.INFLUENCES = [
      {
       "name": "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm",
       "desc": "akute Massen-Mortalität, Lücken.",
-      "soon": true
+      "plain": "Eissturm (Frost & Sturm)",
+      "env": {
+       "temperature": 0.08,
+       "frost": 0.85,
+       "wind": 0.9,
+       "foodAbundance": 0.2,
+       "water": 0.4
+      },
+      "tone": "hit"
      },
      {
       "name": "Dürre als Selektions-Episode",
@@ -645,12 +772,27 @@ window.INFLUENCES = [
      {
       "name": "Supernova / Gammablitz (hypothetisch)",
       "desc": "Ozon-Strippen (Ordovizium?).",
-      "soon": true
+      "plain": "Gammablitz (Ozonschicht weg)",
+      "env": {
+       "uv": 0.95,
+       "radiation": 0.7,
+       "light": 0.8,
+       "foodAbundance": 0.35,
+       "temperature": 0.45
+      },
+      "tone": "hit"
      },
      {
       "name": "Sonnen-Variabilität / Weltraumwetter",
       "desc": "Langzeit-Klima-Forcing.",
-      "soon": true
+      "plain": "Schwache Sonnenphase",
+      "env": {
+       "light": 0.38,
+       "temperature": 0.26,
+       "water": 0.55,
+       "foodAbundance": 0.4
+      },
+      "tone": "shift"
      }
     ]
    },
@@ -678,9 +820,19 @@ window.INFLUENCES = [
     "sub": "Massenaussterben (als Design-Regler)",
     "factors": [
      {
-      "name": "Die „Big Five\"",
+      "name": "Die „Big Five“",
       "desc": "Ordovizium, Devon, Perm (Great Dying), Trias, Kreide.",
-      "soon": true
+      "plain": "Das Große Sterben (Perm)",
+      "env": {
+       "temperature": 0.93,
+       "aridity": 0.55,
+       "foodAbundance": 0.1,
+       "oxygen": 0.3,
+       "toxicity": 0.45,
+       "light": 0.4,
+       "water": 0.25
+      },
+      "tone": "hit"
      },
      {
       "name": "Auslöser-Bündel",
@@ -969,12 +1121,23 @@ window.INFLUENCES = [
      {
       "name": "Konkurrenz (–/–)",
       "desc": "intra-/interspezifisch, Ressourcen- vs. Interferenz, Scramble vs. Contest.",
-      "soon": true
+      "plain": "Konkurrenz um Nahrung",
+      "env": {
+       "foodAbundance": 0.16,
+       "predation": 0.35,
+       "foodHeight": 0.45
+      },
+      "tone": "shift"
      },
      {
       "name": "Prädation / Herbivorie / Granivorie / Frugivorie (+/–)",
       "desc": "Konsum; frugivor↔Samenausbreitung.",
-      "soon": true
+      "plain": "Räuber tauchen auf",
+      "env": {
+       "predation": 0.92,
+       "foodAbundance": 0.55
+      },
+      "tone": "hit"
      },
      {
       "name": "Parasitismus (+/–)",
@@ -1074,7 +1237,13 @@ window.INFLUENCES = [
      {
       "name": "Nischen-Aufteilung / Charakter-Verschiebung / ökologische Freisetzung",
       "desc": "Koexistenz-Mechanik.",
-      "soon": true
+      "plain": "Freie Nische (keine Rivalen)",
+      "env": {
+       "foodAbundance": 0.88,
+       "predation": 0.04,
+       "foodHeight": 0.35
+      },
+      "tone": "bio"
      },
      {
       "name": "Nischen-Konstruktion",
@@ -1104,12 +1273,25 @@ window.INFLUENCES = [
      {
       "name": "Trophische Kaskade (top-down) / Bottom-up-Kontrolle",
       "desc": "Wolf→Elch→Weide.",
-      "soon": true
+      "plain": "Räuber steuern alles (Top-down)",
+      "env": {
+       "predation": 0.85,
+       "foodAbundance": 0.8,
+       "light": 0.6
+      },
+      "tone": "shift"
      },
      {
       "name": "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art",
       "desc": "überproportionaler Einfluss (Seeotter, Biber, Koralle).",
-      "soon": true
+      "plain": "Ökosystem-Ingenieur (Biber staut)",
+      "env": {
+       "water": 0.9,
+       "foodAbundance": 0.72,
+       "foodHeight": 0.15,
+       "light": 0.55
+      },
+      "tone": "bio"
      },
      {
       "name": "Janzen-Connell / Priority-Effekte / Nurse-Plants / Stress-Gradient",
@@ -1119,7 +1301,13 @@ window.INFLUENCES = [
      {
       "name": "Mesopredator-Release / trophic downgrading",
       "desc": "Verlust der Spitze restrukturiert alles.",
-      "soon": true
+      "plain": "Kleinräuber-Schwemme",
+      "env": {
+       "predation": 0.76,
+       "foodAbundance": 0.62,
+       "foodHeight": 0.3
+      },
+      "tone": "hit"
      },
      {
       "name": "Sukzession / Assembly-Rules / Metacommunity",

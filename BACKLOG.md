@@ -402,6 +402,65 @@ eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. 
 
 ---
 
+## ⬜ Offen — Nutzer-Rückmeldung 2026-07-26 (Abend)
+
+Drei Punkte aus dem Spielen der v0.70.0:
+
+- [x] **Zappelnde Anzeige — behoben (v0.70.1).** „Diese Umwelt formt gerade …" und die
+  Gen-Pfeile wechselten im Sekundenbruchteil („das geht so nicht"). Ursachen waren vier,
+  alle gemessen statt geraten (`tools/ui-calm-check.mjs`, neu):
+  1. **Takt:** die Zeile wurde im Bildtakt (60/s) neu gerechnet → jetzt höchstens alle 900 ms.
+  2. **Begriffsfehler:** gezeigt wurde die NETTO-Bewegung, also Selektion **plus** den
+     Mutations-Rücktrieb zum Ruhewert. 15 der 25 Gene ankern bei 0,12 und rutschten deshalb
+     dauernd mit fast gleich großen Minibeträgen — daraus entstand das Ranking-Geflacker.
+     Die Zeile zeigt jetzt nur noch die **Selektion** („was diese Umwelt auswählt").
+  3. **Ranking-Rauschen:** klebrige Auswahl — ein Merkmal verdrängt ein angezeigtes erst,
+     wenn es 1,35× stärker ist; dazu Hysterese + Haltezeit von zwei Takten.
+  4. **DOM:** jede Neuberechnung schrieb in alle 25 Zeilen (gemessen ~37 Änderungen/s).
+     Jetzt wird je Element verglichen, die Intensitäts-Abstufung der Pfeile ist entfallen,
+     und markiert werden nur noch die **drei Merkmale, die auch in der Zeile stehen**.
+  **Messung:** Zeile 19×/8 s → 4×/12 s, Pfeile 35×/12 s → 4×/12 s (≈10× ruhiger).
+  `npm run ui-calm-check` hält das fest (Richtwert: höchstens 6 Wechsel je 12 s).
+
+- [x] **Chronik-Ton: weniger lyrisch, mehr prosaisch — umgesetzt (v0.70.2).** *(Nutzer)* Der generierte Text soll
+  eine **persönliche Beziehung zum Wesen** ermöglichen — „kein Gedicht". Der aktuelle Katalog
+  ist aphoristisch („die Auslese hat kein Ziel, nur eine Richtung") und spricht über Evolution
+  im Allgemeinen statt über **dieses** Tier. Umbau: konkrete, nüchterne Sätze; Name und Form
+  des Wesens benennen; beobachtbare Tatsachen statt Sentenzen; Vergleich mit dem früheren
+  Zustand („trägt jetzt dichteres Fell als vor hundert Generationen"). Betrifft vor allem die
+  `AUSKLANG`-Bausteine (die tragen den lyrischen Ton) und die Satz-Schablonen.
+  **Umgesetzt:** Der ganze `AUSKLANG`-Pool (48 Aphorismen wie „kein einzelnes Wesen erlebt
+  diesen Satz" — Sätze, die den Spieler bewusst auf Distanz schoben) ist durch 39 konkrete
+  Nachsätze ersetzt: was man sehen wird, was es kostet, wovon es abhängt, wie es vorher war.
+  Dazu **Name des Wesens** als Platzhalter (`{wesen}`, `{demwesen}`) — benannte Wesen werden
+  beim Namen genannt, sonst „dein Wesen"; nie mehr „die Linie" als anonyme Abstraktion.
+  24 weitere sentenzhafte Bausteine in Auftakt/Kern konkretisiert, 23 persönliche ergänzt.
+  **Messbar gemacht:** `story-check` prüft jetzt den Tonfall über die ganze Lagen-Suite —
+  Anteil Sätze mit Bezug zum Wesen **13 % → 27 %** (Mindestwert 20 %), Sentenz-Vokabular
+  **6 %** (Höchstwert 12 %). Vorrat dabei von ~142.000 auf ~150.000 Sätze gewachsen.
+  → `docs/storytelling.md` (Abschnitt „Wie man den Vorrat erweitert") gilt weiter.
+
+- [~] **Nutzerbindung / Spieltiefe — Konzept liegt vor, Entscheidung offen.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar
+  immer wieder neue Wesen, aber es hat keine Verbindlichkeit." Es fehlt der Schritt vom
+  Spielzeug zum **Spiel**. Recherche, wie moderne Spiele das lösen, dann ein Konzept, das zu
+  den Produkt-Pfeilern passt (Neugier + Bindung, **keine** Dark Patterns: kein Streak-Zwang,
+  kein Verfall-Schuldgefühl, kein Sammelzwang). Ergebnis gehört in ein eigenes Dokument.
+  **→ `docs/bindung-konzept.md`** (Recherche + Diagnose + fünf Vorschläge).
+  **Kern der Diagnose:** Das Problem ist nicht zu wenig Inhalt, sondern **zu wenig Widerstand**.
+  Gemessen an der Selbstbestimmungstheorie steht Evolve extrem ungleich: Autonomie maximal
+  (alles sofort, gratis und *umkehrbar* einstellbar), **Kompetenz fast null** (man kann in
+  Evolve nicht besser werden — es gibt nichts zu lösen und nichts zu scheitern), Verbundenheit
+  null. Ein Regler ohne Kosten macht jede Handlung folgenlos: keine Entscheidung, kein
+  kostbarer Zustand, kein Plan, keine Geschichte. Das ist die Grenze zwischen Spielzeug und
+  Spiel. **Empfehlung: V1 „Herausforderungen der Natur"** (Ziel + Beschränkung + Scheitern
+  möglich, additiv zur Sandkiste, keine Engine-Änderung) — schließt genau die Kompetenz-Lücke,
+  und was man dabei lernt, ist genau das, was das Spiel ohnehin lehren will. Danach V4
+  (Wissen als Meta-Fortschritt). V2 (Trägheit der Welt) und V3 (Aussterben nur unter deinen
+  Augen, nie offline) verändern das Grundgefühl → **Produktentscheidung des Nutzers**, nicht
+  eigenmächtig umsetzen.
+
+---
+
 ## ⬜ Offen — Live-App
 
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").

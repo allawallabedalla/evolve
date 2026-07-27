@@ -28,8 +28,8 @@ const EFFECTS = {
   "Niederschlag / Feuchte": { tone: "bio", env: { water: 0.92 } },
   "Schneedecke / subnivaler Raum": { tone: "shift", env: { temperature: 0.12, water: 0.5, light: 0.4 } },
   // 1.3 Licht
-  "Lichtintensität": { tone: "bio", env: { light: 0.96 } },
-  "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02 } },
+  "Lichtintensität": { tone: "shift", env: { light: 0.97, temperature: 0.74, water: 0.38, foodAbundance: 0.3, aridity: 0.3 } },   // volle Sonne = auch Hitze + Verdunstung; Licht allein verschiebt nichts (influence-check)
+  "Photische vs. aphotische Zone": { tone: "shift", env: { light: 0.02, water: 0.98, pressure: 0.45, temperature: 0.3, foodAbundance: 0.35 } },   // lichtlose Wassersäule (nicht Höhle — influence-check fand die Dublette)
   // 1.4 Atmosphäre — AXIS-7 Hypoxie (dünne Höhenluft): oxygen<1 stresst hohen Stoffwechsel
   "Luftdruck / Höhe / Hypoxie": { tone: "shift", env: { oxygen: 0.12, temperature: 0.28, light: 0.8, foodAbundance: 0.45, water: 0.4 } },
   "UV-Strahlung": { tone: "hit", env: { uv: 0.9, light: 0.92 } },   // AXIS-10: DNA-Schaden -> Schutzpigment
@@ -48,13 +48,58 @@ const EFFECTS = {
   "Höhengradient": { tone: "shift", env: { temperature: 0.2, foodHeight: 0.15, light: 0.72, water: 0.4 } },
   "Wind (Exposition + Ausbreitungs-Vektor)": { tone: "shift", env: { wind: 0.9, water: 0.35, temperature: 0.35 } },   // AXIS-18: Windhärte
   "Habitat-Struktur-Komplexität / Deckung": { tone: "bio", env: { foodHeight: 0.9, foodAbundance: 0.7 } },
-  "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.45, water: 0.6 } },
+  "Höhlen / unterirdischer Raum": { tone: "shift", env: { light: 0.02, temperature: 0.46, water: 0.55, foodAbundance: 0.22, oxygen: 0.82 } },   // Fels statt Wassersäule: konstant, nahrungsarm, schlecht belüftet
   // 1.8 Energie & Extrem-Chemie
   "Primärproduktivität / Ressourcen-Fülle": { tone: "bio", env: { foodAbundance: 0.95 } },
   "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": { tone: "hit", env: { toxicity: 0.92, salinity: 0.7, water: 0.6, light: 0.3 } },
   "Natürliche Toxine / ionisierende Strahlung": { tone: "hit", env: { toxicity: 0.55, radiation: 0.9 } },   // AXIS-15: Radon/Uran-Boden -> Strahlungsresistenz
   // 1.9 Feuer
   "Feuer-Regime (Häufigkeit/Intensität/Saison)": { tone: "hit", env: { foodAbundance: 0.3, temperature: 0.72, fire: 0.9 } },   // AXIS-16: Pyrophyt
+  // ---- S1: Sektion 1 vervollständigt (2026-07) ----------------------------
+  // Nur Faktoren, die sich als echter UMWELT-ZUSTAND auf den 16 Achsen abbilden
+  // lassen. Was Zyklen, eine fehlende Achse oder die Metapopulation braucht,
+  // bekommt in S4 ein ehrliches Ebenen-Etikett statt eines Schein-Effekts.
+  // 1.2 Wasser & Feuchte
+  "Bodenfeuchte / Wasserspeicher": { tone: "shift", env: { water: 0.9, toxicity: 0.25, foodAbundance: 0.3, oxygen: 0.5, temperature: 0.42 } },   // Torf/Moor: hält Wasser, sauer, sauerstoffarm
+  "Ariditäts-Index (Verdunstungs-Nachfrage)": { tone: "shift", env: { aridity: 0.7, water: 0.22, temperature: 0.68, foodAbundance: 0.42, light: 0.85 } },   // Wüstenrand: dauerhaft trocken (nicht die Dürre-Episode)
+  "Nebel/Tau-Interzeption": { tone: "bio", env: { water: 0.72, aridity: 0.45, light: 0.35, temperature: 0.44, foodAbundance: 0.4 } },   // Küstennebel-Wüste: Wasser aus der Luft, wenig Licht
+  // 1.3 Licht & Strahlung
+  "Spektralqualität (Lichtfarbe)": { tone: "shift", env: { light: 0.33, water: 0.95, pressure: 0.22, temperature: 0.38, foodAbundance: 0.45 } },   // Tiefwasser filtert Rot -> blaugrünes Restlicht
+  // 1.5 Aquatik
+  "Strömung / Wellenenergie / Gezeiten": { tone: "shift", env: { water: 0.95, wind: 0.85, foodAbundance: 0.62, light: 0.72, temperature: 0.45 } },   // Brandungszone: nass UND mechanisch hart
+  "Süß- vs. Meerwasser-Habitatklasse": { tone: "shift", env: { salinity: 0.45, water: 0.92, foodAbundance: 0.7, light: 0.55 } },   // Ästuar: Brackwasser, nährstoffreich
+  "Wasser-Permanenz (Hydroperiode)": { tone: "hit", env: { water: 0.42, aridity: 0.62, temperature: 0.72, foodAbundance: 0.5 } },   // austrocknender Tümpel
+  // 1.6 Boden & Substrat
+  "Bodentyp / Textur": { tone: "shift", env: { water: 0.2, foodAbundance: 0.32, light: 0.8, temperature: 0.6, aridity: 0.35 } },   // Sandboden: Wasser versickert sofort
+  "Boden-pH & -Chemie": { tone: "shift", env: { toxicity: 0.4, foodAbundance: 0.28, water: 0.55, light: 0.7 } },   // saurer Heide-/Moorboden: Nährstoffe schlecht verfügbar
+  "Fels/Sand/Karst als Substrat": { tone: "shift", env: { foodAbundance: 0.1, water: 0.25, light: 0.88, temperature: 0.55, wind: 0.4 } },   // nackter Fels: die Flechten-Nische
+  // 1.7 Terrain
+  "Hangneigung & Exposition": { tone: "shift", env: { light: 0.25, temperature: 0.32, water: 0.78, foodAbundance: 0.5 } },   // Schatt-Nordhang: kühl, feucht, dämmrig
+  // 1.8 Energie & Extrem-Chemie
+  "Chemische Gradienten (Redox/Chemokline)": { tone: "shift", env: { oxygen: 0.35, toxicity: 0.35, water: 0.9, light: 0.45, foodAbundance: 0.62 } },   // Grenzschicht: halb sauerstofffrei, chemisch reich
+  "Energiequelle: photo- vs. chemosynthetisch": { tone: "shift", env: { light: 0, toxicity: 0.6, pressure: 0.85, temperature: 0.78, water: 1, foodAbundance: 0.55 } },   // Hydrothermalquelle: heiß, finster, giftig, tief
+  // ---- S1b: Räuberdruck erreichbar machen (2026-07) -----------------------
+  // Der Prüfstand meldete: die Achse `predation` — einer der sechs Kern-Regler —
+  // wurde von KEINEM der 284 Faktoren benutzt, weil Räuberdruck in Sektion 4 steckt.
+  // Diese sechs sind ehrlich abbildbar: die Engine modelliert Prädation ohnehin als
+  // UMWELTDRUCK auf die eigene Linie, nicht als zweite Population (das ist die
+  // Lebende Welt). Alles, was echte Nachbar-Arten braucht, bleibt ausdrücklich offen.
+  "Prädation / Herbivorie / Granivorie / Frugivorie (+/–)": { tone: "hit", env: {"predation": 0.92, "foodAbundance": 0.55} },
+  "Konkurrenz (–/–)": { tone: "shift", env: {"foodAbundance": 0.16, "predation": 0.35, "foodHeight": 0.45} },
+  "Nischen-Aufteilung / Charakter-Verschiebung / ökologische Freisetzung": { tone: "bio", env: {"foodAbundance": 0.88, "predation": 0.04, "foodHeight": 0.35} },
+  "Mesopredator-Release / trophic downgrading": { tone: "hit", env: {"predation": 0.76, "foodAbundance": 0.62, "foodHeight": 0.3} },
+  "Trophische Kaskade (top-down) / Bottom-up-Kontrolle": { tone: "shift", env: {"predation": 0.85, "foodAbundance": 0.8, "light": 0.6} },
+  "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art": { tone: "bio", env: {"water": 0.9, "foodAbundance": 0.72, "foodHeight": 0.15, "light": 0.55} },
+  // ---- S2: Sektion 2, soweit als Umwelt-ZUSTAND darstellbar (2026-07) -----
+  // Von 17 offenen sind fünf ehrlich abbildbar. Der Rest braucht eine Zeitachse
+  // (Zyklen, Störungs-Regime, Stochastik), gehört in die Lebende Welt (Tektonik,
+  // Landbrücken) oder ist schon durch Einzel-Faktoren abgedeckt (Auslöser-Bündel,
+  // freie Nischen nach dem Aussterben). Etikett dafür in S4.
+  "Störung (disturbance)": { tone: "shift", env: {"foodAbundance": 0.3, "light": 0.88, "foodHeight": 0.12, "predation": 0.12, "water": 0.5} },
+  "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm": { tone: "hit", env: {"temperature": 0.08, "frost": 0.85, "wind": 0.9, "foodAbundance": 0.2, "water": 0.4} },
+  "Supernova / Gammablitz (hypothetisch)": { tone: "hit", env: {"uv": 0.95, "radiation": 0.7, "light": 0.8, "foodAbundance": 0.35, "temperature": 0.45} },
+  "Sonnen-Variabilität / Weltraumwetter": { tone: "shift", env: {"light": 0.38, "temperature": 0.26, "water": 0.55, "foodAbundance": 0.4} },
+  'Die „Big Five“': { tone: "hit", env: {"temperature": 0.93, "aridity": 0.55, "foodAbundance": 0.1, "oxygen": 0.3, "toxicity": 0.45, "light": 0.4, "water": 0.25} },
   // 2.2 Geophysikalisch
   "Vulkanausbruch / Flutbasalt (LIP)": { tone: "hit", env: { temperature: 0.8, light: 0.25, foodAbundance: 0.3 } },
   "Vulkanwinter / Aschefall": { tone: "hit", env: { light: 0.15, temperature: 0.25, foodAbundance: 0.35 } },
@@ -99,6 +144,30 @@ const PLAIN = {
   "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)": "Extremchemie (Schwefel, Salz, Säure)",
   "Natürliche Toxine / ionisierende Strahlung": "Gift & radioaktive Strahlung",
   "Feuer-Regime (Häufigkeit/Intensität/Saison)": "Häufige Brände",
+  "Bodenfeuchte / Wasserspeicher": "Moorboden (hält Wasser)",
+  "Ariditäts-Index (Verdunstungs-Nachfrage)": "Wüstenrand (dauerhaft trocken)",
+  "Nebel/Tau-Interzeption": "Nebelwüste (Wasser aus der Luft)",
+  "Spektralqualität (Lichtfarbe)": "Blaugrünes Tiefwasser-Licht",
+  "Strömung / Wellenenergie / Gezeiten": "Brandungszone (Wellen & Gezeiten)",
+  "Süß- vs. Meerwasser-Habitatklasse": "Brackwasser-Ästuar",
+  "Wasser-Permanenz (Hydroperiode)": "Austrocknender Tümpel",
+  "Bodentyp / Textur": "Sandboden (Wasser versickert)",
+  "Boden-pH & -Chemie": "Saurer Heideboden",
+  "Fels/Sand/Karst als Substrat": "Nackter Fels",
+  "Hangneigung & Exposition": "Schattiger Nordhang",
+  "Chemische Gradienten (Redox/Chemokline)": "Chemische Grenzschicht",
+  "Energiequelle: photo- vs. chemosynthetisch": "Heiße Tiefsee-Quelle",
+  "Prädation / Herbivorie / Granivorie / Frugivorie (+/–)": "Räuber tauchen auf",
+  "Konkurrenz (–/–)": "Konkurrenz um Nahrung",
+  "Nischen-Aufteilung / Charakter-Verschiebung / ökologische Freisetzung": "Freie Nische (keine Rivalen)",
+  "Mesopredator-Release / trophic downgrading": "Kleinräuber-Schwemme",
+  "Trophische Kaskade (top-down) / Bottom-up-Kontrolle": "Räuber steuern alles (Top-down)",
+  "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art": "Ökosystem-Ingenieur (Biber staut)",
+  "Störung (disturbance)": "Lücke im Bestand (Störung)",
+  "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm": "Eissturm (Frost & Sturm)",
+  "Supernova / Gammablitz (hypothetisch)": "Gammablitz (Ozonschicht weg)",
+  "Sonnen-Variabilität / Weltraumwetter": "Schwache Sonnenphase",
+  'Die „Big Five“': "Das Große Sterben (Perm)",
   "Vulkanausbruch / Flutbasalt (LIP)": "Vulkanausbruch",
   "Vulkanwinter / Aschefall": "Vulkanwinter (Aschehimmel)",
   "Erdbeben / Tsunami / Hangrutsch": "Erdbeben & Flutwelle",
