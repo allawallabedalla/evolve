@@ -265,5 +265,199 @@
    "form": "Euglenoid · Mixotroph",
    "raritaet": "haeufig"
   }
+ ],
+ "biomeBeispiele": [
+  {
+   "name": "Eiszeit",
+   "env": {
+    "temperature": 0.08,
+    "predation": 0.15,
+    "foodAbundance": 0.55,
+    "foodHeight": 0.15,
+    "light": 0.4,
+    "water": 0.5
+   },
+   "nachGenerationen": {
+    "form": "Protist · Amöbe",
+    "reich": "Mikrobe",
+    "passung": 27
+   }
+  },
+  {
+   "name": "Räuberland",
+   "env": {
+    "temperature": 0.5,
+    "predation": 0.9,
+    "foodAbundance": 0.8,
+    "foodHeight": 0.15,
+    "light": 0.5,
+    "water": 0.6
+   },
+   "nachGenerationen": {
+    "form": "Fisch · Aalform",
+    "reich": "Tier",
+    "passung": 69
+   }
+  },
+  {
+   "name": "Reiche Kronen",
+   "env": {
+    "temperature": 0.5,
+    "predation": 0.1,
+    "foodAbundance": 0.9,
+    "foodHeight": 0.85,
+    "light": 0.5,
+    "water": 0.7
+   },
+   "nachGenerationen": {
+    "form": "Hefe",
+    "reich": "Pilz",
+    "passung": 74
+   }
+  },
+  {
+   "name": "Hitze-Dürre",
+   "env": {
+    "temperature": 0.92,
+    "predation": 0.1,
+    "foodAbundance": 0.3,
+    "foodHeight": 0.1,
+    "light": 0.9,
+    "water": 0.15
+   },
+   "nachGenerationen": {
+    "form": "Bakterie",
+    "reich": "Mikrobe",
+    "passung": 42
+   }
+  },
+  {
+   "name": "Sonniger Sumpf",
+   "env": {
+    "temperature": 0.55,
+    "predation": 0.1,
+    "foodAbundance": 0.18,
+    "foodHeight": 0.1,
+    "light": 0.95,
+    "water": 0.95
+   },
+   "nachGenerationen": {
+    "form": "Blütenkraut",
+    "reich": "Pflanze",
+    "passung": 41
+   }
+  },
+  {
+   "name": "Dichter Wald",
+   "env": {
+    "temperature": 0.5,
+    "predation": 0.2,
+    "foodAbundance": 0.2,
+    "foodHeight": 0.7,
+    "light": 0.9,
+    "water": 0.85
+   },
+   "nachGenerationen": {
+    "form": "Verholzter Strauch",
+    "reich": "Pflanze",
+    "passung": 40
+   }
+  },
+  {
+   "name": "Moderwald",
+   "env": {
+    "temperature": 0.5,
+    "predation": 0.5,
+    "foodAbundance": 0.05,
+    "foodHeight": 0.05,
+    "light": 0.05,
+    "water": 0.12
+   },
+   "nachGenerationen": {
+    "form": "Euglenoid · Mixotroph",
+    "reich": "Protist",
+    "passung": 11
+   }
+  },
+  {
+   "name": "Urtümpel",
+   "env": {
+    "temperature": 0.35,
+    "predation": 0.1,
+    "foodAbundance": 0.05,
+    "foodHeight": 0.05,
+    "light": 0.1,
+    "water": 0.3
+   },
+   "nachGenerationen": {
+    "form": "Euglenoid · Mixotroph",
+    "reich": "Protist",
+    "passung": 10
+   }
+  },
+  {
+   "name": "Trüber See",
+   "env": {
+    "temperature": 0.55,
+    "predation": 0.55,
+    "foodAbundance": 0.28,
+    "foodHeight": 0.05,
+    "light": 0.1,
+    "water": 0.6
+   },
+   "nachGenerationen": {
+    "form": "Generalisten-Tier",
+    "reich": "Tier",
+    "passung": 11
+   }
+  },
+  {
+   "name": "Sonniges Flachmeer",
+   "env": {
+    "temperature": 0.4,
+    "predation": 0.05,
+    "foodAbundance": 0.05,
+    "foodHeight": 0.05,
+    "light": 0.88,
+    "water": 0.85
+   },
+   "nachGenerationen": {
+    "form": "Grünalge",
+    "reich": "Pflanze",
+    "passung": 30
+   }
+  },
+  {
+   "name": "Offenes Meer",
+   "env": {
+    "temperature": 0.5,
+    "predation": 0.5,
+    "foodAbundance": 0.65,
+    "foodHeight": 0.3,
+    "light": 0.5,
+    "water": 0.98
+   },
+   "nachGenerationen": {
+    "form": "Fisch · Aalform",
+    "reich": "Tier",
+    "passung": 69
+   }
+  },
+  {
+   "name": "Lichtlose Tiefsee",
+   "env": {
+    "temperature": 0.3,
+    "predation": 0.5,
+    "foodAbundance": 0.55,
+    "foodHeight": 0.1,
+    "light": 0.03,
+    "water": 0.95
+   },
+   "nachGenerationen": {
+    "form": "Leuchtwesen · Tiefsee",
+    "reich": "Tier",
+    "passung": 48
+   }
+  }
  ]
 }
