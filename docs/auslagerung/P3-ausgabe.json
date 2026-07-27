@@ -1,0 +1,874 @@
+{
+    "Mitteltemperatur":  {
+                             "klartext":  "Wie warm es im Schnitt ist",
+                             "erklaerung":  "Die durchschnittliche Wärme eines Ortes. Sie bestimmt, welche Lebewesen dort überhaupt gedeihen und sich fortpflanzen können."
+                         },
+    "Temperatur-Spanne / Tag-Nacht-Schwankung":  {
+                                                     "klartext":  "Unterschied zwischen Tag und Nacht",
+                                                     "erklaerung":  "Wie stark die Temperatur zwischen heißem Tag und kühler Nacht schwankt. Große Sprünge zwingen Tiere, mit beiden Extremen zurechtzukommen."
+                                                 },
+    "Saisonalität (Jahreszeiten)":  {
+                                        "klartext":  "Der Wechsel der Jahreszeiten",
+                                        "erklaerung":  "Der jährliche Wechsel von warmen und kalten Zeiten. Er treibt Winterschlaf, Wanderung und den Wechsel des Fells an."
+                                    },
+    "Thermische Stabilität":  {
+                                  "klartext":  "Immer gleich warm oder wechselhaft",
+                                  "erklaerung":  "Ob die Temperatur stets gleich bleibt oder stark schwankt. Gleichbleibende Wärme belohnt Spezialisten, Wechsel belohnt Allrounder."
+                              },
+    "Niederschlags-Saisonalität":  {
+                                       "klartext":  "Regenzeit und Trockenzeit",
+                                       "erklaerung":  "Wie sich Regen über das Jahr verteilt, etwa in Regen- und Trockenzeiten. Der Wechsel formt den Rhythmus von Wachstum und Fortpflanzung."
+                                   },
+    "Photoperiode / Tageslänge":  {
+                                      "klartext":  "Wie lang die Tage sind",
+                                      "erklaerung":  "Die Länge des Tageslichts im Lauf des Jahres. Sie dient vielen Arten als Signal für Blüte, Brut und den Aufbruch zur Wanderung."
+                                  },
+    "Sauerstoff (O₂)":  {
+                            "klartext":  "Wenn die Luft sehr sauerstoffreich ist",
+                            "erklaerung":  "Der Anteil an Sauerstoff in der Luft. In sauerstoffreichen Zeiten konnten sogar riesige Insekten heranwachsen."
+                        },
+    "CO₂":  {
+                "klartext":  "Kohlendioxid in der Luft",
+                "erklaerung":  "Das Gas, aus dem Pflanzen ihre Nahrung bauen und das die Luft aufheizt. Mehr davon verändert Wachstum und Klima zugleich."
+            },
+    "Wetter-Stochastik":  {
+                              "klartext":  "Wenn das Wetter unberechenbar wird",
+                              "erklaerung":  "Wie unvorhersehbar das Wetter von Jahr zu Jahr ausfällt. Wo nichts sicher ist, gewinnen flexible Lebewesen, die alle Chancen nutzen."
+                          },
+    "Substrat-Stabilität / Erosion":  {
+                                          "klartext":  "Fester Fels oder rutschender Hang",
+                                          "erklaerung":  "Wie stabil der Untergrund ist und wie oft er abrutscht. Ständige Bewegung stört Wurzeln und Bauten und zwingt zu ständigem Neuanfang."
+                                      },
+    "Rauigkeit / topografische Komplexität":  {
+                                                  "klartext":  "Ein zerklüftetes Gelände",
+                                                  "erklaerung":  "Wie stark ein Gebiet aus Bergen, Tälern und Spalten zerfurcht ist. Viele Winkel schaffen viele Lebensräume und dadurch mehr Artenvielfalt."
+                                              },
+    "Küsten-/Ufergeometrie":  {
+                                  "klartext":  "Die Form der Küstenlinie",
+                                  "erklaerung":  "Wie das Ufer geformt ist, ob Tümpel, Flussmündung oder felsiges Kap. Die Form entscheidet, wie viele Lebensräume am Wasser entstehen."
+                              },
+    "Ressourcen-Patchiness / -Pulse":  {
+                                           "klartext":  "Wenn Nahrung in Schüben kommt",
+                                           "erklaerung":  "Nahrung, die nicht gleichmäßig fließt, sondern in Schüben auftritt wie Mastjahre oder Lachszüge. Wer den Schub nutzt, hat den Vorteil."
+                                       },
+    "Gravitation / Auftrieb":  {
+                                   "klartext":  "Wie schwer der Körper wiegt",
+                                   "erklaerung":  "Wie stark die Schwerkraft am Körper zieht und wie sehr das Wasser trägt. Sie setzt die Grenze, wie groß ein Lebewesen werden kann."
+                               },
+    "Magnetfeld":  {
+                       "klartext":  "Der Kompass der Erde",
+                       "erklaerung":  "Das unsichtbare Magnetfeld des Planeten. Manche Tiere spüren es und finden damit auf langen Wanderungen ihren Weg über weite Strecken."
+                   },
+    "Störungs-Regime":  {
+                            "klartext":  "Wie oft und heftig Störungen kommen",
+                            "erklaerung":  "Das Muster aus Häufigkeit, Wucht und Zeitpunkt von Störungen. Es entscheidet, ob eine Lebensgemeinschaft zur Ruhe kommt oder ständig umbaut."
+                        },
+    "Intermediate-Disturbance-Hypothese":  {
+                                               "klartext":  "Warum mittlere Störung Vielfalt bringt",
+                                               "erklaerung":  "Die Beobachtung, dass die Artenvielfalt am größten ist, wenn Störungen weder zu selten noch zu heftig auftreten, sondern mittelstark bleiben."
+                                           },
+    "Press vs. Pulse":  {
+                            "klartext":  "Dauerdruck oder kurzer Schock",
+                            "erklaerung":  "Der Unterschied zwischen lang anhaltendem Stress und einem kurzen heftigen Schlag. Beide fordern Lebewesen auf ganz verschiedene Weise heraus."
+                        },
+    "Umwelt-Stochastik":  {
+                              "klartext":  "Der reine Zufall der Umwelt",
+                              "erklaerung":  "Zufällige Schwankungen der Umwelt, die Bestände wachsen oder schrumpfen lassen. Sie können selbst gut angepasste Gruppen unerwartet treffen."
+                          },
+    "Tektonik / Kontinentaldrift / Hebung / Rifting":  {
+                                                           "klartext":  "Wenn Kontinente wandern",
+                                                           "erklaerung":  "Das langsame Wandern und Auffalten der Erdkruste über Jahrmillionen. Es hebt Gebirge, reißt Land auf und trennt oder schafft Lebensräume."
+                                                       },
+    "Landbrücken / Meeresspiegel":  {
+                                        "klartext":  "Brücken zwischen den Landmassen",
+                                        "erklaerung":  "Wenn ein sinkender Meeresspiegel Landmassen verbindet oder ein steigender sie trennt. So mischen sich Tierwelten oder werden voneinander isoliert."
+                                    },
+    "Große Sauerstoff-Krise (GOE)":  {
+                                         "klartext":  "Als der Sauerstoff zum Gift wurde",
+                                         "erklaerung":  "Der erste große Anstieg des Sauerstoffs in der Frühzeit der Erde. Für die damaligen Lebewesen ohne Luftatmung wirkte er wie ein tödliches Gift."
+                                     },
+    "Tag-Nacht / Mond-Gezeiten / Jahreszeit":  {
+                                                   "klartext":  "Die Takte der Natur",
+                                                   "erklaerung":  "Die natürlichen Takte aus Tag und Nacht, Gezeiten und Jahreszeiten. Nach ihnen richten Lebewesen ihre inneren Uhren und ihre Fortpflanzung aus."
+                                               },
+    "ENSO / NAO / dekadische Oszillationen":  {
+                                                  "klartext":  "Klima, das über Jahre schwankt",
+                                                  "erklaerung":  "Große Klimamuster, die über mehrere Jahre kommen und gehen. Sie bringen mal warme, mal kalte Phasen und prägen Nahrung und Wetter langfristig."
+                                              },
+    "Milankovitch-Zyklen":  {
+                                "klartext":  "Warum Eiszeiten wiederkehren",
+                                "erklaerung":  "Langsame Änderungen der Erdbahn um die Sonne über Zehntausende Jahre. Sie takten den Wechsel von Eiszeiten und Warmzeiten über riesige Zeiträume."
+                            },
+    "Auslöser-Bündel":  {
+                            "klartext":  "Wenn mehrere Katastrophen zusammenkommen",
+                            "erklaerung":  "Ein Zusammenspiel mehrerer Katastrophen wie Vulkanausbrüche, Sauerstoffmangel und Einschläge. Gemeinsam lösen sie ein großes Aussterben aus."
+                        },
+    "Freie Nischen → adaptive Radiation danach":  {
+                                                      "klartext":  "Nach dem Aussterben blüht das Leben auf",
+                                                      "erklaerung":  "Wenn ein Aussterben Platz schafft, füllen die Überlebenden rasch die leeren Rollen. So wurden die Säugetiere nach den Dinosauriern groß und vielfältig."
+                                                  },
+    "Gleichgewichts-Theorie (Immigration = Extinktion)":  {
+                                                              "klartext":  "Wenn Zuzug und Aussterben sich ausgleichen",
+                                                              "erklaerung":  "Auf einer Insel pendelt sich die Zahl der Arten ein, wenn ebenso viele neu ankommen wie verschwinden. Die Arten selbst wechseln dabei ständig."
+                                                          },
+    "Arten-Areal-Beziehung (S = cAᶻ)":  {
+                                            "klartext":  "Größere Flächen tragen mehr Arten",
+                                            "erklaerung":  "Je größer ein Lebensraum ist, desto mehr verschiedene Arten leben darin. Mehr Platz bietet mehr Nischen, in denen sich Leben aufspalten kann."
+                                        },
+    "Distanz-/Isolations-Effekt":  {
+                                       "klartext":  "Wie weit ist die Insel entfernt?",
+                                       "erklaerung":  "Weit abgelegene Orte werden von wenigen Zuwanderern erreicht. Diese Abgeschiedenheit lässt Bewohner eigene Wege gehen und sich getrennt entwickeln."
+                                   },
+    "Rescue-Effekt / Target-Effekt":  {
+                                          "klartext":  "Nachschub von nahen Nachbarn",
+                                          "erklaerung":  "Nahe oder große Orte bekommen laufend Zuzug von Nachbarn. Dieser Nachschub bewahrt eine schwächelnde Gruppe vor dem Aussterben."
+                                      },
+    "Relaxation / Extinktions-Schuld":  {
+                                            "klartext":  "Verspätetes Artensterben nach Abtrennung",
+                                            "erklaerung":  "Wird ein Gebiet abgeschnitten, sinkt die Artenzahl erst langsam über lange Zeit. Manche Arten verschwinden erst spät, obwohl ihr Ende schon feststeht."
+                                        },
+    "Insel-Ontogenie (GDM)":  {
+                                  "klartext":  "Vielfalt folgt dem Alter der Insel",
+                                  "erklaerung":  "Junge Vulkaninseln wachsen, altern und versinken wieder. Die größte Artenvielfalt trägt eine Insel im mittleren Lebensalter, danach nimmt sie ab."
+                              },
+    "Taxon-Zyklus":  {
+                         "klartext":  "Vom Neuankömmling zum Relikt",
+                         "erklaerung":  "Eine eingewanderte Art breitet sich aus, wird zum eng spezialisierten Bewohner, schrumpft zum Rest und stirbt aus. Dieser Kreislauf formt Inselleben."
+                     },
+    "Patch (Habitat-Fleck)":  {
+                                  "klartext":  "Einzelner Lebensraum-Flecken",
+                                  "erklaerung":  "Ein abgegrenzter Ort mit eigener kleiner Bewohnergruppe. Solche Flecken sind die Bausteine, aus denen ein Netz verstreuter Populationen besteht."
+                              },
+    "Kolonisation–Extinktion-Umschlag (Levins)":  {
+                                                      "klartext":  "Region überlebt trotz lokalem Sterben",
+                                                      "erklaerung":  "Einzelne Flecken sterben aus und werden neu besiedelt. Weil nie alle gleichzeitig leer sind, überdauert die Art in der ganzen Region."
+                                                  },
+    "Quelle–Senke-Dynamik":  {
+                                 "klartext":  "Gute Orte versorgen schlechte Orte",
+                                 "erklaerung":  "In manchen Flecken gedeiht eine Art und liefert Überschuss, in anderen stirbt sie ohne Nachschub. Der Austausch hält auch die schlechten Orte besiedelt."
+                             },
+    "Konnektivitäts-/Inzidenz-Funktion":  {
+                                              "klartext":  "Chance auf Besiedlung eines Flecks",
+                                              "erklaerung":  "Wie wahrscheinlich ein Ort bewohnt ist, hängt von seiner Größe und seiner Abgeschiedenheit ab. Kleine, abgelegene Flecken bleiben oft leer."
+                                          },
+    "Extinktions-Schwelle / Metapop-Kapazität":  {
+                                                     "klartext":  "Kipppunkt zum Totalzusammenbruch",
+                                                     "erklaerung":  "Fällt die Zahl bewohnbarer Orte unter eine kritische Grenze, bricht das gesamte Netz zusammen. Darunter kann sich die Art nirgends mehr halten."
+                                                 },
+    "Synchronie vs. Portfolio-Effekt":  {
+                                            "klartext":  "Streuung auf viele Orte puffert Risiko",
+                                            "erklaerung":  "Wenn Orte unabhängig voneinander schwanken, gleicht sich Gutes und Schlechtes aus. Das schützt das Ganze so, wie viele Anlagen ein Vermögen sichern."
+                                        },
+    "Ausbreitungs-Fähigkeit (Vagilität) als GEN":  {
+                                                       "klartext":  "Angeborenes Talent zum Wandern",
+                                                       "erklaerung":  "Manche Lebewesen tragen ererbte Merkmale, mit denen sie weite Strecken zurücklegen können, etwa Flügel. Das verändert, wie sich Arten verbreiten."
+                                                   },
+    "Ausbreitungs-Kern (dispersal kernel)":  {
+                                                 "klartext":  "Meist nah, selten weit verstreut",
+                                                 "erklaerung":  "Nachkommen landen fast immer in der Nähe, ganz selten aber sehr weit weg. Diese seltenen Weitwürfe entscheiden über das Besiedeln ferner Orte."
+                                             },
+    "Genfluss / Migration zwischen Orten":  {
+                                                "klartext":  "Erbgut-Austausch zwischen Orten",
+                                                "erklaerung":  "Wandernde Lebewesen bringen ihr Erbgut in fremde Gruppen ein. Dieser Austausch gleicht Unterschiede aus und bremst die Aufspaltung in eigene Arten."
+                                            },
+    "Ausbreitungs-Syndrome":  {
+                                  "klartext":  "Wie Samen und Tiere reisen",
+                                  "erklaerung":  "Manches verbreitet sich durch Wind, Wasser oder Tiere, anderes schleudert sich selbst fort. Der Reiseweg bestimmt, welche Orte erreicht werden."
+                              },
+    "Long-Distance / Sweepstakes / Rafting / Jump-Dispersal":  {
+                                                                   "klartext":  "Seltener Glückstreffer in die Ferne",
+                                                                   "erklaerung":  "Ganz selten überquert ein Lebewesen riesige Distanzen, etwa treibend auf einem Pflanzenfloß. Solche Zufälle besiedeln völlig abgelegene Orte."
+                                                               },
+    "Trittstein-Konnektivität":  {
+                                     "klartext":  "Von Insel zu Insel weiterhüpfen",
+                                     "erklaerung":  "Zwischengelegene kleine Orte dienen als Sprungbretter. Über sie erreicht Leben ferne Ziele, die im einen Sprung unerreichbar wären."
+                                 },
+    "Philopatrie / Sesshaftigkeit":  {
+                                         "klartext":  "Rückkehr zum Geburtsort",
+                                         "erklaerung":  "Manche Tiere kehren zum eigenen Geburtsort zurück, wie Lachse zum Fluss. Diese Treue trennt Gruppen und lässt sie sich an ihren Ort anpassen."
+                                     },
+    "Isolation-by-Distance / -Environment / -Resistance":  {
+                                                               "klartext":  "Ferne Gruppen werden unterschiedlich",
+                                                               "erklaerung":  "Je weiter Populationen auseinanderliegen oder je verschiedener ihre Umwelt, desto stärker weichen sie voneinander ab. Räumliche Distanz treibt sie auseinander."
+                                                           },
+    "Spatial Sorting (Range-Edge)":  {
+                                         "klartext":  "Schnellste sammeln sich an der Front",
+                                         "erklaerung":  "An der vordersten Ausbreitungslinie häufen sich die besten Wanderer, weil nur sie dort ankommen. So sortiert der Raum ihre Merkmale zusammen."
+                                     },
+    "Kompetition–Kolonisation-Trade-off":  {
+                                               "klartext":  "Schnell siedeln oder stark kämpfen",
+                                               "erklaerung":  "Wer sich gut ausbreitet, ist meist ein schwacher Konkurrent, und umgekehrt. Dieser Zielkonflikt lässt beide Typen im Raum nebeneinander bestehen."
+                                           },
+    "Geografische Isolation":  {
+                                   "klartext":  "Getrennt durch Entfernung",
+                                   "erklaerung":  "Zwei Gruppen einer Art leben so weit auseinander, dass sie sich nicht mehr treffen. Getrennt entwickeln sie sich zu eigenen Arten weiter."
+                               },
+    "Gebirge / Flüsse / Ozeane / Wüsten / Eisschilde als Barrieren":  {
+                                                                          "klartext":  "Natürliche Hindernisse im Weg",
+                                                                          "erklaerung":  "Berge, Flüsse, Meere oder Wüsten zerschneiden ein Verbreitungsgebiet. Die getrennten Teile entwickeln sich fortan unabhängig voneinander."
+                                                                      },
+    "Vikarianz vs. Dispersal":  {
+                                    "klartext":  "Barriere kam oder Art wanderte?",
+                                    "erklaerung":  "Zwei Populationen sind getrennt: entweder weil eine neue Barriere durch ihr Gebiet wuchs oder weil ein Teil sie überquerte und auswanderte."
+                                },
+    "Landbrücken / Meeresspiegel / Orogenese / marine Barrieren":  {
+                                                                       "klartext":  "Land verbindet und trennt sich",
+                                                                       "erklaerung":  "Sinkende Meere legen Landbrücken frei, steigende trennen wieder. So verschmelzen und spalten sich Lebensräume über lange Zeit."
+                                                                   },
+    "Edaphische Inseln (Serpentin, Karst)":  {
+                                                 "klartext":  "Besondere Böden als Inseln",
+                                                 "erklaerung":  "Seltene Bodenarten bilden Flecken inmitten anderer Landschaft. Nur angepasste Arten überleben dort und werden mit der Zeit ganz eigen."
+                                             },
+    "Habitat-Fragmentierung":  {
+                                   "klartext":  "Lebensraum zerfällt in Stücke",
+                                   "erklaerung":  "Ein zusammenhängender Lebensraum wird in kleine Inseln zerschnitten. Weniger Austausch führt zu mehr Inzucht in den einzelnen Resten."
+                               },
+    "Randeffekt / Kern- vs. Rand-Arten":  {
+                                              "klartext":  "Ränder anders als die Mitte",
+                                              "erklaerung":  "Am Rand eines Lebensraums herrscht anderes Klima als im Kern. Arten, die viel Fläche brauchen, verschwinden dort zuerst."
+                                          },
+    "Extinktions-Schuld / Kolonisations-Kredit":  {
+                                                      "klartext":  "Verspätete Verluste und Gewinne",
+                                                      "erklaerung":  "Nach einer Veränderung folgen Aussterben und Neuansiedlung erst mit Verzögerung. Das wahre Ergebnis zeigt sich erst nach langer Zeit."
+                                                  },
+    "SLOSS-Debatte":  {
+                          "klartext":  "Ein großes oder viele kleine?",
+                          "erklaerung":  "Bewahrt ein einziges großes Schutzgebiet mehr Arten oder viele kleine verstreute? Die Anordnung entscheidet über das Überleben."
+                      },
+    "Matrix-Permeabilität / Korridore / Perkolations-Schwelle":  {
+                                                                     "klartext":  "Wie durchlässig ist die Landschaft?",
+                                                                     "erklaerung":  "Zwischen Lebensraum-Inseln liegt fremdes Gelände. Ob Tiere es durchqueren können, entscheidet über den Austausch zwischen den Orten."
+                                                                 },
+    "Cline / Ecotone / Umwelt-Gradient":  {
+                                              "klartext":  "Allmählicher Wandel im Raum",
+                                              "erklaerung":  "Von Ort zu Ort verändern sich Merkmale langsam entlang einer Umweltstufe. So entsteht eine durchgehende Kette leicht verschiedener Formen."
+                                          },
+    "Breiten-/Höhen-Diversitäts-Gradient":  {
+                                                "klartext":  "Mehr Vielfalt in den Tropen",
+                                                "erklaerung":  "Die Artenzahl steigt zum Äquator hin und fällt zu den Polen. Ein weltweites Muster, das man an vielen Orten wiederfindet."
+                                            },
+    "Range-Expansion/-Kontraktion / -Limits / -Shift (Klima)":  {
+                                                                    "klartext":  "Verbreitungsgebiet wandert",
+                                                                    "erklaerung":  "Wird das Klima wärmer, verschieben sich Verbreitungsgebiete polwärts oder bergauf. Arten folgen ihren passenden Bedingungen im Raum."
+                                                                },
+    "Refugien (glazial/Mikro-)":  {
+                                      "klartext":  "Rückzugsorte in harten Zeiten",
+                                      "erklaerung":  "In Eiszeiten überdauern Arten in geschützten Nischen. Von dort breiten sie sich später wieder über das Land aus."
+                                  },
+    "Arten-Pumpe (glacial species pump)":  {
+                                               "klartext":  "Eiszeiten als Artenfabrik",
+                                               "erklaerung":  "Wiederkehrende Zyklen aus Trennung und Wiedervereinigung spalten Gruppen immer neu. So entstehen über die Zeit viele neue Arten."
+                                           },
+    "„Escalator to Extinction\"":  {
+                                       "klartext":  "Kein Berg mehr zum Fliehen",
+                                       "erklaerung":  "Bei Erwärmung ziehen Gipfelarten immer höher. Am Berggipfel angekommen bleibt kein Lebensraum mehr übrig, und sie sterben aus."
+                                   },
+    "Landschafts-Konnektivität (strukturell vs. funktional)":  {
+                                                                   "klartext":  "Wie gut hängt Landschaft zusammen?",
+                                                                   "erklaerung":  "Nicht nur sichtbare Verbindungen zählen, sondern ob Tiere sie tatsächlich nutzen können. Das steuert den Austausch zwischen den Orten."
+                                                               },
+    "Biogeografische Realme / Provinzialismus / Wallace-Linie":  {
+                                                                     "klartext":  "Scharfe Grenzen der Tierwelt",
+                                                                     "erklaerung":  "Manche Gebiete tragen völlig verschiedene Tierwelten mit einer scharfen Grenze dazwischen. Sie stammt aus der Geschichte der Kontinente."
+                                                                 },
+    "Endemismus (Paläo-/Neo-/kryptisch) / Hotspots":  {
+                                                          "klartext":  "Nur hier und sonst nirgends",
+                                                          "erklaerung":  "Manche Arten leben ausschließlich in einer einzigen Region. Lange Isolation ließ dort einzigartige Formen entstehen."
+                                                      },
+    "Neutraltheorie (Hubbell): Drift + Dispersal + Speziation":  {
+                                                                     "klartext":  "Vielfalt auch ohne Vorteil",
+                                                                     "erklaerung":  "Selbst wenn alle Arten gleich gut wären, entstünde Vielfalt allein durch Zufall, Ausbreitung und neue Arten. Auswahl ist nicht immer nötig."
+                                                                 },
+    "Distance-Decay / Nestedness / Checkerboard / Mid-Domain":  {
+                                                                    "klartext":  "Muster im Artenteppich",
+                                                                    "erklaerung":  "Ferne Orte teilen weniger Arten, arme Inseln enthalten Teilmengen reicher. Solche räumlichen Muster tauchen überall wieder auf."
+                                                                },
+    "Parasitismus (+/–)":  {
+                               "klartext":  "Schmarotzen auf Kosten anderer",
+                               "erklaerung":  "Eine Art lebt auf oder in einer anderen und schädigt sie, ohne sie sofort zu töten. Der Wirt entwickelt Abwehr, der Schmarotzer neue Tricks."
+                           },
+    "Mutualismus (+/+)":  {
+                              "klartext":  "Zusammenarbeit mit Gewinn für beide",
+                              "erklaerung":  "Zwei Arten helfen sich gegenseitig, etwa Blüte und Biene. Weil beide profitieren, formen sie sich mit der Zeit aufeinander um."
+                          },
+    "Kommensalismus (+/0) / Amensalismus (–/0) / Neutralismus (0/0)":  {
+                                                                           "klartext":  "Nebeneinander ohne echten Austausch",
+                                                                           "erklaerung":  "Bei diesen Beziehungen gewinnt oder verliert höchstens eine Seite, die andere spürt nichts. Auch solches Zusammenleben lenkt die Auslese leicht mit."
+                                                                       },
+    "Apparente Konkurrenz":  {
+                                 "klartext":  "Streit über den gemeinsamen Feind",
+                                 "erklaerung":  "Zwei Beutearten schaden sich, weil sie denselben Räuber ernähren und so seine Zahl steigern. Das braucht mehrere Arten in einem Netz."
+                             },
+    "Bestäubung / Samenausbreitung (Zoochorie)":  {
+                                                      "klartext":  "Tiere tragen Pollen und Samen",
+                                                      "erklaerung":  "Tiere bringen Blütenstaub oder Samen von Ort zu Ort und werden dafür belohnt. Pflanze und Träger passen sich über lange Zeit aneinander an."
+                                                  },
+    "Mykorrhiza / „Wood-Wide-Web\" / N-Fixierer":  {
+                                                       "klartext":  "Wurzeln handeln mit Pilzen",
+                                                       "erklaerung":  "Pflanzenwurzeln tauschen Zucker gegen Nährstoffe von Pilzen oder Bakterien im Boden. Dieser Handel setzt eine passende Partnerart voraus."
+                                                   },
+    "Darm-Mikrobiom / Endosymbiose":  {
+                                          "klartext":  "Helfer-Kleinstleben im Körper",
+                                          "erklaerung":  "Winzige Mitbewohner im Darm oder in Zellen helfen bei Verdauung und Stoffwechsel. Wirt und Untermieter entwickeln sich als Gespann weiter."
+                                      },
+    "Koralle–Zooxanthellen / Flechte / Chemosynthese-Symbiose":  {
+                                                                     "klartext":  "Untermieter liefern die Nahrung",
+                                                                     "erklaerung":  "Ein Lebewesen beherbergt Algen oder Bakterien, die im Inneren Nahrung erzeugen. Ohne die zweite Art gäbe es diese Lebensform nicht."
+                                                                 },
+    "Reinigungs-Symbiose / Ameise–Pflanze / Pilz-Farming / Biolumineszenz-Symbiose":  {
+                                                                                          "klartext":  "Dienst gegen Dienst zwischen Arten",
+                                                                                          "erklaerung":  "Eine Art putzt, schützt, füttert oder leuchtet für eine andere und erhält Gegenleistung. Solche Abmachungen brauchen immer zwei Partner."
+                                                                                      },
+    "Antagonistisch (Wettrüsten) / Red Queen":  {
+                                                    "klartext":  "Endloses Wettrüsten zweier Arten",
+                                                    "erklaerung":  "Räuber und Beute oder Wirt und Parasit rüsten sich gegenseitig immer weiter auf. Jeder Fortschritt der einen Seite zwingt die andere nachzuziehen."
+                                                },
+    "Mutualistisch / diffus (Gilde) / Gen-für-Gen / geografisches Mosaik":  {
+                                                                                "klartext":  "Gemeinsames Formen über viele Arten",
+                                                                                "erklaerung":  "Hier passen sich mehrere Arten gleichzeitig aneinander an, oft je nach Ort verschieden. Das gemeinsame Umformen braucht mehrere Partner."
+                                                                            },
+    "Escape-and-Radiate":  {
+                               "klartext":  "Neue Abwehr eröffnet neue Wege",
+                               "erklaerung":  "Erfindet eine Art eine Abwehr, entkommt sie ihren Feinden und fächert sich in viele Formen auf. Der Gegenspieler löst diese Vielfalt aus."
+                           },
+    "Charakter-Verschiebung":  {
+                                   "klartext":  "Konkurrenten werden unähnlicher",
+                                   "erklaerung":  "Wo zwei ähnliche Arten am selben Ort leben, driften ihre Merkmale auseinander. Erst der Konkurrent treibt diese Verschiebung an."
+                               },
+    "Kospeziation":  {
+                         "klartext":  "Zwei Arten spalten sich im Gleichschritt",
+                         "erklaerung":  "Eng verbundene Partner spalten sich parallel in neue Arten auf, ihre Stammbäume gleichen sich. Das setzt zwei mitentwickelnde Linien voraus."
+                     },
+    "Fundamentale vs. realisierte Nische":  {
+                                                "klartext":  "Möglicher gegen tatsächlichen Lebensraum",
+                                                "erklaerung":  "Eine Art könnte vieles besiedeln, doch andere Arten drängen sie auf einen kleineren Teil zurück. Der echte Platz entsteht erst im Miteinander."
+                                            },
+    "Konkurrenz-Ausschluss (Gause) / Limiting Similarity":  {
+                                                                "klartext":  "Zu ähnlich, um nebeneinander zu bestehen",
+                                                                "erklaerung":  "Zwei Arten mit gleichem Bedarf können nicht dauerhaft koexistieren, eine verdrängt die andere. Das braucht mindestens zwei um dasselbe ringende Arten."
+                                                            },
+    "Nischen-Konstruktion":  {
+                                 "klartext":  "Lebewesen bauen ihre eigene Auslese um",
+                                 "erklaerung":  "Organismen verändern ihre Umwelt so stark, dass sie den Druck auf sich selbst neu setzen. Damit greifen sie in die Auslese direkt ein."
+                             },
+    "R\\*-Theorie (Tilman) / Storage-Effekt / Neutraltheorie":  {
+                                                                    "klartext":  "Wann viele Arten nebeneinander bestehen",
+                                                                    "erklaerung":  "Diese Regeln erklären, wie mehrere konkurrierende Arten sich denselben Raum teilen können. Sie gelten nur für ganze Artengemeinschaften."
+                                                                },
+    "Frequenzabhängige Selektion (neg.)":  {
+                                               "klartext":  "Selten sein zahlt sich aus",
+                                               "erklaerung":  "Wer zu einem seltenen Typ gehört, hat einen Vorteil, sobald er häufig wird schwindet er wieder. So hängt der Erfolg von der Häufigkeit ab."
+                                           },
+    "Nahrungsnetz / trophische Ebenen":  {
+                                             "klartext":  "Wer frisst wen im Geflecht",
+                                             "erklaerung":  "Vom Pflanzenfresser bis zum Zersetzer sind alle über Fressbeziehungen verknüpft. Solche Ebenen zeigen sich erst in einer ganzen Gemeinschaft."
+                                         },
+    "Janzen-Connell / Priority-Effekte / Nurse-Plants / Stress-Gradient":  {
+                                                                               "klartext":  "Warum Vielfalt sich hält",
+                                                                               "erklaerung":  "Wer zuerst da ist, wer wen beschützt und wo Feinde lauern, entscheidet über den Artenreichtum. Diese Regeln wirken nur in einer Gemeinschaft vieler Arten."
+                                                                           },
+    "Sukzession / Assembly-Rules / Metacommunity":  {
+                                                        "klartext":  "Wie sich eine Lebensgemeinschaft aufbaut",
+                                                        "erklaerung":  "In einem neuen Lebensraum siedeln sich Arten in geregelter Reihenfolge an, bis ein reifes Gefüge entsteht. Weil jede Art die Bedingungen für die nächste verändert, formt dies die Auslese vieler Arten."
+                                                    },
+    "Dichteabhängigkeit / Tragfähigkeit (K) / logistisches Wachstum":  {
+                                                                           "klartext":  "Bremse bei zu vielen Individuen",
+                                                                           "erklaerung":  "Je dichter eine Population wird, desto knapper werden Nahrung und Platz, bis das Wachstum stoppt. Diese Rückkopplung koppelt den Fortpflanzungserfolg an die Zahl der Artgenossen und lenkt die Auslese."
+                                                                       },
+    "r/K-Selektion":  {
+                          "klartext":  "Viele billige oder wenige teure Junge",
+                          "erklaerung":  "Ein neues Merkmal legt fest, ob ein Lebewesen viele Nachkommen ohne Fürsorge oder wenige gut versorgte hervorbringt. Diese Strategie entscheidet, welcher Weg sich in welcher Umwelt bewährt."
+                      },
+    "Allee-Effekt":  {
+                         "klartext":  "Zu wenige sind auch schlecht",
+                         "erklaerung":  "Sinkt eine Population unter eine kritische Größe, finden sich kaum noch Partner und der Nachwuchs bricht ein. Diese Regel kann eine kleine Gruppe bis zum Aussterben treiben."
+                     },
+    "Räuber-Beute-Zyklen (Lotka-Volterra) / Funktionale Antwort (Typ I–III)":  {
+                                                                                   "klartext":  "Auf und Ab von Jäger und Beute",
+                                                                                   "erklaerung":  "Steigt die Beutezahl, wächst auch die Jägerzahl, die dann die Beute dezimiert und selbst wieder schrumpft. Diese gekoppelten Schwankungen zweier Arten treiben beide Seiten zu ständiger Anpassung."
+                                                                               },
+    "Boom-Bust / Paradox of Enrichment / Zeitverzögerungen":  {
+                                                                  "klartext":  "Wenn zu viel Futter das System kippt",
+                                                                  "erklaerung":  "Reiches Nahrungsangebot und verzögerte Reaktionen lassen Populationen erst überschießen und dann einbrechen. Diese Instabilität entsteht aus der zeitlichen Kopplung zweier Arten."
+                                                              },
+    "Tarnung (Crypsis/Hintergrund/disruptiv/Konterschattierung/Masquerade/Transparenz)":  {
+                                                                                              "klartext":  "Mit dem Hintergrund verschmelzen",
+                                                                                              "erklaerung":  "Ein Färbungs-Merkmal lässt ein Lebewesen so aussehen wie sein Umfeld, sodass Jäger es übersehen. Wer besser verborgen bleibt, überlebt eher und gibt die tarnenden Muster weiter."
+                                                                                          },
+    "Aposematismus (Warnfarbe)":  {
+                                      "klartext":  "Grelle Farbe als Warnung",
+                                      "erklaerung":  "Ein auffälliges Signal-Merkmal zeigt Jägern an, dass ein Tier giftig oder wehrhaft ist. Weil Räuber solche Farben meiden, verschafft die Warnung dem Träger einen Überlebensvorteil."
+                                  },
+    "Mimikry (Batesian/Müllerian/Mertensian/aggressiv/Automimikry/Vavilov/Pouyann)":  {
+                                                                                          "klartext":  "Eine andere Art nachahmen",
+                                                                                          "erklaerung":  "Eine Art übernimmt Aussehen oder Signale einer anderen, um wehrhaft zu wirken oder Beute anzulocken. Weil die Täuschung nur mit einem lebenden Vorbild wirkt, verknüpft sie beide Arten."
+                                                                                      },
+    "Physisch (Panzer/Stacheln/Schale/Dornen) / chemisch (Toxine/Sekundärmetabolite/Gift)":  {
+                                                                                                 "klartext":  "Panzer, Stacheln oder Gift",
+                                                                                                 "erklaerung":  "Neue Merkmale wie harte Schalen, spitze Dornen oder giftige Stoffe schützen ein Lebewesen vor Angreifern. Wer solche Abwehr trägt, überlebt Attacken häufiger und vererbt den Schutz."
+                                                                                             },
+    "Toxin-Sequestrierung / induzierbare vs. konstitutive Abwehr / indirekte Abwehr (Enemy-Recruit)":  {
+                                                                                                           "klartext":  "Gift speichern und Abwehr steuern",
+                                                                                                           "erklaerung":  "Neue Merkmale erlauben es, fremde Gifte einzulagern oder die Abwehr erst bei Angriff hochzufahren. Solche flexiblen Schutzstrategien senken die Kosten und erhöhen die Überlebenschance."
+                                                                                                       },
+    "Autotomie / Thanatose / Startle-Displays / Augenflecken":  {
+                                                                    "klartext":  "Schwanz abwerfen oder totstellen",
+                                                                    "erklaerung":  "Verhaltens-Merkmale wie das Abwerfen eines Körperteils oder plötzliches Erschrecken bringen einen Angreifer aus dem Konzept. Wer so entkommt, überlebt und gibt das Verhalten weiter."
+                                                                },
+    "Gruppen-Abwehr: Prädator-Sättigung/Mast, Verdünnung, selfish herd, Confusion, Mobbing, Alarmruf":  {
+                                                                                                            "klartext":  "Sicherheit durch die Menge",
+                                                                                                            "erklaerung":  "Ein Sozial-Merkmal lässt Tiere sich in großen Gruppen schützen, indem sie Jäger überfluten, verwirren oder gemeinsam vertreiben. Für den Einzelnen sinkt so das Risiko, gefressen zu werden."
+                                                                                                        },
+    "Epidemien / SIR-Dynamik / R₀ / Herd-Immunität":  {
+                                                          "klartext":  "Wie sich Seuchen ausbreiten",
+                                                          "erklaerung":  "Ein Erreger springt von Wirt zu Wirt, bis genug Individuen immun sind und die Welle abebbt. Weil Krankheit und Wirtspopulation aufeinander wirken, formt die Seuche beide Seiten."
+                                                      },
+    "Virulenz-Evolution (Trade-off; Übertragungs-Modus)":  {
+                                                               "klartext":  "Wird der Erreger mild oder tödlich?",
+                                                               "erklaerung":  "Ein Erreger, der sich leicht überträgt, kann härter zuschlagen, während einer, der einen lebenden Wirt braucht, milder bleibt. Der Übertragungsweg entscheidet über seine Aggressivität."
+                                                           },
+    "Reproduktions-Parasiten (Wolbachia): CI / Male-Killing / Feminisierung / Parthenogenese":  {
+                                                                                                    "klartext":  "Parasiten kapern die Fortpflanzung",
+                                                                                                    "erklaerung":  "Manche Bakterien nisten sich in Wirten ein und manipulieren deren Vermehrung, indem sie Männchen töten oder Weibchen begünstigen. So verbreiten sie sich auf Kosten des Wirts."
+                                                                                                },
+    "Wirt-Manipulation (extended phenotype)":  {
+                                                   "klartext":  "Parasit steuert seinen Wirt",
+                                                   "erklaerung":  "Ein Parasit verändert das Verhalten seines Wirtes so, dass es dem Erreger nützt, etwa indem befallene Tiere sich Räubern ausliefern. Dieser Zwang prägt Parasit und Wirt zugleich."
+                                               },
+    "MHC-Red-Queen / Verdünnungs-Effekt (Biodiversität↓Krankheit)":  {
+                                                                         "klartext":  "Wettlauf zwischen Wirt und Erreger",
+                                                                         "erklaerung":  "Wirte entwickeln ständig neue Immunvarianten, während Erreger sie ebenso ständig umgehen, sodass keine Seite je gewinnt. Eine vielfältige Artengemeinschaft bremst dabei Krankheiten."
+                                                                     },
+    "Intra- (Kampf) vs. inter-sexuell (Wahl)":  {
+                                                    "klartext":  "Um Partner kämpfen oder gewählt werden",
+                                                    "erklaerung":  "Ein neues Merkmal entscheidet, ob ein Geschlecht mit Waffen um Partner kämpft oder mit Schmuck umworben wird. Das lenkt, welche Eigenschaften sich im Wettbewerb um Nachwuchs durchsetzen."
+                                                },
+    "Sexualkonflikt / Spermien-Konkurrenz / kryptische Weibchenwahl / Infantizid":  {
+                                                                                        "klartext":  "Streit der Geschlechter um Nachwuchs",
+                                                                                        "erklaerung":  "Weil Männchen und Weibchen unterschiedliche Interessen bei der Fortpflanzung haben, entstehen Merkmale, die den eigenen Vorteil sichern. Dieser Konflikt treibt beide Seiten zu immer neuen Anpassungen."
+                                                                                    },
+    "Flügelfläche (Flug)":  {
+                                "klartext":  "Flügel zum Fliegen",
+                                "erklaerung":  "Die Größe der Flügel bestimmt, wie gut ein Tier fliegen kann. Das ist im Spiel bereits als eigenes Merkmal umgesetzt."
+                            },
+    "Aquatik / Stromlinie / Kiemen":  {
+                                          "klartext":  "Leben im Wasser",
+                                          "erklaerung":  "Ein Körper mit Stromlinienform und Kiemen erlaubt das Leben unter Wasser statt an Land. Dafür braucht es ein neues Merkmal im Erbgut."
+                                      },
+    "Grabklauen (Graben)":  {
+                                "klartext":  "Klauen zum Graben",
+                                "erklaerung":  "Kräftige Grabklauen lassen ein Tier sich in den Boden wühlen und dort Schutz oder Nahrung finden. Das wäre ein neues Körpermerkmal."
+                            },
+    "Thermische Toleranz-Breite":  {
+                                       "klartext":  "Wie viele Temperaturen ein Tier erträgt",
+                                       "erklaerung":  "Manche Tiere kommen nur mit einer engen Temperatur klar, andere mit vielen. Diese Bandbreite wäre ein eigenes neues Erbmerkmal."
+                                   },
+    "Sinne (Sehen/Hören/Chemo/Elektro/Magneto)":  {
+                                                      "klartext":  "Die Sinne eines Tieres",
+                                                      "erklaerung":  "Sehen, Hören, Riechen oder das Spüren elektrischer und magnetischer Felder helfen beim Finden von Beute und Partnern. Jeder Sinn wäre ein neues Merkmal."
+                                                  },
+    "Färbung / Signal-Muster":  {
+                                    "klartext":  "Farben und Muster der Haut",
+                                    "erklaerung":  "Farben können tarnen, vor Gift warnen oder Partner anlocken. Solch ein sichtbares Signal wäre ein neues Merkmal im Erbgut."
+                                },
+    "Toxin / Gift-Chemie":  {
+                                "klartext":  "Gift zum Angreifen und Verteidigen",
+                                "erklaerung":  "Ein giftiges Tier kann sich besser wehren und leichter Beute machen. Diese Giftchemie wäre ein neues Merkmal im Erbgut."
+                            },
+    "Körper-Symmetrie / Bauplan-Achsen (Hox-artig)":  {
+                                                          "klartext":  "Grundbauplan des Körpers",
+                                                          "erklaerung":  "Der Bauplan legt fest, wie ein Körper in Abschnitte gegliedert ist und wie viele Gliedmaßen er hat. Das wäre ein neues Erbmerkmal."
+                                                      },
+    "Wärmeregulation (Endo-/Ektothermie)":  {
+                                                "klartext":  "Eigene Körperwärme erzeugen",
+                                                "erklaerung":  "Manche Tiere heizen sich selbst, andere hängen von der Umgebung ab. Wer selbst heizt, bleibt in Kälte aktiv. Das wäre ein neues Merkmal."
+                                            },
+    "Fortpflanzungs-Modus als Gen":  {
+                                         "klartext":  "Art der Fortpflanzung",
+                                         "erklaerung":  "Ein Tier kann sich mit einem Partner oder allein vermehren. Diese Wahl der Fortpflanzung wäre ein eigenes neues Erbmerkmal."
+                                     },
+    "Ausbreitungs-Fähigkeit als Gen":  {
+                                           "klartext":  "Wie weit ein Tier wandert",
+                                           "erklaerung":  "Manche Arten bleiben am Ort, andere breiten sich weit aus und besiedeln neue Gebiete. Diese Wanderlust wäre ein neues Erbmerkmal."
+                                       },
+    "Sozialität / Koloniebildung":  {
+                                        "klartext":  "In Gruppen zusammenleben",
+                                        "erklaerung":  "Manche Tiere leben allein, andere bilden Kolonien oder Staaten wie Ameisen. Dieses Zusammenleben wäre ein neues Merkmal im Erbgut."
+                                    },
+    "r/K- bzw. schnell-langsam-Kontinuum":  {
+                                                 "klartext":  "Ganze Skala von schnell bis langsam",
+                                                 "erklaerung":  "Ein Lebewesen liegt irgendwo zwischen kurzem, schnellem Leben mit vielen Jungen und langem Leben mit wenigen. Dieser Grundplan bräuchte ein neues Merkmal im Erbgut."
+                                            },
+    "Grimes C-S-R (Pflanzen)":  {
+                                    "klartext":  "Kämpfer, Aussitzer oder Schnellstarter",
+                                    "erklaerung":  "Drei Lebensweisen von Pflanzen: andere verdrängen, harte Zeiten aushalten oder freie Flächen blitzschnell besetzen. Diese Grundausrichtung bräuchte ein neues Merkmal im Erbgut."
+                                },
+    "Semelparie vs. Iteroparie":  {
+                                      "klartext":  "Einmal alles oder öfter ein wenig",
+                                      "erklaerung":  "Ob sich ein Lebewesen nur einmal im Leben mit vollem Einsatz fortpflanzt oder immer wieder in kleineren Schüben. Das bräuchte ein neues Merkmal im Erbgut."
+                                  },
+    "Generationszeit / Reifealter / reproduktive Seneszenz":  {
+                                                                  "klartext":  "Wie schnell erwachsen und fruchtbar",
+                                                                  "erklaerung":  "Wie früh ein Lebewesen sich fortpflanzen kann und wann diese Fähigkeit im Alter nachlässt. Dieses Lebenstempo bräuchte ein neues Merkmal im Erbgut."
+                                                              },
+    "Kosten der Fortpflanzung / terminale Investition":  {
+                                                             "klartext":  "Jetzt Kraft geben oder aufsparen",
+                                                             "erklaerung":  "Ob ein Lebewesen seine Energie sofort in Nachwuchs steckt oder sich für später schont. Diese Aufteilung bräuchte ein neues Merkmal im Erbgut."
+                                                         },
+    "Determiniertes vs. indeterminiertes Wachstum":  {
+                                                         "klartext":  "Ausgewachsen oder lebenslang größer",
+                                                         "erklaerung":  "Ob ein Lebewesen ab einer Größe aufhört zu wachsen oder das ganze Leben lang wächst und dabei fruchtbarer wird. Das bräuchte ein neues Merkmal im Erbgut."
+                                                     },
+    "Fekundität":  {
+                       "klartext":  "Wie viele Nachkommen pro Runde",
+                       "erklaerung":  "Die Zahl der Eier oder Jungen, die ein Lebewesen pro Fortpflanzung hervorbringt, von wenigen bis zu Millionen. Das bräuchte ein neues Merkmal im Erbgut."
+                   },
+    "Größe–Zahl-Trade-off (Smith-Fretwell) / Lack-Gelegegröße":  {
+                                                                     "klartext":  "Viele kleine oder wenige große Junge",
+                                                                     "erklaerung":  "Der Zwiespalt, seine Kraft auf viele kleine Nachkommen zu verteilen oder in wenige große zu stecken. Diese Wahl bräuchte ein neues Merkmal im Erbgut."
+                                                                 },
+    "Dotter-Provisionierung / Lecithotrophie vs. Matrotrophie (Plazenta)":  {
+                                                                                "klartext":  "Nahrung im Ei oder aus dem Mutterleib",
+                                                                                "erklaerung":  "Ob der Nachwuchs sich aus einem mitgegebenen Dottervorrat ernährt oder direkt vom Körper der Mutter versorgt wird. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                            },
+    "Elterliche Investition (Trivers) / uni-/biparental / Allo-Parenting / kooperative Brut":  {
+                                                                                                   "klartext":  "Wer kümmert sich um den Nachwuchs",
+                                                                                                   "erklaerung":  "Ob ein Elternteil, beide oder sogar Helfer aus der Gruppe die Jungen aufziehen. Diese Aufgabenteilung bräuchte ein neues Merkmal im Erbgut."
+                                                                                               },
+    "Vivipar/ovipar/ovovivipar / Brutparasitismus / Matriphagie":  {
+                                                                       "klartext":  "Eier legen oder lebend gebären",
+                                                                       "erklaerung":  "Ob ein Lebewesen Eier ablegt, die Jungen lebend zur Welt bringt oder seine Brut anderen unterschiebt. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                   },
+    "Sexuell (Auskreuzung) vs. asexuell/klonal":  {
+                                                      "klartext":  "Mit Partner oder als Kopie vermehren",
+                                                      "erklaerung":  "Ob sich ein Lebewesen mit einem Partner fortpflanzt und dabei Erbgut mischt oder allein Kopien von sich erzeugt. Das bräuchte ein neues Merkmal im Erbgut."
+                                                  },
+    "Parthenogenese / Apomixis / Haplodiploidie / Gynogenese":  {
+                                                                    "klartext":  "Nachwuchs ganz ohne Befruchtung",
+                                                                    "erklaerung":  "Sonderwege der Vermehrung, bei denen Weibchen auch ohne befruchtetes Ei Nachkommen bekommen. Diese Sondermodi bräuchten ein neues Merkmal im Erbgut."
+                                                                },
+    "Simultaner \u0026 sequenzieller Hermaphroditismus (Protandrie/-gynie)":  {
+                                                                                  "klartext":  "Beide Geschlechter oder Geschlechtswechsel",
+                                                                                  "erklaerung":  "Ob ein Lebewesen zugleich männlich und weiblich ist oder im Laufe des Lebens das Geschlecht wechselt. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                              },
+    "Selbstung / gemischte Paarung / Knospung/Fragmentierung / Polyembryonie":  {
+                                                                                    "klartext":  "Selbstbefruchtung oder Abspalten",
+                                                                                    "erklaerung":  "Vermehrung durch Befruchtung mit sich selbst oder durch Abspalten von Körperteilen, die zu neuen Lebewesen werden. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                                },
+    "Generationswechsel / Metagenese (Polyp↔Meduse)":  {
+                                                           "klartext":  "Wechsel zwischen zwei Lebensformen",
+                                                           "erklaerung":  "Wenn sich zwei ganz verschiedene Körperformen im Lebenslauf abwechseln, etwa festsitzender Polyp und frei schwimmende Qualle. Das bräuchte ein neues Merkmal im Erbgut."
+                                                       },
+    "Metamorphose (holo-/hemimetabol) / Larvenstadien":  {
+                                                             "klartext":  "Umbau vom Larven- zum Erwachsenenkörper",
+                                                             "erklaerung":  "Ein völliger Körperumbau während der Entwicklung, etwa von der Raupe zum Schmetterling. Diese Verwandlung bräuchte ein neues Merkmal im Erbgut."
+                                                         },
+    "Mehrwirt-Parasiten-Zyklen":  {
+                                      "klartext":  "Parasit mit mehreren Wirtstieren",
+                                      "erklaerung":  "Ein Lebenslauf, in dem ein Schmarotzer nacheinander verschiedene Wirtsarten braucht, wie Malaria Mücke und Mensch. Dafür müssen mehrere Arten mit ihren Beständen in der Welt vorhanden sein."
+                                  },
+    "Paedomorphose/Neotenie / Progenese":  {
+                                               "klartext":  "Jugendform bleibt ein Leben lang",
+                                               "erklaerung":  "Wenn ein Lebewesen geschlechtsreif wird, aber seine jugendliche Körperform behält, wie beim Axolotl. Das bräuchte ein neues Merkmal im Erbgut."
+                                           },
+    "Diapause / Quieszenz / Hibernation / Aestivation":  {
+                                                             "klartext":  "Ruhephasen in harten Zeiten",
+                                                             "erklaerung":  "Fähigkeit, in Kälte, Hitze oder Trockenheit in einen Ruhezustand zu fallen und den Stoffwechsel herunterzufahren. Das bräuchte ein neues Merkmal im Erbgut."
+                                                         },
+    "Samen-/Ei-Banken (Dormanz-Propagulen)":  {
+                                                  "klartext":  "Samen und Eier als Zeitreserve",
+                                                  "erklaerung":  "Ruhende Samen oder Eier, die jahrelang im Boden warten und erst bei guten Bedingungen erwachen. Diese Reserve fürs Überleben bräuchte ein neues Merkmal im Erbgut."
+                                              },
+    "Bet-Hedging (diversifiziert/konservativ)":  {
+                                                     "klartext":  "Nicht alles auf eine Karte setzen",
+                                                     "erklaerung":  "Eine vorsichtige Strategie, das Risiko in unsicheren Umwelten zu streuen statt alles auf eine Möglichkeit zu setzen. Das bräuchte ein neues Merkmal im Erbgut."
+                                                 },
+    "Prädiktive vs. zufällige Plastizität":  {
+                                                 "klartext":  "Auf Signale reagieren oder blind würfeln",
+                                                 "erklaerung":  "Ob ein Lebewesen sich nach Vorzeichen aus der Umwelt richtet oder seine Nachkommen einfach zufällig verschieden ausfallen lässt. Das bräuchte ein neues Merkmal im Erbgut."
+                                             },
+    "Ausbreitungs-Syndrom / Natal- vs. Brut-Dispersal / Philopatrie":  {
+                                                                           "klartext":  "Abwandern oder in der Heimat bleiben",
+                                                                           "erklaerung":  "Ob Junge ihren Geburtsort verlassen und sich anderswo niederlassen oder in der Nähe der Eltern bleiben. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                       },
+    "Migration (saisonal) / Nomadismus/Irruption / Diadromie / Teilzug":  {
+                                                                              "klartext":  "Regelmäßige Wanderungen im Jahreslauf",
+                                                                              "erklaerung":  "Wiederkehrende Wanderungen zwischen Gebieten, die dem Wechsel der Jahreszeiten folgen. Das ist kein Momentzustand, sondern braucht einen Ablauf über die Zeit."
+                                                                          },
+    "Monogamie / Polygynie (Ressourcen-/Harem-/Lek-) / Polyandrie / Promiskuität":  {
+                                                                                        "klartext":  "Ein Partner oder viele Partner",
+                                                                                        "erklaerung":  "Ob sich ein Lebewesen an einen Partner bindet oder sich mit mehreren paart. Dieses Paarungssystem bräuchte ein neues Merkmal im Erbgut."
+                                                                                    },
+    "Anisogamie / Bateman / operationelles Geschlechterverhältnis":  {
+                                                                         "klartext":  "Große Eizelle, kleine Samenzelle",
+                                                                         "erklaerung":  "Der Unterschied zwischen wenigen großen Eizellen und vielen kleinen Samenzellen, aus dem die verschiedenen Rollen der Geschlechter entstehen. Das bräuchte ein neues Merkmal im Erbgut."
+                                                                     },
+    "Ornamente (Wahl) vs. Waffen (Kampf) / Rensch-Regel / Nuptialgeschenke":  {
+                                                                                  "klartext":  "Schmuck zum Werben oder Waffen zum Kampf",
+                                                                                  "erklaerung":  "Ob Tiere mit prächtigem Schmuck um Partner werben oder mit Waffen um sie kämpfen. Diese Merkmale der Partnerwahl bräuchten ein neues Merkmal im Erbgut."
+                                                                              },
+    "Wahl-Modelle: Fisher-Runaway, Good-Genes/Handicap, Sensory-Bias/-Drive, Hamilton-Zuk":  {
+                                                                                                 "klartext":  "Wonach die Partnerwahl sich richtet",
+                                                                                                 "erklaerung":  "Verschiedene Gründe, warum ein Geschlecht bestimmte Merkmale des anderen bevorzugt, etwa als Zeichen guter Gene. Solch eine Vorliebe bräuchte ein neues Merkmal im Erbgut."
+                                                                                             },
+    "Sex-Determination (XY/ZW/Haplodiploid/TSD/ESD/sozial)":  {
+                                                                  "klartext":  "Was das Geschlecht festlegt",
+                                                                  "erklaerung":  "Ob das Geschlecht der Nachkommen durch Erbgut, Bruttemperatur oder die Umgebung bestimmt wird. Das bräuchte ein neues Merkmal im Erbgut."
+                                                              },
+    "Fisher-1:1 / Local-Mate-Competition / Trivers-Willard":  {
+                                                                  "klartext":  "Wie viele Söhne oder Töchter",
+                                                                  "erklaerung":  "Ob eine Art gleich viele Söhne und Töchter zeugt oder das Verhältnis je nach Lage verschiebt. Diese Aufteilung bräuchte ein neues Merkmal im Erbgut."
+                                                              },
+    "Mutation (Quelle aller Variation)":  {
+                                              "klartext":  "Zufällige Erbgut-Änderung",
+                                              "erklaerung":  "Das Erbgut kopiert sich nie ganz fehlerfrei; dabei entstehen zufällige Änderungen. Sie sind der Rohstoff, aus dem Neues in der Evolution überhaupt erst entsteht."
+                                          },
+    "Natürliche Selektion":  {
+                                 "klartext":  "Überleben der Passenden",
+                                 "erklaerung":  "Wer besser zur Umgebung passt, bekommt im Schnitt mehr Nachkommen. So setzen sich vorteilhafte Merkmale über die Generationen durch."
+                             },
+    "Genetische Drift":  {
+                             "klartext":  "Zufall bei kleinen Gruppen",
+                             "erklaerung":  "In kleinen Gruppen entscheidet oft reiner Zufall, welche Erbanlagen weitergegeben werden. Merkmale können so verschwinden oder sich durchsetzen, ganz ohne Vorteil."
+                         },
+    "Genfluss / Migration":  {
+                                 "klartext":  "Zuwanderung neuer Erbanlagen",
+                                 "erklaerung":  "Wenn Tiere oder Pflanzen von einem Ort zum anderen wechseln und sich dort fortpflanzen, bringen sie neue Erbanlagen mit. Das gleicht Unterschiede zwischen Gruppen aus."
+                             },
+    "Rekombination (Sex) / nicht-zufällige Paarung":  {
+                                                          "klartext":  "Neu-Mischen bei der Fortpflanzung",
+                                                          "erklaerung":  "Bei sexueller Fortpflanzung werden die Erbanlagen der Eltern neu gemischt. Wer sich mit wem paart, ist dabei oft nicht rein zufällig und verschiebt so das Ergebnis."
+                                                      },
+    "Gerichtet / stabilisierend / disruptiv / Trunkierung":  {
+                                                                 "klartext":  "Wohin die Selektion drückt",
+                                                                 "erklaerung":  "Die Auslese kann ein Merkmal in eine Richtung verschieben, den Durchschnitt bevorzugen oder gerade die Extreme fördern. Je nachdem verändert sich die Gruppe unterschiedlich."
+                                                             },
+    "Purifizierend vs. positiv":  {
+                                      "klartext":  "Bewahren oder Ausbreiten",
+                                      "erklaerung":  "Auslese kann Bewährtes schützen, indem sie schädliche Änderungen aussortiert, oder eine neue vorteilhafte Anlage aktiv verbreiten. Beides formt das Erbgut gegensätzlich."
+                                  },
+    "Balancierend / Heterozygoten-Vorteil":  {
+                                                 "klartext":  "Mischform im Vorteil",
+                                                 "erklaerung":  "Manchmal ist wer von einer Anlage zwei verschiedene Varianten trägt am besten dran. Dadurch bleiben mehrere Varianten dauerhaft in der Gruppe erhalten."
+                                             },
+    "Frequenz-abhängig (neg./pos.) / dichte-abhängig":  {
+                                                            "klartext":  "Vorteil hängt von der Häufigkeit ab",
+                                                            "erklaerung":  "Wie günstig ein Merkmal ist, hängt davon ab, wie viele andere es schon haben oder wie dicht die Gruppe lebt. Seltenes kann so plötzlich im Vorteil sein."
+                                                        },
+    "Fluktuierend (zeitlich) / räumlich variabel (lokale Anpassung)":  {
+                                                                           "klartext":  "Wechselnde Bedingungen",
+                                                                           "erklaerung":  "Weil sich die Umwelt über Zeit und Ort ändert, ist mal das eine, mal das andere Merkmal günstig. So bleiben mehrere Varianten nebeneinander bestehen."
+                                                                       },
+    "Antagonistische Pleiotropie / sexuell antagonistisch":  {
+                                                                 "klartext":  "Ein Gen mit Vor- und Nachteil",
+                                                                 "erklaerung":  "Dieselbe Erbanlage kann an einer Stelle nützen und an anderer schaden, etwa gut für die Jugend, schlecht fürs Alter. Solche Zwickmühlen bremsen die Auslese."
+                                                             },
+    "Sexuelle / Verwandten- (kin) / Gruppen- / künstliche Selektion":  {
+                                                                           "klartext":  "Weitere Formen der Auslese",
+                                                                           "erklaerung":  "Auslese wirkt nicht nur übers reine Überleben, sondern auch über Partnerwahl, über den Nutzen für Verwandte oder durch gezielte Zucht des Menschen."
+                                                                       },
+    "Dominanz / Über-/Unterdominanz / Pleiotropie / Epistasis (inkl. sign)":  {
+                                                                                  "klartext":  "Wie Gene das Aussehen prägen",
+                                                                                  "erklaerung":  "Erbanlagen setzen sich unterschiedlich durch und wirken zusammen: manche überdecken andere, eine Anlage beeinflusst mehrere Merkmale. Das entscheidet, was am Ende sichtbar wird."
+                                                                              },
+    "Polygenie / infinitesimal / G×E":  {
+                                            "klartext":  "Viele Gene plus Umwelt",
+                                            "erklaerung":  "Merkmale wie Körpergröße entstehen aus vielen kleinen Erbanlagen zusammen und werden zusätzlich von der Umwelt geprägt. Deshalb verläuft die Anpassung fein abgestuft."
+                                        },
+    "Kopplung / LD / Supergene / Modularität":  {
+                                                    "klartext":  "Gemeinsam vererbte Genblöcke",
+                                                    "erklaerung":  "Erbanlagen, die im Erbgut nah beieinander liegen, werden oft als Block zusammen vererbt. So werden auch benachbarte Anlagen mitgezogen, ob nützlich oder nicht."
+                                                },
+    "Gen-Duplikation → Neo-/Subfunktionalisierung / Polyploidie / Inversionen":  {
+                                                                                     "klartext":  "Kopien schaffen neue Funktionen",
+                                                                                     "erklaerung":  "Wird eine Erbanlage verdoppelt, kann die Kopie eine neue Aufgabe übernehmen, während das Original weiterläuft. So entsteht Raum für echte Neuerungen."
+                                                                                 },
+    "Epigenetik / Methylierung / transgenerational / Imprinting / Paramutation":  {
+                                                                                      "klartext":  "Vererbte An-Aus-Schalter",
+                                                                                      "erklaerung":  "Neben dem Erbgut selbst werden auch Schalter weitergegeben, die Gene an- oder abstellen, ohne den Text zu ändern. Auch das kann an Nachkommen übergehen."
+                                                                                  },
+    "Maternale/zytoplasmatische Effekte / Prion-/Small-RNA-Vererbung":  {
+                                                                            "klartext":  "Mitgabe der Mutter",
+                                                                            "erklaerung":  "Nicht nur Gene werden vererbt: Die Mutter gibt mit der Eizelle auch Stoffe und Bausteine mit, die den Start der Nachkommen prägen. Auch das wirkt über Generationen."
+                                                                        },
+    "Phänotypische Plastizität / Reaktionsnorm / Polyphänismus":  {
+                                                                      "klartext":  "Gleiches Erbgut, andere Form",
+                                                                      "erklaerung":  "Ein und dasselbe Erbgut kann je nach Umwelt sehr verschieden ausfallen, etwa größer bei viel Futter. So passt sich ein Lebewesen an, ohne dass sich Gene ändern."
+                                                                  },
+    "Baldwin-Effekt / genetische Assimilation / Plasticity-first":  {
+                                                                        "klartext":  "Erst lernen, dann vererben",
+                                                                        "erklaerung":  "Zuerst passt sich ein Lebewesen durch Lernen oder Flexibilität an. Bewährt sich das, kann die Auslese die Anpassung später fest im Erbgut verankern."
+                                                                    },
+    "Nischen-Konstruktion / kulturelle / Holobiont-Vererbung":  {
+                                                                    "klartext":  "Umgebung und Wissen weitergeben",
+                                                                    "erklaerung":  "Lebewesen verändern ihren Lebensraum und geben Gewohnheiten oder Mikroben weiter. Diese Nicht-Gen-Erbschaft prägt mit, worauf die Auslese dann wirkt."
+                                                                },
+    "Horizontaler Gentransfer (HGT)":  {
+                                           "klartext":  "Gene direkt austauschen",
+                                           "erklaerung":  "Vor allem Bakterien reichen Erbanlagen seitwärts an andere weiter, nicht nur an Nachkommen. So verbreitet sich zum Beispiel Antibiotika-Widerstand rasant."
+                                       },
+    "Introgression / adaptive Introgression":  {
+                                                   "klartext":  "Gene aus einer anderen Art",
+                                                   "erklaerung":  "Durch seltene Kreuzung mit einer verwandten Art sickern deren Erbanlagen dauerhaft ein. Manchmal ist genau das ein Gewinn, wie ein Höhen-Gen vom Neandertaler."
+                                               },
+    "Hybridisierung / Hybrid-Artbildung / Endosymbiose / Symbiogenese":  {
+                                                                             "klartext":  "Verschmelzen zweier Linien",
+                                                                             "erklaerung":  "Zwei Arten kreuzen sich, oder zwei Lebewesen verschmelzen dauerhaft zu einem. So können ganz neue Arten oder sogar neue Zelltypen entstehen."
+                                                                         },
+    "Transposons / meiotic drive / Segregations-Verzerrer / Gen-Drives / B-Chromosomen":  {
+                                                                                              "klartext":  "Egoistische Erbstücke",
+                                                                                              "erklaerung":  "Manche Erbstücke sorgen nur dafür, sich selbst überdurchschnittlich oft weiterzugeben, auch ohne Nutzen fürs Lebewesen. Sie verzerren die faire Vererbung."
+                                                                                          },
+    "Hitchhiking/Sweeps (hart/weich) / Background-Selection / Hill-Robertson / clonal interference":  {
+                                                                                                          "klartext":  "Trittbrettfahrer im Erbgut",
+                                                                                                          "erklaerung":  "Setzt sich eine vorteilhafte Anlage durch, werden ihre Nachbar-Anlagen einfach mitgerissen. Dadurch geht drumherum viel Vielfalt verloren."
+                                                                                                      },
+    "Muller\u0027s Ratchet / Y-Degeneration / Error-Catastrophe":  {
+                                                                       "klartext":  "Verfall ohne Neu-Mischen",
+                                                                       "erklaerung":  "Ohne das Neu-Mischen bei der Fortpflanzung häufen sich schädliche Fehler immer weiter an und lassen sich nicht mehr loswerden. Das Erbgut verfällt Stück für Stück."
+                                                                   },
+    "Kanalisierung / kryptische Variation (Hsp90) / genetische Robustheit":  {
+                                                                                 "klartext":  "Verstecktes Erb-Potenzial",
+                                                                                 "erklaerung":  "Lebewesen puffern kleine Erbgut-Unterschiede ab, sodass sie unsichtbar bleiben. Unter Stress kann dieser versteckte Vorrat plötzlich zum Vorschein kommen."
+                                                                             },
+    "Evolvierbarkeit / facilitated variation / neutrale Netze / effektive Populationsgröße (Nₑ)":  {
+                                                                                                       "klartext":  "Wie gut sich etwas entwickeln kann",
+                                                                                                       "erklaerung":  "Manche Bauweisen des Erbguts erzeugen leichter brauchbare Neuerungen als andere. Wie schnell eine Gruppe sich anpassen kann, hängt auch von ihrer Größe ab."
+                                                                                                   },
+    "Founder-Effekt":  {
+                           "klartext":  "Gründung durch wenige",
+                           "erklaerung":  "Nur wenige Individuen besiedeln einen neuen Ort und tragen zufällig nicht die typische Genmischung ihrer Herkunft. Dadurch startet die neue Population verschoben und schlägt einen eigenen Weg ein."
+                       },
+    "Flaschenhals (Bottleneck)":  {
+                                      "klartext":  "Wenige Überlebende nach Katastrophe",
+                                      "erklaerung":  "Eine Katastrophe lässt nur wenige Überlebende zurück, sodass viel genetische Vielfalt verloren geht. Der Zufall entscheidet dann stärker mit, welche Merkmale erhalten bleiben."
+                                  },
+    "Founder-Flush(-Takeover)-Speziation":  {
+                                                "klartext":  "Neubesiedlung mit schnellem Aufblühen",
+                                                "erklaerung":  "Wenige Gründer vermehren sich am neuen Ort explosionsartig und weichen dabei rasch von der Ausgangsform ab. So kann in kurzer Zeit eine eigene Art entstehen."
+                                            },
+    "Serieller Founder-Effekt / Allele-Surfing":  {
+                                                      "klartext":  "Vielfalt schwindet auf der Wanderroute",
+                                                      "erklaerung":  "Bei einer langen Kette von Neubesiedlungen nimmt die genetische Vielfalt mit jedem Schritt ab, weil immer nur ein Ausschnitt weiterzieht. Am Ende der Route sind Populationen am ärmsten an Varianten."
+                                                  },
+    "Mutations-Ordnungs-Effekt":  {
+                                      "klartext":  "Reihenfolge der Mutationen zählt",
+                                      "erklaerung":  "Bei gleichem Druck setzen sich in getrennten Gruppen unterschiedliche Mutationen in anderer Reihenfolge durch. Das führt zu verschiedenen Lösungen, die untereinander nicht mehr zusammenpassen."
+                                  },
+    "Historische Kontingenz / Potenzierung / Entrenchment":  {
+                                                                 "klartext":  "Frühe Zufälle prägen den Weg",
+                                                                 "erklaerung":  "Was früh geschieht, öffnet oder verschließt spätere Möglichkeiten und verankert sich mit der Zeit immer fester. Würde man die Geschichte neu abspielen, käme oft ein anderes Ergebnis heraus."
+                                                             },
+    "Dollo-Irreversibilität":  {
+                                   "klartext":  "Verlorenes kehrt kaum zurück",
+                                   "erklaerung":  "Ist ein komplexes Merkmal einmal verloren gegangen, entsteht es in genau derselben Form so gut wie nie wieder. Die Evolution findet höchstens einen neuen, anderen Weg zum Ziel."
+                               },
+    "Evolutionäre Rettung (evolutionary rescue)":  {
+                                                       "klartext":  "Anpassung schneller als der Untergang",
+                                                       "erklaerung":  "Eine bedrohte Population überlebt, wenn sie sich schnell genug an neue Bedingungen anpasst, bevor sie ausstirbt. Ob das gelingt, ist ein Wettlauf zwischen Anpassungstempo und Risiko."
+                                                   },
+    "Genfluss-Swamping / Migrations-Last":  {
+                                                "klartext":  "Zuwanderung überschwemmt lokale Anpassung",
+                                                "erklaerung":  "Ständige Zuwanderung von außen bringt immer wieder ortsfremde Gene ein und verhindert, dass sich eine Randgruppe an ihre eigenen Bedingungen anpasst. Das kann die Ausbreitung einer Art begrenzen."
+                                            },
+    "Allopatrisch / peripatrisch / parapatrisch / sympatrisch / heteropatrisch":  {
+                                                                                      "klartext":  "Wie stark Populationen getrennt sind",
+                                                                                      "erklaerung":  "Neue Arten entstehen je nachdem, wie räumlich getrennt die Gruppen sind, von völlig isoliert bis am selben Ort lebend. Der Grad der Trennung prägt, auf welchem Weg sich die Aufspaltung vollzieht."
+                                                                                  },
+    "Ökologische Speziation / „Magic-Trait\" / Sensory-Drive / Mutations-Ordnung":  {
+                                                                                        "klartext":  "Artbildung durch Umwelt und Wahl",
+                                                                                        "erklaerung":  "Unterschiedliche Lebensweisen und Vorlieben bei der Partnerwahl treiben Gruppen auseinander, bis eigene Arten entstehen. Manchmal steuert ein einziges Merkmal Anpassung und Trennung zugleich."
+                                                                                    },
+    "Reproduktive Isolation (prä-: ökolog./zeitl./ethol./mechan./gametisch; post-: BDMI/Haldane/hybrid)":  {
+                                                                                                               "klartext":  "Warum Arten sich nicht mehr mischen",
+                                                                                                               "erklaerung":  "Zwischen Arten wirken viele Schranken: Sie treffen sich nicht, paaren sich nicht oder bekommen keinen fruchtbaren Nachwuchs. Solche Barrieren halten die getrennten Linien dauerhaft auseinander."
+                                                                                                           },
+    "Reinforcement / Wallace-Effekt / Charakter-Verschiebung":  {
+                                                                    "klartext":  "Trennung, die sich selbst verstärkt",
+                                                                    "erklaerung":  "Wo sich zwei junge Arten begegnen, werden Unterschiede in Aussehen und Partnerwahl oft geschärft, weil Mischlinge im Nachteil sind. So festigt sich die Trennung mit der Zeit von selbst."
+                                                                },
+    "Hybridisierung: homoploid, allopolyploid, Introgression, Ringart, Hybridzone, Syngameon":  {
+                                                                                                    "klartext":  "Wenn Arten sich doch vermischen",
+                                                                                                    "erklaerung":  "Verwandte Arten kreuzen sich in Grenzzonen, tauschen Gene aus oder verschmelzen sogar zu etwas Neuem. Solche Vermischungen zeigen, dass Artgrenzen oft durchlässiger sind als gedacht."
+                                                                                                },
+    "Despeziation / Speziations-Umkehr":  {
+                                              "klartext":  "Wenn getrennte Arten wieder verschmelzen",
+                                              "erklaerung":  "Bricht die Trennung zwischen zwei jungen Arten zusammen, vermischen sie sich wieder zu einer einzigen. Eine begonnene Aufspaltung wird so rückgängig gemacht."
+                                          },
+    "Adaptive vs. nicht-adaptive Radiation / ökologische Gelegenheit / Schlüssel-Innovation":  {
+                                                                                                   "klartext":  "Aufblühen vieler Arten aus einer",
+                                                                                                   "erklaerung":  "Aus einer Linie entsteht rasch eine Fülle von Arten, oft weil neue Lebensräume frei sind oder eine entscheidende Neuerung gelingt. Manchmal ist die Vielfalt an Nischen geknüpft, manchmal nicht."
+                                                                                               },
+    "Ökologische Freisetzung / Insel-Syndrom (Zwerg-/Riesenwuchs, Flugverlust, Zahmheit)":  {
+                                                                                                "klartext":  "Was Inseln aus Tieren machen",
+                                                                                                "erklaerung":  "Auf Inseln verändern sich Arten immer wieder auf ähnliche Weise: Große werden klein, Kleine groß, Vögel verlieren die Flugfähigkeit und die Scheu. Fehlende Feinde und Konkurrenz formen dieses Muster."
+                                                                                            },
+    "Hintergrund- vs. Massen-Aussterben / Koaussterbe-Kaskade / Extinktions-Schuld":  {
+                                                                                          "klartext":  "Aussterben im Alltag und in Wellen",
+                                                                                          "erklaerung":  "Meist sterben Arten vereinzelt aus, doch selten reißt ein Massensterben viele auf einmal mit sich. Verschwindet eine Art, zieht sie manchmal abhängige Arten verzögert hinterher."
+                                                                                      },
+    "Lilliput-/Lazarus-/Elvis-Taxon / Dead-Clade-Walking / Selektivität":  {
+                                                                               "klartext":  "Muster nach dem großen Sterben",
+                                                                               "erklaerung":  "Nach Massensterben zeigen sich wiederkehrende Bilder: Überlebende schrumpfen, verschollene Formen tauchen wieder auf und manche Gruppen siechen noch lange dahin. Wer stirbt, ist selten reiner Zufall."
+                                                                           },
+    "Phyletischer Gradualismus vs. Punktualismus / Stasis / Quantum-Evolution":  {
+                                                                                     "klartext":  "Wandel: gemächlich oder in Schüben",
+                                                                                     "erklaerung":  "Manche Linien verändern sich langsam und stetig, andere bleiben lange gleich und springen dann in kurzen Schüben. Das Tempo der Evolution folgt keinem einheitlichen Takt."
+                                                                                 },
+    "Anagenese vs. Kladogenese / Mosaik-Evolution / Heterochronie / Rate-Variation":  {
+                                                                                          "klartext":  "Umwandeln oder Aufspalten",
+                                                                                          "erklaerung":  "Eine Linie kann sich allmählich in etwas Neues verwandeln oder sich in mehrere Äste aufspalten. Dabei verändern sich einzelne Merkmale oft unterschiedlich schnell und unabhängig voneinander."
+                                                                                      },
+    "Arten-Selektion / Court-Jester vs. Red-Queen / Turnover-Puls":  {
+                                                                         "klartext":  "Auslese auch zwischen ganzen Arten",
+                                                                         "erklaerung":  "Nicht nur Individuen, auch ganze Arten überdauern oder verschwinden je nach ihren Eigenschaften. Ob eher die Umwelt oder das Wettrüsten unter Arten den Wandel treibt, ist ein wiederkehrendes Muster."
+                                                                     },
+    "Cope-Regel / Dollo / Williston / evolutionäre Eskalation (Vermeij)":  {
+                                                                               "klartext":  "Wiederkehrende Trends im großen Bogen",
+                                                                               "erklaerung":  "Über lange Zeiträume zeigen sich Neigungen: Körper werden oft größer, Teile spezialisieren sich, Jäger und Beute rüsten gegenseitig auf. Solche Trends tauchen in ganz verschiedenen Gruppen auf."
+                                                                           },
+    "Konvergenz / Parallelismus / Divergenz / iterative Evolution":  {
+                                                                         "klartext":  "Ähnliche Formen entstehen mehrfach",
+                                                                         "erklaerung":  "Nicht verwandte Arten entwickeln unter ähnlichem Druck immer wieder verblüffend ähnliche Formen. Umgekehrt treiben nahe Verwandte auseinander, wenn ihre Bedingungen sich unterscheiden."
+                                                                     },
+    "Lebende Fossilien / Stasis / evolutionäre Sackgassen (Überspezialisierung)":  {
+                                                                                       "klartext":  "Formen, die kaum noch verändern",
+                                                                                       "erklaerung":  "Manche Arten sehen seit Jahrmillionen fast unverändert aus, weil ihre Lebensweise stabil bleibt. Starke Spezialisierung kann eine Linie zugleich in eine Sackgasse führen."
+                                                                                   },
+    "Replikatoren→Chromosomen→DNA/Protein / Pro-→Eukaryot (Endosymbiose)":  {
+                                                                                "klartext":  "Bausteine des Lebens verschmelzen",
+                                                                                "erklaerung":  "Früh schlossen sich einfache Erbmoleküle zu größeren Einheiten zusammen, und aus verschmolzenen Zellen entstanden komplexe Zellen. Solche Zusammenschlüsse hoben das Leben auf neue Stufen."
+                                                                            },
+    "Ein- → Vielzeller / solitär → eusozial (Superorganismus) / Sprache/Kultur":  {
+                                                                                      "klartext":  "Vom Einzelnen zur Gemeinschaft",
+                                                                                      "erklaerung":  "Immer wieder schlossen sich Einheiten zu größeren Ganzen zusammen: Zellen zu Vielzellern, Einzeltiere zu Staaten, Menschen zu Kulturen. Aus vielen Teilen wurde jeweils ein neuer handelnder Verbund."
+                                                                                  },
+    "Breiten-/Höhen-Diversitäts-Gradient (+ Hypothesen: Zeit-Areal/kinetisch/Out-of-Tropics)":  {
+                                                                                                    "klartext":  "Mehr Arten in den Tropen",
+                                                                                                    "erklaerung":  "Zu den Tropen und in tieferen Lagen hin nimmt die Artenzahl meist deutlich zu. Warum das so ist, erklären mehrere Vorschläge, etwa längere Zeit, größere Flächen oder wärmeres Klima."
+                                                                                                },
+    "Arten-Areal / Rapoport / Bergmann / Allen":  {
+                                                      "klartext":  "Geografische Regeln der Vielfalt",
+                                                      "erklaerung":  "In der Natur zeigen sich Faustregeln: Größere Flächen beherbergen mehr Arten, und in kälteren Gebieten sind Tiere oft größer und kompakter gebaut. Solche Muster wiederholen sich rund um die Welt."
+                                                  },
+    "Great American Interchange / Wallace-Linie":  {
+                                                       "klartext":  "Faunenaustausch zwischen Landmassen",
+                                                       "erklaerung":  "Als sich Nord- und Südamerika verbanden, wanderten Tiere in beide Richtungen und mischten die Tierwelten neu. An anderen Grenzen dagegen halten Meeresstraßen die Faunen bis heute getrennt."
+                                                   },
+    "Domestikation / künstliche Zucht / Domestikations-Syndrom":  {
+                                                                      "klartext":  "Zähmung durch den Menschen",
+                                                                      "erklaerung":  "Der Mensch züchtet Tiere gezielt auf Zahmheit, wodurch oft auch Schlappohren und neue Farben entstehen. Zahmheit wäre ein neues Merkmal."
+                                                                  },
+    "Gentechnik / CRISPR / Gene-Drives / synthetische Biologie / De-Extinction":  {
+                                                                                      "klartext":  "Erbgut künstlich verändern",
+                                                                                      "erklaerung":  "Mit Gentechnik greift der Mensch direkt ins Erbgut ein und kann es umschreiben. Das verändert die Vererbung selbst, nicht nur einzelne Tiere."
+                                                                                  },
+    "Konservierung: genetische Rettung / assistierte Migration / assisted gene flow":  {
+                                                                                           "klartext":  "Bedrohte Arten aktiv retten",
+                                                                                           "erklaerung":  "Menschen bringen Tiere in neue Gebiete oder mischen Populationen, um bedrohte Arten zu retten. Das braucht mehrere Orte und Gruppen zugleich."
+                                                                                       },
+    "Ernte-induzierte Evolution":  {
+                                       "klartext":  "Wandel durch Jagd und Fischerei",
+                                       "erklaerung":  "Wenn nur große Tiere gejagt werden, überleben die kleinen und die Art schrumpft mit der Zeit. Dafür braucht es ein eigenes Größen-Merkmal."
+                                   }
+}
