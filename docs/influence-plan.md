@@ -60,7 +60,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       „Lebende Welt", „Fortpflanzung", „Evolutions-Mechanik", „Makro-Muster"; Modal zeigt es an.
 - [ ] **S5 · Modal fertig** — Suchfeld, Wirkungs-Vorschau (welche Achsen, vorher→nachher),
       „Einfluss zurücknehmen", sichtbarer Stapel aktiver Stressoren, a11y-Durchgang.
-- [ ] **S6 · Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für die neuen Einflüsse.
+- [x] **S6 · Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für die neuen Einflüsse.
 - [ ] **S7 · Abschluss** — Doku, `BACKLOG.md`/`resume.md`, Browser-Test, PR nach `main`.
 
 ## Regeln für diese Arbeit
@@ -246,3 +246,27 @@ als S4):
   (zustandsbehaftet) und — gravierender — getaggte Bausteine wurden in einer Welt geprüft, die
   den Tag gar nicht erfüllt; dadurch wäre **jedes korrekt getaggte Fragment** durchgefallen.
   Die Testwelt wird jetzt aus den Tags des Bausteins gebaut.
+
+### S6 · Chronik-Anbindung — erledigt (externe Zulieferung, v0.72.0)
+**312 Bausteine angenommen und eingebaut:** 198 Faktor-Zeilen (alle 66 Einflüsse × 3) und
+114 Textur-Bausteine. `story-import-check` bestanden — 1248 montierte Sätze, alle sauber;
+Tonfall 33 % Bezug zum Wesen, 3 % Sentenz-Vokabular; Umlaute diesmal korrekt.
+
+**Einbau:** `app/story-extra.js` (auto-generiert, `npm run build-story-extra`) hält die
+Zulieferung getrennt vom hand-gepflegten Katalog. `app/story.js` mischt die Textur-Bausteine
+in die Pools und bevorzugt im `welt`-Beat die Zeilen des **ausgelösten Einflusses** — dadurch
+erzählt jeder Einfluss sich selbst, statt nur die bewegte Achse zu nennen. Die App reicht dazu
+den Faktornamen durch (`_lastFaktor` → `ctx.faktor`).
+
+**Zwei Fehler, die erst die Zulieferung sichtbar gemacht hat:**
+1. **Kennungs-Kollision im Gedächtnis (echter Generator-Fehler).** Baustein-Kennungen waren
+   positionsbasiert (`kern-welt:0`), also hieß die erste Zeile JEDES Einflusses gleich. Das
+   Anti-Wiederholungs-Gedächtnis unterdrückte dadurch die Zeilen eines Einflusses, weil ein
+   ganz anderer Einfluss dieselbe Position schon benutzt hatte — sichtbar als „Stadt" ohne eine
+   einzige eigene Zeile. Dasselbe galt latent für jedes Gen im `druck`-Beat. Die Kennung
+   enthält jetzt die Lage (`kern-<beat>|<faktor oder key>`).
+2. **Satzbau-Einfalt.** 28 Faktor-Zeilen nutzen dieselbe Konstruktion (uneingeleiteter
+   Konditionalsatz, „Setzt {wesen} die Wurzeln zu tief, erstickt es sie"). Grammatisch korrekt,
+   aber als Muster erkennbar. Nicht zurückgewiesen (10 % der Bausteine), dafür misst
+   `story-import-check` jetzt die Satzbau-Verteilung und warnt ab 22 % bei markierten
+   Konstruktionen.

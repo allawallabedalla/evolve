@@ -696,6 +696,11 @@
     if (b === "welt") {
       const key = ctx.chg ? ctx.chg.key + (ctx.chg.dir > 0 ? "+" : "-") : null;
       const spec = key && WELT[key] ? wrap(WELT[key]) : [];
+      // Hat der Spieler einen benannten Einfluss ausgelöst, erzählt DIESER sich
+      // selbst — sonst sagt jede kälter machende Ursache dasselbe („es wird kälter").
+      // Die Achsen-Zeilen bleiben als leichteres Beiwerk daneben.
+      const eig = ctx.faktor && EXTRA_FAKTOR[ctx.faktor] ? wrapExtra(EXTRA_FAKTOR[ctx.faktor]) : [];
+      if (eig.length) return eig.concat(dim(spec)).concat(dim(WELT_ALLGEMEIN));
       return spec.concat(dim(WELT_ALLGEMEIN));
     }
     if (b === "druck") {
@@ -723,6 +728,20 @@
     return [];
   }
 
+  // ==========================================================================
+  // 3b. ZULIEFERUNG — extern geschriebene Bausteine (app/story-extra.js).
+  // Getrennt gehalten, damit hand-gepflegter Katalog und zugelieferte Ware nicht
+  // vermischen; eingespielt wird nur, was tools/story-import-check.mjs bestanden
+  // hat. Fehlt die Datei, läuft alles unverändert weiter.
+  // ==========================================================================
+  const EXTRA = (root.EvolveStoryExtra && typeof root.EvolveStoryExtra === "object") ? root.EvolveStoryExtra : {};
+  const EXTRA_FAKTOR = EXTRA.faktoren || {};
+  const wrapExtra = arr => (arr || []).map(x => (Array.isArray(x) ? x : [x, ""]));
+  for (const [pool, arr] of Object.entries(EXTRA.pools || {})) {
+    const target = { auftakt: AUFTAKT, ausklang: AUSKLANG, ruhe: RUHE, not: NOT, bluete: BLUETE, anfang: ANFANG }[pool];
+    if (target) for (const e of wrapExtra(arr)) target.push(e);
+  }
+
   const SLOT_POOLS = { auftakt: AUFTAKT, ausklang: AUSKLANG, zeit: ZEIT };
 
   // --------------------------------------------------------------------------
@@ -733,7 +752,12 @@
   // --------------------------------------------------------------------------
   function pick(ctx, recent) {
     const tags = tagsOf(ctx);
-    const kern = candidates(kernPool(ctx), "kern-" + ctx.beat, tags);
+    // Die Kennung eines Kern-Bausteins muss die LAGE enthalten. Sonst heißt die erste
+    // Zeile jedes Einflusses gleich („kern-welt:0"), und das Gedächtnis unterdrückt
+    // die Zeilen eines Einflusses, weil ein ganz anderer Einfluss dieselbe Position
+    // schon benutzt hatte. Dasselbe galt für jedes Gen im Druck-Beat.
+    const kernId = "kern-" + ctx.beat + "|" + (ctx.faktor || ctx.key || "");
+    const kern = candidates(kernPool(ctx), kernId, tags);
     if (!kern.length) return null;
     const list = Array.isArray(recent) ? recent : [];
     const mem = new Set(list);

@@ -181,6 +181,36 @@ const assembled = [];
   if (aph > 0.12) fail.push(`${Math.round(aph * 100)} % Sentenz-Vokabular — zu lyrisch (Höchstwert 12 %)`);
 }
 
+// --- 8. Satzbau-Einfalt -----------------------------------------------------
+//     Grammatisch korrekte Bausteine können trotzdem ermüden, wenn sie alle
+//     gleich GEBAUT sind. Der Spieler merkt das Muster, nicht die Wörter.
+{
+  const muster = new Map();
+  const ART = new Set(["der","die","das","den","dem","des","ein","eine","einen","einem","einer",
+    "es","er","sie","man","{wesen}","{demwesen}"]);
+  for (const it of items) {
+    if (typeof it.text !== "string") continue;
+    const w = it.text.split(/\s+/);
+    let key = "sonstiges";
+    if (w.length > 1 && /^[a-zäöü]+(t|et|en)$/.test(w[0]) && ART.has(w[1].toLowerCase().replace(/,$/, "")))
+      key = "Verb zuerst (uneingeleiteter Konditionalsatz)";
+    else if (/^(wer|wo|was|wen|wem)\b/i.test(it.text)) key = "beginnt mit „wer/wo/was“";
+    else if (/^(hier|dort|jetzt|ab|von|in|im|an|auf|unter|über|zwischen)\b/i.test(it.text)) key = "beginnt mit Ortsangabe";
+    else if (ART.has(w[0].toLowerCase())) key = "beginnt mit Artikel/Pronomen";
+    muster.set(key, (muster.get(key) || 0) + 1);
+  }
+  const tot = items.length;
+  const zeilen = [...muster.entries()].sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `${k}: ${Math.round(n / tot * 100)} %`);
+  console.log(`  Satzbau: ${zeilen.join(" · ")}`);
+  // „beginnt mit Artikel/Pronomen" ist die natürliche deutsche Grundform — die zu
+  // melden wäre Rauschen. Auffällig sind nur die MARKIERTEN Konstruktionen.
+  const AUFFAELLIG = ["Verb zuerst (uneingeleiteter Konditionalsatz)", "beginnt mit „wer/wo/was“"];
+  for (const [k, n] of muster)
+    if (AUFFAELLIG.includes(k) && n / tot > 0.22)
+      warn.push(`${Math.round(n / tot * 100)} % aller Bausteine sind gleich gebaut („${k}") — das Muster wird sichtbar`);
+}
+
 // --- Bericht ----------------------------------------------------------------
 {
   const byFaktor = Object.keys(data.faktoren || {}).length;
