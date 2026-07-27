@@ -1,0 +1,269 @@
+{
+ "achsen": [
+  {
+   "key": "temperature",
+   "name": "Temperatur",
+   "tief": "kalt",
+   "hoch": "heiß"
+  },
+  {
+   "key": "predation",
+   "name": "Räuber",
+   "tief": "sicher",
+   "hoch": "tödlich"
+  },
+  {
+   "key": "foodAbundance",
+   "name": "Nahrungsmenge",
+   "tief": "knapp",
+   "hoch": "üppig"
+  },
+  {
+   "key": "foodHeight",
+   "name": "Höhe des Futters",
+   "tief": "am Boden",
+   "hoch": "hoch oben"
+  },
+  {
+   "key": "light",
+   "name": "Licht",
+   "tief": "dunkel",
+   "hoch": "hell"
+  },
+  {
+   "key": "water",
+   "name": "Wasser",
+   "tief": "trocken",
+   "hoch": "unter Wasser"
+  }
+ ],
+ "reiche": [
+  "Pflanze",
+  "Tier",
+  "Mikrobe",
+  "Pilz",
+  "Protist"
+ ],
+ "formen": [
+  {
+   "reich": "Pflanze",
+   "form": "Grünalge",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Moos",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Sukkulente · Kaktus",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Polster-Kältepflanze",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Nadelbaum",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Laubbaum",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Verholzter Strauch",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Blütenkraut",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Farn",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Kraut · niedrige Pflanze",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Leuchtwesen · Tiefsee",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Flugsäuger · Fledermaus",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Flatterer · Vogel",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fluginsekt · Segler",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Gepanzerter Koloss",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Krebstier · Arthropode",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Gepanzertes Beutetier",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Schnecke · Weichtier",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fisch · Aalform",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Wurm",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Insekt · Gliederfüßer",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Kopffüßer · Tintenfisch",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Aktiver Großjäger",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fell-Großtier",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fell-Warmblüter",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Behänder Kletterer",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Kleines flinkes Tier",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Amphibie · Lurch",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Reptil · Echse",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Generalisten-Tier",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Archaee · Extremophil",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Bakterie",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Protist · Amöbe",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Hefe",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Koralle · Riffbildner",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Flechte · Symbiose",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Schwamm",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Baumpilz · Porling",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Zunderschwamm",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Schimmel · Fadenpilz",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Hutpilz",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Myzel · Pilzgeflecht",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Protist",
+   "form": "Plankton",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Protist",
+   "form": "Euglenoid · Mixotroph",
+   "raritaet": "haeufig"
+  }
+ ]
+}

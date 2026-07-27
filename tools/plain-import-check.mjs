@@ -24,6 +24,7 @@
 // ============================================================================
 import { readFileSync } from "node:fs";
 import { loadInfluences } from "./lib/app-core.mjs";
+import { umschrift } from "./lib/umlaut-check.mjs";
 
 const file = process.argv[2];
 if (!file) { console.error("Aufruf: node tools/plain-import-check.mjs <datei.json>"); process.exit(2); }
@@ -45,25 +46,6 @@ const JARGON = ["allopatrisch", "sympatrisch", "parapatrisch", "panmiktisch", "P
   "Pleiotropie", "Allel", "Allele", "Introgression", "Vagilität", "Propagul", "Ökoton", "Phänologie",
   "stochastisch", "Metapopulation", "Genotyp", "Phänotyp", "Fitnesslandschaft", "Adaptation",
   "Diversifikation", "Kladogenese", "Anagenese", "Heterozygotie", "Fixierung", "Drift"];
-// ASCII-Umschrift erkennen, ohne echtes Deutsch zu treffen. Ein naiver Substring-Test auf
-// "ue"/"ae"/"oe" schlägt auf jedes Wort mit "au"+e (bauen, Sauerstoff -> "aue"), "eu"+e
-// (Neue, steuert -> "eue") oder zufälligem "ue"/"oe" in der Wortmitte (zuerst, koexistieren,
-// Individuen, sexuell) an — das waren bei P3 real ALLE 41 Erst-Meldungen, keine einzige ein
-// echter Fehler. Eine transliterierte Silbe hat stattdessen fast immer eines dieser Muster:
-// "ä"->"ae" vor typischen Folgen (hnlich/nder/hig/hlt/ss/rgern/quivalen), "ö"->"oe" vor
-// (ss/glich/he/rper/nn/hn/rd/kolog/konom), "ü"->"ue" vor (ck/hr/ss/nsch/ber/rde/brig/gel/tig).
-// Statt Diphthonge zu erwischen, wird gezielt auf diese Nachfolge-Muster geprüft.
-const AE_MUSTER = /a(e)(hnlich|nder|ngst|nger|higkeit|hig|hlt|lt|hnen|ss|tt|rk|gl|rgern|rmlich|quivalen|sthet|ra|chst|lter|hre|sch|uch|ndig|rt|ter|rb|rm)/i;
-const OE_MUSTER = /o(e)(glichkeit|glich|ss|gl|he|ht|rper|nn|hn|rd|kolog|konom|sophag|sen|st|se|n\b)/i;
-const UE_MUSTER = /u(e)(berzeug|berschwemm|berschuss|bertrag|ck|hr|ss|nsch|ber|rde|brig|gel|hl|tig|chte|llig|rlich|hle|ndig|gung|nde|st)/i;
-function umschrift(t) {
-  const out = [];
-  for (const w of t.match(/[A-Za-zÄÖÜäöüß]+/g) || []) {
-    if (/[äöüÄÖÜ]/.test(w)) continue;
-    if (AE_MUSTER.test(w) || OE_MUSTER.test(w) || UE_MUSTER.test(w)) out.push(w);
-  }
-  return out;
-}
 
 const plainSeen = new Map();
 for (const k of keys) {

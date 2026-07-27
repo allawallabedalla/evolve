@@ -326,3 +326,40 @@ zeigen korrekt Klartext, Erklärung, Etikett und Tooltip; keine Konsolen-/Seiten
 Damit ist **S0–S4 vollständig abgeschlossen**. Offen: S5 (Modal-Feinschliff: Suche,
 Wirkungs-Vorschau, Zurücknehmen — bewusst NICHT ausgelagert, da Chirurgie in `app/index.html`),
 S6 ist bereits erledigt, S7 (Abschluss/PR nach main).
+
+### 2026-07-27 · Drei weitere Auslagerungs-Pakete (P5, P6, P7)
+
+Auf Nutzer-Frage „was ließe sich noch auslagern" systematisch durchgesehen (nicht geraten):
+- **Korrektur eines falschen ersten Befunds:** `exemplar.js` schien unvollständig (Grep auf
+  „wiki:" fand nur 27 Treffer), tatsächlich sind alle **44 Archetypen** abgedeckt (anderes
+  Datenformat). Falsche Fährte sofort richtiggestellt; das BACKLOG-Häkchen für den zugehörigen
+  Nutzerwunsch war nur nicht gesetzt — nachgetragen.
+- **25 Gene ohne jede Erklärung im Spiel** (nur der Name steht am Balken) — echte, gemessene
+  Lücke. → **Paket P6**, kleinstes der Pakete.
+- **„Herausforderungen der Natur"** aus `docs/bindung-konzept.md` (die eigene Empfehlung V1)
+  — größtes Paket, aber eine Produktentscheidung. Nutzer hat auf Rückfrage zugestimmt, den
+  **Inhalt** vorzubereiten; die Verdrahtung ins Spiel bleibt bewusst außen vor (Chirurgie in
+  `app/index.html`, wie S5).
+
+**P6 · Gen-Erklärungen** (`docs/auslagerung/P6-*`, `npm run gene-import-check`): 25 Tooltip-
+Texte, Kontext aus den bereits vorhandenen Chronik-Fragmenten (`story.js` DRUCK-Tabelle, alle
+25 Gene bereits mit Auf/Ab-Text) und `PARAMS.mutationAnchor` (Kern- vs. bedingte Stressor-Gene).
+
+**P5 · Herausforderungen der Natur** (`docs/auslagerung/P5-*`, `npm run challenge-import-check`):
+Ziel (Reich/Form) + Beschränkung (Regler-Grenzen) + Generationen-Budget + Text. Der Prüfstand
+geht über Formatprüfung hinaus — er **simuliert**: 24 Stichproben-Umwelten je Herausforderung
+laufen über das angegebene Budget (dieselbe `converge()`-Technik wie `influence-check`), geprüft
+wird (1) Erreichbarkeit — wird das Ziel überhaupt je erreicht, (2) ob die Beschränkung ECHT
+etwas testet (Erfolgsquote mit vs. ohne Beschränkung verglichen — sonst ist sie Dekoration),
+(3) Schwierigkeits-Plausibilität (gemessene Erfolgsquote gegen die angegebene Stufe).
+Gegengetestet an drei Fällen: eine unerreichbare Herausforderung wurde korrekt zurückgewiesen,
+eine zu leicht als „leicht" markierte korrekt bemängelt.
+
+**P7 · Qualitäts-Audit** — bewusst kein neues Datenpaket, sondern ein Prüfauftrag auf bereits
+Verbautem: die 218 P3-Erklärungen (`app/influences.js`) und 312 S6-Chronik-Zeilen
+(`app/story-extra.js`) sollen von einer frischen KI kritisch gegengelesen werden (schwache
+Stellen markieren, keine Textersetzung). Kein eigener Prüfstand nötig — die Existenz-/Form-Prüfer
+(`plain-import-check`, `story-import-check`) laufen weiter über jedes Ergebnis.
+
+**Gemeinsame Bereinigung:** die Umlaut-Heuristik (aus dem P3-Vorfall) ist jetzt in
+`tools/lib/umlaut-check.mjs` zentralisiert statt in `plain-import-check.mjs` dupliziert.

@@ -32,6 +32,8 @@
     "story-import-check": "node tools/story-import-check.mjs",
     "build-story-extra": "node tools/build-story-extra.mjs",
     "plain-import-check": "node tools/plain-import-check.mjs",
+    "gene-import-check": "node tools/gene-import-check.mjs",
+    "challenge-import-check": "node tools/challenge-import-check.mjs",
     "build-influences": "node tools/build-influences.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"
