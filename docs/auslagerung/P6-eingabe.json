@@ -1,0 +1,312 @@
+[
+ {
+  "index": 0,
+  "label": "Wärmedämmung",
+  "kernGen": true,
+  "hinweisAuf": [
+   "dichteres Fell trägt sich hier",
+   "die wärmer eingepackten Jungen überleben den Winter häufiger"
+  ],
+  "hinweisAb": [
+   "die dünner Bedeckten kommen besser durch",
+   "Dämmung wird zur Last"
+  ]
+ },
+ {
+  "index": 1,
+  "label": "Größe",
+  "kernGen": true,
+  "hinweisAuf": [
+   "die größeren Nachkommen setzen sich durch",
+   "Masse rechnet sich hier"
+  ],
+  "hinweisAb": [
+   "große Körper kosten hier zu viel",
+   "die Kleineren bleiben übrig"
+  ]
+ },
+ {
+  "index": 2,
+  "label": "Gliedmaßen",
+  "kernGen": true,
+  "hinweisAuf": [
+   "wer weiter reicht, frisst öfter",
+   "die Gliedmaßen werden länger"
+  ],
+  "hinweisAb": [
+   "lange Gliedmaßen tragen sich nicht mehr",
+   "was nicht gebraucht wird, wird abgebaut"
+  ]
+ },
+ {
+  "index": 3,
+  "label": "Stoffwechsel",
+  "kernGen": true,
+  "hinweisAuf": [
+   "ein heißer Stoffwechsel setzt sich durch",
+   "wer mehr verbrennt, wächst hier schneller heran"
+  ],
+  "hinweisAb": [
+   "die Sparsamen bleiben übrig",
+   "der Stoffwechsel fährt herunter"
+  ]
+ },
+ {
+  "index": 4,
+  "label": "Panzerung",
+  "kernGen": true,
+  "hinweisAuf": [
+   "Panzer zahlt sich aus",
+   "was nicht durchdrungen wird, hinterlässt Nachkommen"
+  ],
+  "hinweisAb": [
+   "ohne Jäger ist Panzer nur Gewicht",
+   "die Leichteren haben mehr übrig"
+  ]
+ },
+ {
+  "index": 5,
+  "label": "Photosynthese",
+  "kernGen": true,
+  "hinweisAuf": [
+   "Grün wird zum Vorteil",
+   "{wesen} deckt einen Teil des Bedarfs jetzt selbst aus Licht"
+  ],
+  "hinweisAb": [
+   "das Licht reicht nicht mehr aus",
+   "die Photosynthese verblasst"
+  ]
+ },
+ {
+  "index": 6,
+  "label": "Mobilität",
+  "kernGen": true,
+  "hinweisAuf": [
+   "Bewegung lohnt sich",
+   "wer weiter herumkommt, findet mehr"
+  ],
+  "hinweisAb": [
+   "Laufen kostet mehr, als es einbringt",
+   "die Linie wird ruhiger"
+  ]
+ },
+ {
+  "index": 7,
+  "label": "Stützgewebe",
+  "kernGen": true,
+  "hinweisAuf": [
+   "das Stützgewebe verholzt",
+   "Höhe braucht ein Gerüst"
+  ],
+  "hinweisAb": [
+   "das Gerüst wird überflüssig",
+   "Stützgewebe kostet, ohne zu tragen"
+  ]
+ },
+ {
+  "index": 8,
+  "label": "Flügelfläche",
+  "kernGen": true,
+  "hinweisAuf": [
+   "Fläche gegen die Luft zahlt sich aus",
+   "die ersten Segler bleiben länger oben"
+  ],
+  "hinweisAb": [
+   "Flügel ohne Nutzen sind teure Fracht",
+   "die Flugfläche bildet sich zurück"
+  ]
+ },
+ {
+  "index": 9,
+  "label": "Biolumineszenz",
+  "kernGen": true,
+  "hinweisAuf": [
+   "eigenes Licht wird zum Werkzeug",
+   "im Finstern lockt, wer leuchtet"
+  ],
+  "hinweisAb": [
+   "Leuchten verrät mehr, als es einbringt",
+   "das Licht im Körper erlischt"
+  ]
+ },
+ {
+  "index": 10,
+  "label": "Entgiftung",
+  "kernGen": false,
+  "hinweisAuf": [
+   "wer das Gift zerlegen kann, hat Nachkommen",
+   "die Entgiftung setzt sich durch"
+  ],
+  "hinweisAb": [
+   "die teure Entgiftung wird abgebaut"
+  ]
+ },
+ {
+  "index": 11,
+  "label": "Sauerstoff-Effizienz",
+  "kernGen": false,
+  "hinweisAuf": [
+   "die sparsamere Atmung setzt sich durch",
+   "wer mit wenig Sauerstoff auskommt, bleibt übrig"
+  ],
+  "hinweisAb": [
+   "die teure Atem-Effizienz lohnt nicht mehr"
+  ]
+ },
+ {
+  "index": 12,
+  "label": "Osmoregulation",
+  "kernGen": false,
+  "hinweisAuf": [
+   "das Salz-Gleichgewicht wird zur Überlebensfrage",
+   "wer sein Inneres im Lot hält, bleibt"
+  ],
+  "hinweisAb": [
+   "die Osmoregulation wird billiger gefahren"
+  ]
+ },
+ {
+  "index": 13,
+  "label": "Grabtrieb",
+  "kernGen": false,
+  "hinweisAuf": [
+   "unter der Erde ist es sicher",
+   "wer gräbt, entkommt dem, was oben wartet"
+  ],
+  "hinweisAb": [
+   "der Grabtrieb bringt hier nichts mehr"
+  ]
+ },
+ {
+  "index": 14,
+  "label": "Schutzpigment",
+  "kernGen": false,
+  "hinweisAuf": [
+   "Farbe wird zum Schutzschild",
+   "dunkles Pigment fängt die Strahlung ab"
+  ],
+  "hinweisAb": [
+   "das Schutzpigment verliert seinen Wert"
+  ]
+ },
+ {
+  "index": 15,
+  "label": "Filterapparat",
+  "kernGen": false,
+  "hinweisAuf": [
+   "aus dem Wasser sieben ist hier ergiebiger als jagen",
+   "wer aus dem Wasser siebt, spart den Weg"
+  ],
+  "hinweisAb": [
+   "der Filterapparat bringt hier nichts mehr ein"
+  ]
+ },
+ {
+  "index": 16,
+  "label": "Tarnung",
+  "kernGen": false,
+  "hinweisAuf": [
+   "unsichtbar zu sein schlägt jeden Panzer",
+   "Tarnung setzt sich durch"
+  ],
+  "hinweisAb": [
+   "ohne Jäger bringt Tarnung {demwesen} keinen Vorteil mehr"
+  ]
+ },
+ {
+  "index": 17,
+  "label": "Druck-Toleranz",
+  "kernGen": false,
+  "hinweisAuf": [
+   "der Körper hält dem Gewicht des Wassers stand",
+   "Druck-Toleranz entscheidet hier unten"
+  ],
+  "hinweisAb": [
+   "die Druck-Toleranz wird überflüssig"
+  ]
+ },
+ {
+  "index": 18,
+  "label": "Sinne",
+  "kernGen": false,
+  "hinweisAuf": [
+   "schärfere Sinne kaufen Sekunden",
+   "wer früher merkt, lebt länger"
+  ],
+  "hinweisAb": [
+   "teure Sinne lohnen sich hier nicht"
+  ]
+ },
+ {
+  "index": 19,
+  "label": "Austrocknungs-Tol.",
+  "kernGen": false,
+  "hinweisAuf": [
+   "wer Wasser hält, bleibt im Rennen",
+   "Austrocknen wird zur häufigsten Todesart"
+  ],
+  "hinweisAb": [
+   "die Austrocknungs-Toleranz wird billiger"
+  ]
+ },
+ {
+  "index": 20,
+  "label": "Strahlungsresistenz",
+  "kernGen": false,
+  "hinweisAuf": [
+   "wer den Strahlenschaden repariert, vererbt",
+   "Reparatur schlägt Glück"
+  ],
+  "hinweisAb": [
+   "die Strahlungs-Reparatur wird zurückgefahren"
+  ]
+ },
+ {
+  "index": 21,
+  "label": "Feuerresistenz",
+  "kernGen": false,
+  "hinweisAuf": [
+   "Rinde und Knospen überstehen das Feuer",
+   "Feuerresistenz zahlt sich aus"
+  ],
+  "hinweisAb": [
+   "Feuerschutz kostet, ohne zu schützen"
+  ]
+ },
+ {
+  "index": 22,
+  "label": "Frostschutz",
+  "kernGen": false,
+  "hinweisAuf": [
+   "Frostschutz sitzt unscheinbar im Gewebe",
+   "wer nicht gefriert, hat Nachkommen"
+  ],
+  "hinweisAb": [
+   "der Frostschutz wird abgebaut"
+  ]
+ },
+ {
+  "index": 23,
+  "label": "Windhärte",
+  "kernGen": false,
+  "hinweisAuf": [
+   "niedrig und zäh übersteht den Wind",
+   "Windhärte entscheidet über Bruch oder Bestand"
+  ],
+  "hinweisAb": [
+   "Windhärte kostet mehr, als sie bringt"
+  ]
+ },
+ {
+  "index": 24,
+  "label": "Stickstoff-Fix.",
+  "kernGen": false,
+  "hinweisAuf": [
+   "Stickstoff aus der Luft schlägt Stickstoff aus dem Boden",
+   "die eigene Düngung setzt sich durch"
+  ],
+  "hinweisAb": [
+   "die teure Stickstoff-Fixierung wird aufgegeben"
+  ]
+ }
+]

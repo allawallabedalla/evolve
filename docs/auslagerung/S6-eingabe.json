@@ -1,0 +1,1172 @@
+[
+ {
+  "name": "Thermische Extreme (Hitze/Frost-Spitzen)",
+  "anzeigename": "Hitze- & Frost-Spitzen",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Letalgrenzen, seltene Killer-Events.",
+  "achsen": [
+   "Temperatur 0.96",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Bakterie",
+   "reich": "Mikrobe",
+   "passung": 36
+  }
+ },
+ {
+  "name": "Geothermie / Mikroklima-Refugien",
+  "anzeigename": "Warme Erdwärme-Zuflucht",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "lokale Wärme-Taschen (Quellen, Höhlen).",
+  "achsen": [
+   "Licht 0.20",
+   "Wasser 0.75",
+   "Temperatur 0.62"
+  ],
+  "ergebnis": {
+   "form": "Kleines flinkes Tier",
+   "reich": "Tier",
+   "passung": 49
+  }
+ },
+ {
+  "name": "Niederschlag / Feuchte",
+  "anzeigename": "Viel Regen & Feuchte",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "Wassermenge; Basis für Pflanzen.",
+  "achsen": [
+   "Wasser 0.92"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 54
+  }
+ },
+ {
+  "name": "Bodenfeuchte / Wasserspeicher",
+  "anzeigename": "Moorboden (hält Wasser)",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Sand (trocken) vs. Ton/Torf (nass).",
+  "achsen": [
+   "Sauerstoff 0.50",
+   "Wasser 0.90",
+   "Gift 0.25",
+   "Nahrung 0.30",
+   "Temperatur 0.42"
+  ],
+  "ergebnis": {
+   "form": "Myzel · Pilzgeflecht",
+   "reich": "Pilz",
+   "passung": 11
+  }
+ },
+ {
+  "name": "Ariditäts-Index (Verdunstungs-Nachfrage)",
+  "anzeigename": "Wüstenrand (dauerhaft trocken)",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Wüsten-Rand-Effekt.",
+  "achsen": [
+   "Austrocknung 0.70",
+   "Wasser 0.22",
+   "Licht 0.85",
+   "Temperatur 0.68",
+   "Nahrung 0.42"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 9
+  }
+ },
+ {
+  "name": "Nebel/Tau-Interzeption",
+  "anzeigename": "Nebelwüste (Wasser aus der Luft)",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "Wasser aus Luft (Küstennebel-Wüsten).",
+  "achsen": [
+   "Austrocknung 0.45",
+   "Licht 0.35",
+   "Wasser 0.72",
+   "Nahrung 0.40",
+   "Temperatur 0.44"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 18
+  }
+ },
+ {
+  "name": "Schneedecke / subnivaler Raum",
+  "anzeigename": "Schnee & Leben darunter",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Isolation + Wasser-Speicher.",
+  "achsen": [
+   "Temperatur 0.12",
+   "Wasser 0.50",
+   "Licht 0.40"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 19
+  }
+ },
+ {
+  "name": "Lichtintensität",
+  "anzeigename": "Grelles Sonnenlicht",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Photosynthese-Basis (schon drin).",
+  "achsen": [
+   "Licht 0.97",
+   "Austrocknung 0.30",
+   "Temperatur 0.74",
+   "Wasser 0.38",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Flechte · Symbiose",
+   "reich": "Pilz",
+   "passung": 11
+  }
+ },
+ {
+  "name": "UV-Strahlung",
+  "anzeigename": "Starke UV-Strahlung",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "DNA-Schaden → Schutzpigmente (Höhe, Ozonloch).",
+  "achsen": [
+   "UV 0.90",
+   "Licht 0.92"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 24
+  }
+ },
+ {
+  "name": "Spektralqualität (Lichtfarbe)",
+  "anzeigename": "Blaugrünes Tiefwasser-Licht",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Tiefwasser filtert Rot → Blau-Grün-Pigmente.",
+  "achsen": [
+   "Wasser 0.95",
+   "Druck 0.22",
+   "Licht 0.33",
+   "Temperatur 0.38",
+   "Nahrung 0.45"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 32
+  }
+ },
+ {
+  "name": "Photische vs. aphotische Zone",
+  "anzeigename": "Lichtlose Tiefe (Dunkelheit)",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Dunkelheit → Biolumineszenz/Blindheit.",
+  "achsen": [
+   "Licht 0.02",
+   "Druck 0.45",
+   "Wasser 0.98",
+   "Temperatur 0.30",
+   "Nahrung 0.35"
+  ],
+  "ergebnis": {
+   "form": "Hefe",
+   "reich": "Pilz",
+   "passung": 17
+  }
+ },
+ {
+  "name": "Luftdruck / Höhe / Hypoxie",
+  "anzeigename": "Dünne Höhenluft",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Höhen-Anpassung (Hämoglobin).",
+  "achsen": [
+   "Sauerstoff 0.12",
+   "Licht 0.80",
+   "Temperatur 0.28",
+   "Wasser 0.40",
+   "Nahrung 0.45"
+  ],
+  "ergebnis": {
+   "form": "Myzel · Pilzgeflecht",
+   "reich": "Pilz",
+   "passung": 11
+  }
+ },
+ {
+  "name": "Wind (Exposition + Ausbreitungs-Vektor)",
+  "anzeigename": "Dauerwind & Sturm",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Krüppelwuchs; trägt Pollen/Samen.",
+  "achsen": [
+   "Wind 0.90",
+   "Wasser 0.35",
+   "Temperatur 0.35"
+  ],
+  "ergebnis": {
+   "form": "Myzel · Pilzgeflecht",
+   "reich": "Pilz",
+   "passung": 9
+  }
+ },
+ {
+  "name": "Salinität + Salz-Gradienten",
+  "anzeigename": "Salziges Wasser",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Süß/Brack/Meer/hypersalin; Osmoregulation.",
+  "achsen": [
+   "Salz 0.85",
+   "Wasser 0.90"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 47
+  }
+ },
+ {
+  "name": "pH / Säure",
+  "anzeigename": "Saures Wasser",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "saure Moore vs. alkalische Soda-Seen.",
+  "achsen": [
+   "Gift 0.70",
+   "Wasser 0.85"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 43
+  }
+ },
+ {
+  "name": "Gelöster Sauerstoff",
+  "anzeigename": "Sauerstoffarmes Wasser",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "kalt/schnell vs. warm/stehend.",
+  "achsen": [
+   "Sauerstoff 0.20",
+   "Wasser 0.92",
+   "Temperatur 0.70"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 60
+  }
+ },
+ {
+  "name": "Tiefe / hydrostatischer Druck",
+  "anzeigename": "Tiefsee-Druck",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Tiefsee-Anpassung.",
+  "achsen": [
+   "Druck 0.90",
+   "Licht 0.02",
+   "Wasser 0.98",
+   "Temperatur 0.28"
+  ],
+  "ergebnis": {
+   "form": "Leuchtwesen · Tiefsee",
+   "reich": "Tier",
+   "passung": 36
+  }
+ },
+ {
+  "name": "Strömung / Wellenenergie / Gezeiten",
+  "anzeigename": "Brandungszone (Wellen & Gezeiten)",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Stromlinie, Haftorgane, Intertidal-Zonierung.",
+  "achsen": [
+   "Wind 0.85",
+   "Wasser 0.95",
+   "Licht 0.72",
+   "Nahrung 0.62",
+   "Temperatur 0.45"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 56
+  }
+ },
+ {
+  "name": "Trübung / Sediment",
+  "anzeigename": "Trübes, schlammiges Wasser",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Licht-Limit, Kiemen-Verstopfung; kann Artbildung *rückgängig* machen (Victoria-Cichliden).",
+  "achsen": [
+   "Licht 0.15",
+   "Wasser 0.80"
+  ],
+  "ergebnis": {
+   "form": "Leuchtwesen · Tiefsee",
+   "reich": "Tier",
+   "passung": 52
+  }
+ },
+ {
+  "name": "Nährstoffstatus (oligo→eutroph)",
+  "anzeigename": "Nährstoffreiches Wasser",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "klare Alpenseen vs. Algen-Teiche.",
+  "achsen": [
+   "Nahrung 0.85",
+   "Wasser 0.85"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 81
+  }
+ },
+ {
+  "name": "Süß- vs. Meerwasser-Habitatklasse",
+  "anzeigename": "Brackwasser-Ästuar",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "fundamentale Barriere.",
+  "achsen": [
+   "Salz 0.45",
+   "Wasser 0.92",
+   "Nahrung 0.70",
+   "Licht 0.55"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 67
+  }
+ },
+ {
+  "name": "Wasser-Permanenz (Hydroperiode)",
+  "anzeigename": "Austrocknender Tümpel",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Tümpel trocknen aus → Dormanz-Eier.",
+  "achsen": [
+   "Austrocknung 0.62",
+   "Temperatur 0.72",
+   "Wasser 0.42",
+   "Nahrung 0.50"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 24
+  }
+ },
+ {
+  "name": "Bodentyp / Textur",
+  "anzeigename": "Sandboden (Wasser versickert)",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Sand/Schluff/Ton → Drainage, Wurzelzugang.",
+  "achsen": [
+   "Wasser 0.20",
+   "Austrocknung 0.35",
+   "Licht 0.80",
+   "Nahrung 0.32",
+   "Temperatur 0.60"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 9
+  }
+ },
+ {
+  "name": "Boden-pH & -Chemie",
+  "anzeigename": "Saurer Heideboden",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "sauer (Heide) vs. alkalisch (Kalk).",
+  "achsen": [
+   "Gift 0.40",
+   "Nahrung 0.28",
+   "Licht 0.70",
+   "Wasser 0.55"
+  ],
+  "ergebnis": {
+   "form": "Koralle · Riffbildner",
+   "reich": "Tier",
+   "passung": 8
+  }
+ },
+ {
+  "name": "Nährstoff-Limitierung (N, P, Fe, Mikronährstoffe)",
+  "anzeigename": "Karger, nährstoffarmer Boden",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "P-arme Böden → Karnivoren.",
+  "achsen": [
+   "Nahrung 0.12"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 9
+  }
+ },
+ {
+  "name": "Serpentin/Schwermetall-Toxizität",
+  "anzeigename": "Giftiger Schwermetall-Boden",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Metallophyten-Endemiten.",
+  "achsen": [
+   "Gift 0.85",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 7
+  }
+ },
+ {
+  "name": "Fels/Sand/Karst als Substrat",
+  "anzeigename": "Nackter Fels",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Grab-, Kletter-, Haft-Baupläne.",
+  "achsen": [
+   "Nahrung 0.10",
+   "Wind 0.40",
+   "Licht 0.88",
+   "Wasser 0.25",
+   "Temperatur 0.55"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 8
+  }
+ },
+ {
+  "name": "Boden-Sauerstoff (Staunässe/anoxisch)",
+  "anzeigename": "Staunässe / Sumpfboden",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Mangroven-Atemwurzeln.",
+  "achsen": [
+   "Sauerstoff 0.18",
+   "Wasser 0.95",
+   "Nahrung 0.50"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 49
+  }
+ },
+ {
+  "name": "Höhengradient",
+  "anzeigename": "Gebirgs-Höhenlage",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "stapelt Klimabänder (Wald→Alpin→Schnee).",
+  "achsen": [
+   "Temperatur 0.20",
+   "Licht 0.72",
+   "Wasser 0.40",
+   "Nahrungshöhe 0.15"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 21
+  }
+ },
+ {
+  "name": "Hangneigung & Exposition",
+  "anzeigename": "Schattiger Nordhang",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Sonn-/Schatthang.",
+  "achsen": [
+   "Licht 0.25",
+   "Wasser 0.78",
+   "Temperatur 0.32",
+   "Nahrung 0.50"
+  ],
+  "ergebnis": {
+   "form": "Fell-Warmblüter",
+   "reich": "Tier",
+   "passung": 36
+  }
+ },
+ {
+  "name": "Habitat-Struktur-Komplexität / Deckung",
+  "anzeigename": "Dichtes Versteck-Gestrüpp",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "Riff, Kronendach, Felsspalten (vertikale Schichten).",
+  "achsen": [
+   "Nahrungshöhe 0.90",
+   "Nahrung 0.70"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 45
+  }
+ },
+ {
+  "name": "Höhlen / unterirdischer Raum",
+  "anzeigename": "Dunkle Höhle",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "dunkel, stabil → Troglobiten.",
+  "achsen": [
+   "Licht 0.02",
+   "Nahrung 0.22",
+   "Sauerstoff 0.82",
+   "Wasser 0.55",
+   "Temperatur 0.46"
+  ],
+  "ergebnis": {
+   "form": "Flechte · Symbiose",
+   "reich": "Pilz",
+   "passung": 10
+  }
+ },
+ {
+  "name": "Primärproduktivität / Ressourcen-Fülle",
+  "anzeigename": "Nahrungs-Überfluss",
+  "sektion": "Ort & Klima",
+  "ton": "bio",
+  "beschreibung": "Auftriebs-reiche vs. karge Zonen.",
+  "achsen": [
+   "Nahrung 0.95"
+  ],
+  "ergebnis": {
+   "form": "Fell-Warmblüter",
+   "reich": "Tier",
+   "passung": 83
+  }
+ },
+ {
+  "name": "Chemische Gradienten (Redox/Chemokline)",
+  "anzeigename": "Chemische Grenzschicht",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Mikroben-Grenzschichten.",
+  "achsen": [
+   "Sauerstoff 0.35",
+   "Gift 0.35",
+   "Wasser 0.90",
+   "Nahrung 0.62",
+   "Licht 0.45"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 54
+  }
+ },
+ {
+  "name": "Energiequelle: photo- vs. chemosynthetisch",
+  "anzeigename": "Heiße Tiefsee-Quelle",
+  "sektion": "Ort & Klima",
+  "ton": "shift",
+  "beschreibung": "Vent-/Seep-Ökosysteme.",
+  "achsen": [
+   "Druck 0.85",
+   "Gift 0.60",
+   "Licht 0.00",
+   "Wasser 1.00",
+   "Temperatur 0.78",
+   "Nahrung 0.55"
+  ],
+  "ergebnis": {
+   "form": "Leuchtwesen · Tiefsee",
+   "reich": "Tier",
+   "passung": 81
+  }
+ },
+ {
+  "name": "Extrem-Chemie (Schwefel/H₂S, Methan, hypersalin, Säure/Alkali)",
+  "anzeigename": "Extremchemie (Schwefel, Salz, Säure)",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Extremophile.",
+  "achsen": [
+   "Gift 0.92",
+   "Salz 0.70",
+   "Licht 0.30",
+   "Wasser 0.60"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 4
+  }
+ },
+ {
+  "name": "Natürliche Toxine / ionisierende Strahlung",
+  "anzeigename": "Gift & radioaktive Strahlung",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Selen/Arsen-Böden, Radon.",
+  "achsen": [
+   "Strahlung 0.90",
+   "Gift 0.55"
+  ],
+  "ergebnis": {
+   "form": "Myzel · Pilzgeflecht",
+   "reich": "Pilz",
+   "passung": 6
+  }
+ },
+ {
+  "name": "Feuer-Regime (Häufigkeit/Intensität/Saison)",
+  "anzeigename": "Häufige Brände",
+  "sektion": "Ort & Klima",
+  "ton": "hit",
+  "beschreibung": "Serotinie, Rinde, Wiederaustrieb, Pyrodiversität.",
+  "achsen": [
+   "Feuer 0.90",
+   "Temperatur 0.72",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Flechte · Symbiose",
+   "reich": "Pilz",
+   "passung": 8
+  }
+ },
+ {
+  "name": "Störung (disturbance)",
+  "anzeigename": "Lücke im Bestand (Störung)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "shift",
+  "beschreibung": "entfernt Biomasse, öffnet Nischen.",
+  "achsen": [
+   "Licht 0.88",
+   "Nahrung 0.30",
+   "Räuberdruck 0.12",
+   "Wasser 0.50",
+   "Nahrungshöhe 0.12"
+  ],
+  "ergebnis": {
+   "form": "Bakterie",
+   "reich": "Mikrobe",
+   "passung": 34
+  }
+ },
+ {
+  "name": "Vulkanausbruch / Flutbasalt (LIP)",
+  "anzeigename": "Vulkanausbruch",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "zerstört + schafft Habitat; End-Perm-Auslöser.",
+  "achsen": [
+   "Temperatur 0.80",
+   "Licht 0.25",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Bakterie",
+   "reich": "Mikrobe",
+   "passung": 35
+  }
+ },
+ {
+  "name": "Vulkanwinter / Aschefall",
+  "anzeigename": "Vulkanwinter (Aschehimmel)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Sonnenlicht-Blockade, Abkühlung (Toba).",
+  "achsen": [
+   "Licht 0.15",
+   "Temperatur 0.25",
+   "Nahrung 0.35"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 16
+  }
+ },
+ {
+  "name": "Erdbeben / Tsunami / Hangrutsch",
+  "anzeigename": "Erdbeben & Flutwelle",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Terrain-Reset, Sekundär-Gefahren.",
+  "achsen": [
+   "Wasser 0.75",
+   "Nahrung 0.40"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 31
+  }
+ },
+ {
+  "name": "Waldbrand / Flut / Dürre / Sturm / Hitzewelle / Eissturm",
+  "anzeigename": "Eissturm (Frost & Sturm)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "akute Massen-Mortalität, Lücken.",
+  "achsen": [
+   "Wind 0.90",
+   "Frost 0.85",
+   "Temperatur 0.08",
+   "Nahrung 0.20",
+   "Wasser 0.40"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 2
+  }
+ },
+ {
+  "name": "Dürre als Selektions-Episode",
+  "anzeigename": "Lange Dürre",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Galápagos-Finken-Schnabel schwankt jahrweise.",
+  "achsen": [
+   "Austrocknung 0.90",
+   "Wasser 0.10",
+   "Temperatur 0.82",
+   "Nahrung 0.30"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 8
+  }
+ },
+ {
+  "name": "Eiszeit / Interglazial / abrupter Klimawechsel",
+  "anzeigename": "Eiszeit",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "shift",
+  "beschreibung": "reorganisiert Biota (Pleistozän-Zyklen).",
+  "achsen": [
+   "Frost 0.90",
+   "Temperatur 0.06",
+   "Nahrung 0.35",
+   "Wasser 0.50"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 3
+  }
+ },
+ {
+  "name": "Hyperthermal (PETM) / Schneeball-Erde",
+  "anzeigename": "Extreme Warmzeit",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "bio",
+  "beschreibung": "globale Warm-/Kälte-Extreme.",
+  "achsen": [
+   "Temperatur 0.88",
+   "Nahrung 0.80",
+   "Wasser 0.70"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 85
+  }
+ },
+ {
+  "name": "Meeresspiegel-Änderung (Transgression/Regression)",
+  "anzeigename": "Steigender Meeresspiegel",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "shift",
+  "beschreibung": "Schelf-Habitat + Konnektivität.",
+  "achsen": [
+   "Wasser 0.96",
+   "Nahrungshöhe 0.10"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 56
+  }
+ },
+ {
+  "name": "Ozean-Anoxie / -Versauerung / Euxinie",
+  "anzeigename": "Sauerstofftotes, giftiges Meer",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "marine Aussterbe-Treiber.",
+  "achsen": [
+   "Sauerstoff 0.08",
+   "Gift 0.60",
+   "Wasser 0.98",
+   "Licht 0.25"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 45
+  }
+ },
+ {
+  "name": "Aridifizierung / Grasland-Ausbreitung",
+  "anzeigename": "Versteppung (Grasland breitet sich aus)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "shift",
+  "beschreibung": "Miozän → Grasfresser, Hominiden.",
+  "achsen": [
+   "Licht 0.78",
+   "Wasser 0.35",
+   "Nahrungshöhe 0.30",
+   "Nahrung 0.55"
+  ],
+  "ergebnis": {
+   "form": "Archaee · Extremophil",
+   "reich": "Mikrobe",
+   "passung": 32
+  }
+ },
+ {
+  "name": "Meteoriten-/Asteroiden-Einschlag + Impakt-Winter",
+  "anzeigename": "Asteroiden-Einschlag",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Chicxulub → K-Pg.",
+  "achsen": [
+   "Licht 0.10",
+   "Nahrung 0.20",
+   "Temperatur 0.25"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 8
+  }
+ },
+ {
+  "name": "Supernova / Gammablitz (hypothetisch)",
+  "anzeigename": "Gammablitz (Ozonschicht weg)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Ozon-Strippen (Ordovizium?).",
+  "achsen": [
+   "UV 0.95",
+   "Strahlung 0.70",
+   "Licht 0.80",
+   "Nahrung 0.35",
+   "Temperatur 0.45"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 3
+  }
+ },
+ {
+  "name": "Sonnen-Variabilität / Weltraumwetter",
+  "anzeigename": "Schwache Sonnenphase",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "shift",
+  "beschreibung": "Langzeit-Klima-Forcing.",
+  "achsen": [
+   "Temperatur 0.26",
+   "Licht 0.38",
+   "Nahrung 0.40",
+   "Wasser 0.55"
+  ],
+  "ergebnis": {
+   "form": "Protist · Amöbe",
+   "reich": "Mikrobe",
+   "passung": 18
+  }
+ },
+ {
+  "name": "Die „Big Five“",
+  "anzeigename": "Das Große Sterben (Perm)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "ton": "hit",
+  "beschreibung": "Ordovizium, Devon, Perm (Great Dying), Trias, Kreide.",
+  "achsen": [
+   "Sauerstoff 0.30",
+   "Austrocknung 0.55",
+   "Gift 0.45",
+   "Temperatur 0.93",
+   "Nahrung 0.10",
+   "Wasser 0.25",
+   "Licht 0.40"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 4
+  }
+ },
+ {
+  "name": "Konkurrenz (–/–)",
+  "anzeigename": "Konkurrenz um Nahrung",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "shift",
+  "beschreibung": "intra-/interspezifisch, Ressourcen- vs. Interferenz, Scramble vs. Contest.",
+  "achsen": [
+   "Nahrung 0.16",
+   "Nahrungshöhe 0.45",
+   "Räuberdruck 0.35"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 9
+  }
+ },
+ {
+  "name": "Prädation / Herbivorie / Granivorie / Frugivorie (+/–)",
+  "anzeigename": "Räuber tauchen auf",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "hit",
+  "beschreibung": "Konsum; frugivor↔Samenausbreitung.",
+  "achsen": [
+   "Räuberdruck 0.92",
+   "Nahrung 0.55"
+  ],
+  "ergebnis": {
+   "form": "Generalisten-Tier",
+   "reich": "Tier",
+   "passung": 24
+  }
+ },
+ {
+  "name": "Nischen-Aufteilung / Charakter-Verschiebung / ökologische Freisetzung",
+  "anzeigename": "Freie Nische (keine Rivalen)",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "bio",
+  "beschreibung": "Koexistenz-Mechanik.",
+  "achsen": [
+   "Nahrung 0.88",
+   "Räuberdruck 0.04",
+   "Nahrungshöhe 0.35"
+  ],
+  "ergebnis": {
+   "form": "Fell-Warmblüter",
+   "reich": "Tier",
+   "passung": 85
+  }
+ },
+ {
+  "name": "Trophische Kaskade (top-down) / Bottom-up-Kontrolle",
+  "anzeigename": "Räuber steuern alles (Top-down)",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "shift",
+  "beschreibung": "Wolf→Elch→Weide.",
+  "achsen": [
+   "Räuberdruck 0.85",
+   "Nahrung 0.80",
+   "Licht 0.60"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 69
+  }
+ },
+ {
+  "name": "Keystone-Art / Ökosystem-Ingenieur / Foundation-Art",
+  "anzeigename": "Ökosystem-Ingenieur (Biber staut)",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "bio",
+  "beschreibung": "überproportionaler Einfluss (Seeotter, Biber, Koralle).",
+  "achsen": [
+   "Wasser 0.90",
+   "Nahrung 0.72",
+   "Licht 0.55",
+   "Nahrungshöhe 0.15"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 73
+  }
+ },
+ {
+  "name": "Mesopredator-Release / trophic downgrading",
+  "anzeigename": "Kleinräuber-Schwemme",
+  "sektion": "Leben mit anderen Arten",
+  "ton": "hit",
+  "beschreibung": "Verlust der Spitze restrukturiert alles.",
+  "achsen": [
+   "Räuberdruck 0.76",
+   "Nahrung 0.62",
+   "Nahrungshöhe 0.30"
+  ],
+  "ergebnis": {
+   "form": "Generalisten-Tier",
+   "reich": "Tier",
+   "passung": 37
+  }
+ },
+ {
+  "name": "Resistenz-Evolution (Echtzeit)",
+  "anzeigename": "Pestizid-Einsatz (Resistenz-Druck)",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "hit",
+  "beschreibung": "Antibiotika / Pestizide / Herbizide / Rodentizide / Impf-Druck.",
+  "achsen": [
+   "Gift 0.75",
+   "Nahrung 0.75",
+   "Licht 0.72",
+   "Räuberdruck 0.10",
+   "Wasser 0.50"
+  ],
+  "ergebnis": {
+   "form": "Fell-Warmblüter",
+   "reich": "Tier",
+   "passung": 57
+  }
+ },
+ {
+  "name": "Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren",
+  "anzeigename": "Lebensraum-Verlust",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "hit",
+  "beschreibung": ".",
+  "achsen": [
+   "Licht 0.90",
+   "Nahrung 0.15",
+   "Wasser 0.30",
+   "Räuberdruck 0.55",
+   "Nahrungshöhe 0.05",
+   "Temperatur 0.62"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 11
+  }
+ },
+ {
+  "name": "Verschmutzung als Selektion",
+  "anzeigename": "Verschmutzung & Überdüngung",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "shift",
+  "beschreibung": "Industrie-Melanismus, Hormon-Disruptoren, Licht/Lärm/thermisch, Eutrophierung (→ Speziations-Umkehr).",
+  "achsen": [
+   "Sauerstoff 0.35",
+   "Gift 0.45",
+   "Nahrung 0.85",
+   "Wasser 0.85",
+   "Licht 0.40"
+  ],
+  "ergebnis": {
+   "form": "Fisch · Aalform",
+   "reich": "Tier",
+   "passung": 71
+  }
+ },
+ {
+  "name": "Klimawandel (anthropogen)",
+  "anzeigename": "Menschgemachte Erwärmung",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "shift",
+  "beschreibung": "Range-Shifts, phänologische Verschiebung/Mismatch, Hitze-Toleranz, TSD-Skew, Hybridisierung durch Range-Kollision (Pizzly-Bär).",
+  "achsen": [
+   "Austrocknung 0.40",
+   "Temperatur 0.82",
+   "Licht 0.70",
+   "Wasser 0.45",
+   "Nahrung 0.50"
+  ],
+  "ergebnis": {
+   "form": "Bakterie",
+   "reich": "Mikrobe",
+   "passung": 27
+  }
+ },
+ {
+  "name": "Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme",
+  "anzeigename": "Eingeschleppte Art (neuer Rivale)",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "hit",
+  "beschreibung": ".",
+  "achsen": [
+   "Räuberdruck 0.80",
+   "Nahrung 0.30",
+   "Nahrungshöhe 0.40",
+   "Licht 0.60"
+  ],
+  "ergebnis": {
+   "form": "Euglenoid · Mixotroph",
+   "reich": "Protist",
+   "passung": 10
+  }
+ },
+ {
+  "name": "Urbanisierung / Urban-Evolution",
+  "anzeigename": "Stadt (Hitzeinsel & Nachtlicht)",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "shift",
+  "beschreibung": "Hitzeinsel, Verhaltens-Zahmheit, U-Bahn-Mücke, weißer Klee ohne Cyanogenese.",
+  "achsen": [
+   "Wasser 0.30",
+   "Gift 0.30",
+   "Wind 0.30",
+   "Licht 0.75",
+   "Temperatur 0.72",
+   "Räuberdruck 0.12",
+   "Nahrung 0.65"
+  ],
+  "ergebnis": {
+   "form": "Kleines flinkes Tier",
+   "reich": "Tier",
+   "passung": 32
+  }
+ },
+ {
+  "name": "Defaunation / Trophic Downgrading / 6. Massenaussterben (HIREC)",
+  "anzeigename": "Entleerte Tierwelt",
+  "sektion": "Mensch & moderne Welt",
+  "ton": "shift",
+  "beschreibung": "Extinktions-Filter (groß/langsam/spezialisiert zuerst).",
+  "achsen": [
+   "Nahrungshöhe 0.50",
+   "Räuberdruck 0.05",
+   "Nahrung 0.40",
+   "Licht 0.60",
+   "Wasser 0.55"
+  ],
+  "ergebnis": {
+   "form": "Bakterie",
+   "reich": "Mikrobe",
+   "passung": 42
+  }
+ }
+]

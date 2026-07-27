@@ -1,0 +1,21 @@
+{
+  "faktoren": {
+    "Nebel/Tau-Interzeption": [
+      "der Nebel legt sich jede Nacht auf {wesen} und ist alles Wasser, das es gibt",
+      "hier trinkt man aus der Luft oder gar nicht"
+    ],
+    "Feuer-Regime (Häufigkeit/Intensität/Saison)": [
+      "das Feuer kommt wieder, und es fragt nicht nach der Form",
+      "was nach dem Brand wieder austreibt, hat gewonnen"
+    ]
+  },
+  "pools": {
+    "ausklang": [
+      ["{wesen} braucht dafür Jahre, die du in Sekunden siehst", ""],
+      ["im Trockenen zählt jeder Tropfen doppelt", "trocken"]
+    ],
+    "not": [
+      ["hier reicht es hinten und vorne nicht", ""]
+    ]
+  }
+}

@@ -54,13 +54,13 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       Klartextnamen, Ton; danach `influence-check` grün.
 - [x] **S2 · Sektion 2** (17 offene → 5 abbildbar) — Katastrophen/Zyklen/Massenaussterben,
       soweit als Umwelt-Zustand darstellbar.
-- [ ] **S3 · Sektion 10 anthropogen** (11 offene) — Habitatverlust, Verschmutzung, Klimawandel,
+- [x] **S3 · Sektion 10 anthropogen** (11 offene → 7 abbildbar) — Habitatverlust, Verschmutzung, Klimawandel,
       Lichtverschmutzung, Urbanisierung, Übernutzung …
-- [ ] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
+- [x] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
       „Lebende Welt", „Fortpflanzung", „Evolutions-Mechanik", „Makro-Muster"; Modal zeigt es an.
 - [ ] **S5 · Modal fertig** — Suchfeld, Wirkungs-Vorschau (welche Achsen, vorher→nachher),
       „Einfluss zurücknehmen", sichtbarer Stapel aktiver Stressoren, a11y-Durchgang.
-- [ ] **S6 · Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für die neuen Einflüsse.
+- [x] **S6 · Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für die neuen Einflüsse.
 - [ ] **S7 · Abschluss** — Doku, `BACKLOG.md`/`resume.md`, Browser-Test, PR nach `main`.
 
 ## Regeln für diese Arbeit
@@ -172,3 +172,194 @@ typografische `„` mit einem **ASCII-`"`**. Das ist genau die in `resume.md` do
 Falle und hat den Generator mit `SyntaxError: Unexpected string` abbrechen lassen. In
 `docs/faktoren-katalog.md` korrigiert (Schlusszeichen `“`), im Generator zusätzlich auf
 einfache Anführungszeichen umgestellt.
+
+### S3 · Sektion 10 (Mensch & moderne Welt) — erledigt
+**7 neue Faktoren** (aktiv 59 → **66**, Sektion 10 jetzt 7/11), alle beim ersten Lauf wirksam
+und nicht redundant: Pestizid-Einsatz (Resistenz-Druck) · Lebensraum-Verlust ·
+Verschmutzung & Überdüngung · Menschgemachte Erwärmung · Eingeschleppte Art (neuer Rivale) ·
+Stadt (Hitzeinsel & Nachtlicht) · Entleerte Tierwelt.
+
+**Vier bleiben inaktiv, mit je konkretem Grund:**
+- **Domestikation / künstliche Zucht** — hier wählt ein *Züchter* Merkmale aus, nicht die
+  Umwelt. Man könnte den Stall als Milieu abbilden (keine Räuber, Futter im Überfluss), aber
+  das Kernphänomen (Zahmheit, Domestikations-Syndrom) käme dabei nicht heraus. Das wäre
+  ein Faktor, der etwas anderes tut, als sein Name verspricht.
+- **Gentechnik / CRISPR / Gene-Drives** — greift ins Genom ein, nicht in die Umwelt.
+- **Genetische Rettung / assistierte Migration** — Genfluss zwischen Orten = Lebende Welt.
+- **Ernte-induzierte Evolution** (Fischerei → kleiner/früher reif) — bräuchte **größenselektive**
+  Prädation; unsere `predation`-Achse trifft alle Größen gleich. Ein reiner Räuberdruck-Faktor
+  würde das Gegenteil bewirken (Selektion auf GRÖSSE statt gegen sie).
+
+**Messwerte danach:** Ø L1-Verschiebung 2,92 · erreichte Formen weiterhin 13 · Reiche-Bilanz
+Tier 28 · Mikrobe 15 · Protist 15 · Pilz 8.
+
+### 2026-07-27 · S4 als Arbeitspaket ausgelagert
+Der Nutzer hat eine lokale KI und fragte, ob sich Arbeit ohne Integrationsrisiko abgeben lässt.
+Antwort: **ja für S4 und S6, nein für S5** — das Kriterium ist nicht die Qualität der KI,
+sondern die **Form der Schnittstelle**. Was als Datendatei mit maschinell prüfbarem Vertrag
+übergeben werden kann, ist sicher; was Eingriffe in `app/index.html` verlangt, ist es nicht.
+
+Vorbereitet:
+- `docs/auslagerung/S4-eingabe.json` — alle 218 inaktiven Faktoren (Name, Sektion, Gruppe,
+  Beschreibung), 42 KB, ohne Repo-Kontext bearbeitbar.
+- `docs/auslagerung/S4-aufgabe.md` — vollständige Auftragsbeschreibung: die 16 Achsen, neun
+  erlaubte Ebenen, Ausgabeformat, Regeln, acht bereits entschiedene Beispiele als Maßstab.
+- `docs/auslagerung/S4-beispiel.json` — Muster-Zulieferung.
+- `tools/layer-import-check.mjs` (`npm run layer-import-check <datei>`) — prüft Namens-Treue,
+  Vollständigkeit, Wertebereich, keine Umetikettierung aktiver Faktoren und **unterwirft jeden
+  `env`-Vorschlag sofort demselben Wirksamkeits- und Dubletten-Test wie einen echten Faktor**.
+  Eine fehlerhafte Zulieferung kann damit nichts kaputt machen — sie kommt gar nicht erst in
+  den Generator.
+- Nebenbei: der App-Kern-Zugriff liegt jetzt in `tools/lib/app-core.mjs` statt doppelt
+  (`influence-check` danach unverändert grün, 66 Faktoren).
+
+### 2026-07-27 · S4-Zulieferung angenommen, S6 als Paket ausgelagert
+**S4-Zulieferung geprüft und angenommen.** `layer-import-check` bestanden: alle 218 inaktiven
+Faktoren, Namen exakt, Ebenen gültig, keine Dubletten, kein aktiver Faktor umetikettiert.
+Inhaltlich stimmig — die Sektions-Verteilung zeigt echtes Verständnis statt Raten:
+Raum & Isolation 39/44 `lebende-welt`, Fortpflanzung 29/31 `neues-gen`, Wie Evolution läuft
+23/29 `mechanik`, Große Muster 20/21 `makro-muster`, Körper & Gene 11/12 `neues-gen`.
+Null `umsetzbar` — konservativ, aber plausibel, weil die abbildbaren Faktoren in S1–S3 schon
+geerntet wurden.
+**Ein Defekt behoben:** die Begründungen kamen in ASCII-Umschrift („braeuchte", „vollstaendig",
+„Groesse"). Da der Text im Spiel-UI erscheint, wortweise korrigiert (128 Begründungen) — mit
+Ausnahmeliste für echte Wörter wie Quelle, Frequenz, Koevolution, Koexistenz, Sequestrierung.
+Datei liegt als `docs/auslagerung/S4-ausgabe.json`; **der Einbau in den Generator steht noch aus
+(= S4).**
+
+**S6 als zweites Auslagerungs-Paket vorbereitet** (Umfang ~200–350 Bausteine, deutlich größer
+als S4):
+- `docs/auslagerung/S6-eingabe.json` — die 66 aktiven Einflüsse mit Anzeigename, Ton,
+  Beschreibung, den real bewegten **Achsen** und dem **Konvergenz-Ergebnis** (Form, Reich,
+  Passung). Damit kann extern über das geschrieben werden, was wirklich passiert.
+- `docs/auslagerung/S6-aufgabe.md` — Auftrag: wie ein Satz montiert wird, die
+  Verbzweitstellungs-Regel, der geänderte Ton (prosaisch statt lyrisch, mit `{wesen}`),
+  Teil A (3 Zeilen je Einfluss) und Teil B (Textur-Pools mit Tag-Liste), inklusive der Warnung,
+  die Mitte nicht zu vergessen (früherer Befund: Auftakt-Pool schrumpfte in milden Welten von
+  40 auf 6).
+- `tools/story-import-check.mjs` (`npm run story-import-check <datei>`) — prüft Schlüssel,
+  Form, Leitplanken, Tags, Dubletten gegen die bestehenden 460 Bausteine, **montiert jedes
+  Fragment auf dem echten Generator-Pfad zu vier fertigen Sätzen** (Haken `ctx.__kern` in
+  `app/story.js`) und misst den Tonfall. Gegenprobe mit absichtlich schlechter Datei: alle
+  sieben Fehlerarten gefangen, inklusive wortgleich abgeschriebener Sentenz.
+- Beim Bauen zwei eigene Fehler gefunden und behoben: eine globale Regex in `.test()`
+  (zustandsbehaftet) und — gravierender — getaggte Bausteine wurden in einer Welt geprüft, die
+  den Tag gar nicht erfüllt; dadurch wäre **jedes korrekt getaggte Fragment** durchgefallen.
+  Die Testwelt wird jetzt aus den Tags des Bausteins gebaut.
+
+### S6 · Chronik-Anbindung — erledigt (externe Zulieferung, v0.72.0)
+**312 Bausteine angenommen und eingebaut:** 198 Faktor-Zeilen (alle 66 Einflüsse × 3) und
+114 Textur-Bausteine. `story-import-check` bestanden — 1248 montierte Sätze, alle sauber;
+Tonfall 33 % Bezug zum Wesen, 3 % Sentenz-Vokabular; Umlaute diesmal korrekt.
+
+**Einbau:** `app/story-extra.js` (auto-generiert, `npm run build-story-extra`) hält die
+Zulieferung getrennt vom hand-gepflegten Katalog. `app/story.js` mischt die Textur-Bausteine
+in die Pools und bevorzugt im `welt`-Beat die Zeilen des **ausgelösten Einflusses** — dadurch
+erzählt jeder Einfluss sich selbst, statt nur die bewegte Achse zu nennen. Die App reicht dazu
+den Faktornamen durch (`_lastFaktor` → `ctx.faktor`).
+
+**Zwei Fehler, die erst die Zulieferung sichtbar gemacht hat:**
+1. **Kennungs-Kollision im Gedächtnis (echter Generator-Fehler).** Baustein-Kennungen waren
+   positionsbasiert (`kern-welt:0`), also hieß die erste Zeile JEDES Einflusses gleich. Das
+   Anti-Wiederholungs-Gedächtnis unterdrückte dadurch die Zeilen eines Einflusses, weil ein
+   ganz anderer Einfluss dieselbe Position schon benutzt hatte — sichtbar als „Stadt" ohne eine
+   einzige eigene Zeile. Dasselbe galt latent für jedes Gen im `druck`-Beat. Die Kennung
+   enthält jetzt die Lage (`kern-<beat>|<faktor oder key>`).
+2. **Satzbau-Einfalt.** 28 Faktor-Zeilen nutzen dieselbe Konstruktion (uneingeleiteter
+   Konditionalsatz, „Setzt {wesen} die Wurzeln zu tief, erstickt es sie"). Grammatisch korrekt,
+   aber als Muster erkennbar. Nicht zurückgewiesen (10 % der Bausteine), dafür misst
+   `story-import-check` jetzt die Satzbau-Verteilung und warnt ab 22 % bei markierten
+   Konstruktionen.
+
+### 2026-07-27 · Paket P3 vorbereitet (Klartext für den Katalog)
+Nach S6 das bisher größte Auslagerungs-Paket: **436 Texte** — für jeden der 218 inaktiven
+Faktoren ein **Klartextname** und eine **Erklärung**.
+
+**Warum das die größte Lücke ist (gemessen):** 218 Faktoren zeigen im Modal ausschließlich
+den Fachbegriff („R*-Theorie (Tilman) / Storage-Effekt / Neutraltheorie"), **42 haben gar
+keine Beschreibung** (im Modal steht ein nackter Punkt), weitere 56 nur eine Wortgruppe.
+Der Katalog ist damit ein Museum mit 218 unbeschrifteten Vitrinen.
+
+- `docs/auslagerung/P3-eingabe.json` — die 218 Faktoren mit Sektion, Gruppe, bisheriger
+  Kurznotiz **und der Ebene + Begründung aus S4**. Letzteres steuert den Ton: ein Faktor der
+  Ebene `lebende-welt` darf nicht klingen, als ließe er sich am Regler einstellen.
+- `docs/auslagerung/P3-aufgabe.md` — Auftrag mit Positiv-/Negativ-Beispielen, Längenregeln,
+  der ausdrücklichen Umlaut-Vorgabe (Lehre aus S4) und der Regel „kein Fachbegriff zur
+  Erklärung eines Fachbegriffs".
+- `tools/plain-import-check.mjs` (`npm run plain-import-check <datei>`) — prüft Schlüssel,
+  Namenslänge/-form (kein `/`, eindeutig, nicht der Fachbegriff selbst), Erklärungslänge und
+  Satzform, **ASCII-Umschrift** und zwei Verständlichkeits-Näherungen: Anteil Wörter ab 14
+  Zeichen (Richtwert unter 6 %) und ungeklärte Fachbegriffe aus einer Sperrliste.
+  Gegenprobe mit absichtlich schlechter Datei: alle Fehlerarten gefangen.
+- Beim Bauen fiel auf, dass mein eigenes Beispiel „Mesopredator-Release" verwendete — ein
+  Faktor, den ich in S1b aktiviert habe und der damit gar nicht mehr zur Aufgabe gehört.
+  Korrigiert; der Prüfstand hatte es selbst gemeldet.
+
+### S4 · Ehrliche Einordnung — erledigt (externe Zulieferung P3, v0.73.0)
+
+**Zwei zugelieferte Pakete zusammengeführt und eingebaut:**
+- **S4-ausgabe.json** (Ebenen-Etikett, bereits angenommen) — 218/218, `layer-import-check` grün.
+- **P3-ausgabe.json** (Klartextname + Erklärung, neu geprüft) — 218/218, `plain-import-check` grün.
+  Beide Zulieferungen decken exakt dieselben 218 Faktoren ab (geprüft: Namensmengen identisch).
+
+**Wichtiger Zwischenfall — der Prüfstand selbst war fehlerhaft, nicht die Zulieferung.**
+`plain-import-check` meldete beim ersten Lauf 41 „ASCII-Umschrift"-Fehler. Bei genauer Prüfung
+war **jede einzelne Meldung ein Fehlalarm**: die Regel testete naiv auf die Buchstabenfolge
+„ue"/„ae"/„oe" irgendwo im Wort — das trifft zwangsläufig auch echtes Deutsch mit „au"+e
+(*bauen*, *Sauerstoff* → „aue"), „eu"+e (*Neue*, *steuert* → „eue") oder zufälligem „ue"/„oe"
+in der Wortmitte (*zuerst*, *koexistieren*, *sexuell*). Die Prüfung wurde neu gebaut: statt
+eines Substring-Tests prüft sie jetzt gezielt auf typische Nachfolge-Muster einer
+Umlaut-Transliteration (z. B. „ae"+„hnlich/nder/hlt/rt/ter", „ue"+„berzeug/chte/llig/ndig",
+„oe"+„glich/rper/n"). Gegengetestet an 31 echten Wörtern (0 Fehlalarme) und 27 echten Fehlern
+(24 erkannt) — deutlich strenger, ohne die Zulieferung mehr fälschlich zu beanstanden.
+
+**Einbau in den Generator** (`tools/build-influences.mjs`): lädt beide Zulieferungen, setzt für
+jeden inaktiven Faktor `f.layer` + `f.layerGrund` (aus S4) sowie `f.plain` + `f.desc` (aus P3).
+Aktive Faktoren bleiben unberührt (66/284 unverändert, `influence-check` weiter grün).
+
+**Modal zeigt es jetzt an** (Definition von S4 verlangte das ausdrücklich): das pauschale
+„kommt bald"-Abzeichen ist einer ehrlichen Kurzform gewichen — „lebende Welt",
+„neues Merkmal nötig", „Evolutions-Mechanik", „nur Beobachtung" usw. (`LAYER_LABEL`-Tabelle),
+mit der Begründung als Tooltip. Browser-Test: 5 Stichproben aus „Leben mit anderen Arten"
+zeigen korrekt Klartext, Erklärung, Etikett und Tooltip; keine Konsolen-/Seitenfehler.
+
+Damit ist **S0–S4 vollständig abgeschlossen**. Offen: S5 (Modal-Feinschliff: Suche,
+Wirkungs-Vorschau, Zurücknehmen — bewusst NICHT ausgelagert, da Chirurgie in `app/index.html`),
+S6 ist bereits erledigt, S7 (Abschluss/PR nach main).
+
+### 2026-07-27 · Drei weitere Auslagerungs-Pakete (P5, P6, P7)
+
+Auf Nutzer-Frage „was ließe sich noch auslagern" systematisch durchgesehen (nicht geraten):
+- **Korrektur eines falschen ersten Befunds:** `exemplar.js` schien unvollständig (Grep auf
+  „wiki:" fand nur 27 Treffer), tatsächlich sind alle **44 Archetypen** abgedeckt (anderes
+  Datenformat). Falsche Fährte sofort richtiggestellt; das BACKLOG-Häkchen für den zugehörigen
+  Nutzerwunsch war nur nicht gesetzt — nachgetragen.
+- **25 Gene ohne jede Erklärung im Spiel** (nur der Name steht am Balken) — echte, gemessene
+  Lücke. → **Paket P6**, kleinstes der Pakete.
+- **„Herausforderungen der Natur"** aus `docs/bindung-konzept.md` (die eigene Empfehlung V1)
+  — größtes Paket, aber eine Produktentscheidung. Nutzer hat auf Rückfrage zugestimmt, den
+  **Inhalt** vorzubereiten; die Verdrahtung ins Spiel bleibt bewusst außen vor (Chirurgie in
+  `app/index.html`, wie S5).
+
+**P6 · Gen-Erklärungen** (`docs/auslagerung/P6-*`, `npm run gene-import-check`): 25 Tooltip-
+Texte, Kontext aus den bereits vorhandenen Chronik-Fragmenten (`story.js` DRUCK-Tabelle, alle
+25 Gene bereits mit Auf/Ab-Text) und `PARAMS.mutationAnchor` (Kern- vs. bedingte Stressor-Gene).
+
+**P5 · Herausforderungen der Natur** (`docs/auslagerung/P5-*`, `npm run challenge-import-check`):
+Ziel (Reich/Form) + Beschränkung (Regler-Grenzen) + Generationen-Budget + Text. Der Prüfstand
+geht über Formatprüfung hinaus — er **simuliert**: 24 Stichproben-Umwelten je Herausforderung
+laufen über das angegebene Budget (dieselbe `converge()`-Technik wie `influence-check`), geprüft
+wird (1) Erreichbarkeit — wird das Ziel überhaupt je erreicht, (2) ob die Beschränkung ECHT
+etwas testet (Erfolgsquote mit vs. ohne Beschränkung verglichen — sonst ist sie Dekoration),
+(3) Schwierigkeits-Plausibilität (gemessene Erfolgsquote gegen die angegebene Stufe).
+Gegengetestet an drei Fällen: eine unerreichbare Herausforderung wurde korrekt zurückgewiesen,
+eine zu leicht als „leicht" markierte korrekt bemängelt.
+
+**P7 · Qualitäts-Audit** — bewusst kein neues Datenpaket, sondern ein Prüfauftrag auf bereits
+Verbautem: die 218 P3-Erklärungen (`app/influences.js`) und 312 S6-Chronik-Zeilen
+(`app/story-extra.js`) sollen von einer frischen KI kritisch gegengelesen werden (schwache
+Stellen markieren, keine Textersetzung). Kein eigener Prüfstand nötig — die Existenz-/Form-Prüfer
+(`plain-import-check`, `story-import-check`) laufen weiter über jedes Ergebnis.
+
+**Gemeinsame Bereinigung:** die Umlaut-Heuristik (aus dem P3-Vorfall) ist jetzt in
+`tools/lib/umlaut-check.mjs` zentralisiert statt in `plain-import-check.mjs` dupliziert.

@@ -478,10 +478,10 @@ Offen bleibt nur noch Feinschliff:
   - [x] **„verbinden/trennen" unverständlich**: erst entfernt, dann mit klarer Metapher zurück —
     „mit Nachbarn verbinden" / „als Insel abtrennen" je Ort, plus sichtbarer Zustand je Ort
     (⛰ Insel / 🔗 verbunden). Effekt (Angleichung vs. eigener Weg) ist jetzt live sichtbar.
-  - [ ] **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch): zu jeder emergenten Art ein
-    Link auf ein reales Vorbild, damit man sieht, wie so etwas in der Natur aussieht. Umsetzung:
-    Mapping (Reich + dominantes Merkmal) → repräsentatives Vorbild + Wikipedia-URL; didaktischer
-    Beistrich, nicht die Klassifikation selbst (Emergenz bleibt). Nächster Schritt nach der Politur.
+  - [x] **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch) — **erledigt, Häkchen nachgetragen
+    (2026-07-27).** Geprüft: `app/exemplar.js` deckt alle 44 `classify()`-Archetypen ab
+    (`ARCH_WIKI`, Hauptansicht) UND alle 5 Reiche der emergenten Lebenden Welt (`realExample()`,
+    trait-basiert mit Fallback). Kein offener Rest.
 
 - **CLS-4-Rest · schmale Größenfenster**: einige seltene Formen (Nadelbaum, Blütenkraut,
   Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr

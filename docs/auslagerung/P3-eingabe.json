@@ -1,0 +1,1746 @@
+[
+ {
+  "name": "Mitteltemperatur",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "bisher": "Basis-Wärme des Ortes.",
+  "ebene": "schon-regler",
+  "warum": "Deckt sich vollständig mit dem Temperatur-Regler in der Konsole."
+ },
+ {
+  "name": "Temperatur-Spanne / Tag-Nacht-Schwankung",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "bisher": "selektiert Toleranz-Breite statt Optimum.",
+  "ebene": "zeitachse",
+  "warum": "Eine Schwankungsbreite über Tag und Nacht ist ein Verlauf; die Engine kennt nur einen Momentwert."
+ },
+ {
+  "name": "Saisonalität (Jahreszeiten)",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "bisher": "zyklischer Temperaturgang → Dormanz, Wanderung, Fell-Wechsel.",
+  "ebene": "zeitachse",
+  "warum": "Ein zyklischer Jahresgang ist etwas anderes als ein hoher oder tiefer Wert; die Engine kennt nur Momentaufnahmen."
+ },
+ {
+  "name": "Thermische Stabilität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "bisher": "konstant (Tiefsee) vs. variabel → Spezialist vs. Generalist.",
+  "ebene": "zeitachse",
+  "warum": "Konstant gegen variabel ist eine Aussage über den Verlauf, nicht über einen einzelnen Zustand."
+ },
+ {
+  "name": "Niederschlags-Saisonalität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Wasser & Feuchte",
+  "bisher": "Regen-/Trockenzeit-Verteilung (Monsun, Mittelmeer).",
+  "ebene": "zeitachse",
+  "warum": "Die Verteilung von Regen- und Trockenzeit ist ein saisonaler Verlauf, kein statischer Feuchtewert."
+ },
+ {
+  "name": "Photoperiode / Tageslänge",
+  "sektion": "Ort & Klima",
+  "gruppe": "Licht & Strahlung",
+  "bisher": "Jahreszeiten-Signal (Blüte, Brut, Zug).",
+  "ebene": "zeitachse",
+  "warum": "Tageslänge ist ein zyklisches Jahreszeiten-Signal, kein einstellbarer Momentzustand."
+ },
+ {
+  "name": "Sauerstoff (O₂)",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "bisher": "historisch variabel; Karbon 35 % → Rieseninsekten.",
+  "ebene": "neue-achse",
+  "warum": "Unsere oxygen-Achse endet bei normal; ein Überschuss wie im Karbon bräuchte eine Achse über Normalniveau."
+ },
+ {
+  "name": "CO₂",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "bisher": "Treibhaus + Photosynthese-Substrat.",
+  "ebene": "neue-achse",
+  "warum": "Bräuchte eine eigene Achse als Photosynthese-Substrat und Treibhausgas; es gibt keine."
+ },
+ {
+  "name": "Wetter-Stochastik",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "bisher": "Unvorhersehbarkeit → opportunistische Strategien.",
+  "ebene": "zeitachse",
+  "warum": "Unvorhersehbarkeit ist eine Eigenschaft des Verlaufs, kein Zustand auf einer Achse."
+ },
+ {
+  "name": "Substrat-Stabilität / Erosion",
+  "sektion": "Ort & Klima",
+  "gruppe": "Boden & Substrat (edaphisch)",
+  "bisher": "Hangrutsch vs. stabiler Fels.",
+  "ebene": "zeitachse",
+  "warum": "Erosion und Hangrutsch sind ein Störungs-Verlauf über Zeit, kein statischer Bodenzustand."
+ },
+ {
+  "name": "Rauigkeit / topografische Komplexität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Terrain & 3D-Struktur",
+  "bisher": "mehr Nischen, mehr Endemismus.",
+  "ebene": "lebende-welt",
+  "warum": "Mehr Nischen und Endemismus entstehen erst mit mehreren Orten und Populationen."
+ },
+ {
+  "name": "Küsten-/Ufergeometrie",
+  "sektion": "Ort & Klima",
+  "gruppe": "Terrain & 3D-Struktur",
+  "bisher": "Tümpel, Ästuar, exponierte Kaps.",
+  "ebene": "lebende-welt",
+  "warum": "Ufergeometrie definiert Zahl und Lage von Habitaten, also eine Eigenschaft der Metapopulation."
+ },
+ {
+  "name": "Ressourcen-Patchiness / -Pulse",
+  "sektion": "Ort & Klima",
+  "gruppe": "Energie, Ressourcen & Extrem-Chemie",
+  "bisher": "Mast-Jahre, Lachszüge, Wüstenblüte.",
+  "ebene": "zeitachse",
+  "warum": "Mast-Jahre und Pulse sind zeitliche Schübe der Nahrung, kein konstanter Fülle-Wert."
+ },
+ {
+  "name": "Gravitation / Auftrieb",
+  "sektion": "Ort & Klima",
+  "gruppe": "Feuer & Planetares",
+  "bisher": "Größenlimit an Land vs. im Wasser (Blauwal).",
+  "ebene": "neue-achse",
+  "warum": "Bräuchte eine Gravitations-Achse als Größenlimit; die 16 Achsen enthalten keine."
+ },
+ {
+  "name": "Magnetfeld",
+  "sektion": "Ort & Klima",
+  "gruppe": "Feuer & Planetares",
+  "bisher": "Navigation (Magnetotaxis, Zugvögel).",
+  "ebene": "neue-achse",
+  "warum": "Magnetfeld-Navigation bräuchte eine eigene Achse; es gibt keine."
+ },
+ {
+  "name": "Störungs-Regime",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "bisher": "Frequenz×Intensität×Größe×Timing.",
+  "ebene": "zeitachse",
+  "warum": "Frequenz mal Intensität mal Timing beschreibt einen Störungs-Verlauf, keinen Momentzustand."
+ },
+ {
+  "name": "Intermediate-Disturbance-Hypothese",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "bisher": "Vielfalt maximal bei *mittlerer* Störung.",
+  "ebene": "makro-muster",
+  "warum": "Eine Beobachtung, dass Vielfalt bei mittlerer Störung maximal wird, nichts zum Einstellen."
+ },
+ {
+  "name": "Press vs. Pulse",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "bisher": "Dauer-Stress vs. kurzer Schock.",
+  "ebene": "zeitachse",
+  "warum": "Dauerstress gegen kurzen Schock ist eine Unterscheidung von Verläufen."
+ },
+ {
+  "name": "Umwelt-Stochastik",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "bisher": "Zufalls-Schwankung → Populations-Fluktuation.",
+  "ebene": "zeitachse",
+  "warum": "Zufalls-Schwankung ist ein Verlauf über Zeit, kein einstellbarer Zustand."
+ },
+ {
+  "name": "Tektonik / Kontinentaldrift / Hebung / Rifting",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Geophysikalisch / tektonisch",
+  "bisher": "*langsame* Barrieren + neue Habitate (Anden, Rift-Seen).",
+  "ebene": "lebende-welt",
+  "warum": "Langsame Barrieren und neue Habitate betreffen Anordnung und Trennung von Orten."
+ },
+ {
+  "name": "Landbrücken / Meeresspiegel",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Geophysikalisch / tektonisch",
+  "bisher": "verbinden/trennen Landmassen (Beringia, Sundaland).",
+  "ebene": "lebende-welt",
+  "warum": "Verbindet oder trennt Landmassen; das ist Sache der Metapopulation, nicht des Milieus einer Linie."
+ },
+ {
+  "name": "Große Sauerstoff-Krise (GOE)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Langzeit-Klima & Erdsystem",
+  "bisher": "O₂-Anstieg vergiftet Anaerobier.",
+  "ebene": "neue-achse",
+  "warum": "Eine O2-Vergiftung von Anaerobiern liegt jenseits der oxygen-Achse, die bei normal endet."
+ },
+ {
+  "name": "Tag-Nacht / Mond-Gezeiten / Jahreszeit",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "bisher": "biologische Rhythmen, synchrone Fortpflanzung.",
+  "ebene": "zeitachse",
+  "warum": "Biologische Rhythmen und synchrone Fortpflanzung brauchen einen Takt über Zeit."
+ },
+ {
+  "name": "ENSO / NAO / dekadische Oszillationen",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "bisher": "mehrjährige Klima-Moden.",
+  "ebene": "zeitachse",
+  "warum": "Mehrjährige Klima-Moden sind Oszillationen, also ein Verlauf statt eines Zustands."
+ },
+ {
+  "name": "Milankovitch-Zyklen",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "bisher": "Orbital-Taktung der Eiszeiten (→ „Arten-Pumpe\", s. 3.6).",
+  "ebene": "zeitachse",
+  "warum": "Orbitale Taktung der Eiszeiten ist ein langfristiger Zyklus, kein Momentwert."
+ },
+ {
+  "name": "Auslöser-Bündel",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Massenaussterben (als Design-Regler)",
+  "bisher": "Vulkanismus+Warming+Anoxie+Versauerung; Impakt; Vereisung+Meeresspiegel.",
+  "ebene": "schon-abgedeckt",
+  "warum": "Fasst Vulkanismus, Anoxie und Impakt zusammen, die einzeln bereits umgesetzt sind."
+ },
+ {
+  "name": "Freie Nischen → adaptive Radiation danach",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Massenaussterben (als Design-Regler)",
+  "bisher": "Säuger nach den Dinos. Der Diversitäts-Motor schlechthin.",
+  "ebene": "schon-abgedeckt",
+  "warum": "Deckt sich mit dem bereits umgesetzten Faktor Freie Nische."
+ },
+ {
+  "name": "Gleichgewichts-Theorie (Immigration = Extinktion)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "stabile Artenzahl mit Umschlag.",
+  "ebene": "lebende-welt",
+  "warum": "Ein Gleichgewicht aus Immigration und Extinktion setzt mehrere Orte mit Umschlag voraus."
+ },
+ {
+  "name": "Arten-Areal-Beziehung (S = cAᶻ)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "größere Orte → mehr Formen.",
+  "ebene": "makro-muster",
+  "warum": "Die Beziehung von Fläche und Artenzahl ist ein Muster an Ergebnissen, nichts zum Einstellen."
+ },
+ {
+  "name": "Distanz-/Isolations-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "ferne Orte bekommen weniger Kolonisten.",
+  "ebene": "lebende-welt",
+  "warum": "Wie viele Kolonisten einen fernen Ort erreichen, ist eine Frage der räumlichen Anordnung."
+ },
+ {
+  "name": "Rescue-Effekt / Target-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "nahe/große Orte werden „gerettet\"/besser getroffen.",
+  "ebene": "lebende-welt",
+  "warum": "Rettung durch nahe Populationen setzt mehrere verbundene Orte voraus."
+ },
+ {
+  "name": "Relaxation / Extinktions-Schuld",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "nach Isolation sinkt Artenzahl langsam.",
+  "ebene": "lebende-welt",
+  "warum": "Langsam sinkende Artenzahl nach Isolation ist ein Metapopulations-Prozess."
+ },
+ {
+  "name": "Insel-Ontogenie (GDM)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "Vielfalt peakt bei mittlerem Insel-Alter.",
+  "ebene": "lebende-welt",
+  "warum": "Der Vielfalts-Peak über das Insel-Alter betrifft ganze Inselbiotas, nicht eine Linie."
+ },
+ {
+  "name": "Taxon-Zyklus",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "bisher": "Kolonist → Spezialist/Endemit → Relikt → Aussterben.",
+  "ebene": "lebende-welt",
+  "warum": "Der Weg vom Kolonisten zum Relikt ist ein Zyklus in der Metapopulation."
+ },
+ {
+  "name": "Patch (Habitat-Fleck)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "diskreter Ort mit lokaler Population.",
+  "ebene": "lebende-welt",
+  "warum": "Ein diskreter Habitat-Fleck mit eigener Population ist die Grundeinheit der Metapopulation."
+ },
+ {
+  "name": "Kolonisation–Extinktion-Umschlag (Levins)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "regionales Überleben trotz lokalem Aussterben.",
+  "ebene": "lebende-welt",
+  "warum": "Regionales Überleben trotz lokalem Aussterben braucht viele Orte mit Umschlag."
+ },
+ {
+  "name": "Quelle–Senke-Dynamik",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "gute Orte subventionieren schlechte.",
+  "ebene": "lebende-welt",
+  "warum": "Gute Orte subventionieren schlechte; das setzt Genfluss zwischen Orten voraus."
+ },
+ {
+  "name": "Konnektivitäts-/Inzidenz-Funktion",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "Besetzung ~ Größe + Isolation.",
+  "ebene": "lebende-welt",
+  "warum": "Besetzung als Funktion von Größe und Isolation ist eine Metapopulations-Größe."
+ },
+ {
+  "name": "Extinktions-Schwelle / Metapop-Kapazität",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "unter X kollabiert alles.",
+  "ebene": "lebende-welt",
+  "warum": "Eine Schwelle, unter der alles kollabiert, ergibt sich erst aus dem Netz von Orten."
+ },
+ {
+  "name": "Synchronie vs. Portfolio-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "bisher": "unkorrelierte Orte puffern das Ganze.",
+  "ebene": "lebende-welt",
+  "warum": "Ob unkorrelierte Orte das Ganze puffern, ist eine Frage mehrerer Populationen."
+ },
+ {
+  "name": "Ausbreitungs-Fähigkeit (Vagilität) als GEN",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "geflügelt vs. flügellos.",
+  "ebene": "neues-gen",
+  "warum": "Ausbreitungs-Fähigkeit als vererbtes Merkmal bräuchte ein neues Gen im Genom."
+ },
+ {
+  "name": "Ausbreitungs-Kern (dispersal kernel)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "meist nah, selten weit (fat tail).",
+  "ebene": "lebende-welt",
+  "warum": "Ein Ausbreitungs-Kern beschreibt Bewegung zwischen Orten im Raum."
+ },
+ {
+  "name": "Genfluss / Migration zwischen Orten",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "homogenisiert; der zentrale Isolations-Regler.",
+  "ebene": "lebende-welt",
+  "warum": "Genfluss zwischen Orten ist der zentrale Isolations-Regler der Metapopulation."
+ },
+ {
+  "name": "Ausbreitungs-Syndrome",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "Wind/Wasser/Tier/ballistisch (Frucht, Flughaar, Klette).",
+  "ebene": "lebende-welt",
+  "warum": "Wind, Wasser oder Tier als Ausbreitungsweg betreffen den Transfer zwischen Orten."
+ },
+ {
+  "name": "Long-Distance / Sweepstakes / Rafting / Jump-Dispersal",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "seltene Fern-Kolonisation.",
+  "ebene": "lebende-welt",
+  "warum": "Seltene Fern-Kolonisation ist ein räumlicher Ausbreitungs-Prozess."
+ },
+ {
+  "name": "Trittstein-Konnektivität",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "Insel-Hopping über Zwischen-Orte.",
+  "ebene": "lebende-welt",
+  "warum": "Insel-Hopping über Zwischenorte ist reine Metapopulations-Konnektivität."
+ },
+ {
+  "name": "Philopatrie / Sesshaftigkeit",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "Heimkehr → lokale Anpassung (Lachs).",
+  "ebene": "lebende-welt",
+  "warum": "Heimkehr und lokale Anpassung setzen mehrere Orte mit begrenztem Austausch voraus."
+ },
+ {
+  "name": "Isolation-by-Distance / -Environment / -Resistance",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "Differenzierung ~ Distanz/Umwelt.",
+  "ebene": "lebende-welt",
+  "warum": "Differenzierung mit der Distanz ergibt sich erst aus räumlich verteilten Populationen."
+ },
+ {
+  "name": "Spatial Sorting (Range-Edge)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "schnellste Ausbreiter sammeln sich an der Front (Aga-Kröten-Beine).",
+  "ebene": "lebende-welt",
+  "warum": "Sortierung an der Ausbreitungsfront ist ein räumlicher Prozess über Orte hinweg."
+ },
+ {
+  "name": "Kompetition–Kolonisation-Trade-off",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "bisher": "guter Ausbreiter = schlechter Konkurrent → Koexistenz.",
+  "ebene": "lebende-welt",
+  "warum": "Der Trade-off zwischen Ausbreitung und Konkurrenz stiftet Koexistenz im Raum."
+ },
+ {
+  "name": "Geografische Isolation",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "bisher": "Basis der allopatrischen Artbildung.",
+  "ebene": "lebende-welt",
+  "warum": "Geografische Isolation ist die Basis allopatrischer Artbildung, also Sache mehrerer Orte."
+ },
+ {
+  "name": "Gebirge / Flüsse / Ozeane / Wüsten / Eisschilde als Barrieren",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "bisher": "teilen Areale.",
+  "ebene": "lebende-welt",
+  "warum": "Barrieren teilen Areale; das betrifft die Anordnung von Orten, nicht ein Milieu."
+ },
+ {
+  "name": "Vikarianz vs. Dispersal",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "bisher": "Barriere entsteht *durch* Areal vs. Überquerung.",
+  "ebene": "lebende-welt",
+  "warum": "Barriere durch Areal gegen Überquerung ist eine biogeografische Unterscheidung."
+ },
+ {
+  "name": "Landbrücken / Meeresspiegel / Orogenese / marine Barrieren",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "bisher": "verbinden/trennen.",
+  "ebene": "lebende-welt",
+  "warum": "Verbinden und Trennen von Landmassen ist ein Metapopulations-Vorgang."
+ },
+ {
+  "name": "Edaphische Inseln (Serpentin, Karst)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "bisher": "Substrat-Isolation → Endemiten.",
+  "ebene": "lebende-welt",
+  "warum": "Substrat-Inseln erzeugen Endemiten erst durch Isolation mehrerer Orte."
+ },
+ {
+  "name": "Habitat-Fragmentierung",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "bisher": "Zerstückelung → weniger Genfluss, mehr Inzucht.",
+  "ebene": "lebende-welt",
+  "warum": "Zerstückelung mit weniger Genfluss betrifft die räumliche Struktur der Population."
+ },
+ {
+  "name": "Randeffekt / Kern- vs. Rand-Arten",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "bisher": "Rand-Mikroklima; flächen-sensible Arten sterben zuerst.",
+  "ebene": "lebende-welt",
+  "warum": "Kern gegen Rand und flächen-sensible Arten sind Muster fragmentierter Landschaften."
+ },
+ {
+  "name": "Extinktions-Schuld / Kolonisations-Kredit",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "bisher": "verzögerte Verluste/Gewinne.",
+  "ebene": "lebende-welt",
+  "warum": "Verzögerte Verluste und Gewinne sind Metapopulations-Dynamik über viele Orte."
+ },
+ {
+  "name": "SLOSS-Debatte",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "bisher": "eine große vs. viele kleine Reserven.",
+  "ebene": "lebende-welt",
+  "warum": "Eine grosse gegen viele kleine Reserven ist eine Frage der Habitat-Anordnung."
+ },
+ {
+  "name": "Matrix-Permeabilität / Korridore / Perkolations-Schwelle",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "bisher": "Bewegbarkeit dazwischen.",
+  "ebene": "lebende-welt",
+  "warum": "Durchlässigkeit der Matrix und Korridore betreffen Bewegung zwischen Orten."
+ },
+ {
+  "name": "Cline / Ecotone / Umwelt-Gradient",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "kontinuierlicher Merkmalswandel im Raum.",
+  "ebene": "lebende-welt",
+  "warum": "Ein kontinuierlicher Merkmalswandel im Raum braucht eine Kette von Populationen."
+ },
+ {
+  "name": "Breiten-/Höhen-Diversitäts-Gradient",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Vielfalt peakt tropisch/mittel-elevation.",
+  "ebene": "makro-muster",
+  "warum": "Der Diversitäts-Gipfel entlang Breite oder Höhe ist ein Muster an Ergebnissen."
+ },
+ {
+  "name": "Range-Expansion/-Kontraktion / -Limits / -Shift (Klima)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Areale wandern (polwärts/aufwärts).",
+  "ebene": "lebende-welt",
+  "warum": "Wandernde Areale betreffen Verschiebung von Populationen im Raum."
+ },
+ {
+  "name": "Refugien (glazial/Mikro-)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Überdauern + Wieder-Ausbreitung.",
+  "ebene": "lebende-welt",
+  "warum": "Überdauern und Wieder-Ausbreitung aus Refugien ist ein räumlicher Prozess."
+ },
+ {
+  "name": "Arten-Pumpe (glacial species pump)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Zyklen aus Isolation+Reconnection erzeugen Arten.",
+  "ebene": "lebende-welt",
+  "warum": "Zyklen aus Isolation und Reconnection erzeugen Arten über viele Orte."
+ },
+ {
+  "name": "„Escalator to Extinction\"",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Berggipfel-Arten laufen oben aus dem Habitat.",
+  "ebene": "lebende-welt",
+  "warum": "Wenn Gipfelarten oben aus dem Habitat laufen, ist das ein räumlicher Range-Prozess."
+ },
+ {
+  "name": "Landschafts-Konnektivität (strukturell vs. funktional)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "bisher": "Least-Cost-Path, Circuit-Theory.",
+  "ebene": "lebende-welt",
+  "warum": "Struktureller gegen funktionaler Zusammenhang der Landschaft ist Metapopulations-Konnektivität."
+ },
+ {
+  "name": "Biogeografische Realme / Provinzialismus / Wallace-Linie",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "bisher": "tiefe Faunen-Grenzen.",
+  "ebene": "lebende-welt",
+  "warum": "Tiefe Faunen-Grenzen ergeben sich aus der historischen Anordnung von Landmassen."
+ },
+ {
+  "name": "Endemismus (Paläo-/Neo-/kryptisch) / Hotspots",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "bisher": "regional einzigartige Formen.",
+  "ebene": "lebende-welt",
+  "warum": "Regional einzigartige Formen entstehen durch Isolation vieler Orte."
+ },
+ {
+  "name": "Neutraltheorie (Hubbell): Drift + Dispersal + Speziation",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "bisher": "Vielfalt ohne Nischen-Unterschiede.",
+  "ebene": "mechanik",
+  "warum": "Vielfalt aus Drift, Dispersal und Speziation ohne Nischen betrifft den Selektions-Mechanismus."
+ },
+ {
+  "name": "Distance-Decay / Nestedness / Checkerboard / Mid-Domain",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "bisher": "räumliche Verteilungs-Muster.",
+  "ebene": "makro-muster",
+  "warum": "Nestedness und Checkerboard sind räumliche Verteilungs-Muster, nichts zum Einstellen."
+ },
+ {
+  "name": "Parasitismus (+/–)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "bisher": "Ekto-/Endo-, Mikro-/Makro-, Parasitoid, Brut-/Sozial-Parasit, Kastration.",
+  "ebene": "lebende-welt",
+  "warum": "Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu."
+ },
+ {
+  "name": "Mutualismus (+/+)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "bisher": "obligat/fakultativ, Ressourcen-/Service-Tausch.",
+  "ebene": "lebende-welt",
+  "warum": "Mutualismus setzt eine Partnerart voraus, die es in der Engine nicht gibt."
+ },
+ {
+  "name": "Kommensalismus (+/0) / Amensalismus (–/0) / Neutralismus (0/0)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "bisher": "Phoresie, Allelopathie.",
+  "ebene": "lebende-welt",
+  "warum": "Diese Vorzeichen-Beziehungen beschreiben Interaktionen zwischen zwei Arten."
+ },
+ {
+  "name": "Apparente Konkurrenz",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "bisher": "indirekt über geteilten Räuber.",
+  "ebene": "lebende-welt",
+  "warum": "Konkurrenz über einen geteilten Räuber braucht mehrere Arten in einem Netz."
+ },
+ {
+  "name": "Bestäubung / Samenausbreitung (Zoochorie)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "bisher": "Ko-Diversifikations-Motor.",
+  "ebene": "lebende-welt",
+  "warum": "Bestäubung und Zoochorie sind Ko-Diversifikation mit einer Partnerart."
+ },
+ {
+  "name": "Mykorrhiza / „Wood-Wide-Web\" / N-Fixierer",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "bisher": "Pflanzen-Pilz-/Bakterien-Tausch.",
+  "ebene": "lebende-welt",
+  "warum": "Pflanze-Pilz-Tausch braucht eine symbiotische Partnerart."
+ },
+ {
+  "name": "Darm-Mikrobiom / Endosymbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "bisher": "Verdauung; Ursprung von Mitochondrien/Chloroplasten.",
+  "ebene": "lebende-welt",
+  "warum": "Ein Mikrobiom ist eine Gemeinschaft anderer Organismen im Wirt."
+ },
+ {
+  "name": "Koralle–Zooxanthellen / Flechte / Chemosynthese-Symbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "bisher": "Photo/Chemo im Wirt.",
+  "ebene": "lebende-welt",
+  "warum": "Photo- und Chemo-Symbiose im Wirt setzen eine zweite Art voraus."
+ },
+ {
+  "name": "Reinigungs-Symbiose / Ameise–Pflanze / Pilz-Farming / Biolumineszenz-Symbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Reinigung, Ameise-Pflanze und Pilz-Farming sind allesamt Zwei-Arten-Beziehungen."
+ },
+ {
+  "name": "Antagonistisch (Wettrüsten) / Red Queen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "bisher": "Räuber-Beute, Wirt-Parasit; erhält Sex.",
+  "ebene": "lebende-welt",
+  "warum": "Ein Wettrüsten mit Beute oder Wirt braucht die Gegenart als bewegliches Ziel."
+ },
+ {
+  "name": "Mutualistisch / diffus (Gilde) / Gen-für-Gen / geografisches Mosaik",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Diese Koevolutions-Formen setzen eine oder mehrere Partnerarten voraus."
+ },
+ {
+  "name": "Escape-and-Radiate",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "bisher": "Abwehr-Innovation → Radiation (Pflanzen↔Schmetterlinge).",
+  "ebene": "lebende-welt",
+  "warum": "Abwehr-Innovation und Radiation gegen eine Gegenart ist Koevolution."
+ },
+ {
+  "name": "Charakter-Verschiebung",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "bisher": "sympatrische Konkurrenten divergieren (Finken-Schnäbel).",
+  "ebene": "lebende-welt",
+  "warum": "Divergenz sympatrischer Konkurrenten braucht die andere Art als Auslöser."
+ },
+ {
+  "name": "Kospeziation",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "bisher": "parallele Diversifikation von Partnern.",
+  "ebene": "lebende-welt",
+  "warum": "Parallele Diversifikation von Partnern setzt zwei koevolvierende Linien voraus."
+ },
+ {
+  "name": "Fundamentale vs. realisierte Nische",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "bisher": "Potenzial vs. nach Interaktion.",
+  "ebene": "lebende-welt",
+  "warum": "Die realisierte Nische ergibt sich erst nach Interaktion mit anderen Arten."
+ },
+ {
+  "name": "Konkurrenz-Ausschluss (Gause) / Limiting Similarity",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "bisher": "max. Nischen-Überlappung.",
+  "ebene": "lebende-welt",
+  "warum": "Konkurrenz-Ausschluss braucht mindestens zwei um dieselbe Ressource konkurrierende Arten."
+ },
+ {
+  "name": "Nischen-Konstruktion",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "bisher": "Organismen ändern ihre eigene Selektion (Biber, Korallen).",
+  "ebene": "mechanik",
+  "warum": "Wenn Organismen ihre eigene Selektion ändern, betrifft das den Selektions-Mechanismus."
+ },
+ {
+  "name": "R\\*-Theorie (Tilman) / Storage-Effekt / Neutraltheorie",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "bisher": "Koexistenz-Bedingungen.",
+  "ebene": "lebende-welt",
+  "warum": "Koexistenz-Bedingungen gelten für mehrere konkurrierende Arten zugleich."
+ },
+ {
+  "name": "Frequenzabhängige Selektion (neg.)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "bisher": "seltener Typ im Vorteil → Branching (s. Spike!).",
+  "ebene": "mechanik",
+  "warum": "Wenn der seltene Typ im Vorteil ist, hängt die Fitness von der Population ab; das ist Selektions-Mechanik."
+ },
+ {
+  "name": "Nahrungsnetz / trophische Ebenen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "bisher": "Produzent→Konsument→Zersetzer.",
+  "ebene": "lebende-welt",
+  "warum": "Trophische Ebenen ergeben sich erst aus einer Gemeinschaft mehrerer Arten."
+ },
+ {
+  "name": "Janzen-Connell / Priority-Effekte / Nurse-Plants / Stress-Gradient",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "bisher": "Diversitäts-Erhalt.",
+  "ebene": "lebende-welt",
+  "warum": "Diese Mechanismen erhalten Vielfalt in einer Gemeinschaft mehrerer Arten."
+ },
+ {
+  "name": "Sukzession / Assembly-Rules / Metacommunity",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "bisher": "geordneter Community-Aufbau.",
+  "ebene": "lebende-welt",
+  "warum": "Der geordnete Aufbau einer Gemeinschaft braucht viele interagierende Arten."
+ },
+ {
+  "name": "Dichteabhängigkeit / Tragfähigkeit (K) / logistisches Wachstum",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "bisher": "Regulation.",
+  "ebene": "mechanik",
+  "warum": "Dichteabhängige Regulation koppelt Fitness an die Populationsgröße; das ist Selektions-Mechanik."
+ },
+ {
+  "name": "r/K-Selektion",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "bisher": "schnell-viel vs. langsam-konkurrenzstark.",
+  "ebene": "neues-gen",
+  "warum": "Viele billige gegen wenige teure Nachkommen bräuchte eine Fortpflanzungs-Strategie im Genom."
+ },
+ {
+  "name": "Allee-Effekt",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "bisher": "reduzierte Fitness bei geringer Dichte (Aussterbe-Beschleuniger).",
+  "ebene": "mechanik",
+  "warum": "Reduzierte Fitness bei geringer Dichte ist eine dichteabhängige Regel der Populationsdynamik."
+ },
+ {
+  "name": "Räuber-Beute-Zyklen (Lotka-Volterra) / Funktionale Antwort (Typ I–III)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "bisher": "Oszillationen.",
+  "ebene": "lebende-welt",
+  "warum": "Räuber-Beute-Oszillationen brauchen beide Arten als koppelnde Populationen."
+ },
+ {
+  "name": "Boom-Bust / Paradox of Enrichment / Zeitverzögerungen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "bisher": "Instabilität.",
+  "ebene": "lebende-welt",
+  "warum": "Diese Instabilitäten entstehen aus der Kopplung zweier Populationen über Zeit."
+ },
+ {
+  "name": "Tarnung (Crypsis/Hintergrund/disruptiv/Konterschattierung/Masquerade/Transparenz)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Tarnungs-Muster bräuchten ein Färbungs-Merkmal im Genom, das mit dem Hintergrund interagiert."
+ },
+ {
+  "name": "Aposematismus (Warnfarbe)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": "signalisiert Wehrhaftigkeit.",
+  "ebene": "neues-gen",
+  "warum": "Eine Warnfarbe bräuchte ein Signal-Merkmal im Genom, gekoppelt an Wehrhaftigkeit."
+ },
+ {
+  "name": "Mimikry (Batesian/Müllerian/Mertensian/aggressiv/Automimikry/Vavilov/Pouyann)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Mimikry ahmt eine Modell-Art nach und braucht diese als Bezugsart."
+ },
+ {
+  "name": "Physisch (Panzer/Stacheln/Schale/Dornen) / chemisch (Toxine/Sekundärmetabolite/Gift)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Panzer, Stacheln oder Toxine bräuchten eigene Abwehr-Merkmale im Genom."
+ },
+ {
+  "name": "Toxin-Sequestrierung / induzierbare vs. konstitutive Abwehr / indirekte Abwehr (Enemy-Recruit)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Sequestrierung und induzierbare Abwehr bräuchten neue Merkmale im Genom."
+ },
+ {
+  "name": "Autotomie / Thanatose / Startle-Displays / Augenflecken",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": "Verhaltens-Abwehr.",
+  "ebene": "neues-gen",
+  "warum": "Autotomie und Startle-Displays sind Verhaltens-Merkmale, die das Genom nicht kennt."
+ },
+ {
+  "name": "Gruppen-Abwehr: Prädator-Sättigung/Mast, Verdünnung, selfish herd, Confusion, Mobbing, Alarmruf",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Gruppen-Abwehr wie selfish herd bräuchte ein Sozial-Merkmal im Genom."
+ },
+ {
+  "name": "Epidemien / SIR-Dynamik / R₀ / Herd-Immunität",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "bisher": "Ausbreitung durch Wirte.",
+  "ebene": "lebende-welt",
+  "warum": "SIR-Dynamik braucht ein Pathogen und eine Wirtspopulation als eigene Akteure."
+ },
+ {
+  "name": "Virulenz-Evolution (Trade-off; Übertragungs-Modus)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "bisher": "vertikal→mild, horizontal→virulent.",
+  "ebene": "lebende-welt",
+  "warum": "Virulenz-Evolution spielt sich in der Pathogen-Population am Wirt ab."
+ },
+ {
+  "name": "Reproduktions-Parasiten (Wolbachia): CI / Male-Killing / Feminisierung / Parthenogenese",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Reproduktions-Parasiten manipulieren einen Wirt und brauchen diesen als zweite Art."
+ },
+ {
+  "name": "Wirt-Manipulation (extended phenotype)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "bisher": "„Zombie\"-Ameisen, Toxoplasma.",
+  "ebene": "lebende-welt",
+  "warum": "Wirt-Manipulation als erweiterter Phänotyp setzt Parasit und Wirt voraus."
+ },
+ {
+  "name": "MHC-Red-Queen / Verdünnungs-Effekt (Biodiversität↓Krankheit)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "MHC-Red-Queen koppelt Wirt und Erreger und braucht beide als Populationen."
+ },
+ {
+  "name": "Intra- (Kampf) vs. inter-sexuell (Wahl)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Sexualselektions-Interaktionen (→ auch Ebene 6)",
+  "bisher": "Waffen vs. Ornamente.",
+  "ebene": "neues-gen",
+  "warum": "Kampf gegen Wahl bräuchte ein Paarungssystem-Merkmal im Genom."
+ },
+ {
+  "name": "Sexualkonflikt / Spermien-Konkurrenz / kryptische Weibchenwahl / Infantizid",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Sexualselektions-Interaktionen (→ auch Ebene 6)",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Sexualkonflikt und Spermien-Konkurrenz bräuchten Fortpflanzungs-Merkmale im Genom."
+ },
+ {
+  "name": "Flügelfläche (Flug)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "✅ erledigt (AXIS-1).",
+  "ebene": "schon-abgedeckt",
+  "warum": "Ist als AXIS-1 bereits umgesetzt und darf nicht neu etikettiert werden."
+ },
+ {
+  "name": "Aquatik / Stromlinie / Kiemen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "unterteilt Tiere in Land/Wasser; holt Fisch/Wal/Qualle. Empfohlen als Nächstes.",
+  "ebene": "neues-gen",
+  "warum": "Land gegen Wasser bräuchte ein Aquatik-Merkmal im Genom, keinen Umweltzustand."
+ },
+ {
+  "name": "Grabklauen (Graben)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "versucht, verworfen (orthogonal, s. Backlog).",
+  "ebene": "neues-gen",
+  "warum": "Grabklauen wären ein neues Körpermerkmal; bereits als orthogonal verworfen."
+ },
+ {
+  "name": "Thermische Toleranz-Breite",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Spezialist vs. Generalist (statt reinem Isolations-Optimum).",
+  "ebene": "neues-gen",
+  "warum": "Toleranz-Breite gegen Optimum bräuchte ein eigenes Genom-Merkmal."
+ },
+ {
+  "name": "Sinne (Sehen/Hören/Chemo/Elektro/Magneto)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Sensorium; Basis für Tarnung/Signal.",
+  "ebene": "neues-gen",
+  "warum": "Ein Sensorium wie Elektro- oder Magneto-Wahrnehmung bräuchte neue Merkmale im Genom."
+ },
+ {
+  "name": "Färbung / Signal-Muster",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Tarnung ↔ Warnung ↔ Partnerwahl (ein „magic trait\").",
+  "ebene": "neues-gen",
+  "warum": "Färbung als magic trait bräuchte ein Signal-Merkmal im Genom."
+ },
+ {
+  "name": "Toxin / Gift-Chemie",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Abwehr + Jagd; koppelt an Sequestrierung.",
+  "ebene": "neues-gen",
+  "warum": "Gift-Chemie für Abwehr und Jagd bräuchte ein Toxin-Merkmal im Genom."
+ },
+ {
+  "name": "Körper-Symmetrie / Bauplan-Achsen (Hox-artig)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Segmentierung, Gliedmaßen-Zahl.",
+  "ebene": "neues-gen",
+  "warum": "Bauplan-Achsen und Gliedmassenzahl sind Genom-Merkmale, kein Umweltzustand."
+ },
+ {
+  "name": "Wärmeregulation (Endo-/Ektothermie)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "teuer, aber Aktivität bei Kälte.",
+  "ebene": "neues-gen",
+  "warum": "Endo- gegen Ektothermie wäre ein Stoffwechsel-Merkmal im Genom."
+ },
+ {
+  "name": "Fortpflanzungs-Modus als Gen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "sexuell/asexuell (s. Ebene 6).",
+  "ebene": "neues-gen",
+  "warum": "Sexuell gegen asexuell bräuchte ein Fortpflanzungs-Merkmal im Genom."
+ },
+ {
+  "name": "Ausbreitungs-Fähigkeit als Gen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Vagilität (koppelt an Ebene 3.3).",
+  "ebene": "neues-gen",
+  "warum": "Vagilität als Merkmal bräuchte ein neues Gen im Genom."
+ },
+ {
+  "name": "Sozialität / Koloniebildung",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "bisher": "Eusozialität, modulare Organismen.",
+  "ebene": "neues-gen",
+  "warum": "Eusozialität und Koloniebildung bräuchten ein Sozial-Merkmal im Genom."
+ },
+ {
+  "name": "r/K- bzw. schnell-langsam-Kontinuum",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "Master-Slider (viele billige vs. wenige teure).",
+  "ebene": "neues-gen",
+  "warum": "Der Master-Slider viele-billige gegen wenige-teure bräuchte eine Fortpflanzungs-Strategie im Genom."
+ },
+ {
+  "name": "Grimes C-S-R (Pflanzen)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "Konkurrent/Stress-Tolerator/Ruderal.",
+  "ebene": "neues-gen",
+  "warum": "Das C-S-R-Schema bräuchte ein Lebensstrategie-Merkmal im Genom."
+ },
+ {
+  "name": "Semelparie vs. Iteroparie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "ein Big-Bang vs. wiederholt.",
+  "ebene": "neues-gen",
+  "warum": "Ein Big-Bang gegen wiederholte Fortpflanzung bräuchte ein Lebenszyklus-Merkmal im Genom."
+ },
+ {
+  "name": "Generationszeit / Reifealter / reproduktive Seneszenz",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "Lebens-Tempo.",
+  "ebene": "neues-gen",
+  "warum": "Reifealter und Seneszenz bräuchten ein Lebensdauer-Merkmal im Genom."
+ },
+ {
+  "name": "Kosten der Fortpflanzung / terminale Investition",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "jetzt vs. später (disposable soma).",
+  "ebene": "neues-gen",
+  "warum": "Jetzt gegen später investieren bräuchte eine Allokations-Strategie im Genom."
+ },
+ {
+  "name": "Determiniertes vs. indeterminiertes Wachstum",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "bisher": "große alte Weibchen = fruchtbarer.",
+  "ebene": "neues-gen",
+  "warum": "Determiniertes gegen indeterminiertes Wachstum bräuchte ein Wachstums-Merkmal im Genom."
+ },
+ {
+  "name": "Fekundität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "bisher": "Sonnenfisch ~300 Mio. Eier vs. Hai wenige.",
+  "ebene": "neues-gen",
+  "warum": "Fekundität als Zahl der Nachkommen bräuchte ein Fortpflanzungs-Merkmal im Genom."
+ },
+ {
+  "name": "Größe–Zahl-Trade-off (Smith-Fretwell) / Lack-Gelegegröße",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "bisher": "optimaler Wurf.",
+  "ebene": "neues-gen",
+  "warum": "Der Größe-Zahl-Trade-off bräuchte ein Investitions-Merkmal im Genom."
+ },
+ {
+  "name": "Dotter-Provisionierung / Lecithotrophie vs. Matrotrophie (Plazenta)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Dotter gegen Plazenta bräuchte ein Brutpflege-Merkmal im Genom."
+ },
+ {
+  "name": "Elterliche Investition (Trivers) / uni-/biparental / Allo-Parenting / kooperative Brut",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Elterliche Investition und kooperative Brut bräuchten ein Brutpflege-Merkmal im Genom."
+ },
+ {
+  "name": "Vivipar/ovipar/ovovivipar / Brutparasitismus / Matriphagie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Vivipar gegen ovipar bräuchte ein Fortpflanzungs-Merkmal im Genom."
+ },
+ {
+  "name": "Sexuell (Auskreuzung) vs. asexuell/klonal",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "bisher": "Rekombination vs. Kopie.",
+  "ebene": "neues-gen",
+  "warum": "Auskreuzung gegen klonal bräuchte ein Fortpflanzungs-Merkmal im Genom."
+ },
+ {
+  "name": "Parthenogenese / Apomixis / Haplodiploidie / Gynogenese",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "bisher": "Sonder-Modi.",
+  "ebene": "neues-gen",
+  "warum": "Parthenogenese und Haplodiploidie bräuchten Sonder-Modi als Genom-Merkmal."
+ },
+ {
+  "name": "Simultaner & sequenzieller Hermaphroditismus (Protandrie/-gynie)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "bisher": "Sexwechsel.",
+  "ebene": "neues-gen",
+  "warum": "Sexwechsel bräuchte ein Geschlechts-Merkmal im Genom."
+ },
+ {
+  "name": "Selbstung / gemischte Paarung / Knospung/Fragmentierung / Polyembryonie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Selbstung und Knospung bräuchten ein Fortpflanzungs-Merkmal im Genom."
+ },
+ {
+  "name": "Generationswechsel / Metagenese (Polyp↔Meduse)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Ein Generationswechsel Polyp-Meduse bräuchte ein Lebenszyklus-Merkmal im Genom."
+ },
+ {
+  "name": "Metamorphose (holo-/hemimetabol) / Larvenstadien",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "bisher": "Ausbreitungs-/Fress-Trennung.",
+  "ebene": "neues-gen",
+  "warum": "Metamorphose mit Larvenstadien bräuchte ein Lebenszyklus-Merkmal im Genom."
+ },
+ {
+  "name": "Mehrwirt-Parasiten-Zyklen",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "bisher": "Malaria: Mücke+Mensch.",
+  "ebene": "lebende-welt",
+  "warum": "Ein Mehrwirt-Zyklus braucht mehrere Wirtsarten und deren Populationen."
+ },
+ {
+  "name": "Paedomorphose/Neotenie / Progenese",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "bisher": "Jugendform bleibt (Axolotl).",
+  "ebene": "neues-gen",
+  "warum": "Neotenie, das Bleiben der Jugendform, bräuchte ein Entwicklungs-Merkmal im Genom."
+ },
+ {
+  "name": "Diapause / Quieszenz / Hibernation / Aestivation",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "bisher": "Ruhe-Zustände.",
+  "ebene": "neues-gen",
+  "warum": "Ruhezustände wie Diapause bräuchten ein Dormanz-Merkmal im Genom."
+ },
+ {
+  "name": "Samen-/Ei-Banken (Dormanz-Propagulen)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "bisher": "Zeit-Versicherung (Daphnien-Ephippien).",
+  "ebene": "neues-gen",
+  "warum": "Samen- und Ei-Banken als Zeit-Versicherung bräuchten ein Dormanz-Merkmal im Genom."
+ },
+ {
+  "name": "Bet-Hedging (diversifiziert/konservativ)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "bisher": "Fitness-Varianz senken (Wüsten-Keimung).",
+  "ebene": "neues-gen",
+  "warum": "Fitness-Varianz senken durch Bet-Hedging bräuchte eine Strategie im Genom."
+ },
+ {
+  "name": "Prädiktive vs. zufällige Plastizität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "bisher": "Cue-gesteuert vs. Zufalls-Wette.",
+  "ebene": "neues-gen",
+  "warum": "Cue-gesteuerte gegen zufällige Plastizität bräuchte ein Reaktionsnorm-Merkmal im Genom."
+ },
+ {
+  "name": "Ausbreitungs-Syndrom / Natal- vs. Brut-Dispersal / Philopatrie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Ausbreitung & Bewegung (→ Ebene 3.3)",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Natal- gegen Brut-Dispersal bräuchte ein Ausbreitungs-Merkmal im Genom."
+ },
+ {
+  "name": "Migration (saisonal) / Nomadismus/Irruption / Diadromie / Teilzug",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Ausbreitung & Bewegung (→ Ebene 3.3)",
+  "bisher": ".",
+  "ebene": "zeitachse",
+  "warum": "Saisonale Migration und Teilzug sind zeitlich getaktete Verläufe, kein Momentzustand."
+ },
+ {
+  "name": "Monogamie / Polygynie (Ressourcen-/Harem-/Lek-) / Polyandrie / Promiskuität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Monogamie gegen Polygynie bräuchte ein Paarungssystem-Merkmal im Genom."
+ },
+ {
+  "name": "Anisogamie / Bateman / operationelles Geschlechterverhältnis",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": "Wurzel der Sex-Rollen.",
+  "ebene": "neues-gen",
+  "warum": "Anisogamie als Wurzel der Sex-Rollen bräuchte ein Geschlechts-Merkmal im Genom."
+ },
+ {
+  "name": "Ornamente (Wahl) vs. Waffen (Kampf) / Rensch-Regel / Nuptialgeschenke",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Ornamente gegen Waffen bräuchten Sexualselektions-Merkmale im Genom."
+ },
+ {
+  "name": "Wahl-Modelle: Fisher-Runaway, Good-Genes/Handicap, Sensory-Bias/-Drive, Hamilton-Zuk",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": ".",
+  "ebene": "neues-gen",
+  "warum": "Wahl-Modelle wie Fisher-Runaway bräuchten ein Präferenz-Merkmal im Genom."
+ },
+ {
+  "name": "Sex-Determination (XY/ZW/Haplodiploid/TSD/ESD/sozial)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": "inkl. Klimawandel-Skew.",
+  "ebene": "neues-gen",
+  "warum": "Geschlechts-Bestimmung wie TSD bräuchte ein Determinations-Merkmal im Genom."
+ },
+ {
+  "name": "Fisher-1:1 / Local-Mate-Competition / Trivers-Willard",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "bisher": "Geschlechter-Allokation.",
+  "ebene": "neues-gen",
+  "warum": "Geschlechter-Allokation bräuchte ein Verhältnis-Merkmal im Genom."
+ },
+ {
+  "name": "Mutation (Quelle aller Variation)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "bisher": "drin.",
+  "ebene": "schon-abgedeckt",
+  "warum": "Mutation ist bereits als Quelle der Variation umgesetzt."
+ },
+ {
+  "name": "Natürliche Selektion",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "bisher": "drin (Fitness-Gradient).",
+  "ebene": "schon-abgedeckt",
+  "warum": "Natürliche Selektion ist als Fitness-Gradient bereits umgesetzt."
+ },
+ {
+  "name": "Genetische Drift",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "bisher": "drin (Stochastik-Kanal); stark in kleinen Populationen.",
+  "ebene": "schon-abgedeckt",
+  "warum": "Genetische Drift ist als Stochastik-Kanal bereits umgesetzt."
+ },
+ {
+  "name": "Genfluss / Migration",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "bisher": "zwischen Orten (Ebene 3.3).",
+  "ebene": "lebende-welt",
+  "warum": "Genfluss zwischen Orten setzt eine Metapopulation aus mehreren Orten voraus."
+ },
+ {
+  "name": "Rekombination (Sex) / nicht-zufällige Paarung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "bisher": "mischt Allele.",
+  "ebene": "mechanik",
+  "warum": "Rekombination und nicht-zufällige Paarung betreffen den Vererbungs-Mechanismus."
+ },
+ {
+  "name": "Gerichtet / stabilisierend / disruptiv / Trunkierung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Wirkung)",
+  "bisher": "Mittel verschieben/verengen/spalten.",
+  "ebene": "mechanik",
+  "warum": "Gerichtet, stabilisierend oder disruptiv sind Selektions-Arten, also Teil der Mechanik."
+ },
+ {
+  "name": "Purifizierend vs. positiv",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Wirkung)",
+  "bisher": "Konservierung vs. Ausbreitung.",
+  "ebene": "mechanik",
+  "warum": "Purifizierend gegen positiv beschreibt die Wirkungsweise der Selektion."
+ },
+ {
+  "name": "Balancierend / Heterozygoten-Vorteil",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "bisher": "erhält Polymorphismus (Sichelzelle).",
+  "ebene": "mechanik",
+  "warum": "Heterozygoten-Vorteil erhält Polymorphismus über den Vererbungs-Mechanismus."
+ },
+ {
+  "name": "Frequenz-abhängig (neg./pos.) / dichte-abhängig",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "bisher": "→ Koexistenz/Branching.",
+  "ebene": "mechanik",
+  "warum": "Frequenz- und dichteabhängige Selektion koppeln Fitness an die Population; das ist Mechanik."
+ },
+ {
+  "name": "Fluktuierend (zeitlich) / räumlich variabel (lokale Anpassung)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "bisher": "erhält Variation.",
+  "ebene": "mechanik",
+  "warum": "Fluktuierende und räumlich variable Selektion sind Selektions-Arten der Mechanik."
+ },
+ {
+  "name": "Antagonistische Pleiotropie / sexuell antagonistisch",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "bisher": "Trade-off-getrieben.",
+  "ebene": "mechanik",
+  "warum": "Antagonistische Pleiotropie ist Trade-off-getrieben und Teil der genetischen Architektur."
+ },
+ {
+  "name": "Sexuelle / Verwandten- (kin) / Gruppen- / künstliche Selektion",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Verwandten- und Gruppen-Selektion sind alternative Selektions-Ebenen der Mechanik."
+ },
+ {
+  "name": "Dominanz / Über-/Unterdominanz / Pleiotropie / Epistasis (inkl. sign)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "bisher": "Genotyp→Phänotyp.",
+  "ebene": "mechanik",
+  "warum": "Dominanz, Pleiotropie und Epistasis regeln die Abbildung Genotyp auf Phänotyp."
+ },
+ {
+  "name": "Polygenie / infinitesimal / G×E",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "bisher": "quantitative Merkmale, Umwelt-Interaktion.",
+  "ebene": "mechanik",
+  "warum": "Polygenie und G-mal-E betreffen die genetische Architektur quantitativer Merkmale."
+ },
+ {
+  "name": "Kopplung / LD / Supergene / Modularität",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "bisher": "mit-vererbte Blöcke.",
+  "ebene": "mechanik",
+  "warum": "Kopplung und Supergene sind mit-vererbte Blöcke im Vererbungs-Mechanismus."
+ },
+ {
+  "name": "Gen-Duplikation → Neo-/Subfunktionalisierung / Polyploidie / Inversionen",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "bisher": "Neuheits-Quelle, Pflanzen-Artbildung.",
+  "ebene": "mechanik",
+  "warum": "Gen-Duplikation und Polyploidie sind Neuheits-Quellen im Vererbungs-Mechanismus."
+ },
+ {
+  "name": "Epigenetik / Methylierung / transgenerational / Imprinting / Paramutation",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Epigenetische und transgenerationale Vererbung ist ein zusätzlicher Vererbungs-Kanal."
+ },
+ {
+  "name": "Maternale/zytoplasmatische Effekte / Prion-/Small-RNA-Vererbung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Maternale und zytoplasmatische Effekte sind nicht-DNA-Vererbungs-Kanäle der Mechanik."
+ },
+ {
+  "name": "Phänotypische Plastizität / Reaktionsnorm / Polyphänismus",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "bisher": "ein Genotyp, viele Phänotypen.",
+  "ebene": "mechanik",
+  "warum": "Ein Genotyp mit vielen Phänotypen betrifft die Genotyp-Phänotyp-Abbildung."
+ },
+ {
+  "name": "Baldwin-Effekt / genetische Assimilation / Plasticity-first",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "bisher": "Lernen/Plastizität leitet Evolution.",
+  "ebene": "mechanik",
+  "warum": "Der Baldwin-Effekt und genetische Assimilation ändern, wie Selektion greift."
+ },
+ {
+  "name": "Nischen-Konstruktion / kulturelle / Holobiont-Vererbung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "bisher": "nicht-genetische Kanäle.",
+  "ebene": "mechanik",
+  "warum": "Nischen-Konstruktion und kulturelle Vererbung sind nicht-genetische Kanäle der Mechanik."
+ },
+ {
+  "name": "Horizontaler Gentransfer (HGT)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "bisher": "Bakterien tauschen Gene (Resistenz-Plasmide).",
+  "ebene": "mechanik",
+  "warum": "Horizontaler Gentransfer ist ein zusätzlicher Vererbungs-Weg neben der Deszendenz."
+ },
+ {
+  "name": "Introgression / adaptive Introgression",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "bisher": "Gene über Art-Grenzen (Neandertaler-EPAS1).",
+  "ebene": "lebende-welt",
+  "warum": "Introgression trägt Gene über Art-Grenzen und braucht eine zweite Linie."
+ },
+ {
+  "name": "Hybridisierung / Hybrid-Artbildung / Endosymbiose / Symbiogenese",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Hybridisierung setzt zwei sich kreuzende Arten voraus."
+ },
+ {
+  "name": "Transposons / meiotic drive / Segregations-Verzerrer / Gen-Drives / B-Chromosomen",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Transposons und meiotic drive sind selbstsüchtige Elemente im Vererbungs-Mechanismus."
+ },
+ {
+  "name": "Hitchhiking/Sweeps (hart/weich) / Background-Selection / Hill-Robertson / clonal interference",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Sweeps und Hill-Robertson sind Kopplungs-Effekte im Selektions-Mechanismus."
+ },
+ {
+  "name": "Muller's Ratchet / Y-Degeneration / Error-Catastrophe",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "bisher": "Verfall ohne Rekombination.",
+  "ebene": "mechanik",
+  "warum": "Mullers Ratchet beschreibt Verfall ohne Rekombination, also Vererbungs-Mechanik."
+ },
+ {
+  "name": "Kanalisierung / kryptische Variation (Hsp90) / genetische Robustheit",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Robustheit & Evolvierbarkeit",
+  "bisher": "verborgenes Potenzial.",
+  "ebene": "mechanik",
+  "warum": "Kanalisierung und kryptische Variation betreffen die Robustheit der Architektur."
+ },
+ {
+  "name": "Evolvierbarkeit / facilitated variation / neutrale Netze / effektive Populationsgröße (Nₑ)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Robustheit & Evolvierbarkeit",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "Evolvierbarkeit und effektive Populationsgröße sind Eigenschaften des Mechanismus."
+ },
+ {
+  "name": "Founder-Effekt",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "wenige Kolonisten tragen unrepräsentative Gene.",
+  "ebene": "lebende-welt",
+  "warum": "Der Founder-Effekt entsteht bei Kolonisation eines neuen Ortes durch wenige Gründer."
+ },
+ {
+  "name": "Flaschenhals (Bottleneck)",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "Katastrophe → wenige Überlebende → Diversitäts-Verlust.",
+  "ebene": "mechanik",
+  "warum": "Ein Flaschenhals verstärkt die Drift; das ist ein Mechanismus der Populationsgenetik."
+ },
+ {
+  "name": "Founder-Flush(-Takeover)-Speziation",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "Bottleneck + Explosion → schnelle Divergenz (Hawaii-Drosophila).",
+  "ebene": "lebende-welt",
+  "warum": "Founder-Flush-Speziation braucht Kolonisation und Divergenz an einem neuen Ort."
+ },
+ {
+  "name": "Serieller Founder-Effekt / Allele-Surfing",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "Diversität sinkt entlang der Kolonisations-Route.",
+  "ebene": "lebende-welt",
+  "warum": "Sinkende Diversität entlang der Kolonisations-Route ist ein räumlicher Prozess."
+ },
+ {
+  "name": "Mutations-Ordnungs-Effekt",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "gleiche Selektion, andere fixierte Mutation → Inkompatibilität.",
+  "ebene": "mechanik",
+  "warum": "Der Mutations-Ordnungs-Effekt betrifft die Reihenfolge fixierter Mutationen; das ist Mechanik."
+ },
+ {
+  "name": "Historische Kontingenz / Potenzierung / Entrenchment",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "„Band des Lebens neu abspielen\" (LTEE Cit⁺).",
+  "ebene": "mechanik",
+  "warum": "Historische Kontingenz und Potenzierung betreffen die Pfadabhängigkeit der Evolution."
+ },
+ {
+  "name": "Dollo-Irreversibilität",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "komplexe verlorene Merkmale kehren nicht zurück.",
+  "ebene": "mechanik",
+  "warum": "Dollo-Irreversibilität ist eine Regel darüber, was der Mechanismus zulässt."
+ },
+ {
+  "name": "Evolutionäre Rettung (evolutionary rescue)",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "schnelle Anpassung verhindert Aussterben.",
+  "ebene": "mechanik",
+  "warum": "Evolutionäre Rettung koppelt Anpassungs-Tempo an das Aussterbe-Risiko im Mechanismus."
+ },
+ {
+  "name": "Genfluss-Swamping / Migrations-Last",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "bisher": "Zuwanderung überschwemmt lokale Anpassung → Range-Limit.",
+  "ebene": "lebende-welt",
+  "warum": "Wenn Zuwanderung lokale Anpassung überschwemmt, setzt das mehrere Orte voraus."
+ },
+ {
+  "name": "Allopatrisch / peripatrisch / parapatrisch / sympatrisch / heteropatrisch",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": "je nach Isolations-Grad.",
+  "ebene": "makro-muster",
+  "warum": "Die Artbildungs-Modi sind emergente Ergebnisse aus Raum und Selektion, nichts zum Einstellen."
+ },
+ {
+  "name": "Ökologische Speziation / „Magic-Trait\" / Sensory-Drive / Mutations-Ordnung",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Ökologische Speziation ist ein emergentes Ergebnis, keine einstellbare Größe."
+ },
+ {
+  "name": "Reproduktive Isolation (prä-: ökolog./zeitl./ethol./mechan./gametisch; post-: BDMI/Haldane/hybrid)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Reproduktive Isolation ist ein emergentes Ergebnis der Artbildung."
+ },
+ {
+  "name": "Reinforcement / Wallace-Effekt / Charakter-Verschiebung",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Reinforcement und Wallace-Effekt sind beobachtete Artbildungs-Muster."
+ },
+ {
+  "name": "Hybridisierung: homoploid, allopolyploid, Introgression, Ringart, Hybridzone, Syngameon",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Hybridzonen und Ringarten sind emergente Muster, kein Regler."
+ },
+ {
+  "name": "Despeziation / Speziations-Umkehr",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "bisher": "Isolation bricht zusammen (Victoria-Cichliden).",
+  "ebene": "makro-muster",
+  "warum": "Speziations-Umkehr ist ein beobachtetes Ergebnis am Ende eines Artbildungs-Prozesses."
+ },
+ {
+  "name": "Adaptive vs. nicht-adaptive Radiation / ökologische Gelegenheit / Schlüssel-Innovation",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Adaptive Radiation ist ein Diversifikations-Muster an fertigen Ergebnissen."
+ },
+ {
+  "name": "Ökologische Freisetzung / Insel-Syndrom (Zwerg-/Riesenwuchs, Flugverlust, Zahmheit)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Das Insel-Syndrom ist ein wiederkehrendes Ergebnis-Muster, kein einstellbarer Zustand."
+ },
+ {
+  "name": "Hintergrund- vs. Massen-Aussterben / Koaussterbe-Kaskade / Extinktions-Schuld",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Hintergrund- gegen Massen-Aussterben ist ein Muster im Aussterbe-Verlauf."
+ },
+ {
+  "name": "Lilliput-/Lazarus-/Elvis-Taxon / Dead-Clade-Walking / Selektivität",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "bisher": "Aussterbe-Vokabular.",
+  "ebene": "makro-muster",
+  "warum": "Lazarus- und Elvis-Taxa sind ein Vokabular für beobachtete Aussterbe-Muster."
+ },
+ {
+  "name": "Phyletischer Gradualismus vs. Punktualismus / Stasis / Quantum-Evolution",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Gradualismus gegen Punktualismus ist ein Muster im Tempo der Evolution."
+ },
+ {
+  "name": "Anagenese vs. Kladogenese / Mosaik-Evolution / Heterochronie / Rate-Variation",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Anagenese gegen Kladogenese ist ein beobachtetes Muster der Stammesgeschichte."
+ },
+ {
+  "name": "Arten-Selektion / Court-Jester vs. Red-Queen / Turnover-Puls",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": "höhere Selektions-Ebenen.",
+  "ebene": "makro-muster",
+  "warum": "Arten-Selektion und Court-Jester sind Muster auf höheren Selektions-Ebenen."
+ },
+ {
+  "name": "Cope-Regel / Dollo / Williston / evolutionäre Eskalation (Vermeij)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": "Makro-Gesetze.",
+  "ebene": "makro-muster",
+  "warum": "Cope-Regel und Eskalation sind Makro-Gesetze, also beobachtete Trends."
+ },
+ {
+  "name": "Konvergenz / Parallelismus / Divergenz / iterative Evolution",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": "wiederholte Formen (Anolis-Ökomorphe).",
+  "ebene": "makro-muster",
+  "warum": "Konvergenz und Parallelismus sind Muster wiederholter Formen an Ergebnissen."
+ },
+ {
+  "name": "Lebende Fossilien / Stasis / evolutionäre Sackgassen (Überspezialisierung)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Lebende Fossilien und Sackgassen sind beobachtete Ergebnis-Muster."
+ },
+ {
+  "name": "Replikatoren→Chromosomen→DNA/Protein / Pro-→Eukaryot (Endosymbiose)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Große Übergänge (Maynard Smith & Szathmáry)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Die grossen Übergänge sind ein historisches Makro-Muster, nichts zum Einstellen."
+ },
+ {
+  "name": "Ein- → Vielzeller / solitär → eusozial (Superorganismus) / Sprache/Kultur",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Große Übergänge (Maynard Smith & Szathmáry)",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Ein- zu Vielzeller und der Weg zur Eusozialität sind grosse Übergangs-Muster."
+ },
+ {
+  "name": "Breiten-/Höhen-Diversitäts-Gradient (+ Hypothesen: Zeit-Areal/kinetisch/Out-of-Tropics)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "bisher": ".",
+  "ebene": "makro-muster",
+  "warum": "Der Diversitäts-Gradient samt Hypothesen ist ein makroökologisches Muster."
+ },
+ {
+  "name": "Arten-Areal / Rapoport / Bergmann / Allen",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "bisher": "geografische Regeln.",
+  "ebene": "makro-muster",
+  "warum": "Rapoport, Bergmann und Allen sind geografische Regeln an fertigen Ergebnissen."
+ },
+ {
+  "name": "Great American Interchange / Wallace-Linie",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "bisher": "biotischer Austausch.",
+  "ebene": "lebende-welt",
+  "warum": "Der Grosse Amerikanische Faunenaustausch ist ein biotischer Austausch zwischen Landmassen."
+ },
+ {
+  "name": "Domestikation / künstliche Zucht / Domestikations-Syndrom",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "bisher": "Zahmheit, Schlappohren (Belyaev-Füchse).",
+  "ebene": "neues-gen",
+  "warum": "Bei Domestikation wählt ein Züchter Merkmale aus; Zahmheit ist kein Umweltzustand."
+ },
+ {
+  "name": "Gentechnik / CRISPR / Gene-Drives / synthetische Biologie / De-Extinction",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "bisher": ".",
+  "ebene": "mechanik",
+  "warum": "CRISPR und Gene-Drives greifen direkt in den Vererbungs-Mechanismus ein."
+ },
+ {
+  "name": "Konservierung: genetische Rettung / assistierte Migration / assisted gene flow",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "bisher": ".",
+  "ebene": "lebende-welt",
+  "warum": "Assistierte Migration und Gen-Fluss setzen mehrere Orte und Populationen voraus."
+ },
+ {
+  "name": "Ernte-induzierte Evolution",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "bisher": "Fischerei→kleiner/früher reif; Trophäenjagd→kleinere Waffen; Wilderei→Stoßzahn-Verlust.",
+  "ebene": "neues-gen",
+  "warum": "Größenselektive Ernte bräuchte ein Größen-Merkmal; unsere predation trifft alle Größen gleich."
+ }
+]

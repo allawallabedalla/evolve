@@ -1,0 +1,11 @@
+[
+ {
+  "id": "pilz-ohne-licht",
+  "titel": "Leben ohne Sonne",
+  "beschreibung": "Bring eine Linie ins Reich der Pilze, ohne das Licht je über 0,25 zu heben und mit reichlich Feuchte.",
+  "ziel": { "reich": "Pilz" },
+  "grenzen": { "light": { "max": 0.25 }, "water": { "min": 0.55 } },
+  "generationen": 900,
+  "schwierigkeit": "mittel"
+ }
+]

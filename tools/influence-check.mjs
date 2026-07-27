@@ -24,76 +24,14 @@
 // Aufruf:  npm run influence-check          (Prüfung + Bericht)
 //          node tools/influence-check.mjs --list     (Tabelle aller Faktoren)
 // ============================================================================
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
+import { loadAppCore, loadInfluences, BASE_ENV, AXES, STRESSORS } from "./lib/app-core.mjs";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const html = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
-
-// --- App-Inline-Kern rekonstruieren (App = maßgebliche Fassung) -------------
-const grab = (re, what) => {
-  const m = html.match(re);
-  if (!m) { console.error(`influence-check: ${what} nicht in app/index.html gefunden.`); process.exit(1); }
-  return m[0];
-};
-const physSrc   = grab(/const PHYS = \{[\s\S]*?\n\};/, "PHYS");
-const paramsSrc = grab(/const PARAMS = \{[\s\S]*?\n\};/, "PARAMS");
-const fitSrc    = grab(/function fitness\(t, e\)\{[\s\S]*?\n\}/, "fitness()");
-const stepSrc   = grab(/function stepGeneration\(m, env, randn\)\{[\s\S]*?\n\}/, "stepGeneration()");
-const classSrc  = grab(/function classify\(t\)\{[\s\S]*?\n\}/, "classify()");
-const geneLabels = eval(grab(/const GENE_LABELS = \[[\s\S]*?\];/, "GENE_LABELS").replace(/^const GENE_LABELS = /, "").replace(/;$/, ""));
-
-const sandbox = {};
-new Function("box", `
-  const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
-  const sigmoid = x => 1 / (1 + Math.exp(-x));
-  ${physSrc}
-  ${paramsSrc}
-  const NG = ${geneLabels.length};
-  const DRIFT_SCALE = 0;
-  ${fitSrc}
-  ${stepSrc}
-  ${classSrc}
-  box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify; box.NG = NG;
-`)(sandbox);
-const { fitness, stepGeneration, classify, NG } = sandbox;
-
-// --- Katalog laden ---------------------------------------------------------
-const infSrc = readFileSync(join(ROOT, "app", "influences.js"), "utf-8");
-const win = {};
-new Function("window", infSrc)(win);
-const INFLUENCES = win.INFLUENCES;
-
-// Die 16 Achsen der App + der Startzustand eines frischen Wesens.
-const BASE_ENV = { temperature: .5, predation: .3, foodAbundance: .5, foodHeight: .2, light: .5, water: .6,
-  toxicity: 0, oxygen: 1, salinity: 0, uv: 0, pressure: 0, aridity: 0, radiation: 0, fire: 0, frost: 0, wind: 0 };
-const AXES = Object.keys(BASE_ENV);
-// Achsen, die ein Einfluss NICHT setzt, werden von applyInfluence() zurückgesetzt
-// (Stressoren gelten nur, solange der auslösende Einfluss aktiv ist) — genau so
-// baut auch dieser Prüfstand die Umwelt zusammen.
-const STRESSORS = ["toxicity", "salinity", "uv", "pressure", "aridity", "radiation", "fire", "frost", "wind"];
-function envOf(f) {
-  const e = { ...BASE_ENV, ...f.env };
-  for (const s of STRESSORS) if (f.env[s] === undefined) e[s] = 0;
-  e.oxygen = f.env.oxygen === undefined ? 1 : f.env.oxygen;
-  return e;
-}
-
-const GENS = 400;
-function converge(env) {
-  let g = new Array(NG).fill(.5);
-  for (let i = 0; i < GENS; i++) g = stepGeneration(g, env, null);
-  return g;
-}
-const l1 = (a, b) => a.reduce((s, x, i) => s + Math.abs(x - b[i]), 0);
+const { fitness, classify, NG, converge, envOf, l1 } = loadAppCore("influence-check");
+const { INFLUENCES } = loadInfluences();
 
 // --- Faktoren einsammeln ---------------------------------------------------
-const factors = [];
-for (const c of INFLUENCES)
-  for (const g of c.groups)
-    for (const f of g.factors)
-      factors.push({ ...f, cat: c.plain || c.cat, sub: g.sub });
+const { factors } = loadInfluences();
 const active = factors.filter(f => !f.soon);
 
 const fail = [], warn = [];
