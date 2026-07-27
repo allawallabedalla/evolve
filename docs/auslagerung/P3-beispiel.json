@@ -1,0 +1,10 @@
+{
+ "Allee-Effekt": {
+  "klartext": "Zu selten, um sich zu finden",
+  "erklaerung": "Wird eine Art zu selten, finden sich Partner nicht mehr zuverlässig. Ab da schrumpft der Bestand weiter, obwohl Platz und Futter reichen würden."
+ },
+ "Mimikry (Batesian/Müllerian/Mertensian/aggressiv/Automimikry/Vavilov/Pouyann)": {
+  "klartext": "Nachahmung fremder Warnsignale",
+  "erklaerung": "Harmlose Arten kopieren das Aussehen giftiger Vorbilder. Wer die Täuschung besser hinbekommt, wird seltener gefressen und gibt sie weiter."
+ }
+}

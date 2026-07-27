@@ -270,3 +270,27 @@ den Faktornamen durch (`_lastFaktor` → `ctx.faktor`).
    aber als Muster erkennbar. Nicht zurückgewiesen (10 % der Bausteine), dafür misst
    `story-import-check` jetzt die Satzbau-Verteilung und warnt ab 22 % bei markierten
    Konstruktionen.
+
+### 2026-07-27 · Paket P3 vorbereitet (Klartext für den Katalog)
+Nach S6 das bisher größte Auslagerungs-Paket: **436 Texte** — für jeden der 218 inaktiven
+Faktoren ein **Klartextname** und eine **Erklärung**.
+
+**Warum das die größte Lücke ist (gemessen):** 218 Faktoren zeigen im Modal ausschließlich
+den Fachbegriff („R*-Theorie (Tilman) / Storage-Effekt / Neutraltheorie"), **42 haben gar
+keine Beschreibung** (im Modal steht ein nackter Punkt), weitere 56 nur eine Wortgruppe.
+Der Katalog ist damit ein Museum mit 218 unbeschrifteten Vitrinen.
+
+- `docs/auslagerung/P3-eingabe.json` — die 218 Faktoren mit Sektion, Gruppe, bisheriger
+  Kurznotiz **und der Ebene + Begründung aus S4**. Letzteres steuert den Ton: ein Faktor der
+  Ebene `lebende-welt` darf nicht klingen, als ließe er sich am Regler einstellen.
+- `docs/auslagerung/P3-aufgabe.md` — Auftrag mit Positiv-/Negativ-Beispielen, Längenregeln,
+  der ausdrücklichen Umlaut-Vorgabe (Lehre aus S4) und der Regel „kein Fachbegriff zur
+  Erklärung eines Fachbegriffs".
+- `tools/plain-import-check.mjs` (`npm run plain-import-check <datei>`) — prüft Schlüssel,
+  Namenslänge/-form (kein `/`, eindeutig, nicht der Fachbegriff selbst), Erklärungslänge und
+  Satzform, **ASCII-Umschrift** und zwei Verständlichkeits-Näherungen: Anteil Wörter ab 14
+  Zeichen (Richtwert unter 6 %) und ungeklärte Fachbegriffe aus einer Sperrliste.
+  Gegenprobe mit absichtlich schlechter Datei: alle Fehlerarten gefangen.
+- Beim Bauen fiel auf, dass mein eigenes Beispiel „Mesopredator-Release" verwendete — ein
+  Faktor, den ich in S1b aktiviert habe und der damit gar nicht mehr zur Aufgabe gehört.
+  Korrigiert; der Prüfstand hatte es selbst gemeldet.
