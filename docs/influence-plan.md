@@ -58,7 +58,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       Lichtverschmutzung, Urbanisierung, Übernutzung …
 - [x] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
       „Lebende Welt", „Fortpflanzung", „Evolutions-Mechanik", „Makro-Muster"; Modal zeigt es an.
-- [ ] **S5 · Modal fertig** — Suchfeld, Wirkungs-Vorschau (welche Achsen, vorher→nachher),
+- [x] **S5 · Modal fertig** — Suchfeld, Wirkungs-Vorschau (welche Achsen, vorher→nachher),
       „Einfluss zurücknehmen", sichtbarer Stapel aktiver Stressoren, a11y-Durchgang.
 - [x] **S6 · Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für die neuen Einflüsse.
 - [ ] **S7 · Abschluss** — Doku, `BACKLOG.md`/`resume.md`, Browser-Test, PR nach `main`.
@@ -363,3 +363,40 @@ Stellen markieren, keine Textersetzung). Kein eigener Prüfstand nötig — die 
 
 **Gemeinsame Bereinigung:** die Umlaut-Heuristik (aus dem P3-Vorfall) ist jetzt in
 `tools/lib/umlaut-check.mjs` zentralisiert statt in `plain-import-check.mjs` dupliziert.
+
+### S5 · Modal fertig — erledigt (v0.74.0)
+Vier geforderte Teile ergänzt, Browser-getestet, keine Fehler:
+- **Suchfeld** über den GESAMTEN Katalog (284 Faktoren, alle Sektionen) — vorher nur Blättern
+  Kategorie für Kategorie. Treffer über Klartext, Fachbegriff und Erklärung; ein Treffer
+  öffnet direkt die richtige Sektion mit dem Faktor vorausgewählt (bestehender
+  `preselectName`-Mechanismus wiederverwendet).
+- **Wirkungs-Vorschau** — welche der 16 Achsen sich verschieben würden, vorher→nachher.
+  Dafür `applyInfluence()` in eine reine Funktion `influenceResultEnv(f)` zerlegt, die
+  sowohl die Vorschau als auch die echte Anwendung speist — Vorschau kann nie von der
+  tatsächlichen Wirkung abweichen, weil es dieselbe Berechnung ist.
+- **„Einfluss zurücknehmen"** — Ein-Schritt-Undo (kein voller Verlauf): Milieu-Schnappschuss
+  unmittelbar vor `applyInfluence()`, ein Knopf stellt ihn wieder her (inkl. Biom-Tag,
+  Regler-UI, Stress-Chips, Chronik-Reaktion).
+- **a11y-Fund + Fix:** Escape schloss das Einfluss-Modal bisher gar nicht — obwohl der
+  Handler schon für Genbuch/Login/Reveal existierte, fehlte der Fall komplett. Ergänzt
+  (Sub-Modal offen → wie „Abbrechen"; sonst ganz schließen). Neue Elemente (Suche,
+  Suchergebnisse) liegen innerhalb des bestehenden Tab-Trap-Dialogs, keine Zusatzarbeit nötig.
+  `.infl-search`/`.infl-search-result` zur 44px-Touchziel-Regel ergänzt, `.sr-only`-Klasse
+  ergänzt (fehlte bisher im Stylesheet) für das Suchfeld-Label.
+
+**Damit ist S0–S6 vollständig.** Nur noch S7 (Abschluss/PR) offen.
+
+### P6 · Gen-Erklärungen — angenommen und eingebaut (v0.74.0)
+Externe Zulieferung (`docs/auslagerung/P6-ausgabe.json`) geprüft: `gene-import-check`
+bestanden, 25/25, nur 5 milde Stilhinweise (Gen-Name in der Erklärung genannt — bei Prüfung
+der Texte alle im Kontext natürlich, keine Überarbeitung nötig). Alle 25 Gene haben jetzt
+zum ersten Mal eine Erklärung im Spiel (Tooltip am Gen-Balken) — vorher stand dort nur der
+Name. Eingebaut wie S4/S6: `app/gene-explain.js` (auto-generiert, `npm run build-gene-explain`),
+`window.GENE_EXPLAIN[i]` als `title`-Attribut am Gen-Element.
+
+### Rückfrage zu P5 beantwortet
+Die lokale KI wartete auf Engine-Zugriff, um Simulations-Erreichbarkeit selbst zu prüfen —
+klargestellt: das übernimmt `challenge-import-check.mjs` bereits auf unserer Seite.
+`P5-eingabe.json` zusätzlich um 12 `biomeBeispiele` ergänzt (alle Spiel-Biome mit ihrem
+ECHTEN, in der Engine gemessenen Konvergenz-Ergebnis über 800 Generationen) als Ausgangspunkt
+für plausiblere Vorschläge.
