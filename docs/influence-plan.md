@@ -400,3 +400,28 @@ klargestellt: das übernimmt `challenge-import-check.mjs` bereits auf unserer Se
 `P5-eingabe.json` zusätzlich um 12 `biomeBeispiele` ergänzt (alle Spiel-Biome mit ihrem
 ECHTEN, in der Engine gemessenen Konvergenz-Ergebnis über 800 Generationen) als Ausgangspunkt
 für plausiblere Vorschläge.
+
+### 2026-07-27 · P5-Zulieferung geprüft, echter Prüfstand-Bug gefunden, P8 als Nachfolgepaket (300 Stück)
+`P5-ausgabe.json` (28 Herausforderungen) geprüft: erst 14/28 durchgefallen ("nie erreichbar").
+Beim Nachforschen zwei getrennte Ursachen gefunden:
+1. **Echter Bug in `challenge-import-check.mjs`**: `sampleEnv()` hat die `STRESSORS`-Liste aus
+   `tools/lib/app-core.mjs` zweckfremd wiederverwendet, um zu entscheiden, welche Achsen ohne
+   `grenzen`-Eintrag unverändert bleiben. `oxygen` steht dort bewusst NICHT drin (die Liste dient
+   anderswo einem Reset-auf-0-Muster, oxygen resettet aber auf 1) — Folge: `oxygen` wurde bei
+   JEDER Stichprobe zufällig zwischen 0 und 1 gewürfelt statt beim zugesicherten neutralen Wert 1
+   zu bleiben. Behoben (Commit `1eaa20f`): 14 → 10 Fehlschläge.
+2. **Echtes Inhalts-Problem** (verbleibende 10): Ziele wie Nadelbaum, Sukkulente, Koralle wurden
+   aus biologischer Intuition heraus mit Beschränkungen versehen, die mit der tatsächlichen
+   Simulations-Logik nichts zu tun haben — Tiefen-Stichprobe (1500 statt 24 pro Fall) bestätigte:
+   6 der 10 sind bei 0/1500 echte Sackgassen, der Rest im Promille-Bereich.
+
+Daraus **P8** gebaut: 45.000-Stichproben-Simulationslauf über die 6 Regler ergab für 39 von 44
+Formen und alle 5 Reiche echte, gemessene "Envelopes" (Wertespannen + Beispiel-Umgebungen, die
+das Ziel nachweislich erreichen) plus Seltenheits-Zahl (`treffer`). `docs/auslagerung/P8-*`
+liefert diese Daten der externen KI mit, mit der Regel: jede eingeschränkte Achse muss die
+gemessene Spanne abdecken; bei sehr seltenen Zielen (`treffer` < ~50) reicht die grobe Envelope
+NICHT — dort muss eng um EIN konkretes Beispiel herum eingeschränkt werden (getestet an
+Nadelbaum: lockere Envelope-Beschränkung auf 2 Achsen → 0/24, enge 6-Achsen-Bindung an ein
+Beispiel → 8 % Trefferquote). `P8-beispiel.json` geprüft, besteht. Umfang diesmal: 300
+Herausforderungen. P5 selbst bleibt vorerst offen/unintegriert — P8 ist der vorgesehene
+Ersatz/die Erweiterung dafür.

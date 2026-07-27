@@ -1,0 +1,2700 @@
+{
+ "achsen": [
+  {
+   "key": "temperature",
+   "name": "Temperatur",
+   "tief": "kalt",
+   "hoch": "heiß"
+  },
+  {
+   "key": "predation",
+   "name": "Räuber",
+   "tief": "sicher",
+   "hoch": "tödlich"
+  },
+  {
+   "key": "foodAbundance",
+   "name": "Nahrungsmenge",
+   "tief": "knapp",
+   "hoch": "üppig"
+  },
+  {
+   "key": "foodHeight",
+   "name": "Höhe des Futters",
+   "tief": "am Boden",
+   "hoch": "hoch oben"
+  },
+  {
+   "key": "light",
+   "name": "Licht",
+   "tief": "dunkel",
+   "hoch": "hell"
+  },
+  {
+   "key": "water",
+   "name": "Wasser",
+   "tief": "trocken",
+   "hoch": "unter Wasser"
+  }
+ ],
+ "reiche": [
+  "Pflanze",
+  "Tier",
+  "Mikrobe",
+  "Pilz",
+  "Protist"
+ ],
+ "formen": [
+  {
+   "reich": "Pflanze",
+   "form": "Grünalge",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Moos",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Sukkulente · Kaktus",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Polster-Kältepflanze",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Nadelbaum",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Laubbaum",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Verholzter Strauch",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Blütenkraut",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Farn",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pflanze",
+   "form": "Kraut · niedrige Pflanze",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Leuchtwesen · Tiefsee",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Flugsäuger · Fledermaus",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Flatterer · Vogel",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fluginsekt · Segler",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Gepanzerter Koloss",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Krebstier · Arthropode",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Gepanzertes Beutetier",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Schnecke · Weichtier",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fisch · Aalform",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Wurm",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Insekt · Gliederfüßer",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Kopffüßer · Tintenfisch",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Aktiver Großjäger",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fell-Großtier",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Fell-Warmblüter",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Behänder Kletterer",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Kleines flinkes Tier",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Tier",
+   "form": "Amphibie · Lurch",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Reptil · Echse",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Tier",
+   "form": "Generalisten-Tier",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Archaee · Extremophil",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Bakterie",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Mikrobe",
+   "form": "Protist · Amöbe",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Hefe",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Tier",
+   "form": "Koralle · Riffbildner",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Flechte · Symbiose",
+   "raritaet": "selten"
+  },
+  {
+   "reich": "Tier",
+   "form": "Schwamm",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Baumpilz · Porling",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Zunderschwamm",
+   "raritaet": "sehr-selten"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Schimmel · Fadenpilz",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Hutpilz",
+   "raritaet": "legendaer"
+  },
+  {
+   "reich": "Pilz",
+   "form": "Myzel · Pilzgeflecht",
+   "raritaet": "haeufig"
+  },
+  {
+   "reich": "Protist",
+   "form": "Plankton",
+   "raritaet": "gelegentlich"
+  },
+  {
+   "reich": "Protist",
+   "form": "Euglenoid · Mixotroph",
+   "raritaet": "haeufig"
+  }
+ ],
+ "reichEnvelopes": {
+  "Mikrobe": {
+   "treffer": 6592,
+   "envelope": {
+    "temperature": {
+     "min": 0.33,
+     "max": 0.93
+    },
+    "predation": {
+     "min": 0.02,
+     "max": 0.51
+    },
+    "foodAbundance": {
+     "min": 0.17,
+     "max": 0.8
+    },
+    "foodHeight": {
+     "min": 0.12,
+     "max": 0.93
+    },
+    "light": {
+     "min": 0.18,
+     "max": 1
+    },
+    "water": {
+     "min": 0.13,
+     "max": 0.65
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.69,
+     "predation": 0.03,
+     "foodAbundance": 0.19,
+     "foodHeight": 0.12,
+     "light": 0.63,
+     "water": 0.38
+    },
+    {
+     "temperature": 0.33,
+     "predation": 0.05,
+     "foodAbundance": 0.8,
+     "foodHeight": 0.76,
+     "light": 0.18,
+     "water": 0.61
+    },
+    {
+     "temperature": 0.48,
+     "predation": 0.02,
+     "foodAbundance": 0.17,
+     "foodHeight": 0.64,
+     "light": 0.23,
+     "water": 0.33
+    }
+   ]
+  },
+  "Pilz": {
+   "treffer": 4308,
+   "envelope": {
+    "temperature": {
+     "min": 0.25,
+     "max": 0.97
+    },
+    "predation": {
+     "min": 0.1,
+     "max": 0.94
+    },
+    "foodAbundance": {
+     "min": 0.46,
+     "max": 0.94
+    },
+    "foodHeight": {
+     "min": 0.57,
+     "max": 1
+    },
+    "light": {
+     "min": 0.27,
+     "max": 0.98
+    },
+    "water": {
+     "min": 0.6,
+     "max": 0.96
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.25,
+     "predation": 0.74,
+     "foodAbundance": 0.62,
+     "foodHeight": 0.77,
+     "light": 0.7,
+     "water": 0.85
+    },
+    {
+     "temperature": 0.64,
+     "predation": 0.14,
+     "foodAbundance": 0.77,
+     "foodHeight": 0.97,
+     "light": 0.87,
+     "water": 0.95
+    },
+    {
+     "temperature": 0.37,
+     "predation": 0.1,
+     "foodAbundance": 0.74,
+     "foodHeight": 0.87,
+     "light": 0.27,
+     "water": 0.84
+    }
+   ]
+  },
+  "Protist": {
+   "treffer": 13064,
+   "envelope": {
+    "temperature": {
+     "min": 0.04,
+     "max": 0.99
+    },
+    "predation": {
+     "min": 0.11,
+     "max": 0.87
+    },
+    "foodAbundance": {
+     "min": 0.07,
+     "max": 0.55
+    },
+    "foodHeight": {
+     "min": 0.17,
+     "max": 0.93
+    },
+    "light": {
+     "min": 0.18,
+     "max": 0.76
+    },
+    "water": {
+     "min": 0.09,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.14,
+     "predation": 0.69,
+     "foodAbundance": 0.55,
+     "foodHeight": 0.93,
+     "light": 0.52,
+     "water": 0.09
+    },
+    {
+     "temperature": 0.69,
+     "predation": 0.85,
+     "foodAbundance": 0.21,
+     "foodHeight": 0.28,
+     "light": 0.23,
+     "water": 0.62
+    },
+    {
+     "temperature": 0.51,
+     "predation": 0.87,
+     "foodAbundance": 0.21,
+     "foodHeight": 0.5,
+     "light": 0.2,
+     "water": 0.12
+    }
+   ]
+  },
+  "Tier": {
+   "treffer": 19801,
+   "envelope": {
+    "temperature": {
+     "min": 0.03,
+     "max": 0.92
+    },
+    "predation": {
+     "min": 0.27,
+     "max": 1
+    },
+    "foodAbundance": {
+     "min": 0.61,
+     "max": 0.98
+    },
+    "foodHeight": {
+     "min": 0.12,
+     "max": 0.73
+    },
+    "light": {
+     "min": 0.02,
+     "max": 0.85
+    },
+    "water": {
+     "min": 0.05,
+     "max": 0.94
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.92,
+     "predation": 0.73,
+     "foodAbundance": 0.98,
+     "foodHeight": 0.12,
+     "light": 0.36,
+     "water": 0.05
+    },
+    {
+     "temperature": 0.78,
+     "predation": 0.58,
+     "foodAbundance": 0.63,
+     "foodHeight": 0.73,
+     "light": 0.02,
+     "water": 0.54
+    },
+    {
+     "temperature": 0.03,
+     "predation": 0.27,
+     "foodAbundance": 0.67,
+     "foodHeight": 0.46,
+     "light": 0.08,
+     "water": 0.06
+    }
+   ]
+  },
+  "Pflanze": {
+   "treffer": 1235,
+   "envelope": {
+    "temperature": {
+     "min": 0.27,
+     "max": 0.92
+    },
+    "predation": {
+     "min": 0.01,
+     "max": 0.9
+    },
+    "foodAbundance": {
+     "min": 0,
+     "max": 0.53
+    },
+    "foodHeight": {
+     "min": 0.24,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.48,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.77,
+     "max": 0.99
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.7,
+     "predation": 0.9,
+     "foodAbundance": 0.53,
+     "foodHeight": 0.79,
+     "light": 0.99,
+     "water": 0.83
+    },
+    {
+     "temperature": 0.92,
+     "predation": 0.29,
+     "foodAbundance": 0,
+     "foodHeight": 0.99,
+     "light": 0.48,
+     "water": 0.77
+    },
+    {
+     "temperature": 0.53,
+     "predation": 0.22,
+     "foodAbundance": 0.04,
+     "foodHeight": 0.28,
+     "light": 0.56,
+     "water": 0.85
+    }
+   ]
+  }
+ },
+ "formEnvelopes": {
+  "Bakterie": {
+   "reich": "Mikrobe",
+   "treffer": 3643,
+   "envelope": {
+    "temperature": {
+     "min": 0.48,
+     "max": 0.99
+    },
+    "predation": {
+     "min": 0.02,
+     "max": 0.3
+    },
+    "foodAbundance": {
+     "min": 0.17,
+     "max": 0.49
+    },
+    "foodHeight": {
+     "min": 0,
+     "max": 0.96
+    },
+    "light": {
+     "min": 0.23,
+     "max": 0.89
+    },
+    "water": {
+     "min": 0.3,
+     "max": 0.88
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.69,
+     "predation": 0.03,
+     "foodAbundance": 0.19,
+     "foodHeight": 0.12,
+     "light": 0.63,
+     "water": 0.38
+    },
+    {
+     "temperature": 0.48,
+     "predation": 0.02,
+     "foodAbundance": 0.17,
+     "foodHeight": 0.64,
+     "light": 0.23,
+     "water": 0.33
+    },
+    {
+     "temperature": 0.53,
+     "predation": 0.11,
+     "foodAbundance": 0.22,
+     "foodHeight": 0.13,
+     "light": 0.64,
+     "water": 0.49
+    }
+   ]
+  },
+  "Baumpilz · Porling": {
+   "reich": "Pilz",
+   "treffer": 1372,
+   "envelope": {
+    "temperature": {
+     "min": 0.23,
+     "max": 0.97
+    },
+    "predation": {
+     "min": 0.52,
+     "max": 0.94
+    },
+    "foodAbundance": {
+     "min": 0.46,
+     "max": 0.99
+    },
+    "foodHeight": {
+     "min": 0.57,
+     "max": 0.97
+    },
+    "light": {
+     "min": 0.26,
+     "max": 0.9
+    },
+    "water": {
+     "min": 0.6,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.25,
+     "predation": 0.74,
+     "foodAbundance": 0.62,
+     "foodHeight": 0.77,
+     "light": 0.7,
+     "water": 0.85
+    },
+    {
+     "temperature": 0.34,
+     "predation": 0.61,
+     "foodAbundance": 0.87,
+     "foodHeight": 0.78,
+     "light": 0.46,
+     "water": 0.84
+    },
+    {
+     "temperature": 0.86,
+     "predation": 0.78,
+     "foodAbundance": 0.94,
+     "foodHeight": 0.75,
+     "light": 0.31,
+     "water": 0.96
+    }
+   ]
+  },
+  "Euglenoid · Mixotroph": {
+   "reich": "Protist",
+   "treffer": 12907,
+   "envelope": {
+    "temperature": {
+     "min": 0.04,
+     "max": 0.99
+    },
+    "predation": {
+     "min": 0.11,
+     "max": 0.87
+    },
+    "foodAbundance": {
+     "min": 0.07,
+     "max": 0.55
+    },
+    "foodHeight": {
+     "min": 0.17,
+     "max": 0.93
+    },
+    "light": {
+     "min": 0.18,
+     "max": 0.76
+    },
+    "water": {
+     "min": 0.09,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.14,
+     "predation": 0.69,
+     "foodAbundance": 0.55,
+     "foodHeight": 0.93,
+     "light": 0.52,
+     "water": 0.09
+    },
+    {
+     "temperature": 0.69,
+     "predation": 0.85,
+     "foodAbundance": 0.21,
+     "foodHeight": 0.28,
+     "light": 0.23,
+     "water": 0.62
+    },
+    {
+     "temperature": 0.51,
+     "predation": 0.87,
+     "foodAbundance": 0.21,
+     "foodHeight": 0.5,
+     "light": 0.2,
+     "water": 0.12
+    }
+   ]
+  },
+  "Reptil · Echse": {
+   "reich": "Tier",
+   "treffer": 1285,
+   "envelope": {
+    "temperature": {
+     "min": 0.59,
+     "max": 1
+    },
+    "predation": {
+     "min": 0.22,
+     "max": 0.99
+    },
+    "foodAbundance": {
+     "min": 0.51,
+     "max": 0.98
+    },
+    "foodHeight": {
+     "min": 0.03,
+     "max": 0.53
+    },
+    "light": {
+     "min": 0.26,
+     "max": 1
+    },
+    "water": {
+     "min": 0.01,
+     "max": 0.66
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.92,
+     "predation": 0.73,
+     "foodAbundance": 0.98,
+     "foodHeight": 0.12,
+     "light": 0.36,
+     "water": 0.05
+    },
+    {
+     "temperature": 0.97,
+     "predation": 0.22,
+     "foodAbundance": 0.92,
+     "foodHeight": 0.33,
+     "light": 0.67,
+     "water": 0.54
+    },
+    {
+     "temperature": 1,
+     "predation": 0.65,
+     "foodAbundance": 0.89,
+     "foodHeight": 0.37,
+     "light": 0.66,
+     "water": 0.01
+    }
+   ]
+  },
+  "Flatterer · Vogel": {
+   "reich": "Tier",
+   "treffer": 1109,
+   "envelope": {
+    "temperature": {
+     "min": 0.51,
+     "max": 0.9
+    },
+    "predation": {
+     "min": 0.28,
+     "max": 0.99
+    },
+    "foodAbundance": {
+     "min": 0.62,
+     "max": 0.95
+    },
+    "foodHeight": {
+     "min": 0.73,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.02,
+     "max": 0.9
+    },
+    "water": {
+     "min": 0.04,
+     "max": 0.54
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.78,
+     "predation": 0.58,
+     "foodAbundance": 0.63,
+     "foodHeight": 0.73,
+     "light": 0.02,
+     "water": 0.54
+    },
+    {
+     "temperature": 0.75,
+     "predation": 0.8,
+     "foodAbundance": 0.74,
+     "foodHeight": 0.74,
+     "light": 0.54,
+     "water": 0.54
+    },
+    {
+     "temperature": 0.74,
+     "predation": 0.63,
+     "foodAbundance": 0.94,
+     "foodHeight": 0.87,
+     "light": 0.87,
+     "water": 0.04
+    }
+   ]
+  },
+  "Fell-Warmblüter": {
+   "reich": "Tier",
+   "treffer": 5114,
+   "envelope": {
+    "temperature": {
+     "min": 0.02,
+     "max": 0.41
+    },
+    "predation": {
+     "min": 0.07,
+     "max": 1
+    },
+    "foodAbundance": {
+     "min": 0.61,
+     "max": 0.94
+    },
+    "foodHeight": {
+     "min": 0.05,
+     "max": 0.77
+    },
+    "light": {
+     "min": 0.08,
+     "max": 0.9
+    },
+    "water": {
+     "min": 0.06,
+     "max": 0.8
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.03,
+     "predation": 0.27,
+     "foodAbundance": 0.67,
+     "foodHeight": 0.46,
+     "light": 0.08,
+     "water": 0.06
+    },
+    {
+     "temperature": 0.13,
+     "predation": 1,
+     "foodAbundance": 0.61,
+     "foodHeight": 0.23,
+     "light": 0.85,
+     "water": 0.31
+    },
+    {
+     "temperature": 0.02,
+     "predation": 0.31,
+     "foodAbundance": 0.81,
+     "foodHeight": 0.45,
+     "light": 0.9,
+     "water": 0.23
+    }
+   ]
+  },
+  "Fisch · Aalform": {
+   "reich": "Tier",
+   "treffer": 1791,
+   "envelope": {
+    "temperature": {
+     "min": 0.23,
+     "max": 0.86
+    },
+    "predation": {
+     "min": 0.03,
+     "max": 0.85
+    },
+    "foodAbundance": {
+     "min": 0.42,
+     "max": 0.92
+    },
+    "foodHeight": {
+     "min": 0.04,
+     "max": 0.43
+    },
+    "light": {
+     "min": 0.38,
+     "max": 0.84
+    },
+    "water": {
+     "min": 0.72,
+     "max": 0.96
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.66,
+     "predation": 0.38,
+     "foodAbundance": 0.67,
+     "foodHeight": 0.43,
+     "light": 0.41,
+     "water": 0.94
+    },
+    {
+     "temperature": 0.23,
+     "predation": 0.6,
+     "foodAbundance": 0.69,
+     "foodHeight": 0.37,
+     "light": 0.63,
+     "water": 0.75
+    },
+    {
+     "temperature": 0.82,
+     "predation": 0.48,
+     "foodAbundance": 0.42,
+     "foodHeight": 0.12,
+     "light": 0.84,
+     "water": 0.87
+    }
+   ]
+  },
+  "Myzel · Pilzgeflecht": {
+   "reich": "Pilz",
+   "treffer": 1107,
+   "envelope": {
+    "temperature": {
+     "min": 0.2,
+     "max": 0.95
+    },
+    "predation": {
+     "min": 0.14,
+     "max": 0.93
+    },
+    "foodAbundance": {
+     "min": 0.35,
+     "max": 0.77
+    },
+    "foodHeight": {
+     "min": 0.21,
+     "max": 1
+    },
+    "light": {
+     "min": 0.09,
+     "max": 0.9
+    },
+    "water": {
+     "min": 0.51,
+     "max": 0.95
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.64,
+     "predation": 0.14,
+     "foodAbundance": 0.77,
+     "foodHeight": 0.97,
+     "light": 0.87,
+     "water": 0.95
+    },
+    {
+     "temperature": 0.49,
+     "predation": 0.31,
+     "foodAbundance": 0.76,
+     "foodHeight": 1,
+     "light": 0.59,
+     "water": 0.8
+    },
+    {
+     "temperature": 0.25,
+     "predation": 0.27,
+     "foodAbundance": 0.75,
+     "foodHeight": 0.68,
+     "light": 0.9,
+     "water": 0.74
+    }
+   ]
+  },
+  "Aktiver Großjäger": {
+   "reich": "Tier",
+   "treffer": 2545,
+   "envelope": {
+    "temperature": {
+     "min": 0.08,
+     "max": 0.9
+    },
+    "predation": {
+     "min": 0.11,
+     "max": 0.96
+    },
+    "foodAbundance": {
+     "min": 0.53,
+     "max": 0.94
+    },
+    "foodHeight": {
+     "min": 0.27,
+     "max": 0.72
+    },
+    "light": {
+     "min": 0.05,
+     "max": 0.78
+    },
+    "water": {
+     "min": 0.61,
+     "max": 0.91
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.8,
+     "predation": 0.96,
+     "foodAbundance": 0.77,
+     "foodHeight": 0.61,
+     "light": 0.69,
+     "water": 0.8
+    },
+    {
+     "temperature": 0.17,
+     "predation": 0.3,
+     "foodAbundance": 0.8,
+     "foodHeight": 0.72,
+     "light": 0.05,
+     "water": 0.73
+    },
+    {
+     "temperature": 0.12,
+     "predation": 0.94,
+     "foodAbundance": 0.76,
+     "foodHeight": 0.43,
+     "light": 0.78,
+     "water": 0.78
+    }
+   ]
+  },
+  "Generalisten-Tier": {
+   "reich": "Tier",
+   "treffer": 1437,
+   "envelope": {
+    "temperature": {
+     "min": 0.41,
+     "max": 0.77
+    },
+    "predation": {
+     "min": 0.13,
+     "max": 0.91
+    },
+    "foodAbundance": {
+     "min": 0.3,
+     "max": 0.98
+    },
+    "foodHeight": {
+     "min": 0.16,
+     "max": 0.38
+    },
+    "light": {
+     "min": 0.05,
+     "max": 0.86
+    },
+    "water": {
+     "min": 0,
+     "max": 0.71
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.41,
+     "predation": 0.8,
+     "foodAbundance": 0.55,
+     "foodHeight": 0.3,
+     "light": 0.2,
+     "water": 0.71
+    },
+    {
+     "temperature": 0.58,
+     "predation": 0.37,
+     "foodAbundance": 0.3,
+     "foodHeight": 0.36,
+     "light": 0.16,
+     "water": 0.08
+    },
+    {
+     "temperature": 0.51,
+     "predation": 0.55,
+     "foodAbundance": 0.85,
+     "foodHeight": 0.32,
+     "light": 0.19,
+     "water": 0.33
+    }
+   ]
+  },
+  "Kleines flinkes Tier": {
+   "reich": "Tier",
+   "treffer": 1924,
+   "envelope": {
+    "temperature": {
+     "min": 0.52,
+     "max": 0.83
+    },
+    "predation": {
+     "min": 0.07,
+     "max": 0.68
+    },
+    "foodAbundance": {
+     "min": 0.47,
+     "max": 0.73
+    },
+    "foodHeight": {
+     "min": 0.01,
+     "max": 0.48
+    },
+    "light": {
+     "min": 0.02,
+     "max": 0.97
+    },
+    "water": {
+     "min": 0.09,
+     "max": 0.74
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.8,
+     "predation": 0.09,
+     "foodAbundance": 0.64,
+     "foodHeight": 0.31,
+     "light": 0.97,
+     "water": 0.09
+    },
+    {
+     "temperature": 0.61,
+     "predation": 0.68,
+     "foodAbundance": 0.47,
+     "foodHeight": 0.41,
+     "light": 0.07,
+     "water": 0.15
+    },
+    {
+     "temperature": 0.52,
+     "predation": 0.34,
+     "foodAbundance": 0.57,
+     "foodHeight": 0.11,
+     "light": 0.82,
+     "water": 0.14
+    }
+   ]
+  },
+  "Protist · Amöbe": {
+   "reich": "Mikrobe",
+   "treffer": 2238,
+   "envelope": {
+    "temperature": {
+     "min": 0.14,
+     "max": 0.93
+    },
+    "predation": {
+     "min": 0.03,
+     "max": 0.51
+    },
+    "foodAbundance": {
+     "min": 0.28,
+     "max": 0.8
+    },
+    "foodHeight": {
+     "min": 0.21,
+     "max": 0.93
+    },
+    "light": {
+     "min": 0.18,
+     "max": 1
+    },
+    "water": {
+     "min": 0.13,
+     "max": 0.87
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.33,
+     "predation": 0.05,
+     "foodAbundance": 0.8,
+     "foodHeight": 0.76,
+     "light": 0.18,
+     "water": 0.61
+    },
+    {
+     "temperature": 0.42,
+     "predation": 0.31,
+     "foodAbundance": 0.54,
+     "foodHeight": 0.21,
+     "light": 0.98,
+     "water": 0.54
+    },
+    {
+     "temperature": 0.87,
+     "predation": 0.51,
+     "foodAbundance": 0.46,
+     "foodHeight": 0.31,
+     "light": 0.23,
+     "water": 0.44
+    }
+   ]
+  },
+  "Flugsäuger · Fledermaus": {
+   "reich": "Tier",
+   "treffer": 875,
+   "envelope": {
+    "temperature": {
+     "min": 0.07,
+     "max": 0.45
+    },
+    "predation": {
+     "min": 0.06,
+     "max": 0.89
+    },
+    "foodAbundance": {
+     "min": 0.64,
+     "max": 0.93
+    },
+    "foodHeight": {
+     "min": 0.61,
+     "max": 0.9
+    },
+    "light": {
+     "min": 0.01,
+     "max": 0.73
+    },
+    "water": {
+     "min": 0.07,
+     "max": 0.65
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.18,
+     "predation": 0.89,
+     "foodAbundance": 0.9,
+     "foodHeight": 0.62,
+     "light": 0.01,
+     "water": 0.65
+    },
+    {
+     "temperature": 0.34,
+     "predation": 0.06,
+     "foodAbundance": 0.7,
+     "foodHeight": 0.61,
+     "light": 0.73,
+     "water": 0.61
+    },
+    {
+     "temperature": 0.14,
+     "predation": 0.39,
+     "foodAbundance": 0.71,
+     "foodHeight": 0.84,
+     "light": 0.39,
+     "water": 0.39
+    }
+   ]
+  },
+  "Insekt · Gliederfüßer": {
+   "reich": "Tier",
+   "treffer": 863,
+   "envelope": {
+    "temperature": {
+     "min": 0.64,
+     "max": 0.98
+    },
+    "predation": {
+     "min": 0,
+     "max": 0.92
+    },
+    "foodAbundance": {
+     "min": 0.52,
+     "max": 0.83
+    },
+    "foodHeight": {
+     "min": 0.52,
+     "max": 0.78
+    },
+    "light": {
+     "min": 0,
+     "max": 0.96
+    },
+    "water": {
+     "min": 0.11,
+     "max": 0.56
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.8,
+     "predation": 0.36,
+     "foodAbundance": 0.6,
+     "foodHeight": 0.53,
+     "light": 0.06,
+     "water": 0.31
+    },
+    {
+     "temperature": 0.76,
+     "predation": 0.66,
+     "foodAbundance": 0.73,
+     "foodHeight": 0.63,
+     "light": 0.39,
+     "water": 0.28
+    },
+    {
+     "temperature": 0.64,
+     "predation": 0.79,
+     "foodAbundance": 0.68,
+     "foodHeight": 0.68,
+     "light": 0.59,
+     "water": 0.51
+    }
+   ]
+  },
+  "Fell-Großtier": {
+   "reich": "Tier",
+   "treffer": 309,
+   "envelope": {
+    "temperature": {
+     "min": 0.12,
+     "max": 0.74
+    },
+    "predation": {
+     "min": 0.13,
+     "max": 0.87
+    },
+    "foodAbundance": {
+     "min": 0.64,
+     "max": 1
+    },
+    "foodHeight": {
+     "min": 0.04,
+     "max": 0.28
+    },
+    "light": {
+     "min": 0.04,
+     "max": 0.95
+    },
+    "water": {
+     "min": 0.68,
+     "max": 0.95
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.2,
+     "predation": 0.47,
+     "foodAbundance": 0.94,
+     "foodHeight": 0.25,
+     "light": 0.1,
+     "water": 0.85
+    },
+    {
+     "temperature": 0.7,
+     "predation": 0.62,
+     "foodAbundance": 0.88,
+     "foodHeight": 0.2,
+     "light": 0.12,
+     "water": 0.9
+    },
+    {
+     "temperature": 0.14,
+     "predation": 0.87,
+     "foodAbundance": 0.64,
+     "foodHeight": 0.28,
+     "light": 0.04,
+     "water": 0.81
+    }
+   ]
+  },
+  "Hefe": {
+   "reich": "Pilz",
+   "treffer": 714,
+   "envelope": {
+    "temperature": {
+     "min": 0.35,
+     "max": 0.94
+    },
+    "predation": {
+     "min": 0.1,
+     "max": 0.72
+    },
+    "foodAbundance": {
+     "min": 0.42,
+     "max": 0.75
+    },
+    "foodHeight": {
+     "min": 0.42,
+     "max": 1
+    },
+    "light": {
+     "min": 0.1,
+     "max": 0.98
+    },
+    "water": {
+     "min": 0.58,
+     "max": 0.91
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.37,
+     "predation": 0.1,
+     "foodAbundance": 0.74,
+     "foodHeight": 0.87,
+     "light": 0.27,
+     "water": 0.84
+    },
+    {
+     "temperature": 0.53,
+     "predation": 0.53,
+     "foodAbundance": 0.57,
+     "foodHeight": 0.98,
+     "light": 0.98,
+     "water": 0.74
+    },
+    {
+     "temperature": 0.94,
+     "predation": 0.59,
+     "foodAbundance": 0.54,
+     "foodHeight": 0.76,
+     "light": 0.97,
+     "water": 0.58
+    }
+   ]
+  },
+  "Krebstier · Arthropode": {
+   "reich": "Tier",
+   "treffer": 538,
+   "envelope": {
+    "temperature": {
+     "min": 0.04,
+     "max": 0.81
+    },
+    "predation": {
+     "min": 0.44,
+     "max": 0.96
+    },
+    "foodAbundance": {
+     "min": 0.38,
+     "max": 0.69
+    },
+    "foodHeight": {
+     "min": 0.64,
+     "max": 0.82
+    },
+    "light": {
+     "min": 0.08,
+     "max": 0.98
+    },
+    "water": {
+     "min": 0.08,
+     "max": 0.54
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.04,
+     "predation": 0.68,
+     "foodAbundance": 0.5,
+     "foodHeight": 0.64,
+     "light": 0.98,
+     "water": 0.22
+    },
+    {
+     "temperature": 0.34,
+     "predation": 0.69,
+     "foodAbundance": 0.42,
+     "foodHeight": 0.67,
+     "light": 0.19,
+     "water": 0.54
+    },
+    {
+     "temperature": 0.24,
+     "predation": 0.84,
+     "foodAbundance": 0.69,
+     "foodHeight": 0.82,
+     "light": 0.59,
+     "water": 0.24
+    }
+   ]
+  },
+  "Laubbaum": {
+   "reich": "Pflanze",
+   "treffer": 276,
+   "envelope": {
+    "temperature": {
+     "min": 0.27,
+     "max": 0.86
+    },
+    "predation": {
+     "min": 0.14,
+     "max": 0.98
+    },
+    "foodAbundance": {
+     "min": 0.02,
+     "max": 0.53
+    },
+    "foodHeight": {
+     "min": 0.41,
+     "max": 1
+    },
+    "light": {
+     "min": 0.71,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.75,
+     "max": 0.99
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.7,
+     "predation": 0.9,
+     "foodAbundance": 0.53,
+     "foodHeight": 0.79,
+     "light": 0.99,
+     "water": 0.83
+    },
+    {
+     "temperature": 0.27,
+     "predation": 0.61,
+     "foodAbundance": 0.28,
+     "foodHeight": 0.91,
+     "light": 0.82,
+     "water": 0.99
+    },
+    {
+     "temperature": 0.37,
+     "predation": 0.54,
+     "foodAbundance": 0.44,
+     "foodHeight": 0.97,
+     "light": 0.99,
+     "water": 0.92
+    }
+   ]
+  },
+  "Verholzter Strauch": {
+   "reich": "Pflanze",
+   "treffer": 384,
+   "envelope": {
+    "temperature": {
+     "min": 0.4,
+     "max": 0.98
+    },
+    "predation": {
+     "min": 0.01,
+     "max": 0.57
+    },
+    "foodAbundance": {
+     "min": 0,
+     "max": 0.27
+    },
+    "foodHeight": {
+     "min": 0.17,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.48,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.68,
+     "max": 0.99
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.92,
+     "predation": 0.29,
+     "foodAbundance": 0,
+     "foodHeight": 0.99,
+     "light": 0.48,
+     "water": 0.77
+    },
+    {
+     "temperature": 0.62,
+     "predation": 0.37,
+     "foodAbundance": 0.02,
+     "foodHeight": 0.71,
+     "light": 0.87,
+     "water": 0.77
+    },
+    {
+     "temperature": 0.59,
+     "predation": 0.01,
+     "foodAbundance": 0.27,
+     "foodHeight": 0.89,
+     "light": 0.77,
+     "water": 0.93
+    }
+   ]
+  },
+  "Archaee · Extremophil": {
+   "reich": "Mikrobe",
+   "treffer": 711,
+   "envelope": {
+    "temperature": {
+     "min": 0.23,
+     "max": 0.89
+    },
+    "predation": {
+     "min": 0,
+     "max": 0.18
+    },
+    "foodAbundance": {
+     "min": 0.38,
+     "max": 0.87
+    },
+    "foodHeight": {
+     "min": 0.03,
+     "max": 0.94
+    },
+    "light": {
+     "min": 0.01,
+     "max": 0.83
+    },
+    "water": {
+     "min": 0.28,
+     "max": 0.77
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.68,
+     "predation": 0.05,
+     "foodAbundance": 0.47,
+     "foodHeight": 0.09,
+     "light": 0.65,
+     "water": 0.72
+    },
+    {
+     "temperature": 0.4,
+     "predation": 0.02,
+     "foodAbundance": 0.43,
+     "foodHeight": 0.16,
+     "light": 0.02,
+     "water": 0.66
+    },
+    {
+     "temperature": 0.32,
+     "predation": 0.05,
+     "foodAbundance": 0.87,
+     "foodHeight": 0.94,
+     "light": 0.83,
+     "water": 0.28
+    }
+   ]
+  },
+  "Flechte · Symbiose": {
+   "reich": "Pilz",
+   "treffer": 673,
+   "envelope": {
+    "temperature": {
+     "min": 0.03,
+     "max": 0.48
+    },
+    "predation": {
+     "min": 0.09,
+     "max": 0.67
+    },
+    "foodAbundance": {
+     "min": 0.16,
+     "max": 0.5
+    },
+    "foodHeight": {
+     "min": 0.01,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.25,
+     "max": 0.96
+    },
+    "water": {
+     "min": 0.16,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.48,
+     "predation": 0.67,
+     "foodAbundance": 0.32,
+     "foodHeight": 0.84,
+     "light": 0.59,
+     "water": 0.97
+    },
+    {
+     "temperature": 0.03,
+     "predation": 0.09,
+     "foodAbundance": 0.37,
+     "foodHeight": 0.36,
+     "light": 0.54,
+     "water": 0.55
+    },
+    {
+     "temperature": 0.2,
+     "predation": 0.16,
+     "foodAbundance": 0.37,
+     "foodHeight": 0.13,
+     "light": 0.62,
+     "water": 0.16
+    }
+   ]
+  },
+  "Kraut · niedrige Pflanze": {
+   "reich": "Pflanze",
+   "treffer": 230,
+   "envelope": {
+    "temperature": {
+     "min": 0.18,
+     "max": 0.7
+    },
+    "predation": {
+     "min": 0.01,
+     "max": 0.31
+    },
+    "foodAbundance": {
+     "min": 0.02,
+     "max": 0.2
+    },
+    "foodHeight": {
+     "min": 0.24,
+     "max": 0.87
+    },
+    "light": {
+     "min": 0.11,
+     "max": 0.93
+    },
+    "water": {
+     "min": 0.31,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.53,
+     "predation": 0.22,
+     "foodAbundance": 0.04,
+     "foodHeight": 0.28,
+     "light": 0.56,
+     "water": 0.85
+    },
+    {
+     "temperature": 0.34,
+     "predation": 0.31,
+     "foodAbundance": 0.03,
+     "foodHeight": 0.24,
+     "light": 0.78,
+     "water": 0.97
+    },
+    {
+     "temperature": 0.28,
+     "predation": 0.09,
+     "foodAbundance": 0.16,
+     "foodHeight": 0.53,
+     "light": 0.89,
+     "water": 0.71
+    }
+   ]
+  },
+  "Koralle · Riffbildner": {
+   "reich": "Tier",
+   "treffer": 275,
+   "envelope": {
+    "temperature": {
+     "min": 0.05,
+     "max": 0.98
+    },
+    "predation": {
+     "min": 0.18,
+     "max": 0.77
+    },
+    "foodAbundance": {
+     "min": 0.1,
+     "max": 0.5
+    },
+    "foodHeight": {
+     "min": 0.35,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.09,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.09,
+     "max": 0.95
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.85,
+     "predation": 0.45,
+     "foodAbundance": 0.3,
+     "foodHeight": 0.68,
+     "light": 0.82,
+     "water": 0.3
+    },
+    {
+     "temperature": 0.73,
+     "predation": 0.21,
+     "foodAbundance": 0.1,
+     "foodHeight": 0.62,
+     "light": 0.09,
+     "water": 0.55
+    },
+    {
+     "temperature": 0.09,
+     "predation": 0.77,
+     "foodAbundance": 0.5,
+     "foodHeight": 0.49,
+     "light": 0.99,
+     "water": 0.95
+    }
+   ]
+  },
+  "Behänder Kletterer": {
+   "reich": "Tier",
+   "treffer": 674,
+   "envelope": {
+    "temperature": {
+     "min": 0.35,
+     "max": 0.85
+    },
+    "predation": {
+     "min": 0.03,
+     "max": 0.98
+    },
+    "foodAbundance": {
+     "min": 0.58,
+     "max": 0.92
+    },
+    "foodHeight": {
+     "min": 0.53,
+     "max": 0.76
+    },
+    "light": {
+     "min": 0.15,
+     "max": 0.78
+    },
+    "water": {
+     "min": 0,
+     "max": 0.52
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.49,
+     "predation": 0.03,
+     "foodAbundance": 0.58,
+     "foodHeight": 0.55,
+     "light": 0.37,
+     "water": 0.02
+    },
+    {
+     "temperature": 0.79,
+     "predation": 0.96,
+     "foodAbundance": 0.74,
+     "foodHeight": 0.53,
+     "light": 0.67,
+     "water": 0.09
+    },
+    {
+     "temperature": 0.35,
+     "predation": 0.1,
+     "foodAbundance": 0.76,
+     "foodHeight": 0.68,
+     "light": 0.62,
+     "water": 0
+    }
+   ]
+  },
+  "Plankton": {
+   "reich": "Protist",
+   "treffer": 157,
+   "envelope": {
+    "temperature": {
+     "min": 0.36,
+     "max": 0.98
+    },
+    "predation": {
+     "min": 0.06,
+     "max": 0.5
+    },
+    "foodAbundance": {
+     "min": 0.43,
+     "max": 0.66
+    },
+    "foodHeight": {
+     "min": 0.04,
+     "max": 0.73
+    },
+    "light": {
+     "min": 0.02,
+     "max": 0.66
+    },
+    "water": {
+     "min": 0.08,
+     "max": 0.52
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.79,
+     "predation": 0.19,
+     "foodAbundance": 0.58,
+     "foodHeight": 0.64,
+     "light": 0.35,
+     "water": 0.38
+    },
+    {
+     "temperature": 0.8,
+     "predation": 0.06,
+     "foodAbundance": 0.66,
+     "foodHeight": 0.48,
+     "light": 0.66,
+     "water": 0.52
+    },
+    {
+     "temperature": 0.45,
+     "predation": 0.32,
+     "foodAbundance": 0.5,
+     "foodHeight": 0.45,
+     "light": 0.08,
+     "water": 0.52
+    }
+   ]
+  },
+  "Gepanzertes Beutetier": {
+   "reich": "Tier",
+   "treffer": 592,
+   "envelope": {
+    "temperature": {
+     "min": 0.03,
+     "max": 0.87
+    },
+    "predation": {
+     "min": 0.59,
+     "max": 0.98
+    },
+    "foodAbundance": {
+     "min": 0.38,
+     "max": 0.52
+    },
+    "foodHeight": {
+     "min": 0.02,
+     "max": 0.47
+    },
+    "light": {
+     "min": 0.35,
+     "max": 0.92
+    },
+    "water": {
+     "min": 0.05,
+     "max": 0.37
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.7,
+     "predation": 0.76,
+     "foodAbundance": 0.4,
+     "foodHeight": 0.47,
+     "light": 0.87,
+     "water": 0.14
+    },
+    {
+     "temperature": 0.08,
+     "predation": 0.89,
+     "foodAbundance": 0.51,
+     "foodHeight": 0.13,
+     "light": 0.35,
+     "water": 0.05
+    },
+    {
+     "temperature": 0.85,
+     "predation": 0.7,
+     "foodAbundance": 0.38,
+     "foodHeight": 0.11,
+     "light": 0.59,
+     "water": 0.37
+    }
+   ]
+  },
+  "Schimmel · Fadenpilz": {
+   "reich": "Pilz",
+   "treffer": 87,
+   "envelope": {
+    "temperature": {
+     "min": 0.08,
+     "max": 0.99
+    },
+    "predation": {
+     "min": 0.02,
+     "max": 0.43
+    },
+    "foodAbundance": {
+     "min": 0.49,
+     "max": 0.88
+    },
+    "foodHeight": {
+     "min": 0.4,
+     "max": 0.86
+    },
+    "light": {
+     "min": 0.09,
+     "max": 0.9
+    },
+    "water": {
+     "min": 0.73,
+     "max": 0.99
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.2,
+     "predation": 0.28,
+     "foodAbundance": 0.49,
+     "foodHeight": 0.4,
+     "light": 0.6,
+     "water": 0.8
+    },
+    {
+     "temperature": 0.41,
+     "predation": 0.43,
+     "foodAbundance": 0.55,
+     "foodHeight": 0.54,
+     "light": 0.31,
+     "water": 0.73
+    },
+    {
+     "temperature": 0.99,
+     "predation": 0.02,
+     "foodAbundance": 0.84,
+     "foodHeight": 0.63,
+     "light": 0.65,
+     "water": 0.83
+    }
+   ]
+  },
+  "Leuchtwesen · Tiefsee": {
+   "reich": "Tier",
+   "treffer": 360,
+   "envelope": {
+    "temperature": {
+     "min": 0.25,
+     "max": 0.84
+    },
+    "predation": {
+     "min": 0.18,
+     "max": 0.97
+    },
+    "foodAbundance": {
+     "min": 0.35,
+     "max": 0.75
+    },
+    "foodHeight": {
+     "min": 0,
+     "max": 0.18
+    },
+    "light": {
+     "min": 0.1,
+     "max": 0.24
+    },
+    "water": {
+     "min": 0.64,
+     "max": 0.94
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.84,
+     "predation": 0.77,
+     "foodAbundance": 0.35,
+     "foodHeight": 0.05,
+     "light": 0.1,
+     "water": 0.94
+    },
+    {
+     "temperature": 0.67,
+     "predation": 0.93,
+     "foodAbundance": 0.57,
+     "foodHeight": 0,
+     "light": 0.18,
+     "water": 0.64
+    },
+    {
+     "temperature": 0.25,
+     "predation": 0.97,
+     "foodAbundance": 0.71,
+     "foodHeight": 0.04,
+     "light": 0.17,
+     "water": 0.7
+    }
+   ]
+  },
+  "Kopffüßer · Tintenfisch": {
+   "reich": "Tier",
+   "treffer": 33,
+   "envelope": {
+    "temperature": {
+     "min": 0.64,
+     "max": 0.95
+    },
+    "predation": {
+     "min": 0.06,
+     "max": 0.99
+    },
+    "foodAbundance": {
+     "min": 0.46,
+     "max": 0.91
+    },
+    "foodHeight": {
+     "min": 0.49,
+     "max": 0.69
+    },
+    "light": {
+     "min": 0.01,
+     "max": 0.66
+    },
+    "water": {
+     "min": 0.14,
+     "max": 0.77
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.8,
+     "predation": 0.06,
+     "foodAbundance": 0.91,
+     "foodHeight": 0.61,
+     "light": 0.04,
+     "water": 0.14
+    },
+    {
+     "temperature": 0.64,
+     "predation": 0.58,
+     "foodAbundance": 0.46,
+     "foodHeight": 0.54,
+     "light": 0.01,
+     "water": 0.6
+    },
+    {
+     "temperature": 0.66,
+     "predation": 0.6,
+     "foodAbundance": 0.53,
+     "foodHeight": 0.56,
+     "light": 0.23,
+     "water": 0.65
+    }
+   ]
+  },
+  "Hutpilz": {
+   "reich": "Pilz",
+   "treffer": 355,
+   "envelope": {
+    "temperature": {
+     "min": 0.06,
+     "max": 0.65
+    },
+    "predation": {
+     "min": 0.21,
+     "max": 0.8
+    },
+    "foodAbundance": {
+     "min": 0.46,
+     "max": 0.95
+    },
+    "foodHeight": {
+     "min": 0.49,
+     "max": 0.98
+    },
+    "light": {
+     "min": 0.09,
+     "max": 0.77
+    },
+    "water": {
+     "min": 0.58,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.41,
+     "predation": 0.3,
+     "foodAbundance": 0.95,
+     "foodHeight": 0.98,
+     "light": 0.42,
+     "water": 0.7
+    },
+    {
+     "temperature": 0.31,
+     "predation": 0.25,
+     "foodAbundance": 0.57,
+     "foodHeight": 0.49,
+     "light": 0.41,
+     "water": 0.83
+    },
+    {
+     "temperature": 0.1,
+     "predation": 0.66,
+     "foodAbundance": 0.68,
+     "foodHeight": 0.67,
+     "light": 0.19,
+     "water": 0.91
+    }
+   ]
+  },
+  "Gepanzerter Koloss": {
+   "reich": "Tier",
+   "treffer": 70,
+   "envelope": {
+    "temperature": {
+     "min": 0.28,
+     "max": 1
+    },
+    "predation": {
+     "min": 0.77,
+     "max": 1
+    },
+    "foodAbundance": {
+     "min": 0.25,
+     "max": 0.45
+    },
+    "foodHeight": {
+     "min": 0.19,
+     "max": 0.81
+    },
+    "light": {
+     "min": 0.21,
+     "max": 0.67
+    },
+    "water": {
+     "min": 0.56,
+     "max": 0.89
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.28,
+     "predation": 0.98,
+     "foodAbundance": 0.39,
+     "foodHeight": 0.42,
+     "light": 0.25,
+     "water": 0.86
+    },
+    {
+     "temperature": 0.84,
+     "predation": 0.97,
+     "foodAbundance": 0.45,
+     "foodHeight": 0.81,
+     "light": 0.25,
+     "water": 0.56
+    },
+    {
+     "temperature": 0.51,
+     "predation": 0.88,
+     "foodAbundance": 0.31,
+     "foodHeight": 0.19,
+     "light": 0.67,
+     "water": 0.81
+    }
+   ]
+  },
+  "Wurm": {
+   "reich": "Tier",
+   "treffer": 6,
+   "envelope": {
+    "temperature": {
+     "min": 0.34,
+     "max": 0.88
+    },
+    "predation": {
+     "min": 0,
+     "max": 0.26
+    },
+    "foodAbundance": {
+     "min": 0.41,
+     "max": 0.53
+    },
+    "foodHeight": {
+     "min": 0.01,
+     "max": 0.14
+    },
+    "light": {
+     "min": 0.41,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.77,
+     "max": 0.99
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.8,
+     "predation": 0,
+     "foodAbundance": 0.53,
+     "foodHeight": 0.11,
+     "light": 0.8,
+     "water": 0.78
+    },
+    {
+     "temperature": 0.68,
+     "predation": 0.23,
+     "foodAbundance": 0.49,
+     "foodHeight": 0.14,
+     "light": 0.96,
+     "water": 0.77
+    },
+    {
+     "temperature": 0.36,
+     "predation": 0.26,
+     "foodAbundance": 0.41,
+     "foodHeight": 0.06,
+     "light": 0.43,
+     "water": 0.99
+    }
+   ]
+  },
+  "Grünalge": {
+   "reich": "Pflanze",
+   "treffer": 52,
+   "envelope": {
+    "temperature": {
+     "min": 0.43,
+     "max": 0.96
+    },
+    "predation": {
+     "min": 0.01,
+     "max": 0.22
+    },
+    "foodAbundance": {
+     "min": 0,
+     "max": 0.19
+    },
+    "foodHeight": {
+     "min": 0.01,
+     "max": 0.59
+    },
+    "light": {
+     "min": 0.64,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.45,
+     "max": 0.88
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.96,
+     "predation": 0.1,
+     "foodAbundance": 0,
+     "foodHeight": 0.35,
+     "light": 0.64,
+     "water": 0.73
+    },
+    {
+     "temperature": 0.63,
+     "predation": 0.1,
+     "foodAbundance": 0.12,
+     "foodHeight": 0.07,
+     "light": 0.98,
+     "water": 0.81
+    },
+    {
+     "temperature": 0.78,
+     "predation": 0.14,
+     "foodAbundance": 0.09,
+     "foodHeight": 0.02,
+     "light": 0.89,
+     "water": 0.88
+    }
+   ]
+  },
+  "Polster-Kältepflanze": {
+   "reich": "Pflanze",
+   "treffer": 252,
+   "envelope": {
+    "temperature": {
+     "min": 0.13,
+     "max": 0.36
+    },
+    "predation": {
+     "min": 0.01,
+     "max": 0.11
+    },
+    "foodAbundance": {
+     "min": 0.02,
+     "max": 0.23
+    },
+    "foodHeight": {
+     "min": 0.01,
+     "max": 0.93
+    },
+    "light": {
+     "min": 0.2,
+     "max": 0.88
+    },
+    "water": {
+     "min": 0.03,
+     "max": 0.82
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.34,
+     "predation": 0.03,
+     "foodAbundance": 0.14,
+     "foodHeight": 0.93,
+     "light": 0.65,
+     "water": 0.25
+    },
+    {
+     "temperature": 0.34,
+     "predation": 0.1,
+     "foodAbundance": 0.02,
+     "foodHeight": 0.56,
+     "light": 0.41,
+     "water": 0.82
+    },
+    {
+     "temperature": 0.36,
+     "predation": 0.11,
+     "foodAbundance": 0.12,
+     "foodHeight": 0.76,
+     "light": 0.2,
+     "water": 0.74
+    }
+   ]
+  },
+  "Sukkulente · Kaktus": {
+   "reich": "Pflanze",
+   "treffer": 31,
+   "envelope": {
+    "temperature": {
+     "min": 0.41,
+     "max": 0.91
+    },
+    "predation": {
+     "min": 0.3,
+     "max": 0.46
+    },
+    "foodAbundance": {
+     "min": 0.03,
+     "max": 0.19
+    },
+    "foodHeight": {
+     "min": 0.2,
+     "max": 0.99
+    },
+    "light": {
+     "min": 0.5,
+     "max": 0.91
+    },
+    "water": {
+     "min": 0.46,
+     "max": 0.86
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.77,
+     "predation": 0.46,
+     "foodAbundance": 0.13,
+     "foodHeight": 0.2,
+     "light": 0.74,
+     "water": 0.75
+    },
+    {
+     "temperature": 0.71,
+     "predation": 0.42,
+     "foodAbundance": 0.19,
+     "foodHeight": 0.64,
+     "light": 0.85,
+     "water": 0.49
+    },
+    {
+     "temperature": 0.91,
+     "predation": 0.45,
+     "foodAbundance": 0.19,
+     "foodHeight": 0.9,
+     "light": 0.53,
+     "water": 0.64
+    }
+   ]
+  },
+  "Nadelbaum": {
+   "reich": "Pflanze",
+   "treffer": 7,
+   "envelope": {
+    "temperature": {
+     "min": 0.19,
+     "max": 0.64
+    },
+    "predation": {
+     "min": 0.37,
+     "max": 0.97
+    },
+    "foodAbundance": {
+     "min": 0.09,
+     "max": 0.42
+    },
+    "foodHeight": {
+     "min": 0.39,
+     "max": 0.88
+    },
+    "light": {
+     "min": 0.85,
+     "max": 0.99
+    },
+    "water": {
+     "min": 0.74,
+     "max": 0.97
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.26,
+     "predation": 0.8,
+     "foodAbundance": 0.42,
+     "foodHeight": 0.85,
+     "light": 0.94,
+     "water": 0.89
+    },
+    {
+     "temperature": 0.44,
+     "predation": 0.97,
+     "foodAbundance": 0.4,
+     "foodHeight": 0.76,
+     "light": 0.93,
+     "water": 0.78
+    },
+    {
+     "temperature": 0.19,
+     "predation": 0.84,
+     "foodAbundance": 0.39,
+     "foodHeight": 0.68,
+     "light": 0.97,
+     "water": 0.97
+    }
+   ]
+  },
+  "Moos": {
+   "reich": "Pflanze",
+   "treffer": 2,
+   "envelope": {
+    "temperature": {
+     "min": 0.27,
+     "max": 0.3
+    },
+    "predation": {
+     "min": 0.05,
+     "max": 0.17
+    },
+    "foodAbundance": {
+     "min": 0.17,
+     "max": 0.18
+    },
+    "foodHeight": {
+     "min": 0.02,
+     "max": 0.17
+    },
+    "light": {
+     "min": 0.95,
+     "max": 0.97
+    },
+    "water": {
+     "min": 0.76,
+     "max": 0.81
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.27,
+     "predation": 0.05,
+     "foodAbundance": 0.18,
+     "foodHeight": 0.17,
+     "light": 0.95,
+     "water": 0.81
+    },
+    {
+     "temperature": 0.3,
+     "predation": 0.17,
+     "foodAbundance": 0.17,
+     "foodHeight": 0.02,
+     "light": 0.97,
+     "water": 0.76
+    }
+   ]
+  },
+  "Fluginsekt · Segler": {
+   "reich": "Tier",
+   "treffer": 1,
+   "envelope": {
+    "temperature": {
+     "min": 0.92,
+     "max": 0.92
+    },
+    "predation": {
+     "min": 0.48,
+     "max": 0.48
+    },
+    "foodAbundance": {
+     "min": 0.51,
+     "max": 0.51
+    },
+    "foodHeight": {
+     "min": 0.75,
+     "max": 0.75
+    },
+    "light": {
+     "min": 0.13,
+     "max": 0.13
+    },
+    "water": {
+     "min": 0.07,
+     "max": 0.07
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.92,
+     "predation": 0.48,
+     "foodAbundance": 0.51,
+     "foodHeight": 0.75,
+     "light": 0.13,
+     "water": 0.07
+    }
+   ]
+  },
+  "Farn": {
+   "reich": "Pflanze",
+   "treffer": 1,
+   "envelope": {
+    "temperature": {
+     "min": 0.43,
+     "max": 0.43
+    },
+    "predation": {
+     "min": 0.15,
+     "max": 0.15
+    },
+    "foodAbundance": {
+     "min": 0.08,
+     "max": 0.08
+    },
+    "foodHeight": {
+     "min": 0.24,
+     "max": 0.24
+    },
+    "light": {
+     "min": 0.59,
+     "max": 0.59
+    },
+    "water": {
+     "min": 0.82,
+     "max": 0.82
+    }
+   },
+   "beispiele": [
+    {
+     "temperature": 0.43,
+     "predation": 0.15,
+     "foodAbundance": 0.08,
+     "foodHeight": 0.24,
+     "light": 0.59,
+     "water": 0.82
+    }
+   ]
+  }
+ },
+ "formenOhneTreffer": [
+  "Blütenkraut",
+  "Schnecke · Weichtier",
+  "Amphibie · Lurch",
+  "Schwamm",
+  "Zunderschwamm"
+ ],
+ "hinweis": "reichEnvelopes/formEnvelopes stammen aus 45000 rein zufälligen Umgebungen (die 6 Regler gleichverteilt über [0,1], alles andere neutral), je 800 Generationen konvergiert. treffer = wie oft dieses Ziel getroffen wurde (Seltenheits-Maß). envelope = die tatsächlich gemessene Spanne jeder Achse unter den Treffern. beispiele = bis zu 8 konkrete Umgebungen, die dieses Ziel wirklich erreicht haben."
+}
