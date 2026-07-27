@@ -1,0 +1,254 @@
+[
+ {
+  "id": "pilz-ohne-licht",
+  "titel": "Leben ohne Sonne",
+  "beschreibung": "Bring eine Linie ins Reich der Pilze, ohne das Licht je über 0,25 zu heben und bei reichlich Feuchte.",
+  "ziel": { "reich": "Pilz" },
+  "grenzen": { "light": { "max": 0.25 }, "water": { "min": 0.5 } },
+  "generationen": 900,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "pflanze-im-halbschatten",
+  "titel": "Grün trotz Dämmerung",
+  "beschreibung": "Erreiche das Reich der Pflanzen, obwohl die Nahrung nie über 0,3 steigt und das Licht knapp bleibt.",
+  "ziel": { "reich": "Pflanze" },
+  "grenzen": { "foodAbundance": { "max": 0.3 }, "light": { "min": 0.55 } },
+  "generationen": 700,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "tier-ohne-raeuber",
+  "titel": "Wehrhaft ohne Not",
+  "beschreibung": "Bring eine Linie ins Reich der Tiere, ohne dass der Räuberdruck je über 0,2 steigt.",
+  "ziel": { "reich": "Tier" },
+  "grenzen": { "predation": { "max": 0.2 } },
+  "generationen": 1200,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "mikrobe-in-der-hitze",
+  "titel": "Am Rand des Erträglichen",
+  "beschreibung": "Halt die Temperatur über 0,85 und das Licht unter 0,2, bis sich eine Linie zur Mikrobe zurückzieht.",
+  "ziel": { "reich": "Mikrobe" },
+  "grenzen": { "temperature": { "min": 0.85 }, "light": { "max": 0.2 } },
+  "generationen": 600,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "protist-im-wasser",
+  "titel": "Kleines Leben im Teich",
+  "beschreibung": "Erreiche das Reich der Protisten unter Wasser, ohne dass das Licht je über 0,45 steigt.",
+  "ziel": { "reich": "Protist" },
+  "grenzen": { "water": { "min": 0.7 }, "light": { "max": 0.45 } },
+  "generationen": 800,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "pflanze-in-der-duerre",
+  "titel": "Grün im Trockenen",
+  "beschreibung": "Bring eine Linie ins Reich der Pflanzen, ohne dass das Wasser je über 0,25 steigt.",
+  "ziel": { "reich": "Pflanze" },
+  "grenzen": { "water": { "max": 0.25 }, "light": { "min": 0.6 } },
+  "generationen": 1000,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "pilz-am-boden",
+  "titel": "Zersetzer im Dunkeln",
+  "beschreibung": "Erreiche das Reich der Pilze, ohne dass die Nahrung je über 0,25 steigt und das Licht dunkel bleibt.",
+  "ziel": { "reich": "Pilz" },
+  "grenzen": { "foodAbundance": { "max": 0.25 }, "light": { "max": 0.3 } },
+  "generationen": 750,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "tier-im-ueberfluss",
+  "titel": "Jagd im vollen Land",
+  "beschreibung": "Bring eine Linie ins Reich der Tiere, wenn der Räuberdruck stets über 0,6 bleibt und Nahrung reichlich ist.",
+  "ziel": { "reich": "Tier" },
+  "grenzen": { "predation": { "min": 0.6 }, "foodAbundance": { "min": 0.5 } },
+  "generationen": 500,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "mikrobe-in-der-kaelte",
+  "titel": "Frost und Finsternis",
+  "beschreibung": "Halt die Temperatur unter 0,15 und das Licht unter 0,25, bis eine Linie ins Reich der Mikroben findet.",
+  "ziel": { "reich": "Mikrobe" },
+  "grenzen": { "temperature": { "max": 0.15 }, "light": { "max": 0.25 } },
+  "generationen": 650,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "nadelbaum-in-der-kaelte",
+  "titel": "Grün im ewigen Winter",
+  "beschreibung": "Erreiche den Nadelbaum, ohne dass die Temperatur je über 0,3 steigt, bei viel Licht und mittlerem Wasser.",
+  "ziel": { "form": "Nadelbaum" },
+  "grenzen": { "temperature": { "max": 0.3 }, "light": { "min": 0.6 } },
+  "generationen": 1400,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "sukkulente-in-der-wueste",
+  "titel": "Durstiges Land",
+  "beschreibung": "Bring eine Linie zur Sukkulente, ohne dass das Wasser je über 0,2 steigt und bei starker Hitze.",
+  "ziel": { "form": "Sukkulente · Kaktus" },
+  "grenzen": { "water": { "max": 0.2 }, "temperature": { "min": 0.6 }, "light": { "min": 0.6 } },
+  "generationen": 1300,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "leuchtwesen-der-tiefsee",
+  "titel": "Licht aus der Tiefe",
+  "beschreibung": "Erreiche das Leuchtwesen der Tiefsee: tief unter Wasser, im Dunkeln, mit spürbarem Räuberdruck.",
+  "ziel": { "form": "Leuchtwesen · Tiefsee" },
+  "grenzen": { "water": { "min": 0.8 }, "light": { "max": 0.1 }, "predation": { "min": 0.4 } },
+  "generationen": 1600,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "koralle-im-riff",
+  "titel": "Baumeister im Flachwasser",
+  "beschreibung": "Bring eine Linie zur Koralle: warm, hell und ständig unter Wasser, bei ruhigem Räuberdruck.",
+  "ziel": { "form": "Koralle · Riffbildner" },
+  "grenzen": { "water": { "min": 0.75 }, "temperature": { "min": 0.55 }, "light": { "min": 0.55 } },
+  "generationen": 1800,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "moos-am-waldboden",
+  "titel": "Grüner Teppich im Schatten",
+  "beschreibung": "Erreiche das Moos am feuchten Boden, ohne dass das Futter je über den Boden hinaus in die Höhe wandert.",
+  "ziel": { "form": "Moos" },
+  "grenzen": { "foodHeight": { "max": 0.2 }, "water": { "min": 0.55 }, "light": { "min": 0.4 } },
+  "generationen": 1700,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "flatterer-in-der-hoehe",
+  "titel": "Nahrung nur ganz oben",
+  "beschreibung": "Bring eine Linie zum Vogel, wenn das Futter stets hoch über dem Boden hängt und Räuber lauern.",
+  "ziel": { "form": "Flatterer · Vogel" },
+  "grenzen": { "foodHeight": { "min": 0.7 }, "predation": { "min": 0.4 } },
+  "generationen": 1500,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "fledermaus-in-der-nacht",
+  "titel": "Flügel in der Dunkelheit",
+  "beschreibung": "Erreiche den Flugsäuger, wenn das Futter hoch hängt, das Licht dunkel bleibt und Räuber jagen.",
+  "ziel": { "form": "Flugsäuger · Fledermaus" },
+  "grenzen": { "foodHeight": { "min": 0.65 }, "light": { "max": 0.25 }, "predation": { "min": 0.4 } },
+  "generationen": 1700,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "gepanzerter-koloss",
+  "titel": "Rüstung gegen alles",
+  "beschreibung": "Bring eine Linie zum gepanzerten Koloss, wenn der Räuberdruck nie unter 0,7 fällt und Nahrung üppig ist.",
+  "ziel": { "form": "Gepanzerter Koloss" },
+  "grenzen": { "predation": { "min": 0.7 }, "foodAbundance": { "min": 0.55 } },
+  "generationen": 1900,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "grossjaeger-an-der-spitze",
+  "titel": "Jäger an der Spitze",
+  "beschreibung": "Erreiche den aktiven Großjäger, wenn Nahrung reichlich am Boden liegt und der Räuberdruck stets hoch bleibt.",
+  "ziel": { "form": "Aktiver Großjäger" },
+  "grenzen": { "predation": { "min": 0.6 }, "foodAbundance": { "min": 0.5 }, "foodHeight": { "max": 0.4 } },
+  "generationen": 2000,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "fell-warmblueter-in-der-kaelte",
+  "titel": "Warmes Fell im Frost",
+  "beschreibung": "Bring eine Linie zum Fell-Warmblüter, ohne dass die Temperatur je über 0,3 steigt und mit Nahrung am Boden.",
+  "ziel": { "form": "Fell-Warmblüter" },
+  "grenzen": { "temperature": { "max": 0.3 }, "foodAbundance": { "min": 0.4 } },
+  "generationen": 1200,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "fisch-im-offenen-wasser",
+  "titel": "Ganz im Wasser zu Hause",
+  "beschreibung": "Erreiche den Fisch, wenn das Wasser stets über 0,8 bleibt und Räuber durch das offene Wasser ziehen.",
+  "ziel": { "form": "Fisch · Aalform" },
+  "grenzen": { "water": { "min": 0.8 }, "predation": { "min": 0.35 } },
+  "generationen": 1800,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "extremophil-am-limit",
+  "titel": "Wo sonst nichts lebt",
+  "beschreibung": "Bring eine Linie zur Archaee, wenn die Hitze über 0,9 liegt, das Licht fehlt und kaum Nahrung da ist.",
+  "ziel": { "form": "Archaee · Extremophil" },
+  "grenzen": { "temperature": { "min": 0.9 }, "light": { "max": 0.15 }, "foodAbundance": { "max": 0.2 } },
+  "generationen": 800,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "plankton-im-licht",
+  "titel": "Treiben im hellen Wasser",
+  "beschreibung": "Erreiche das Plankton nahe der Wasseroberfläche, bei viel Licht und stets üppiger Nahrung.",
+  "ziel": { "form": "Plankton" },
+  "grenzen": { "water": { "min": 0.7 }, "light": { "min": 0.55 }, "foodAbundance": { "min": 0.5 } },
+  "generationen": 900,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "flechte-auf-dem-fels",
+  "titel": "Bündnis auf nacktem Stein",
+  "beschreibung": "Bring eine Linie zur Flechte, wenn kaum Nahrung da ist, das Wasser knapp bleibt und das Licht dennoch reicht.",
+  "ziel": { "form": "Flechte · Symbiose" },
+  "grenzen": { "foodAbundance": { "max": 0.2 }, "water": { "max": 0.35 }, "light": { "min": 0.45 } },
+  "generationen": 2000,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "myzel-im-erdreich",
+  "titel": "Netz unter dem Boden",
+  "beschreibung": "Erreiche das Myzel im dunklen, feuchten Erdreich, ohne dass die Nahrung je über den Boden steigt.",
+  "ziel": { "form": "Myzel · Pilzgeflecht" },
+  "grenzen": { "light": { "max": 0.2 }, "water": { "min": 0.55 }, "foodHeight": { "max": 0.25 } },
+  "generationen": 1000,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "krebstier-im-flachwasser",
+  "titel": "Panzer im seichten Wasser",
+  "beschreibung": "Bring eine Linie zum Krebstier ins Wasser, wenn der Räuberdruck spürbar bleibt und Nahrung am Boden liegt.",
+  "ziel": { "form": "Krebstier · Arthropode" },
+  "grenzen": { "water": { "min": 0.6 }, "predation": { "min": 0.35 }, "foodHeight": { "max": 0.4 } },
+  "generationen": 1300,
+  "schwierigkeit": "mittel"
+ },
+ {
+  "id": "laubbaum-in-der-hoehe",
+  "titel": "Krone im Sonnenlicht",
+  "beschreibung": "Erreiche den Laubbaum, wenn das Licht stets hell ist, das Wasser reicht und das Futter hoch oben wächst.",
+  "ziel": { "form": "Laubbaum" },
+  "grenzen": { "light": { "min": 0.6 }, "water": { "min": 0.45 }, "foodHeight": { "min": 0.6 } },
+  "generationen": 1600,
+  "schwierigkeit": "schwer"
+ },
+ {
+  "id": "bakterie-ohne-alles",
+  "titel": "Anfang aus dem Nichts",
+  "beschreibung": "Bring eine Linie zur Bakterie zurück, wenn kaum Nahrung da ist und das Licht durchweg dunkel bleibt.",
+  "ziel": { "form": "Bakterie" },
+  "grenzen": { "foodAbundance": { "max": 0.15 }, "light": { "max": 0.2 } },
+  "generationen": 500,
+  "schwierigkeit": "leicht"
+ },
+ {
+  "id": "kletterer-im-geaest",
+  "titel": "Flink durch die Zweige",
+  "beschreibung": "Erreiche den behänden Kletterer, wenn das Futter hoch oben hängt und Räuber durch das Geäst streifen.",
+  "ziel": { "form": "Behänder Kletterer" },
+  "grenzen": { "foodHeight": { "min": 0.65 }, "predation": { "min": 0.35 }, "water": { "max": 0.5 } },
+  "generationen": 1700,
+  "schwierigkeit": "schwer"
+ }
+]
