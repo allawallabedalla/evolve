@@ -178,7 +178,7 @@
     ["über allem liegt das Gewicht des Wassers", "tiefe"],
     ["der Wind hört nicht auf", "sturm"],
     ["Feuer gehört hier zum Jahreslauf", "feuer"],
-    ["die Welt ringsum bleibt, wie sie ist", ""],
+    ["die Welt ringsum bleibt, wie sie ist", "!b-welt,!b-wandel,!b-heimkehr"],
     ["die Bedingungen sind gesetzt", ""],
     ["so steht die Welt gerade", ""],
     ["das ist die Welt, in die du {wesen} gestellt hast", ""],
