@@ -2119,37 +2119,95 @@ window.INFLUENCES = [
      {
       "name": "Resistenz-Evolution (Echtzeit)",
       "desc": "Antibiotika / Pestizide / Herbizide / Rodentizide / Impf-Druck.",
-      "soon": true
+      "plain": "Pestizid-Einsatz (Resistenz-Druck)",
+      "env": {
+       "toxicity": 0.75,
+       "foodAbundance": 0.75,
+       "light": 0.72,
+       "water": 0.5,
+       "predation": 0.1
+      },
+      "tone": "hit"
      },
      {
       "name": "Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren",
       "desc": ".",
-      "soon": true
+      "plain": "Lebensraum-Verlust",
+      "env": {
+       "foodAbundance": 0.15,
+       "foodHeight": 0.05,
+       "light": 0.9,
+       "water": 0.3,
+       "predation": 0.55,
+       "temperature": 0.62
+      },
+      "tone": "hit"
      },
      {
       "name": "Verschmutzung als Selektion",
       "desc": "Industrie-Melanismus, Hormon-Disruptoren, Licht/Lärm/thermisch, Eutrophierung (→ Speziations-Umkehr).",
-      "soon": true
+      "plain": "Verschmutzung & Überdüngung",
+      "env": {
+       "toxicity": 0.45,
+       "oxygen": 0.35,
+       "water": 0.85,
+       "foodAbundance": 0.85,
+       "light": 0.4
+      },
+      "tone": "shift"
      },
      {
       "name": "Klimawandel (anthropogen)",
       "desc": "Range-Shifts, phänologische Verschiebung/Mismatch, Hitze-Toleranz, TSD-Skew, Hybridisierung durch Range-Kollision (Pizzly-Bär).",
-      "soon": true
+      "plain": "Menschgemachte Erwärmung",
+      "env": {
+       "temperature": 0.82,
+       "water": 0.45,
+       "aridity": 0.4,
+       "foodAbundance": 0.5,
+       "light": 0.7
+      },
+      "tone": "shift"
      },
      {
       "name": "Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme",
       "desc": ".",
-      "soon": true
+      "plain": "Eingeschleppte Art (neuer Rivale)",
+      "env": {
+       "predation": 0.8,
+       "foodAbundance": 0.3,
+       "foodHeight": 0.4,
+       "light": 0.6
+      },
+      "tone": "hit"
      },
      {
       "name": "Urbanisierung / Urban-Evolution",
       "desc": "Hitzeinsel, Verhaltens-Zahmheit, U-Bahn-Mücke, weißer Klee ohne Cyanogenese.",
-      "soon": true
+      "plain": "Stadt (Hitzeinsel & Nachtlicht)",
+      "env": {
+       "temperature": 0.72,
+       "light": 0.75,
+       "foodAbundance": 0.65,
+       "water": 0.3,
+       "predation": 0.12,
+       "toxicity": 0.3,
+       "wind": 0.3
+      },
+      "tone": "shift"
      },
      {
       "name": "Defaunation / Trophic Downgrading / 6. Massenaussterben (HIREC)",
       "desc": "Extinktions-Filter (groß/langsam/spezialisiert zuerst).",
-      "soon": true
+      "plain": "Entleerte Tierwelt",
+      "env": {
+       "predation": 0.05,
+       "foodAbundance": 0.4,
+       "foodHeight": 0.5,
+       "light": 0.6,
+       "water": 0.55
+      },
+      "tone": "shift"
      }
     ]
    }

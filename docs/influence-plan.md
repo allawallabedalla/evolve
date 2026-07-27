@@ -54,7 +54,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       Klartextnamen, Ton; danach `influence-check` grün.
 - [x] **S2 · Sektion 2** (17 offene → 5 abbildbar) — Katastrophen/Zyklen/Massenaussterben,
       soweit als Umwelt-Zustand darstellbar.
-- [ ] **S3 · Sektion 10 anthropogen** (11 offene) — Habitatverlust, Verschmutzung, Klimawandel,
+- [x] **S3 · Sektion 10 anthropogen** (11 offene → 7 abbildbar) — Habitatverlust, Verschmutzung, Klimawandel,
       Lichtverschmutzung, Urbanisierung, Übernutzung …
 - [ ] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
       „Lebende Welt", „Fortpflanzung", „Evolutions-Mechanik", „Makro-Muster"; Modal zeigt es an.
@@ -172,3 +172,23 @@ typografische `„` mit einem **ASCII-`"`**. Das ist genau die in `resume.md` do
 Falle und hat den Generator mit `SyntaxError: Unexpected string` abbrechen lassen. In
 `docs/faktoren-katalog.md` korrigiert (Schlusszeichen `“`), im Generator zusätzlich auf
 einfache Anführungszeichen umgestellt.
+
+### S3 · Sektion 10 (Mensch & moderne Welt) — erledigt
+**7 neue Faktoren** (aktiv 59 → **66**, Sektion 10 jetzt 7/11), alle beim ersten Lauf wirksam
+und nicht redundant: Pestizid-Einsatz (Resistenz-Druck) · Lebensraum-Verlust ·
+Verschmutzung & Überdüngung · Menschgemachte Erwärmung · Eingeschleppte Art (neuer Rivale) ·
+Stadt (Hitzeinsel & Nachtlicht) · Entleerte Tierwelt.
+
+**Vier bleiben inaktiv, mit je konkretem Grund:**
+- **Domestikation / künstliche Zucht** — hier wählt ein *Züchter* Merkmale aus, nicht die
+  Umwelt. Man könnte den Stall als Milieu abbilden (keine Räuber, Futter im Überfluss), aber
+  das Kernphänomen (Zahmheit, Domestikations-Syndrom) käme dabei nicht heraus. Das wäre
+  ein Faktor, der etwas anderes tut, als sein Name verspricht.
+- **Gentechnik / CRISPR / Gene-Drives** — greift ins Genom ein, nicht in die Umwelt.
+- **Genetische Rettung / assistierte Migration** — Genfluss zwischen Orten = Lebende Welt.
+- **Ernte-induzierte Evolution** (Fischerei → kleiner/früher reif) — bräuchte **größenselektive**
+  Prädation; unsere `predation`-Achse trifft alle Größen gleich. Ein reiner Räuberdruck-Faktor
+  würde das Gegenteil bewirken (Selektion auf GRÖSSE statt gegen sie).
+
+**Messwerte danach:** Ø L1-Verschiebung 2,92 · erreichte Formen weiterhin 13 · Reiche-Bilanz
+Tier 28 · Mikrobe 15 · Protist 15 · Pilz 8.

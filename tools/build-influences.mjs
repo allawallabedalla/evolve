@@ -100,6 +100,19 @@ const EFFECTS = {
   "Supernova / Gammablitz (hypothetisch)": { tone: "hit", env: {"uv": 0.95, "radiation": 0.7, "light": 0.8, "foodAbundance": 0.35, "temperature": 0.45} },
   "Sonnen-Variabilität / Weltraumwetter": { tone: "shift", env: {"light": 0.38, "temperature": 0.26, "water": 0.55, "foodAbundance": 0.4} },
   'Die „Big Five“': { tone: "hit", env: {"temperature": 0.93, "aridity": 0.55, "foodAbundance": 0.1, "oxygen": 0.3, "toxicity": 0.45, "light": 0.4, "water": 0.25} },
+  // ---- S3: Sektion 10, Mensch & moderne Welt (2026-07) --------------------
+  // Sieben von elf sind echte Umwelt-ZUSTÄNDE. Nicht abbildbar bleiben:
+  // Domestikation (braucht Zuchtwahl statt Umweltdruck), Gentechnik (greift ins
+  // Genom, nicht in die Umwelt), genetische Rettung (Genfluss = Lebende Welt) und
+  // ernte-induzierte Evolution (bräuchte GRÖSSENSELEKTIVE Prädation — unsere
+  // predation-Achse trifft alle gleich). Etikett dafür in S4.
+  "Resistenz-Evolution (Echtzeit)": { tone: "hit", env: {"toxicity": 0.75, "foodAbundance": 0.75, "light": 0.72, "water": 0.5, "predation": 0.1} },
+  "Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren": { tone: "hit", env: {"foodAbundance": 0.15, "foodHeight": 0.05, "light": 0.9, "water": 0.3, "predation": 0.55, "temperature": 0.62} },
+  "Verschmutzung als Selektion": { tone: "shift", env: {"toxicity": 0.45, "oxygen": 0.35, "water": 0.85, "foodAbundance": 0.85, "light": 0.4} },
+  "Klimawandel (anthropogen)": { tone: "shift", env: {"temperature": 0.82, "water": 0.45, "aridity": 0.4, "foodAbundance": 0.5, "light": 0.7} },
+  "Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme": { tone: "hit", env: {"predation": 0.8, "foodAbundance": 0.3, "foodHeight": 0.4, "light": 0.6} },
+  "Urbanisierung / Urban-Evolution": { tone: "shift", env: {"temperature": 0.72, "light": 0.75, "foodAbundance": 0.65, "water": 0.3, "predation": 0.12, "toxicity": 0.3, "wind": 0.3} },
+  "Defaunation / Trophic Downgrading / 6. Massenaussterben (HIREC)": { tone: "shift", env: {"predation": 0.05, "foodAbundance": 0.4, "foodHeight": 0.5, "light": 0.6, "water": 0.55} },
   // 2.2 Geophysikalisch
   "Vulkanausbruch / Flutbasalt (LIP)": { tone: "hit", env: { temperature: 0.8, light: 0.25, foodAbundance: 0.3 } },
   "Vulkanwinter / Aschefall": { tone: "hit", env: { light: 0.15, temperature: 0.25, foodAbundance: 0.35 } },
@@ -168,6 +181,13 @@ const PLAIN = {
   "Supernova / Gammablitz (hypothetisch)": "Gammablitz (Ozonschicht weg)",
   "Sonnen-Variabilität / Weltraumwetter": "Schwache Sonnenphase",
   'Die „Big Five“': "Das Große Sterben (Perm)",
+  "Resistenz-Evolution (Echtzeit)": "Pestizid-Einsatz (Resistenz-Druck)",
+  "Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren": "Lebensraum-Verlust",
+  "Verschmutzung als Selektion": "Verschmutzung & Überdüngung",
+  "Klimawandel (anthropogen)": "Menschgemachte Erwärmung",
+  "Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme": "Eingeschleppte Art (neuer Rivale)",
+  "Urbanisierung / Urban-Evolution": "Stadt (Hitzeinsel & Nachtlicht)",
+  "Defaunation / Trophic Downgrading / 6. Massenaussterben (HIREC)": "Entleerte Tierwelt",
   "Vulkanausbruch / Flutbasalt (LIP)": "Vulkanausbruch",
   "Vulkanwinter / Aschefall": "Vulkanwinter (Aschehimmel)",
   "Erdbeben / Tsunami / Hangrutsch": "Erdbeben & Flutwelle",
