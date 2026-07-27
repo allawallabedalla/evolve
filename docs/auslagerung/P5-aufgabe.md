@@ -125,6 +125,31 @@ Damit die 15–30 Herausforderungen nicht alle dieselbe Form haben:
 
 ---
 
+## 5b. Du brauchst die Spiel-Engine NICHT — hier ist die Antwort, warum
+
+Falls die Frage aufkommt „wie prüfe ich, ob mein Ziel überhaupt erreichbar ist, ohne die
+Engine laufen zu lassen": **das musst du nicht.** Genau dafür gibt es
+`node tools/challenge-import-check.mjs deine-datei.json` auf unserer Seite — der lädt die
+echte Engine (`app/index.html`) und **simuliert** jede deiner Herausforderungen tatsächlich.
+Du lieferst nur Text + Zieldefinitionen, keine Simulation.
+
+Damit deine Vorschläge trotzdem beim ersten Versuch treffen, liefert `P5-eingabe.json` jetzt
+zusätzlich `biomeBeispiele` — **12 bereits bekannte, funktionierende Umwelt-Rezepte** aus dem
+Spiel selbst, jedes mit seinem echten Konvergenz-Ergebnis (800 Generationen, in der Engine
+gemessen):
+
+```json
+{"name":"Moderwald","env":{"temperature":0.5,"light":0.15,"water":0.85,"foodAbundance":0.5,"predation":0.3,"foodHeight":0.2},
+ "nachGenerationen":{"form":"Protist · Euglenoid · Mixotroph","reich":"Protist","passung":11}}
+```
+
+Nutze diese als **Ausgangspunkt**, nicht als Zwang: Willst du eine Herausforderung mit Ziel
+„Pilz", schau dir „Reiche Kronen" an (→ Hefe) — eine Beschränkung, die *nah* an diesem Rezept
+bleibt (z. B. nur EINE seiner Achsen einschränkt), ist mit hoher Wahrscheinlichkeit lösbar.
+Eine Beschränkung, die *weit* von jedem bekannten Rezept wegführt, ist ein Risiko — kann
+klappen, kann aber auch am Budget scheitern. Beides ist okay, der Prüfstand sagt dir danach,
+was zutrifft.
+
 ## 6. Ausgabeformat
 
 ```json

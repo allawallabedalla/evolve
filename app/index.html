@@ -243,7 +243,7 @@
   .ctrl.newlife { margin-left: auto; }
   /* B10: groessere Touch-Ziele auf Touch-Geraeten */
   @media (pointer: coarse) {
-    .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip { min-height: 44px; }
+    .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip, .infl-search-result, .infl-search { min-height: 44px; }
     .infl-quick-chip { padding: 8px 14px; }
     .speed { padding: 10px 14px; }
     /* Größerer Schieberegler-Griff auf Touch (Audit): feine Umwelt-Justierung am Handy. */
@@ -332,6 +332,37 @@
   .infl-quick-chip .ic { width: 1rem; height: 1rem; color: var(--bio-dim); flex: 0 0 auto; }
   .infl-foot { display: flex; justify-content: flex-end; gap: 10px; }
   .infl-foot .ctrl { min-width: 110px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  /* S5: Suche über den GESAMTEN Katalog (aktiv + kommt-bald), nicht nur die offene Kategorie —
+     bei 284 Faktoren in 10 Sektionen ist Blättern allein zu langsam. */
+  .infl-search-row { margin: 2px 0 10px; }
+  .infl-search { width: 100%; box-sizing: border-box; background: var(--abyss); border: 1px solid var(--line-soft);
+    border-radius: 10px; padding: 10px 13px; font: inherit; font-size: .88rem; color: var(--text); }
+  .infl-search:focus { outline: 2px solid var(--bio-dim); outline-offset: 1px; }
+  .infl-search-results { display: flex; flex-direction: column; gap: 6px; margin: 0 0 14px; max-height: 40vh; overflow-y: auto; }
+  .infl-search-results[hidden] { display: none; }
+  .infl-search-empty { color: var(--muted); font-size: .82rem; padding: 6px 2px; }
+  .infl-search-result { display: flex; align-items: baseline; gap: 8px; text-align: left; background: var(--abyss);
+    border: 1px solid var(--line-soft); border-radius: 10px; padding: 9px 12px; cursor: pointer; font: inherit; color: var(--text); }
+  .infl-search-result:hover { border-color: var(--bio-dim); }
+  .infl-search-result .ic { width: 1rem; height: 1rem; color: var(--bio-dim); flex: 0 0 auto; }
+  .infl-search-result .srn { font-weight: 700; font-size: .86rem; }
+  .infl-search-result .src { margin-left: auto; font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  .infl-search-result.soon { opacity: .68; }
+  .infl-search-result.soon .src { color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
+  /* S5: Wirkungs-Vorschau — welche Achsen sich vom aktuellen Milieu weg verschieben würden. */
+  .infl-preview { background: var(--chamber-2); border: 1px solid var(--line-soft); border-radius: 11px;
+    padding: 10px 13px; margin: 0 0 14px; }
+  .infl-preview-h { font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--bio-dim);
+    font-weight: 700; margin-bottom: 6px; }
+  .infl-preview-row { display: flex; align-items: center; gap: 8px; font-size: .82rem; padding: 2px 0; }
+  .infl-preview-row .pn { color: var(--muted); min-width: 90px; }
+  .infl-preview-row .pv { font-family: var(--mono); font-size: .78rem; }
+  .infl-preview-row .parrow { color: var(--bio-dim); }
+  .infl-preview-none { color: var(--muted); font-size: .8rem; }
+  /* S5: Einfluss zurücknehmen — ein Klick, stellt das Milieu von vor dem letzten Einfluss wieder her. */
+  .infl-undo { margin-left: 10px; font-size: .78rem; }
   .infl-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
   .infl-ok:disabled { background: var(--line); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
@@ -600,6 +631,7 @@
       <div class="entry-row">
         <button class="disc" id="discBtn" title="Lebensbaum öffnen — die entdeckten Formen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
         <button class="disc worldbtn" id="worldBtn" title="Ein Umwelt-Ereignis auslösen, das die Welt deines Wesens verändert">Umwelt-Einfluss auslösen ↗</button>
+        <button class="link infl-undo" id="inflUndoBtn" hidden>↩ Einfluss zurücknehmen</button>
       </div>
     </div>
 
@@ -712,6 +744,11 @@
         <button class="link" id="inflClose">schließen</button>
       </div>
       <p class="infl-sub">Der vollständige Faktoren-Katalog. <b>Aktive</b> Faktoren verändern die Umwelt deines Wesens — es passt sich über Generationen an. <b>Grau (kommt bald)</b> = im Katalog erfasst, aber als echte Selektionskraft noch in Arbeit.</p>
+      <div class="infl-search-row">
+        <label class="sr-only" for="inflSearch">Faktoren durchsuchen</label>
+        <input type="search" id="inflSearch" class="infl-search" placeholder="Faktor suchen — z. B. „Frost" oder „Räuber"" autocomplete="off">
+      </div>
+      <div class="infl-search-results" id="inflSearchResults" hidden aria-live="polite"></div>
       <div class="infl-quick" id="inflQuick"></div>
       <div class="infl-cats" id="inflCats"></div>
     </div>
@@ -724,6 +761,7 @@
       </div>
       <p class="infl-sub">Wähle einen Faktor und drücke <b>Auslösen</b> — die Umwelt verschiebt sich, dein Wesen passt sich über Generationen an. <b>Naheliegend</b> = kleiner Schritt, <b>großer Sprung</b> = drastische Verschiebung.</p>
       <div class="infl-factors" id="inflFactors"></div>
+      <div class="infl-preview" id="inflPreview" hidden aria-live="polite"></div>
       <div class="infl-foot">
         <button class="ctrl" id="inflCancel">Abbrechen</button>
         <button class="ctrl infl-ok" id="inflOk" disabled>Auslösen</button>
@@ -783,12 +821,13 @@
 
 <script src="./vendor/supabase.js"></script>
 <script src="./influences.js"></script>
+<script src="./gene-explain.js"></script>
 <script src="./story-extra.js"></script>
 <script src="./story.js"></script>
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.73.0";
+const APP_VERSION = "v0.74.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1490,9 +1529,14 @@ document.getElementById("engineInfoBtn").addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if(e.key !== "Escape") return;
   const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
+  const iSub=document.getElementById("inflSub"), iMain=document.getElementById("infl");
   if(!gb.hidden){ closeGenbook(); }
   else if(!lg.hidden){ lg.hidden = true; }
   else if(!rv.hidden){ rv.hidden = true; }
+  // S5: das Einfluss-Modal fehlte hier bisher komplett — Escape tat nichts.
+  // Sub-Modal offen -> wie „Abbrechen" nur einen Schritt zurück; sonst ganz schließen.
+  else if(iSub && !iSub.hidden){ closeInflSub(); }
+  else if(iMain && !iMain.hidden){ closeInfl(); }
 });
 // a11y (Audit): Tab-Fokus in einem offenen Modal halten (kein Wegtabben in den
 // unsichtbaren Hintergrund). Wirkt auf das oberste sichtbare aria-modal-Dialog.
@@ -1781,6 +1825,10 @@ GENE_LABELS.forEach((lbl,i) => {
   d.setAttribute("role","meter"); d.setAttribute("aria-label",lbl);
   d.setAttribute("aria-valuemin","0"); d.setAttribute("aria-valuemax","1"); d.setAttribute("aria-valuenow","0.5");
   d.innerHTML=`<span class="lbl">${lbl}</span><span class="track"><span class="fill" id="g-${i}"></span></span><span class="dir" id="gd-${i}" aria-hidden="true"></span><span class="num" id="gn-${i}">0.50</span>`;
+  // P6: Erklärung als Tooltip — vorher hatte kein Gen eine Erklärung im Spiel, nur den
+  // Namen. window.GENE_EXPLAIN kommt aus gene-explain.js (auto-generiert, S4/S6-Muster).
+  const explain = window.GENE_EXPLAIN && window.GENE_EXPLAIN[i];
+  if(explain) d.title = explain;
   genesEl.appendChild(d);
 });
 // Progressive Disclosure der Gen-Zahlen (Standard: aus; Zustand gespeichert).
@@ -2244,8 +2292,34 @@ function openInfl(){
       : `<button class="infl-cat soon" data-i="${o.i}" disabled>${ic(o.c.icon)}<span>${o.c.plain||o.c.cat}</span><span class="cnt bald">bald</span></button>`
     ).join("");
   _el("inflCats").querySelectorAll(".infl-cat:not(.soon)").forEach(b=> b.onclick = ()=> openInflSub(+b.dataset.i));
+  const search = _el("inflSearch"); if(search) search.value = "";
+  renderInflSearch("");
   _el("infl").hidden = false; _el("inflClose").focus();
 }
+// S5: Suche über den GESAMTEN Katalog (284 Faktoren, 10 Sektionen) — Blättern allein
+// ist bei der Menge zu langsam. Treffer über Klartext, Fachbegriff UND Erklärung;
+// ein Treffer öffnet direkt die richtige Kategorie mit dem Faktor vorausgewählt.
+const _inflFlatAll = INFL.flatMap((c,ci)=> c.groups.flatMap(g=>g.factors.map(f=>({f,ci}))));
+function renderInflSearch(q){
+  const box = _el("inflSearchResults");
+  const quick = _el("inflQuick"), cats = _el("inflCats");
+  const term = q.trim().toLowerCase();
+  if(!term){ box.hidden = true; box.innerHTML = ""; quick.hidden = false; cats.hidden = false; return; }
+  quick.hidden = true; cats.hidden = true; box.hidden = false;
+  const hits = _inflFlatAll.filter(({f}) =>
+    (f.plain||"").toLowerCase().includes(term) || f.name.toLowerCase().includes(term) ||
+    (f.desc||"").toLowerCase().includes(term)
+  ).slice(0, 40);
+  if(!hits.length){ box.innerHTML = `<div class="infl-search-empty">Keine Treffer für „${term}".</div>`; return; }
+  box.innerHTML = hits.map(({f,ci}) => {
+    const tag = f.soon ? `<span class="src">${LAYER_LABEL[f.layer]||"kommt bald"}</span>` : `<span class="src">${INFL[ci].plain||INFL[ci].cat}</span>`;
+    return `<button type="button" class="infl-search-result${f.soon?' soon':''}" data-ci="${ci}" data-fn="${encodeURIComponent(f.name)}">`+
+      `${ic(INFL[ci].icon)}<span class="srn">${f.plain||f.name}</span>${tag}</button>`;
+  }).join("");
+  box.querySelectorAll(".infl-search-result").forEach(b => b.onclick = () =>
+    openInflSub(+b.dataset.ci, decodeURIComponent(b.dataset.fn)));
+}
+_el("inflSearch").addEventListener("input", e => renderInflSearch(e.target.value));
 function closeInfl(){ _el("inflSub").hidden = true; _el("infl").hidden = true; inflSel = null;
   if(inflOpener && inflOpener.focus) inflOpener.focus(); }
 function openInflSub(ci, preselectName){
@@ -2290,9 +2364,10 @@ function openInflSub(ci, preselectName){
   const pick = (b)=>{
     _el("inflFactors").querySelectorAll(".infl-factor.sel").forEach(x=>x.classList.remove("sel"));
     b.classList.add("sel"); inflSel = flat[+b.dataset.fi]; _el("inflOk").disabled = false;
+    renderInflPreview(inflSel);   // S5: Wirkungs-Vorschau
   };
   _el("inflFactors").querySelectorAll(".infl-factor:not(.soon)").forEach(b=> b.onclick = ()=> pick(b));
-  _el("inflOk").disabled = true; _el("inflSub").hidden = false;
+  _el("inflOk").disabled = true; renderInflPreview(null); _el("inflSub").hidden = false;
   // Direkt aus einem „Naheliegend"-Chip vorausgewählt: markieren, sichtbar scrollen.
   if(preselectName){
     const idx = flat.findIndex(f=>f.name===preselectName);
@@ -2301,20 +2376,49 @@ function openInflSub(ci, preselectName){
   }
   _el("inflBack").focus();
 }
-function closeInflSub(){ _el("inflSub").hidden = true; inflSel = null; }
+function closeInflSub(){ _el("inflSub").hidden = true; inflSel = null; renderInflPreview(null); }
+// S5: EINE Stelle, die berechnet, was ein Einfluss am Milieu ändern WÜRDE — von
+// applyInfluence() zum echten Setzen genutzt, von der Wirkungs-Vorschau zum bloßen
+// Anzeigen. So kann die Vorschau nie von der tatsächlichen Wirkung abweichen.
+function influenceResultEnv(f){
+  const out = { ...env, ...f.env };
+  out.toxicity = f.env.toxicity || 0;   // Gift-Milieu nur, solange ein giftiger Einfluss aktiv ist
+  out.oxygen = f.env.oxygen == null ? 1 : f.env.oxygen;   // Hypoxie nur, solange ein O2-armer Einfluss aktiv ist
+  out.salinity = f.env.salinity || 0;   // Salz-Milieu nur, solange ein salziger Einfluss aktiv ist
+  out.uv = f.env.uv || 0;   // UV nur, solange ein strahlungsstarker Einfluss aktiv ist
+  out.pressure = f.env.pressure || 0;   // Tiefsee-Druck nur, solange ein Druck-Einfluss aktiv ist
+  out.aridity = f.env.aridity || 0;   // Austrocknung nur, solange ein Dürre-Einfluss aktiv ist
+  out.radiation = f.env.radiation || 0;   // Strahlung nur, solange ein Strahlungs-Einfluss aktiv ist
+  out.fire = f.env.fire || 0;   // Feuer nur, solange ein Feuer-Einfluss aktiv ist
+  out.frost = f.env.frost || 0;   // Frost nur, solange ein Frost-Einfluss aktiv ist
+  out.wind = f.env.wind || 0;   // Wind nur, solange ein Wind-Einfluss aktiv ist
+  return out;
+}
+// Deutsche Namen für alle 16 Achsen (6 Regler + 10 verborgene Stressoren) an einer
+// Stelle — LEVERS deckt nur die Regler ab, renderStressChips() kannte die anderen
+// bisher nur als Chip-Text. Von der Wirkungs-Vorschau UND der Suche genutzt.
+const AXIS_LABEL = Object.fromEntries(LEVERS.map(l => [l.key, l.name]));
+Object.assign(AXIS_LABEL, { toxicity:"Gift", oxygen:"Sauerstoff", salinity:"Salz", uv:"UV-Strahlung",
+  pressure:"Tiefsee-Druck", aridity:"Austrocknung", radiation:"Strahlung", fire:"Feuer", frost:"Frost", wind:"Wind" });
+const ALL_AXES = Object.keys(AXIS_LABEL);
+// S5: Wirkungs-Vorschau — nur die Achsen, die sich TATSÄCHLICH verschieben würden
+// (>0.005, sonst zählt Rundung als „Änderung"), mit ihrem heutigen und künftigen Wert.
+function renderInflPreview(f){
+  const box = _el("inflPreview"); if(!box) return;
+  if(!f || !f.env){ box.hidden = true; box.innerHTML = ""; return; }
+  const result = influenceResultEnv(f);
+  const rows = ALL_AXES.filter(ax => Math.abs((result[ax] ?? 0) - (env[ax] ?? 0)) > 0.005);
+  if(!rows.length){ box.hidden = false; box.innerHTML = `<div class="infl-preview-h">Wirkung</div><div class="infl-preview-none">Verschiebt nichts gegenüber der jetzigen Umwelt.</div>`; return; }
+  box.hidden = false;
+  box.innerHTML = `<div class="infl-preview-h">Wirkung — was sich verschiebt</div>` + rows.map(ax =>
+    `<div class="infl-preview-row"><span class="pn">${AXIS_LABEL[ax]}</span><span class="pv">${(env[ax]??0).toFixed(2)}</span>`+
+    `<span class="parrow">→</span><span class="pv">${result[ax].toFixed(2)}</span></div>`).join("");
+}
 function applyInfluence(f){
   if(!f || !f.env) return;
-  Object.assign(env, f.env);
-  env.toxicity = f.env.toxicity || 0;   // Gift-Milieu nur, solange ein giftiger Einfluss aktiv ist
-  env.oxygen = f.env.oxygen == null ? 1 : f.env.oxygen;   // Hypoxie nur, solange ein O2-armer Einfluss aktiv ist
-  env.salinity = f.env.salinity || 0;   // Salz-Milieu nur, solange ein salziger Einfluss aktiv ist
-  env.uv = f.env.uv || 0;   // UV nur, solange ein strahlungsstarker Einfluss aktiv ist
-  env.pressure = f.env.pressure || 0;   // Tiefsee-Druck nur, solange ein Druck-Einfluss aktiv ist
-  env.aridity = f.env.aridity || 0;   // Austrocknung nur, solange ein Dürre-Einfluss aktiv ist
-  env.radiation = f.env.radiation || 0;   // Strahlung nur, solange ein Strahlungs-Einfluss aktiv ist
-  env.fire = f.env.fire || 0;   // Feuer nur, solange ein Feuer-Einfluss aktiv ist
-  env.frost = f.env.frost || 0;   // Frost nur, solange ein Frost-Einfluss aktiv ist
-  env.wind = f.env.wind || 0;   // Wind nur, solange ein Wind-Einfluss aktiv ist
+  const preEnv = { ...env };   // S5: Schnappschuss für „Einfluss zurücknehmen"
+  const preBiome = lastBiome, preActive = document.querySelector(".biome.active");
+  Object.assign(env, influenceResultEnv(f));
   LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
     if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
   renderStressChips();
@@ -2330,7 +2434,29 @@ function applyInfluence(f){
   showInfoToast("Ausgelöst: " + (f.plain||f.name));
   _lastFaktor = f.name;   // Chronik: DIESER Einfluss soll sich selbst erzählen
   storyEnvChanged();
+  _pendingUndo = { env: preEnv, biome: preBiome, activeBtn: preActive || null, label: f.plain||f.name };
+  const undoBtn = _el("inflUndoBtn");
+  if(undoBtn){ undoBtn.hidden = false; undoBtn.title = `„${f.plain||f.name}“ rückgängig machen — stellt das Milieu von davor wieder her`; }
 }
+// S5: „Einfluss zurücknehmen" — EIN Schritt zurück (kein voller Verlauf), stellt
+// exakt das Milieu von unmittelbar vor dem letzten ausgelösten Einfluss wieder her.
+let _pendingUndo = null;
+function undoLastInfluence(){
+  if(!_pendingUndo) return;
+  const { env: preEnv, biome, activeBtn, label } = _pendingUndo;
+  Object.assign(env, preEnv);
+  LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
+    if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
+  renderStressChips();
+  lastBiome = biome; _el("biomeTag").textContent = biome;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  if(activeBtn && activeBtn.isConnected) activeBtn.classList.add("active");
+  _pendingUndo = null;
+  _el("inflUndoBtn").hidden = true;
+  showInfoToast("Zurückgenommen: " + label);
+  storyEnvChanged();
+}
+_el("inflUndoBtn").addEventListener("click", undoLastInfluence);
 // Schlichter Info-Toast (kein Form-Fund) — nutzt dasselbe Toast-Element.
 let infoToastTimer = null;
 function showInfoToast(msg){

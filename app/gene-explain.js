@@ -1,0 +1,30 @@
+// AUTO-GENERIERT aus auslagerung/P6-ausgabe.json (externe Zulieferung,
+// geprüft mit tools/gene-import-check.mjs). Nicht von Hand editieren.
+// Index entspricht GENE_LABELS in app/index.html.
+window.GENE_EXPLAIN = [
+ "Hält die Körperwärme im Kalten, wird aber in der Hitze zur Last, weil die Wärme nicht mehr entweichen kann.",
+ "Ein großer Körper übersteht Kälte und Angriffe besser, kostet aber deutlich mehr Nahrung und Energie.",
+ "Längere Gliedmaßen erreichen weiter entferntes oder höheres Futter, sind aber teurer zu bauen und zu tragen.",
+ "Ein hoher Stoffwechsel lässt schneller wachsen und reagieren, verlangt dafür aber ständig viel Nahrung.",
+ "Fester Panzer wehrt Bisse und Angriffe ab, wiegt jedoch schwer und bringt ohne Jäger nur Ballast.",
+ "Gewinnt Energie aus Licht und spart so Nahrung, taugt aber nur dort, wo genug Helligkeit ankommt.",
+ "Höhere Beweglichkeit erschließt mehr Futter und Fluchtwege, verbraucht dafür aber laufend Energie.",
+ "Stützgewebe trägt Höhe und aufrechte Form, ist aber totes Gewicht, wo niedriger Wuchs genügt.",
+ "Große Flügelfläche trägt durch die Luft und ermöglicht Gleiten, bleibt ohne Flug jedoch teure Fracht.",
+ "Eigenes Licht lockt Beute oder Partner in der Finsternis an, verrät aber zugleich die eigene Lage.",
+ "Baut Giftstoffe im Körper ab und hilft dort, wo die Umgebung vergiftet ist, sonst nur teurer Aufwand.",
+ "Kommt mit wenig Sauerstoff aus und rettet in sauerstoffarmer Umgebung, bringt bei viel Luft kaum Vorteil.",
+ "Hält den Salzhaushalt im Gleichgewicht und sichert das Überleben in salzigem oder wechselndem Wasser.",
+ "Erlaubt den Rückzug unter die Erde und schützt vor Jägern, bringt aber nichts, wo nichts jagt.",
+ "Dunkles Pigment fängt gefährliche Strahlung ab und hilft im grellen Licht, ist im Schatten überflüssig.",
+ "Siebt Nahrung aus dem Wasser und ist ergiebiger als Jagen, aber nur in nährstoffreichem Wasser sinnvoll.",
+ "Macht schwer sichtbar und schützt so vor Jägern, bringt aber keinen Vorteil, wo niemand jagt.",
+ "Hält dem Druck der Tiefe stand und öffnet das tiefe Wasser, wird in flachen Zonen jedoch überflüssig.",
+ "Schärfere Sinne bemerken Gefahr und Beute früher, verlangen aber teures Nerven- und Sinnesgewebe.",
+ "Hält Wasser im Körper zurück und rettet in Trockenheit, bringt aber wenig, wo Feuchte reichlich ist.",
+ "Repariert Schäden durch Strahlung und hilft in verstrahlter Umgebung, ist sonst nur teurer Aufwand.",
+ "Schützt Rinde und Knospen vor Feuer und rettet nach Bränden, kostet aber ohne Feuergefahr nur Energie.",
+ "Verhindert das Gefrieren des Gewebes und sichert das Überleben im Frost, ist in Wärme jedoch nutzlos.",
+ "Niedriger, zäher Wuchs übersteht starken Wind ohne Bruch, kostet aber Höhe und Wachstumstempo.",
+ "Bindet Stickstoff aus der Luft und macht unabhängig vom Boden, ist auf gutem Grund aber unnötig teuer."
+];

@@ -31,6 +31,7 @@
     "layer-import-check": "node tools/layer-import-check.mjs",
     "story-import-check": "node tools/story-import-check.mjs",
     "build-story-extra": "node tools/build-story-extra.mjs",
+    "build-gene-explain": "node tools/build-gene-explain.mjs",
     "plain-import-check": "node tools/plain-import-check.mjs",
     "gene-import-check": "node tools/gene-import-check.mjs",
     "challenge-import-check": "node tools/challenge-import-check.mjs",
