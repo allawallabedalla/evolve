@@ -679,6 +679,11 @@
   // Der KERN-Pool für die konkrete Lage. Hier steckt die Salienz: welcher Pool
   // gewählt wird, hängt ausschließlich am Simulationszustand.
   function kernPool(ctx) {
+    // Prüf-Haken: erlaubt es, einen Satz aus FREMDEN Kern-Bausteinen zu bauen,
+    // ohne den Katalog anzufassen (tools/story-import-check.mjs prüft damit
+    // zugelieferte Fragmente auf dem echten Pfad — mit allen Längen-, Wort- und
+    // Wiederholungs-Schranken). Im Spiel wird das nie gesetzt.
+    if (ctx.__kern) return ctx.__kern;
     const b = ctx.beat;
     const wrap = (arr, tag) => arr.map(x => (Array.isArray(x) ? x : [x, tag || ""]));
     // Rückfall-Sätze bewusst leicht machen: sie sollen einspringen, nicht führen.

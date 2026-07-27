@@ -212,3 +212,37 @@ Vorbereitet:
   den Generator.
 - Nebenbei: der App-Kern-Zugriff liegt jetzt in `tools/lib/app-core.mjs` statt doppelt
   (`influence-check` danach unverändert grün, 66 Faktoren).
+
+### 2026-07-27 · S4-Zulieferung angenommen, S6 als Paket ausgelagert
+**S4-Zulieferung geprüft und angenommen.** `layer-import-check` bestanden: alle 218 inaktiven
+Faktoren, Namen exakt, Ebenen gültig, keine Dubletten, kein aktiver Faktor umetikettiert.
+Inhaltlich stimmig — die Sektions-Verteilung zeigt echtes Verständnis statt Raten:
+Raum & Isolation 39/44 `lebende-welt`, Fortpflanzung 29/31 `neues-gen`, Wie Evolution läuft
+23/29 `mechanik`, Große Muster 20/21 `makro-muster`, Körper & Gene 11/12 `neues-gen`.
+Null `umsetzbar` — konservativ, aber plausibel, weil die abbildbaren Faktoren in S1–S3 schon
+geerntet wurden.
+**Ein Defekt behoben:** die Begründungen kamen in ASCII-Umschrift („braeuchte", „vollstaendig",
+„Groesse"). Da der Text im Spiel-UI erscheint, wortweise korrigiert (128 Begründungen) — mit
+Ausnahmeliste für echte Wörter wie Quelle, Frequenz, Koevolution, Koexistenz, Sequestrierung.
+Datei liegt als `docs/auslagerung/S4-ausgabe.json`; **der Einbau in den Generator steht noch aus
+(= S4).**
+
+**S6 als zweites Auslagerungs-Paket vorbereitet** (Umfang ~200–350 Bausteine, deutlich größer
+als S4):
+- `docs/auslagerung/S6-eingabe.json` — die 66 aktiven Einflüsse mit Anzeigename, Ton,
+  Beschreibung, den real bewegten **Achsen** und dem **Konvergenz-Ergebnis** (Form, Reich,
+  Passung). Damit kann extern über das geschrieben werden, was wirklich passiert.
+- `docs/auslagerung/S6-aufgabe.md` — Auftrag: wie ein Satz montiert wird, die
+  Verbzweitstellungs-Regel, der geänderte Ton (prosaisch statt lyrisch, mit `{wesen}`),
+  Teil A (3 Zeilen je Einfluss) und Teil B (Textur-Pools mit Tag-Liste), inklusive der Warnung,
+  die Mitte nicht zu vergessen (früherer Befund: Auftakt-Pool schrumpfte in milden Welten von
+  40 auf 6).
+- `tools/story-import-check.mjs` (`npm run story-import-check <datei>`) — prüft Schlüssel,
+  Form, Leitplanken, Tags, Dubletten gegen die bestehenden 460 Bausteine, **montiert jedes
+  Fragment auf dem echten Generator-Pfad zu vier fertigen Sätzen** (Haken `ctx.__kern` in
+  `app/story.js`) und misst den Tonfall. Gegenprobe mit absichtlich schlechter Datei: alle
+  sieben Fehlerarten gefangen, inklusive wortgleich abgeschriebener Sentenz.
+- Beim Bauen zwei eigene Fehler gefunden und behoben: eine globale Regex in `.test()`
+  (zustandsbehaftet) und — gravierender — getaggte Bausteine wurden in einer Welt geprüft, die
+  den Tag gar nicht erfüllt; dadurch wäre **jedes korrekt getaggte Fragment** durchgefallen.
+  Die Testwelt wird jetzt aus den Tags des Bausteins gebaut.
