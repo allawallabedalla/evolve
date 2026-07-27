@@ -56,7 +56,7 @@ vorzutäuschen — genau die Attrappe, die das Projekt sonst vermeidet.
       soweit als Umwelt-Zustand darstellbar.
 - [x] **S3 · Sektion 10 anthropogen** (11 offene → 7 abbildbar) — Habitatverlust, Verschmutzung, Klimawandel,
       Lichtverschmutzung, Urbanisierung, Übernutzung …
-- [ ] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
+- [x] **S4 · Ehrliche Einordnung der Rest-Sektionen** — `layer`-Feld statt `soon`:
       „Lebende Welt", „Fortpflanzung", „Evolutions-Mechanik", „Makro-Muster"; Modal zeigt es an.
 - [ ] **S5 · Modal fertig** — Suchfeld, Wirkungs-Vorschau (welche Achsen, vorher→nachher),
       „Einfluss zurücknehmen", sichtbarer Stapel aktiver Stressoren, a11y-Durchgang.
@@ -294,3 +294,35 @@ Der Katalog ist damit ein Museum mit 218 unbeschrifteten Vitrinen.
 - Beim Bauen fiel auf, dass mein eigenes Beispiel „Mesopredator-Release" verwendete — ein
   Faktor, den ich in S1b aktiviert habe und der damit gar nicht mehr zur Aufgabe gehört.
   Korrigiert; der Prüfstand hatte es selbst gemeldet.
+
+### S4 · Ehrliche Einordnung — erledigt (externe Zulieferung P3, v0.73.0)
+
+**Zwei zugelieferte Pakete zusammengeführt und eingebaut:**
+- **S4-ausgabe.json** (Ebenen-Etikett, bereits angenommen) — 218/218, `layer-import-check` grün.
+- **P3-ausgabe.json** (Klartextname + Erklärung, neu geprüft) — 218/218, `plain-import-check` grün.
+  Beide Zulieferungen decken exakt dieselben 218 Faktoren ab (geprüft: Namensmengen identisch).
+
+**Wichtiger Zwischenfall — der Prüfstand selbst war fehlerhaft, nicht die Zulieferung.**
+`plain-import-check` meldete beim ersten Lauf 41 „ASCII-Umschrift"-Fehler. Bei genauer Prüfung
+war **jede einzelne Meldung ein Fehlalarm**: die Regel testete naiv auf die Buchstabenfolge
+„ue"/„ae"/„oe" irgendwo im Wort — das trifft zwangsläufig auch echtes Deutsch mit „au"+e
+(*bauen*, *Sauerstoff* → „aue"), „eu"+e (*Neue*, *steuert* → „eue") oder zufälligem „ue"/„oe"
+in der Wortmitte (*zuerst*, *koexistieren*, *sexuell*). Die Prüfung wurde neu gebaut: statt
+eines Substring-Tests prüft sie jetzt gezielt auf typische Nachfolge-Muster einer
+Umlaut-Transliteration (z. B. „ae"+„hnlich/nder/hlt/rt/ter", „ue"+„berzeug/chte/llig/ndig",
+„oe"+„glich/rper/n"). Gegengetestet an 31 echten Wörtern (0 Fehlalarme) und 27 echten Fehlern
+(24 erkannt) — deutlich strenger, ohne die Zulieferung mehr fälschlich zu beanstanden.
+
+**Einbau in den Generator** (`tools/build-influences.mjs`): lädt beide Zulieferungen, setzt für
+jeden inaktiven Faktor `f.layer` + `f.layerGrund` (aus S4) sowie `f.plain` + `f.desc` (aus P3).
+Aktive Faktoren bleiben unberührt (66/284 unverändert, `influence-check` weiter grün).
+
+**Modal zeigt es jetzt an** (Definition von S4 verlangte das ausdrücklich): das pauschale
+„kommt bald"-Abzeichen ist einer ehrlichen Kurzform gewichen — „lebende Welt",
+„neues Merkmal nötig", „Evolutions-Mechanik", „nur Beobachtung" usw. (`LAYER_LABEL`-Tabelle),
+mit der Begründung als Tooltip. Browser-Test: 5 Stichproben aus „Leben mit anderen Arten"
+zeigen korrekt Klartext, Erklärung, Etikett und Tooltip; keine Konsolen-/Seitenfehler.
+
+Damit ist **S0–S4 vollständig abgeschlossen**. Offen: S5 (Modal-Feinschliff: Suche,
+Wirkungs-Vorschau, Zurücknehmen — bewusst NICHT ausgelagert, da Chirurgie in `app/index.html`),
+S6 ist bereits erledigt, S7 (Abschluss/PR nach main).

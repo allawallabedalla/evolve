@@ -12,6 +12,17 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const md = readFileSync(join(ROOT, "docs", "faktoren-katalog.md"), "utf-8");
 
+// Geprüfte externe Zulieferungen (S4: Ebenen-Etikett statt vagem "kommt bald";
+// P3: Klartextname + Erklärung für dieselben 218 inaktiven Faktoren). Beide sind
+// mit tools/layer-import-check.mjs bzw. tools/plain-import-check.mjs abgesichert,
+// bevor sie hier ankommen — falls eine Datei fehlt, läuft der Build unverändert
+// weiter (Faktor bleibt bei "soon" ohne Ebene/Klartext, wie bisher).
+function loadJsonIfExists(path) {
+  try { return JSON.parse(readFileSync(path, "utf-8")); } catch { return {}; }
+}
+const LAYERS = loadJsonIfExists(join(ROOT, "docs", "auslagerung", "S4-ausgabe.json"));
+const PLAIN_INACTIVE = loadJsonIfExists(join(ROOT, "docs", "auslagerung", "P3-ausgabe.json"));
+
 // Icon je Sektion (Nummer -> flaches Icon aus dem App-Icon-Set).
 const SEC_ICON = {
   "1": "mountain", "2": "meteor", "3": "island", "4": "fang", "5": "dna",
@@ -252,7 +263,18 @@ for (const raw of md.split("\n")) {
     const eff = EFFECTS[name];
     const f = { name, desc };
     if (PLAIN[name]) f.plain = PLAIN[name];
-    if (eff) { f.env = eff.env; f.tone = eff.tone; } else { f.soon = true; }
+    if (eff) {
+      f.env = eff.env; f.tone = eff.tone;
+    } else {
+      f.soon = true;
+      // Ehrliche Einordnung statt vagem "kommt bald": WER ist zuständig, und warum.
+      const layer = LAYERS[name];
+      if (layer && layer.layer) { f.layer = layer.layer; f.layerGrund = layer.grund; }
+      // Klartextname + verständliche Erklärung, auch für inaktive Faktoren — sonst
+      // zeigt das Modal 218× nur den nackten Fachbegriff.
+      const plain = PLAIN_INACTIVE[name];
+      if (plain && plain.klartext) { f.plain = plain.klartext; f.desc = plain.erklaerung || desc; }
+    }
     group.factors.push(f);
   }
 }
@@ -278,3 +300,14 @@ const names = new Set(out.flatMap((s) => s.groups).flatMap((g) => g.factors).map
 const unmatched = Object.keys(EFFECTS).filter((k) => !names.has(k));
 console.log(`influences.js: ${out.length} Sektionen, ${total} Faktoren (${realCount} real, ${total - realCount} kommt-bald).`);
 if (unmatched.length) console.log("  ⚠ EFFECTS ohne Katalog-Treffer:\n   - " + unmatched.join("\n   - "));
+
+const inactive = out.flatMap((s) => s.groups).flatMap((g) => g.factors).filter((f) => f.soon);
+const withLayer = inactive.filter((f) => f.layer).length;
+const withPlain = inactive.filter((f) => f.plain).length;
+console.log(`  Ehrliche Einordnung: ${withLayer}/${inactive.length} mit Ebenen-Etikett, ${withPlain}/${inactive.length} mit Klartextname.`);
+const layerNamesFound = new Set(Object.keys(LAYERS));
+const plainNamesFound = new Set(Object.keys(PLAIN_INACTIVE));
+const unmatchedLayer = [...layerNamesFound].filter((k) => !names.has(k));
+const unmatchedPlain = [...plainNamesFound].filter((k) => !names.has(k));
+if (unmatchedLayer.length) console.log("  ⚠ S4-ausgabe.json ohne Katalog-Treffer:\n   - " + unmatchedLayer.join("\n   - "));
+if (unmatchedPlain.length) console.log("  ⚠ P3-ausgabe.json ohne Katalog-Treffer:\n   - " + unmatchedPlain.join("\n   - "));

@@ -308,8 +308,10 @@
   .infl-factor .fsci { color: var(--muted); font-size: .66rem; letter-spacing: .01em; margin-top: 1px; opacity: .8; }
   .infl-factor .fd { color: var(--muted); font-size: .78rem; line-height: 1.45; margin-top: 3px; }
   .infl-factor.soon { cursor: not-allowed; opacity: .6; }
-  .infl-factor.soon .fn::after { content: "kommt bald"; margin-left: auto; font-weight: 400; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
-    color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; }
+  /* S4: ehrliche Einordnung statt pauschalem "kommt bald" — attr() zieht das Etikett
+     aus data-layer-label (je Faktor gesetzt), damit die CSS-Regel für alle passt. */
+  .infl-factor.soon .fn::after { content: attr(data-layer-label); margin-left: auto; font-weight: 400; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
+    color: #fbf3dd; background: var(--muted); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
   /* Kuratierung: „kommt bald"-Faktoren gesammelt hinter einem Aufklapper, damit die aktiven glänzen. */
   .infl-soon-toggle { text-align: left; width: 100%; margin-top: 4px; background: none; border: none; cursor: pointer;
     font: inherit; font-size: .76rem; color: var(--muted); padding: 8px 2px; display: flex; align-items: center; gap: 7px; }
@@ -786,7 +788,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.72.0";
+const APP_VERSION = "v0.73.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -2194,6 +2196,14 @@ document.getElementById("revealX").addEventListener("click", () => { document.ge
 // Sub-Modal (jeder mit Erklärsatz) -> auswählen + Auslösen/Abbrechen. Faktoren aus
 // docs/faktoren-katalog.md (app/influences.js). Wirkt mit Cinematik aufs Hauptwesen.
 const INFL = window.INFLUENCES || [];
+// S4: kurze, ehrliche Etiketten statt des pauschalen „kommt bald" — sagen, WER für
+// einen (noch) nicht auslösbaren Faktor zuständig wäre. Werte kommen aus f.layer,
+// vergeben in tools/build-influences.mjs aus der geprüften Zulieferung S4-ausgabe.json.
+const LAYER_LABEL = {
+  "umsetzbar": "in Prüfung", "zeitachse": "braucht Zeitverlauf", "lebende-welt": "lebende Welt",
+  "neue-achse": "neue Achse nötig", "neues-gen": "neues Merkmal nötig", "mechanik": "Evolutions-Mechanik",
+  "makro-muster": "nur Beobachtung", "schon-regler": "schon ein Regler", "schon-abgedeckt": "schon abgedeckt",
+};
 let inflSel = null, inflOpener = null;
 const _el = (id) => document.getElementById(id);
 const _inflFactors = (c)=> c.groups.flatMap(g=>g.factors);   // alle Faktoren einer Sektion, flach
@@ -2244,7 +2254,11 @@ function openInflSub(ci, preselectName){
   const flat = [];   // flache Faktor-Liste der Sektion (für die Auswahl per Index)
   const factorHtml = (f, fi, d) => {
     const sci = f.plain ? `<div class="fsci">${f.name}</div>` : "";
-    return `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}>`+
+    // S4: WER zuständig wäre, statt eines vagen Versprechens „kommt bald". Fehlt die
+    // Einordnung (sollte nach dem Katalog-Build nicht vorkommen), bleibt der alte Text.
+    const layerAttr = f.soon ? ` data-layer-label="${(LAYER_LABEL[f.layer]||"kommt bald")}"` : "";
+    const layerTitle = f.soon && f.layerGrund ? ` title="${f.layerGrund.replace(/"/g,'&quot;')}"` : "";
+    return `<button class="infl-factor${f.soon?' soon':''}" data-fi="${fi}"${f.soon?' disabled':''}${layerAttr}${layerTitle}>`+
       `<div class="fn">${f.plain||f.name}${f.soon?'':proxBadge(d)}</div>${sci}<div class="fd">${f.desc}</div></button>`;
   };
   // AKTIVE Faktoren zuerst und sichtbar (nach Milieu-Nähe); die vielen „kommt bald"-
