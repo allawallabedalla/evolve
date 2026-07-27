@@ -1,0 +1,1310 @@
+[
+ {
+  "name": "Mitteltemperatur",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "beschreibung": "Basis-Wärme des Ortes."
+ },
+ {
+  "name": "Temperatur-Spanne / Tag-Nacht-Schwankung",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "beschreibung": "selektiert Toleranz-Breite statt Optimum."
+ },
+ {
+  "name": "Saisonalität (Jahreszeiten)",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "beschreibung": "zyklischer Temperaturgang → Dormanz, Wanderung, Fell-Wechsel."
+ },
+ {
+  "name": "Thermische Stabilität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Temperatur & Thermik",
+  "beschreibung": "konstant (Tiefsee) vs. variabel → Spezialist vs. Generalist."
+ },
+ {
+  "name": "Niederschlags-Saisonalität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Wasser & Feuchte",
+  "beschreibung": "Regen-/Trockenzeit-Verteilung (Monsun, Mittelmeer)."
+ },
+ {
+  "name": "Photoperiode / Tageslänge",
+  "sektion": "Ort & Klima",
+  "gruppe": "Licht & Strahlung",
+  "beschreibung": "Jahreszeiten-Signal (Blüte, Brut, Zug)."
+ },
+ {
+  "name": "Sauerstoff (O₂)",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "beschreibung": "historisch variabel; Karbon 35 % → Rieseninsekten."
+ },
+ {
+  "name": "CO₂",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "beschreibung": "Treibhaus + Photosynthese-Substrat."
+ },
+ {
+  "name": "Wetter-Stochastik",
+  "sektion": "Ort & Klima",
+  "gruppe": "Atmosphäre & Luft",
+  "beschreibung": "Unvorhersehbarkeit → opportunistische Strategien."
+ },
+ {
+  "name": "Substrat-Stabilität / Erosion",
+  "sektion": "Ort & Klima",
+  "gruppe": "Boden & Substrat (edaphisch)",
+  "beschreibung": "Hangrutsch vs. stabiler Fels."
+ },
+ {
+  "name": "Rauigkeit / topografische Komplexität",
+  "sektion": "Ort & Klima",
+  "gruppe": "Terrain & 3D-Struktur",
+  "beschreibung": "mehr Nischen, mehr Endemismus."
+ },
+ {
+  "name": "Küsten-/Ufergeometrie",
+  "sektion": "Ort & Klima",
+  "gruppe": "Terrain & 3D-Struktur",
+  "beschreibung": "Tümpel, Ästuar, exponierte Kaps."
+ },
+ {
+  "name": "Ressourcen-Patchiness / -Pulse",
+  "sektion": "Ort & Klima",
+  "gruppe": "Energie, Ressourcen & Extrem-Chemie",
+  "beschreibung": "Mast-Jahre, Lachszüge, Wüstenblüte."
+ },
+ {
+  "name": "Gravitation / Auftrieb",
+  "sektion": "Ort & Klima",
+  "gruppe": "Feuer & Planetares",
+  "beschreibung": "Größenlimit an Land vs. im Wasser (Blauwal)."
+ },
+ {
+  "name": "Magnetfeld",
+  "sektion": "Ort & Klima",
+  "gruppe": "Feuer & Planetares",
+  "beschreibung": "Navigation (Magnetotaxis, Zugvögel)."
+ },
+ {
+  "name": "Störungs-Regime",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "beschreibung": "Frequenz×Intensität×Größe×Timing."
+ },
+ {
+  "name": "Intermediate-Disturbance-Hypothese",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "beschreibung": "Vielfalt maximal bei *mittlerer* Störung."
+ },
+ {
+  "name": "Press vs. Pulse",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "beschreibung": "Dauer-Stress vs. kurzer Schock."
+ },
+ {
+  "name": "Umwelt-Stochastik",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Störungs-Grundbegriffe",
+  "beschreibung": "Zufalls-Schwankung → Populations-Fluktuation."
+ },
+ {
+  "name": "Tektonik / Kontinentaldrift / Hebung / Rifting",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Geophysikalisch / tektonisch",
+  "beschreibung": "*langsame* Barrieren + neue Habitate (Anden, Rift-Seen)."
+ },
+ {
+  "name": "Landbrücken / Meeresspiegel",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Geophysikalisch / tektonisch",
+  "beschreibung": "verbinden/trennen Landmassen (Beringia, Sundaland)."
+ },
+ {
+  "name": "Große Sauerstoff-Krise (GOE)",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Langzeit-Klima & Erdsystem",
+  "beschreibung": "O₂-Anstieg vergiftet Anaerobier."
+ },
+ {
+  "name": "Tag-Nacht / Mond-Gezeiten / Jahreszeit",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "beschreibung": "biologische Rhythmen, synchrone Fortpflanzung."
+ },
+ {
+  "name": "ENSO / NAO / dekadische Oszillationen",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "beschreibung": "mehrjährige Klima-Moden."
+ },
+ {
+  "name": "Milankovitch-Zyklen",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Zyklen",
+  "beschreibung": "Orbital-Taktung der Eiszeiten (→ „Arten-Pumpe\", s. 3.6)."
+ },
+ {
+  "name": "Auslöser-Bündel",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Massenaussterben (als Design-Regler)",
+  "beschreibung": "Vulkanismus+Warming+Anoxie+Versauerung; Impakt; Vereisung+Meeresspiegel."
+ },
+ {
+  "name": "Freie Nischen → adaptive Radiation danach",
+  "sektion": "Katastrophen & Welt-Ereignisse",
+  "gruppe": "Massenaussterben (als Design-Regler)",
+  "beschreibung": "Säuger nach den Dinos. Der Diversitäts-Motor schlechthin."
+ },
+ {
+  "name": "Gleichgewichts-Theorie (Immigration = Extinktion)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "stabile Artenzahl mit Umschlag."
+ },
+ {
+  "name": "Arten-Areal-Beziehung (S = cAᶻ)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "größere Orte → mehr Formen."
+ },
+ {
+  "name": "Distanz-/Isolations-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "ferne Orte bekommen weniger Kolonisten."
+ },
+ {
+  "name": "Rescue-Effekt / Target-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "nahe/große Orte werden „gerettet\"/besser getroffen."
+ },
+ {
+  "name": "Relaxation / Extinktions-Schuld",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "nach Isolation sinkt Artenzahl langsam."
+ },
+ {
+  "name": "Insel-Ontogenie (GDM)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "Vielfalt peakt bei mittlerem Insel-Alter."
+ },
+ {
+  "name": "Taxon-Zyklus",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Inselbiogeografie (MacArthur–Wilson)",
+  "beschreibung": "Kolonist → Spezialist/Endemit → Relikt → Aussterben."
+ },
+ {
+  "name": "Patch (Habitat-Fleck)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "diskreter Ort mit lokaler Population."
+ },
+ {
+  "name": "Kolonisation–Extinktion-Umschlag (Levins)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "regionales Überleben trotz lokalem Aussterben."
+ },
+ {
+  "name": "Quelle–Senke-Dynamik",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "gute Orte subventionieren schlechte."
+ },
+ {
+  "name": "Konnektivitäts-/Inzidenz-Funktion",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "Besetzung ~ Größe + Isolation."
+ },
+ {
+  "name": "Extinktions-Schwelle / Metapop-Kapazität",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "unter X kollabiert alles."
+ },
+ {
+  "name": "Synchronie vs. Portfolio-Effekt",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Metapopulations-Dynamik",
+  "beschreibung": "unkorrelierte Orte puffern das Ganze."
+ },
+ {
+  "name": "Ausbreitungs-Fähigkeit (Vagilität) als GEN",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "geflügelt vs. flügellos."
+ },
+ {
+  "name": "Ausbreitungs-Kern (dispersal kernel)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "meist nah, selten weit (fat tail)."
+ },
+ {
+  "name": "Genfluss / Migration zwischen Orten",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "homogenisiert; der zentrale Isolations-Regler."
+ },
+ {
+  "name": "Ausbreitungs-Syndrome",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "Wind/Wasser/Tier/ballistisch (Frucht, Flughaar, Klette)."
+ },
+ {
+  "name": "Long-Distance / Sweepstakes / Rafting / Jump-Dispersal",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "seltene Fern-Kolonisation."
+ },
+ {
+  "name": "Trittstein-Konnektivität",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "Insel-Hopping über Zwischen-Orte."
+ },
+ {
+  "name": "Philopatrie / Sesshaftigkeit",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "Heimkehr → lokale Anpassung (Lachs)."
+ },
+ {
+  "name": "Isolation-by-Distance / -Environment / -Resistance",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "Differenzierung ~ Distanz/Umwelt."
+ },
+ {
+  "name": "Spatial Sorting (Range-Edge)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "schnellste Ausbreiter sammeln sich an der Front (Aga-Kröten-Beine)."
+ },
+ {
+  "name": "Kompetition–Kolonisation-Trade-off",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Ausbreitung & Genfluss",
+  "beschreibung": "guter Ausbreiter = schlechter Konkurrent → Koexistenz."
+ },
+ {
+  "name": "Geografische Isolation",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "beschreibung": "Basis der allopatrischen Artbildung."
+ },
+ {
+  "name": "Gebirge / Flüsse / Ozeane / Wüsten / Eisschilde als Barrieren",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "beschreibung": "teilen Areale."
+ },
+ {
+  "name": "Vikarianz vs. Dispersal",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "beschreibung": "Barriere entsteht *durch* Areal vs. Überquerung."
+ },
+ {
+  "name": "Landbrücken / Meeresspiegel / Orogenese / marine Barrieren",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "beschreibung": "verbinden/trennen."
+ },
+ {
+  "name": "Edaphische Inseln (Serpentin, Karst)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Isolation & physische Barrieren",
+  "beschreibung": "Substrat-Isolation → Endemiten."
+ },
+ {
+  "name": "Habitat-Fragmentierung",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "beschreibung": "Zerstückelung → weniger Genfluss, mehr Inzucht."
+ },
+ {
+  "name": "Randeffekt / Kern- vs. Rand-Arten",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "beschreibung": "Rand-Mikroklima; flächen-sensible Arten sterben zuerst."
+ },
+ {
+  "name": "Extinktions-Schuld / Kolonisations-Kredit",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "beschreibung": "verzögerte Verluste/Gewinne."
+ },
+ {
+  "name": "SLOSS-Debatte",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "beschreibung": "eine große vs. viele kleine Reserven."
+ },
+ {
+  "name": "Matrix-Permeabilität / Korridore / Perkolations-Schwelle",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Fragmentierung & Randeffekte",
+  "beschreibung": "Bewegbarkeit dazwischen."
+ },
+ {
+  "name": "Cline / Ecotone / Umwelt-Gradient",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "kontinuierlicher Merkmalswandel im Raum."
+ },
+ {
+  "name": "Breiten-/Höhen-Diversitäts-Gradient",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Vielfalt peakt tropisch/mittel-elevation."
+ },
+ {
+  "name": "Range-Expansion/-Kontraktion / -Limits / -Shift (Klima)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Areale wandern (polwärts/aufwärts)."
+ },
+ {
+  "name": "Refugien (glazial/Mikro-)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Überdauern + Wieder-Ausbreitung."
+ },
+ {
+  "name": "Arten-Pumpe (glacial species pump)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Zyklen aus Isolation+Reconnection erzeugen Arten."
+ },
+ {
+  "name": "„Escalator to Extinction\"",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Berggipfel-Arten laufen oben aus dem Habitat."
+ },
+ {
+  "name": "Landschafts-Konnektivität (strukturell vs. funktional)",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Gradienten, Range-Dynamik & Konnektivität",
+  "beschreibung": "Least-Cost-Path, Circuit-Theory."
+ },
+ {
+  "name": "Biogeografische Realme / Provinzialismus / Wallace-Linie",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "beschreibung": "tiefe Faunen-Grenzen."
+ },
+ {
+  "name": "Endemismus (Paläo-/Neo-/kryptisch) / Hotspots",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "beschreibung": "regional einzigartige Formen."
+ },
+ {
+  "name": "Neutraltheorie (Hubbell): Drift + Dispersal + Speziation",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "beschreibung": "Vielfalt ohne Nischen-Unterschiede."
+ },
+ {
+  "name": "Distance-Decay / Nestedness / Checkerboard / Mid-Domain",
+  "sektion": "Raum & Isolation",
+  "gruppe": "Realme, Endemismus, Neutraltheorie",
+  "beschreibung": "räumliche Verteilungs-Muster."
+ },
+ {
+  "name": "Parasitismus (+/–)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "beschreibung": "Ekto-/Endo-, Mikro-/Makro-, Parasitoid, Brut-/Sozial-Parasit, Kastration."
+ },
+ {
+  "name": "Mutualismus (+/+)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "beschreibung": "obligat/fakultativ, Ressourcen-/Service-Tausch."
+ },
+ {
+  "name": "Kommensalismus (+/0) / Amensalismus (–/0) / Neutralismus (0/0)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "beschreibung": "Phoresie, Allelopathie."
+ },
+ {
+  "name": "Apparente Konkurrenz",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Interaktions-Matrix (Vorzeichen +/–/0)",
+  "beschreibung": "indirekt über geteilten Räuber."
+ },
+ {
+  "name": "Bestäubung / Samenausbreitung (Zoochorie)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "beschreibung": "Ko-Diversifikations-Motor."
+ },
+ {
+  "name": "Mykorrhiza / „Wood-Wide-Web\" / N-Fixierer",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "beschreibung": "Pflanzen-Pilz-/Bakterien-Tausch."
+ },
+ {
+  "name": "Darm-Mikrobiom / Endosymbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "beschreibung": "Verdauung; Ursprung von Mitochondrien/Chloroplasten."
+ },
+ {
+  "name": "Koralle–Zooxanthellen / Flechte / Chemosynthese-Symbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "beschreibung": "Photo/Chemo im Wirt."
+ },
+ {
+  "name": "Reinigungs-Symbiose / Ameise–Pflanze / Pilz-Farming / Biolumineszenz-Symbiose",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Symbiosen (Schlüssel-Innovationen)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Antagonistisch (Wettrüsten) / Red Queen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "beschreibung": "Räuber-Beute, Wirt-Parasit; erhält Sex."
+ },
+ {
+  "name": "Mutualistisch / diffus (Gilde) / Gen-für-Gen / geografisches Mosaik",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "beschreibung": "."
+ },
+ {
+  "name": "Escape-and-Radiate",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "beschreibung": "Abwehr-Innovation → Radiation (Pflanzen↔Schmetterlinge)."
+ },
+ {
+  "name": "Charakter-Verschiebung",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "beschreibung": "sympatrische Konkurrenten divergieren (Finken-Schnäbel)."
+ },
+ {
+  "name": "Kospeziation",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Koevolution",
+  "beschreibung": "parallele Diversifikation von Partnern."
+ },
+ {
+  "name": "Fundamentale vs. realisierte Nische",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "beschreibung": "Potenzial vs. nach Interaktion."
+ },
+ {
+  "name": "Konkurrenz-Ausschluss (Gause) / Limiting Similarity",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "beschreibung": "max. Nischen-Überlappung."
+ },
+ {
+  "name": "Nischen-Konstruktion",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "beschreibung": "Organismen ändern ihre eigene Selektion (Biber, Korallen)."
+ },
+ {
+  "name": "R\\*-Theorie (Tilman) / Storage-Effekt / Neutraltheorie",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "beschreibung": "Koexistenz-Bedingungen."
+ },
+ {
+  "name": "Frequenzabhängige Selektion (neg.)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Nischen- & Konkurrenz-Theorie",
+  "beschreibung": "seltener Typ im Vorteil → Branching (s. Spike!)."
+ },
+ {
+  "name": "Nahrungsnetz / trophische Ebenen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "beschreibung": "Produzent→Konsument→Zersetzer."
+ },
+ {
+  "name": "Janzen-Connell / Priority-Effekte / Nurse-Plants / Stress-Gradient",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "beschreibung": "Diversitäts-Erhalt."
+ },
+ {
+  "name": "Sukzession / Assembly-Rules / Metacommunity",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Community-Struktur & Nahrungsnetze",
+  "beschreibung": "geordneter Community-Aufbau."
+ },
+ {
+  "name": "Dichteabhängigkeit / Tragfähigkeit (K) / logistisches Wachstum",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "beschreibung": "Regulation."
+ },
+ {
+  "name": "r/K-Selektion",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "beschreibung": "schnell-viel vs. langsam-konkurrenzstark."
+ },
+ {
+  "name": "Allee-Effekt",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "beschreibung": "reduzierte Fitness bei geringer Dichte (Aussterbe-Beschleuniger)."
+ },
+ {
+  "name": "Räuber-Beute-Zyklen (Lotka-Volterra) / Funktionale Antwort (Typ I–III)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "beschreibung": "Oszillationen."
+ },
+ {
+  "name": "Boom-Bust / Paradox of Enrichment / Zeitverzögerungen",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Populationsdynamik",
+  "beschreibung": "Instabilität."
+ },
+ {
+  "name": "Tarnung (Crypsis/Hintergrund/disruptiv/Konterschattierung/Masquerade/Transparenz)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "."
+ },
+ {
+  "name": "Aposematismus (Warnfarbe)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "signalisiert Wehrhaftigkeit."
+ },
+ {
+  "name": "Mimikry (Batesian/Müllerian/Mertensian/aggressiv/Automimikry/Vavilov/Pouyann)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "."
+ },
+ {
+  "name": "Physisch (Panzer/Stacheln/Schale/Dornen) / chemisch (Toxine/Sekundärmetabolite/Gift)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "."
+ },
+ {
+  "name": "Toxin-Sequestrierung / induzierbare vs. konstitutive Abwehr / indirekte Abwehr (Enemy-Recruit)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "."
+ },
+ {
+  "name": "Autotomie / Thanatose / Startle-Displays / Augenflecken",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "Verhaltens-Abwehr."
+ },
+ {
+  "name": "Gruppen-Abwehr: Prädator-Sättigung/Mast, Verdünnung, selfish herd, Confusion, Mobbing, Alarmruf",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Verteidigungen & Mimikry",
+  "beschreibung": "."
+ },
+ {
+  "name": "Epidemien / SIR-Dynamik / R₀ / Herd-Immunität",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "beschreibung": "Ausbreitung durch Wirte."
+ },
+ {
+  "name": "Virulenz-Evolution (Trade-off; Übertragungs-Modus)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "beschreibung": "vertikal→mild, horizontal→virulent."
+ },
+ {
+  "name": "Reproduktions-Parasiten (Wolbachia): CI / Male-Killing / Feminisierung / Parthenogenese",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "beschreibung": "."
+ },
+ {
+  "name": "Wirt-Manipulation (extended phenotype)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "beschreibung": "„Zombie\"-Ameisen, Toxoplasma."
+ },
+ {
+  "name": "MHC-Red-Queen / Verdünnungs-Effekt (Biodiversität↓Krankheit)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Krankheit / Pathogen-Dynamik",
+  "beschreibung": "."
+ },
+ {
+  "name": "Intra- (Kampf) vs. inter-sexuell (Wahl)",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Sexualselektions-Interaktionen (→ auch Ebene 6)",
+  "beschreibung": "Waffen vs. Ornamente."
+ },
+ {
+  "name": "Sexualkonflikt / Spermien-Konkurrenz / kryptische Weibchenwahl / Infantizid",
+  "sektion": "Leben mit anderen Arten",
+  "gruppe": "Sexualselektions-Interaktionen (→ auch Ebene 6)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Flügelfläche (Flug)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "✅ erledigt (AXIS-1)."
+ },
+ {
+  "name": "Aquatik / Stromlinie / Kiemen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "unterteilt Tiere in Land/Wasser; holt Fisch/Wal/Qualle. Empfohlen als Nächstes."
+ },
+ {
+  "name": "Grabklauen (Graben)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "versucht, verworfen (orthogonal, s. Backlog)."
+ },
+ {
+  "name": "Thermische Toleranz-Breite",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Spezialist vs. Generalist (statt reinem Isolations-Optimum)."
+ },
+ {
+  "name": "Sinne (Sehen/Hören/Chemo/Elektro/Magneto)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Sensorium; Basis für Tarnung/Signal."
+ },
+ {
+  "name": "Färbung / Signal-Muster",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Tarnung ↔ Warnung ↔ Partnerwahl (ein „magic trait\")."
+ },
+ {
+  "name": "Toxin / Gift-Chemie",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Abwehr + Jagd; koppelt an Sequestrierung."
+ },
+ {
+  "name": "Körper-Symmetrie / Bauplan-Achsen (Hox-artig)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Segmentierung, Gliedmaßen-Zahl."
+ },
+ {
+  "name": "Wärmeregulation (Endo-/Ektothermie)",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "teuer, aber Aktivität bei Kälte."
+ },
+ {
+  "name": "Fortpflanzungs-Modus als Gen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "sexuell/asexuell (s. Ebene 6)."
+ },
+ {
+  "name": "Ausbreitungs-Fähigkeit als Gen",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Vagilität (koppelt an Ebene 3.3)."
+ },
+ {
+  "name": "Sozialität / Koloniebildung",
+  "sektion": "Körper & Gene",
+  "gruppe": "",
+  "beschreibung": "Eusozialität, modulare Organismen."
+ },
+ {
+  "name": "r/K- bzw. schnell-langsam-Kontinuum",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "Master-Slider (viele billige vs. wenige teure)."
+ },
+ {
+  "name": "Grimes C-S-R (Pflanzen)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "Konkurrent/Stress-Tolerator/Ruderal."
+ },
+ {
+  "name": "Semelparie vs. Iteroparie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "ein Big-Bang vs. wiederholt."
+ },
+ {
+  "name": "Generationszeit / Reifealter / reproduktive Seneszenz",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "Lebens-Tempo."
+ },
+ {
+  "name": "Kosten der Fortpflanzung / terminale Investition",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "jetzt vs. später (disposable soma)."
+ },
+ {
+  "name": "Determiniertes vs. indeterminiertes Wachstum",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Tempo & Zeitplan",
+  "beschreibung": "große alte Weibchen = fruchtbarer."
+ },
+ {
+  "name": "Fekundität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "beschreibung": "Sonnenfisch ~300 Mio. Eier vs. Hai wenige."
+ },
+ {
+  "name": "Größe–Zahl-Trade-off (Smith-Fretwell) / Lack-Gelegegröße",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "beschreibung": "optimaler Wurf."
+ },
+ {
+  "name": "Dotter-Provisionierung / Lecithotrophie vs. Matrotrophie (Plazenta)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "beschreibung": "."
+ },
+ {
+  "name": "Elterliche Investition (Trivers) / uni-/biparental / Allo-Parenting / kooperative Brut",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "beschreibung": "."
+ },
+ {
+  "name": "Vivipar/ovipar/ovovivipar / Brutparasitismus / Matriphagie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Nachkommen-Zahl, -Größe, -Pflege",
+  "beschreibung": "."
+ },
+ {
+  "name": "Sexuell (Auskreuzung) vs. asexuell/klonal",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "beschreibung": "Rekombination vs. Kopie."
+ },
+ {
+  "name": "Parthenogenese / Apomixis / Haplodiploidie / Gynogenese",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "beschreibung": "Sonder-Modi."
+ },
+ {
+  "name": "Simultaner & sequenzieller Hermaphroditismus (Protandrie/-gynie)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "beschreibung": "Sexwechsel."
+ },
+ {
+  "name": "Selbstung / gemischte Paarung / Knospung/Fragmentierung / Polyembryonie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Fortpflanzungs-Modi",
+  "beschreibung": "."
+ },
+ {
+  "name": "Generationswechsel / Metagenese (Polyp↔Meduse)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "beschreibung": "."
+ },
+ {
+  "name": "Metamorphose (holo-/hemimetabol) / Larvenstadien",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "beschreibung": "Ausbreitungs-/Fress-Trennung."
+ },
+ {
+  "name": "Mehrwirt-Parasiten-Zyklen",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "beschreibung": "Malaria: Mücke+Mensch."
+ },
+ {
+  "name": "Paedomorphose/Neotenie / Progenese",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Komplexe Lebenszyklen",
+  "beschreibung": "Jugendform bleibt (Axolotl)."
+ },
+ {
+  "name": "Diapause / Quieszenz / Hibernation / Aestivation",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "beschreibung": "Ruhe-Zustände."
+ },
+ {
+  "name": "Samen-/Ei-Banken (Dormanz-Propagulen)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "beschreibung": "Zeit-Versicherung (Daphnien-Ephippien)."
+ },
+ {
+  "name": "Bet-Hedging (diversifiziert/konservativ)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "beschreibung": "Fitness-Varianz senken (Wüsten-Keimung)."
+ },
+ {
+  "name": "Prädiktive vs. zufällige Plastizität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Dormanz & Bet-Hedging (Unsicherheits-Strategien)",
+  "beschreibung": "Cue-gesteuert vs. Zufalls-Wette."
+ },
+ {
+  "name": "Ausbreitungs-Syndrom / Natal- vs. Brut-Dispersal / Philopatrie",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Ausbreitung & Bewegung (→ Ebene 3.3)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Migration (saisonal) / Nomadismus/Irruption / Diadromie / Teilzug",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Ausbreitung & Bewegung (→ Ebene 3.3)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Monogamie / Polygynie (Ressourcen-/Harem-/Lek-) / Polyandrie / Promiskuität",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Anisogamie / Bateman / operationelles Geschlechterverhältnis",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "Wurzel der Sex-Rollen."
+ },
+ {
+  "name": "Ornamente (Wahl) vs. Waffen (Kampf) / Rensch-Regel / Nuptialgeschenke",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Wahl-Modelle: Fisher-Runaway, Good-Genes/Handicap, Sensory-Bias/-Drive, Hamilton-Zuk",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Sex-Determination (XY/ZW/Haplodiploid/TSD/ESD/sozial)",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "inkl. Klimawandel-Skew."
+ },
+ {
+  "name": "Fisher-1:1 / Local-Mate-Competition / Trivers-Willard",
+  "sektion": "Fortpflanzung & Lebensweg",
+  "gruppe": "Paarungssysteme & Sexualselektion (→ Ebene 4.9)",
+  "beschreibung": "Geschlechter-Allokation."
+ },
+ {
+  "name": "Mutation (Quelle aller Variation)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "beschreibung": "drin."
+ },
+ {
+  "name": "Natürliche Selektion",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "beschreibung": "drin (Fitness-Gradient)."
+ },
+ {
+  "name": "Genetische Drift",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "beschreibung": "drin (Stochastik-Kanal); stark in kleinen Populationen."
+ },
+ {
+  "name": "Genfluss / Migration",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "beschreibung": "zwischen Orten (Ebene 3.3)."
+ },
+ {
+  "name": "Rekombination (Sex) / nicht-zufällige Paarung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Grundkräfte",
+  "beschreibung": "mischt Allele."
+ },
+ {
+  "name": "Gerichtet / stabilisierend / disruptiv / Trunkierung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Wirkung)",
+  "beschreibung": "Mittel verschieben/verengen/spalten."
+ },
+ {
+  "name": "Purifizierend vs. positiv",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Wirkung)",
+  "beschreibung": "Konservierung vs. Ausbreitung."
+ },
+ {
+  "name": "Balancierend / Heterozygoten-Vorteil",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "beschreibung": "erhält Polymorphismus (Sichelzelle)."
+ },
+ {
+  "name": "Frequenz-abhängig (neg./pos.) / dichte-abhängig",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "beschreibung": "→ Koexistenz/Branching."
+ },
+ {
+  "name": "Fluktuierend (zeitlich) / räumlich variabel (lokale Anpassung)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "beschreibung": "erhält Variation."
+ },
+ {
+  "name": "Antagonistische Pleiotropie / sexuell antagonistisch",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "beschreibung": "Trade-off-getrieben."
+ },
+ {
+  "name": "Sexuelle / Verwandten- (kin) / Gruppen- / künstliche Selektion",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selektions-Typen (nach Kontext)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Dominanz / Über-/Unterdominanz / Pleiotropie / Epistasis (inkl. sign)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "beschreibung": "Genotyp→Phänotyp."
+ },
+ {
+  "name": "Polygenie / infinitesimal / G×E",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "beschreibung": "quantitative Merkmale, Umwelt-Interaktion."
+ },
+ {
+  "name": "Kopplung / LD / Supergene / Modularität",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "beschreibung": "mit-vererbte Blöcke."
+ },
+ {
+  "name": "Gen-Duplikation → Neo-/Subfunktionalisierung / Polyploidie / Inversionen",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Genetische Architektur",
+  "beschreibung": "Neuheits-Quelle, Pflanzen-Artbildung."
+ },
+ {
+  "name": "Epigenetik / Methylierung / transgenerational / Imprinting / Paramutation",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "beschreibung": "."
+ },
+ {
+  "name": "Maternale/zytoplasmatische Effekte / Prion-/Small-RNA-Vererbung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "beschreibung": "."
+ },
+ {
+  "name": "Phänotypische Plastizität / Reaktionsnorm / Polyphänismus",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "beschreibung": "ein Genotyp, viele Phänotypen."
+ },
+ {
+  "name": "Baldwin-Effekt / genetische Assimilation / Plasticity-first",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "beschreibung": "Lernen/Plastizität leitet Evolution."
+ },
+ {
+  "name": "Nischen-Konstruktion / kulturelle / Holobiont-Vererbung",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Vererbung jenseits der DNA",
+  "beschreibung": "nicht-genetische Kanäle."
+ },
+ {
+  "name": "Horizontaler Gentransfer (HGT)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "beschreibung": "Bakterien tauschen Gene (Resistenz-Plasmide)."
+ },
+ {
+  "name": "Introgression / adaptive Introgression",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "beschreibung": "Gene über Art-Grenzen (Neandertaler-EPAS1)."
+ },
+ {
+  "name": "Hybridisierung / Hybrid-Artbildung / Endosymbiose / Symbiogenese",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Horizontaler Transfer & Fusionen",
+  "beschreibung": "."
+ },
+ {
+  "name": "Transposons / meiotic drive / Segregations-Verzerrer / Gen-Drives / B-Chromosomen",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "beschreibung": "."
+ },
+ {
+  "name": "Hitchhiking/Sweeps (hart/weich) / Background-Selection / Hill-Robertson / clonal interference",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "beschreibung": "."
+ },
+ {
+  "name": "Muller's Ratchet / Y-Degeneration / Error-Catastrophe",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Selfish Genes & Kopplungs-Effekte",
+  "beschreibung": "Verfall ohne Rekombination."
+ },
+ {
+  "name": "Kanalisierung / kryptische Variation (Hsp90) / genetische Robustheit",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Robustheit & Evolvierbarkeit",
+  "beschreibung": "verborgenes Potenzial."
+ },
+ {
+  "name": "Evolvierbarkeit / facilitated variation / neutrale Netze / effektive Populationsgröße (Nₑ)",
+  "sektion": "Wie Evolution läuft",
+  "gruppe": "Robustheit & Evolvierbarkeit",
+  "beschreibung": "."
+ },
+ {
+  "name": "Founder-Effekt",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "wenige Kolonisten tragen unrepräsentative Gene."
+ },
+ {
+  "name": "Flaschenhals (Bottleneck)",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "Katastrophe → wenige Überlebende → Diversitäts-Verlust."
+ },
+ {
+  "name": "Founder-Flush(-Takeover)-Speziation",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "Bottleneck + Explosion → schnelle Divergenz (Hawaii-Drosophila)."
+ },
+ {
+  "name": "Serieller Founder-Effekt / Allele-Surfing",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "Diversität sinkt entlang der Kolonisations-Route."
+ },
+ {
+  "name": "Mutations-Ordnungs-Effekt",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "gleiche Selektion, andere fixierte Mutation → Inkompatibilität."
+ },
+ {
+  "name": "Historische Kontingenz / Potenzierung / Entrenchment",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "„Band des Lebens neu abspielen\" (LTEE Cit⁺)."
+ },
+ {
+  "name": "Dollo-Irreversibilität",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "komplexe verlorene Merkmale kehren nicht zurück."
+ },
+ {
+  "name": "Evolutionäre Rettung (evolutionary rescue)",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "schnelle Anpassung verhindert Aussterben."
+ },
+ {
+  "name": "Genfluss-Swamping / Migrations-Last",
+  "sektion": "Zufall & Schicksal",
+  "gruppe": "",
+  "beschreibung": "Zuwanderung überschwemmt lokale Anpassung → Range-Limit."
+ },
+ {
+  "name": "Allopatrisch / peripatrisch / parapatrisch / sympatrisch / heteropatrisch",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "je nach Isolations-Grad."
+ },
+ {
+  "name": "Ökologische Speziation / „Magic-Trait\" / Sensory-Drive / Mutations-Ordnung",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Reproduktive Isolation (prä-: ökolog./zeitl./ethol./mechan./gametisch; post-: BDMI/Haldane/hybrid)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Reinforcement / Wallace-Effekt / Charakter-Verschiebung",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Hybridisierung: homoploid, allopolyploid, Introgression, Ringart, Hybridzone, Syngameon",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Despeziation / Speziations-Umkehr",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Artbildungs-Modi (emergent aus Raum + Selektion)",
+  "beschreibung": "Isolation bricht zusammen (Victoria-Cichliden)."
+ },
+ {
+  "name": "Adaptive vs. nicht-adaptive Radiation / ökologische Gelegenheit / Schlüssel-Innovation",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "beschreibung": "."
+ },
+ {
+  "name": "Ökologische Freisetzung / Insel-Syndrom (Zwerg-/Riesenwuchs, Flugverlust, Zahmheit)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "beschreibung": "."
+ },
+ {
+  "name": "Hintergrund- vs. Massen-Aussterben / Koaussterbe-Kaskade / Extinktions-Schuld",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "beschreibung": "."
+ },
+ {
+  "name": "Lilliput-/Lazarus-/Elvis-Taxon / Dead-Clade-Walking / Selektivität",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Diversifikations- & Aussterbe-Muster",
+  "beschreibung": "Aussterbe-Vokabular."
+ },
+ {
+  "name": "Phyletischer Gradualismus vs. Punktualismus / Stasis / Quantum-Evolution",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "."
+ },
+ {
+  "name": "Anagenese vs. Kladogenese / Mosaik-Evolution / Heterochronie / Rate-Variation",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "."
+ },
+ {
+  "name": "Arten-Selektion / Court-Jester vs. Red-Queen / Turnover-Puls",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "höhere Selektions-Ebenen."
+ },
+ {
+  "name": "Cope-Regel / Dollo / Williston / evolutionäre Eskalation (Vermeij)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "Makro-Gesetze."
+ },
+ {
+  "name": "Konvergenz / Parallelismus / Divergenz / iterative Evolution",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "wiederholte Formen (Anolis-Ökomorphe)."
+ },
+ {
+  "name": "Lebende Fossilien / Stasis / evolutionäre Sackgassen (Überspezialisierung)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Tempo, Trends & Konvergenz",
+  "beschreibung": "."
+ },
+ {
+  "name": "Replikatoren→Chromosomen→DNA/Protein / Pro-→Eukaryot (Endosymbiose)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Große Übergänge (Maynard Smith & Szathmáry)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Ein- → Vielzeller / solitär → eusozial (Superorganismus) / Sprache/Kultur",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Große Übergänge (Maynard Smith & Szathmáry)",
+  "beschreibung": "."
+ },
+ {
+  "name": "Breiten-/Höhen-Diversitäts-Gradient (+ Hypothesen: Zeit-Areal/kinetisch/Out-of-Tropics)",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "beschreibung": "."
+ },
+ {
+  "name": "Arten-Areal / Rapoport / Bergmann / Allen",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "beschreibung": "geografische Regeln."
+ },
+ {
+  "name": "Great American Interchange / Wallace-Linie",
+  "sektion": "Große Muster der Vielfalt",
+  "gruppe": "Makroökologische Muster",
+  "beschreibung": "biotischer Austausch."
+ },
+ {
+  "name": "Domestikation / künstliche Zucht / Domestikations-Syndrom",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "beschreibung": "Zahmheit, Schlappohren (Belyaev-Füchse)."
+ },
+ {
+  "name": "Gentechnik / CRISPR / Gene-Drives / synthetische Biologie / De-Extinction",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "beschreibung": "."
+ },
+ {
+  "name": "Konservierung: genetische Rettung / assistierte Migration / assisted gene flow",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "beschreibung": "."
+ },
+ {
+  "name": "Ernte-induzierte Evolution",
+  "sektion": "Mensch & moderne Welt",
+  "gruppe": "",
+  "beschreibung": "Fischerei→kleiner/früher reif; Trophäenjagd→kleinere Waffen; Wilderei→Stoßzahn-Verlust."
+ }
+]

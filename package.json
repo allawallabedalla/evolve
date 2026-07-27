@@ -28,6 +28,7 @@
     "story-check": "node tools/story-check.mjs",
     "influence-check": "node tools/influence-check.mjs",
     "ui-calm-check": "node tools/ui-calm-check.mjs",
+    "layer-import-check": "node tools/layer-import-check.mjs",
     "build-influences": "node tools/build-influences.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000"

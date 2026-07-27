@@ -1,0 +1,18 @@
+{
+ "Saisonalität (Jahreszeiten)": {
+  "layer": "zeitachse",
+  "grund": "Ein schwankender Zustand ist etwas anderes als ein hoher oder tiefer Zustand; die Engine kennt nur Momentaufnahmen."
+ },
+ "Landbrücken / Meeresspiegel": {
+  "layer": "lebende-welt",
+  "grund": "Verbindet oder trennt Orte — das ist eine Eigenschaft der Metapopulation, nicht des Milieus einer Linie."
+ },
+ "Mitteltemperatur": {
+  "layer": "schon-regler",
+  "grund": "Deckt sich vollständig mit dem Temperatur-Regler in der Konsole."
+ },
+ "CO₂": {
+  "layer": "neue-achse",
+  "grund": "Bräuchte eine eigene Umwelt-Achse als Photosynthese-Substrat; es gibt keine."
+ }
+}

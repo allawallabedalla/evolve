@@ -192,3 +192,23 @@ Stadt (Hitzeinsel & Nachtlicht) · Entleerte Tierwelt.
 
 **Messwerte danach:** Ø L1-Verschiebung 2,92 · erreichte Formen weiterhin 13 · Reiche-Bilanz
 Tier 28 · Mikrobe 15 · Protist 15 · Pilz 8.
+
+### 2026-07-27 · S4 als Arbeitspaket ausgelagert
+Der Nutzer hat eine lokale KI und fragte, ob sich Arbeit ohne Integrationsrisiko abgeben lässt.
+Antwort: **ja für S4 und S6, nein für S5** — das Kriterium ist nicht die Qualität der KI,
+sondern die **Form der Schnittstelle**. Was als Datendatei mit maschinell prüfbarem Vertrag
+übergeben werden kann, ist sicher; was Eingriffe in `app/index.html` verlangt, ist es nicht.
+
+Vorbereitet:
+- `docs/auslagerung/S4-eingabe.json` — alle 218 inaktiven Faktoren (Name, Sektion, Gruppe,
+  Beschreibung), 42 KB, ohne Repo-Kontext bearbeitbar.
+- `docs/auslagerung/S4-aufgabe.md` — vollständige Auftragsbeschreibung: die 16 Achsen, neun
+  erlaubte Ebenen, Ausgabeformat, Regeln, acht bereits entschiedene Beispiele als Maßstab.
+- `docs/auslagerung/S4-beispiel.json` — Muster-Zulieferung.
+- `tools/layer-import-check.mjs` (`npm run layer-import-check <datei>`) — prüft Namens-Treue,
+  Vollständigkeit, Wertebereich, keine Umetikettierung aktiver Faktoren und **unterwirft jeden
+  `env`-Vorschlag sofort demselben Wirksamkeits- und Dubletten-Test wie einen echten Faktor**.
+  Eine fehlerhafte Zulieferung kann damit nichts kaputt machen — sie kommt gar nicht erst in
+  den Generator.
+- Nebenbei: der App-Kern-Zugriff liegt jetzt in `tools/lib/app-core.mjs` statt doppelt
+  (`influence-check` danach unverändert grün, 66 Faktoren).
