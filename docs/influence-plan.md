@@ -437,3 +437,40 @@ weniger Herausforderungen als eine, die niemand schaffen kann"). Ergebnis:
 Einstufung/Beschränkungs-Trennschärfe bei ~30 Einträgen — kein Fail).**
 Verdrahtung ins Spiel (neue UI, Fortschrittsanzeige) weiterhin NICHT Teil davon — eigene
 Entscheidung, noch offen.
+
+### 2026-07-27 · Textqualität der P8-Zulieferung geprüft — Nacharbeit nötig
+Stichprobe der 271 angenommenen Texte zeigte einen systematischen Grammatikfehler, den
+`challenge-import-check.mjs` nicht prüft (nur Länge/Ton/Umlaute, keine Grammatik): 226/271
+Beschreibungen enthielten „zu das Reich der Mikrobe" statt „zum Reich der Mikroben" (falsche
+Präposition UND falscher Numerus), und alle 271 Titel kamen aus nur 12 wiederverwendeten
+Vorlagen („Im stillen Winkel: X", „In der Gluthitze: X", …) — reines Mad-Libs, nicht die im
+Auftrag geforderte natürliche, variierte Prosa.
+
+Entschieden: **nicht** so übernommen. `tools/gen-challenge-text.mjs` (neu) erzeugt Titel +
+Beschreibung stattdessen selbst — deterministisch, aus einem festen Wortschatz je Achse/Richtung
+(dieselbe Technik wie `app/story.js`), auf Basis der bereits simulations-geprüften `ziel`/
+`grenzen`-Felder (die blieben unverändert). Ergebnis: 0 doppelte Titel, 0 doppelte
+Beschreibungen, 0 Grammatikfehler, erneut vollständig mit `challenge-import-check.mjs` bestanden
+(271/271). `docs/auslagerung/P8-ausgabe.json` enthält jetzt diesen selbst erzeugten Text.
+
+### S8 · Herausforderungen ins Spiel verdrahtet — erledigt (v0.75.0)
+271 Herausforderungen eingebaut: `tools/build-challenges.mjs` → `app/challenges.js` →
+neuer Button „Herausforderungen ↗" (Modal mit Suche + Reich-/Schwierigkeits-Filtern, capped auf
+60 gerenderte Treffer). Browser-Test (Playwright, `/opt/pw-browsers`) deckte zwei echte Bugs vor
+dem Release auf, beide behoben:
+1. **Sofort-Fehlschlag beim Annehmen**: eine Herausforderung mit eng gefasster Beschränkung
+   scheiterte im ALTEN Entwurf schon im ersten Frame nach „annehmen", weil die aktuellen Regler
+   die Beschränkung so gut wie nie zufällig schon erfüllen. Fix: neuer Zustand „warten" — die
+   Generationen-Uhr startet erst, wenn die Umwelt tatsächlich im Rahmen ist.
+2. **Sofort-Gewinn beim Annehmen**: das unbeeinflusste Start-Genom (alle 25 Gene auf 0,5)
+   klassifiziert schon als „Protist · Euglenoid · Mixotroph" — ohne Gegenmaßnahme wäre jede
+   Herausforderung mit diesem Ziel ein Gewinn ganz ohne Zutun gewesen. Fix: `CHAL_MIN_GENS = 5`,
+   ein „geschafft" zählt erst nach mindestens 5 echten Generationen im laufenden Zustand.
+Fortschritt (`completedChallenges`) übersteht „Neues Leben" (eigener localStorage-Schlüssel,
+unabhängig vom Spielstand). Kein Zwang: annehmen/aufgeben/erneut versuchen jederzeit ohne Folgen.
+`npm run app-parity` und `npm run story-check` weiterhin grün — keine Regression.
+
+Damit ist die ursprüngliche Aufgabe „Umwelt-Einfluss auslösen fertigstellen" (S0–S7) UND der
+daraus entstandene Bindungs-Baustein V1 (S8) abgeschlossen. Offen bleiben nur die
+Ausbaustufen aus `docs/bindung-konzept.md` (Bestenliste, „Welt der Woche" — brauchen einen
+Server) sowie das separat geführte Paket P7 (Qualitäts-Audit, nur Idee, nicht angefragt).

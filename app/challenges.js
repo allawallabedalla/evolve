@@ -1,4 +1,6 @@
-[
+// AUTO-GENERIERT aus auslagerung/P8-ausgabe.json (externe Zulieferung,
+// geprüft mit tools/challenge-import-check.mjs). Nicht von Hand editieren.
+window.EVOLVE_CHALLENGES = [
  {
   "id": "mikrobe-3",
   "titel": "Der enge Grat — in glühender Sonne, ohne Räuber in der Nähe",
@@ -8299,4 +8301,4 @@
   "generationen": 1536,
   "schwierigkeit": "mittel"
  }
-]
+];
