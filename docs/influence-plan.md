@@ -425,3 +425,15 @@ Nadelbaum: lockere Envelope-Beschränkung auf 2 Achsen → 0/24, enge 6-Achsen-B
 Beispiel → 8 % Trefferquote). `P8-beispiel.json` geprüft, besteht. Umfang diesmal: 300
 Herausforderungen. P5 selbst bleibt vorerst offen/unintegriert — P8 ist der vorgesehene
 Ersatz/die Erweiterung dafür.
+
+### 2026-07-27 · P8-Zulieferung geprüft (300 Herausforderungen)
+`docs/auslagerung/P8-herausforderungen.json` (300 Stück, externe Zulieferung) geprüft: **29/300
+durchgefallen** (nie erreichbar im Budget) — deutliche Verbesserung gegenüber P5 (dort 10/28,
+also ~36 %; hier ~9,7 %), die Envelope-Grounding-Methode wirkt. Da der Prüfstand alles-oder-
+nichts arbeitet, wurden die 29 Attrappen herausgefiltert (Regel aus P5-aufgabe.md §7: „lieber
+weniger Herausforderungen als eine, die niemand schaffen kann"). Ergebnis:
+**`docs/auslagerung/P8-ausgabe.json` — 271 Herausforderungen, alle einzeln simulations-verifiziert,
+`challenge-import-check` bestanden (0 Beanstandungen, nur milde Hinweise zu Schwierigkeits-
+Einstufung/Beschränkungs-Trennschärfe bei ~30 Einträgen — kein Fail).**
+Verdrahtung ins Spiel (neue UI, Fortschrittsanzeige) weiterhin NICHT Teil davon — eigene
+Entscheidung, noch offen.
