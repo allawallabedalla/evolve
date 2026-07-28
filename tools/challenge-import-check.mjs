@@ -61,7 +61,10 @@ function sampleEnv(rnd, grenzen, ignoreGrenzen) {
     // Achsen ohne Beschränkung bleiben frei wählbar (Spielraum des Spielers) —
     // aber nur, wenn sie zum Spiel gehören; Stressoren starten bei 0/1 (s. o.)
     // und werden nur bewegt, wenn die Herausforderung sie ausdrücklich einschränkt.
-    if (!g && STRESSORS.includes(ax)) continue;
+    // oxygen ist in tools/lib/app-core.mjs::STRESSORS bewusst NICHT enthalten (die
+    // Liste wird anderswo für ein "Reset auf 0"-Muster genutzt, oxygen resettet
+    // aber auf 1) — hier braucht es dieselbe Behandlung wie ein echter Stressor.
+    if (!g && (STRESSORS.includes(ax) || ax === "oxygen")) continue;
     e[ax] = lo + rnd() * (hi - lo);
   }
   return e;
