@@ -461,6 +461,39 @@ Drei Punkte aus dem Spielen der v0.70.0:
 
 ---
 
+## ⬜ Offen — Realitätstreue-Loop (Forschungsarbeit 2026-07-28)
+
+Forschungsauftrag: wissenschaftlich fundiertestes Evolutionsmodell + ein automatischer
+Kreislauf, der seine Treue zur biologischen Realität selbst misst und maximiert.
+**Volles Dokument:** `docs/evolution-fidelity-loop.md`.
+
+Kern-Idee: Realitätstreue ist keine einzelne Zahl, sondern drei unabhängige Schichten mit
+je eigener Mindestschwelle (keine Schicht darf die andere „erkaufen"): **A** Evolutionstheorie-
+Phänomene (P1–P8: Radiation, Branching, Allopatrie, Konvergenz, Red Queen, Kontingenz,
+Verteilungsgesetze, Aussterben/Erholung), **B** reale Biodiversitäts-Verteilungen (SAD/SAR/
+Größenspektrum gegen publizierte Referenzformen), **C** Distillation der Browser-Engine gegen
+ein reicheres Offline-Referenzmodell (Orakel). Ein äußerer Optimierungs-Loop (Kandidat →
+simulieren → messen → Regressionsschutz per Holdout → Champion persistieren) sucht Engine-
+Parameter automatisch; Strukturänderungen (Genom-Topologie/GRN) bleiben bewusst außerhalb der
+Auto-Schleife, um Overfitting an die eigene Messlatte zu vermeiden.
+
+Repo-Abgleich (Teil VI des Dokuments) zeigt: Populations-Kern, Ko-Evolution, Metapopulation,
+Cluster-basierte Arten und ein erster GA-Loop (`training/fit.ts`) existieren bereits und decken
+strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch komplett.
+
+**Vereinbarter erster Schritt (kleinster isoliert testbarer Schnitt):**
+1. Genom-Breite vereinheitlichen — `world/population.ts` (`numGenes = 9`) auf die vollen 25 Gene
+   aus `engine/types.ts` bringen, sonst misst jeder spätere Loop ein verkürztes Modell.
+2. **Schicht-A-Portfolio** bauen: die 8 Phänomen-Szenarien (P1–P8) als eigenständige, deterministische
+   Tests mit Zielband — je Szenario mit einer Ablation, die beweisen muss, dass das Phänomen bei
+   abgeschalteter Kraft verschwindet (emergent, nicht hineinprogrammiert).
+   Erst danach: Schicht B (Verteilungs-Fits) und Ausbau von `training/fit.ts` zum Drei-Schicht-Loop
+   mit Champion-Persistenz + Multi-Schicht-Report + Regressions-Gate.
+
+**Start:** Mittwoch, 2026-07-29, 15:00 Uhr (Europe/Berlin).
+
+---
+
 ## ⬜ Offen — Live-App
 
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
