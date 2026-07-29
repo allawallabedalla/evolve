@@ -362,7 +362,12 @@ Rarität-Grundmechanik ist umgesetzt (s. „Erledigt" → „Rarität / Entdecku
 als Politur:
 - [ ] Sanfte Biom-Empfehlungen („in diese Richtung wohnt noch etwas Seltenes") statt harter
   Gates.
-- [ ] Rarität optional auch in `tree-of-life.json` spiegeln.
+- [x] **Rarität in `tree-of-life.json` gespiegelt (erledigt 2026-07-29)** — jeder Knoten mit
+  `ourForms` bekommt jetzt ein `formRarity`-Objekt (Name→Tier, aus `docs/rarity.json`, das
+  bereits exakt dieselben Formnamen wie `TREE`/`ourForms` verwendet — keine Namens-Umrechnung
+  nötig). Rein additiv, minimal-invasiv per gezielter Textersetzung eingefügt (kein
+  Full-Reformat), Originalformatierung erhalten. Rein informativ, keine Spielfunktion liest
+  diese Datei — reines Referenz-Dokument.
 
 ### 9 · Realitätstreue-Loop (Forschungsarbeit 2026-07-28)
 
