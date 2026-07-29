@@ -599,7 +599,15 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   gewichteten Summe — Goodhart-Schutz) + `failingLayers`. Verifiziert:
   `computeFidelity(1.0, 1.0, 0.72)` (heutiger Stand) → Fidelity 0.907, fällt knapp durch,
   ausschließlich wegen Schicht C — genau wie gefordert kein Grün-beim-ersten-Lauf.
-- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **Modell: Opus** für
+- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **pausiert
+  (2026-07-29):** baut auf `training/fit.ts`/`fitted-params.json` auf, die laut
+  `docs/engine-forschungsergebnis.md` Migrationsplan (Punkt 2, Stufe 6) im Zuge der
+  laufenden Engine-Migration **ersatzlos entfallen** sollen (Score_C selbst wird dort neu
+  definiert — Verteilungs-Konvergenz-in-N statt Per-Gen-Distillation). Einen elaborierten
+  Optimierungsloop um eine Komponente zu bauen, die absehbar entfernt wird, wäre
+  widersprüchliche Arbeit. **Erst nach Abschluss/Entscheidung der Punkt-2-Migration (mind.
+  bis Stufe 6 dort) neu bewerten**, ob und in welcher Form dieser Schritt noch sinnvoll ist.
+  — **Modell: Opus** für
   den Loop-/Gate-Architekturentwurf (Overfitting-Vermeidung ist konzeptionell heikel),
   **Sonnet** für die Implementierung danach (Forschungsdokument
   Teil IV, „### 4.2 Die sechs Stationen im Detail" — Kandidat, Simulieren, Messen,
