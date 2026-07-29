@@ -144,8 +144,22 @@ dieses Ergebnis vorliegt.
   Abstimmung). **Empfohlene Umsetzungsreihenfolge:** P0.1 Gene progressiv einblenden → Biome→
   Presets-Umstellung → Prio-3-Nebenfunktionen ins Details-Panel bündeln → (P2) Inline-Fitness-
   Kopie in `index.html` durch generierte Version ersetzen (schließt die Fehlerklasse des
-  10-Versionen-NaN-Bugs, s. „Erledigt"). **Noch nicht umgesetzt** — Start ist
-  Produktentscheidung des Nutzers.
+  10-Versionen-NaN-Bugs, s. „Erledigt").
+
+  - [x] **P0.1 + P0.2 umgesetzt (2026-07-29):** Gen-Zeilen progressiv eingeblendet
+    (`computeRelevantGenes`/`applyGeneFilter` — relevant = |Wert−Mutations-Anker| > 0.15 ODER
+    Teil des aktiven Selektions-Theaters; mind. 6 Gene bleiben immer sichtbar; „Alle 25 Gene
+    zeigen"-Umschalter mit `localStorage`, analog zum bestehenden Zahlen-Toggle). Die sieben
+    Prio-3-Nebenfunktionen (Name, „So funktioniert's", Chronik, Zahlen-Toggle, Engine-Info,
+    Login, Neu beginnen) in ein neues „⋯ Details"-Panel gebündelt (Fokus-Falle,
+    Escape-Handling inkl. verschachtelter Dialoge korrekt einzeln schließbar). Nur
+    `app/index.html` geändert, reine Anzeige-Filterung (alle 25 Werte weiter berechnet).
+    Getestet: Syntax-Check sauber, Playwright-Browser-Test (Gen-Filter + Aufklappen,
+    Details-Panel + Fokus-Falle, verschachtelte Dialoge, Kernschleife unverändert),
+    `app-parity`/`mf-fidelity` weiterhin grün. **Noch offen aus P0-P2:** Biome→Presets,
+    Herausforderungen/Einfluss-Kuratierung, Datei-Aufsplittung, Inline-Fitness-Kopie
+    eliminieren — Start war Produktentscheidung des Nutzers, inzwischen freigegeben
+    (2026-07-29, „der Reihenfolge nach abarbeiten").
 
 ### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — eigener Branch, läuft parallel
 

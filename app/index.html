@@ -180,6 +180,11 @@
   @media (prefers-reduced-motion: reduce) { .gene .track, .gene .dir { transition: none; } }
   .gene.muted { opacity: .55; }
   .gene.muted .lbl::after { content: " ·"; }
+  /* P0.1 (Komplexitaets-Audit): progressive Disclosure der Gen-Zeilen — nur auffaellig
+     vom Anker abweichende oder gerade aktiv selektierte Gene sind standardmaessig
+     sichtbar (computeRelevantGenes/applyGeneFilter). Reine Anzeige-Filterung: alle 25
+     Werte werden weiterhin jede Generation berechnet, es aendert sich nur, was gezeigt wird. */
+  .genes:not(.show-all-genes) .gene:not(.gene-relevant) { display: none; }
   /* ---- Vitalitäts-Anzeige (A3) ---- */
   .vitality { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
   .vit-track { flex: 1; height: 9px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
@@ -635,6 +640,31 @@
   .footnote b { color: var(--text); font-weight: 600; }
   .ver { display: block; margin-top: 6px; font-family: var(--mono); font-size: .66rem; color: var(--bio-dim); letter-spacing: .04em; opacity: .8; }
   .chip-val { font-family: var(--mono); color: var(--bio-dim); }
+
+  /* ---- Details-Panel (Komplexitaets-Audit P0.2): Sekundär-Controls gebündelt ----
+     Name-Edit, „So funktioniert's", Chronik-Log, Engine-Info, Zahlen-Toggle,
+     Login/Cloud-Sync und „Neu beginnen" stehen nicht mehr permanent auf der Hauptseite,
+     sondern liegen gemeinsam hinter einem Klick (Prio 3: bewusst vergraben). */
+  .details-btn { margin-left: auto; white-space: nowrap; }
+  .dpanel { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center;
+    background: rgba(74,60,36,.34); backdrop-filter: blur(5px); animation: fadein .3s ease; }
+  .dpanel[hidden] { display: none; }
+  .dpanel-card { width: min(92%, 460px); max-height: 84vh; overflow-y: auto;
+    background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%);
+    border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
+  .dpanel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .dpanel-head h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.15rem; margin: 0; color: var(--text); }
+  .dpanel-sec { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+  .dpanel-sec:first-of-type { margin-top: 14px; padding-top: 0; border-top: none; }
+  .dpanel-sec h3 { margin: 0 0 8px; font-size: .66rem; text-transform: uppercase; letter-spacing: .12em; color: var(--bio-dim); }
+  .dpanel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .dpanel-row:last-child { margin-bottom: 0; }
+  .dpanel .auth { margin-left: 0; }
+  .dpanel-row .ctrl.newlife { margin-left: 0; }
+  .dpanel-note { font-size: .78rem; color: var(--muted); line-height: 1.55; margin: 8px 0 0; }
+  .dpanel-note b { color: var(--text); font-weight: 600; }
+  .dpanel-note[hidden] { display: none; }
+  @media (prefers-reduced-motion: reduce) { .dpanel { animation: none; } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 
@@ -642,7 +672,7 @@
   <header class="top">
     <h1 class="brand"><b>Evolve</b> · Bio-Kammer</h1>
     <div class="tagline">Du steuerst nie das Wesen — nur seine Welt. Die Zeit läuft ununterbrochen; dreh an der Umwelt und sieh zu, wie sich das Leben über Generationen anpasst.</div>
-    <div class="auth" id="authState"></div>
+    <button class="link details-btn" id="detailsBtn" aria-haspopup="dialog" aria-controls="detailsPanel" title="Weitere Einstellungen: Name, Chronik, Engine-Info, Zahlen, Konto, Neu beginnen">⋯ Details</button>
   </header>
 
   <div class="stage">
@@ -690,21 +720,16 @@
       <div class="controls">
         <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter"></button>
         <div class="speeds" id="speeds"></div>
-        <button class="ctrl newlife" id="newLifeBtn">Neu beginnen</button>
       </div>
     </div>
 
     <!-- Identitaets-/Detail-Karte -->
     <div class="panel card creature-card">
-      <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span><button class="link cname-edit" id="nameBtn" aria-label="Wesen benennen" title="Wesen benennen">✎</button></div>
+      <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span></div>
       <div class="kingdom" id="kingdom">—</div>
       <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
       <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
       <div class="chron-line" id="chronLine" role="status" aria-live="polite" hidden></div>
-      <details class="how">
-        <summary>So funktioniert's</summary>
-        <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
-      </details>
       <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
         <span class="vit-label" id="vitLabel">Passung zur Umwelt</span>
         <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
@@ -712,30 +737,15 @@
       </div>
       <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausleset — daran passt sich das Wesen über Generationen an."></div>
       <div class="genes" id="genes"></div>
-      <button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button>
+      <button class="gene-nums-toggle" id="geneFilterBtn" aria-pressed="false" title="Nur auffällige Gene zeigen oder alle 25 Gene auf einmal">Alle 25 Gene zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
-      <details class="chron-log" id="chronLog" hidden>
-        <summary id="chronLogSum">Chronik dieses Lebens</summary>
-        <ol id="chronList"></ol>
-      </details>
       <button class="link cshare" id="shareBtn" title="Ein Bild deines Wesens erstellen und teilen">Schnappschuss teilen ↗</button>
     </div>
   </div>
 
   <p class="footnote">
     Prozedural aus 25 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
-    <button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button>
     <span class="ver" id="appVer" title="App-Version"></span>
-  </p>
-  <p class="footnote" id="engineDetail" hidden>
-    Diese Hauptansicht zeigt die <b>Anpassungs-Bahn einer Linie</b> — die mittlere Form, auf die
-    sich eine ganze Population über Generationen zubewegt (eine geglättete Näherung, nicht ein
-    einzelnes Lebewesen). Unter der Haube trägt der Populations-Kern echte <b>Streuung, Zufalls-Drift
-    und sogar Aufspaltung in mehrere Cluster</b> (sympatrische Konkurrenz) — die Hauptansicht fokussiert
-    bewusst auf dein eines Wesen. Die Engine ist gegen ein
-    wissenschaftliches Referenzmodell auf <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die
-    <b>Modell-Güte</b> (wie gut die schlanke Browser-Engine das schwere Referenzmodell trifft),
-    <b>keine Bewertung deines Wesens</b>.
   </p>
 
   <div class="login" id="login" role="dialog" aria-modal="true" aria-label="Geräte-Sync — Login" hidden>
@@ -753,6 +763,54 @@
       <div class="login-links">
         <button id="loginReset" class="link">Passwort vergessen?</button>
         <button id="loginClose" class="link">abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details-Panel (Komplexitaets-Audit P0.2): die sieben Sekundär-Controls, die
+       vorher permanent auf der Hauptseite standen (Name-Edit, „So funktioniert's",
+       Chronik-Log, Engine-Info, Zahlen-Toggle, Login/Cloud-Sync, Neu beginnen),
+       gebündelt hinter einem Klick. -->
+  <div class="dpanel" id="detailsPanel" role="dialog" aria-modal="true" aria-labelledby="dpanelTitle" hidden>
+    <div class="dpanel-card">
+      <div class="dpanel-head">
+        <h2 id="dpanelTitle">Details</h2>
+        <button id="detailsClose" class="link">schließen</button>
+      </div>
+      <div class="dpanel-sec">
+        <h3>Wesen</h3>
+        <div class="dpanel-row"><button class="link" id="nameBtn">✎ Wesen umbenennen</button></div>
+        <details class="how">
+          <summary>So funktioniert's</summary>
+          <p>In jeder Generation entstehen <b>zufällige Varianten</b>. Die, die besser zur Umwelt passen, hinterlassen mehr Nachkommen — so verschiebt sich über viele Generationen die Form einer ganzen <b>Linie</b>. Kein Wesen „will" sich verändern; es wird <b>ausgelesen</b>, nicht umgebaut.</p>
+        </details>
+        <details class="chron-log" id="chronLog" hidden>
+          <summary id="chronLogSum">Chronik dieses Lebens</summary>
+          <ol id="chronList"></ol>
+        </details>
+      </div>
+      <div class="dpanel-sec">
+        <h3>Anzeige</h3>
+        <div class="dpanel-row"><button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button></div>
+        <div class="dpanel-row"><button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button></div>
+        <p class="dpanel-note" id="engineDetail" hidden>
+          Diese Hauptansicht zeigt die <b>Anpassungs-Bahn einer Linie</b> — die mittlere Form, auf die
+          sich eine ganze Population über Generationen zubewegt (eine geglättete Näherung, nicht ein
+          einzelnes Lebewesen). Unter der Haube trägt der Populations-Kern echte <b>Streuung, Zufalls-Drift
+          und sogar Aufspaltung in mehrere Cluster</b> (sympatrische Konkurrenz) — die Hauptansicht fokussiert
+          bewusst auf dein eines Wesen. Die Engine ist gegen ein
+          wissenschaftliches Referenzmodell auf <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die
+          <b>Modell-Güte</b> (wie gut die schlanke Browser-Engine das schwere Referenzmodell trifft),
+          <b>keine Bewertung deines Wesens</b>.
+        </p>
+      </div>
+      <div class="dpanel-sec">
+        <h3>Konto</h3>
+        <div class="auth" id="authState"></div>
+      </div>
+      <div class="dpanel-sec">
+        <h3>Verwalten</h3>
+        <div class="dpanel-row"><button class="ctrl newlife" id="newLifeBtn">Neu beginnen</button></div>
       </div>
     </div>
   </div>
@@ -1593,12 +1651,28 @@ document.getElementById("engineInfoBtn").addEventListener("click", (e) => {
   const d=document.getElementById("engineDetail"); const open=d.hidden;
   d.hidden=!open; e.target.setAttribute("aria-expanded", String(open));
 });
-// B4: Escape schliesst offene Overlays (Genbuch/Login/Reveal).
+// P0.2 (Komplexitaets-Audit): Details-Panel — buendelt die Sekundär-Controls hinter
+// einem Klick, folgt demselben Oeffnen/Schliessen/Fokus-Rueckgabe-Muster wie Genbuch/
+// Einfluss/Herausforderungen (openGenbook/closeGenbook etc. oben).
+let _detailsOpener = null;
+function openDetails(){
+  _detailsOpener = document.activeElement;
+  document.getElementById("detailsPanel").hidden = false;
+  document.getElementById("detailsClose").focus();
+}
+function closeDetails(){
+  document.getElementById("detailsPanel").hidden = true;
+  if(_detailsOpener && _detailsOpener.focus) _detailsOpener.focus();
+  _detailsOpener = null;
+}
+document.getElementById("detailsBtn").addEventListener("click", openDetails);
+document.getElementById("detailsClose").addEventListener("click", closeDetails);
+// B4: Escape schliesst offene Overlays (Genbuch/Login/Reveal/Details).
 document.addEventListener("keydown", (e) => {
   if(e.key !== "Escape") return;
   const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
   const iSub=document.getElementById("inflSub"), iMain=document.getElementById("infl");
-  const ch=document.getElementById("chal");
+  const ch=document.getElementById("chal"), dp=document.getElementById("detailsPanel");
   if(!gb.hidden){ closeGenbook(); }
   else if(!lg.hidden){ lg.hidden = true; }
   else if(!rv.hidden){ rv.hidden = true; }
@@ -1607,6 +1681,7 @@ document.addEventListener("keydown", (e) => {
   else if(iSub && !iSub.hidden){ closeInflSub(); }
   else if(iMain && !iMain.hidden){ closeInfl(); }
   else if(ch && !ch.hidden){ closeChal(); }
+  else if(dp && !dp.hidden){ closeDetails(); }
 });
 // a11y (Audit): Tab-Fokus in einem offenen Modal halten (kein Wegtabben in den
 // unsichtbaren Hintergrund). Wirkt auf das oberste sichtbare aria-modal-Dialog.
@@ -1746,7 +1821,13 @@ function updateAuthUI(){
     document.getElementById("signOut").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
   } else {
     el.innerHTML = `<button class="link" id="signIn">☁️ Anmelden für Geräte-Sync</button>`;
-    document.getElementById("signIn").addEventListener("click", () => { document.getElementById("login").hidden = false; document.getElementById("loginEmail").focus(); });
+    document.getElementById("signIn").addEventListener("click", () => {
+      // Login liegt jetzt hinter dem Details-Panel — erst das Panel schliessen, sonst
+      // stuenden zwei Dialoge uebereinander (Details-Panel + Login gleichzeitig offen).
+      const dp = document.getElementById("detailsPanel");
+      if(dp && !dp.hidden) closeDetails();
+      document.getElementById("login").hidden = false; document.getElementById("loginEmail").focus();
+    });
   }
 }
 async function doAuth(kind){
@@ -1911,6 +1992,19 @@ GENE_LABELS.forEach((lbl,i) => {
   btn.addEventListener("click", ()=>{ const v=!genesEl.classList.contains("show-nums"); apply(v);
     localStorage.setItem("evolveGeneNums", v?"1":"0"); });
 })();
+// P0.1 (Komplexitaets-Audit): progressive Disclosure der Gen-ZEILEN selbst (nicht nur
+// der Zahlen). Standard: nur auffaellig vom Mutations-Anker abweichende ODER gerade
+// aktiv selektierte Gene stehen da — der Rest liegt hinter "Alle 25 Gene zeigen"
+// (folgt demselben localStorage-Muster wie "Zahlen zeigen" oben).
+(function(){
+  const btn=document.getElementById("geneFilterBtn");
+  const on = localStorage.getItem("evolveGeneShowAll")==="1";
+  const apply = v => { genesEl.classList.toggle("show-all-genes", v); btn.setAttribute("aria-pressed", v?"true":"false");
+    btn.textContent = v ? "Nur relevante Gene zeigen" : "Alle 25 Gene zeigen"; };
+  apply(on);
+  btn.addEventListener("click", ()=>{ const v=!genesEl.classList.contains("show-all-genes"); apply(v);
+    localStorage.setItem("evolveGeneShowAll", v?"1":"0"); });
+})();
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
 // Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct,8 wing,...,13 Grabtrieb
 function mutedGenes(a){
@@ -1919,6 +2013,40 @@ function mutedGenes(a){
   if(a.k==="Tier") return flyer ? [5,13,15] : [5,8];  // Tiere: keine Photosynthese; Flieger graben/filtern nicht
   if(a.k==="Protist") return [8,13,16];             // Mischotroph: kein Flug/Graben/Tarnung
   return [2,6,8,13,16,18];                         // Pflanze/Pilz/Mikrobe: sessil -> keine Gliedmassen/Mobilitaet/Flug/Graben/Tarnung/Sinne
+}
+// P0.1: welche Gene zaehlen als "relevant" (Zeile bleibt/steht sichtbar)?
+//   (a) deutlich vom neutralen Mutations-Anker abgewichen (die 10 Kern-Gene ankern bei
+//       0.5, die 15 Kosten-Gene bei 0.12 — siehe PARAMS.mutationAnchor) — das Merkmal
+//       hat sich also wirklich ausgepraegt, nicht nur Rauschen um den Ruhewert;
+//   (b) gerade Teil des Selektions-Theaters (_why.shown/_why.on aus updateWhy) — dann
+//       ist es GENAU DAS, was die aktuelle Umwelt gerade formt.
+// Mindestanzahl GENE_FILTER_MIN, damit die Karte nie (fast) leer wirkt, z. B. direkt
+// nach "Neu beginnen", bevor irgendein Gen erkennbar abgewichen ist.
+const GENE_FILTER_THRESH = 0.15, GENE_FILTER_MIN = 6;
+function computeRelevantGenes(g){
+  g = g || genome;
+  const dev = new Array(NG);
+  const rel = new Set();
+  for(let i=0;i<NG;i++){
+    const anchor = PARAMS.mutationAnchor ? PARAMS.mutationAnchor[i] : 0.5;
+    dev[i] = Math.abs(g[i]-anchor);
+    if(dev[i] > GENE_FILTER_THRESH) rel.add(i);
+  }
+  if(typeof _why !== "undefined" && _why.shown){
+    for(const i of _why.shown){ if(_why.on[i] !== 0) rel.add(i); }
+  }
+  if(rel.size < GENE_FILTER_MIN){
+    const order = [...Array(NG).keys()].sort((a,b)=>dev[b]-dev[a]);
+    for(const i of order){ if(rel.size>=GENE_FILTER_MIN) break; rel.add(i); }
+  }
+  return rel;
+}
+function applyGeneFilter(g){
+  const rel = computeRelevantGenes(g);
+  for(let i=0;i<NG;i++){
+    const ge = document.getElementById("gene-"+i);
+    if(ge) ge.classList.toggle("gene-relevant", rel.has(i));
+  }
 }
 
 function updatePanels(g, a){
@@ -1953,6 +2081,7 @@ function updatePanels(g, a){
   document.getElementById("vitLabel").textContent = "Passung hier · " + word;
   document.getElementById("vitNum").textContent = Math.round(vit*100) + "%";
   updateWhy(g);
+  applyGeneFilter(g);   // P0.1: NACH updateWhy — braucht dessen _why.shown/_why.on
 }
 // Live-„Warum": welche Merkmale die AKTUELLE Umwelt gerade AUSLIEST. Aus dem
 // Neugier-Anstöße für den „fertig angepasst"-Moment: leise Einladungen, die Ursache→Wirkung
@@ -2284,7 +2413,10 @@ _dlg.ok.addEventListener("click", () => _dlgClose(_dlg.input.hidden ? true : _dl
 _dlg.cancel.addEventListener("click", () => _dlgClose(_dlg.input.hidden ? false : null));
 _dlg.el.addEventListener("click", e => { if(e.target === _dlg.el) _dlg.cancel.click(); });
 _dlg.el.addEventListener("keydown", e => {
-  if(e.key === "Escape"){ e.preventDefault(); _dlg.cancel.click(); }
+  // stopPropagation: dieser Dialog kann jetzt ÜBER dem Details-Panel liegen (z. B.
+  // "Neu beginnen"/Umbenennen werden von dort ausgelöst) — sonst würde ein einzelnes
+  // Escape beide Ebenen auf einmal schließen (erst dlg, dann Bubbling zum Panel).
+  if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); _dlg.cancel.click(); }
   else if(e.key === "Enter" && !_dlg.input.hidden){ e.preventDefault(); _dlg.ok.click(); }
 });
 
