@@ -345,12 +345,12 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
 - Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht
   Supabase-Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr);
   B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
-- [ ] **`npm run seed-check` schlägt fehl** (Befund 2026-07-29, beim Prüfen von Punkt 9
-  entdeckt) — „Monomorpher Start (NN klein)" FAIL, NN=0.149 gegen Schwelle 0.12.
-  **Vorbestehend, nicht durch Punkt 9 verursacht** (auch mit dem alten `numGenes:9`-Default
-  bereits FAIL, per `git stash` gegengeprüft). Vermutlich eine zu eng kalibrierte Schwelle
-  in `tools/seed-check.mjs` für die inzwischen 25-dimensionale Nächste-Nachbar-Distanz — nicht
-  näher untersucht, geringe Priorität (betrifft nur die „Lebende Welt (Beta)"-Overlay-Startlogik).
+- [x] **`npm run seed-check` schlug fehl (behoben 2026-07-29)** — war tatsächlich eine zu eng
+  kalibrierte Schwelle (0.12), aus der 9-dimensionalen Vor-Erweiterung übernommen. Hergeleitet
+  statt geraten: acht frisch geseedete (monomorphe) Populationen liefern NN in [0.145, 0.152],
+  eine echt diverse Population (uniforme Zufalls-Genome) liefert NN in [1.42, 1.47] — neue
+  Schwelle 0.25 liegt sicher dazwischen. `tools/seed-check.mjs` jetzt grün, Herleitung im
+  Code kommentiert.
 
 ### 8 · Gamification-Feinschliff
 

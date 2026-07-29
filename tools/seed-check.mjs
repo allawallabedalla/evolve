@@ -33,7 +33,14 @@ console.log(`  Anfangs geringe Diversität:       NN = ${divStart.toFixed(3)}`);
 console.log(`  Nach 60 Gen. evolviert weiter:    |Δmean| = ${moved.toFixed(3)}, NN = ${divAfter.toFixed(3)}`);
 
 const nearSeed = distToSeed < 0.06;   // Start praktisch = Seed (nur Streuung)
-const tight = divStart < 0.12 && divAfter > divStart * 2;  // monomorph am Start, danach klar breiter
+// Schwelle 0.25 fuer 25-dimensionale Nächste-Nachbar-Distanz (raw-Euklid-Summe ueber alle
+// Gene, s. World.diversityNN/meanDistance) — hergeleitet, nicht geraten: acht frisch
+// geseedete (monomorphe) Populationen liefern NN in [0.145, 0.152], eine echt diverse
+// Population (uniforme Zufalls-Genome) liefert NN in [1.42, 1.47] — 0.25 liegt sicher ueber
+// dem monomorphen Ceiling und weit unter dem diversen Floor. Die alte Schwelle 0.12 war fuer
+// die 9-dimensionale Vor-Erweiterung kalibriert (Befund 2026-07-29, s. BACKLOG.md Punkt 7) —
+// der Rohsummen-Abstand waechst mit der Gen-Anzahl, nicht die tatsaechliche Diversitaet.
+const tight = divStart < 0.25 && divAfter > divStart * 2;  // monomorph am Start, danach klar breiter
 const evolves = moved > 0.02;         // Selektion bewegt die Linie danach
 console.log("");
 console.log(`  Start = Seed-Genom (± Streuung):   ${nearSeed ? "OK" : "FAIL"}`);
