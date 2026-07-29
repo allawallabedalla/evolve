@@ -301,8 +301,8 @@ strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch 
 - [ ] **Schritt 3** — Schicht B (Verteilungs-Fits) + Ausbau von `training/fit.ts` zum
   Drei-Schicht-Loop mit Champion-Persistenz + Multi-Schicht-Report + Regressions-Gate.
 
-**Start:** Mi 2026-07-29, 13:01 Europe/Berlin (Timer läuft; wird entfernt, sobald sukzessive
-an diesem Punkt gearbeitet wird).
+Wird sukzessive abgearbeitet (kein automatischer Trigger mehr aktiv — Start ab
+Mi 2026-07-29).
 
 ---
 
