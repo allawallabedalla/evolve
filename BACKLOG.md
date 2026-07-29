@@ -19,6 +19,52 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ---
 
+## 🔴 Offen — GitHub „Unverified"-Commits — gründlicher Audit nötig, VOR jedem History-Rewrite
+
+**Befund (2026-07-29), noch ungeklärt, absichtlich nicht eigenmächtig „gefixt":** der lokale
+Stop-Hook (`~/.claude/stop-hook-git-check.sh`) meldet bei praktisch jeder Session-Aktivität
+Commits als „GitHub wird das als Unverified zeigen" und schlägt automatisch
+`commit --amend --reset-author` + `rebase` + Force-Push vor.
+
+**Was bereits geprüft ist:**
+- Die betroffenen Commits **haben** tatsächlich eine eingebettete SSH-Signatur
+  (`git cat-file commit <hash>` zeigt einen vollständigen `gpgsig`-Block mit demselben
+  Schlüssel wie `user.signingkey` in `~/.gitconfig`).
+- `git log --format=%G?` zeigt trotzdem `N` — das liegt an einem lokal fehlenden
+  `gpg.ssh.allowedSignersFile`; Git kann hier also gar nicht selbst verifizieren. Das `N`
+  ist **kein Beweis dafür, dass die Signatur fehlt oder ungültig ist.**
+- Das Muster ist **projektweit und sessionübergreifend**: Stichproben über die gesamte
+  bisherige Historie (auch längst gemergte Commits verschiedenster früherer Sessions, z. B.
+  `402d070`, `6b6173b`, `7b1f76e`) zeigen exakt dasselbe `N`. Es ist also kein Fehler dieser
+  einen Session, sondern ein Bestandsproblem seit Projektbeginn.
+
+**Warum hier NICHT einfach dem Hook-Vorschlag gefolgt wurde:**
+1. Ein Fix betrifft zwangsläufig Commits anderer, teils parallel laufender Sessions
+   (z. B. Redesign-Branch `claude/flat-vector-simulation-ui-kttqxx`) — Rewrite + Force-Push
+   auf `main` würde deren Historie unter den Füßen verändern.
+2. Da die Signaturen objektiv vorhanden sind, ist unklar, ob ein Amend das GitHub-Ergebnis
+   überhaupt ändert — wahrscheinlicher liegt die Ursache **nicht** in Git selbst, sondern
+   darin, dass der verwendete SSH-Signing-Key bei GitHub nicht (oder nicht für das richtige
+   Konto) als Signing-Key hinterlegt ist. Falls das so ist, würde ein reines
+   Kontoeinstellungs-Fix bei GitHub **rückwirkend alle** vorhandenen (bereits korrekt
+   signierten) Commits als „Verified" zeigen lassen — **ohne jeden History-Rewrite und ohne
+   Risiko.** Das wäre dem destruktiven Rebase-Weg klar vorzuziehen.
+3. Ein Fix nur für die paar Commits der aktuellen Session würde das Problem ohnehin nicht
+   lösen — die gesamte restliche Historie bliebe „Unverified".
+
+**Nächster Schritt (gründlicher Audit, bevor irgendwas an Git-History angefasst wird):**
+- Klären, welchem GitHub-Konto/-Signing-Key-Eintrag `user.signingkey`
+  (`/home/claude/.ssh/commit_signing_key.pub`) zugeordnet sein soll, und ob dieser Key dort
+  tatsächlich als SSH-Signing-Key hinterlegt ist (**Nutzer-/Admin-Aufgabe**, keine
+  Git-Operation).
+- Erst wenn das geklärt ist, entscheiden: entweder löst sich „Unverified" von selbst
+  (Konto-Fix), oder es ist tatsächlich ein Rewrite nötig — dann aber koordiniert (alle
+  laufenden Sessions/Branches informiert) statt spontan per Force-Push über `main`.
+- Bis dahin: **kein `--amend`/`rebase`/Force-Push** wegen dieser Meldung, auch wenn der
+  Stop-Hook das bei jeder Aktion erneut vorschlägt.
+
+---
+
 ## ✅ Erledigt
 
 ### Spiel-Motivation & Klarheit — Batch (2026-07, v0.64–v0.66)
