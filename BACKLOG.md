@@ -19,7 +19,21 @@ Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 
 ---
 
-## 🔴 Offen — GitHub „Unverified"-Commits — gründlicher Audit nötig, VOR jedem History-Rewrite
+## ⬜ Offen — konsolidierte, priorisierte Übersicht
+
+Zusammengeführt aus mehreren parallel gewachsenen „Offen"-Abschnitten (2026-07-29) — Ziel:
+**ein** Ort für alles Offene, damit nichts doppelt angefasst wird. Reihenfolge ≈
+Bearbeitungsreihenfolge (Blocker/Meta zuerst). Beim Zusammenführen zwei stille Dopplungen
+gefunden und aufgelöst: „AXIS-2 Graben" war bereits als AXIS-9 erledigt, „AXIS-3
+Ernährungsmodus" im Filtrierer-Teil ebenfalls — siehe Punkt 6.
+
+> **⚠️ Koordinations-Hinweis (Punkte 3+4):** beide laufen parallel und ändern
+> `app/index.html`s Hauptbildschirm — Punkt 3 (Komplexitäts-Audit) die **Struktur/das Layout**,
+> Punkt 4 (Redesign) nur die **Optik** (Farben/Formen). Empfohlene Reihenfolge bei Umsetzung:
+> erst Layout (3), dann Politur obendrauf (4) — sonst überschreiben sich CSS-/Markup-Änderungen
+> gegenseitig oder eine Session baut auf einer bald veralteten Struktur.
+
+### 1 · 🔴 GitHub „Unverified"-Commits — Audit nötig, VOR jedem History-Rewrite
 
 **Befund (2026-07-29), noch ungeklärt, absichtlich nicht eigenmächtig „gefixt":** der lokale
 Stop-Hook (`~/.claude/stop-hook-git-check.sh`) meldet bei praktisch jeder Session-Aktivität
@@ -63,9 +77,212 @@ Commits als „GitHub wird das als Unverified zeigen" und schlägt automatisch
 - Bis dahin: **kein `--amend`/`rebase`/Force-Push** wegen dieser Meldung, auch wenn der
   Stop-Hook das bei jeder Aktion erneut vorschlägt.
 
+*(Blockiert nichts anderes hier — reine Meta-Aufgabe, aber recht billig zu klären.)*
+
+### 2 · Engine-Grundlagenforschung: Determinismus/Vielfalt — blockiert Punkt 6
+
+*(Nutzer, 2026-07-29)* „Die Engine wirkt sehr deterministisch" — konkret: Dunkelheit führt bei
+Fellwesen im Spiel immer zu einem Leuchtorgan statt zu einem Fellwesen, und Fisch/
+Insekten wurden trotz Existenz im Möglichkeitsraum praktisch nie beobachtet.
+
+**Befund:** teils ein konkreter, noch offener Kaskaden-Bug (`classify()` in
+`app/index.html` prüft Biolumineszenz vor Fell — ein Wesen mit hoher Isolation UND
+hoher Biolumineszenz wird deshalb immer als „Leuchtwesen · Tiefsee" klassifiziert,
+nie als Fellwesen), teils eine strukturelle Grenze der Architektur: AXIS-4 (Aquatik)
+und AXIS-5 (Biolumineszenz) haben die Erreichbarkeit von Fisch/seltenen Nischen
+bereits gezielt verbessert (Fisch 0 % → 3,8 %), aber die Werte bleiben niedrig, weil
+die Produktions-Engine ein einziges Mittelwert-Genom per Gradientenaufstieg simuliert
+— schmale Fitness-Nebengipfel (= seltene, aber biologisch plausible Formen) werden
+dadurch grundsätzlich selten erreicht, egal wie viel an einzelnen Schwellen
+nachjustiert wird.
+
+**→ Diese Recherche soll noch durchgeführt werden:**
+**`docs/forschungsauftrag-naechste-engine.md`** enthält einen vollständigen, sofort
+kopierbaren Forschungsauftrag für einen neutralen Chat (Divergenz-Phase ohne
+Denkverbote → radikal unterschiedliche Modell-Paradigmen jenseits von
+Populationsgenetik, dann Konvergenz an Browser-Performance/Erklärbarkeit/Erreichbarkeit
+aller Archetypen), inkl. Modellwahl-Empfehlung (Opus 5 für die abwägungsintensive
+Konvergenz- und Spezifikationsphase, Sonnet 5 reicht für die breite Ideensammlung in
+der Divergenz-Phase). Ergebnis kommt danach zur Umsetzung zurück in dieses Repo — bis
+dahin bleiben `engine/fitness.ts`, `physics.json` und `classify()` unverändert.
+
+**Blockiert:** Punkt 6 (Rest-Achsen) — dort keine neuen Gene/Physik-Änderungen bauen, bevor
+dieses Ergebnis vorliegt.
+
+### 3 · Komplexitäts-Audit / Informationsarchitektur (2026-07-29)
+
+- [~] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — Konzept liegt vor,
+  Umsetzung offen.** *(Nutzer)* Audit + abgestimmter Bauplan in
+  **`docs/komplexitaets-audit.md`**.
+  **Befund:** die Hauptansicht zeigt ~49 gleichzeitig aktive UI-Elemente, bevor überhaupt ein
+  Modal geöffnet wird — 25 Gen-Balken permanent (auch die im Milieu irrelevanten), 12
+  gleichrangige Biom-Buttons neben 6 Reglern, zwei inkonsistente Umwelt-Bedienmuster (Regler
+  vs. Einfluss-Chips) und vier Modale mit je eigener Navigationslogik. Ursache ist kein
+  Einzelfehler, sondern ein Muster: die letzten Audit-Runden haben fast nur hinzugefügt und
+  erklärt, kaum je etwas entfernt oder gruppiert.
+  **Fitness-Physik/Achsen bleiben unangetastet** (Validität ~85 %, Parität ~1e-16, Reality
+  20/20) — das Problem sitzt in der Präsentation, nicht im Modell.
+  **Abgestimmte Informationsarchitektur** nach Zugriffshäufigkeit statt Feature-Vollständigkeit
+  (Details siehe Doc):
+  - **Prio 1** (immer sofort da): 6 Regler, Play/Pause/Tempo, Lebensbaum-Zähler als stiller
+    Fortschritts-Motivator.
+  - **Prio 2** (ein Klick, aber beworben): Biome als kompakter „Presets ↗" statt 12
+    Einzel-Buttons, Umwelt-Einfluss, Herausforderungen (Startansicht kuratiert statt 271
+    Einträge), Teilen als kleiner Ghost-Button.
+  - **Prio 3** (Submodal/Settings, bewusst vergraben): Weltkarte-Details, „So funktioniert's",
+    Engine-Info, Zahlen-Toggle, Login, Name bearbeiten, **Neu beginnen** (destruktiv, gehört
+    weg von der Kernbedienung).
+  Reduziert die Dauersicht im Kern auf 6 Regler + Zeitkontrolle + Zähler + 4 klar
+  sekundäre Buttons; sieben Nebenfunktionen wandern in ein „⋯ Details"-Aufklapp.
+  Statisches Vorher/Nachher-Layout-Mockup wurde gebaut und abgenommen (nicht im Repo, nur zur
+  Abstimmung). **Empfohlene Umsetzungsreihenfolge:** P0.1 Gene progressiv einblenden → Biome→
+  Presets-Umstellung → Prio-3-Nebenfunktionen ins Details-Panel bündeln → (P2) Inline-Fitness-
+  Kopie in `index.html` durch generierte Version ersetzen (schließt die Fehlerklasse des
+  10-Versionen-NaN-Bugs, s. „Erledigt"). **Noch nicht umgesetzt** — Start ist
+  Produktentscheidung des Nutzers.
+
+### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — eigener Branch, läuft parallel
+
+Nutzer-Auftrag: die gesamte Oberfläche auf flachen Vektor-Illustrationsstil mit
+Siebdruck-Anmutung umstellen (Referenz: Two Dots, Mid-Century-Wissenschaftsposter) —
+nur Flächenfarben, kein Verlauf/Schatten, max. 5 Farben je Ansicht, Umgebungsvariablen
+als Farbsystem (Temperatur → Hintergrundton, Sauerstoff/Nährstoffe → Partikeldichte,
+Feuchtigkeit → Formensprache Welle↔Kristall, Strahlung/Druck → Lichtkeile), Lebewesen
+als reine modulare Silhouette mit einer Akzentfarbe für neu erworbene Merkmale.
+Konzept-Vorschau (Palettenvergleich + Live-Demo) vorab als Artifact abgestimmt,
+Palette **„Klippenlicht"** (Aubergine-Ink + dusty Lilac + Ringelblume-Akzent) gewählt.
+Branch `claude/flat-vector-simulation-ui-kttqxx`.
+
+- [x] **Phase 1 — Design-Tokens**: `:root`-Palette auf Klippenlicht umgestellt,
+  Neomorph-Schatten (`--shadow*`) durch flache Hairline-Konturen ersetzt, alle
+  `linear-/radial-gradient`-Stellen (Body-BG, Gen-/Vitalitätsbalken, Login-Card,
+  Flash-Effekte, Rarity-/Toast-Glows) geflacht, `backdrop-filter`-Blur aus allen
+  Modal-Scrims entfernt, Kontrastfixes für helle Schrift auf Akzentflächen,
+  Papierkorn-Overlay als globaler SVG-Filter (`feTurbulence`).
+- [x] **Phase 2 — Habitat-Renderer Canvas→SVG**: `drawHabitat()`/`drawMotes()`
+  laufen jetzt als echtes SVG-DOM statt Canvas-2D. Temperatur → Hintergrundfarbe,
+  Feuchtigkeit → Bodenform (weiche Welle ↔ harte Kristallkante), Strahlung/Druck
+  (UV+Strahlung+Tiefsee-Druck) → diagonale Lichtkeile, Sauerstoff+Nahrungsfülle →
+  Partikeldichte/-deckkraft. Alle bestehenden Regler/Stress-Chips (Gift, Hypoxie,
+  Salz, Schnee, Wasserstand) bleiben erhalten, jetzt flach statt Verlauf. Die
+  Kreatur selbst läuft vorerst weiter auf einem transparenten Canvas-Overlay über
+  der SVG-Bühne (Übergangslösung bis Phase 3).
+- [x] **Icon-Konsistenz-Audit**: 8 reine Strich-Icons (`snow`, `waves`, `dna`,
+  `globe`, `wind`, `mineral`, `link`, `fern` + `moss`/`mold`/`mycelium`) brachen
+  mit dem „kein Outline-Stil"-Prinzip → auf flache Silhouetten/kräftigere Striche
+  umgestellt. Letzte rohe Emoji (☁️ Cloud-Sync-Status, 👋 Onboarding-Hinweis)
+  durch flaches Icon ersetzt bzw. entfernt — der Rest der App nutzt bereits
+  durchgängig `ic()`/`formIcon()`.
+- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)**:
+  `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
+  (~800 Zeilen biologischer Sonderfälle: Biolumineszenz, Tarnung, Flugbauplan …)
+  von Canvas-2D auf modulares SVG umbauen — Körperkern + austauschbare Anbauteile
+  (Flossen, Membranen, Panzerplatten, Fühler) als eigene Elemente, Tiefe über
+  Layering + Helligkeitsstufen statt Schlagschatten, EINE Akzentfarbe für das
+  jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
+  seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
+  Erkennung für die Chronik auf). Geplant: an einen Opus-Subagenten delegiert
+  (geschmacksintensivster Teil), Sonnet bleibt Orchestrator/Integration.
+- [ ] **Phase 4 — Restliche UI**: Genom-Balken, Vitalitätsanzeige, Chronik,
+  Genbook, Baum-des-Lebens-SVG, Challenge-Liste auf dieselbe Palette + die
+  Hell/Dunkel-Hierarchieregel übertragen (Werte/Regler/Buttons bleiben die
+  einzigen hellen, hochkontrastigen Elemente).
+- [ ] **Phase 5 — Audit**: WCAG-Kontrast erneut prüfen, `prefers-reduced-motion`
+  erhalten, alle Biome/Extremregler/Mutationsfälle durchklicken.
+- [ ] **Zwei kleine Politur-Punkte aus Phase 2**: Himmel wirkt bei mittlerem
+  Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
+  die Wellenlinie am Boden (`groundPath()`) könnte mit mehr Stützpunkten runder
+  werden.
+
+Betrifft nur die Präsentationsschicht — `engine/`, `physics.json` und die
+Fitness-Validierung (`npm run parity`) sind unangetastet.
+
+### 5 · Nutzerbindung / Spieltiefe — V1 „Herausforderungen der Natur" live, Ausbaustufen offen
+
+*(Nutzer, 2026-07-26)* Ursprünglicher Befund: „Durch das einfache Regler-Ändern kommen zwar
+immer wieder neue Wesen, aber es hat keine Verbindlichkeit." Diagnose + Recherche in
+**`docs/bindung-konzept.md`**: gemessen an der Selbstbestimmungstheorie stand Evolve extrem
+ungleich (Autonomie maximal, Kompetenz fast null, Verbundenheit null) — ein Regler ohne
+Kosten macht jede Handlung folgenlos, das ist die Grenze zwischen Spielzeug und Spiel.
+
+**Die Empfehlung daraus — V1 „Herausforderungen der Natur" — ist inzwischen umgesetzt**
+(v0.71.0–v0.75.0, voller Verlauf in `docs/influence-plan.md` S0–S8): 271
+simulations-verifizierte Herausforderungen spielbar (Button „Herausforderungen ↗",
+Suche/Filter, HUD), schließt genau die Kompetenz-Lücke aus der Diagnose. **Damit ist dieser
+Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschieden:
+
+- [ ] **V1-Ausbaustufen** — feste Startwelt für alle, Bestenliste nach Generationenzahl,
+  „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen Server/Vergleichsraum (Supabase
+  steht bereits) — bewusst nicht Teil der Erstversion.
+- [ ] **V2–V5** (`docs/bindung-konzept.md`) — Trägheit der Welt, Aussterben nur unter
+  Beobachtung, Wissen als Meta-Fortschritt, Verbundenheit über einen wöchentlichen festen
+  Seed. Nur recherchiert/vorgeschlagen, keine Umsetzung — nächste Empfehlung wäre V4 (Wissen
+  als Meta-Fortschritt). **Start ist Produktentscheidung des Nutzers**, nicht eigenmächtig
+  umsetzen.
+
+### 6 · Große Brocken — Rest-Achsen (wartet auf Punkt 2)
+
+Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und AXIS-5
+(Biolumineszenz) erledigt (s. „Erledigt").
+
+**Beim Durchsortieren gefunden (2026-07-29) — zwei Punkte standen fälschlich noch als offen:**
+- **AXIS-2 „Graben"** (Gen „Grabklauen", Ziel: Maulwurf/Wühlmaus-Nische über
+  Räuberdruck-Flucht) ist **bereits erledigt** — unter der Bezeichnung **AXIS-9 Graben**
+  (`burrow`) im „Breiten-Ausbau"-Batch, identisches Ziel und identische Nische erreicht.
+  **Nicht erneut bauen.**
+- **AXIS-3 „Ernährungsmodus"** ist im Filtrierer-Teil ebenfalls **bereits erledigt** (eigenes
+  Gen `filter`, neuer Energiekanal, s. „Erledigt"). Offen bleibt nur der ursprünglich
+  mitgemeinte Aasfresser-/Parasit-Teil, den es nie als eigenes Gen gab.
+
+- [ ] **Rest von AXIS-3 · Aasfresser/Parasit** — kein eigenes Gen bisher, geringe Priorität,
+  nur falls ein konkreter Katalog-Faktor es rechtfertigt (Gefahr sonst: reine
+  Muster-Wiederholung mit abnehmendem Grenznutzen, wie im Breiten-Ausbau dokumentiert).
+  **Nicht anfassen, bevor Punkt 2 (Engine-Grundlagenforschung) abgeschlossen ist** — die
+  hält `engine/fitness.ts`/`physics.json` bis dahin bewusst unverändert.
+
+### 7 · Live-App — Feinschliff & Aufräumen (kleinere Reste)
+
+- [ ] **CLS-4-Rest · schmale Größenfenster** — einige seltene Formen (Nadelbaum, Blütenkraut,
+  Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
+  (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe
+  Priorität.
+- [ ] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee"** — die Form ist über `classify()` real
+  erreichbar (Reich Tier) und wird von den Herausforderungen genutzt, fehlt aber im `TREE`
+  (Genbuch) selbst, dadurch auch in `FORM_KINGDOM`. Für den Herausforderungen-Reich-Filter
+  lokal in `app/index.html` überbrückt (`CHAL_KINGDOM_FALLBACK`); der eigentliche
+  Lebensbaum-Eintrag (Ära/Evo-Notiz) fehlt weiterhin.
+- [ ] **`docs/auslagerung/P5-ausgabe.json` aufräumen** — die ursprüngliche 28er-Lieferung (10
+  davon nicht erreichbar) liegt noch auf `main`, ist durch P8 (271 Stück) ersetzt und nie ins
+  Spiel verdrahtet worden. Sollte entfernt oder klar als „ersetzt durch P8" markiert werden.
+- [ ] **P7 · Qualitäts-Audit** — zweiter Blick auf die bereits übernommenen P3-Erklärungen und
+  S6-Erzähl-Bausteine (nur als Idee notiert, nie als Paket beauftragt oder gebaut).
+- Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht
+  Supabase-Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr);
+  B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
+
+### 8 · Gamification-Feinschliff
+
+Rarität-Grundmechanik ist umgesetzt (s. „Erledigt" → „Rarität / Entdeckungs-Tiefe"). Offen
+als Politur:
+- [ ] Sanfte Biom-Empfehlungen („in diese Richtung wohnt noch etwas Seltenes") statt harter
+  Gates.
+- [ ] Rarität optional auch in `tree-of-life.json` spiegeln.
+
 ---
 
-## ✅ Erledigt
+## 🧭 Produkt-Pfeiler (Leitplanken)
+
+- **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
+- **Rarität = Entdeckungs-Tiefe**, keine kaufbare Währung / kein Grind (Skinner-Loop).
+- **Wertschätzung für die Natur als positives Neben-Ziel** *(Nutzer, 2026-07)* — **implizit,
+  nicht explizit**: über glaubwürdige Baupläne, echte Erdzeit-Reihenfolge (Hover „wann"),
+  reale Klade-Namen und die Referenz-gestützte Ökologie soll ein Staunen über die Vielfalt
+  des Lebens *mitschwingen* — ohne belehrenden Ton, ohne „Lern"-Overlay. Prüf-Frage für neue
+  Features: *Weckt es Staunen, oder nur Sammel-Druck?* (Ersteres fördern, Letzteres meiden.)
+
+---
+
+## ✅ Erledigt (Archiv)
 
 ### Spiel-Motivation & Klarheit — Batch (2026-07, v0.64–v0.66)
 Nach dem Evolutions-Audit: Fokus-Wechsel von Simulations-**Breite** zu spürbarer **Klarheit &
@@ -100,8 +317,7 @@ Patterns: kein Streak-Zwang, kein Verfall-Schuldgefühl, kein Sammelzwang):
   Fallback (Desktop). Selbst-enthalten, kein Backend — soziale Verbreitung als gesunde Motivation.
 
 **Damit ist der Motivations-Strang vollständig** (Selektions-Theater, Comeback-Moment, Katalog-
-Kuratierung, Reich-Meilensteine, Neugier-Anstöße, Schnappschuss). Nur noch Rest-Politur offen
-(CLS-4-Klassifikations-Fenster, Cloud-Ahnenlinie via Supabase-Schema, Kontrast-Feintuning).
+Kuratierung, Reich-Meilensteine, Neugier-Anstöße, Schnappschuss).
 
 ### Erzählwerk — Chronik-Stimme mit „unendlichem" Satzvorrat (2026-07, v0.70.0)
 
@@ -314,7 +530,9 @@ Nutzer: „start with the biggest bucket" (Breite). Zwei weitere echte Achsen, v
 - ✅ **AXIS-9 Graben** (`burrow`) — NEUE Mechanik (kein Stressor): fossoriale Räuber-Flucht,
   wirkt nur an Land (landFactor), billige Verteidigung ohne Panzer-Drag → Maulwurf/Wühlmaus-
   Nische. Nutzt bestehende Regler (predation+water), sofort im Spiel erlebbar. Reality-Regel
-  „Räuberdruck an Land → Grabtrieb". Tier-Anteil unverändert (45.4 %).
+  „Räuberdruck an Land → Grabtrieb". Tier-Anteil unverändert (45.4 %). *(→ deckt sich mit der
+  ursprünglich als „AXIS-2 Graben" geplanten Achse — dasselbe Ziel, hier unter neuer Nummer
+  umgesetzt.)*
 - ✅ **AXIS-10 UV-Strahlung** (`pigment` / `uv`) — Stressor: UV schädigt DNA ohne Schutzpigment.
   Aktiviert Katalog-Faktor „UV-Strahlung"; violetter UV-Schleier + Stress-Chip. Reality-Regel
   „UV → Schutzpigment".
@@ -322,7 +540,9 @@ Nutzer: „start with the biggest bucket" (Breite). Zwei weitere echte Achsen, v
 **Nächste Breiten-Kandidaten (höherer Aufwand/Risiko):**
 - **AXIS-3 Ernährungsmodus / Filtrierer** (neuer ENERGIE-Kanal, nicht nur Survival-Term) — der
   riskanteste, weil er die fein austarierte Ökologie-Verteilung verschieben kann; braucht eine
-  eigene Tuning-Runde gegen C1–C6. Höchster Einzel-Mehrwert der offenen Achsen.
+  eigene Tuning-Runde gegen C1–C6. Höchster Einzel-Mehrwert der offenen Achsen. *(→ der
+  Filtrierer-Teil ist inzwischen umgesetzt, s. „Breiten-Ausbau AXIS-9..14" oben; nur der
+  Aasfresser/Parasit-Teil bleibt offen, s. „Offen" Punkt 6.)*
 - Weitere Stressor-Paare (Druck/Tiefsee, Wind/Strömung) — je ein Gen; geringeres Risiko, aber
   abnehmender Grenznutzen (Muster-Wiederholung). Nur wenn ein konkreter Katalog-Faktor es lohnt.
 
@@ -429,7 +649,9 @@ eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. 
   Raritäts-Badge + Farb-Ramp pro Kachel, seltene entdeckte Formen leuchten (Glow),
   Legende, „x/7 legendär"-Zähler, Hover zeigt Rang. **Toast:** seltene/legendäre Funde
   besonders hervorgehoben (Text + Gold-Glow, längere Standzeit). *Sanfte Anreize, keine
-  kaufbare Währung, kein Vollständigkeits-Zwang (Leitplanke gehalten).*
+  kaufbare Währung, kein Vollständigkeits-Zwang (Leitplanke gehalten).* Ursprünglich vom
+  Nutzer vorgeschlagene Idee („seltene Arten spät, häufige früh") 1:1 in der Sweep-Logik
+  umgesetzt.
 
 ### UX-Feinschliff (Session 2026-07)
 - **A3 · Live-Vitalitätsanzeige** aus `fitness(genome, env)` — Balken + Wort (kämpft/…/blüht auf);
@@ -446,42 +668,8 @@ eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. 
   Copy „Höhe (Nahrung/Licht)".
 - **CLS-3 · Gen-Balken** je Reich kontextabhängig gedimmt.
 
----
-
-## ⬜ Offen — Engine-Grundlagenforschung: Determinismus/Vielfalt (2026-07-29)
-
-*(Nutzer)* „Die Engine wirkt sehr deterministisch" — konkret: Dunkelheit führt bei
-Fellwesen im Spiel immer zu einem Leuchtorgan statt zu einem Fellwesen, und Fisch/
-Insekten wurden trotz Existenz im Möglichkeitsraum praktisch nie beobachtet.
-
-**Befund:** teils ein konkreter, noch offener Kaskaden-Bug (`classify()` in
-`app/index.html` prüft Biolumineszenz vor Fell — ein Wesen mit hoher Isolation UND
-hoher Biolumineszenz wird deshalb immer als „Leuchtwesen · Tiefsee" klassifiziert,
-nie als Fellwesen), teils eine strukturelle Grenze der Architektur: AXIS-4 (Aquatik)
-und AXIS-5 (Biolumineszenz) haben die Erreichbarkeit von Fisch/seltenen Nischen
-bereits gezielt verbessert (Fisch 0 % → 3,8 %), aber die Werte bleiben niedrig, weil
-die Produktions-Engine ein einziges Mittelwert-Genom per Gradientenaufstieg simuliert
-— schmale Fitness-Nebengipfel (= seltene, aber biologisch plausible Formen) werden
-dadurch grundsätzlich selten erreicht, egal wie viel an einzelnen Schwellen
-nachjustiert wird.
-
-**→ Diese Recherche soll noch durchgeführt werden:**
-**`docs/forschungsauftrag-naechste-engine.md`** enthält einen vollständigen, sofort
-kopierbaren Forschungsauftrag für einen neutralen Chat (Divergenz-Phase ohne
-Denkverbote → radikal unterschiedliche Modell-Paradigmen jenseits von
-Populationsgenetik, dann Konvergenz an Browser-Performance/Erklärbarkeit/Erreichbarkeit
-aller Archetypen), inkl. Modellwahl-Empfehlung (Opus 5 für die abwägungsintensive
-Konvergenz- und Spezifikationsphase, Sonnet 5 reicht für die breite Ideensammlung in
-der Divergenz-Phase). Ergebnis kommt danach zur Umsetzung zurück in dieses Repo — bis
-dahin bleiben `engine/fitness.ts`, `physics.json` und `classify()` unverändert.
-
----
-
-## ⬜ Offen — Nutzer-Rückmeldung 2026-07-26 (Abend)
-
-Drei Punkte aus dem Spielen der v0.70.0:
-
-- [x] **Zappelnde Anzeige — behoben (v0.70.1).** „Diese Umwelt formt gerade …" und die
+### Nutzer-Feedback-Fixes (2026-07-26)
+- ✅ **Zappelnde Anzeige — behoben (v0.70.1).** „Diese Umwelt formt gerade …" und die
   Gen-Pfeile wechselten im Sekundenbruchteil („das geht so nicht"). Ursachen waren vier,
   alle gemessen statt geraten (`tools/ui-calm-check.mjs`, neu):
   1. **Takt:** die Zeile wurde im Bildtakt (60/s) neu gerechnet → jetzt höchstens alle 900 ms.
@@ -496,43 +684,16 @@ Drei Punkte aus dem Spielen der v0.70.0:
      und markiert werden nur noch die **drei Merkmale, die auch in der Zeile stehen**.
   **Messung:** Zeile 19×/8 s → 4×/12 s, Pfeile 35×/12 s → 4×/12 s (≈10× ruhiger).
   `npm run ui-calm-check` hält das fest (Richtwert: höchstens 6 Wechsel je 12 s).
-
-- [x] **Chronik-Ton: weniger lyrisch, mehr prosaisch — umgesetzt (v0.70.2).** *(Nutzer)* Der generierte Text soll
-  eine **persönliche Beziehung zum Wesen** ermöglichen — „kein Gedicht". Der aktuelle Katalog
-  ist aphoristisch („die Auslese hat kein Ziel, nur eine Richtung") und spricht über Evolution
-  im Allgemeinen statt über **dieses** Tier. Umbau: konkrete, nüchterne Sätze; Name und Form
-  des Wesens benennen; beobachtbare Tatsachen statt Sentenzen; Vergleich mit dem früheren
-  Zustand („trägt jetzt dichteres Fell als vor hundert Generationen"). Betrifft vor allem die
-  `AUSKLANG`-Bausteine (die tragen den lyrischen Ton) und die Satz-Schablonen.
-  **Umgesetzt:** Der ganze `AUSKLANG`-Pool (48 Aphorismen wie „kein einzelnes Wesen erlebt
-  diesen Satz" — Sätze, die den Spieler bewusst auf Distanz schoben) ist durch 39 konkrete
-  Nachsätze ersetzt: was man sehen wird, was es kostet, wovon es abhängt, wie es vorher war.
-  Dazu **Name des Wesens** als Platzhalter (`{wesen}`, `{demwesen}`) — benannte Wesen werden
-  beim Namen genannt, sonst „dein Wesen"; nie mehr „die Linie" als anonyme Abstraktion.
-  24 weitere sentenzhafte Bausteine in Auftakt/Kern konkretisiert, 23 persönliche ergänzt.
-  **Messbar gemacht:** `story-check` prüft jetzt den Tonfall über die ganze Lagen-Suite —
+- ✅ **Chronik-Ton: weniger lyrisch, mehr prosaisch — umgesetzt (v0.70.2).** *(Nutzer)* Der
+  generierte Text soll eine **persönliche Beziehung zum Wesen** ermöglichen — „kein Gedicht".
+  Umbau: konkrete, nüchterne Sätze; Name und Form des Wesens benennen; beobachtbare Tatsachen
+  statt Sentenzen; Vergleich mit dem früheren Zustand. Der ganze `AUSKLANG`-Pool (48 Aphorismen)
+  ist durch 39 konkrete Nachsätze ersetzt; **Name des Wesens** als Platzhalter (`{wesen}`,
+  `{demwesen}`). 24 weitere sentenzhafte Bausteine in Auftakt/Kern konkretisiert, 23 persönliche
+  ergänzt. **Messbar gemacht:** `story-check` prüft den Tonfall über die ganze Lagen-Suite —
   Anteil Sätze mit Bezug zum Wesen **13 % → 27 %** (Mindestwert 20 %), Sentenz-Vokabular
   **6 %** (Höchstwert 12 %). Vorrat dabei von ~142.000 auf ~150.000 Sätze gewachsen.
   → `docs/storytelling.md` (Abschnitt „Wie man den Vorrat erweitert") gilt weiter.
-
-- [~] **Nutzerbindung / Spieltiefe — Konzept liegt vor, Entscheidung offen.** *(Nutzer)* „Durch das einfache Regler-Ändern kommen zwar
-  immer wieder neue Wesen, aber es hat keine Verbindlichkeit." Es fehlt der Schritt vom
-  Spielzeug zum **Spiel**. Recherche, wie moderne Spiele das lösen, dann ein Konzept, das zu
-  den Produkt-Pfeilern passt (Neugier + Bindung, **keine** Dark Patterns: kein Streak-Zwang,
-  kein Verfall-Schuldgefühl, kein Sammelzwang). Ergebnis gehört in ein eigenes Dokument.
-  **→ `docs/bindung-konzept.md`** (Recherche + Diagnose + fünf Vorschläge).
-  **Kern der Diagnose:** Das Problem ist nicht zu wenig Inhalt, sondern **zu wenig Widerstand**.
-  Gemessen an der Selbstbestimmungstheorie steht Evolve extrem ungleich: Autonomie maximal
-  (alles sofort, gratis und *umkehrbar* einstellbar), **Kompetenz fast null** (man kann in
-  Evolve nicht besser werden — es gibt nichts zu lösen und nichts zu scheitern), Verbundenheit
-  null. Ein Regler ohne Kosten macht jede Handlung folgenlos: keine Entscheidung, kein
-  kostbarer Zustand, kein Plan, keine Geschichte. Das ist die Grenze zwischen Spielzeug und
-  Spiel. **Empfehlung: V1 „Herausforderungen der Natur"** (Ziel + Beschränkung + Scheitern
-  möglich, additiv zur Sandkiste, keine Engine-Änderung) — schließt genau die Kompetenz-Lücke,
-  und was man dabei lernt, ist genau das, was das Spiel ohnehin lehren will. Danach V4
-  (Wissen als Meta-Fortschritt). V2 (Trägheit der Welt) und V3 (Aussterben nur unter deinen
-  Augen, nie offline) verändern das Grundgefühl → **Produktentscheidung des Nutzers**, nicht
-  eigenmächtig umsetzen.
 
 ### „Umwelt-Einfluss auslösen" fertiggestellt + V1 „Herausforderungen" umgesetzt (v0.71.0–v0.75.0)
 Vollständiger Verlauf inkl. gemessener Befunde in `docs/influence-plan.md` (Stufen S0–S8),
@@ -552,177 +713,25 @@ Nutzerbindungs-Konzept in `docs/bindung-konzept.md`. Kurzfassung:
   (unbeeinflusstes Start-Genom klassifiziert von sich aus schon als Protist) ist durch eine
   Mindest-Generationenzahl ausgeschlossen.
 
-**Offene Nachträge aus diesem Strang:**
-- [ ] **`docs/auslagerung/P5-ausgabe.json` aufräumen** — die ursprüngliche 28er-Lieferung
-  (10 davon nicht erreichbar) liegt noch auf `main`, ist durch P8 (271 Stück) ersetzt und nie
-  ins Spiel verdrahtet worden. Sollte entfernt oder klar als „ersetzt durch P8" markiert werden.
-- [ ] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee"** — die Form ist über `classify()` real
-  erreichbar (Reich Tier) und wird von den Herausforderungen genutzt, fehlt aber im `TREE`
-  (Genbuch) selbst, dadurch auch in `FORM_KINGDOM`. Für den Herausforderungen-Reich-Filter
-  lokal in `app/index.html` überbrückt (`CHAL_KINGDOM_FALLBACK`); der eigentliche Lebensbaum-
-  Eintrag (Ära/Evo-Notiz) fehlt weiterhin.
-- [ ] **P7 · Qualitäts-Audit** — zweiter Blick auf die bereits übernommenen P3-Erklärungen und
-  S6-Erzähl-Bausteine (nur als Idee notiert, nie als Paket beauftragt oder gebaut).
-- [ ] **V1-Ausbaustufen** (`docs/bindung-konzept.md`) — feste Startwelt für alle, Bestenliste
-  nach Generationenzahl, „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen Server/
-  Vergleichsraum (Supabase steht bereits) — bewusst nicht Teil der Erstversion.
-- [ ] **V2–V5** (`docs/bindung-konzept.md`) — Trägheit der Welt, Aussterben nur unter Beobachtung,
-  Wissen als Meta-Fortschritt, Verbundenheit über einen wöchentlichen festen Seed. Nur
-  recherchiert/vorgeschlagen, keine Umsetzung — nächste Empfehlung wäre V4 (Wissen als
-  Meta-Fortschritt), aber Start ist Produktentscheidung des Nutzers.
+*(Offene Nachträge aus diesem Strang stehen jetzt in „Offen" Punkte 5 und 7.)*
 
----
+### „Lebende Welt (Beta)"-Overlay — Nutzer-Feedback 2026-07 (Runde 1)
+- ✅ **Zappeln/Jitter**: das Modal sprang, weil (a) `place-items:center` + variable Kartenhöhe
+  ständig neu zentrierte, (b) die Chronik jeden Step nach Häufigkeit umsortierte, (c) 9 Steps/s.
+  → feste Kartenhöhe, stabile Chronik-Sortierung (nach Schlüssel), ruhiges Tempo (~2 Steps/s),
+  interner Scroll statt Karten-Reflow.
+- ✅ **Hintergrund-Zeit anhalten bei offenem Modal** (etabliertes Muster): Haupt-Sim pausiert,
+  während das Welt-Overlay offen ist (`window.__mainSim.pause/resume`).
+- ✅ **Bunte Emoji statt flacher Icons** (verstößt gegen die Icon-Policy): alle Emoji im
+  Overlay → flaches `ic()`-System (via `window.__ic`), inkl. neuer Icons globe/meteor/tune.
+- ✅ **„verbinden/trennen" unverständlich**: erst entfernt, dann mit klarer Metapher zurück —
+  „mit Nachbarn verbinden" / „als Insel abtrennen" je Ort, plus sichtbarer Zustand je Ort
+  (⛰ Insel / 🔗 verbunden). Effekt (Angleichung vs. eigener Weg) ist jetzt live sichtbar.
+- ✅ **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch) — geprüft: `app/exemplar.js`
+  deckt alle 44 `classify()`-Archetypen ab (`ARCH_WIKI`, Hauptansicht) UND alle 5 Reiche der
+  emergenten Lebenden Welt (`realExample()`, trait-basiert mit Fallback). Kein offener Rest.
 
-## ⬜ Offen — Nutzer-Rückmeldung 2026-07-29 — Komplexitäts-Audit
-
-- [~] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — Konzept liegt vor,
-  Umsetzung offen.** *(Nutzer)* Audit + abgestimmter Bauplan in
-  **`docs/komplexitaets-audit.md`**.
-  **Befund:** die Hauptansicht zeigt ~49 gleichzeitig aktive UI-Elemente, bevor überhaupt ein
-  Modal geöffnet wird — 25 Gen-Balken permanent (auch die im Milieu irrelevanten), 12
-  gleichrangige Biom-Buttons neben 6 Reglern, zwei inkonsistente Umwelt-Bedienmuster (Regler
-  vs. Einfluss-Chips) und vier Modale mit je eigener Navigationslogik. Ursache ist kein
-  Einzelfehler, sondern ein Muster: die letzten Audit-Runden haben fast nur hinzugefügt und
-  erklärt, kaum je etwas entfernt oder gruppiert.
-  **Fitness-Physik/Achsen bleiben unangetastet** (Validität ~85 %, Parität ~1e-16, Reality
-  20/20) — das Problem sitzt in der Präsentation, nicht im Modell.
-  **Abgestimmte Informationsarchitektur** nach Zugriffshäufigkeit statt Feature-Vollständigkeit
-  (Details siehe Doc):
-  - **Prio 1** (immer sofort da): 6 Regler, Play/Pause/Tempo, Lebensbaum-Zähler als stiller
-    Fortschritts-Motivator.
-  - **Prio 2** (ein Klick, aber beworben): Biome als kompakter „Presets ↗" statt 12
-    Einzel-Buttons, Umwelt-Einfluss, Herausforderungen (Startansicht kuratiert statt 271
-    Einträge), Teilen als kleiner Ghost-Button.
-  - **Prio 3** (Submodal/Settings, bewusst vergraben): Weltkarte-Details, „So funktioniert's",
-    Engine-Info, Zahlen-Toggle, Login, Name bearbeiten, **Neu beginnen** (destruktiv, gehört
-    weg von der Kernbedienung).
-  Reduziert die Dauersicht im Kern auf 6 Regler + Zeitkontrolle + Zähler + 4 klar
-  sekundäre Buttons; sieben Nebenfunktionen wandern in ein „⋯ Details"-Aufklapp.
-  Statisches Vorher/Nachher-Layout-Mockup wurde gebaut und abgenommen (nicht im Repo, nur zur
-  Abstimmung). **Empfohlene Umsetzungsreihenfolge:** P0.1 Gene progressiv einblenden → Biome→
-  Presets-Umstellung → Prio-3-Nebenfunktionen ins Details-Panel bündeln → (P2) Inline-Fitness-
-  Kopie in `index.html` durch generierte Version ersetzen (schließt die Fehlerklasse des
-  10-Versionen-NaN-Bugs, s. u.). **Noch nicht umgesetzt** — Start ist Produktentscheidung des
-  Nutzers.
-
----
-
-## ⬜ Offen — Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29)
-
-Nutzer-Auftrag: die gesamte Oberfläche auf flachen Vektor-Illustrationsstil mit
-Siebdruck-Anmutung umstellen (Referenz: Two Dots, Mid-Century-Wissenschaftsposter) —
-nur Flächenfarben, kein Verlauf/Schatten, max. 5 Farben je Ansicht, Umgebungsvariablen
-als Farbsystem (Temperatur → Hintergrundton, Sauerstoff/Nährstoffe → Partikeldichte,
-Feuchtigkeit → Formensprache Welle↔Kristall, Strahlung/Druck → Lichtkeile), Lebewesen
-als reine modulare Silhouette mit einer Akzentfarbe für neu erworbene Merkmale.
-Konzept-Vorschau (Palettenvergleich + Live-Demo) vorab als Artifact abgestimmt,
-Palette **„Klippenlicht"** (Aubergine-Ink + dusty Lilac + Ringelblume-Akzent) gewählt.
-Branch `claude/flat-vector-simulation-ui-kttqxx`.
-
-- [x] **Phase 1 — Design-Tokens**: `:root`-Palette auf Klippenlicht umgestellt,
-  Neomorph-Schatten (`--shadow*`) durch flache Hairline-Konturen ersetzt, alle
-  `linear-/radial-gradient`-Stellen (Body-BG, Gen-/Vitalitätsbalken, Login-Card,
-  Flash-Effekte, Rarity-/Toast-Glows) geflacht, `backdrop-filter`-Blur aus allen
-  Modal-Scrims entfernt, Kontrastfixes für helle Schrift auf Akzentflächen,
-  Papierkorn-Overlay als globaler SVG-Filter (`feTurbulence`).
-- [x] **Phase 2 — Habitat-Renderer Canvas→SVG**: `drawHabitat()`/`drawMotes()`
-  laufen jetzt als echtes SVG-DOM statt Canvas-2D. Temperatur → Hintergrundfarbe,
-  Feuchtigkeit → Bodenform (weiche Welle ↔ harte Kristallkante), Strahlung/Druck
-  (UV+Strahlung+Tiefsee-Druck) → diagonale Lichtkeile, Sauerstoff+Nahrungsfülle →
-  Partikeldichte/-deckkraft. Alle bestehenden Regler/Stress-Chips (Gift, Hypoxie,
-  Salz, Schnee, Wasserstand) bleiben erhalten, jetzt flach statt Verlauf. Die
-  Kreatur selbst läuft vorerst weiter auf einem transparenten Canvas-Overlay über
-  der SVG-Bühne (Übergangslösung bis Phase 3).
-- [x] **Icon-Konsistenz-Audit**: 8 reine Strich-Icons (`snow`, `waves`, `dna`,
-  `globe`, `wind`, `mineral`, `link`, `fern` + `moss`/`mold`/`mycelium`) brachen
-  mit dem „kein Outline-Stil"-Prinzip → auf flache Silhouetten/kräftigere Striche
-  umgestellt. Letzte rohe Emoji (☁️ Cloud-Sync-Status, 👋 Onboarding-Hinweis)
-  durch flaches Icon ersetzt bzw. entfernt — der Rest der App nutzt bereits
-  durchgängig `ic()`/`formIcon()`.
-- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)**:
-  `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
-  (~800 Zeilen biologischer Sonderfälle: Biolumineszenz, Tarnung, Flugbauplan …)
-  von Canvas-2D auf modulares SVG umbauen — Körperkern + austauschbare Anbauteile
-  (Flossen, Membranen, Panzerplatten, Fühler) als eigene Elemente, Tiefe über
-  Layering + Helligkeitsstufen statt Schlagschatten, EINE Akzentfarbe für das
-  jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
-  seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
-  Erkennung für die Chronik auf). Geplant: an einen Opus-Subagenten delegiert
-  (geschmacksintensivster Teil), Sonnet bleibt Orchestrator/Integration.
-- [ ] **Phase 4 — Restliche UI**: Genom-Balken, Vitalitätsanzeige, Chronik,
-  Genbook, Baum-des-Lebens-SVG, Challenge-Liste auf dieselbe Palette + die
-  Hell/Dunkel-Hierarchieregel übertragen (Werte/Regler/Buttons bleiben die
-  einzigen hellen, hochkontrastigen Elemente).
-- [ ] **Phase 5 — Audit**: WCAG-Kontrast erneut prüfen, `prefers-reduced-motion`
-  erhalten, alle Biome/Extremregler/Mutationsfälle durchklicken.
-- [ ] **Zwei kleine Politur-Punkte aus Phase 2**: Himmel wirkt bei mittlerem
-  Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
-  die Wellenlinie am Boden (`groundPath()`) könnte mit mehr Stützpunkten runder
-  werden.
-
-Betrifft nur die Präsentationsschicht — `engine/`, `physics.json` und die
-Fitness-Validierung (`npm run parity`) sind unangetastet.
-
----
-
-## ⬜ Offen — Live-App
-
-Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
-Offen bleibt nur noch Feinschliff:
-
-- **„Lebende Welt (Beta)"-Overlay — Nutzer-Feedback 2026-07 (Runde 1):**
-  - [x] **Zappeln/Jitter**: das Modal sprang, weil (a) `place-items:center` + variable Kartenhöhe
-    ständig neu zentrierte, (b) die Chronik jeden Step nach Häufigkeit umsortierte, (c) 9 Steps/s.
-    → feste Kartenhöhe, stabile Chronik-Sortierung (nach Schlüssel), ruhiges Tempo (~2 Steps/s),
-    interner Scroll statt Karten-Reflow.
-  - [x] **Hintergrund-Zeit anhalten bei offenem Modal** (etabliertes Muster): Haupt-Sim pausiert,
-    während das Welt-Overlay offen ist (`window.__mainSim.pause/resume`).
-  - [x] **Bunte Emoji statt flacher Icons** (verstößt gegen die Icon-Policy, Zeile ~1968): alle
-    Emoji im Overlay → flaches `ic()`-System (via `window.__ic`), inkl. neuer Icons globe/meteor/tune.
-  - [x] **„verbinden/trennen" unverständlich**: erst entfernt, dann mit klarer Metapher zurück —
-    „mit Nachbarn verbinden" / „als Insel abtrennen" je Ort, plus sichtbarer Zustand je Ort
-    (⛰ Insel / 🔗 verbunden). Effekt (Angleichung vs. eigener Weg) ist jetzt live sichtbar.
-  - [x] **„→ in echt"-Link je Art (Wikipedia)** (Nutzer-Wunsch) — **erledigt, Häkchen nachgetragen
-    (2026-07-27).** Geprüft: `app/exemplar.js` deckt alle 44 `classify()`-Archetypen ab
-    (`ARCH_WIKI`, Hauptansicht) UND alle 5 Reiche der emergenten Lebenden Welt (`realExample()`,
-    trait-basiert mit Fallback). Kein offener Rest.
-
-- **CLS-4-Rest · schmale Größenfenster**: einige seltene Formen (Nadelbaum, Blütenkraut,
-  Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
-  (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe Priorität.
-- Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht Supabase-
-  Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr); B-Reste
-  (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
-
----
-
-## ⬜ Offen — Große Brocken (je: neues Gen + Orakel-Spiegelung + Re-Validierung)
-
-Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
-- ✅ **AXIS-1 · Flug/Gleiten** (Gen „Flügelfläche") — **erledigt** (s. o.).
-- **AXIS-2 · Graben** (Gen „Grabklauen"): Flucht/Versteck bei Räuberdruck + Boden-Nahrung
-  → Maulwurf, Wühlmaus.
-- **AXIS-3 · Ernährungsmodus** (Filtrierer/Aasfresser/Parasit) statt binärer Photo-vs-Jagd-Gabel.
-  *Teilweise angestoßen:* der Absorptions-Kanal + die sessilen Filtrierer (Koralle/Schwamm)
-  decken „sessiles Fressen" konzeptionell ab — ein eigenes Gen dafür fehlt noch.
-- [x] **AXIS-4 · Aquatik** — *erledigt (v0.9.0)*: vierter Energieweg „aquatische Jagd" in der
-  Fitness (`physics.json` v5, gespiegelt in `engine/fitness.ts` + Orakel + App-Inline). Schwimmen
-  belohnt Mobilität + Stromlinienform (Gliedmaßen/Panzer = Drag), nur in tiefem Wasser, heterotroph.
-  Diagnose per `tools/divergence-audit.mjs`: vorher Fisch 0/500 (nur Drift), jetzt **Fisch 3,8 %**,
-  aquatische Formen 12→32/500; Biom „Offenes Meer" liefert zuverlässig einen Fisch. `parity` exakt
-  (1e-16), `ecology` C1–C6 grün. Kiemen/Biolumineszenz als eigene Gene bleiben offen (AXIS-5).
-- [x] **AXIS-5 · Biolumineszenz** — *erledigt (v0.16.0)*: neues Gen `biolum` (10. Gen). Leuchten
-  wirkt NUR im echten Dunkeln (`biolumDarkFloor` — unterhalb ~0,3 Licht): energyGlow (lockt Beute,
-  wo Photosynthese tot ist) + Verteidigung (Gegenbeleuchtung), Kosten `maintenance.biolum`. Voller
-  Pipeline-Durchlauf (physics.json v6 + engine + Orakel-`TRAITS` auf 10 + App-Inline + `responseRate[9]`),
-  Form „Leuchtwesen · Tiefsee" (Anglerfisch/Qualle, jelly-Icon, Cyan-Glow in `drawCreature`), Biom
-  „Leuchtende Tiefe". Validierung: `parity` exakt, `ecology` C1–C6 grün, `pop-check` 0,010; Sweep
-  Leuchtwesen 14 % (nach Dark-Floor-Tuning von 43 %). Offen: Sinne/Tarnung/Gift als weitere Achsen.
-
----
-
-## ✅ Engine/CLI (Live-App nutzt eigenen Inline-Code, dort kein Problem) — abgearbeitet
-
+### Engine/CLI (Live-App nutzt eigenen Inline-Code, dort kein Problem)
 - ✅ **BUG-2 ·** `explain.ts` `causeFor()` wählte Kausal-Texte an rohen Umwelt-Schwellen statt am
   echten Grund → widersprüchliche Erklärungen. **Behoben:** Ursache aus dem emergenten Archetyp
   (`classify()` aufs Endgenom) + realen `env`-Werten abgeleitet — Photosynthese-↑ behauptet keine
@@ -738,25 +747,6 @@ Der Möglichkeitsraum stößt an fehlende Achsen (jede braucht ein neues Gen):
   bestehen, wird aber nicht mehr gepflegt (README/resume entsprechend klargestellt, `npm run serve`
   zeigt jetzt auf `/app/`). Damit ist auch CLS-2 (fehlende Photosynthese-Flächen im alten Mockup)
   gegenstandslos für das gepflegte Produkt.
-
----
-
-## 🧭 Produkt-Pfeiler (Leitplanken)
-
-- **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
-- **Rarität = Entdeckungs-Tiefe**, keine kaufbare Währung / kein Grind (Skinner-Loop).
-- **Wertschätzung für die Natur als positives Neben-Ziel** *(Nutzer, 2026-07)* — **implizit,
-  nicht explizit**: über glaubwürdige Baupläne, echte Erdzeit-Reihenfolge (Hover „wann"),
-  reale Klade-Namen und die Referenz-gestützte Ökologie soll ein Staunen über die Vielfalt
-  des Lebens *mitschwingen* — ohne belehrenden Ton, ohne „Lern"-Overlay. Prüf-Frage für neue
-  Features: *Weckt es Staunen, oder nur Sammel-Druck?* (Ersteres fördern, Letzteres meiden.)
-
-## 💡 Gamification-Ideen (Diskussion)
-
-### ✅ Entstehungswahrscheinlichkeit als Rarität — umgesetzt (s. „Erledigt")
-Idee (Nutzer): seltene Arten spät, häufige früh. Umgesetzt als Entdeckungs-Tiefe über den
-Ökologie-Sweep. Offen als Feinschliff: sanfte Biom-Empfehlungen („in diese Richtung wohnt
-noch etwas Seltenes") statt harter Gates; Rarität optional auch in `tree-of-life.json` spiegeln.
 
 ---
 
