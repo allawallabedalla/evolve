@@ -200,10 +200,24 @@ sinnvoll ist.
     `app/index.html` geändert, reine Anzeige-Filterung (alle 25 Werte weiter berechnet).
     Getestet: Syntax-Check sauber, Playwright-Browser-Test (Gen-Filter + Aufklappen,
     Details-Panel + Fokus-Falle, verschachtelte Dialoge, Kernschleife unverändert),
-    `app-parity`/`mf-fidelity` weiterhin grün. **Noch offen aus P0-P2:** Biome→Presets,
-    Herausforderungen/Einfluss-Kuratierung, Datei-Aufsplittung, Inline-Fitness-Kopie
-    eliminieren — Start war Produktentscheidung des Nutzers, inzwischen freigegeben
-    (2026-07-29, „der Reihenfolge nach abarbeiten").
+    `app-parity`/`mf-fidelity` weiterhin grün.
+  - [x] **P1.3 + P1.4 umgesetzt (2026-07-29):** Die zwei Umwelt-Klassen-Trennung (10
+    Stress-Achsen nur über Biome/Ereignisse, nie als freie Regler) war bereits konsequent —
+    als bewusste, abgeschlossene Entscheidung im Code kommentiert. 12 Biom-Buttons →
+    kompakter „Presets ↗"-Button + Modal (aktives Biom weiterhin markiert, Klick übernimmt
+    UND schließt das Panel, analog zum bestehenden Herausforderungen-Muster). Herausforderungen-
+    und Einfluss-Kataloge starten jetzt kuratiert (5 gemischte Einträge nach Reich/Schwierigkeit
+    bzw. die bestehende „naheliegend"-Sortierung) mit einem „Alle 271/10 anzeigen"-Link zur
+    vollen, unveränderten Such-/Filter-Ansicht. Nebenbefund behoben: `[hidden]` wurde durch
+    gleich-spezifische `display`-Deklarationen dreier Klassen (`.infl-quick`/`.infl-cats`/neu
+    `.catalog-showall`) unterlaufen — vorbestehender Bug (auch schon bei der alten
+    Einfluss-Suche), jetzt mit expliziten `[hidden]`-Overrides gefixt. Getestet: Playwright
+    (Presets/Fokus-Falle/Escape, beide Kataloge kuratiert→voll, Suche weiterhin funktionsfähig,
+    Kernschleife unverändert), `app-parity`/`mf-fidelity` grün, `ui-calm-check`-Fail als
+    vorbestehend/unabhängig verifiziert (identisch auf unverändertem HEAD reproduziert).
+    **Noch offen aus P1-P2:** Datei-Aufsplittung (P1.5, reine Infrastruktur ohne
+    Spieler-Sichtbarkeit — niedrigere Priorität als P1.3/1.4), Inline-Fitness-Kopie
+    eliminieren (P2.6).
 
 ### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — eigener Branch, läuft parallel
 
