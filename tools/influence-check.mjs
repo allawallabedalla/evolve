@@ -54,7 +54,7 @@ if (!fail.length) ok(`Form & Gültigkeit: ${active.length} aktive Faktoren, alle
 
 // --- 3. Wirksamkeit --------------------------------------------------------
 const baseG = converge(BASE_ENV);
-const baseA = classify(baseG);
+const baseA = classify(baseG, BASE_ENV);
 const MIN_SHIFT = 0.25;          // L1 über 25 Gene — darunter ist es kein Einfluss
 const results = [];
 for (const f of active) {
@@ -62,7 +62,7 @@ for (const f of active) {
   const fitBase = fitness(baseG, env);
   if (!Number.isFinite(fitBase)) { fail.push(`„${f.plain || f.name}": Fitness ist NaN/Infinity`); continue; }
   const g = converge(env);
-  const a = classify(g);
+  const a = classify(g, env);
   const shift = l1(g, baseG);
   results.push({ f, g, a, shift, vit: fitness(g, env) });
   if (shift < MIN_SHIFT)

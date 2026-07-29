@@ -24,25 +24,49 @@ export function loadAppCore(toolName = "app-core") {
   };
   const physSrc   = grab(/const PHYS = \{[\s\S]*?\n\};/, "PHYS");
   const paramsSrc = grab(/const PARAMS = \{[\s\S]*?\n\};/, "PARAMS");
+  const ficonSrc  = grab(/const FICON = \{[\s\S]*?\n\};/, "FICON");
   const fitSrc    = grab(/function fitness\(t, e\)\{[\s\S]*?\n\}/, "fitness()");
   const stepSrc   = grab(/function stepGeneration\(m, env, randn\)\{[\s\S]*?\n\}/, "stepGeneration()");
-  const classSrc  = grab(/function classify\(t\)\{[\s\S]*?\n\}/, "classify()");
+  // Prototyp-Matcher (Migrations-Stufe 2) — loest die alte classify()-Kaskade ab.
+  // Die Formen selbst sind Daten (app/archetypes.js), hier nur der Rechenweg.
+  const libSrc    = grab(/function archLib\(\)\{[\s\S]*?\n\}/, "archLib()");
+  const weightSrc = grab(/function selectionWeights\(t, e\)\{[\s\S]*?\n\}/, "selectionWeights()");
+  const burdenSrc = grab(/function unusedBurden\(t, e\)\{[\s\S]*?\n\}/, "unusedBurden()");
+  const envFitSrc = grab(/function envFits\(e, req\)\{[\s\S]*?\n\}/, "envFits()");
+  const nounSrc   = grab(/function bodyPlanNoun\(t, e\)\{[\s\S]*?\n\}/, "bodyPlanNoun()");
+  const genSrc    = grab(/function generateFormName\(t, e, w, near\)\{[\s\S]*?\n\}/, "generateFormName()");
+  const matchSrc  = grab(/function matchArchetype\(t, e\)\{[\s\S]*?\n\}/, "matchArchetype()");
+  const classSrc  = grab(/function classify\(t, envIn\)\{[\s\S]*?\n\}/, "classify()");
   const geneLabels = eval(grab(/const GENE_LABELS = \[[\s\S]*?\];/, "GENE_LABELS")
     .replace(/^const GENE_LABELS = /, "").replace(/;$/, ""));
+  const archWin = {};
+  new Function("window", readFileSync(join(ROOT, "app", "archetypes.js"), "utf-8"))(archWin);
 
   const box = {};
-  new Function("box", `
+  new Function("box", "ARCH", `
     const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
     const sigmoid = x => 1 / (1 + Math.exp(-x));
     ${physSrc}
     ${paramsSrc}
+    ${ficonSrc}
     const NG = ${geneLabels.length};
     const DRIFT_SCALE = 0;
     ${fitSrc}
     ${stepSrc}
+    let _archLib = null, _archNamedMax = 1;
+    const _archDist = [];
+    const NOVEL_DEV_MIN = 0.18;
+    ${libSrc}
+    ${weightSrc}
+    ${burdenSrc}
+    ${envFitSrc}
+    ${nounSrc}
+    ${genSrc}
+    ${matchSrc}
     ${classSrc}
-    box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify; box.NG = NG;
-  `)(box);
+    box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify;
+    box.matchArchetype = matchArchetype; box.selectionWeights = selectionWeights; box.NG = NG;
+  `)(box, archWin.ARCHETYPES);
 
   // Deterministische Konvergenz aus dem Ur-Genom (kein Rauschen) — das Maß dafür,
   // ob ein Einfluss die Selektion wirklich verschiebt.

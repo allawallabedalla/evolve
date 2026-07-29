@@ -107,7 +107,7 @@ if (proposals.length) {
     const env = envOf({ env: e.env });
     const g = converge(env);
     const shift = l1(g, baseG);
-    const form = classify(g);
+    const form = classify(g, env);
     const vit = fitness(g, env);
     const okShift = shift >= MIN_SHIFT && Number.isFinite(vit);
     if (!okShift) fail.push(`„${k}": Vorschlag verschiebt die Selektion kaum (L1 ${shift.toFixed(2)}) — Attrappe, abgelehnt`);

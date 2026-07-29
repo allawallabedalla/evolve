@@ -122,6 +122,12 @@
   .species-wiki { font-family: var(--mono); font-style: normal; font-size: .68rem; color: var(--bio-dim); text-decoration: none; white-space: nowrap; }
   .species-wiki:hover { color: var(--bio-dim); text-decoration: underline; }
   .species .emoji { font-style: normal; font-size: 1.5rem; }
+  /* Grenzfall-Zeile: erscheint NUR, wenn die Form wirklich nicht eindeutig ist —
+     eine Weggabelung ist Information, eine Dauer-Prozentzahl waere nur Rauschen. */
+  .species-edge { font-size: .78rem; color: var(--muted); margin: -3px 0 7px; line-height: 1.45; }
+  .species-edge b { font-weight: 600; color: var(--bio-dim); font-style: normal; }
+  .species-edge .edge-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--gold); margin-right: 6px; vertical-align: middle; opacity: .8; }
   .bauplan { color: var(--muted); font-size: .9rem; }
   .how { margin-top: 8px; }
   .how > summary { cursor: pointer; font-size: .74rem; color: var(--bio-dim); list-style: none; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
@@ -755,6 +761,7 @@
       <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span></div>
       <div class="kingdom" id="kingdom">—</div>
       <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
+      <div class="species-edge" id="speciesEdge" hidden></div>
       <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
       <div class="chron-line" id="chronLine" role="status" aria-live="polite" hidden></div>
       <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
@@ -998,6 +1005,7 @@
 </div>
 
 <script src="./vendor/supabase.js"></script>
+<script src="./archetypes.js"></script>
 <script src="./influences.js"></script>
 <script src="./gene-explain.js"></script>
 <script src="./challenges.js"></script>
@@ -1263,81 +1271,198 @@ function stepGeneration(m, env, randn){
   return next;
 }
 
-// ---- Interpretation: Archetyp + Bauplan ----
-function classify(t){
-  const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0,detox=t[10]||0,oxyEff=t[11]||0,osmo=t[12]||0,burrow=t[13]||0,pigment=t[14]||0,filter=t[15]||0,camo=t[16]||0,baro=t[17]||0,sense=t[18]||0,desicc=t[19]||0,radres=t[20]||0,fireres=t[21]||0,frostres=t[22]||0,windres=t[23]||0,nfix=t[24]||0;
-
-  // ===== Reich PFLANZEN — autotroph (Photosynthese) + sessil =====
-  if(photo>0.45 && mob<0.4){
-    if(size<0.18 && struct<0.32)          return {k:"Pflanze",n:"Grünalge",e:"🟢"};
-    if(struct<0.28 && size<0.42)          return {k:"Pflanze",n:"Moos",e:"🌱"};
-    if(armor>0.5)                         return {k:"Pflanze",n:"Sukkulente · Kaktus",e:"🌵"};
-    if(insul>0.6)                         return {k:"Pflanze",n:"Polster-Kältepflanze",e:"🏔️"};
-    if(struct>0.6 && size>0.5)            return insul>0.4 ? {k:"Pflanze",n:"Nadelbaum",e:"🌲"}
-                                                          : {k:"Pflanze",n:"Laubbaum",e:"🌳"};
-    if(struct>0.55)                       return {k:"Pflanze",n:"Verholzter Strauch",e:"🪴"};
-    if(photo>0.75 && struct<0.42)         return {k:"Pflanze",n:"Blütenkraut",e:"🌸"};
-    if(struct<0.42 && size>0.35)          return {k:"Pflanze",n:"Farn",e:"🌿"};
-    return {k:"Pflanze",n:"Kraut · niedrige Pflanze",e:"☘️"};
-  }
-
-  // ===== Reich TIERE — heterotroph + mobil =====
-  if(mob>0.45 && photo<0.4){
-    // Biolumineszenz (AXIS-5) -> Tiefsee-Leuchtwesen (Anglerfisch/Qualle), aber NUR
-    // wenn stromlinienförmig (Tiefsee-Schwimmer). Ein beiniger/geflügelter Leuchter an
-    // dunklem Land (Glühwürmchen/Leuchtkäfer) fällt unten in seine Landform — sonst
-    // hieße ein Landtier fälschlich „Tiefsee".
-    if(biolum>0.55 && limb<0.3 && armor<0.35) return {k:"Tier",n:"Leuchtwesen · Tiefsee",e:"🪼"};
-    // Flug-Baupläne (AXIS-1): hohe Flügelfläche + leichter, waffenloser Körper.
-    if(wing>0.5 && size<0.34 && armor<0.4){
-      if(metab>0.7 && insul>0.62)         return {k:"Tier",n:"Flugsäuger · Fledermaus",e:"🦇"};
-      if(metab>0.7)                       return {k:"Tier",n:"Flatterer · Vogel",e:"🐦"};
-      return {k:"Tier",n:"Fluginsekt · Segler",e:"🦋"};
+// ---- Interpretation: Archetyp (Prototyp-Matcher) + Bauplan ----
+//
+// Hier stand bis Migrations-Stufe 2 eine if/else-Kaskade mit 43 Zweigen („erster Treffer
+// gewinnt"). Sie hatte einen dokumentierten, reproduzierten Konstruktionsfehler: ein Wesen
+// mit viel Wärmedämmung UND Leuchtorgan wurde IMMER „Leuchtwesen · Tiefsee", weil der
+// Biolumineszenz-Zweig oberhalb des Fell-Zweigs stand — „Fell-Warmblüter" war für so ein
+// Genom unerreichbar. Und weil jede Schwelle eine Klippe ist, konnte ein einzelnes Gen die
+// Identität über zwei Archetypen hinweg kippen (biolum .60 -> „Leuchtwesen", biolum .20 ->
+// „Fisch", nie „Fell"). Beides ist nicht wegkalibrierbar; es IST die Bauform.
+//
+// Ersatz (docs/engine-forschungsergebnis.md, Abschnitt 4): die Formen sind jetzt DATEN
+// (app/archetypes.js) — je ein Prototyp-Genom pro Lebensform. Benannt wird über die NÄHE
+// des Genoms zu diesen Punkten. Drei Eigenschaften, die die Kaskade prinzipiell nicht hatte:
+//
+//   1. Es zählt das GANZE Genom, nicht die erste zutreffende Bedingung. Hohe Isolation kann
+//      hohe Biolumineszenz überstimmen, wenn sie die größere Abweichung ist.
+//   2. Die Gewichtung ist UMWELT-BEWUSST, ohne eine einzige if-Abfrage über env: jedes Gen
+//      zählt so viel, wie es hier über Leben und Tod entscheidet (|∂Fitness/∂Gen| am Genom
+//      selbst — dieselbe Größe, die auch die Selektion treibt). In einer giftfreien Welt ist
+//      „Entgiftung" für die Identität fast egal; in einer giftigen wird sie identitätsstiftend.
+//   3. Es gibt eine KONFIDENZ (Vorsprung vor dem Zweitplatzierten) und einen Ausweg: passt
+//      kein Prototyp, wird keine Form erzwungen, sondern ein Name aus den stärksten
+//      Abweichungen gebildet. Der stille Fehltreffer bei Chimären wird damit sichtbar.
+//
+// Selbe Idee wie selectionWeights() in world/cluster.ts (Migrations-Stufe 1) — dort für die
+// Cluster-Metrik, hier für die Benennung. Bewusst hier reimplementiert statt importiert: die
+// App hat ihre eigene Inline-Kopie von fitness()/PHYS/PARAMS (s. docs/komplexitaets-audit.md);
+// ein ES-Modul-Import aus engine/ liefe im Browser nicht ohne Bundling.
+const ARCH = window.ARCHETYPES;
+// Prototyp-Objekte -> Vektor + Liste der GENANNTEN Gene (einmalig, beim ersten Aufruf).
+// `idx` ist der Kern der Bauform: ein Prototyp ist eine TEIL-Spezifikation. Nur die Gene,
+// über die sein Kaskaden-Zweig eine Aussage traf, gehen in den Abstand ein — der
+// Fisch-Zweig prüfte Gliedmaßen/Panzer/Mobilität und schwieg über Größe und Wärmedämmung,
+// also schweigt auch der Fisch-Prototyp darüber (sonst fiele ein kalter Tiefsee-Fisch,
+// der real Isolation ~0.9 entwickelt, aus seiner eigenen Form heraus).
+let _archLib = null, _archNamedMax = 1;
+function archLib(){
+  if(_archLib) return _archLib;
+  const keys = ARCH.genes;
+  _archLib = ARCH.forms.map(f => {
+    const v = new Array(keys.length).fill(null), idx = [];
+    for(let i=0;i<keys.length;i++){
+      const x = f.proto[keys[i]];
+      if(x!==undefined){ v[i]=x; idx.push(i); }
     }
-    if(armor>0.55 && size>0.55)           return {k:"Tier",n:"Gepanzerter Koloss",e:"🦏"};
-    if(armor>0.5 && limb>0.5)             return {k:"Tier",n:"Krebstier · Arthropode",e:"🦀"};
-    if(armor>0.55)                        return {k:"Tier",n:"Gepanzertes Beutetier",e:"🐢"};
-    if(armor>0.45 && limb<0.3 && mob<0.6) return {k:"Tier",n:"Schnecke · Weichtier",e:"🐌"};
-    if(limb<0.3 && armor<0.32 && mob>0.6) return {k:"Tier",n:"Fisch · Aalform",e:"🐟"};
-    if(limb<0.3 && size<0.35)             return {k:"Tier",n:"Wurm",e:"🪱"};
-    if(limb>0.6 && size<0.32 && insul<0.4)return {k:"Tier",n:"Insekt · Gliederfüßer",e:"🐜"};
-    if(limb>0.55 && struct<0.32 && armor<0.32 && insul<0.35 && size>0.32) return {k:"Tier",n:"Kopffüßer · Tintenfisch",e:"🐙"};
-    if(size>0.6 && metab>0.6)             return {k:"Tier",n:"Aktiver Großjäger",e:"🐺"};
-    if(insul>0.6 && size>0.52)            return {k:"Tier",n:"Fell-Großtier",e:"🐻"};
-    if(insul>0.6)                         return {k:"Tier",n:"Fell-Warmblüter",e:"🦊"};
-    if(limb>0.6 && size<0.45)             return {k:"Tier",n:"Behänder Kletterer",e:"🐒"};
-    if(size<0.28)                         return {k:"Tier",n:"Kleines flinkes Tier",e:"🐭"};
-    if(armor<0.32 && insul<0.32 && struct<0.35 && metab<0.5) return {k:"Tier",n:"Amphibie · Lurch",e:"🐸"};
-    if(armor<0.32 && insul<0.32)          return {k:"Tier",n:"Reptil · Echse",e:"🦎"};
-    return {k:"Tier",n:"Generalisten-Tier",e:"🦥"};
+    return { f, v, idx };
+  });
+  // Wie viele Gene nennt der ausführlichste Prototyp? Bezug für den Spezifitäts-Bonus.
+  _archNamedMax = Math.max(1, ..._archLib.map(a => a.idx.length));
+  return _archLib;
+}
+// Selektions-Relevanz je Gen: |∂Fitness/∂Gen| AM GENOM SELBST, auf 0..1 normiert, mit
+// Exponent geschärft und mit einem Boden versehen (nie ganz ignorieren). Ohne diesen
+// Schritt ertränken die 15 bedingten Kosten-Gene (Stressor-Resistenzen, die ohne ihren
+// Stressor frei driften) den Abstand in Rauschen — gemessen ~64 % des rohen 25-D-Abstands.
+// Geschärft wird, weil schon die bloße Unterhaltslast jedem Gen eine kleine, gleich große
+// Ableitung gibt; ohne Exponent lägen die folgenlosen Gene noch bei ~40 % Gewicht.
+function selectionWeights(t, e){
+  const eps = 0.01, w = new Array(NG); let mx = 1e-9;
+  for(let i=0;i<NG;i++){
+    const up=t.slice(); up[i]=clamp01(up[i]+eps);
+    const dn=t.slice(); dn[i]=clamp01(dn[i]-eps);
+    const d = Math.abs(fitness(up,e)-fitness(dn,e))/(2*eps);
+    w[i]=d; if(d>mx) mx=d;
   }
-
-  // ===== Reich PILZE & MIKROBEN — heterotroph + sessil (fressen ohne Wandern) =====
-  if(photo<0.45 && mob<0.4){
-    if(size<0.16){
-      if(metab>0.6 || insul>0.6)          return {k:"Mikrobe",n:"Archaee · Extremophil",e:"🦠"};
-      return {k:"Mikrobe",n:"Bakterie",e:"🧫"};
+  const fl = ARCH.weightFloor, sh = ARCH.weightSharpen;
+  for(let i=0;i<NG;i++) w[i] = fl + (1-fl)*Math.pow(w[i]/mx, sh);
+  return w;
+}
+// UNERKLÄRTE MERKMALSLAST — der zweite Weg, auf dem eine Fehlzuordnung sichtbar wird.
+// Ein Wesen, das die 15 bedingten Merkmale (Entgiftung, Frostschutz, Druck-Toleranz …)
+// kräftig ausgeprägt trägt, OBWOHL seine Welt sie nicht abfragt, ist keine saubere Form,
+// sondern eine Chimäre: es bezahlt Unterhalt für Rüstung ohne Gegner. Genau diesen Fall
+// hat die Kaskade still verschluckt — sie hat die Gene 10..24 nie angesehen.
+// Gemessen statt geraten, mit EINEM zusätzlichen fitness()-Aufruf: um wie viel ginge es
+// dem Wesen besser, wenn es diese ganze Ausrüstung ablegte? Bei echter Anpassung (eine
+// giftige Welt, die Entgiftung wirklich braucht) ist das ≤ 0 und kostet nichts.
+function unusedBurden(t, e){
+  const rest = t.slice(); let any=false;
+  for(let i=10;i<NG;i++) if(rest[i] > ARCH.burdenRest){ rest[i] = ARCH.burdenRest; any=true; }
+  if(!any) return 0;
+  const f0 = fitness(t, e);
+  if(!(f0>0)) return 0;
+  return Math.max(0, (fitness(rest, e) - f0)/f0);
+}
+// Plausibilitätsfenster: WEICH. Liegt die Umwelt außerhalb, wird der Abstand gestreckt —
+// ein Landtier in der Tiefsee wird unwahrscheinlich, nicht unmöglich.
+function envFits(e, req){
+  for(const ax in req){
+    const r = req[ax], v = (e[ax]==null ? 0 : e[ax]);
+    if(v < r[0] || v > r[1]) return false;
+  }
+  return true;
+}
+// Bauplan-Grundwort für neuartige Formen — aus dem Genom, nicht aus einer Formen-Tabelle.
+function bodyPlanNoun(t, e){
+  const N = ARCH.novel.nouns;
+  const size=t[1], limb=t[2], photo=t[5], mob=t[6], wing=t[8];
+  const deepWater = (e && e.water!=null ? e.water : 0.6) >= 0.5;
+  if(mob >= 0.4 && photo >= 0.4 && size < 0.30) return N.mischling;
+  if(wing > 0.45 && !deepWater) return N.flieger;
+  if(mob > 0.45){
+    if(deepWater && limb < 0.35) return N.schwimmer;
+    return limb >= 0.35 ? N.laeufer : N.kriecher;
+  }
+  if(photo > 0.45) return N.gewaechs;
+  return size < 0.18 ? N.zeller : N.geflecht;
+}
+// Kein Zwang zur Einordnung: der Name entsteht aus den ein bis zwei selektionsrelevantesten
+// Abweichungen vom nächsten Prototyp — „Gepanzerter Leuchtschwimmer" statt einer falschen
+// Zuordnung zu „Krebstier · Arthropode". Schweigt der Prototyp zu einem Gen, gilt als
+// Bezug der Ruhewert eines ungenutzten Gens.
+const NOVEL_DEV_MIN = 0.18;
+function generateFormName(t, e, w, near){
+  const nv = ARCH.novel, gi = {}; ARCH.genes.forEach((g,i)=>{ gi[g]=i; });
+  const cands = [];
+  for(const ax of nv.axes){
+    const i = gi[ax.gene]; if(i===undefined || i>=NG) continue;
+    const ref = near.v[i]!==null ? near.v[i] : (i<10 ? nv.silentCore : nv.silentCond);
+    const d = t[i] - ref;
+    if(ax.dir==="hi" ? d < NOVEL_DEV_MIN : -d < NOVEL_DEV_MIN) continue;
+    cands.push({ ax, score: Math.abs(d)*w[i] });
+  }
+  cands.sort((a,b)=>b.score-a.score);
+  const noun = bodyPlanNoun(t, e), end = noun.g==="n" ? "es" : "er";
+  if(!cands.length) return nv.fallback;
+  const first = cands[0];
+  const second = cands.find(c => c.ax.gene !== first.ax.gene);
+  return second ? `${first.ax.adj}${end} ${second.ax.stem}${noun.w.toLowerCase()}`
+                : `${first.ax.adj}${end} ${noun.w}`;
+}
+// Der eigentliche Matcher: gewichteter, normierter Abstand zu jedem Prototyp — gemittelt
+// NUR über die Gene, zu denen der jeweilige Prototyp etwas sagt (s. archLib()).
+const _archDist = [];
+function matchArchetype(t, e){
+  const lib = archLib(), w = selectionWeights(t, e);
+  let best=null, dBest=Infinity, second=null, dSecond=Infinity;
+  for(let ai=0; ai<lib.length; ai++){
+    const a = lib[ai];
+    let s=0, z=0;
+    for(const i of a.idx){ const d=(t[i]-a.v[i])*w[i]; s+=d*d; z+=w[i]*w[i]; }
+    // Spezifitäts-Bonus: ein Prototyp, der zu VIELEN Genen etwas sagt, gewinnt bei sonst
+    // gleichem Abstand. Ohne ihn schlägt der vagere Prototyp den genaueren immer — er hat
+    // ja weniger zu treffen. („Archaee" sagt nichts über Stoffwechsel/Dämmung, weil ihr
+    // Zweig ein ODER enthielt; „Bakterie" sagt zu beiden etwas. Ohne Bonus wäre jede
+    // Bakterie eine Archaee.) Entspricht der Reihenfolge der alten Kaskade: die
+    // spezielleren Zweige standen oben.
+    let dist = Math.sqrt(s/Math.max(z,1e-9)) * (1 - ARCH.specificityBonus*a.idx.length/_archNamedMax);
+    if(a.f.requires && !envFits(e, a.f.requires)) dist *= ARCH.requiresPenalty;
+    _archDist[ai] = dist;
+    if(dist < dBest){ second=best; dSecond=dBest; best=a; dBest=dist; }
+    else if(dist < dSecond){ second=a; dSecond=dist; }
+  }
+  // Eine Form darf mehrere Prototypen haben (ein ODER in der alten Kaskade lässt sich nicht
+  // in EINEN Punkt übersetzen — „Archaee" ist winzig UND hochaktiv ODER winzig UND gedämmt).
+  // „Zweitnächster" meint dann die nächste ANDERE Form, sonst grenzte etwas an sich selbst.
+  if(second && second.f.n === best.f.n){
+    second = null; dSecond = Infinity;
+    for(let ai=0; ai<lib.length; ai++){
+      if(lib[ai].f.n === best.f.n) continue;
+      if(_archDist[ai] < dSecond){ second = lib[ai]; dSecond = _archDist[ai]; }
     }
-    if(size<0.28 && struct<0.35)          return {k:"Mikrobe",n:"Protist · Amöbe",e:"🔬"};
-    if(metab>0.55 && size<0.35)           return {k:"Pilz",n:"Hefe",e:"🫧"};
-    if(photo>0.28 && struct>0.5 && armor>0.4) return {k:"Tier",n:"Koralle · Riffbildner",e:"🪸"};
-    if(photo>0.28)                        return {k:"Pilz",n:"Flechte · Symbiose",e:"🍥"};
-    if(struct<0.3 && armor<0.3 && metab<0.45 && size>0.38) return {k:"Tier",n:"Schwamm",e:"🧽"};
-    if(struct>0.55 && size>0.4)           return {k:"Pilz",n:"Baumpilz · Porling",e:"🪵"};
-    if(armor>0.5)                         return {k:"Pilz",n:"Zunderschwamm",e:"🟤"};
-    if(struct<0.3 && size<0.42)           return {k:"Pilz",n:"Schimmel · Fadenpilz",e:"🧵"};
-    if(size>0.45)                         return {k:"Pilz",n:"Hutpilz",e:"🍄"};
-    return {k:"Pilz",n:"Myzel · Pilzgeflecht",e:"🍂"};
   }
-
-  // ===== Reich PROTISTEN — schwimmen UND Photosynthese (Mischotroph) =====
-  if(size<0.2)                            return {k:"Protist",n:"Plankton",e:"✨"};
-  return {k:"Protist",n:"Euglenoid · Mixotroph",e:"🦠"};
+  // Konfidenz = relativer Vorsprung vor dem Zweitplatzierten. Produkt-Nebeneffekt: das ist
+  // Spielinhalt — „Fell-Warmblüter, grenzt an Fisch" erzählt, dass die Linie an einer
+  // Weggabelung steht. Eine Kaskade kann das prinzipiell nicht liefern.
+  const margin = dSecond>0 ? clamp01((dSecond-dBest)/dSecond*ARCH.confidenceGain) : 1;
+  const burden = unusedBurden(t, e);
+  const settled = clamp01(1 - burden/ARCH.burdenFull);   // 1 = keine überflüssige Ausrüstung
+  const conf = margin * settled;
+  if(dBest > ARCH.novelThreshold){
+    const n = generateFormName(t, e, w, best);
+    // Reich, Emoji und damit Silhouette/Bauplan-Text folgen dem nächsten Verwandten — nur
+    // der NAME ist neu. Damit die vorhandene Icon-Tabelle (Name -> Icon) auch für erzeugte
+    // Namen greift, erbt der Name das Icon des nächsten Verwandten.
+    if(FICON[n]===undefined) FICON[n] = FICON[best.f.n] || "dot";
+    return { k:best.f.k, n, e:best.f.e, key:"novum", conf:0, margin:0, settled, alt:best.f.n,
+             novel:true, dist:dBest };
+  }
+  return { k:best.f.k, n:best.f.n, e:best.f.e, key:best.f.key, conf, margin, settled,
+           alt: second ? second.f.n : null, novel:false, dist:dBest };
+}
+// Signatur unverändert für alle Aufrufer: classify(genome) -> {k, n, e}. Neu obendrauf:
+// key/conf/alt/novel/dist. Die Umwelt ist optional — ohne Angabe gilt die aktuelle Welt
+// des Wesens (dieselbe, in der es gerade lebt und bewertet wird).
+function classify(t, envIn){
+  return matchArchetype(t, envIn || (typeof env !== "undefined" ? env : ARCH.fallbackEnv));
 }
 
-function describe(t){
+function describe(t, a){
   const insul=t[0],size=t[1],limb=t[2],metab=t[3],armor=t[4],photo=t[5],mob=t[6],struct=t[7],wing=t[8]||0,biolum=t[9]||0;
-  const a=classify(t);
+  a = a || classify(t);
   const plant=a.k==="Pflanze", animal=a.k==="Tier", fungus=a.k==="Pilz", microbe=a.k==="Mikrobe", protist=a.k==="Protist";
   // Morphologie AUS DEM ARCHETYP ableiten (denselben classify()-Signalen, die die Art
   // benennen UND zeichnen) — so kann der Text der gezeigten Form nie widersprechen
@@ -1617,7 +1742,7 @@ function biomeHintForms(){
   _biomeHintForms = BIOMES.map(b => {
     let m = new Array(NG).fill(0.5);
     for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, b.env);
-    return classify(m).n;
+    return classify(m, b.env).n;   // in DER Welt benennen, in der es auch gewachsen ist
   });
   return _biomeHintForms;
 }
@@ -2198,13 +2323,50 @@ function applyGeneFilter(g){
   }
 }
 
+// Grenzfall-Zeile unter dem Artnamen. Konfidenz ist Spielinhalt, KEIN Dauer-Messwert:
+// „Fell-Warmblüter, grenzt an Fisch" erzählt, dass die Linie an einer Weggabelung steht —
+// eine Information, die die alte Kaskade prinzipiell nicht liefern konnte (dort war jede
+// Zuordnung per Konstruktion 100 % sicher, auch die falschen). Sichtbar nur, wenn die Form
+// wirklich uneindeutig ist; eine dauerhaft eingeblendete Prozentzahl wäre nur Unruhe.
+// Es gibt zwei GRÜNDE, warum eine Form unklar sein kann, und sie brauchen verschiedene Sätze:
+//   (1) Weggabelung — ein zweiter Bauplan liegt fast genauso nah (kleiner `margin`).
+//   (2) Umstellung  — das Wesen schleppt noch Anlagen mit, die diese Welt nicht abfragt
+//       (kleines `settled`), typisch direkt nach einem Biom- oder Reglerwechsel.
+// Ein „nahe an Krebstier"-Satz wäre im zweiten Fall schlicht falsch.
+const EDGE_SHOW = 0.50;
+let _edgeSig = "";
+function renderSpeciesEdge(a){
+  const el = document.getElementById("speciesEdge"); if(!el) return;
+  const pct = x => Math.round(x*100);
+  let mode = "";
+  if(a && a.novel) mode = "novel";
+  else if(a && a.settled != null && a.settled < 0.75 && a.settled <= (a.margin==null?1:a.margin)) mode = "shift";
+  else if(a && a.conf != null && a.conf < EDGE_SHOW && a.alt) mode = "edge";
+  const sig = mode ? mode+"|"+(a.alt||"")+"|"+pct(a.conf||0) : "";
+  if(sig === _edgeSig) return;   // Ruhe: DOM nur anfassen, wenn sich das Ergebnis ändert
+  _edgeSig = sig;
+  if(!mode){ el.hidden = true; el.innerHTML = ""; el.removeAttribute("title"); return; }
+  if(mode === "novel"){
+    el.innerHTML = `<i class="edge-dot"></i>Noch unbenannte Bauform — am nächsten liegt <b>${a.alt}</b>.`;
+    el.title = "Dieses Genom passt zu keiner der bekannten Formen. Der Name ist aus seinen stärksten Merkmalen gebildet, statt es in eine unpassende Schublade zu zwingen.";
+  } else if(mode === "shift"){
+    el.innerHTML = `<i class="edge-dot"></i>Noch in Umstellung — dein Wesen trägt Anlagen, die diese Welt nicht abfragt.`;
+    el.title = "Es unterhält Merkmale (Entgiftung, Frostschutz, Druck-Toleranz …), für die es hier keine Verwendung gibt — das kostet Energie. Über die nächsten Generationen legt es sie ab, und die Form wird klarer.";
+  } else {
+    el.innerHTML = `<i class="edge-dot"></i>Grenzfall · <b>${pct(a.conf)} %</b> eindeutig — nahe an <b>${a.alt}</b>.`;
+    el.title = `Wie klar diese Form ist: ${pct(a.conf)} %. Der zweitnächste Bauplan ist „${a.alt}" — schon kleine Verschiebungen im Genom könnten deine Linie dorthin kippen.`;
+  }
+  el.hidden = false;
+}
+
 function updatePanels(g, a){
   g = g || genome;
   a = a || (typeof committedArch !== "undefined" && committedArch) || classify(g);
   document.getElementById("kingdom").textContent = a.k;
   document.getElementById("emoji").innerHTML = formIcon(a.n);
   document.getElementById("species").textContent = a.n;
-  document.getElementById("bauplan").textContent = describe(g);
+  document.getElementById("bauplan").textContent = describe(g, a);
+  renderSpeciesEdge(a);
   const muted = mutedGenes(a);
   for(let i=0;i<NG;i++){
     document.getElementById("g-"+i).style.width = (g[i]*100).toFixed(0)+"%";
@@ -3946,7 +4108,10 @@ function frame(time){
       else { candArch = cur.n; candCount = steps; }
       if(candCount >= STABLE_GENS){
         if(committedArch.n !== cur.n) committedArch = cur;
-        if(!discovered.has(cur.n)){
+        // Neuartige (erzeugte) Namen sind KEINE Blätter des Lebensbaums — sie bekommen
+        // keinen Genbuch-Eintrag, sonst zählte der Fortschritt Formen mit, die es im
+        // Baum gar nicht gibt. Die Form selbst wird trotzdem angezeigt und erzählt.
+        if(!cur.novel && !discovered.has(cur.n)){
           // Erstes Wesen eines Reiches? -> Reich-Meilenstein statt normalem Fund-Toast.
           const kd = kingdomOf(cur.n);
           const newKingdom = kd && !awakenedKingdoms(discovered).has(kd);

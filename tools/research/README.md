@@ -21,6 +21,16 @@ bewegen.
   Konkurrenz-Kernel + selektions-gewichtete Cluster-Metrik).
 - `naming.mjs` — reproduziert den gemeldeten Kaskaden-Bug (Fell+Biolumineszenz) und
   demonstriert den Prototyp-Matcher als Ersatz.
+- `archetype-derive.mjs` *(Stufe 2)* — leitet die Prototyp-Zahlen von `app/archetypes.js`
+  mechanisch aus der alten Kaskade ab: welche Gene ein Zweig festlegt (Streuung über 4 Mio
+  gleichverteilte Genome) und welchen Wert sie bekommen (Mischung aus geometrischer Mitte
+  des Schwellen-Fensters und Mittelwert über erreichbare Genome). Nachrechen-Werkzeug für
+  die Frage „woher kommt diese Zahl?" und Grundlage, um die Bibliothek nach einer
+  Physik-Änderung neu abzuleiten. Die eingecheckte Bibliothek ist damit reproduzierbar.
+
+> Hinweis: `classify.mjs` bildet weiterhin die **alte** Kaskade ab — die anderen Skripte
+> messen damit bewusst den Ist-Zustand vor Stufe 2 (Vergleichsbasis). Die Live-App benennt
+> seit Stufe 2 über `matchArchetype()` + `app/archetypes.js`.
 
 Aufruf: `npm run build` zuerst (Skripte importieren aus `dist/`), dann z. B.
 `node tools/research/bench.mjs`.

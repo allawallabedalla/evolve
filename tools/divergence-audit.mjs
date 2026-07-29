@@ -21,7 +21,7 @@ const out = await p.evaluate(() => {
     const randn = gauss(mulberry32(seed));
     let g = new Array(NG).fill(0.5);
     for (let i = 0; i < gens; i++) g = stepGeneration(g, env, randn);
-    const c = classify(g);
+    const c = classify(g, env);
     return { name: c.n, kingdom: c.k, g };
   }
   // 5 „Durchläufe" wie ein normaler Nutzer: je ein Preset-Biom, unterschiedliche Leben (Seeds).

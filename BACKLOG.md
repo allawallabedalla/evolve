@@ -143,8 +143,38 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     fälschlich als zweiten Cluster. `radius`/`minFraction` mussten nicht neu kalibriert werden
     (Gate blieb mit unveränderten Defaults grün). Alle 5 Kern-Gates + `census-check`/
     `phenomena-check`/`ablation-check`/`seed-check`/`rarity-check` weiterhin grün.
-  - [ ] Stufe 2 — Prototyp-Matcher + `archetypes.json`; `classify()`-Kaskade in
-    `app/index.html` ersetzen (behebt den gemeldeten Fell/Leuchtwesen-Kaskaden-Bug direkt).
+  - [x] **Stufe 2 (erledigt 2026-07-29, Opus) — Prototyp-Matcher ersetzt die `classify()`-
+    Kaskade:** `app/archetypes.js` (44 Prototypen als reine Daten, `.js` statt `.json` — der
+    App-Start braucht `classify()` synchron, `fetch()` hätte einen Umbau der Startsequenz
+    gebraucht; `.js` via `<script src>` ist bereits das etablierte Muster für
+    `influences.js`/`challenges.js`). `matchArchetype()` in `app/index.html` ersetzt die
+    Kaskade, Rückgabeform `{k,n,e}` unverändert (erweitert um `conf`/`margin`/`novel`/…) —
+    **kein Aufrufer musste angepasst werden**. Prototyp-Zahlen sind **gemessen, nicht
+    geraten**: neues `tools/research/archetype-derive.mjs` leitet sie mechanisch aus der
+    alten Kaskade ab (welche Gene: Streuung über 4 Mio. Zufallsgenome; welcher Wert: Mischung
+    aus Schwellen-Fenstermitte und Mittel erreichbarer Genome) — die eingecheckte Bibliothek
+    ist exakt reproduzierbar gegen dieses Skript geprüft.
+    **Bug-Verifikation (Vorher/Nachher, mit Zahlen):** das gemeldete Testgenom
+    (Isolation .82 + Biolum .60) ergibt jetzt in allen getesteten Umwelten „Fell-Großtier"/
+    „Fell-Warmblüter" statt immer „Leuchtwesen · Tiefsee"; ein Größen-Sweep zeigt sanfte
+    Übergänge mit Konfidenz-Anzeige statt einer harten Ein-Gen-Klippe. Regression: Insekt/
+    Krebstier/6 von 7 Handgenomen weiterhin korrekt; unmögliche Chimäre → 0 % Konfidenz +
+    generierter Name statt stillem Fehltreffer.
+    **Getestet:** Syntax sauber, `app-parity`/`mf-fidelity` exakt/grün, `exemplar-check`/
+    `story-check`/`influence-check` grün, Playwright 10 Prüfblöcke (Presets, Regler-Extreme,
+    Genbuch-Zähler, alle 271 Herausforderungs-Ziele in der Bibliothek, Chronik, 0
+    Konsolenfehler), `classify()` 28 µs/Aufruf im Browser. Zwei vorbestehende, unabhängig
+    reproduzierte Fails (`ui-calm-check`, `app-world-smoke`) identisch auf Original-HEAD.
+    **Ehrlich offengelegter Trade-off:** von 271 Herausforderungen bleiben 156 erreichbar, 96
+    waren schon vorher unerreichbar, **11 verloren / 8 gewonnen → netto −3** (nach einer
+    Nachschärfungs-Runde von ursprünglich −14 verbessert) — akzeptabler Preis für die Behebung
+    eines echten, user-gemeldeten Bugs plus Wegfall der strukturellen Ein-Gen-Klippen-
+    Fragilität. 9 von 12 Biom-Presets liefern identische Namen wie vorher, 3 wechseln
+    (jeweils mit Begründung/Konfidenz nachvollziehbar). Schwache Archetypen (Übereinstimmung
+    < 50 % auf erreichbaren Genomen) identifiziert: Sukkulente, Hefe, Kopffüßer, Koralle,
+    Gepanzertes Beutetier — Kopffüßer/Koralle sind reale Grenzfälle, kein Fehler dieser
+    Migration. **Hinweis für später:** die Prototyp-Werte enthalten zu 50 % die *heutige*
+    Engine-Dynamik — nach Stufe 3/4 sollte `archetype-derive.mjs` erneut laufen.
   - [ ] Stufe 3 — Mehrdimensionaler Nischen-Kernel in `population.ts` + gestreute
     Gründer-Genome (Ziel: ≥18 Formen über 11 Biome, Koexistenz in ≥5 Biomen).
   - [ ] Stufe 3.5 — kleiner Physik-Term für Insekt-Nische (Gliedmaßen-Substrat-Traktion o.ä.,

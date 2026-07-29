@@ -115,9 +115,9 @@ for (const ch of list) {
   let hitWith = 0, hitWithout = 0;
   for (let i = 0; i < SAMPLES; i++) {
     const envWith = sampleEnv(rndA, grenzen, false);
-    if (matches(classify(converge(envWith, Math.min(gens, 1200))))) hitWith++;
+    if (matches(classify(converge(envWith, Math.min(gens, 1200)), envWith))) hitWith++;
     const envWithout = sampleEnv(rndB, grenzen, true);
-    if (matches(classify(converge(envWithout, Math.min(gens, 1200))))) hitWithout++;
+    if (matches(classify(converge(envWithout, Math.min(gens, 1200)), envWithout))) hitWithout++;
   }
   const rateWith = hitWith / SAMPLES, rateWithout = hitWithout / SAMPLES;
   results.push({ id, titel, rateWith, rateWithout, gens });
