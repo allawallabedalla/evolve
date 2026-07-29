@@ -573,7 +573,7 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   `ablation-check` weiterhin grün. (Merkmals-Kovarianz/Kleiber-Abgleich war bereits als Punkt
   im Forschungsdokument genannt, aber bereits im Code als `kleiberDecades` validiert — hier
   nicht erneut aufgegriffen, kein offener Punkt.)
-- [ ] **Schritt 5 — Gewichte & Schwellen festlegen** — **Modell: Sonnet** (begründete
+- [x] **Schritt 5 — Gewichte & Schwellen festlegen (erledigt 2026-07-29)** — **Modell: Sonnet** (begründete
   Default-Wahl + Dokumentation, kein tiefes Ermessen nötig) (Forschungsdokument „### Aggregat"):
   `Fidelity = w_A·Score_A + w_B·Score_B + w_C·Score_C` mit Pro-Schicht-Mindestschwellen.
   **Ausdrücklich KEINE Rückfrage nötig** — das ist laut Dokument eine bewusste, aber vom
@@ -587,6 +587,18 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   (w_A=w_B=w_C=1/3), Mindestschwelle je Schicht so, dass der aktuelle Stand (nach Schritt
   2+4) knapp durchfällt statt knapp besteht — ein Prüfstand, der beim ersten Lauf grün ist,
   prüft nichts.
+
+  **✅ Erledigt (2026-07-29):** `training/fidelity-config.ts` — genau wie vorgeschlagen
+  gleich gewichtet (1/3 je Schicht, keine belastbare Begründung für andere Gewichtung
+  gefunden). Mindestschwellen: `MIN_SCORE_A = 7/8` und `MIN_SCORE_B = 3/4` (je ein
+  Ausfall-Puffer bei aktuell 8/8 bzw. 4/4 — bestehen knapp, kippen aber nicht bei jedem
+  erwarteten Grenzfall), `MIN_SCORE_C = 0.80` (übernimmt bewusst `TARGET_LOW` aus
+  `training/fit.ts` statt eine neue Zahl zu erfinden — als **vorläufig markiert**, da Score_C
+  gerade strukturell in Bewegung ist, s. Migrations-Stufe 6). `computeFidelity()` liefert
+  `fidelity` + `passesThresholds` (hängt NUR an den Pro-Schicht-Schwellen, nicht an der
+  gewichteten Summe — Goodhart-Schutz) + `failingLayers`. Verifiziert:
+  `computeFidelity(1.0, 1.0, 0.72)` (heutiger Stand) → Fidelity 0.907, fällt knapp durch,
+  ausschließlich wegen Schicht C — genau wie gefordert kein Grün-beim-ersten-Lauf.
 - [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **Modell: Opus** für
   den Loop-/Gate-Architekturentwurf (Overfitting-Vermeidung ist konzeptionell heikel),
   **Sonnet** für die Implementierung danach (Forschungsdokument
