@@ -34,6 +34,14 @@ function makeRandn(rng) {
         return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
     };
 }
+/** Loest `axes`/`axis` (Legacy) auf eine einheitliche Achsen-Liste auf. Leer = keine Achse konfiguriert. */
+function competitionAxes(c) {
+    if (c.axes && c.axes.length)
+        return c.axes;
+    if (typeof c.axis === "number")
+        return [c.axis];
+    return [];
+}
 /** Defaults spiegeln das Orakel (ORACLE_POP/MUT_SD/SEL_POWER/RECOMB_PROB). */
 export const DEFAULT_POP_CONFIG = {
     size: 300,
@@ -42,6 +50,7 @@ export const DEFAULT_POP_CONFIG = {
     selPower: 2.0,
     recombProb: 0.5,
     startSpread: 0.03,
+    founderSpread: "gaussian",
     competition: null,
 };
 export class Population {
@@ -53,8 +62,11 @@ export class Population {
         this.cfg = { ...DEFAULT_POP_CONFIG, ...cfg };
         this.rng = mulberry32(seed);
         this.randn = makeRandn(this.rng);
-        const { size, numGenes, startSpread } = this.cfg;
-        this.genomes = Array.from({ length: size }, () => Array.from({ length: numGenes }, () => clamp01(start + this.randn() * startSpread)));
+        const { size, numGenes, startSpread, founderSpread } = this.cfg;
+        this.genomes =
+            founderSpread === "uniform"
+                ? Array.from({ length: size }, () => Array.from({ length: numGenes }, () => this.rng()))
+                : Array.from({ length: size }, () => Array.from({ length: numGenes }, () => clamp01(start + this.randn() * startSpread)));
     }
     get size() {
         return this.genomes.length;
@@ -75,21 +87,35 @@ export class Population {
         const base = this.genomes.map((g) => Math.pow(fitness(g, env, phys), selPower));
         if (!competition)
             return base;
-        const { axis, sigmaC, sigmaK, kCenter } = competition;
-        const x = this.genomes.map((g) => g[axis]);
+        const axes = competitionAxes(competition);
+        if (axes.length === 0)
+            return base;
+        const { sigmaC, sigmaK, kCenter } = competition;
+        const G = this.genomes;
         const inv2c2 = 1 / (2 * sigmaC * sigmaC);
         const inv2k2 = 1 / (2 * sigmaK * sigmaK);
         const N = this.size;
         const w = new Array(N);
+        // Mehrdimensionaler Kernel (Migrations-Stufe 3): euklidische Distanz UEBER ALLE
+        // `axes` gleichzeitig statt nur einer — reduziert bei axes.length===1 exakt auf
+        // die alte Ein-Achsen-Formel (tools/research/proto.mjs B2).
         for (let i = 0; i < N; i++) {
             let n = 0;
             for (let j = 0; j < N; j++) {
-                const d = x[i] - x[j];
-                n += Math.exp(-d * d * inv2c2);
+                let d2 = 0;
+                for (const a of axes) {
+                    const d = G[i][a] - G[j][a];
+                    d2 += d * d;
+                }
+                n += Math.exp(-d2 * inv2c2);
             }
             n /= N; // mittlere Konkurrenz-Dichte (0..1)
-            const dk = x[i] - kCenter;
-            const K = Math.exp(-dk * dk * inv2k2);
+            let dk2 = 0;
+            for (const a of axes) {
+                const d = G[i][a] - kCenter;
+                dk2 += d * d;
+            }
+            const K = Math.exp(-dk2 * inv2k2);
             w[i] = (base[i] * K) / (n + 1e-9);
         }
         return w;

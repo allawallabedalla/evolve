@@ -6,7 +6,7 @@
 // Kaskade: eine Art ist eine Häufung, ihr Name kommt aus ihrem Genom.
 //
 // Das ist die „Beobachten"-Ebene der Veränderung-IA (nicht schalten, nur ansehen).
-import { clusters } from "./cluster.js";
+import { clusters, selectionWeights } from "./cluster.js";
 import { describe, formKey, kingdomOf } from "./describe.js";
 import { rarityOf } from "./rarity.js";
 /** Arten-Zensus über alle Orte: Cluster je Ort → prozedural benannt → nach Identität aggregiert. */
@@ -17,7 +17,11 @@ export function census(world, opts = {}) {
     const nPlaces = world.places.length;
     for (let i = 0; i < nPlaces; i++) {
         const place = world.places[i];
-        const cl = clusters(place.pop.genomes, { radius, minFraction });
+        // Selektions-gewichtete Metrik (Messung 1, docs/engine-forschungsergebnis.md):
+        // neutrale/driftende Gene zaehlen kaum, selektiv relevante Gene zaehlen voll —
+        // sonst ertrinkt die Cluster-Erkennung im Driftrauschen der bedingten Gene.
+        const weights = selectionWeights(place.pop.mean(), place.env, world.phys);
+        const cl = clusters(place.pop.genomes, { radius, minFraction, weights });
         for (const c of cl) {
             const key = formKey(c.centroid);
             let sp = byKey.get(key);

@@ -5,9 +5,10 @@
 <style>
   /* ============================================================
      EVOLVE — visueller Mockup. Bewusst einwelt-dunkel ("Bio-Kammer"):
-     ein leuchtendes Lebewesen in einem Habitat-Fenster. Die Engine
-     (Fitness, Selektion, Genom->Bauplan) ist inline und identisch zur
-     validierten TS-Engine (~84% Orakel-Validitaet).
+     ein leuchtendes Lebewesen in einem Habitat-Fenster. Die Fitness-Physik
+     ist inline und bitgleich zur validierten TS-Engine (npm run app-parity);
+     die Simulationsschleife selbst ist seit Migrations-Stufe 4 ein echter
+     Populations-Schwarm aus app/core/ (world/population.js + cluster.js).
      ============================================================ */
   :root {
     color-scheme: light;
@@ -828,14 +829,15 @@
         <div class="dpanel-row"><button class="gene-nums-toggle" id="geneNumsBtn" aria-pressed="false" title="Genaue Werte ein-/ausblenden">Zahlen zeigen</button></div>
         <div class="dpanel-row"><button class="link" id="engineInfoBtn" aria-expanded="false" aria-controls="engineDetail">ⓘ Über die Engine</button></div>
         <p class="dpanel-note" id="engineDetail" hidden>
-          Diese Hauptansicht zeigt die <b>Anpassungs-Bahn einer Linie</b> — die mittlere Form, auf die
-          sich eine ganze Population über Generationen zubewegt (eine geglättete Näherung, nicht ein
-          einzelnes Lebewesen). Unter der Haube trägt der Populations-Kern echte <b>Streuung, Zufalls-Drift
-          und sogar Aufspaltung in mehrere Cluster</b> (sympatrische Konkurrenz) — die Hauptansicht fokussiert
-          bewusst auf dein eines Wesen. Die Engine ist gegen ein
-          wissenschaftliches Referenzmodell auf <b class="chip-val">~86&nbsp;%</b> abgeglichen — das ist die
-          <b>Modell-Güte</b> (wie gut die schlanke Browser-Engine das schwere Referenzmodell trifft),
-          <b>keine Bewertung deines Wesens</b>.
+          Im Hintergrund lebt eine <b>ganze Population</b>: <b class="chip-val" id="engN">200</b> Individuen,
+          die sich jede Generation fortpflanzen — wer besser zur Umwelt passt, hinterlässt mehr Nachkommen
+          (mit Rekombination, Mutation und echter Zufalls-Drift durch die endliche Zahl der Individuen).
+          Dazu kommt <b>Konkurrenz um Nischen</b>: wer dort lebt, wo schon viele leben, hat es schwerer —
+          deshalb kann sich eine Linie in mehrere Formen <b>aufspalten</b>, statt immer auf denselben
+          Gipfel zu laufen. <b>Dein Wesen</b> ist die häufigste Form dieser Population; spaltet sie sich,
+          steht das unter dem Artnamen. Die Fitness-Physik dahinter (Energie-Pfade, Stoffwechsel-Kosten,
+          Stress-Achsen) ist dieselbe, die auch das wissenschaftliche Referenzmodell benutzt — der Browser
+          rechnet sie nur mit weniger Individuen.
         </p>
       </div>
       <div class="dpanel-sec">
@@ -1014,7 +1016,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.75.0";
+const APP_VERSION = "v0.76.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1047,6 +1049,18 @@ const PHYS = {
   defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
+// PARAMS — die gefitteten Mittelfeld-Parameter.
+//
+// ⚠️ SEIT MIGRATIONS-STUFE 4 NUR NOCH FÜR stepGeneration() (Biom-Vorschau + Notfall-
+// Rückfall) UND als Empfindlichkeits-Skala der Warum-Zeile. Sie beschreiben NICHT
+// mehr, wie sich das Wesen des Spielers entwickelt — das tut der Schwarm weiter unten.
+// Damit verliert auch die dazugehörige Kennzahl „Test-Validität ~72 %" ihre Bedeutung:
+// sie maß, wie gut dieses Surrogat die Mittelwert-Bahn des Orakels trifft, und die Live-
+// App fährt diese Bahn nicht mehr. Der entsprechende Prozentwert im Panel „Über die
+// Engine" ist deshalb mit dieser Stufe ERSETZT worden (kein Modell-Güte-Wert mehr,
+// sondern eine Erklärung, was die Population tut). training/fit.ts, fitted-params.json
+// und der Orakel-Prüfstand werden erst in Stufe 6 umgestellt/entsorgt — bis dahin
+// bleiben diese Zahlen hier stehen, weil stepGeneration() sie noch braucht.
 const PARAMS = {
   // responseRate/mutationRate/selectionStrength aus training/fit.ts (npm run train), seit
   // Backlog Punkt 9 Schritt 1 (2026-07-29) echt ueber alle 25 Gene gegen das Orakel gefittet
@@ -1252,8 +1266,21 @@ function fitness(t, e){
 const DRIFT_SCALE = 0.02;
 function mulberry32(seed){ let a=seed>>>0; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
 
-// EINE Generation weiter (Basis der kontinuierlichen Zeit): passt das Genom ab
-// seinem aktuellen Zustand an die aktuelle Umwelt an.
+// EINE Generation im MITTELFELD-Regime (Gradientenaufstieg auf einem einzigen
+// Mittelwert-Genom).
+//
+// ⚠️ SEIT MIGRATIONS-STUFE 4 NICHT MEHR DER PRODUKTIVE SIMULATIONSPFAD.
+// Die laufende Simulation ist jetzt ein echter Schwarm (siehe „Der Schwarm" weiter
+// unten: Population/Wright-Fisher + frequenzabhängige Konkurrenz aus app/core/).
+// Diese Funktion bleibt aus GENAU EINEM Grund erhalten:
+//   · biomeHintForms() — die stille Biom-Empfehlung („hier wohnt vermutlich noch
+//     etwas Seltenes"). Das ist eine reine VORSCHAU-Nebenrechnung ohne Spielwirkung
+//     (sie blendet nur ein Funken-Badge ein, sperrt nichts), und sie muss 12 Biome
+//     × 250 Generationen synchron durchrechnen — mit dem Schwarm wären das ~2 s
+//     Blockade beim Öffnen des Preset-Panels statt der heutigen ~5 ms.
+//   · Notfall-Rückfall, falls app/core/ nicht geladen werden kann (siehe simAdvance).
+// PARAMS/mutationAnchor gehören ausschließlich zu dieser Funktion; sie beschreiben
+// NICHT mehr, wie sich das Wesen des Spielers entwickelt.
 function stepGeneration(m, env, randn){
   const eps=PHYS.eps, next=m.slice();
   for(let g=0; g<NG; g++){
@@ -1582,11 +1609,272 @@ let _pressTop = null;
 const STABLE_GENS = 15;
 let committedArch, candArch = null, candCount = 0;
 function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+// ======================= Der Schwarm (Migrations-Stufe 4) =======================
+//
+// Bis hierher war die Simulation EIN Punkt: ein Mittelwert-Genom, das per
+// Gradientenaufstieg (stepGeneration) bergauf geschoben wurde. Das ist seit
+// docs/engine-forschungsergebnis.md als Sackgasse vermessen: auf einer FIXEN
+// Landschaft konvergiert so etwas per Konstruktion auf genau einen Gipfel, und der
+// Mittelwert eines gespaltenen Schwarms läge im leeren Tal (spike/FINDINGS.md).
+//
+// Jetzt läuft im Hintergrund eine echte Population: N Individuen, Wright-Fisher-
+// Reproduktion (fitness^selPower als Nachkommen-Erwartung), Rekombination, gaußsche
+// Mutation, endliche Populationsgröße (Drift entsteht damit ECHT statt aufaddiert)
+// und — der eigentliche Vielfalts-Mechanismus — frequenzabhängige Konkurrenz auf
+// einem mehrdimensionalen Nischen-Kernel: wer dort sitzt, wo schon viele sitzen,
+// bekommt weniger Nachkommen. Damit hört Fishers Fundamentalsatz auf, Konvergenz
+// auf einen Gipfel zu erzwingen; Koexistenz wird ein Gleichgewichtszustand.
+//
+// „DEIN WESEN" ist ab jetzt die REPRÄSENTATIVE FORM dieses Schwarms: der Zentroid
+// des dominanten Clusters (selektions-gewichtete Cluster-Metrik, exakt wie in
+// world/census.ts produktiv). Er landet weiterhin in derselben Variablen `genome` —
+// deshalb funktioniert die gesamte übrige App (Gen-Balken, Vitalität, Warum-Zeile,
+// matchArchetype, Chronik, Genbuch, Herausforderungen, Schnappschuss) unverändert
+// weiter, nur mit besser begründeten Daten.
+//
+// ARCHITEKTUR-ENTSCHEIDUNG (bewusst, s. Bericht): der Populations-Kern wird NICHT
+// ein viertes Mal von Hand nach index.html kopiert, sondern als ECHTES Modul aus
+// app/core/ importiert (npm run bundle-app spiegelt world/*.ts + engine/fitness.ts
+// dorthin — GitHub Pages liefert nur app/ aus). Das ist derselbe, per pop-check/
+// branching-check/census-check/distribution-check getestete Code wie im headless-
+// Prüfstand. Geladen wird per dynamischem import() aus diesem klassischen <script>
+// heraus (dasselbe Muster, das das Welt-Overlay unten schon benutzt) — so bleibt die
+// Skript-Einbindung und die Auswertungsreihenfolge der Live-App unangetastet.
+// Die Physik-Konstanten kommen weiterhin aus der Inline-PHYS-Kopie oben und werden
+// dem Modul hereingereicht; npm run app-parity garantiert, dass sie mit
+// physics.json/Engine/Orakel bitgleich sind.
+const SWARM = {
+  // Populationsgröße = die Referenzgröße aus der Stufe-3-Abnahme
+  // (tools/research/niche-swarm-check.mjs). IM BROWSER GEMESSEN, nicht geschätzt
+  // (Chromium, `pop.step()` nach JIT-Warmlauf, zwei unabhängige Läufe):
+  // 1.5–1.7 ms je Generation, 0.75–1.07 ms je Zensus, also 1.6–1.8 ms je Tick
+  // inkl. amortisiertem Zensus — rund 6× unter dem 10-ms-Kriterium.
+  // Kleinere Populationen wurden mitgemessen und VERWORFEN, obwohl sie billiger sind:
+  // N=150 fällt in der Vielfalts-Diagnose auf 1.25 Cluster/Lauf, 19 Formen, 9/11
+  // Koexistenz-Biome und unterschreitet damit das Stufe-3-Kriterium (>=1.3 Cluster).
+  // N=200 reproduziert exakt die abgenommenen 1.42 / 23 / 11. Vielfalt ist der Zweck
+  // dieses Umbaus; die Rechenzeit ist hier nicht der knappe Posten (s. simStepBudget()).
+  N: 200,
+  mutationSd: 0.05, selPower: 2.0, recombProb: 0.5,
+  // Nischen-Achsen: size, limb, photo, mobility, armor, wing, biolum, filter — die acht
+  // Achsen, entlang derer sich Lebensformen real aufteilen (identisch zu
+  // tools/research/niche-swarm-check.mjs, der Stufe-3-Abnahme).
+  niche: [1, 2, 5, 6, 4, 8, 9, 15],
+  sigmaC: 0.22,
+  // sigmaK gross = Ressourcen-Term K(x) faktisch neutral. BEGRÜNDUNG (offener Befund
+  // aus Stufe 3, hier entschieden): der im Forschungsdokument genannte sigmaK=0.35 ist
+  // ein in EINER Dimension plausibler Wert. Über acht Achsen summieren sich die
+  // quadrierten Abweichungen, und derselbe Wert wird zur scharfen Barriere um kCenter —
+  // gemessen bricht die Vielfalt dann auf 1.18 Cluster/9 Formen/4 Biome ein (statt
+  // 1.42/23/11). world/phenomena.ts führt aus demselben Grund seit jeher sigmaK: 9.
+  sigmaK: 50, kCenter: 0.5,
+  // Cluster-Erkennung: identisch zur Stufe-1/3-Abnahme (tools/research/niche-swarm-check.mjs).
+  radius: 0.35, minFraction: 0.08,
+  // Zensus (Cluster-Erkennung) ist O(N²) und muss NICHT jede Generation laufen —
+  // die Artgrenzen bewegen sich viel langsamer als eine Generation (Pseudocode 3D,
+  // „CENSUS_INTERVAL"). Der reine Reproduktions-Schritt läuft dagegen jeden Tick.
+  // ZWEI Grenzen, weil das Spieltempo um den Faktor ~40 schwankt:
+  //   censusEvery  — Obergrenze in GENERATIONEN (Amortisierung bei „schnell" + Schub:
+  //                  bei 115 Gen/s sind das ~10 Zensus/s à ~0.9 ms = 1 % Rechenzeit).
+  //   censusMaxMs  — Obergrenze in ZEIT. Ohne sie stünde die Anzeige bei „langsam"
+  //                  (3 Gen/s) vier Sekunden lang still und ruckte dann auf einmal
+  //                  weiter; der Spieler soll sein Wesen fließen sehen.
+  censusEvery: 12,
+  censusMaxMs: 400,
+  // Streuung beim Wiederbesiedeln aus einem gespeicherten Genom („dein Wesen als Ort",
+  // Population.seedFrom): eng, aber nicht null — ein monomorpher Ort kann nicht evolvieren.
+  seedSpread: 0.06,
+  // Kontinuität: der zuletzt gezeigten Linie treu bleiben, solange sie nicht deutlich
+  // kleiner ist als der größte Cluster (sonst springt „dein Wesen" bei 51%/49% hin und her).
+  stickyFraction: 0.6,
+  // Ab welchem Anteil eine zweite Bauform als Aufspaltung gemeldet wird.
+  splitShow: 0.15,
+  // Rechenzeit-Deckel je Bild (von 16.7 ms bei 60 fps). Siehe simStepBudget().
+  frameBudgetMs: 6,
+};
+let POPCORE = null;      // { Population, clusters, selectionWeights } aus app/core/
+let pop = null;          // der laufende Schwarm (null = Mittelfeld-Rückfall)
+let swarmForms = [];     // [{fraction, centroid}], dominanter Cluster zuerst
+let swarmSplit = null;   // {n, pct} — zweite, klar andere Bauform (Aufspaltung), sonst null
+let _censusDue = 0, _censusT = 0;   // Generationen bzw. Zeitpunkt seit dem letzten Zensus
+// Ehrliche Laufzeit-Messung statt Schätzung (Abnahme-Kriterium Stufe 4: < 10 ms/Tick).
+// In der Konsole: __evolvePerf()
+const _perf = { gens: 0, genMs: 0, census: 0, censusMs: 0, worstGenMs: 0 };
+window.__evolvePerf = () => ({
+  N: SWARM.N, schwarmAktiv: !!pop, generationen: _perf.gens, zensusLaeufe: _perf.census,
+  msProGeneration: _perf.gens ? _perf.genMs / _perf.gens : 0,
+  msSchlechtesteGeneration: _perf.worstGenMs,
+  msProZensus: _perf.census ? _perf.censusMs / _perf.census : 0,
+  clusterAktuell: swarmForms.length,
+  generationenProFrameBudget: simStepBudget(),
+});
+window.__evolvePerfReset = () => { _perf.gens = 0; _perf.genMs = 0; _perf.census = 0; _perf.censusMs = 0; _perf.worstGenMs = 0; };
+
+// Den echten Populations-Kern nachladen. Wird EINMAL vor boot()/restore() awaited,
+// damit ein wiederhergestellter Spielstand direkt in den Schwarm gesetzt wird.
+async function initSwarmCore(){
+  try {
+    const [pmod, cmod] = await Promise.all([
+      import("./core/world/population.js"),
+      import("./core/world/cluster.js"),
+    ]);
+    POPCORE = { Population: pmod.Population, clusters: cmod.clusters, selectionWeights: cmod.selectionWeights };
+  } catch(e){
+    // Kein harter Absturz: die App läuft dann im alten Mittelfeld-Regime weiter
+    // (stepGeneration). Sichtbar nur in der Konsole und an __evolvePerf().schwarmAktiv.
+    console.warn("Populations-Kern (app/core/) nicht ladbar — Mittelfeld-Rückfall aktiv.", e);
+    POPCORE = null; return false;
+  }
+  // JIT-Warmlauf auf einer Wegwerf-Population: der allererste pop.step() kostet im
+  // Browser gemessen ~14 ms (kalter Optimierer), eingeschwungen ~1.5 ms. Ohne das
+  // stolpert genau der erste Frame nach dem Laden. Kosten hier: < 1 ms, einmalig.
+  try {
+    const warm = new POPCORE.Population({ size: 24, numGenes: NG, founderSpread: "uniform",
+      competition: { axes: SWARM.niche, sigmaC: SWARM.sigmaC, sigmaK: SWARM.sigmaK, kCenter: SWARM.kCenter } }, 1);
+    for(let i=0;i<10;i++) warm.step(env, PHYS);
+    POPCORE.clusters(warm.genomes, { radius: SWARM.radius, minFraction: SWARM.minFraction,
+      weights: POPCORE.selectionWeights(warm.mean(), env, PHYS) });
+  } catch(e){ /* Warmlauf ist reine Kür — ein Fehler hier darf das Spiel nicht stoppen */ }
+  spawnSwarm(null);   // gestreute Gründer für das gerade laufende (frische) Leben
+  // Anzeige auf den Schwarm-Zentroid nachziehen (newLineage() lief vor dem Modul-Ladevorgang).
+  displayGenome = genome.slice();
+  committedArch = classify(genome); candArch = null; candCount = 0;
+  return true;
+}
+
+/**
+ * Schwarm (neu) aufsetzen.
+ *  seedGenome == null -> GESTREUTE GRÜNDER (founderSpread "uniform"): jedes Gen jedes
+ *    Individuums gleichverteilt. Der Trick aus Stufe 3 — kostet null Rechenzeit und
+ *    öffnet alle Einzugsgebiete gleichzeitig, statt nur das um 0.5 herum. Das ist der
+ *    Grund, warum zwei neue Leben in derselben Welt verschieden ausgehen können.
+ *  seedGenome != null -> „dein Wesen besiedelt diesen Ort" (Population.seedFrom):
+ *    eng um das gespeicherte Genom gestreut. Der Kontinuitäts-Pfad nach Neuladen/Offline.
+ */
+function spawnSwarm(seedGenome){
+  if(!POPCORE){ pop = null; swarmForms = []; swarmSplit = null; return; }
+  pop = new POPCORE.Population({
+    size: SWARM.N, numGenes: NG, mutationSd: SWARM.mutationSd, selPower: SWARM.selPower,
+    recombProb: SWARM.recombProb, startSpread: SWARM.seedSpread,
+    founderSpread: seedGenome ? "gaussian" : "uniform",
+    competition: { axes: SWARM.niche, sigmaC: SWARM.sigmaC, sigmaK: SWARM.sigmaK, kCenter: SWARM.kCenter },
+  }, (lineageSeed + generation) >>> 0);
+  if(seedGenome) pop.seedFrom(padGenome(seedGenome), SWARM.seedSpread);
+  _censusDue = 0; _censusT = 0; swarmForms = []; swarmSplit = null;
+  readSwarm();
+}
+
+// Selektions-gewichteter Genom-Abstand (dieselbe Metrik wie die Cluster-Erkennung).
+function _wdist(a, b, w){ let s = 0; for(let i=0;i<NG;i++){ const d=(a[i]-b[i])*w[i]; s += d*d; } return Math.sqrt(s); }
+
+/**
+ * „Passung hier" (0..1) — die Anzeige-Skala für die rohe Fitness.
+ *
+ * NEU KALIBRIERT MIT MIGRATIONS-STUFE 4 (gemessen, nicht nach Gefühl):
+ * vorher galt (fitness − 0.12) / 0.72, d. h. 0.84 Fitness = 100 %. Dieser obere Anker
+ * war der Endpunkt des MITTELFELD-Gradientenaufstiegs — also die Fitness eines
+ * idealisierten, mutations- und driftfreien Bergsteigers, der exakt auf dem Gipfel
+ * stehen bleibt. Eine ECHTE Population steht nie dort: Mutationslast, Drift bei
+ * endlichem N und die Nischen-Konkurrenz halten sie unterhalb des Optimums
+ * (Mutations-Selektions-Gleichgewicht — Lehrbuch, kein Fehler).
+ *
+ * Wie groß der Unterschied ist, ist an diesem Repo gemessen (Umwelt „Default-Regler",
+ * 250 Generationen):
+ *   Mittelfeld-Surrogat (die alte Anzeige)                       0.458
+ *   Orakel-Spiegel (world/DEFAULT_POP_CONFIG, N=300, ohne Konkurrenz) 0.294
+ *   Nischen-Schwarm dieser App (N=200, mit Konkurrenz)           0.263
+ * Der alte 100-%-Anker war also nie die Fitness des REFERENZMODELLS, sondern die des
+ * Surrogats — die Anzeige war systematisch zu optimistisch. Die neuen Anker stammen aus
+ * dem gemessenen Wertebereich, den der Schwarm über alle 13 Presets tatsächlich erreicht
+ * (0.10 in praktisch lebensfeindlichen Welten … 0.62 in „Offenes Meer"/„Reiche Kronen").
+ */
+const VIT_FLOOR = 0.10, VIT_SPAN = 0.52;
+function vitality(g, e){ return clamp01((fitness(g, e) - VIT_FLOOR) / VIT_SPAN); }
+
+/**
+ * ZENSUS — „was ist mein Wesen geworden?" (Pseudocode-Abschnitt E).
+ * Reine LESE-Operation auf dem laufenden Schwarm: selektions-gewichtete Cluster,
+ * dominanter Zentroid -> `genome`. Läuft nur alle SWARM.censusEvery Generationen.
+ */
+function readSwarm(){
+  if(!pop) return;
+  const t0 = performance.now();
+  _censusDue = 0; _censusT = t0;
+  // Ohne diese Gewichtung ertrinkt die Cluster-Erkennung im Driftrauschen der 15
+  // bedingten Gene (gemessen: ~64 % des rohen 25-D-Abstands) — Messung 1 des
+  // Forschungsdokuments, produktiv gelöst in world/cluster.ts (Stufe 1).
+  const w = POPCORE.selectionWeights(pop.mean(), env, PHYS);
+  const cl = POPCORE.clusters(pop.genomes, { radius: SWARM.radius, minFraction: SWARM.minFraction, weights: w });
+  // Frisch gestreute Gründer sind noch gar keine Art: dann gibt es keinen Cluster über
+  // minFraction, und der Mittelwert der Wolke ist die ehrlichste Auskunft („noch nichts
+  // Bestimmtes"). Nach wenigen Generationen greift die Cluster-Erkennung von selbst.
+  const forms = cl.length ? cl.map(c => ({ fraction: c.fraction, centroid: c.centroid }))
+                          : [{ fraction: 1, centroid: pop.mean() }];
+  // Kontinuität von „deinem Wesen": bei mehreren Clustern der zuletzt gezeigten Linie
+  // treu bleiben, solange sie nicht deutlich kleiner ist als der größte Cluster.
+  let pick = 0;
+  if(forms.length > 1){
+    let near = 0, dn = Infinity;
+    for(let i=0;i<forms.length;i++){ const d = _wdist(genome, forms[i].centroid, w); if(d < dn){ dn = d; near = i; } }
+    if(forms[near].fraction >= SWARM.stickyFraction * forms[0].fraction) pick = near;
+  }
+  swarmForms = [forms[pick], ...forms.filter((_, i) => i !== pick)];
+  genome = swarmForms[0].centroid.slice();
+  // Aufspaltung: gibt es daneben eine zweite, wirklich ANDERE Bauform mit Gewicht?
+  swarmSplit = null;
+  if(swarmForms.length > 1 && swarmForms[1].fraction >= SWARM.splitShow){
+    const other = classify(swarmForms[1].centroid, env);
+    swarmSplit = { n: other.n, pct: Math.round(swarmForms[1].fraction * 100) };
+  }
+  _perf.census++; _perf.censusMs += performance.now() - t0;
+}
+
+// Gleitender Mittelwert der echten Kosten einer Generation (ms) — die Grundlage des
+// Rechenzeit-Deckels unten. Startwert bewusst pessimistisch, damit der erste Frame nach
+// dem Laden (JIT noch kalt: gemessen bis 8.6 ms/Generation statt ~1.7 ms) nicht ruckelt.
+let _genMsEma = 2.5;
+/**
+ * Wie viele Generationen passen noch in DIESEN Frame?
+ *
+ * Der Schwarm ist rund 100× teurer als der alte Ein-Punkt-Schritt (gemessen 1.7 ms
+ * statt 0.017 ms je Generation bei N=200). Bei „schnell" + Anpassungs-Schub verlangt die
+ * Zeitsteuerung bis zu ~115 Generationen pro Sekunde — auf einem schnellen Rechner
+ * knapp (~20 % einer Kern-Sekunde), auf einem schwachen Telefon nicht mehr leistbar.
+ * Statt N oder das Spieltempo für alle zu beschneiden, deckelt dieser Budget-Wächter
+ * die Simulationsarbeit pro Frame GERÄTEABHÄNGIG: schnelle Geräte laufen mit vollem
+ * Tempo, langsame verlieren Generationen statt Bildrate. Ein Tamagotchi verträgt eine
+ * langsamere Uhr; es verträgt kein ruckelndes Bild.
+ */
+function simStepBudget(){
+  if(!pop) return 40;
+  return Math.max(1, Math.floor(SWARM.frameBudgetMs / Math.max(_genMsEma, 0.01)));
+}
+
+/** `steps` Generationen weiter — der einzige Ort, an dem die Zeit voranschreitet. */
+function simAdvance(steps){
+  if(pop){
+    const t0 = performance.now();
+    for(let i=0;i<steps;i++) pop.step(env, PHYS);
+    const dt = performance.now() - t0;
+    _genMsEma += (dt / steps - _genMsEma) * 0.15;
+    _perf.gens += steps; _perf.genMs += dt;
+    if(dt / steps > _perf.worstGenMs) _perf.worstGenMs = dt / steps;
+    generation += steps;
+    _censusDue += steps;
+    if(_censusDue >= SWARM.censusEvery || performance.now() - _censusT >= SWARM.censusMaxMs) readSwarm();
+  } else {
+    // Rückfall (app/core/ nicht ladbar): altes Mittelfeld-Regime.
+    for(let i=0;i<steps;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+  }
+}
+
 function newLineage(){
   genome = new Array(NG).fill(0.5); generation = 0;
-  displayGenome = genome.slice();
   lineageSeed = (Math.random()*4294967296)>>>0;
   rng = mulberry32(lineageSeed); randn = makeRandn();
+  spawnSwarm(null);   // frisches Leben = gestreute Gründer (setzt `genome` auf den Zentroid)
+  displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   creatureName = "";
   // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
@@ -1735,6 +2023,14 @@ function rarityOf(name){ return RARITY[name] || "haeufig"; }
 // vorhandenen App-Funktionen stepGeneration/classify). Reine Nebenrechnung: liest nur
 // BIOMES/PARAMS/PHYS, veraendert nirgends genome/generation/env/discovered. Wird NICHT
 // pro Frame wiederholt, sondern einmalig berechnet und gecacht (biomeHintForms()).
+//
+// BEWUSST WEITERHIN MITTELFELD (Migrations-Stufe 4, s. Bericht): das ist nur eine
+// VORSCHAU, die entscheidet, ob an einem Preset ein leiser Funken steht — sie sperrt
+// nichts und benennt nichts, was der Spieler danach sieht. Mit dem Schwarm gerechnet
+// wären es 12 Biome × 250 Generationen × N Individuen, also ~2 s Blockade beim Öffnen
+// des Preset-Panels statt heute ~5 ms. Der Preis: die Empfehlung trifft die tatsächliche
+// Schwarm-Auslese nur noch ungefähr. Sauberer wäre ein einmalig offline vermessener,
+// eingecheckter Sweep über die Presets (Folgearbeit).
 const BIOME_HINT_GENS = 250;
 let _biomeHintForms = null;
 function biomeHintForms(){
@@ -1993,6 +2289,14 @@ function applyState(s){
   ancestry = Array.isArray(s.ancestry) ? s.ancestry : ancestry;   // Ahnenlinie: lokal (Cloud-Zeile hat keine Spalte)
   lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
   rng = mulberry32((lineageSeed + generation) >>> 0); randn = makeRandn();
+  // Kontinuität über Sitzungen hinweg („dein Wesen als Ort"): gespeichert wird nur der
+  // Zentroid der dominanten Form (ein 25-Zahlen-Vektor, unverändertes Speicherformat /
+  // unverändertes Supabase-Schema). Der Schwarm wird daraus eng gestreut neu aufgebaut
+  // und läuft weiter — genau wie früher stepGeneration von `m` aus weiterlief, nur jetzt
+  // als echter Schwarm statt als Punkt. Bewusst NICHT persistiert: die stehende genetische
+  // Varianz und eventuelle Nebencluster (s. Bericht/Backlog — volle N-Individuen-Persistenz
+  // wäre ~40 kB je Spielstand für etwas, das der Spieler gar nicht sieht).
+  spawnSwarm(genome);
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
 }
@@ -2001,7 +2305,8 @@ function offlineCatchup(prevTs){
   const offGens = Math.min(OFFLINE_CAP, Math.floor(elapsed / OFFLINE_MS_PER_GEN));
   if(offGens > 0){
     const beforeA = classify(genome), beforeG = genome.slice();
-    for(let i=0;i<offGens;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+    simAdvance(offGens);
+    readSwarm();   // Endstand sofort ablesen (nicht erst beim nächsten Zensus-Takt)
     showReveal(elapsed, offGens, beforeA, classify(genome), beforeG, genome);
   }
   displayGenome = genome.slice();
@@ -2045,7 +2350,7 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
                      : `Immer noch <b>${afterA.n}</b> — aber im Detail verändert.`);
   // Der Kern-Moment: WIE GUT passt das Wesen jetzt zu seiner Welt? (Passung vorher → nachher,
   // beide unter der aktuellen Umwelt gemessen — so sieht man die Anpassung als Zahl.)
-  const vitOf = gm => Math.round(clamp01((fitness(gm, env) - 0.12) / 0.72) * 100);
+  const vitOf = gm => Math.round(vitality(gm, env) * 100);
   const vB = vitOf(beforeG), vA = vitOf(afterG);
   if(Math.abs(vA - vB) >= 2){
     const tail = vA > vB ? " — besser an deine Welt angepasst." : " — deine Welt fordert es heraus.";
@@ -2156,6 +2461,10 @@ sb.auth.onAuthStateChange((event, s) => {
   if(s && !was) restore();   // gerade angemeldet -> Cloud-Wesen laden
 });
 async function boot(){
+  // ZUERST der Populations-Kern: restore()/offlineCatchup() setzen den gespeicherten
+  // Stand direkt in den Schwarm. Bis das Modul da ist (wenige ms) zeigt die App das
+  // Startgenom und die Zeit steht still (frame() schiebt ohne `pop` nur den Rückfall).
+  await initSwarmCore();
   try { const { data } = await sb.auth.getSession(); session = data.session; } catch(e) { console.warn(e); }
   updateAuthUI();
   await restore();
@@ -2338,23 +2647,46 @@ let _edgeSig = "";
 function renderSpeciesEdge(a){
   const el = document.getElementById("speciesEdge"); if(!el) return;
   const pct = x => Math.round(x*100);
+  // (0) AUFSPALTUNG (Migrations-Stufe 4) — der Schwarm trägt gerade zwei getrennte,
+  //     gleichzeitig lebensfähige Bauformen. Das ist die auffälligste Neuigkeit, die der
+  //     Punkt-Motor prinzipiell nicht liefern konnte (der Mittelwert einer gespaltenen
+  //     Population läge im leeren Tal) — deshalb steht sie vor allen anderen Modi.
+  const split = (swarmSplit && a && swarmSplit.n !== a.n) ? swarmSplit : null;
   let mode = "";
-  if(a && a.novel) mode = "novel";
-  else if(a && a.settled != null && a.settled < 0.75 && a.settled <= (a.margin==null?1:a.margin)) mode = "shift";
-  else if(a && a.conf != null && a.conf < EDGE_SHOW && a.alt) mode = "edge";
-  const sig = mode ? mode+"|"+(a.alt||"")+"|"+pct(a.conf||0) : "";
+  if(split) mode = "split";
+  else if(a && a.novel) mode = "novel";
+  // ANPASSUNG MIT STUFE 4: `settled` (= wie wenig überflüssige Stressor-Ausrüstung das
+  // Genom mitschleppt) und damit `conf = margin × settled` bedeuten am Schwarm-Zentroid
+  // etwas anderes als am Mittelfeld-Punkt. Der Mittelfeld-Bergsteiger fuhr die 15
+  // bedingten Gene bis auf ihren Anker herunter (`settled` gemessen 99 % im Mittel über
+  // die 12 Presets); eine ECHTE Population hält sie im Mutations-Selektions-Gleichgewicht
+  // dauerhaft darüber (gemessen 73 % im Mittel, in Einzelfällen 0 %). „Noch in Umstellung —
+  // legt sie über die nächsten Generationen ab" wäre damit schlicht falsch geworden: sie
+  // legt sie nie ganz ab. Zwei Konsequenzen, beide nur hier in der Anzeige:
+  //   · „Umstellung" verlangt jetzt einen wirklich großen Überhang (0.35 statt 0.75) —
+  //     dann stimmt die Aussage wieder (typisch direkt nach einem Biom-/Reglerwechsel).
+  //   · Der Grenzfall-Prozentwert ist jetzt `margin` (reiner Vorsprung vor dem
+  //     zweitnächsten Bauplan) statt `conf`. Nur `margin` misst, was der Satz behauptet —
+  //     und es ist die einzige der drei Größen, die von der Mutationslast unberührt bleibt
+  //     (gemessen: Mittelfeld 52 %, Schwarm 45 % — vergleichbar).
+  else if(a && a.settled != null && a.settled < 0.35) mode = "shift";
+  else if(a && a.margin != null && a.margin < EDGE_SHOW && a.alt) mode = "edge";
+  const sig = mode ? mode+"|"+(split ? split.n+split.pct : (a.alt||""))+"|"+pct(a.margin||0) : "";
   if(sig === _edgeSig) return;   // Ruhe: DOM nur anfassen, wenn sich das Ergebnis ändert
   _edgeSig = sig;
   if(!mode){ el.hidden = true; el.innerHTML = ""; el.removeAttribute("title"); return; }
-  if(mode === "novel"){
+  if(mode === "split"){
+    el.innerHTML = `<i class="edge-dot"></i>Deine Linie hat sich gespalten — neben dir lebt <b>${split.n}</b> (${split.pct} %).`;
+    el.title = "In deiner Population haben sich zwei Bauformen getrennt und halten sich gleichzeitig: sie nutzen verschiedene Nischen und stehen deshalb nicht mehr in direkter Konkurrenz. Angezeigt wird die häufigere Linie.";
+  } else if(mode === "novel"){
     el.innerHTML = `<i class="edge-dot"></i>Noch unbenannte Bauform — am nächsten liegt <b>${a.alt}</b>.`;
     el.title = "Dieses Genom passt zu keiner der bekannten Formen. Der Name ist aus seinen stärksten Merkmalen gebildet, statt es in eine unpassende Schublade zu zwingen.";
   } else if(mode === "shift"){
     el.innerHTML = `<i class="edge-dot"></i>Noch in Umstellung — dein Wesen trägt Anlagen, die diese Welt nicht abfragt.`;
     el.title = "Es unterhält Merkmale (Entgiftung, Frostschutz, Druck-Toleranz …), für die es hier keine Verwendung gibt — das kostet Energie. Über die nächsten Generationen legt es sie ab, und die Form wird klarer.";
   } else {
-    el.innerHTML = `<i class="edge-dot"></i>Grenzfall · <b>${pct(a.conf)} %</b> eindeutig — nahe an <b>${a.alt}</b>.`;
-    el.title = `Wie klar diese Form ist: ${pct(a.conf)} %. Der zweitnächste Bauplan ist „${a.alt}" — schon kleine Verschiebungen im Genom könnten deine Linie dorthin kippen.`;
+    el.innerHTML = `<i class="edge-dot"></i>Grenzfall · <b>${pct(a.margin)} %</b> eindeutig — nahe an <b>${a.alt}</b>.`;
+    el.title = `Wie klar diese Form ist: ${pct(a.margin)} %. Der zweitnächste Bauplan ist „${a.alt}" — schon kleine Verschiebungen im Genom könnten deine Linie dorthin kippen.`;
   }
   el.hidden = false;
 }
@@ -2380,8 +2712,7 @@ function updatePanels(g, a){
   if(cv) cv.setAttribute("aria-label", `Generation ${generation}, Form: ${a.n}`);
   // A3: Vitalitaet = wie gut passt das Wesen zur AKTUELLEN Umwelt (Fitness).
   // Live -> dreht man einen Regler, sackt sie kurz ab und erholt sich beim Anpassen.
-  const fit = fitness(g, env);
-  const vit = clamp01((fit - 0.12) / 0.72);
+  const vit = vitality(g, env);
   const vf = document.getElementById("vitFill");
   vf.style.width = (vit*100).toFixed(0) + "%";
   vf.style.background = vit < 0.4 ? "linear-gradient(90deg,#9c5f33,#d08a44)"
@@ -2409,6 +2740,18 @@ const EXPLORE_IDEAS = [
 ];
 // Selektionsgradient ∂Fitness/∂Gen (dieselbe Größe, die die Evolution treibt) — so
 // sieht man live, WARUM sich das Wesen in diese Richtung verschiebt, nicht erst im Reveal.
+//
+// STAND NACH MIGRATIONS-STUFE 4 (bewusst minimal angepasst, s. Bericht/BACKLOG Stufe 5):
+// gerechnet wird jetzt am ZENTROID der dominanten Form statt am alten Mittelwert-Punkt —
+// die RICHTUNG (↑/↓ = Vorzeichen von ∂Fitness/∂Gen) bleibt damit exakt richtig, denn genau
+// dorthin verschiebt die Selektion auch den Schwarm. Die BETRÄGE werden weiterhin mit
+// PARAMS.responseRate/selectionStrength/mutationRate skaliert; das sind Mittelfeld-Größen,
+// die die Schwarm-Dynamik nicht mehr beschreiben — sie dienen hier nur noch als (monotone)
+// Empfindlichkeits-Kalibrierung der Schwellen WHY_ENTER/WHY_LEAVE. Die saubere Ablösung ist
+// Migrations-Stufe 5: das ECHTE Selektionsdifferential cov(fitness_i, gen_i)/mean(fitness)
+// direkt aus dem Schwarm. Bewusst NICHT hier mitgemacht, weil die gesamte Glättungs-/
+// Hysterese-Kalibrierung dieser Zeile daran hängt und ein Umbau ohne neue Kalibrierung die
+// ruhigste Stelle der UI wieder zum Flackern brächte.
 //
 // RUHE (Nutzer-Rückmeldung 2026-07): diese Zeile und die Gen-Pfeile liefen im Takt der
 // Bildrate und sprangen im Sekundenbruchteil. Drei Bremsen, alle nötig:
@@ -2592,7 +2935,7 @@ function storyLine(beat, extra){
   // spezifischer (und damit weniger austauschbar) wird der Satz.
   const ctx = Object.assign({ beat, env, genome, form: a.n, kingdom: a.k, gen: generation,
     name: creatureName,   // benannte Wesen werden beim Namen genannt — sonst „dein Wesen"
-    vit: clamp01((fitness(genome, env) - 0.12) / 0.72), seed: lineageSeed >>> 0, key: "" }, extra || {});
+    vit: vitality(genome, env), seed: lineageSeed >>> 0, key: "" }, extra || {});
   // _story.recent ist das Gedächtnis des Generators (Bausteine + Zeilen-Hashes);
   // gepflegt wird es DORT — hier nur durchreichen.
   let r = null; try { r = S.pick(ctx, _story.recent); } catch(e){ return; }
@@ -2647,7 +2990,7 @@ function storyTick(steps){
     _story.calmGens += steps;
     if(_story.calmGens >= 120 && !_story.calmDone){ _story.calmDone = true; storyLine("ruhe", { key: "ruhe" }); }
   } else { _story.calmGens = 0; _story.calmDone = false; }
-  const vit = clamp01((fitness(genome, env) - 0.12) / 0.72);
+  const vit = vitality(genome, env);
   if(vit < 0.32){
     _story.highGens = 0; _story.highDone = false; _story.lowGens += steps;
     if(_story.lowGens >= 60 && !_story.lowDone){ _story.lowDone = true; storyLine("not", { vit, key: "not" }); }
@@ -4099,8 +4442,8 @@ function frame(time){
     acc += dt*gensPerSec*(1 + adaptBoost*5);
     let steps = Math.floor(acc);
     if(steps>0){
-      acc -= steps; steps = Math.min(steps, 40);   // Nachhol-Deckel
-      for(let i=0;i<steps;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+      acc -= steps; steps = Math.min(steps, 40, simStepBudget());   // Nachhol- + Rechenzeit-Deckel
+      simAdvance(steps);   // Schwarm: N Individuen, Wright-Fisher + Nischen-Konkurrenz
       // Stabile Form: nur wenn dieselbe Klasse STABLE_GENS Generationen haelt ->
       // dann committen (Anzeige/Zeichnung wechselt) UND erst dann Genbuch-Unlock.
       const cur = classify(genome);
@@ -4156,6 +4499,8 @@ document.getElementById("chalBtn").innerHTML = ic("dna") + ' Herausforderungen �
   sb.addEventListener("click", ()=>{ shareSnapshot().catch(()=>showInfoToast("Schnappschuss fehlgeschlagen")); }); } })();
 playBtn.innerHTML = ic("pause");
 const _ver = document.getElementById("appVer"); if(_ver) _ver.textContent = APP_VERSION;
+// „Über die Engine": die Populationsgröße kommt aus der Konfiguration, nie aus dem Text.
+const _engN = document.getElementById("engN"); if(_engN) _engN.textContent = SWARM.N;
 resize(); initMotes(); updatePanels(); updateDisc(); updateBonding();
 
 // Brücken für das entkoppelte Welt-Overlay-Modul (<script type=module> unten):

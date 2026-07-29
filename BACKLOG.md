@@ -197,8 +197,69 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
   - [ ] Stufe 3.5 — kleiner Physik-Term für Insekt-Nische (Gliedmaßen-Substrat-Traktion o.ä.,
     ~15 Zeilen analog bestehender AXIS-Achsen) — NACH Stufe 3, mit Multi-Start-Messung
     abgenommen (Ziel: Insekt ≥2 % im Zufalls-Sweep, heute 0.14 %).
-  - [ ] Stufe 4 — Live-App auf `world/` umstellen, `simulate.ts` aus dem Produktionspfad
-    (Ziel: Tick < 10 ms im Browser gemessen).
+  - [x] **Stufe 4 (erledigt 2026-07-29, Opus) — Live-App läuft jetzt auf dem echten
+    Nischen-Schwarm statt dem Mittelfeld-Punkt:**
+    **Architektur:** dynamischer `import()` des bestehenden, bereits getesteten
+    Bundles (`app/core/world/{population,cluster}.js`, via `npm run bundle-app`
+    neu erzeugt für Stufe 1+3) statt einer vierten Hand-Physik-Kopie — begründet
+    gegen einen Umbau auf `type="module"` (zu großer Blast-Radius für 3500 Zeilen
+    Live-Code) abgewogen. Fällt bei Ladefehler graceful auf das alte Mittelfeld
+    zurück (getestet: 404 auf die Bundle-Datei → App läuft weiter, nur `console.warn`).
+    **"Dein Wesen"** = Zentroid des dominanten Clusters (`selectionWeights()` +
+    gewichtetes `clusters()` aus Stufe 1), mit Klebrigkeit (bleibt bei der zuletzt
+    gezeigten Linie, solange sie ≥60 % des größten Clusters hat) gegen Flackern bei
+    knappen Mehrheiten. N=200 (Kompromiss aus Performance-Budget und Stufe-3-
+    Vielfalts-Kriterium — N=150 unterschreitet ≥1.3 Cluster/Lauf bereits). `sigmaK`
+    aus dem Stufe-3-K-Term-Befund faktisch neutral gesetzt (konsistent mit
+    `world/phenomena.ts`s bestehender Wahl).
+    **Performance real im Browser gemessen** (nicht geschätzt): ~1.8–2.2 ms/Tick bei
+    N=200, Ziel <10 ms mit ~6× Reserve übertroffen. Zwei neue Takt-Regler
+    (`simStepBudget`/Zensus-Zeitlimit) verhindern Generationsstau auf langsamen
+    Geräten.
+    **Alle bestehenden UI-Komponenten getestet und funktionsfähig** (Gen-Balken,
+    Vitalität, Warum-Zeile, Chronik, Genbuch, Herausforderungen, Schnappschuss,
+    Neu-beginnen, Umwelt-Einfluss, Neuladen-Kontinuität, Offline-Reveal,
+    Lebende-Welt-Overlay) — 0 Konsolenfehler in allen Testpfaden.
+    **Zwei ehrliche, gemessene Rekalibrierungen, die der Umbau erzwang:**
+    (a) Vitalitäts-Skala neu verankert — der alte 100-%-Anker (Fitness 0.84) war
+    der Endpunkt des drift-/mutationsfreien Bergsteigers, den eine echte Population
+    nie erreicht (gemessen: Schwarm-Fitness ~0.26 vs. altes Surrogat ~0.46 in
+    derselben Umwelt); neue Skala an den real gemessenen Schwarm-Wertebereich
+    (0.10–0.62 über alle 13 Presets) verankert und in einer zentralen `vitality()`-
+    Funktion gebündelt (vorher an 4 Stellen dupliziert). Ehrliche Folge: Passung
+    liest sich in mittleren Welten jetzt ~1 Stufe niedriger als vorher.
+    (b) Grenzfall-Zeilen-Schwelle (`settled`) angepasst — eine echte Population hält
+    bedingte Kosten-Gene dauerhaft über ihrem Anker (Mutations-Selektions-
+    Gleichgewicht, gemessen ~73 % im Mittel) statt sie wie der Bergsteiger bis auf
+    99 % herunterzufahren; „Noch in Umstellung" verlangt jetzt `settled < 0.35`
+    statt `< 0.75`, Prozentanzeige nutzt `margin` statt `conf` (unberührt von der
+    Mutationslast). `matchArchetype()` selbst unangetastet.
+    **"Test-Validität ~86 %"-Satz im Details-Panel ersetzt** durch eine Erklärung
+    des tatsächlich laufenden Mechanismus (Population, Vererbung+Drift,
+    Nischen-Konkurrenz, "dein Wesen" = häufigste Form) — der alte Prozentsatz maß
+    nach diesem Umbau nichts mehr Sinnvolles. `APP_VERSION` v0.75.0 → v0.76.0.
+    **Bewusst unvollständig gelassen, mit klarer Folgeschritt-Empfehlung:**
+    Warum-Zeilen-Beträge nutzen weiterhin Mittelfeld-skalierte Schwellen (Richtung
+    ist korrekt, nur die Größenordnung ist Erbe — echtes Selektionsdifferential
+    kommt mit Stufe 5, zusammen mit einer Neukalibrierung von `ui-calm-check`s
+    Hysterese-Schwellen); Aufspaltung nur minimal in der bestehenden Grenzfall-Zeile
+    sichtbar gemacht, kein eigener Chronik-Beat (echte Story-Engine-Arbeit,
+    außerhalb des Rahmens); Persistenz speichert weiterhin nur den Zentroid, nicht
+    die volle Population (Varianz/Nebencluster überleben ein Neuladen nicht, klingt
+    nach ~50 Generationen wieder ein — Supabase-Schema unverändert, bewusst keine
+    Migration für etwas, das der Spieler nicht sieht); Biom-Empfehlungen (Punkt 8)
+    bleiben Mittelfeld-basiert (Schwarm-Sweep wäre ~2s Blockade beim Öffnen des
+    Presets-Panels); Prototyp-Bibliothek (Stufe 2) nicht neu abgeleitet (bekannter
+    Folgeschritt aus Stufe 2 selbst); Cloud-Sync-Pfad nicht end-to-end mit echtem
+    Konto getestet (Logik identisch zum lokalen Pfad, der getestet wurde).
+    **Getestet:** alle 5 Kern-Gates + `census-check`/`phenomena-check`/
+    `ablation-check`/`seed-check`/`rarity-check`/`coevolution-check`/
+    `distribution-check`/`app-parity`/`mf-fidelity`/`exemplar-check`/`story-check`/
+    `influence-check`/`ui-calm-check` grün, `app-world-smoke`-Selektor-Timeout
+    vorbestehend (identisch auf Original-HEAD verifiziert). Unabhängig
+    gegengeprüft (eigener Playwright-Lauf dieser Session): Schwarm nachweislich
+    aktiv (`window.__evolvePerf()` → `schwarmAktiv:true`, ~2–4 ms/Generation),
+    Formwechsel/Genbuch/Rendering visuell bestätigt, 0 Konsolenfehler.
   - [ ] Stufe 5 — Telemetrie-Erklärung (echtes Selektionsdifferential aus dem Schwarm) statt
     `engine/explain.ts`s handgeschriebener `env`-Schwellen-Sätze (behebt nebenbei die im
     Code selbst dokumentierte BUG-2-Klasse).
