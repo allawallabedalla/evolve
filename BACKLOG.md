@@ -369,8 +369,16 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
 
 Rarität-Grundmechanik ist umgesetzt (s. „Erledigt" → „Rarität / Entdeckungs-Tiefe"). Offen
 als Politur:
-- [ ] Sanfte Biom-Empfehlungen („in diese Richtung wohnt noch etwas Seltenes") statt harter
-  Gates.
+- [x] **Sanfte Biom-Empfehlungen (erledigt 2026-07-29)** — dezentes Sparkle-Badge an
+  Preset-Buttons im neuen Presets-Panel, wenn der Mean-Field-Konvergenzpunkt dieses Bioms
+  (dieselbe deterministische Regime-A-Logik wie `tools/research/biome.mjs`, lokal
+  nachgebaut, einmalig memoiziert beim Öffnen des Panels — keine Pro-Frame-Berechnung) eine
+  noch nicht entdeckte Form mit Rarität `selten`+ ergibt. Text: „In dieser Richtung wohnt
+  vermutlich noch etwas Seltenes, das du noch nicht gesehen hast." — rein informativ, **kein
+  Gate**, kein Preset gesperrt/deaktiviert. `app-parity`/`mf-fidelity` weiterhin grün.
+  **Nebenbefund (kein Bug dieser Aufgabe):** `docs/rarity.json` hat noch keinen Eintrag für
+  „Leuchtwesen · Tiefsee" (fällt auf `haeufig` zurück, bekommt daher nie ein Badge) — kleine
+  Datenlücke, separat nachtragbar, nicht blockierend.
 - [x] **Rarität in `tree-of-life.json` gespiegelt (erledigt 2026-07-29)** — jeder Knoten mit
   `ourForms` bekommt jetzt ein `formRarity`-Objekt (Name→Tier, aus `docs/rarity.json`, das
   bereits exakt dieselben Formnamen wie `TREE`/`ourForms` verwendet — keine Namens-Umrechnung

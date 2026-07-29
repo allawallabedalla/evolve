@@ -224,6 +224,13 @@
   .biome:active { box-shadow: var(--shadow-inset); }
   /* K5: aktuell gewähltes Biom — eingedrückt (Neomorph) + Salbei-Rand/Text */
   .biome.active { color: var(--bio-dim); font-weight: 700; box-shadow: var(--shadow-inset), inset 0 0 0 1.5px var(--bio-dim); }
+  /* Sanfte Biom-Empfehlung (Backlog Punkt 8): dezenter Funke, NUR sichtbar wenn
+     .show gesetzt ist (updateBiomeHintBadges) — kein Gate, reiner Hinweis, keine
+     Animation (bewusst statisch, s. Aufgabenstellung). Farbe kommt inline aus
+     RARITY_META (dieselbe Farbcodierung wie Genbuch/Fund-Toast). */
+  .biome-hint { display: none; margin-left: 2px; vertical-align: -0.15em; }
+  .biome-hint.show { display: inline-flex; }
+  .biome .biome-hint .ic { width: .78rem; height: .78rem; margin-right: 0; }
 
   .lever { margin-bottom: 13px; }
   .lever .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
@@ -1053,6 +1060,9 @@ const sigmoid = x => 1/(1+Math.exp(-x));
 // ===== Flaches monochromes Icon-System (Inline-SVG, erbt currentColor) =====
 const ICONS = {
   dot:`<circle cx="12" cy="12" r="3"/>`,
+  // Sanfte Biom-Empfehlung (Backlog Punkt 8): kleiner Funke, KEIN Archetyp-Emoji
+  // (die classify()-Formen tragen schon eigene e-Emojis, s. FICON) - bewusst neutral.
+  spark:`<path d="M12 2l1.7 6.6L20 10l-6.3 1.4L12 18l-1.7-6.6L4 10l6.3-1.4z"/>`,
   share:`<path d="M11 4.6l-3.1 3.1 1.4 1.4L11 7.4V15h2V7.4l1.7 1.7 1.4-1.4L13 4.6a1.4 1.4 0 0 0-2 0z"/><path d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8h-2v7H7v-7z"/>`,
   // Umwelt / Regler / Biome
   temp:`<rect x="10" y="3" width="4" height="11" rx="2"/><circle cx="12" cy="17.5" r="4"/>`,
@@ -1593,6 +1603,33 @@ const RARITY_META = {
 };
 function rarityOf(name){ return RARITY[name] || "haeufig"; }
 
+// Sanfte Biom-Empfehlungen (BACKLOG.md Punkt 8): pro Preset der Formname, auf den ein
+// neutrales Genom (0.5 in allen NG Genen) im Mittelfeld-Regime (deterministisch, OHNE
+// Drift) nach ausreichend vielen Generationen konvergiert — dieselbe Regime-A-Logik wie
+// tools/research/biome.mjs (kein Import, nur dieselbe Rechnung lokal mit den bereits
+// vorhandenen App-Funktionen stepGeneration/classify). Reine Nebenrechnung: liest nur
+// BIOMES/PARAMS/PHYS, veraendert nirgends genome/generation/env/discovered. Wird NICHT
+// pro Frame wiederholt, sondern einmalig berechnet und gecacht (biomeHintForms()).
+const BIOME_HINT_GENS = 250;
+let _biomeHintForms = null;
+function biomeHintForms(){
+  if(_biomeHintForms) return _biomeHintForms;
+  _biomeHintForms = BIOMES.map(b => {
+    let m = new Array(NG).fill(0.5);
+    for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, b.env);
+    return classify(m).n;
+  });
+  return _biomeHintForms;
+}
+// Explizit KEIN hartes Gate: liefert nur, ob ein leiser Hinweis angezeigt werden darf
+// (noch nicht entdeckt + Raritaets-Tier >= "selten"). Blockiert/sperrt nichts.
+function biomeHintFor(i){
+  const form = biomeHintForms()[i];
+  if(discovered.has(form)) return null;
+  const rk = rarityOf(form), rm = RARITY_META[rk];
+  return rm.rank>=2 ? {form, rk, rm} : null;
+}
+
 function renderGenbook(){
   const found = discovered.size;
   const legendFound = [...discovered].filter(n=>rarityOf(n)==="legendaer").length;
@@ -1740,6 +1777,7 @@ let _presetsOpener = null;
 function openPresets(){
   _presetsOpener = document.activeElement;
   dismissOnboard();   // der Pulse auf "Presets ↗" hat sein Ziel erreicht, sobald geoeffnet wird
+  if(typeof updateBiomeHintBadges === "function") updateBiomeHintBadges();   // Backlog Punkt 8: Hinweise frisch je Oeffnen
   document.getElementById("presetsPanel").hidden = false;
   document.getElementById("presetsClose").focus();
 }
@@ -2043,8 +2081,9 @@ function renderStressChips(){
   });
 }
 const biomesEl = document.getElementById("biomes");
-BIOMES.forEach(b => {
-  const btn = document.createElement("button"); btn.className="biome"; btn.innerHTML=ic(b.ico)+" "+b.n;
+BIOMES.forEach((b,bi) => {
+  const btn = document.createElement("button"); btn.className="biome";
+  btn.innerHTML = ic(b.ico)+" "+b.n+` <span class="biome-hint" data-bi="${bi}">${ic("spark")}</span>`;
   btn.addEventListener("click", () => {
     Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;   // Biome sind saubere, geschützte Milieus
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
@@ -2061,6 +2100,25 @@ BIOMES.forEach(b => {
   });
   biomesEl.appendChild(btn);
 });
+// Sanfte Biom-Empfehlungen (Backlog Punkt 8): Badges werden erst beim Oeffnen des
+// Presets-Panels aktualisiert (nicht pro Frame) — discovered kann sich seit dem
+// letzten Oeffnen veraendert haben (neue Form gefunden), die Zielform je Biom selbst
+// ist aber statisch/gecacht (biomeHintForms()). Rein zusaetzlich: kein Button wird
+// je gesperrt oder deaktiviert, nur ein optionaler Hinweis ein-/ausgeblendet.
+function updateBiomeHintBadges(){
+  biomesEl.querySelectorAll(".biome").forEach(btn => {
+    const span = btn.querySelector(".biome-hint");
+    if(!span) return;
+    const hint = biomeHintFor(+span.dataset.bi);
+    span.classList.toggle("show", !!hint);
+    if(hint){
+      span.style.color = hint.rm.col;
+      span.title = "In dieser Richtung wohnt vermutlich noch etwas Seltenes, das du noch nicht gesehen hast.";
+    } else {
+      span.removeAttribute("title");
+    }
+  });
+}
 const genesEl = document.getElementById("genes");
 GENE_LABELS.forEach((lbl,i) => {
   const d=document.createElement("div"); d.className="gene"; d.id="gene-"+i;
