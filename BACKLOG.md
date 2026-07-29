@@ -402,6 +402,35 @@ eine Bimodalität sichtbar zu machen bräuchte genau diese Verteilungs-Ansicht. 
 
 ---
 
+## ⬜ Offen — Engine-Grundlagenforschung: Determinismus/Vielfalt (2026-07-29)
+
+*(Nutzer)* „Die Engine wirkt sehr deterministisch" — konkret: Dunkelheit führt bei
+Fellwesen im Spiel immer zu einem Leuchtorgan statt zu einem Fellwesen, und Fisch/
+Insekten wurden trotz Existenz im Möglichkeitsraum praktisch nie beobachtet.
+
+**Befund:** teils ein konkreter, noch offener Kaskaden-Bug (`classify()` in
+`app/index.html` prüft Biolumineszenz vor Fell — ein Wesen mit hoher Isolation UND
+hoher Biolumineszenz wird deshalb immer als „Leuchtwesen · Tiefsee" klassifiziert,
+nie als Fellwesen), teils eine strukturelle Grenze der Architektur: AXIS-4 (Aquatik)
+und AXIS-5 (Biolumineszenz) haben die Erreichbarkeit von Fisch/seltenen Nischen
+bereits gezielt verbessert (Fisch 0 % → 3,8 %), aber die Werte bleiben niedrig, weil
+die Produktions-Engine ein einziges Mittelwert-Genom per Gradientenaufstieg simuliert
+— schmale Fitness-Nebengipfel (= seltene, aber biologisch plausible Formen) werden
+dadurch grundsätzlich selten erreicht, egal wie viel an einzelnen Schwellen
+nachjustiert wird.
+
+**→ Diese Recherche soll noch durchgeführt werden:**
+**`docs/forschungsauftrag-naechste-engine.md`** enthält einen vollständigen, sofort
+kopierbaren Forschungsauftrag für einen neutralen Chat (Divergenz-Phase ohne
+Denkverbote → radikal unterschiedliche Modell-Paradigmen jenseits von
+Populationsgenetik, dann Konvergenz an Browser-Performance/Erklärbarkeit/Erreichbarkeit
+aller Archetypen), inkl. Modellwahl-Empfehlung (Opus 5 für die abwägungsintensive
+Konvergenz- und Spezifikationsphase, Sonnet 5 reicht für die breite Ideensammlung in
+der Divergenz-Phase). Ergebnis kommt danach zur Umsetzung zurück in dieses Repo — bis
+dahin bleiben `engine/fitness.ts`, `physics.json` und `classify()` unverändert.
+
+---
+
 ## ⬜ Offen — Nutzer-Rückmeldung 2026-07-26 (Abend)
 
 Drei Punkte aus dem Spielen der v0.70.0:
