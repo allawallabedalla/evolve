@@ -39,17 +39,39 @@ function makeRandn(rng: () => number): () => number {
 }
 
 /**
- * Frequenzabhaengige Konkurrenz entlang EINER Merkmals-Achse (Ressourcen-Achse).
- * w_i wird geteilt durch die effektive Dichte aehnlich "grosser" Konkurrenten und
- * multipliziert mit der Ressourcen-Verfuegbarkeit K(x). Branching entsteht, wenn
- * die Konkurrenz schmaler ist als die Ressource (sigmaC < sigmaK). Dieckmann &
- * Doebeli 1999; validiert in spike/FINDINGS.md.
+ * Frequenzabhaengige Konkurrenz ueber EINE ODER MEHRERE Merkmals-Achsen
+ * (Ressourcen-/Nischen-Achsen). w_i wird geteilt durch die effektive Dichte
+ * aehnlich gelegener Konkurrenten (euklidische Distanz UEBER ALLE `axes`) und
+ * multipliziert mit der Ressourcen-Verfuegbarkeit K(x) (Gauss um kCenter, auch
+ * ueber alle Achsen). Branching entsteht, wenn die Konkurrenz schmaler ist als
+ * die Ressource (sigmaC < sigmaK). Dieckmann & Doebeli 1999; validiert in
+ * spike/FINDINGS.md und tools/research/proto.mjs (8-Achsen-Kernel, Migrations-
+ * Stufe 3, docs/engine-forschungsergebnis.md Abschnitt 3 B2).
  */
 export interface CompetitionConfig {
-  axis: number; // Trait-Index als Ressourcen-/Nischen-Achse (z.B. SIZE = 1)
+  /**
+   * Nischen-Achsen (Trait-Indizes), mehrdimensional — der Kernel misst die
+   * euklidische Distanz ueber ALLE hier genannten Achsen gleichzeitig (nicht nur
+   * eine). Ein-Achsen-Konkurrenz ist der Spezialfall `axes: [SIZE]` usw.
+   */
+  axes?: number[];
+  /**
+   * @deprecated Alt-Form aus der Ein-Achsen-Aera (vor Migrations-Stufe 3): eine
+   * einzelne Achse, aequivalent zu `axes: [axis]`. Nur fuer Rueckwaertskompatibilitaet
+   * bestehender Aufrufer (z.B. `world/phenomena.ts`, `tools/research/{bench,reach}.mjs`),
+   * die bewusst unveraendert bleiben — neue Aufrufer sollten `axes` verwenden.
+   */
+  axis?: number;
   sigmaC: number; // Breite des Konkurrenz-Kernels
   sigmaK: number; // Breite der Ressourcen-Verteilung K(x) (Gauss um kCenter)
   kCenter: number; // Ressourcen-Gipfel (Default 0.5)
+}
+
+/** Loest `axes`/`axis` (Legacy) auf eine einheitliche Achsen-Liste auf. Leer = keine Achse konfiguriert. */
+function competitionAxes(c: CompetitionConfig): number[] {
+  if (c.axes && c.axes.length) return c.axes;
+  if (typeof c.axis === "number") return [c.axis];
+  return [];
 }
 
 export interface PopulationConfig {
@@ -58,7 +80,18 @@ export interface PopulationConfig {
   mutationSd: number; // SD der gaussschen Mutation
   selPower: number; // Fitness^selPower (Selektions-Schaerfe)
   recombProb: number; // Rekombinations-Wahrscheinlichkeit je Gen
-  startSpread: number; // Anfangsstreuung um den Startwert
+  startSpread: number; // Anfangsstreuung um den Startwert (nur bei founderSpread="gaussian")
+  /**
+   * Gruender-Verteilung bei freiem/unbesiedeltem Start (Migrations-Stufe 3):
+   * "gaussian" (Default, unveraendertes Verhalten) streut eng um `start`
+   * (Konstruktor-Parameter, Default 0.5) mit SD `startSpread`. "uniform" streut
+   * jedes Gen jedes Individuums unabhaengig gleichverteilt in [0,1] — der
+   * gestreute-Gruender-Trick aus tools/research/proto.mjs: kostet keine
+   * Rechenzeit, oeffnet aber alle Einzugsgebiete gleichzeitig statt nur das um
+   * `start`. Betrifft NUR den Konstruktor, NICHT `seedFrom()` (Spieler-Linie
+   * besiedelt einen Ort bleibt bewusst eng gaussisch — siehe dort).
+   */
+  founderSpread: "uniform" | "gaussian";
   competition: CompetitionConfig | null;
 }
 
@@ -70,6 +103,7 @@ export const DEFAULT_POP_CONFIG: PopulationConfig = {
   selPower: 2.0,
   recombProb: 0.5,
   startSpread: 0.03,
+  founderSpread: "gaussian",
   competition: null,
 };
 
@@ -83,10 +117,13 @@ export class Population {
     this.cfg = { ...DEFAULT_POP_CONFIG, ...cfg };
     this.rng = mulberry32(seed);
     this.randn = makeRandn(this.rng);
-    const { size, numGenes, startSpread } = this.cfg;
-    this.genomes = Array.from({ length: size }, () =>
-      Array.from({ length: numGenes }, () => clamp01(start + this.randn() * startSpread)),
-    );
+    const { size, numGenes, startSpread, founderSpread } = this.cfg;
+    this.genomes =
+      founderSpread === "uniform"
+        ? Array.from({ length: size }, () => Array.from({ length: numGenes }, () => this.rng()))
+        : Array.from({ length: size }, () =>
+            Array.from({ length: numGenes }, () => clamp01(start + this.randn() * startSpread)),
+          );
   }
 
   get size(): number {
@@ -111,21 +148,34 @@ export class Population {
     const { selPower, competition } = this.cfg;
     const base = this.genomes.map((g) => Math.pow(fitness(g, env, phys), selPower));
     if (!competition) return base;
-    const { axis, sigmaC, sigmaK, kCenter } = competition;
-    const x = this.genomes.map((g) => g[axis]);
+    const axes = competitionAxes(competition);
+    if (axes.length === 0) return base;
+    const { sigmaC, sigmaK, kCenter } = competition;
+    const G = this.genomes;
     const inv2c2 = 1 / (2 * sigmaC * sigmaC);
     const inv2k2 = 1 / (2 * sigmaK * sigmaK);
     const N = this.size;
     const w = new Array<number>(N);
+    // Mehrdimensionaler Kernel (Migrations-Stufe 3): euklidische Distanz UEBER ALLE
+    // `axes` gleichzeitig statt nur einer — reduziert bei axes.length===1 exakt auf
+    // die alte Ein-Achsen-Formel (tools/research/proto.mjs B2).
     for (let i = 0; i < N; i++) {
       let n = 0;
       for (let j = 0; j < N; j++) {
-        const d = x[i] - x[j];
-        n += Math.exp(-d * d * inv2c2);
+        let d2 = 0;
+        for (const a of axes) {
+          const d = G[i][a] - G[j][a];
+          d2 += d * d;
+        }
+        n += Math.exp(-d2 * inv2c2);
       }
       n /= N; // mittlere Konkurrenz-Dichte (0..1)
-      const dk = x[i] - kCenter;
-      const K = Math.exp(-dk * dk * inv2k2);
+      let dk2 = 0;
+      for (const a of axes) {
+        const d = G[i][a] - kCenter;
+        dk2 += d * d;
+      }
+      const K = Math.exp(-dk2 * inv2k2);
       w[i] = (base[i] * K) / (n + 1e-9);
     }
     return w;

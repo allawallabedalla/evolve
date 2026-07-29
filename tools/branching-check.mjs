@@ -24,7 +24,9 @@ function trial(comp, seed) {
   return { modes: modes1D(sz, { bandwidth: 0.05 }).count, sd };
 }
 
-const COMP = { axis: SIZE, sigmaC: 0.35, sigmaK: 9, kCenter: 0.5 };
+// axes: [SIZE] statt axis: SIZE (Migrations-Stufe 3: CompetitionConfig ist jetzt
+// mehrdimensional; die alte Ein-Achsen-Form bleibt ein Spezialfall mit axes.length===1).
+const COMP = { axes: [SIZE], sigmaC: 0.35, sigmaK: 9, kCenter: 0.5 };
 const ctl = SEEDS.map((s) => trial(null, s));
 const brc = SEEDS.map((s) => trial(COMP, s));
 const ctlModes = ctl.map((r) => r.modes);

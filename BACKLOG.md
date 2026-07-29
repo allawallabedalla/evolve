@@ -175,8 +175,25 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     Gepanzertes Beutetier — Kopffüßer/Koralle sind reale Grenzfälle, kein Fehler dieser
     Migration. **Hinweis für später:** die Prototyp-Werte enthalten zu 50 % die *heutige*
     Engine-Dynamik — nach Stufe 3/4 sollte `archetype-derive.mjs` erneut laufen.
-  - [ ] Stufe 3 — Mehrdimensionaler Nischen-Kernel in `population.ts` + gestreute
-    Gründer-Genome (Ziel: ≥18 Formen über 11 Biome, Koexistenz in ≥5 Biomen).
+  - [x] Stufe 3 (erledigt 2026-07-29) — `CompetitionConfig.axes: number[]` (mehrdimensional,
+    `axes:[SIZE]` = exakter Spezialfall der alten Ein-Achsen-Form, `axis?` als deprecated
+    Alias für unveränderte Alt-Aufrufer wie `world/phenomena.ts`/`tools/research/{bench,
+    reach}.mjs`), `PopulationConfig.founderSpread: "uniform"|"gaussian"` (Default weiterhin
+    `"gaussian"`, `seedFrom()` bleibt bewusst immer eng gaußsch). Kernel summiert jetzt über
+    alle Achsen. Abnahme-Kriterium erreicht: **1.42 Cluster/Lauf, 23 Formen, 11/11 Biome mit
+    Koexistenz** (mit dem Ressourcen-Term K faktisch neutralisiert) — übertrifft sogar
+    `proto.mjs`s eigene Referenz (20 Formen).
+    **Ehrlicher Fund dabei:** `proto.mjs` (der bisher als „verifiziert" geltende Prototyp)
+    implementiert den K-Term aus dem eigenen Pseudocode gar nicht (Dichte-Division ohne
+    K-Multiplikation). Die produktive `weights()`-Funktion hat den K-Term aus der
+    Alt-Implementierung geerbt; mit dem im Dokument wörtlich vorgeschlagenen `σ_K=0.35`
+    kollabiert die Vielfalt auf 8 Achsen (1.18/9 Formen/4 Biome), weil sich quadrierte
+    Abweichungen über 8 Dimensionen summieren und ein 1D-plausibler `σ_K` in 8D zur scharfen
+    Barriere wird. **Nicht durch eine neu erfundene Reskalierung „repariert"** — beide
+    Varianten gemessen, dokumentiert, Entscheidung (K behalten+reskalieren vs. faktisch aus)
+    bewusst an Stufe 4+ delegiert, wo der Nischen-Schwarm produktiv konfiguriert wird.
+    Alle 5 Kern-Gates + `census-check`/`phenomena-check`/`ablation-check`/`seed-check`/
+    `rarity-check`/`coevolution-check`/`distribution-check` weiterhin grün.
   - [ ] Stufe 3.5 — kleiner Physik-Term für Insekt-Nische (Gliedmaßen-Substrat-Traktion o.ä.,
     ~15 Zeilen analog bestehender AXIS-Achsen) — NACH Stufe 3, mit Multi-Start-Messung
     abgenommen (Ziel: Insekt ≥2 % im Zufalls-Sweep, heute 0.14 %).
