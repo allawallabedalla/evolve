@@ -265,9 +265,9 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
   (Genbuch) selbst, dadurch auch in `FORM_KINGDOM`. Für den Herausforderungen-Reich-Filter
   lokal in `app/index.html` überbrückt (`CHAL_KINGDOM_FALLBACK`); der eigentliche
   Lebensbaum-Eintrag (Ära/Evo-Notiz) fehlt weiterhin.
-- [ ] **`docs/auslagerung/P5-ausgabe.json` aufräumen** — die ursprüngliche 28er-Lieferung (10
-  davon nicht erreichbar) liegt noch auf `main`, ist durch P8 (271 Stück) ersetzt und nie ins
-  Spiel verdrahtet worden. Sollte entfernt oder klar als „ersetzt durch P8" markiert werden.
+- [x] **`docs/auslagerung/P5-ausgabe.json` aufräumen** (erledigt 2026-07-29) — Deletion
+  hätte den historischen Kontext verloren, daher stattdessen `P5-aufgabe.md` mit einem
+  klaren „ersetzt durch P8"-Hinweis versehen (JSON selbst unangetastet, bleibt als Archiv).
 - [ ] **P7 · Qualitäts-Audit** — zweiter Blick auf die bereits übernommenen P3-Erklärungen und
   S6-Erzähl-Bausteine (nur als Idee notiert, nie als Paket beauftragt oder gebaut).
 - Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht

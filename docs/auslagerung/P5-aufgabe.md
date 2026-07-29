@@ -1,5 +1,11 @@
 # Arbeitspaket P5 — „Herausforderungen der Natur" (Inhalt)
 
+> ⚠️ **Ersetzt durch P8 (2026-07-29):** die hier gelieferten 28 Herausforderungen
+> (`P5-ausgabe.json`, 10 davon nicht erreichbar) wurden nie ins Spiel verdrahtet und sind
+> durch das spätere Paket P8 (271 simulations-verifizierte Herausforderungen, live seit
+> v0.71.0–v0.75.0) vollständig abgelöst. Bleibt nur als historisches Archiv stehen, s.
+> BACKLOG.md Punkt 7.
+
 **Für eine externe Bearbeitung ohne Zugriff auf das Repository.**
 Umfang: **15–30 Herausforderungen**. Das größte der bisherigen Pakete — und das Einzige,
 das eine neue Spielidee einführt statt einer bestehenden Lücke zu füllen.
