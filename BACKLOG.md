@@ -1,7 +1,8 @@
 # Backlog
 
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
-Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
+Test-Validität **~72 %** (Ziel-Band 80–90 %, seit der 25-Gene-Korrektur ehrlich über alle
+Gene gemessen statt blind für 15 davon — s. Punkt 9 Schritt 1 Befund), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
 **25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
 Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken) sowie 8
@@ -33,53 +34,55 @@ Ernährungsmodus" im Filtrierer-Teil ebenfalls — siehe Punkt 6.
 > erst Layout (3), dann Politur obendrauf (4) — sonst überschreiben sich CSS-/Markup-Änderungen
 > gegenseitig oder eine Session baut auf einer bald veralteten Struktur.
 
-### 1 · 🔴 GitHub „Unverified"-Commits — Audit nötig, VOR jedem History-Rewrite
+> **🤖 Modell-Empfehlung je Punkt** (2026-07-29, damit ein neuer Chat nicht neu abwägen muss):
+> **Sonnet** für klar spezifizierte Umsetzung/Mechanik-Fixes/Recherche mit engem Suchraum,
+> **Opus** für geschmacks-/abwägungsintensive Design- und Architekturentscheidungen mit großem
+> Ermessensspielraum. Steht als `**Modell:**`-Zeile direkt unter jeder Überschrift/jedem
+> Schritt. Faustregel bei mehrteiligen Punkten: wenn nicht anders vermerkt, gilt die Angabe an
+> der Überschrift für alle Unterpunkte.
 
-**Befund (2026-07-29), noch ungeklärt, absichtlich nicht eigenmächtig „gefixt":** der lokale
-Stop-Hook (`~/.claude/stop-hook-git-check.sh`) meldet bei praktisch jeder Session-Aktivität
-Commits als „GitHub wird das als Unverified zeigen" und schlägt automatisch
-`commit --amend --reset-author` + `rebase` + Force-Push vor.
+### 1 · ✅ GitHub „Unverified"-Commits — Audit abgeschlossen (2026-07-29): kein Rewrite, nicht user-fixbar
 
-**Was bereits geprüft ist:**
-- Die betroffenen Commits **haben** tatsächlich eine eingebettete SSH-Signatur
-  (`git cat-file commit <hash>` zeigt einen vollständigen `gpgsig`-Block mit demselben
-  Schlüssel wie `user.signingkey` in `~/.gitconfig`).
-- `git log --format=%G?` zeigt trotzdem `N` — das liegt an einem lokal fehlenden
-  `gpg.ssh.allowedSignersFile`; Git kann hier also gar nicht selbst verifizieren. Das `N`
-  ist **kein Beweis dafür, dass die Signatur fehlt oder ungültig ist.**
-- Das Muster ist **projektweit und sessionübergreifend**: Stichproben über die gesamte
-  bisherige Historie (auch längst gemergte Commits verschiedenster früherer Sessions, z. B.
-  `402d070`, `6b6173b`, `7b1f76e`) zeigen exakt dasselbe `N`. Es ist also kein Fehler dieser
-  einen Session, sondern ein Bestandsproblem seit Projektbeginn.
+**Ursache geklärt:** jeder Claude-Code-Commit läuft unter `user.name=Claude`,
+`user.email=noreply@anthropic.com`. GitHub ordnet diese E-Mail NICHT dem Repo-Account
+(`allawallabedalla`) zu, sondern einem eigenständigen, geteilten GitHub-Account
+**`github.com/claude`** (id 81847, ~147k Follower, Bio verlinkt „@anthropics" /
+„anthropic.com/claude-code" — erkennbar die offizielle Anthropic/Claude-Code-Identität, an
+die GitHub JEDEN Claude-Code-Commit über alle Repos/Nutzer/Sessions hinweg attribuiert).
+Per `get_commit`-API bestätigt: sowohl der frische Commit dieser Session (`f7951a6`) als auch
+ein Commit einer komplett anderen, laengst gemergten Session (`402d070`, 2026-07-28) zeigen
+identisch `author.login: "claude", id: 81847` — das Muster ist also kein Repo- oder
+Signatur-Problem, sondern eine Eigenschaft der Commit-Attribution selbst.
 
-**Warum hier NICHT einfach dem Hook-Vorschlag gefolgt wurde:**
-1. Ein Fix betrifft zwangsläufig Commits anderer, teils parallel laufender Sessions
-   (z. B. Redesign-Branch `claude/flat-vector-simulation-ui-kttqxx`) — Rewrite + Force-Push
-   auf `main` würde deren Historie unter den Füßen verändern.
-2. Da die Signaturen objektiv vorhanden sind, ist unklar, ob ein Amend das GitHub-Ergebnis
-   überhaupt ändert — wahrscheinlicher liegt die Ursache **nicht** in Git selbst, sondern
-   darin, dass der verwendete SSH-Signing-Key bei GitHub nicht (oder nicht für das richtige
-   Konto) als Signing-Key hinterlegt ist. Falls das so ist, würde ein reines
-   Kontoeinstellungs-Fix bei GitHub **rückwirkend alle** vorhandenen (bereits korrekt
-   signierten) Commits als „Verified" zeigen lassen — **ohne jeden History-Rewrite und ohne
-   Risiko.** Das wäre dem destruktiven Rebase-Weg klar vorzuziehen.
-3. Ein Fix nur für die paar Commits der aktuellen Session würde das Problem ohnehin nicht
-   lösen — die gesamte restliche Historie bliebe „Unverified".
+**Konsequenz — die im vorigen Audit offene Frage ist damit beantwortet:**
+- Die eingebettete SSH-Signatur (`gpgsig`, ssh-ed25519, bestätigt vorhanden — s. vorheriger
+  Befund) müsste als **Signing Key im GitHub-Account `github.com/claude`** hinterlegt sein,
+  damit „Verified" erscheint — NICHT im Account `allawallabedalla` und in keinem
+  Repo-/Organisations-Setting, das der Nutzer hier kontrolliert.
+- **Das ist damit keine Aufgabe, die der Nutzer (oder diese Session) für DIESES Repo lösen
+  kann.** Es ist eine plattformweite Anthropic-Konfigurationsfrage (Signing-Key-Registrierung
+  auf dem geteilten `claude`-Account) — falls überhaupt gewünscht: möglich, dass jede
+  Umgebung/Session ihren eigenen Schlüssel über `/tmp/code-sign` →
+  `/opt/env-runner/environment-manager` erzeugt (die lokale
+  `~/.ssh/commit_signing_key.pub`-Datei ist in dieser Session z. B. leer/0 Byte — die
+  eigentliche Schlüsselverwaltung läuft nicht über diese Datei), was eine dauerhafte
+  Registrierung ohnehin erschweren würde.
+- **Kein `--amend`/`rebase`/Force-Push** — würde am Ergebnis nichts ändern (das Problem sitzt
+  auf GitHub-Kontoebene, nicht in der Commit-Historie) und hätte das unter Punkt 1 schon
+  vorher benannte Risiko, parallel laufende Sessions/Branches zu stören. Der Stop-Hook-Vorschlag
+  bleibt also weiterhin zu Recht ignoriert.
 
-**Nächster Schritt (gründlicher Audit, bevor irgendwas an Git-History angefasst wird):**
-- Klären, welchem GitHub-Konto/-Signing-Key-Eintrag `user.signingkey`
-  (`/home/claude/.ssh/commit_signing_key.pub`) zugeordnet sein soll, und ob dieser Key dort
-  tatsächlich als SSH-Signing-Key hinterlegt ist (**Nutzer-/Admin-Aufgabe**, keine
-  Git-Operation).
-- Erst wenn das geklärt ist, entscheiden: entweder löst sich „Unverified" von selbst
-  (Konto-Fix), oder es ist tatsächlich ein Rewrite nötig — dann aber koordiniert (alle
-  laufenden Sessions/Branches informiert) statt spontan per Force-Push über `main`.
-- Bis dahin: **kein `--amend`/`rebase`/Force-Push** wegen dieser Meldung, auch wenn der
-  Stop-Hook das bei jeder Aktion erneut vorschlägt.
+**Für den Nutzer:** falls „Verified"-Häkchen bei Claude-Code-Commits gewünscht sind, wäre das
+eine Anfrage an Anthropic (Claude Code Support), nicht ein Repo- oder GitHub-Account-Fix, den
+`allawallabedalla` selbst vornehmen kann. Dieser Backlog-Punkt ist damit abgeschlossen —
+nichts weiter zu tun am Repo.
 
 *(Blockiert nichts anderes hier — reine Meta-Aufgabe, aber recht billig zu klären.)*
 
 ### 2 · Engine-Grundlagenforschung: Determinismus/Vielfalt — blockiert Punkt 6
+
+**Modell:** Sonnet für die Divergenz-Phase (breite Ideensammlung ohne Denkverbote) → **Opus**
+für die Konvergenz-/Spezifikationsphase (abwägungsintensiv, s. u.).
 
 *(Nutzer, 2026-07-29)* „Die Engine wirkt sehr deterministisch" — konkret: Dunkelheit führt bei
 Fellwesen im Spiel immer zu einem Leuchtorgan statt zu einem Fellwesen, und Fisch/
@@ -110,6 +113,9 @@ dahin bleiben `engine/fitness.ts`, `physics.json` und `classify()` unverändert.
 dieses Ergebnis vorliegt.
 
 ### 3 · Komplexitäts-Audit / Informationsarchitektur (2026-07-29)
+
+**Modell:** Sonnet — Konzept + Priorisierung liegen bereits fertig abgestimmt vor
+(`docs/komplexitaets-audit.md`), hier nur noch Ausführung nach Plan.
 
 - [~] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — Konzept liegt vor,
   Umsetzung offen.** *(Nutzer)* Audit + abgestimmter Bauplan in
@@ -153,6 +159,8 @@ Konzept-Vorschau (Palettenvergleich + Live-Demo) vorab als Artifact abgestimmt,
 Palette **„Klippenlicht"** (Aubergine-Ink + dusty Lilac + Ringelblume-Akzent) gewählt.
 Branch `claude/flat-vector-simulation-ui-kttqxx`.
 
+**Modell:** je Phase unterschiedlich — s. Tags unten (Phase 3 Opus, Rest Sonnet).
+
 - [x] **Phase 1 — Design-Tokens**: `:root`-Palette auf Klippenlicht umgestellt,
   Neomorph-Schatten (`--shadow*`) durch flache Hairline-Konturen ersetzt, alle
   `linear-/radial-gradient`-Stellen (Body-BG, Gen-/Vitalitätsbalken, Login-Card,
@@ -173,7 +181,8 @@ Branch `claude/flat-vector-simulation-ui-kttqxx`.
   umgestellt. Letzte rohe Emoji (☁️ Cloud-Sync-Status, 👋 Onboarding-Hinweis)
   durch flaches Icon ersetzt bzw. entfernt — der Rest der App nutzt bereits
   durchgängig `ic()`/`formIcon()`.
-- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)**:
+- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)** — **Modell: Opus**
+  (geschmacksintensivster Teil, Sonnet bleibt Orchestrator/Integration):
   `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
   (~800 Zeilen biologischer Sonderfälle: Biolumineszenz, Tarnung, Flugbauplan …)
   von Canvas-2D auf modulares SVG umbauen — Körperkern + austauschbare Anbauteile
@@ -181,16 +190,17 @@ Branch `claude/flat-vector-simulation-ui-kttqxx`.
   Layering + Helligkeitsstufen statt Schlagschatten, EINE Akzentfarbe für das
   jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
   seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
-  Erkennung für die Chronik auf). Geplant: an einen Opus-Subagenten delegiert
-  (geschmacksintensivster Teil), Sonnet bleibt Orchestrator/Integration.
-- [ ] **Phase 4 — Restliche UI**: Genom-Balken, Vitalitätsanzeige, Chronik,
+  Erkennung für die Chronik auf).
+- [ ] **Phase 4 — Restliche UI** — **Modell: Sonnet** (Palette/Regeln bereits definiert, nur
+  Übertragung): Genom-Balken, Vitalitätsanzeige, Chronik,
   Genbook, Baum-des-Lebens-SVG, Challenge-Liste auf dieselbe Palette + die
   Hell/Dunkel-Hierarchieregel übertragen (Werte/Regler/Buttons bleiben die
   einzigen hellen, hochkontrastigen Elemente).
-- [ ] **Phase 5 — Audit**: WCAG-Kontrast erneut prüfen, `prefers-reduced-motion`
-  erhalten, alle Biome/Extremregler/Mutationsfälle durchklicken.
-- [ ] **Zwei kleine Politur-Punkte aus Phase 2**: Himmel wirkt bei mittlerem
-  Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
+- [ ] **Phase 5 — Audit** — **Modell: Sonnet** (Checkliste abarbeiten): WCAG-Kontrast erneut
+  prüfen, `prefers-reduced-motion` erhalten, alle Biome/Extremregler/Mutationsfälle
+  durchklicken.
+- [ ] **Zwei kleine Politur-Punkte aus Phase 2** — **Modell: Sonnet**: Himmel wirkt bei
+  mittlerem Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
   die Wellenlinie am Boden (`groundPath()`) könnte mit mehr Stützpunkten runder
   werden.
 
@@ -211,10 +221,12 @@ simulations-verifizierte Herausforderungen spielbar (Button „Herausforderungen
 Suche/Filter, HUD), schließt genau die Kompetenz-Lücke aus der Diagnose. **Damit ist dieser
 Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschieden:
 
-- [ ] **V1-Ausbaustufen** — feste Startwelt für alle, Bestenliste nach Generationenzahl,
-  „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen Server/Vergleichsraum (Supabase
-  steht bereits) — bewusst nicht Teil der Erstversion.
-- [ ] **V2–V5** (`docs/bindung-konzept.md`) — Trägheit der Welt, Aussterben nur unter
+- [ ] **V1-Ausbaustufen** — **Modell: Opus** (Spieldesign-/Architektur-Abwägungen mit viel
+  Ermessen — erst nach Produktentscheidung des Nutzers starten) — feste Startwelt für alle,
+  Bestenliste nach Generationenzahl, „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen
+  Server/Vergleichsraum (Supabase steht bereits) — bewusst nicht Teil der Erstversion.
+- [ ] **V2–V5** (`docs/bindung-konzept.md`) — **Modell: Opus** (aus demselben Grund wie oben;
+  ebenfalls erst nach Produktentscheidung) — Trägheit der Welt, Aussterben nur unter
   Beobachtung, Wissen als Meta-Fortschritt, Verbundenheit über einen wöchentlichen festen
   Seed. Nur recherchiert/vorgeschlagen, keine Umsetzung — nächste Empfehlung wäre V4 (Wissen
   als Meta-Fortschritt). **Start ist Produktentscheidung des Nutzers**, nicht eigenmächtig
@@ -234,13 +246,15 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
   Gen `filter`, neuer Energiekanal, s. „Erledigt"). Offen bleibt nur der ursprünglich
   mitgemeinte Aasfresser-/Parasit-Teil, den es nie als eigenes Gen gab.
 
-- [ ] **Rest von AXIS-3 · Aasfresser/Parasit** — kein eigenes Gen bisher, geringe Priorität,
+- [ ] **Rest von AXIS-3 · Aasfresser/Parasit** — **Modell: Sonnet** — kein eigenes Gen bisher, geringe Priorität,
   nur falls ein konkreter Katalog-Faktor es rechtfertigt (Gefahr sonst: reine
   Muster-Wiederholung mit abnehmendem Grenznutzen, wie im Breiten-Ausbau dokumentiert).
   **Nicht anfassen, bevor Punkt 2 (Engine-Grundlagenforschung) abgeschlossen ist** — die
   hält `engine/fitness.ts`/`physics.json` bis dahin bewusst unverändert.
 
 ### 7 · Live-App — Feinschliff & Aufräumen (kleinere Reste)
+
+**Modell:** Sonnet — durchweg kleine, klar umrissene Fixes/Cleanups.
 
 - [ ] **CLS-4-Rest · schmale Größenfenster** — einige seltene Formen (Nadelbaum, Blütenkraut,
   Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
@@ -267,6 +281,8 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
   näher untersucht, geringe Priorität (betrifft nur die „Lebende Welt (Beta)"-Overlay-Startlogik).
 
 ### 8 · Gamification-Feinschliff
+
+**Modell:** Sonnet — kleine UX-Politur, geringe Tragweite.
 
 Rarität-Grundmechanik ist umgesetzt (s. „Erledigt" → „Rarität / Entdeckungs-Tiefe"). Offen
 als Politur:
@@ -313,30 +329,64 @@ strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch 
 > hat denselben 9-Gene-Rest, wird aber nur vom archivierten `mockup/` + `cli/demo.ts` genutzt —
 > niedrige Priorität.)
 
-- [ ] **Schritt 1 — `training/fit.ts` auf 25 Gene bringen**: `NUM_GENES` von `training/fit.ts`
-  dynamisch aus `phys.traits.length` lesen (statt hart 9), `BOUNDS`/`responseRate` entsprechend
-  auf 25 Einträge erweitern. Für die 15 bedingten Kosten-Gene (Stressor-Resistenzen/Nischen-
-  Mechaniken) den bereits im Live-App-Mittelfeld validierten `mutationAnchor` (Kern-Gene 0–9
-  neutral 0.5, restliche 15 niedrig 0.12 — s. „Mittelfeld-Fidelity-Fix v0.63.0" im Archiv) mit
-  ausgeben, statt ihn ungeankert zu lassen. GA neu laufen lassen (`npm run train`),
-  `fitted-params.json` neu erzeugen, alle 5 Gates (`pop-check`, `branching-check`,
-  `world-check`, `parity`, `ecology`) + `ecology-full`/`reality`/`app-parity`/`mf-fidelity`
-  gegenprüfen — `validityTest` sollte im 80–90 %-Band bleiben, sonst nachkalibrieren.
-  `world/population.ts`s `numGenes: 9`-Default kann bei Gelegenheit trotzdem auf 25 gesetzt
-  werden (Hygiene, kein funktionaler Effekt).
-  **Ausstiegsregel (Identifizierbarkeit, Forschungsdokument Teil V Punkt 3):** bleibt
-  `validityTest` nach dieser Erweiterung UND nach Nachkalibrierungs-Versuchen dauerhaft
-  unter 80 %, ist das kein Kalibrierungsproblem mehr, sondern ein Signal, dass die
-  Mittelfeld-Engine-STRUKTUR das 25-Gene-Orakel nicht treffen kann. Dann NICHT weiter an
-  Parametern drehen — Befund hier im Backlog dokumentieren und Schritt 6/7 pausieren, bis
-  das strukturell geklärt ist (neuer, separater Punkt), statt stillschweigend mit einer zu
-  armen Engine weiterzuarbeiten.
+- [x] **Schritt 1 — `training/fit.ts` auf 25 Gene bringen (erledigt 2026-07-29, mit
+  strukturellem Restbefund):**
+  **Tieferer Befund beim Umsetzen:** die Lücke saß nicht nur in `training/fit.ts` — die
+  wirklich bindende Quelle war `engine/types.ts`s `TRAITS`-Konstante, die trotz `physics.json`s
+  25 Traits (und `fitness.ts`s Indizes bis 24) noch immer nur **10** Gene listete.
+  `engine/simulate.ts`s `runSimulation`/`stepGeneration` nutzen `TRAITS.length` als Vektorlänge
+  → die 15 bedingten Kosten-Gene waren in der Mittelfeld-Engine strukturell gar nicht Teil des
+  Zustandsvektors (nicht bloß `NaN`, wie zunächst vermutet: `fitness.ts`s `traits[g] ?? 0`
+  hielt sie hart bei 0). Nur `app/index.html`s Hand-Kopie hatte das mit einem GESCHÄTZTEN
+  Platzhalter (`responseRate` 0.27 für Index 10–24, nie GA-gefittet) umschifft.
+  **Fix:** `TRAITS` in `engine/types.ts` auf alle 25 Gene erweitert (Reihenfolge = `physics.json`),
+  `DEFAULT_ENGINE_PARAMS` inkl. `mutationAnchor` (Kern 0–9 → 0.5, bedingte Kosten-Gene 10–24 →
+  0.12) mitgezogen; `training/fit.ts`s `NUM_GENES` liest jetzt dynamisch aus
+  `phys.traits.length`, hängt denselben `mutationAnchor` fix an (kein GA-Parameter), GA-Budget
+  an die gewachsene Dimension angepasst (POP 72→160, GENS 140→160); `world/population.ts`s
+  `numGenes`-Default 9→25 (Hygiene, kein funktionaler Effekt, alle echten Aufrufer übergaben
+  ohnehin schon 25). GA zweimal neu trainiert (`npm run train`, zweiter Lauf zusätzlich mit
+  Zufalls-Immigranten gegen vorzeitige Plateaubildung) — beide Läufe konvergierten
+  unabhängig auf fast denselben Wert. `app/index.html`s `PARAMS.responseRate`/`mutationRate`/
+  `selectionStrength` mit dem ehrlich gefitteten Ergebnis synchronisiert (ersetzt den alten
+  Platzhalter). Alle Gates gegengeprüft: `pop-check`, `branching-check`, `world-check`,
+  `parity`, `ecology`, `ecology-full`, `reality` (20/20), `app-parity` (exakt), `mf-fidelity`
+  — alle grün (`mf-fidelity` sogar verbessert: reale statt geschätzte Stressor-Antworten).
+  `seed-check`-FAIL ist der bereits unter Punkt 7 dokumentierte, unabhängige Vorbefund.
+  **Ausstiegsregel griff (Identifizierbarkeit, Forschungsdokument Teil V Punkt 3):**
+  `validityTest` blieb nach der Erweiterung UND nach dem zweiten (Immigranten-)Lauf bei
+  ~71–72 % — deutlich unter dem 80–90 %-Band, keine Verbesserung durch mehr Suchbudget
+  (Trainingskurve flachte beide Male um Generation 60–80 vollständig ab: echte Konvergenz,
+  kein Budget-Mangel). Eine Per-Gen-Fehleranalyse (MAE Engine↔Orakel je Gen) zeigt: die
+  Verschlechterung verteilt sich über FAST ALLE 25 Gene (auch die ursprünglichen 9 Kern-Gene
+  liegen jetzt schlechter als die alte ~85 %-Zahl vermuten liess, z. B. armor 0.099, mobility
+  0.096, wing 0.091), nicht isoliert auf die neuen 15 — Ursache ist strukturell: `mutationRate`/
+  `selectionStrength`/`varianceWeight` sind EINE globale Zahl für alle 25 Gene gleichzeitig
+  (nur `responseRate` ist pro Gen), das reicht nicht mehr, um 25 Orakel-Trajektorien gemeinsam
+  zu treffen, sobald man sie ehrlich (nicht mehr blind für 15 von 25) misst. Auffälligster
+  Einzelfall: `nfix` (MAE 0.103, schlechtester Wert) — das Orakel lässt Stickstoff-Fixierung in
+  manchen benignen Szenarien (z. B. „Eiszeit", mobility niedrig) auf ~0.83 statt der als
+  „bedingtes Kosten-Gen" angenommenen Nähe zu 0.12 laufen; anders als die zehn reinen
+  Stressor-Resistenz-Gene ist `nfix` (wie `filter`) ein ALTERNATIVER Energiepfad, der auch ohne
+  einen benannten Extrem-Stressor eine eigene Nische tragen kann — der binäre Kern/Kosten-Anker
+  ist dafür zu grob. Das ist genau das im Forschungsdokument vorhergesehene Signal: **kein
+  Kalibrierungsproblem mehr, sondern eine Strukturgrenze der Mittelfeld-Engine.**
+  **Konsequenz:** Schritt 6/7 (Drei-Schicht-Optimierungsloop) bleiben pausiert, bis diese
+  Strukturfrage separat geklärt ist (z. B. per-Gen-Mutationsrate/-Selektionsstärke statt
+  globaler Skalare, oder eine feinere Anker-Kategorisierung, die `nfix`/`filter`/`burrow`/
+  `camo`/`sense` von den zehn reinen Stressor-Resistenz-Genen unterscheidet) — **absichtlich
+  nicht eigenmächtig umgesetzt**, da das laut Autonomie-Regel in `training/fit.ts` eine
+  bewusste Struktur-, keine Parameter-Entscheidung ist. Kopfzeile dieser Datei entsprechend auf
+  ~72 % korrigiert (ehrlicher Wert statt der alten, für 15 Gene blinden ~85 %-Zahl).
 
 **Ab hier zwei unabhängige Spuren, die parallel begonnen werden können** (Schritt 2–3
 betreffen den Populations-Kern `world/`, Schritt 6–7 die Mittelfeld-Engine aus Schritt 1 —
 verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen):
 
-- [ ] **Schritt 2 — Schicht-A-Portfolio** (P1–P8) als neues Gate `tools/phenomena-check.mjs`
+- [ ] **Schritt 2 — Schicht-A-Portfolio** (P1–P8) — **Modell: Sonnet** (vier von acht
+  Phänomenen sind Wiederverwendung bestehender Checks; bei der Bandwahl für P6 Kontingenz
+  sorgfältig begründen, s. u. — kein Grund für Opus, nur Sorgfaltspflicht) — als neues Gate
+  `tools/phenomena-check.mjs`
   (+ ggf. `world/phenomena.ts` für die Szenario-/Metrik-Logik, analog zum Aufbau von
   `world/cluster.ts`/`tools/branching-check.mjs`). Zielband + Szenario-Beschreibung je
   Phänomen stehen in `docs/evolution-fidelity-loop.md`, Abschnitt **„### Schicht A —
@@ -364,14 +414,18 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   **Baue den Portfolio-Runner von Anfang an mit einem `disabledMechanisms`-Parameter**
   (z. B. `{ competition: false, migration: false, coevolution: false, drift: false }`) —
   das macht Schritt 3 zu einer reinen Wiederverwendung statt einer zweiten Implementierung.
-- [ ] **Schritt 3 — Mechanismus-Ablationsstudie** (Validierungsplan Teil V Punkt 2): den
+- [ ] **Schritt 3 — Mechanismus-Ablationsstudie** — **Modell: Sonnet** (Diagnose-Ausgabe, kein
+  Gate, mechanisch) (Validierungsplan Teil V Punkt 2): den
   Schritt-2-Portfolio-Runner einmal je Mechanismus mit `disabledMechanisms` auf „aus"
   laufen lassen (Konkurrenz/Migration/Ko-Evolution/Drift einzeln), Matrix „Mechanismus ×
   welches P-Ergebnis kippt" ausgeben (z. B. `tools/ablation-check.mjs`, druckt eine Tabelle,
   kein hartes Pass/Fail nötig — das ist eine Diagnose-/Doku-Ausgabe, kein Gate). Bindet
   Mechanismus kausal an Phänomen; Ergebnis kurz in diesem Backlog-Punkt oder einer neuen
   Datei `docs/ablation-results.md` festhalten.
-- [ ] **Schritt 4 — Schicht-B-Metriken**: Referenzverteilungen mit Quelle (Anhang „Belegprinzip"
+- [ ] **Schritt 4 — Schicht-B-Metriken** — **Modell: Sonnet** (Umsetzung), aber bei der
+  Quellen-/Bandwahl unter Unsicherheit sorgfältig gegen die Literatur abwägen (Belegprinzip,
+  s. u. — bei ernsthaftem Zweifel eher Rücksprache/Opus für die Bewertung als eine erfundene
+  Zahl): Referenzverteilungen mit Quelle (Anhang „Belegprinzip"
   in `docs/evolution-fidelity-loop.md` beachten — **keine erfundenen Zahlen**, wo Unsicherheit
   besteht ein Band statt eines Punktwerts) für Körpergrößen-Verteilung (log-normal), SAD
   (Fisher 1943 log-series bzw. Preston 1948 log-normal), SAR (S≈c·Aᶻ, z≈0.2–0.35,
@@ -383,7 +437,8 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   das ist NICHT dasselbe wie Schicht B (Verteilungs-*Form*, nicht Reich-*Anteil*); als
   Vorbild für den Belegprinzip-Stil trotzdem lesenswert. Neues Gate z. B.
   `tools/distribution-check.mjs`.
-- [ ] **Schritt 5 — Gewichte & Schwellen festlegen** (Forschungsdokument „### Aggregat"):
+- [ ] **Schritt 5 — Gewichte & Schwellen festlegen** — **Modell: Sonnet** (begründete
+  Default-Wahl + Dokumentation, kein tiefes Ermessen nötig) (Forschungsdokument „### Aggregat"):
   `Fidelity = w_A·Score_A + w_B·Score_B + w_C·Score_C` mit Pro-Schicht-Mindestschwellen.
   **Ausdrücklich KEINE Rückfrage nötig** — das ist laut Dokument eine bewusste, aber vom
   Optimierer entkoppelte technische Entscheidung (Goodhart-Schutz), keine Produktentscheidung
@@ -396,7 +451,9 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   (w_A=w_B=w_C=1/3), Mindestschwelle je Schicht so, dass der aktuelle Stand (nach Schritt
   2+4) knapp durchfällt statt knapp besteht — ein Prüfstand, der beim ersten Lauf grün ist,
   prüft nichts.
-- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** (Forschungsdokument
+- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **Modell: Opus** für
+  den Loop-/Gate-Architekturentwurf (Overfitting-Vermeidung ist konzeptionell heikel),
+  **Sonnet** für die Implementierung danach (Forschungsdokument
   Teil IV, „### 4.2 Die sechs Stationen im Detail" — Kandidat, Simulieren, Messen,
   Optimierer, Selektion mit Holdout, Champion+Report). Baut auf Schritt 1 (25-Gene-Fitting)
   UND Schritt 5 (Gewichte/Schwellen) auf; Schritt 2–4 liefern die Score_A/B/C-Messfunktionen,
@@ -416,15 +473,16 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   ist DAS das Signal, dass dieser Punkt fällig wird — dann als neuer, eigener Backlog-Punkt
   aufnehmen, nicht in Schritt 6 hineinquetschen.
 
-**Sicherheitshinweis für alle Schritte:** nichts hiervon berührt `app/index.html` direkt —
-Schritt 1/6 schreiben nur `fitted-params.json`/`fidelity-champion.json` (gelesen von
-`tools/ecology-check.mjs`/`cli/demo.ts`, NICHT von der Live-App, die ihre eigene
-hand-gepflegte `PARAMS`-Kopie inline hat), Schritt 2–4 sind neue, eigenständige
-`world/`+`tools/`-Dateien. Die „Live-App bleibt unangetastet"-Leitplanke aus
-`docs/rebuild-roadmap.md` ist damit für den gesamten Punkt 9 automatisch erfüllt — kein
-gesonderter Check nötig. Jeder Schritt einzeln committen, nach jedem Schritt die 5
-Kern-Gates (`pop-check`, `branching-check`, `world-check`, `parity`, `ecology`) plus alle
-neu hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
+**Sicherheitshinweis für Schritt 2–7:** nichts davon berührt `app/index.html` direkt —
+Schritt 6 schreibt nur `fitted-params.json`/`fidelity-champion.json` (gelesen von
+`tools/ecology-check.mjs`/`cli/demo.ts`, NICHT von der Live-App), Schritt 2–4 sind neue,
+eigenständige `world/`+`tools/`-Dateien. **Ausnahme Schritt 1** (s. o., bereits erledigt):
+dort WURDE `app/index.html`s `PARAMS`-Kopie bewusst synchronisiert (ersetzt einen nie
+gefitteten Platzhalter durch den echten GA-Wert) — die „Live-App bleibt unangetastet"-
+Leitplanke aus `docs/rebuild-roadmap.md` gilt also ab Schritt 2, nicht rückwirkend für
+Schritt 1. Jeder Schritt einzeln committen, nach jedem Schritt die 5 Kern-Gates
+(`pop-check`, `branching-check`, `world-check`, `parity`, `ecology`) plus alle neu
+hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
 
 Wird sukzessive abgearbeitet (kein automatischer Trigger mehr aktiv — Start ab
 Mi 2026-07-29).
