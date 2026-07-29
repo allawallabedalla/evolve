@@ -294,9 +294,85 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     gegengeprüft (eigener Playwright-Lauf dieser Session): Schwarm nachweislich
     aktiv (`window.__evolvePerf()` → `schwarmAktiv:true`, ~2–4 ms/Generation),
     Formwechsel/Genbuch/Rendering visuell bestätigt, 0 Konsolenfehler.
-  - [ ] Stufe 5 — Telemetrie-Erklärung (echtes Selektionsdifferential aus dem Schwarm) statt
-    `engine/explain.ts`s handgeschriebener `env`-Schwellen-Sätze (behebt nebenbei die im
-    Code selbst dokumentierte BUG-2-Klasse).
+  - [x] **Stufe 5 (erledigt 2026-07-29, Opus) — die Warum-Zeile misst jetzt das ECHTE
+    Selektionsdifferential des Schwarms:**
+    `app/index.html`, neue Funktion `swarmSelection()` + `updateWhy()`. Statt eines
+    fiktiven Fitness-Gradienten am Zentroid × Mittelfeld-Konstanten läuft jetzt
+    `S_i = cov(w_j, gen_j[i]) / mean(w_j)` (Robertson/Price) über alle N=200 Individuen
+    der laufenden Population. Einheit: Gen-Einheiten je Generation, also wörtlich „um so
+    viel verschiebt die Auslese den Durchschnitt dieses Merkmals in dieser Generation".
+    **Gemessene Abweichung von der Aufgaben-Formel, bewusst und begründet:** `w` ist NICHT
+    die rohe Fitness, sondern `pop.weights()` (Fitness^selPower / Nischen-Konkurrenzdichte
+    × K) — genau die Größe, nach der `pop.step()` Eltern zieht. Mit roher Fitness sagt
+    `S_i` die reale Bewegung des Populationsmittels NICHT vorher (Korrelation −0.38 /
+    −0.35 / −0.45 in eingeschwungenen Populationen), weil die frequenzabhängige Konkurrenz
+    die Kosten-Selektion auf den 8 Nischen-Achsen exakt aufhebt; mit den echten Gewichten
+    +0.60 / +0.84 / +0.36 und direkt nach einem Reglerwechsel +0.91 statt +0.83.
+    **`pull` ebenfalls gemessen statt geschätzt:** der Transmissions-Term der
+    Price-Gleichung (erwarteter Versatz durch Mutation + Klemmung an [0,1], analytisch über
+    Φ/φ, gewichtet mit `w`). `net = S + pull` reproduziert die real durchgerechnete
+    Bewegung des Populationsmittels mit Korrelation **0.986 / 0.999 / 0.965** (40
+    unabhängige Realisierungen je Messpunkt) und bleibt damit — wie vorher — das Kriterium
+    „bewegt sich das Merkmal überhaupt?": ein Gen am mutationsbedingten Boden (Photosynthese
+    bei 0.05 in einer dunklen Welt) hat großes |S|, aber net ≈ 0 und bekommt korrekt keinen
+    Pfeil.
+    **Der behobene Fehler war real und sichtbar:** die alte Zeile fror gemessen nach ~3 s
+    dauerhaft auf „Panzerung ↓ · Biolumineszenz ↓ · Photosynthese ↓" ein — in JEDER Welt
+    dasselbe, weil der Mittelfeld-Gradient am Zentroid von den Unterhaltskosten ungenutzter
+    Gene dominiert wird. Das ist genau die BUG-2-Klasse (eine Erklärung, die etwas behauptet,
+    was die Lage nicht hergibt), nur in der Live-App statt in `engine/explain.ts`.
+    **Neukalibrierung aller fünf Bremsen (Struktur unangetastet):** `WHY_ENTER` 0.0022 →
+    0.026, `WHY_LEAVE` 0.0010 → 0.012, net-Schwelle 0.0002 → `WHY_STILL` 0.0024 — die alten
+    Werte × 12, mit unverändertem Verhältnis 2.2 (EIN/AUS) und 1/11 (STILL/EIN). `WHY_MS`
+    (900 ms), `WHY_SMOOTH` (0.28), `WHY_STICKY` (1.35), `WHY_HOLD` (2) unverändert. Weg
+    dorthin: Gitterlauf über einen 1:1-Nachbau der Zustandsmaschine (42 Messungen je
+    Kandidat = 3 Tempi × 2 Einschwing-Zustände × 7 Seeds), dann im Browser gegengemessen.
+    Faktor 12 gewann gegen 10 in BEIDEN Kriterien gleichzeitig (ruhiger *und*
+    aussagekräftiger).
+    **Eine strukturelle Ergänzung, gemessen erzwungen:** der Schwarm passt sich viel
+    schneller an als der alte Bergsteiger — nach einem Umwelt-Wechsel fällt |S| des
+    betroffenen Gens binnen ~7 Generationen von 1.7e-1 auf 2.4e-2 (Wärmedämmung bei
+    Eiszeit, Mittelwert 0.31 → 0.78). Bei „normal" ist das EIN Takt; Trägheit + Haltezeit
+    verschluckten den didaktisch wertvollsten Moment vollständig (gemessen: 0 von 12 Presets
+    zeigten nach einem Biom-Wechsel überhaupt etwas). Bei einem echten Umwelt-SPRUNG
+    (Summe der Änderungen über die 16 Umwelt-Achsen SEIT DEM LETZTEN BILD > `WHY_JUMP` =
+    0.08) werden Trägheit und Haltezeit deshalb EINMAL übergangen. Bewusst je BILD statt je
+    Takt gemessen: feines Regler-Ziehen bewegt ~0.01–0.04 je Bild und bleibt darunter, kann
+    die Zeile also nicht über die alte Höchstrate treiben (im Browser gegengeprüft: 5 s
+    langsames Ziehen → **0 Wechsel**).
+    **Ruhe objektiv abgenommen.** `ui-calm-check` (das Abnahmekriterium): vorher 3/0/2,
+    nachher **1/0/3** von erlaubten 6. Zusätzlich 7 eigene Browser-Szenarien, die
+    `ui-calm-check` nicht abdeckt: frisch geladen 5, reif+unberührt 0, Preset Eiszeit 1,
+    Tiefsee 3, Hitze-Dürre 2, langsames Ziehen 0, Tempo „schnell" + Preset 0 — alle unter 6,
+    0 Konsolenfehler.
+    **Inhalt gegengeprüft (12 Presets):** 12/12 nennen beim Umschalten plausible Merkmale
+    (Eiszeit → „Wärmedämmung ↑ · Stoffwechsel ↑" — das Endothermie-Paar, Tiefsee →
+    „Biolumineszenz ↑ · Filterapparat ↑", Hitze-Dürre → „Wärmedämmung ↓ · Stoffwechsel ↓",
+    Räuberland → „Mobilität ↑ · Größe ↑"), 12/12 fallen eingeschwungen wieder auf
+    „Angepasst" zurück. **Sichtbare Verhaltensänderung, ehrlich benannt:** „Angepasst an
+    diese Umwelt — die Form steht" erscheint jetzt regelmäßig (vorher praktisch nie) —
+    das ist der Zustand, für den die Zeile immer gedacht war.
+    **Laufzeit real gemessen, nicht geschätzt** (neu in `__evolvePerf()`: `msProWarum`):
+    2.3–2.7 ms je Takt, also alle 900 ms — ~0.3 % Rechenzeit. Kollidiert nicht mit
+    `simStepBudget()` aus Stufe 4, das nur `pop.step()` misst.
+    **Rückfall-Pfad unverändert lauffähig** (Bundle-Import per Playwright abgebrochen →
+    `schwarmAktiv:false`): die Mittelfeld-Näherung bleibt Zeile für Zeile stehen, wird nur
+    mit `WHY_MF_SCALE = 12` auf die neue Skala gebracht, damit dieselben Schwellen greifen
+    (LEAVE/STILL exakt wie vor Stufe 5, ENTER 1.5 % empfindlicher). Gegengemessen: 7
+    Wechsel/12 s im Rückfall — auf Original-HEAD im identischen Szenario 8, also keine
+    Regression.
+    `APP_VERSION` v0.76.0 → v0.77.0; „Über die Engine" und der `#whyLine`-Tooltip erklären
+    jetzt die gemessene Größe (Tippfehler „ausleset" dabei behoben).
+    **Bewusst NICHT gemacht:** `engine/explain.ts` unangetastet — es ist NICHT toter Code
+    (`engine/report.ts` → `engine/index.ts` → `cli/demo.ts`, also `npm run demo`), liegt aber
+    im Mittelfeld-CLI-Pfad und nicht in der Live-App; die konkrete BUG-2-Instanz dort ist
+    laut Backlog längst behoben. Eine Umstellung auf Telemetrie wäre ein eigener Umbau des
+    CLI-Berichts ohne Nutzen für die App und wurde nicht ohne Rückfrage begonnen.
+    **Getestet:** `build` + `pop-check`/`branching-check`/`world-check`/`parity`/`ecology`/
+    `app-parity`/`mf-fidelity`/`census-check`/`phenomena-check`/`ablation-check`/
+    `seed-check`/`rarity-check`/`coevolution-check`/`distribution-check`/`exemplar-check`/
+    `story-check`/`influence-check`/`ui-calm-check` alle grün; `app-world-smoke`-Selektor-
+    Timeout vorbestehend (Ausgabe zeichenweise identisch auf Original-HEAD verifiziert).
   - [ ] Stufe 6 — Orakel-Prüfstand auf Verteilungsmetrik (Jensen-Shannon über Formhäufigkeiten)
     umstellen; `fitted-params.json`/`validityTest`-Prozentbalken fallen weg oder bekommen
     neue Bedeutung (Konvergenz-in-N statt Distillation).

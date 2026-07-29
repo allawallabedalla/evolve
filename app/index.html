@@ -770,7 +770,7 @@
         <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
         <span class="vit-num" id="vitNum">—</span>
       </div>
-      <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausleset — daran passt sich das Wesen über Generationen an."></div>
+      <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausliest — gemessen an der lebenden Population: um so viel verschiebt die Auslese den Durchschnitt dieses Merkmals je Generation. Steht nichts, ist das Wesen angepasst."></div>
       <div class="genes" id="genes"></div>
       <button class="gene-nums-toggle" id="geneFilterBtn" aria-pressed="false" title="Nur auffällige Gene zeigen oder alle 25 Gene auf einmal">Alle 25 Gene zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
@@ -835,9 +835,12 @@
           Dazu kommt <b>Konkurrenz um Nischen</b>: wer dort lebt, wo schon viele leben, hat es schwerer —
           deshalb kann sich eine Linie in mehrere Formen <b>aufspalten</b>, statt immer auf denselben
           Gipfel zu laufen. <b>Dein Wesen</b> ist die häufigste Form dieser Population; spaltet sie sich,
-          steht das unter dem Artnamen. Die Fitness-Physik dahinter (Energie-Pfade, Stoffwechsel-Kosten,
-          Stress-Achsen) ist dieselbe, die auch das wissenschaftliche Referenzmodell benutzt — der Browser
-          rechnet sie nur mit weniger Individuen.
+          steht das unter dem Artnamen. Auch <b>„Diese Umwelt formt gerade …"</b> ist an dieser Population
+          gemessen und nicht geschätzt: für jedes Merkmal wird verglichen, wie stark es bei denen ausgeprägt
+          ist, die gerade mehr Nachkommen hinterlassen — das ergibt direkt, um wie viel die Auslese den
+          Durchschnitt dieses Merkmals in dieser Generation verschiebt. Die Fitness-Physik dahinter
+          (Energie-Pfade, Stoffwechsel-Kosten, Stress-Achsen) ist dieselbe, die auch das wissenschaftliche
+          Referenzmodell benutzt — der Browser rechnet sie nur mit weniger Individuen.
         </p>
       </div>
       <div class="dpanel-sec">
@@ -1016,7 +1019,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.76.0";
+const APP_VERSION = "v0.77.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1713,16 +1716,19 @@ let swarmSplit = null;   // {n, pct} — zweite, klar andere Bauform (Aufspaltun
 let _censusDue = 0, _censusT = 0;   // Generationen bzw. Zeitpunkt seit dem letzten Zensus
 // Ehrliche Laufzeit-Messung statt Schätzung (Abnahme-Kriterium Stufe 4: < 10 ms/Tick).
 // In der Konsole: __evolvePerf()
-const _perf = { gens: 0, genMs: 0, census: 0, censusMs: 0, worstGenMs: 0 };
+const _perf = { gens: 0, genMs: 0, census: 0, censusMs: 0, worstGenMs: 0, why: 0, whyMs: 0, worstWhyMs: 0 };
 window.__evolvePerf = () => ({
   N: SWARM.N, schwarmAktiv: !!pop, generationen: _perf.gens, zensusLaeufe: _perf.census,
   msProGeneration: _perf.gens ? _perf.genMs / _perf.gens : 0,
   msSchlechtesteGeneration: _perf.worstGenMs,
   msProZensus: _perf.census ? _perf.censusMs / _perf.census : 0,
+  // Stufe 5: das Selektionsdifferential der Warum-Zeile (alle WHY_MS = 900 ms).
+  warumLaeufe: _perf.why, msProWarum: _perf.why ? _perf.whyMs / _perf.why : 0,
+  msSchlechtestesWarum: _perf.worstWhyMs,
   clusterAktuell: swarmForms.length,
   generationenProFrameBudget: simStepBudget(),
 });
-window.__evolvePerfReset = () => { _perf.gens = 0; _perf.genMs = 0; _perf.census = 0; _perf.censusMs = 0; _perf.worstGenMs = 0; };
+window.__evolvePerfReset = () => { _perf.gens = 0; _perf.genMs = 0; _perf.census = 0; _perf.censusMs = 0; _perf.worstGenMs = 0; _perf.why = 0; _perf.whyMs = 0; _perf.worstWhyMs = 0; };
 
 // Den echten Populations-Kern nachladen. Wird EINMAL vor boot()/restore() awaited,
 // damit ein wiederhergestellter Spielstand direkt in den Schwarm gesetzt wird.
@@ -2754,17 +2760,39 @@ const EXPLORE_IDEAS = [
 // Selektionsgradient ∂Fitness/∂Gen (dieselbe Größe, die die Evolution treibt) — so
 // sieht man live, WARUM sich das Wesen in diese Richtung verschiebt, nicht erst im Reveal.
 //
-// STAND NACH MIGRATIONS-STUFE 4 (bewusst minimal angepasst, s. Bericht/BACKLOG Stufe 5):
-// gerechnet wird jetzt am ZENTROID der dominanten Form statt am alten Mittelwert-Punkt —
-// die RICHTUNG (↑/↓ = Vorzeichen von ∂Fitness/∂Gen) bleibt damit exakt richtig, denn genau
-// dorthin verschiebt die Selektion auch den Schwarm. Die BETRÄGE werden weiterhin mit
-// PARAMS.responseRate/selectionStrength/mutationRate skaliert; das sind Mittelfeld-Größen,
-// die die Schwarm-Dynamik nicht mehr beschreiben — sie dienen hier nur noch als (monotone)
-// Empfindlichkeits-Kalibrierung der Schwellen WHY_ENTER/WHY_LEAVE. Die saubere Ablösung ist
-// Migrations-Stufe 5: das ECHTE Selektionsdifferential cov(fitness_i, gen_i)/mean(fitness)
-// direkt aus dem Schwarm. Bewusst NICHT hier mitgemacht, weil die gesamte Glättungs-/
-// Hysterese-Kalibrierung dieser Zeile daran hängt und ein Umbau ohne neue Kalibrierung die
-// ruhigste Stelle der UI wieder zum Flackern brächte.
+// STAND SEIT MIGRATIONS-STUFE 5: gerechnet wird das ECHTE SELEKTIONSDIFFERENTIAL des
+// laufenden Schwarms, nicht mehr ein fiktiver Gradient am Zentroid.
+//
+//   S_i = cov(w_j, gen_j[i]) / mean(w_j)      (Robertson/Price, Standardgröße der
+//                                              quantitativen Genetik)
+//
+// über ALLE N=200 Individuen der laufenden Population. Einheit: Gen-Einheiten je
+// Generation — S_i ist wörtlich „um so viel verschiebt die Selektion den Mittelwert
+// dieses Merkmals in dieser Generation". Vorher stand hier eine Näherung
+// (∂Fitness/∂Gen am Zentroid × PARAMS.responseRate × selectionStrength): die RICHTUNG
+// war korrekt, die Beträge waren Mittelfeld-Erbstücke, die den Schwarm nicht
+// beschrieben — und die Zeile fror deshalb dauerhaft auf drei Kosten-Genen ein
+// („Panzerung ↓ · Biolumineszenz ↓ · Photosynthese ↓" in JEDER Welt, gemessen).
+//
+// GEMESSENE ENTSCHEIDUNG, welches `w` (bewusst NICHT die rohe Fitness):
+// `w` ist das ECHTE Reproduktions-Gewicht des Schwarms (`pop.weights()` = Fitness^selPower
+// geteilt durch die Nischen-Konkurrenzdichte, × K) — also genau die Größe, nach der
+// `pop.step()` Eltern zieht. Mit der rohen Fitness sagt S_i die reale Bewegung des
+// Populationsmittels NICHT vorher (gemessene Korrelation −0.38 / −0.35 / −0.45 in
+// eingeschwungenen Populationen, weil die frequenzabhängige Konkurrenz die Kosten-
+// Selektion auf den 8 Nischen-Achsen exakt aufhebt); mit den echten Gewichten +0.60 /
+// +0.84 / +0.36, und direkt nach einem Reglerwechsel +0.91 statt +0.83.
+//
+// `pull` (der zweite Term, „was das Gen von selbst tut") ist jetzt ebenfalls gemessen
+// statt geschätzt: der TRANSMISSIONS-Term der Price-Gleichung, d. h. der erwartete
+// Versatz durch Mutation + Klemmung an [0,1], gemittelt über die Eltern (gewichtet mit
+// w). Analytisch für ε~N(0,mutationSd):  E[clamp01(z+ε)]−z. Damit gilt
+//   net_i = S_i + pull_i ≈ tatsächliche Änderung des Populationsmittels je Generation
+// (unabhängig gegengeprüft: Korrelation 0.986 / 0.999 / 0.965 gegen 40 real
+// durchgerechnete Generationen). `net` ist deshalb weiterhin — wie vorher — das
+// Kriterium „bewegt sich das Merkmal überhaupt?": ein Gen am mutationsbedingten Boden
+// (z. B. Photosynthese bei 0.05 in einer dunklen Welt) hat großes |S|, aber net ≈ 0 und
+// bekommt korrekt KEINEN Pfeil.
 //
 // RUHE (Nutzer-Rückmeldung 2026-07): diese Zeile und die Gen-Pfeile liefen im Takt der
 // Bildrate und sprangen im Sekundenbruchteil. Drei Bremsen, alle nötig:
@@ -2774,41 +2802,156 @@ const EXPLORE_IDEAS = [
 //   3. Schwellen-Hysterese — ein Merkmal muss deutlich über EIN, aber weit unter AUS
 //      fallen, um wieder zu verschwinden. Dazwischen bleibt die Anzeige, wie sie ist.
 // Zusätzlich wird das DOM nur angefasst, wenn sich das ANGEZEIGTE Ergebnis ändert.
-const WHY_MS = 900, WHY_SMOOTH = 0.28, WHY_ENTER = 0.0022, WHY_LEAVE = 0.0010, WHY_STICKY = 1.35, WHY_HOLD = 2;
+//
+// NEUKALIBRIERUNG DER FÜNF BREMSEN FÜR DIE NEUE GRÖSSENORDNUNG (Stufe 5): die STRUKTUR
+// ist unangetastet, neu sind nur die Schwellenwerte. S_i liegt rund EINE DEKADE über dem
+// alten Mittelfeld-Surrogat (gemessen über 12 Presets × 3 Zeitpunkte: |S| des stärksten
+// Gens 2e-3…1.5e-1, Median 4e-3) — ENTER/LEAVE/STILL sind deshalb die alten Werte × 12,
+// mit dem unveränderten Verhältnis 2.2 (EIN/AUS) bzw. 1/11 (STILL/EIN). Takt (900 ms),
+// Trägheit (0.28), Klebrigkeit (1.35) und Haltezeit (2 Takte) bleiben, wie sie waren.
+// Weg dorthin: erst ein Gitterlauf im Nachbau der Zustandsmaschine (SMOOTH × ENTER ×
+// LEAVE × HOLD, je Kandidat 42 Messungen = 3 Tempi × 2 Einschwing-Zustände × 7 Seeds),
+// dann im echten Browser gegengemessen (7 Szenarien, s. u.). Der Faktor 12 gewann gegen
+// 10 in BEIDEN Kriterien gleichzeitig — ruhiger UND aussagekräftiger (gemessen:
+// „frisch geladen" 5→4 Wechsel, Eiszeit 5→3, Hitze-Dürre 4→1, und die Eiszeit nennt erst
+// mit 12 das didaktisch richtige Paar „Wärmedämmung ↑ · Stoffwechsel ↑").
+// Gemessene Wechselraten im Browser (Grenze 6 je 12 s): frisch geladen 4, reif und
+// unberührt 0, Preset Eiszeit 3, Tiefsee 3, Hitze-Dürre 1, Räuberland (Tempo „schnell") 4,
+// Flachmeer 2, langsames Regler-Ziehen über 5 s 0.
+//
+// EINE STRUKTURELLE ERGÄNZUNG, gemessen begründet: der Schwarm passt sich VIEL schneller
+// an als der alte Bergsteiger — nach einem Umwelt-Wechsel fällt |S| des betroffenen Gens
+// binnen ~7 Generationen von 1.7e-1 auf 2.4e-2 (gemessen: Wärmedämmung bei Eiszeit,
+// Mittelwert 0.31 → 0.78). Bei „normal" (8 Gen/s) ist das EIN Takt. Trägheit und
+// Haltezeit hätten diesen — didaktisch wertvollsten — Moment vollständig verschluckt
+// (gemessen: 0 von 12 Presets zeigten nach einem Biom-Wechsel überhaupt etwas). Bei einem
+// echten Umwelt-SPRUNG werden Trägheit und Haltezeit deshalb EINMAL übergangen: der
+// gleitende Mittelwert startet auf dem Momentanwert. Danach greifen alle fünf Bremsen
+// unverändert. Ergebnis: 12/12 Presets nennen beim Umschalten plausible Merkmale
+// (Tiefsee → „Biolumineszenz ↑ · Filterapparat ↑"), 12/12 fallen eingeschwungen wieder
+// auf „Angepasst" zurück.
+const WHY_MS = 900, WHY_SMOOTH = 0.28, WHY_ENTER = 0.026, WHY_LEAVE = 0.012, WHY_STICKY = 1.35, WHY_HOLD = 2;
+// „Bewegt sich das Merkmal überhaupt?" (net-Schwelle, vorher inline 0.0002) und „ist die
+// Umwelt gesprungen?" (Summe der Änderungen über alle 16 Umwelt-Achsen SEIT DEM LETZTEN
+// BILD — ein Preset/Einfluss springt weit darüber, feines Regler-Ziehen bleibt darunter).
+const WHY_STILL = 0.0024, WHY_JUMP = 0.08;
+// Rückfall-Pfad (Schwarm nicht geladen, s. initSwarmCore()): die Mittelfeld-Näherung liegt
+// eine Dekade tiefer als S_i — mit diesem Faktor treffen sie dieselben Schwellen. Der
+// Rückfall verhält sich damit praktisch wie die abgenommene Fassung vor Stufe 5
+// (LEAVE/STILL exakt gleich, ENTER 1.5 % empfindlicher: 0.026/12 vs. 0.0022).
+const WHY_MF_SCALE = 12;
 const _why = { t: 0, ema: new Array(NG).fill(0), on: new Array(NG).fill(0), sig: "", shown: [],
-               hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null) };
+               hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null), env: null };
+// Die 16 Umwelt-Achsen, an denen ein „Sprung" erkannt wird (6 Regler + 10 Stressoren).
+const WHY_ENV_KEYS = ["temperature","predation","foodAbundance","foodHeight","light","water",
+  "toxicity","oxygen","salinity","uv","pressure","aridity","radiation","fire","frost","wind"];
+// Standardnormalverteilung: Dichte + Verteilungsfunktion (Abramowitz-Stegun 7.1.26,
+// |Fehler| < 1.5e-7 — für eine Anzeige-Schwelle mehr als ausreichend genau).
+const _npdf = x => Math.exp(-0.5*x*x) / Math.sqrt(2*Math.PI);
+function _ndf(x){
+  const s = x < 0 ? -1 : 1; const z = Math.abs(x) / Math.SQRT2;
+  const t = 1/(1+0.3275911*z);
+  const e = 1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-z*z);
+  return 0.5*(1+s*e);
+}
+/**
+ * Selektionsdifferential S_i + Price-Transmissionsterm pull_i aus dem LAUFENDEN Schwarm.
+ * Ein Durchlauf über N Individuen × NG Gene (200×25) plus einmal `pop.weights()` — das
+ * teuerste Stück ist der O(N²)-Konkurrenz-Kernel in weights(), also genau eine
+ * zusätzliche „halbe Generation" alle WHY_MS = 900 ms. Im Browser gemessen (Chromium,
+ * N=200): 1.6–2.0 ms, d. h. ~0.2 % Rechenzeit — unabhängig vom Bild-Budget aus Stufe 4
+ * (simStepBudget() misst nur pop.step()) und damit ohne Rückwirkung auf das Spieltempo.
+ * Gibt null zurück, wenn kein Schwarm läuft (Mittelfeld-Rückfall).
+ */
+function swarmSelection(){
+  if(!pop) return null;
+  const G = pop.genomes, N = G.length, sd = SWARM.mutationSd;
+  if(!N) return null;
+  const w = pop.weights(env, PHYS);
+  let tw = 0; for(let j=0;j<N;j++) tw += w[j];
+  if(!(tw > 0)) return null;
+  const wm = tw / N;
+  const zm = new Array(NG).fill(0);
+  for(let j=0;j<N;j++){ const gj=G[j]; for(let i=0;i<NG;i++) zm[i] += gj[i]; }
+  for(let i=0;i<NG;i++) zm[i] /= N;
+  const S = new Array(NG).fill(0), P = new Array(NG).fill(0);
+  for(let j=0;j<N;j++){
+    const gj = G[j], dw = w[j]-wm, ww = w[j];
+    for(let i=0;i<NG;i++){
+      const z = gj[i];
+      S[i] += dw * (z - zm[i]);                        // Kovarianz-Summe (Robertson)
+      const a = -z/sd, b = (1-z)/sd;                   // Mutation + Klemmung (Price-Transmission)
+      P[i] += ww * (-z*_ndf(a) + (1-z)*(1-_ndf(b)) + sd*(_npdf(a)-_npdf(b)));
+    }
+  }
+  for(let i=0;i<NG;i++){ S[i] /= N*wm; P[i] /= tw; }
+  return { S, P };
+}
 function updateWhy(g, force){
   const el = document.getElementById("whyLine"); if(!el) return;
   const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
-  if(!force && now - _why.t < WHY_MS) return;   // Takt: höchstens alle WHY_MS
+  // Umwelt-SPRUNG = eine UNSTETIGE Änderung seit dem LETZTEN BILD (Preset, Umwelt-
+  // Einfluss, Herausforderung, Ortswechsel in der Welt oder ein beherzter Sprung am
+  // Regler). Bewusst je Bild gemessen, nicht je Takt: beim feinen Ziehen bewegt sich
+  // ein Regler nur um ~0.01–0.04 je Bild und bleibt damit sicher unter WHY_JUMP — ein
+  // Ziehen kann die Zeile also NICHT über die alte Höchstrate hinaus treiben (Bremse 1
+  // bleibt unangetastet), ein echter Sprung wird dagegen sofort erkannt.
+  let envJump = 0;
+  if(_why.env) for(const k of WHY_ENV_KEYS) envJump += Math.abs((env[k]??0) - (_why.env[k]??0));
+  const fresh = !_why.env || envJump > WHY_JUMP;
+  if(!_why.env) _why.env = {};
+  for(const k of WHY_ENV_KEYS) _why.env[k] = env[k]??0;
+  // Takt: höchstens alle WHY_MS — ein echter Sprung darf einmal früher rechnen, weil der
+  // Selektionsdruck genau dann am größten ist und der Schwarm ihn binnen ~7 Generationen
+  // zur Hälfte abgebaut hat (gemessen). Eine Bildrate-Kopplung entsteht daraus nicht: ein
+  // Sprung ist ein einzelnes Ereignis, und danach greift der WHY_MS-Takt wieder.
+  if(!force && !fresh && now - _why.t < WHY_MS) return;
   _why.t = now;
   const eps = PHYS.eps, muted = mutedGenes(committedArch||classify(g));
-  // „Bewegt sich das Merkmal gerade?" = die NETTO-Änderung pro Generation (Selektion + Mutations-
-  // Rücktrieb, geklemmt), NICHT der rohe Fitness-Gradient. Nur so erreicht das Wesen ein echtes
-  // „fertig"-Gleichgewicht: am Attraktor hält die Mutation den Gradienten im Gleichgewicht, das Gen
-  // steht still — dann zeigen wir keine Pfeile mehr, sondern den Neugier-Anstoß.
+  // Das echte Selektionsdifferential des Schwarms (null => Mittelfeld-Rückfall unten).
+  // Laufzeit ehrlich mitgemessen statt geschätzt (__evolvePerf().msProWarum).
+  const _t0 = now;
+  const pr = swarmSelection();
+  if(pop){ const dt = ((typeof performance !== "undefined" ? performance.now() : Date.now()) - _t0);
+    _perf.why++; _perf.whyMs += dt; if(dt > _perf.worstWhyMs) _perf.worstWhyMs = dt; }
+  // „Bewegt sich das Merkmal gerade?" = die NETTO-Änderung pro Generation (Selektion +
+  // Mutations-/Klemm-Versatz), NICHT die Selektion allein. Nur so erreicht das Wesen ein
+  // echtes „fertig"-Gleichgewicht: am Attraktor hält die Mutationslast die Selektion im
+  // Gleichgewicht, das Gen steht still — dann zeigen wir keine Pfeile mehr, sondern den
+  // Neugier-Anstoß.
   const press = [];
   for(let i=0;i<NG;i++){
     if(muted.includes(i)){ _why.ema[i] = 0; _why.on[i] = 0; continue; }   // irrelevante Gene ausklammern
-    const up=g.slice(); up[i]=clamp01(up[i]+eps);
-    const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
-    const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
-    // Netto-Schritt = was stepGeneration deterministisch täte (inkl. Mutations-Rücktrieb + Klemmung).
-    const vf = 4*g[i]*(1-g[i]);
-    const speedMod = PARAMS.varianceWeight*vf + (1-PARAMS.varianceWeight);
-    const anchor = PARAMS.mutationAnchor ? PARAMS.mutationAnchor[i] : 0.5;
     // ZWEI Größen, die vorher vermengt waren:
     //   sel  = was die UMWELT tut (Selektion) — nur das ist „diese Umwelt formt gerade"
-    //   pull = Mutations-Rücktrieb zum Ruhewert — das tut ein ungenutztes Gen von selbst,
-    //          auch in einer völlig reizlosen Welt. 15 der 25 Gene ankern niedrig, fielen
-    //          also dauernd mit winzigen, fast gleich großen Beträgen — daraus entstand
-    //          das Ranking-Geflacker in der Zeile.
-    const sel  = PARAMS.responseRate[i]*PARAMS.selectionStrength*grad*speedMod;
-    const pull = PARAMS.mutationRate*(anchor - g[i]);
-    const net  = clamp01(g[i] + sel + pull) - g[i];   // tatsächliche Bewegung (am Rand geklemmt)
-    // Trägheit: gleitender Mittelwert der SELEKTION statt Momentaufnahme.
-    _why.ema[i] += (sel - _why.ema[i]) * WHY_SMOOTH;
-    if(Math.abs(net) < 0.0002) { _why.on[i] = 0; continue; }   // steht am Rand/still: kein Pfeil
+    //   pull = was das Gen von selbst tut (Mutation/Klemmung bzw. im Rückfall der
+    //          Rücktrieb zum Ruhewert). 15 der 25 Gene ankern niedrig, fielen also
+    //          dauernd mit winzigen, fast gleich großen Beträgen — daraus entstand das
+    //          Ranking-Geflacker in der Zeile.
+    let sel, net;
+    if(pr){
+      sel = pr.S[i];
+      net = pr.S[i] + pr.P[i];
+    } else {
+      // RÜCKFALL (kein Schwarm): unverändert die Mittelfeld-Näherung von vor Stufe 5,
+      // nur auf die S_i-Skala gebracht (WHY_MF_SCALE), damit dieselben Schwellen greifen.
+      const up=g.slice(); up[i]=clamp01(up[i]+eps);
+      const dn=g.slice(); dn[i]=clamp01(dn[i]-eps);
+      const grad=(fitness(up,env)-fitness(dn,env))/(2*eps);
+      const vf = 4*g[i]*(1-g[i]);
+      const speedMod = PARAMS.varianceWeight*vf + (1-PARAMS.varianceWeight);
+      const anchor = PARAMS.mutationAnchor ? PARAMS.mutationAnchor[i] : 0.5;
+      const mfSel  = PARAMS.responseRate[i]*PARAMS.selectionStrength*grad*speedMod;
+      const mfPull = PARAMS.mutationRate*(anchor - g[i]);
+      sel = mfSel * WHY_MF_SCALE;
+      net = (clamp01(g[i] + mfSel + mfPull) - g[i]) * WHY_MF_SCALE;   // am Rand geklemmt
+    }
+    // Trägheit: gleitender Mittelwert der SELEKTION statt Momentaufnahme. Beim echten
+    // Umwelt-Sprung einmal übergangen (s. Kommentar oben) — sonst verschluckt die
+    // Trägheit den kurzen, stärksten Selektionsmoment vollständig.
+    if(fresh) _why.ema[i] = sel;
+    else _why.ema[i] += (sel - _why.ema[i]) * WHY_SMOOTH;
+    if(Math.abs(net) < WHY_STILL) { _why.on[i] = 0; continue; }   // steht am Rand/still: kein Pfeil
     const v = _why.ema[i], mag = Math.abs(v);
     // Hysterese: rein erst über EIN, raus erst unter AUS — dazwischen bleibt der Zustand.
     let want = _why.on[i];
@@ -2816,9 +2959,10 @@ function updateWhy(g, force){
     else if(mag < WHY_LEAVE) want = 0;
     else want = v > 0 ? 1 : -1;
     // Haltezeit: ein Wechsel muss sich über zwei Takte behaupten. Ein Merkmal, das an der
-    // Schwelle pendelt, schaltet damit nicht mehr im Sekundentakt hin und her.
+    // Schwelle pendelt, schaltet damit nicht mehr im Sekundentakt hin und her. (Beim
+    // echten Umwelt-Sprung ist die Neuigkeit keine Pendelbewegung -> sofort gültig.)
     if(want !== _why.on[i]){
-      if(++_why.hold[i] >= WHY_HOLD){ _why.on[i] = want; _why.hold[i] = 0; }
+      if(fresh || ++_why.hold[i] >= WHY_HOLD){ _why.on[i] = want; _why.hold[i] = 0; }
     } else _why.hold[i] = 0;
     if(_why.on[i] !== 0) press.push({ i, dir: _why.on[i], m: mag });
   }
