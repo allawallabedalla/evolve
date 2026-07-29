@@ -11,37 +11,43 @@
      ============================================================ */
   :root {
     color-scheme: light;
-    /* Neomorphismus · Ocker-Braun-Basis mit Pastell-Akzenten (Design v2). */
-    --abyss: #cebd97;        /* tiefster Ockerton (Seiten-Hintergrund unten) */
-    --bg-top: #e8dcbe;       /* warmer Ocker oben */
-    --chamber: #e4d6b6;      /* Karten/Flächen — nahe am Grund (Neomorph) */
-    --chamber-2: #ded0ac;
-    --line: #cbb98f;
-    --line-soft: #d8c8a0;
-    --text: #4c3d27;         /* warmes Dunkelbraun */
-    --muted: #5c4a2c;        /* WCAG AA auch auf der --abyss-Fläche (Audit): ~4.6:1 */
-    --bio: #5f9c83;          /* Pastell-Salbei — Flächen/Punkte/Thumbs */
-    --bio-dim: #356152;      /* dunkles Salbei — Text-Rolle, AA auch bei kleinem Text (Audit) */
-    --ember: #d69a6b;        /* Pastell-Terrakotta — Tier/Energie */
-    --danger: #cf8975;
-    --gold: #bf9636;         /* gedämpftes Ocker-Gold — Rarität */
-    /* Neomorph-Schatten (aus dem Grundton abgeleitet) */
-    --nm-light: #f5eaca;
-    --nm-dark: #bda767;
-    --shadow: 7px 7px 18px var(--nm-dark), -7px -7px 18px var(--nm-light);
-    --shadow-sm: 4px 4px 9px var(--nm-dark), -4px -4px 9px var(--nm-light);
-    --shadow-inset: inset 3px 3px 7px var(--nm-dark), inset -3px -3px 7px var(--nm-light);
+    /* Flacher Vektor / Siebdruck (Design v3, "Klippenlicht"). Reine Flächenfarben,
+       keine Verläufe/Schatten. Rollen statt Neomorph-Tiefe: --abyss/--chamber bleiben
+       als Namen erhalten (viele Regeln referenzieren sie), tragen aber jetzt flache
+       Töne aus der Palette. */
+    --abyss: #eee6d6;        /* Karten-Untergrund (helle, warme Papierfläche) */
+    --bg-top: #e4dac2;       /* Seiten-Hintergrund (etwas gedeckter als die Karten) */
+    --chamber: #f7f1e2;      /* Karten/Flächen — flach, kein Schatten trägt sie */
+    --chamber-2: #efe6d0;
+    --line: #d9cbab;         /* Hairline-Kontur statt Schlagschatten */
+    --line-soft: #e3d7ba;
+    --text: #2c2130;         /* Aubergine-Ink — Fließtext */
+    --muted: #6a5a68;        /* gedämpftes Aubergine-Grau, AA auf --chamber/--abyss */
+    --bio: #9c7fa0;          /* dusty Lilac — Silhouette hell / Flächen */
+    --bio-dim: #4a3650;      /* Aubergine dunkel — Text-Rolle, AA-tauglich */
+    --ember: #cf8f4e;        /* warmer Ockerton — Temperatur-Achse warm */
+    --danger: #b0472f;
+    --gold: #b98a2e;         /* Rarität */
+    --accent: #e2a72e;       /* Ringelblume — EINZIGER Akzent: neu erworbene Merkmale */
+    --cream: #f7f1de;        /* helles UI-Chrome: Werte/Regler/Buttons */
+    --ink: #241f28;          /* Text auf hellem UI-Chrome */
+    --warn: #93591f;         /* "Gen wird zurückgedrängt" / Warnung — unterscheidbar von --danger */
+    /* Flach: keine Unschärfe, keine Doppel-Schatten — nur eine 1px-Kontur. */
+    --shadow: 0 0 0 1px var(--line);
+    --shadow-sm: 0 0 0 1px var(--line-soft);
+    --shadow-inset: inset 0 0 0 1px var(--line-soft);
     --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+    /* Habitat-Palette (fuer Phase 2/3 — Canvas->SVG-Umbau — schon hier angelegt) */
+    --hab-cold: #5c7496; --hab-warm: #cf8f4e;
+    --hab-ground-cold: #3a485c; --hab-ground-warm: #8b582a;
+    --hab-fig-deep: #3c2a3e; --hab-fig-light: #9c7fa0;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background:
-      radial-gradient(1200px 800px at 50% -8%, var(--bg-top) 0%, var(--abyss) 70%),
-      var(--abyss);
-    background-attachment: fixed;
+    background: var(--bg-top);
     color: var(--text);
     font-family: var(--sans);
     line-height: 1.5;
@@ -51,10 +57,13 @@
 
   header.top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
   .brand {
-    font-family: var(--serif); font-style: italic; font-size: 1.9rem; letter-spacing: .01em;
-    color: var(--text); margin: 0; font-weight: 400;
+    font-family: var(--serif); font-style: italic; font-size: 1.6rem; letter-spacing: .01em;
+    color: var(--muted); margin: 0; font-weight: 400;
   }
-  .brand b { color: var(--bio-dim); font-style: normal; font-weight: 700; }
+  .brand b {
+    font-family: var(--sans); font-style: normal; font-weight: 900; letter-spacing: -.01em;
+    font-size: 1.15em; color: var(--bio-dim); margin-right: 1px;
+  }
   .tagline { color: var(--muted); font-size: .9rem; max-width: 46ch; }
 
   .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start;
@@ -74,13 +83,17 @@
 
   /* ---- Habitat-Fenster ---- */
   .viewport { position: relative; padding: 0; overflow: hidden; }
-  .viewport canvas { display: block; width: 100%; height: auto; border-radius: 16px; }
+  /* SVG traegt die Szene (Himmel/Boden/Wetter/Partikel), das Canvas bleibt vorerst
+     transparent obenauf nur fuer die Kreatur (Phase 3 loest das Canvas ab). */
+  .hab-stage { position: relative; }
+  .hab-stage svg { display: block; width: 100%; height: auto; border-radius: 16px; }
+  .hab-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 16px; }
   /* Umwelt-Einfluss-Cinematik: kurzer tongefärbter Blitz + leichtes Beben aufs Habitat */
   .viewport::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; border-radius: 16px; z-index: 4; }
   .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: vpShake .5s ease; }
-  .viewport.fx-hit::after   { background: radial-gradient(circle at 50% 45%, rgba(207,137,117,.6), transparent 68%); animation: vpFlash .95s ease; }
-  .viewport.fx-shift::after { background: radial-gradient(circle at 50% 45%, rgba(111,208,255,.55), transparent 68%); animation: vpFlash .95s ease; }
-  .viewport.fx-bio::after   { background: radial-gradient(circle at 50% 45%, rgba(95,156,131,.55), transparent 68%); animation: vpFlash .95s ease; }
+  .viewport.fx-hit::after   { background: rgba(176,71,47,.4); animation: vpFlash .95s ease; }
+  .viewport.fx-shift::after { background: rgba(92,116,150,.4); animation: vpFlash .95s ease; }
+  .viewport.fx-bio::after   { background: rgba(226,167,46,.38); animation: vpFlash .95s ease; }
   @keyframes vpFlash { 0%{ opacity: 0; } 18%{ opacity: 1; } 100%{ opacity: 0; } }
   @keyframes vpShake { 0%,100%{ transform: translateX(0); } 20%{ transform: translateX(-3px); } 40%{ transform: translateX(3px); } 60%{ transform: translateX(-2px); } 80%{ transform: translateX(2px); } }
   @media (prefers-reduced-motion: reduce) { .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: none; } }
@@ -92,18 +105,18 @@
   .gen-readout {
     position: absolute; top: 12px; left: 14px;
     font-family: var(--mono); font-size: .74rem; letter-spacing: .05em;
-    color: var(--bio-dim); background: rgba(245,235,205,.7); border: 1px solid var(--line-soft);
-    padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(3px);
+    color: var(--ink); background: var(--cream); border: 1px solid var(--line-soft);
+    padding: 3px 9px; border-radius: 999px;
   }
   .biome-tag {
     position: absolute; top: 12px; right: 14px;
-    font-size: .74rem; color: var(--text); background: rgba(245,235,205,.7);
-    border: 1px solid var(--line-soft); padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(3px);
+    font-size: .74rem; color: var(--ink); background: var(--cream);
+    border: 1px solid var(--line-soft); padding: 3px 9px; border-radius: 999px;
   }
   /* Verborgene Stressoren (AXIS-6..8): sonst unsichtbar & „klebrig" — als Chips zeigen. */
   .stress-chips { position: absolute; top: 40px; right: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   .stress-chip { font-size: .7rem; font-weight: 700; color: #fbf3dd; border-radius: 999px; padding: 2px 9px 2px 8px;
-    display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 4px rgba(40,30,10,.18); }
+    display: inline-flex; align-items: center; gap: 5px; }
   .stress-chip.tox { background: #7d8a2f; }
   .stress-chip.oxy { background: #5a7fa6; }
   .stress-chip.sal { background: #7f93a6; }
@@ -168,22 +181,21 @@
   .gene .lbl { font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .02em; }
   .gene .track { height: 7px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden;
     transition: box-shadow .3s ease; }
-  .gene .fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); border-radius: 999px; transition: width .12s linear; }
-  /* Selektions-Theater: das Gen, das die AKTUELLE Umwelt gerade auslest, leuchtet + zeigt
-     die Richtung (↑ gefördert / ↓ zurückgedrängt). Macht die unsichtbare Evolution sichtbar —
-     dieselbe Größe (∂Fitness/∂Gen), die die Zahlen wirklich bewegt. */
+  .gene .fill { height: 100%; width: 50%; background: var(--bio-dim); border-radius: 999px; transition: width .12s linear; }
+  /* Selektions-Theater: das Gen, das die AKTUELLE Umwelt gerade auslest, zeigt die Richtung
+     (↑ gefördert / ↓ zurückgedrängt) über Farbe + Kontur statt Leucht-Schatten — flach. */
   .gene .dir { font-family: var(--mono); font-size: .72rem; font-weight: 700; text-align: center; opacity: 0; transition: opacity .3s ease; }
-  .gene.sel-up   .dir { color: var(--bio); }
-  .gene.sel-down .dir { color: #cc9a3f; }
-  .gene.sel-up   .track { box-shadow: var(--shadow-inset), 0 0 6px rgba(95,156,131,.5); }
-  .gene.sel-down .track { box-shadow: var(--shadow-inset), 0 0 6px rgba(204,154,63,.42); }
+  .gene.sel-up   .dir { color: var(--bio-dim); }
+  .gene.sel-down .dir { color: var(--warn); }
+  .gene.sel-up   .track { box-shadow: inset 0 0 0 1.5px var(--bio-dim); }
+  .gene.sel-down .track { box-shadow: inset 0 0 0 1.5px var(--warn); }
   @media (prefers-reduced-motion: reduce) { .gene .track, .gene .dir { transition: none; } }
   .gene.muted { opacity: .55; }
   .gene.muted .lbl::after { content: " ·"; }
   /* ---- Vitalitäts-Anzeige (A3) ---- */
   .vitality { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-family: var(--mono); font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
   .vit-track { flex: 1; height: 9px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
-  .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, var(--bio-dim), var(--bio)); transition: width .25s ease, background .4s ease; }
+  .vit-fill { height: 100%; width: 50%; border-radius: 999px; background: var(--bio-dim); transition: width .25s ease, background .4s ease; }
   .vit-num { min-width: 34px; text-align: right; color: var(--text); font-weight: 700; }
   /* Live-„Warum": welche Merkmale die aktuelle Umwelt gerade auslest (Selektionsgradient). */
   .why { margin-top: 7px; font-size: .74rem; line-height: 1.5; color: var(--muted); min-height: 1.1em; }
@@ -253,8 +265,8 @@
   }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
   .speed { font-size: .78rem; color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-  .speed.active { background: var(--bio); color: #06201a; font-weight: 700; box-shadow: var(--shadow-sm); }   /* dunkle Schrift -> AA auf Salbei (Audit) */
-  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bio); box-shadow: 0 0 6px var(--bio-dim); animation: pulse 1.6s ease-in-out infinite; }
+  .speed.active { background: var(--bio-dim); color: #fbf3dd; font-weight: 700; box-shadow: var(--shadow-sm); }   /* helle Schrift auf dunklem Aubergine -> AA (Audit) */
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bio-dim); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 
   /* ---- Genbuch-Zähler ---- */
@@ -266,10 +278,10 @@
   @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
 
   /* ---- Genbuch (begehbarer Lebensbaum) ---- */
-  .genbook { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(74,60,36,.34); backdrop-filter: blur(6px); animation: fadein .3s ease; }
+  .genbook { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .genbook[hidden] { display: none; }
   /* In-App-Dialog (ersetzt natives confirm/prompt — passt zur Pastell-Optik) */
-  .dlg { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .25s ease; }
+  .dlg { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: fadein .25s ease; }
   .dlg[hidden] { display: none; }
   .dlg-card { width: min(92%, 420px); background: var(--chamber); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
   .dlg-msg { margin: 0 0 14px; font-size: .95rem; line-height: 1.5; color: var(--text); }
@@ -281,8 +293,8 @@
   .dlg-btns .ctrl { min-width: 96px; }
   .dlg-ok { background: var(--bio-dim); color: #fbf6e6; border-color: var(--bio-dim); }
   /* ---- Umwelt-Einflüsse (geschachteltes Modal + Sub-Modal) ---- */
-  .infl { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .25s ease; z-index: 30; }
-  .infl.inflsub { z-index: 31; background: rgba(74,60,36,.28); }
+  .infl { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: fadein .25s ease; z-index: 30; }
+  .infl.inflsub { z-index: 31; background: rgba(36,31,40,.4); }
   .infl[hidden] { display: none; }
   .infl-card { width: min(94%, 640px); max-height: 88vh; display: flex; flex-direction: column; background: var(--chamber); border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
   .infl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
@@ -303,7 +315,7 @@
   .infl-group:first-child { margin-top: 2px; }
   .infl-factor { text-align: left; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 11px; padding: 10px 13px; cursor: pointer; font: inherit; color: var(--text); transition: border-color .12s, box-shadow .12s; }
   .infl-factor:hover:not(.soon) { border-color: var(--bio-dim); }
-  .infl-factor.sel { border-color: var(--bio-dim); box-shadow: 0 0 0 1.5px var(--bio-dim), inset 0 0 22px rgba(95,156,131,.1); }
+  .infl-factor.sel { border-color: var(--bio-dim); box-shadow: 0 0 0 1.5px var(--bio-dim); }
   .infl-factor .fn { font-weight: 700; font-size: .9rem; display: flex; align-items: center; gap: 8px; }
   .infl-factor .fsci { color: var(--muted); font-size: .66rem; letter-spacing: .01em; margin-top: 1px; opacity: .8; }
   .infl-factor .fd { color: var(--muted); font-size: .78rem; line-height: 1.45; margin-top: 3px; }
@@ -368,7 +380,7 @@
   /* --- Lebende Welt (Beta): emergenter Metapopulations-Kern als Overlay --- */
   .worldbtn { display: block; }
   .worldbtn .beta, .wl-beta { font-size: .6rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; vertical-align: middle; }
-  .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(74,60,36,.38); backdrop-filter: blur(7px); animation: wl-bg-in .34s ease; }
+  .world { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: wl-bg-in .34s ease; }
   .world[hidden] { display: none; }
   /* Echter Zoom: beim Öffnen zoomt die Weltkarte aus dem Wesen heraus, beim Schließen
      wieder hinein — das „rauszoomen ↔ reinzoomen" der Pet-↔-Welt-Vision. */
@@ -390,18 +402,18 @@
   @media (max-width: 760px) { .wl-grid { grid-template-columns: 1fr; } }
   .wl-map { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
   .wl-place { flex: 1 1 200px; min-width: 180px; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; padding: 11px 12px; cursor: pointer; transition: border-color .15s; }
-  .wl-place.sel { border-color: var(--bio); box-shadow: 0 0 0 1px rgba(95,156,131,.28); }
-  .wl-place.flash-hit { border-color: var(--danger) !important; box-shadow: 0 0 0 2px var(--danger), 0 0 20px rgba(255,122,107,.45); }
-  .wl-place.flash-shift { border-color: #6fd0ff !important; box-shadow: 0 0 0 2px #6fd0ff, 0 0 20px rgba(111,208,255,.4); }
-  .wl-place.flash-bio { border-color: var(--bio) !important; box-shadow: 0 0 0 2px var(--bio), 0 0 20px rgba(95,156,131,.45); }
+  .wl-place.sel { border-color: var(--bio-dim); box-shadow: 0 0 0 1px var(--bio-dim); }
+  .wl-place.flash-hit { border-color: var(--danger) !important; box-shadow: 0 0 0 2px var(--danger); }
+  .wl-place.flash-shift { border-color: var(--hab-cold) !important; box-shadow: 0 0 0 2px var(--hab-cold); }
+  .wl-place.flash-bio { border-color: var(--accent) !important; box-shadow: 0 0 0 2px var(--accent); }
   /* ---- Cinematischer Eingriff: Anlauf (charge) -> Einschlag (blast) ---- */
   .wl-place--charge { animation: wlCharge .34s ease-in-out infinite; box-shadow: var(--shadow-inset); z-index: 2; }
   @keyframes wlCharge { 0%,100%{ filter: brightness(1); transform: scale(1); } 50%{ filter: brightness(.8); transform: scale(.985); } }
   .wl-place--blast { animation: wlBlast .55s cubic-bezier(.2,.9,.25,1.25); z-index: 3; }
   @keyframes wlBlast { 0%{ transform: scale(1); } 18%{ transform: scale(1.07) rotate(-.4deg); } 45%{ transform: scale(.975) rotate(.3deg); } 70%{ transform: scale(1.015); } 100%{ transform: scale(1); } }
-  .wl-blast-hit   { border-color: var(--danger) !important; box-shadow: 0 0 0 3px var(--danger), 0 0 36px 8px rgba(207,137,117,.7); }
-  .wl-blast-shift { border-color: #6fd0ff !important;      box-shadow: 0 0 0 3px #6fd0ff, 0 0 36px 8px rgba(111,208,255,.6); }
-  .wl-blast-bio   { border-color: var(--bio) !important;   box-shadow: 0 0 0 3px var(--bio), 0 0 36px 8px rgba(95,156,131,.65); }
+  .wl-blast-hit   { border-color: var(--danger) !important; box-shadow: 0 0 0 3px var(--danger); }
+  .wl-blast-shift { border-color: var(--hab-cold) !important; box-shadow: 0 0 0 3px var(--hab-cold); }
+  .wl-blast-bio   { border-color: var(--accent) !important;   box-shadow: 0 0 0 3px var(--accent); }
   /* Steuerung während des Eingriffs einklappen — Blick geht auf die Karte */
   .wl-eingreifen .wl-busy { display: none; font-size: .8rem; color: var(--bio-dim); padding: 4px 0; min-height: 1.5em; }
   .wl-eingreifen.busy .wl-btns, .wl-eingreifen.busy > .wl-hint, .wl-eingreifen.busy .wl-fine { display: none; }
@@ -419,7 +431,7 @@
   .wl-events .ev-hit { color: var(--danger); } .wl-events .ev-shift { color: #6fd0ff; } .wl-events .ev-bio { color: var(--bio-dim); }
   .wl-events .ev-ic .ic { width: .95em; height: .95em; vertical-align: -.15em; }
   .wl-ev-empty { color: var(--muted); font-style: italic; }
-  .wl-place--pet { background: linear-gradient(180deg, rgba(95,156,131,.09), var(--abyss)); border-color: var(--bio-dim); }
+  .wl-place--pet { background: rgba(74,58,80,.1); border-color: var(--bio-dim); }
   .wl-you { font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: #fbf3dd; background: var(--bio-dim); border-radius: 4px; padding: 1px 5px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
   .wl-place .nm .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
   .wl-place .nm { font-weight: 700; font-size: .82rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text); }
@@ -492,13 +504,13 @@
   .chal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chal-chip { font-size: .72rem; color: var(--muted); background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 999px;
     padding: 4px 11px; cursor: pointer; font-family: inherit; }
-  .chal-chip.active { background: var(--bio); color: #06201a; font-weight: 700; border-color: var(--bio); }
+  .chal-chip.active { background: var(--bio-dim); color: #fbf3dd; font-weight: 700; border-color: var(--bio-dim); }
   .chal-count { font-size: .72rem; color: var(--muted); margin-bottom: 8px; }
   .chal-list { display: flex; flex-direction: column; gap: 8px; }
   .chal-item { display: flex; align-items: flex-start; gap: 11px; background: var(--abyss); border: 1px solid var(--line-soft);
     border-radius: 12px; padding: 11px 13px; }
   .chal-item.done { border-color: var(--bio-dim); }
-  .chal-item.active-now { border-color: var(--bio); box-shadow: 0 0 0 1px var(--bio) inset; }
+  .chal-item.active-now { border-color: var(--bio-dim); box-shadow: 0 0 0 1px var(--bio-dim) inset; }
   .chal-item-icon { flex: 0 0 auto; width: 1.3rem; height: 1.3rem; color: var(--bio-dim); margin-top: 2px; }
   .chal-item-body { flex: 1; min-width: 0; }
   .chal-item-title { font-size: .88rem; font-weight: 700; color: var(--text); }
@@ -512,14 +524,14 @@
   .chal-item-start { flex: 0 0 auto; align-self: center; min-width: 96px; }
   .chal-empty { color: var(--muted); font-size: .82rem; padding: 20px 4px; text-align: center; }
   .chal-more-hint { color: var(--muted); font-size: .72rem; padding: 8px 2px 0; text-align: center; }
-  .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,156,131,.22), 0 0 14px rgba(95,156,131,.1); }
+  .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px var(--bio-dim); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
   .gb-tile { position: relative; }
   .gb-tile.found { cursor: pointer; }
   .gb-tile.miss { cursor: help; }
   /* Klick-Detailpanel im Genbuch (Wikipedia-Beschreibung) */
-  #gbDetail { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(74,60,36,.4); backdrop-filter: blur(6px); animation: fadein .2s ease; }
+  #gbDetail { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: fadein .2s ease; }
   #gbDetail[hidden] { display: none; }
   #gbDetail #gbdBody { width: min(92%, 460px); max-height: 84vh; overflow-y: auto; background: var(--chamber); border-radius: 18px; padding: 20px 22px 22px; box-shadow: var(--shadow); }
   #gbDetail h3 { margin: 0 0 2px; font-family: var(--serif); font-style: italic; font-size: 1.25rem; color: var(--text); }
@@ -536,9 +548,9 @@
   .gb-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
   .gb-tile.miss .gb-rar { opacity: .4; filter: grayscale(.5); }
   /* seltene entdeckte Formen leuchten in ihrer Rang-Farbe */
-  .gb-tile.rare.found.rar-selten       { border-color: rgba(47,134,173,.55);  box-shadow: 0 0 0 1px rgba(47,134,173,.2),  0 0 16px rgba(47,134,173,.13); }
-  .gb-tile.rare.found.rar-sehr-selten  { border-color: rgba(125,85,196,.55);  box-shadow: 0 0 0 1px rgba(125,85,196,.22), 0 0 18px rgba(125,85,196,.15); }
-  .gb-tile.rare.found.rar-legendaer    { border-color: rgba(176,125,31,.6);   box-shadow: 0 0 0 1px rgba(176,125,31,.3),  0 0 22px rgba(176,125,31,.22); }
+  .gb-tile.rare.found.rar-selten       { border-color: rgba(47,134,173,.7);  box-shadow: 0 0 0 1px rgba(47,134,173,.35); }
+  .gb-tile.rare.found.rar-sehr-selten  { border-color: rgba(125,85,196,.7);  box-shadow: 0 0 0 1px rgba(125,85,196,.35); }
+  .gb-tile.rare.found.rar-legendaer    { border-color: var(--gold);   box-shadow: 0 0 0 1px var(--gold); }
   .gb-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 2px 0 6px;
     font-size: .62rem; color: var(--muted); }
   .gb-leg-item { display: inline-flex; align-items: center; gap: 5px; }
@@ -553,11 +565,11 @@
   #gbTip .tip-rar { display: inline-flex; align-items: center; gap: 5px; font-size: .64rem; letter-spacing: .04em;
     text-transform: uppercase; margin: 3px 0 1px; }
   #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
-  .toast.legendary { border-color: rgba(176,125,31,.55); box-shadow: 0 0 0 1px rgba(176,125,31,.3), 0 0 24px rgba(176,125,31,.2); }
+  .toast.legendary { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
   /* Reich-Meilenstein: mehrzeiliger, wärmerer Moment (kein Pill). */
   .toast.milestone { border-radius: 14px; padding: 12px 18px; max-width: min(86%, 340px); text-align: center; line-height: 1.4;
-    box-shadow: 0 0 0 1px rgba(95,156,131,.4), 0 0 26px rgba(95,156,131,.22); }
+    box-shadow: 0 0 0 1px var(--bio-dim); }
   .toast .toast-ms-h { font-size: .92rem; color: var(--text); font-weight: 700; }
   .toast .toast-ms-h b { color: var(--bio); }
   .toast .toast-ms-sub { font-size: .76rem; color: var(--muted); margin-top: 4px; }
@@ -587,9 +599,9 @@
   .link:hover { filter: brightness(1.1); }
 
   /* ---- Login-Overlay ---- */
-  .login { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(74,60,36,.34); backdrop-filter: blur(5px); animation: fadein .3s ease; }
+  .login { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .login[hidden] { display: none; }
-  .login-card { width: min(90%, 380px); background: linear-gradient(180deg, var(--chamber) 0%, var(--chamber-2) 100%); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
+  .login-card { width: min(90%, 380px); background: var(--chamber); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
   .login-p { color: var(--muted); font-size: .85rem; line-height: 1.55; margin: 8px 0 16px; }
   #loginEmail, #loginPass { width: 100%; padding: 11px 12px; border-radius: 10px; background: var(--abyss); border: 1px solid var(--line); color: var(--text); font: inherit; margin-bottom: 8px; }
   #loginEmail:focus, #loginPass:focus { outline: 2px solid var(--bio-dim); outline-offset: 2px; border-color: var(--bio-dim); }
@@ -600,7 +612,7 @@
   /* ---- Willkommen-zurück-Reveal ---- */
   .reveal {
     position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-    background: rgba(6,14,13,.82); backdrop-filter: blur(4px); border-radius: 16px 16px 0 0;
+    background: rgba(36,31,40,.9); border-radius: 16px 16px 0 0;
     animation: fadein .4s ease;
   }
   .reveal[hidden] { display: none; }   /* sonst schlaegt display:grid das hidden-Attribut */
@@ -615,19 +627,18 @@
   .rf-ic .ic { width: 2.5rem; height: 2.5rem; }
   .rf-nm { line-height: 1.15; text-align: center; }
   .rf-new { color: var(--bio-dim); }
-  .rf-new .rf-ic { filter: drop-shadow(0 0 9px rgba(95,156,131,.6)); }
   .rf-arrow { color: var(--bio-dim); font-size: 1.4rem; }
   /* ---- Onboarding-Startimpuls (A5) ---- */
-  .onboard { background: rgba(95,156,131,.10); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio-dim); line-height: 1.5; }
+  .onboard { background: rgba(74,54,80,.1); border: 1px solid var(--bio-dim); border-radius: 10px; padding: 9px 12px; margin-bottom: 12px; font-size: .8rem; color: var(--bio-dim); line-height: 1.5; }
   .onboard[hidden] { display: none; }
   .onboard b { color: var(--text); }
-  .biomes.hint .biome:first-child { border-color: var(--bio); animation: biomepulse 1.6s ease-in-out infinite; }
-  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(95,156,131,0); } 50%{ box-shadow: 0 0 0 4px rgba(95,156,131,.22); } }
+  .biomes.hint .biome:first-child { border-color: var(--bio-dim); animation: biomepulse 1.6s ease-in-out infinite; }
+  @keyframes biomepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(74,54,80,0); } 50%{ box-shadow: 0 0 0 4px rgba(74,54,80,.3); } }
   @media (prefers-reduced-motion: reduce) { .biomes.hint .biome:first-child { animation: none; } }
   .reveal-x {
     margin-top: 16px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
-    font-family: var(--sans); font-size: .85rem; font-weight: 600; color: #06201a;
-    background: var(--bio); border: none;
+    font-family: var(--sans); font-size: .85rem; font-weight: 600; color: #fbf3dd;
+    background: var(--bio-dim); border: none;
   }
   .reveal-x:hover { filter: brightness(1.06); }
 
@@ -636,7 +647,24 @@
   .ver { display: block; margin-top: 6px; font-family: var(--mono); font-size: .66rem; color: var(--bio-dim); letter-spacing: .04em; opacity: .8; }
   .chip-val { font-family: var(--mono); color: var(--bio-dim); }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+  /* ---- Papierkorn: globaler Siebdruck-Overlay (SVG-Filter, keine Rasterbilder) ---- */
+  #paperGrain {
+    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    mix-blend-mode: multiply; opacity: .05;
+  }
 </style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="paperGrainFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise"></feTurbulence>
+    <feColorMatrix in="noise" type="matrix"
+      values="0 0 0 0 0.14  0 0 0 0 0.12  0 0 0 0 0.15  0 0 0 0.75 0"></feColorMatrix>
+  </filter>
+</svg>
+<div id="paperGrain" aria-hidden="true">
+  <svg width="100%" height="100%"><rect width="100%" height="100%" filter="url(#paperGrainFilter)"></rect></svg>
+</div>
 
 <div class="wrap">
   <header class="top">
@@ -652,7 +680,23 @@
         <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <div class="stress-chips" id="stressChips" hidden></div>
-        <canvas id="habitat" width="720" height="560" role="img" aria-label="Lebewesen in seiner Umwelt"></canvas>
+        <div class="hab-stage" role="img" aria-label="Lebewesen in seiner Umwelt">
+          <svg id="habitatSvg" viewBox="0 0 720 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect id="hSky" x="0" y="0" width="720" height="560"></rect>
+            <g id="hWedges"></g>
+            <circle id="hSun" cx="576" cy="112" r="0" fill="none"></circle>
+            <g id="hVeg"></g>
+            <path id="hGround" d=""></path>
+            <ellipse id="hSnow" cx="360" cy="540" rx="432" ry="67" fill="#f2f6fa" fill-opacity="0"></ellipse>
+            <rect id="hWater" x="0" y="560" width="720" height="0" fill-opacity="0"></rect>
+            <line id="hWaterline" x1="0" y1="560" x2="720" y2="560" stroke-opacity="0"></line>
+            <rect id="hToxOverlay" x="0" y="0" width="720" height="560" fill="#96aa3c" fill-opacity="0"></rect>
+            <rect id="hHypoxOverlay" x="0" y="0" width="720" height="280" fill="#e0e8f0" fill-opacity="0"></rect>
+            <rect id="hSalOverlay" x="0" y="392" width="720" height="168" fill="#ecf0f4" fill-opacity="0"></rect>
+            <g id="hMotes"></g>
+          </svg>
+          <canvas id="habitat" width="720" height="560" aria-hidden="true"></canvas>
+        </div>
         <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
         <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-label="Willkommen zurück" hidden>
           <div class="reveal-card">
@@ -1940,9 +1984,9 @@ function updatePanels(g, a){
   const vit = clamp01((fit - 0.12) / 0.72);
   const vf = document.getElementById("vitFill");
   vf.style.width = (vit*100).toFixed(0) + "%";
-  vf.style.background = vit < 0.4 ? "linear-gradient(90deg,#9c5f33,#d08a44)"
-                     : vit < 0.7 ? "linear-gradient(90deg,#8a8a34,#cbc24a)"
-                     : "linear-gradient(90deg,var(--bio-dim),var(--bio))";
+  vf.style.background = vit < 0.4 ? "var(--danger)"
+                     : vit < 0.7 ? "var(--gold)"
+                     : "var(--bio-dim)";
   const word = vit<0.3 ? "kämpft" : vit<0.5 ? "hält sich" : vit<0.72 ? "gedeiht" : "blüht auf";
   // „hier" macht klar: Fitness ist relativ zur Umwelt, kein Urteil über das Wesen (Didaktik-Audit).
   document.getElementById("vitLabel").textContent = "Passung hier · " + word;
@@ -2789,9 +2833,15 @@ setInterval(saveState, 4000);
 document.addEventListener("visibilitychange", () => { if(document.hidden) saveState(); });
 window.addEventListener("pagehide", saveState);
 
-// ======================= Canvas-Renderer =======================
+// ======================= Renderer: SVG-Habitat + Canvas-Kreatur =======================
+// Die Bühne (Habitat) ist jetzt echtes SVG-DOM (flache Flächen, CSS-/JS-Farbwerte,
+// kein Rasterbild) — das Canvas bleibt vorerst nur fuer die Kreatur (Phase 3 loest
+// auch das ab). Beide Layer teilen dieselbe 720x560-Bühne per SVG-viewBox bzw.
+// DPR-skaliertem Canvas, decken sich also exakt.
 const canvas = document.getElementById("habitat");
 const ctx = canvas.getContext("2d");
+const hSvg = document.getElementById("habitatSvg");
+const SVGNS = "http://www.w3.org/2000/svg";
 let CW=720, CH=560, DPR=1;
 function resize(){
   const rect = canvas.getBoundingClientRect();
@@ -2809,118 +2859,152 @@ const rgb = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
 // deterministischer RNG aus dem Genom (fuer organischen, aber stabilen Jitter)
 function seeded(g){ let s=0; for(let i=0;i<g.length;i++) s=(s*131+Math.floor(g[i]*997))>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
 
-function drawHabitat(){
-  // Schematisch angedeutetes Habitat aus den 6 Umwelt-Reglern — bewegt man einen
-  // Regler/wählt ein Biom, verändert sich das Bild sofort sichtbar (direktes Feedback).
-  const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
-  // Pastell-Tag-Szene (Design v2): Himmel kühl-pastellblau(kalt)↔pfirsich(warm), Helligkeit
-  // nach Licht. Sehr wenig Licht -> tief & dunkelblau (Tiefsee/Höhle), dort sticht Leuchten hervor.
-  // Helligkeits-Boden angehoben (0.42): auch dunkle Szenen bleiben pastellig statt
-  // fast schwarz (Design-Audit) — Tiefsee/Höhle signalisiert sich über kühlen Blauton.
-  const bright = lerp(0.42, 1, L);
-  const sky = mix([150,192,214],[236,206,170], T);
-  const top = sky.map(c=>12+c*bright);
-  const hor = mix(sky,[246,228,190],0.45).map(c=>10+c*Math.max(bright,0.14)*0.95);
-  const grd = ctx.createLinearGradient(0,0,0,CH);
-  grd.addColorStop(0, rgb(top)); grd.addColorStop(0.7, rgb(hor));
-  grd.addColorStop(1, rgb(mix([206,186,146],[36,42,58], 1-bright)));
-  ctx.fillStyle=grd; ctx.fillRect(0,0,CW,CH);
+// Habitat-Palette (flach, kalt<->warm — Temperatur-Achse). Aus :root gespiegelt,
+// hier als RGB-Tripel fuer die lerp-Mathematik.
+const HAB_COLD=[92,116,150], HAB_WARM=[207,143,78];
+const HAB_GROUND_COLD=[58,72,92], HAB_GROUND_WARM=[139,88,42];
+const HAB_FIG_LIGHT=[156,127,160];
 
-  // Lichtquelle: hell & warm bei viel Licht, klein/erloschen bei wenig (Tiefsee/Nacht)
-  if(L>0.1){
-    const sx=CW*0.80, sy=CH*0.20, sr=lerp(12,42,L);
-    const sc=mix([255,246,216],[255,230,178],T);
-    const sg=ctx.createRadialGradient(sx,sy,0, sx,sy,sr*2.8);
-    sg.addColorStop(0,`rgba(${sc[0]|0},${sc[1]|0},${sc[2]|0},${0.55*L})`);
-    sg.addColorStop(1,"rgba(255,240,210,0)");
-    ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,sy,sr*2.8,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle=`rgba(${sc[0]|0},${sc[1]|0},${sc[2]|0},${0.3+0.55*L})`;
-    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+// Boden-Formensprache: weiche Welle (Feuchtigkeit hoch) <-> harte Kristallkante (trocken).
+// Feste 720x560-Bühne (SVG-viewBox) — deshalb keine CW/CH-Abhaengigkeit noetig.
+function groundPath(humidity){
+  const n=10, pts=[];
+  for(let i=0;i<=n;i++){
+    const x=(720/n)*i;
+    const wave = 460 + Math.sin(i*0.85)*14;
+    const crystal = 452 + (i%2===0 ? -22 : 18);
+    pts.push([x, lerp(crystal, wave, humidity)]);
   }
-
-  const groundY=CH*0.82;
-  // Vegetation: Anzahl ~ Nahrungsfülle, Höhe ~ Nahrungshöhe (schematische Halme + Kronen)
-  const n=Math.round(lerp(0,9,FA));
-  ctx.save();
-  ctx.strokeStyle=`rgba(120,150,96,${(0.4+0.4*bright).toFixed(2)})`; ctx.fillStyle=`rgba(142,172,112,${(0.45+0.35*bright).toFixed(2)})`;
-  ctx.lineWidth=Math.max(1.6,CW*0.006); ctx.lineCap="round";
-  for(let i=0;i<n;i++){
-    const fx=CW*(0.1+0.8*((i+0.5)/n));
-    const h=lerp(CH*0.05,CH*0.34,FH)*(0.7+0.6*(((i*37)%10)/10));
-    ctx.beginPath(); ctx.moveTo(fx,groundY); ctx.lineTo(fx,groundY-h); ctx.stroke();
-    ctx.beginPath(); ctx.arc(fx,groundY-h,lerp(3.5,15,FH),0,Math.PI*2); ctx.fill();
+  let d = `M0,560 L0,${pts[0][1].toFixed(1)}`;
+  if(humidity > 0.5){
+    for(let j=1;j<pts.length;j++){
+      const prev=pts[j-1], cur=pts[j], midx=(prev[0]+cur[0])/2;
+      d += ` Q${midx.toFixed(1)},${prev[1].toFixed(1)} ${cur[0].toFixed(1)},${cur[1].toFixed(1)}`;
+    }
+  } else {
+    for(let k=1;k<pts.length;k++) d += ` L${pts[k][0].toFixed(1)},${pts[k][1].toFixed(1)}`;
   }
-  ctx.restore();
-
-  // Boden (Pastell-Ocker, dunkler bei wenig Licht)
-  ctx.fillStyle=rgb(mix([198,178,134],[64,66,82], 1-bright));
-  ctx.beginPath(); ctx.ellipse(CW/2, CH*0.98, CW*0.62, CH*0.18, 0,0,Math.PI*2); ctx.fill();
-  // Schnee/Eis bei Kälte
-  if(T<0.28){
-    ctx.fillStyle=`rgba(242,246,250,${lerp(0,0.7,(0.28-T)/0.28).toFixed(2)})`;
-    ctx.beginPath(); ctx.ellipse(CW/2, CH*0.965, CW*0.6, CH*0.12, 0,0,Math.PI*2); ctx.fill();
-  }
-
-  // Wasser: steigt mit env.water — Pastellblau (Tiefsee = fast alles unter Wasser)
-  if(W>0.34){
-    const wl=lerp(CH*0.99,CH*0.24,(W-0.34)/0.66);
-    const wc=mix([124,178,202],[34,68,108], 1-bright);
-    ctx.fillStyle=`rgba(${wc[0]|0},${wc[1]|0},${wc[2]|0},${lerp(0.22,0.5,W).toFixed(2)})`;
-    ctx.fillRect(0,wl,CW,CH-wl);
-    ctx.strokeStyle=`rgba(210,230,242,${(0.35*W).toFixed(2)})`; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(0,wl); ctx.lineTo(CW,wl); ctx.stroke();
-  }
-  // Gift-Milieu (AXIS-6): kränklich-grüngelber Schleier über der ganzen Szene.
-  const tox = env.toxicity||0;
-  if(tox>0.05){
-    const tg=ctx.createLinearGradient(0,0,0,CH);
-    tg.addColorStop(0,`rgba(150,170,60,${(0.05+0.22*tox).toFixed(2)})`);
-    tg.addColorStop(1,`rgba(110,120,40,${(0.08+0.30*tox).toFixed(2)})`);
-    ctx.fillStyle=tg; ctx.fillRect(0,0,CW,CH);
-  }
-  // Hypoxie (AXIS-7): dünne, fahle Höhenluft — kühl-blasser Schleier oben, der die
-  // Szene entsättigt (kein grüner Gift-Ton). Signalisiert Sauerstoffmangel.
-  const oxy = env.oxygen==null?1:env.oxygen, hyp = 1-oxy;
-  if(hyp>0.05){
-    const hg=ctx.createLinearGradient(0,0,0,CH);
-    hg.addColorStop(0,`rgba(224,232,240,${(0.06+0.30*hyp).toFixed(2)})`);
-    hg.addColorStop(0.6,`rgba(210,222,236,${(0.03+0.12*hyp).toFixed(2)})`);
-    hg.addColorStop(1,`rgba(200,214,230,0)`);
-    ctx.fillStyle=hg; ctx.fillRect(0,0,CW,CH);
-  }
-  // Salinität (AXIS-8): milchig-weißer Salzschimmer unten (Salzkruste/Brine) + kühler Ton.
-  const sal = env.salinity||0;
-  if(sal>0.05){
-    const sg=ctx.createLinearGradient(0,CH,0,0);
-    sg.addColorStop(0,`rgba(236,240,244,${(0.10+0.34*sal).toFixed(2)})`);
-    sg.addColorStop(0.4,`rgba(222,230,238,${(0.04+0.14*sal).toFixed(2)})`);
-    sg.addColorStop(1,`rgba(210,222,232,0)`);
-    ctx.fillStyle=sg; ctx.fillRect(0,0,CW,CH);
-  }
-  // UV-Strahlung (AXIS-10): violett-fahler, grelle Strahlungsschleier von oben.
-  const uvv = env.uv||0;
-  if(uvv>0.05){
-    const ug=ctx.createLinearGradient(0,0,0,CH);
-    ug.addColorStop(0,`rgba(196,170,222,${(0.08+0.30*uvv).toFixed(2)})`);
-    ug.addColorStop(0.5,`rgba(210,190,230,${(0.03+0.12*uvv).toFixed(2)})`);
-    ug.addColorStop(1,`rgba(220,205,235,0)`);
-    ctx.fillStyle=ug; ctx.fillRect(0,0,CW,CH);
-  }
+  d += " L720,560 Z";
+  return d;
 }
 
-// B5: prefers-reduced-motion -> Canvas-Animation (Atem, Partikel) beruhigen.
+const hSky=el0("hSky"), hWedges=el0("hWedges"), hSun=el0("hSun"), hVeg=el0("hVeg"),
+  hGround=el0("hGround"), hSnow=el0("hSnow"), hWater=el0("hWater"), hWaterline=el0("hWaterline"),
+  hTox=el0("hToxOverlay"), hHypox=el0("hHypoxOverlay"), hSal=el0("hSalOverlay");
+function el0(id){ return document.getElementById(id); }
+
+function drawHabitat(){
+  // Vier Umwelt-Kanaele steuern die Bühne, ohne Zahlen: Temperatur -> Hintergrundfarbe,
+  // Feuchtigkeit -> Formensprache (Welle/Kristall), Sauerstoff+Nahrungsfülle -> Partikel
+  // (in drawMotes), Strahlung/Druck -> Lichtkeile. Die uebrigen Regler/Stressoren bleiben
+  // eingebunden (Vegetation, Licht, Schnee, Wasserstand, Gift/Hypoxie/Salz-Schleier).
+  const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
+  const bright = lerp(0.5, 1, L);
+
+  // Himmel: EINE flache Flaeche (kein Verlauf) auf der kalt<->warm-Achse.
+  const sky = mix(HAB_COLD, HAB_WARM, T).map(c => c*bright);
+  hSky.setAttribute("fill", rgb(sky));
+
+  // Lichtquelle: flacher Kreis statt Leucht-Verlauf, klein/erloschen bei wenig Licht.
+  if(L>0.1){
+    hSun.setAttribute("r", lerp(10,26,L).toFixed(1));
+    hSun.setAttribute("fill", rgb(mix([244,236,214],[226,167,46],T*0.6)));
+    hSun.setAttribute("fill-opacity", (0.35+0.5*L).toFixed(2));
+  } else hSun.setAttribute("r","0");
+
+  // Lichtkeile (Strahlung/Druck): Haeufigkeit aus UV+Strahlung, Neigung aus Tiefsee-Druck.
+  const rayForce = Math.max(env.uv||0, env.radiation||0);
+  const count = Math.round(lerp(0,6,rayForce));
+  hWedges.innerHTML = "";
+  if(count>0){
+    const angle = lerp(6,30, env.pressure||0);
+    const shear = Math.tan(angle*Math.PI/180) * 200;
+    for(let i=0;i<count;i++){
+      const bx = 40 + i*(640/Math.max(count-1,1)), wch=14;
+      const poly = document.createElementNS(SVGNS,"polygon");
+      poly.setAttribute("points", `${bx},0 ${bx+wch},0 ${bx+wch-shear},200 ${bx-shear},200`);
+      poly.setAttribute("fill", "#f4ecda");
+      poly.setAttribute("fill-opacity", (0.06+0.05*rayForce).toFixed(2));
+      hWedges.appendChild(poly);
+    }
+  }
+
+  // Vegetation: Anzahl ~ Nahrungsfuelle, Hoehe ~ Nahrungshoehe (schematische Halme + Kronen).
+  const groundY=460;
+  const n=Math.round(lerp(0,9,FA));
+  hVeg.innerHTML = "";
+  const vegStroke = rgb(mix([70,86,58],[120,150,96],bright)), vegFill = rgb(mix([96,116,78],[142,172,112],bright));
+  for(let i=0;i<n;i++){
+    const fx=720*(0.1+0.8*((i+0.5)/n));
+    const h=lerp(560*0.05,560*0.34,FH)*(0.7+0.6*(((i*37)%10)/10));
+    const stem = document.createElementNS(SVGNS,"line");
+    stem.setAttribute("x1",fx); stem.setAttribute("y1",groundY);
+    stem.setAttribute("x2",fx); stem.setAttribute("y2",groundY-h);
+    stem.setAttribute("stroke",vegStroke); stem.setAttribute("stroke-width", Math.max(2,720*0.006).toFixed(1));
+    stem.setAttribute("stroke-linecap","round");
+    hVeg.appendChild(stem);
+    const crown = document.createElementNS(SVGNS,"circle");
+    crown.setAttribute("cx",fx); crown.setAttribute("cy",groundY-h); crown.setAttribute("r",lerp(3.5,15,FH).toFixed(1));
+    crown.setAttribute("fill",vegFill);
+    hVeg.appendChild(crown);
+  }
+
+  // Boden: Formensprache aus Feuchtigkeit (Welle <-> Kristall), Farbe aus Temperatur.
+  hGround.setAttribute("d", groundPath(W));
+  hGround.setAttribute("fill", rgb(mix(HAB_GROUND_COLD,HAB_GROUND_WARM,T).map(c=>c*Math.max(bright,0.5))));
+
+  // Schnee/Eis bei Kaelte — flache Flaeche.
+  hSnow.setAttribute("fill-opacity", T<0.28 ? lerp(0,0.7,(0.28-T)/0.28).toFixed(2) : "0");
+
+  // Wasser: steigt mit env.water — flache Flaeche + Wasserlinie.
+  if(W>0.34){
+    const wl=lerp(560*0.99,560*0.24,(W-0.34)/0.66);
+    hWater.setAttribute("y", wl.toFixed(1)); hWater.setAttribute("height", (560-wl).toFixed(1));
+    hWater.setAttribute("fill", rgb(mix(HAB_COLD, HAB_FIG_LIGHT, 0.3).map(c=>c*Math.max(bright,0.5))));
+    hWater.setAttribute("fill-opacity", lerp(0.28,0.55,W).toFixed(2));
+    hWaterline.setAttribute("y1", wl.toFixed(1)); hWaterline.setAttribute("y2", wl.toFixed(1));
+    hWaterline.setAttribute("stroke", "#f4ecda"); hWaterline.setAttribute("stroke-opacity", (0.35*W).toFixed(2));
+    hWaterline.setAttribute("stroke-width","1.5");
+  } else { hWater.setAttribute("fill-opacity","0"); hWaterline.setAttribute("stroke-opacity","0"); }
+
+  // Gift-Milieu (AXIS-6): flacher gruengelber Schleier statt Verlauf.
+  const tox = env.toxicity||0;
+  hTox.setAttribute("fill-opacity", tox>0.05 ? (0.06+0.24*tox).toFixed(2) : "0");
+  // Hypoxie (AXIS-7): flacher fahler Schleier oben.
+  const hyp = 1-(env.oxygen==null?1:env.oxygen);
+  hHypox.setAttribute("fill-opacity", hyp>0.05 ? (0.05+0.28*hyp).toFixed(2) : "0");
+  // Salinitaet (AXIS-8): flacher milchiger Schleier unten.
+  const sal = env.salinity||0;
+  hSal.setAttribute("fill-opacity", sal>0.05 ? (0.08+0.3*sal).toFixed(2) : "0");
+}
+
+// B5: prefers-reduced-motion -> Partikel-Animation beruhigen.
 const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let motes = [];
-function initMotes(){ motes = Array.from({length:26},()=>({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.6+0.4,s:Math.random()*0.3+0.05,ph:Math.random()*6})); }
+const hMotes = el0("hMotes");
+let moteEls = [];
+function initMotes(){
+  motes = Array.from({length:26},()=>({x:Math.random()*720,y:Math.random()*560,r:Math.random()*1.8+0.5,s:Math.random()*0.3+0.05,ph:Math.random()*6}));
+  hMotes.innerHTML = "";
+  moteEls = motes.map(m => {
+    const c = document.createElementNS(SVGNS,"circle");
+    c.setAttribute("r", m.r);
+    hMotes.appendChild(c);
+    return c;
+  });
+}
 function drawMotes(time){
-  ctx.save();  // warmer Pollen-/Sporen-Staub (auf hellem Grund sichtbar)
-  for(const m of motes){
-    m.y -= m.s; if(m.y< -4){ m.y=CH+4; m.x=Math.random()*CW; }
-    const a = 0.07+0.05*Math.sin(time*0.001+m.ph);
-    ctx.fillStyle=`rgba(150,128,78,${a.toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,Math.PI*2); ctx.fill();
-  }
-  ctx.restore();
+  // Dichte + Deckkraft ~ Sauerstoff/Naehrstoffe (env.oxygen x env.foodAbundance).
+  const richness = Math.max(0, Math.min(1, ((env.oxygen==null?1:env.oxygen) + (env.foodAbundance??0.5)) / 2));
+  const visible = Math.round(lerp(4, motes.length, richness));
+  motes.forEach((m,i) => {
+    m.y -= m.s; if(m.y< -4){ m.y=560+4; m.x=Math.random()*720; }
+    const c = moteEls[i];
+    if(i>=visible){ c.setAttribute("fill-opacity","0"); return; }
+    const a = (0.08+0.06*Math.sin(time*0.001+m.ph)) * (0.5+0.5*richness);
+    c.setAttribute("cx", m.x.toFixed(1)); c.setAttribute("cy", m.y.toFixed(1));
+    c.setAttribute("fill", "#96805a"); c.setAttribute("fill-opacity", Math.max(0,a).toFixed(3));
+  });
 }
 
 function drawCreature(g, time, a){
@@ -3767,15 +3851,14 @@ try {
   }
 
   // Dezenter Hintergrund-Ton je Ort aus seiner Umwelt: kalt(blau)↔warm(orange),
-  // heller bei viel Licht, ein Hauch Türkis bei viel Wasser. Gibt jeder Welt sofort
-  // sichtbare Vielfalt, ohne die Lesbarkeit zu stören.
+  // heller bei viel Licht, ein Hauch Türkis bei viel Wasser. Flache Flächenfarbe
+  // (kein Verlauf) — dieselbe kalt/warm-Achse wie die Habitat-Bühne.
   function envTint(e) {
     const T = e.temperature ?? .5, L = e.light ?? .5, W = e.water ?? .5;
-    const cold = [60,120,170], hot = [190,110,70];
+    const cold = [92,116,150], hot = [207,143,78];
     const c = cold.map((v, k) => (v + (hot[k] - v) * T) | 0);
-    const a = (0.07 + 0.10 * L).toFixed(2);
-    const teal = W > 0.6 ? `, rgba(40,125,145,${(0.05 + 0.14 * (W - 0.6) / 0.4).toFixed(2)}) 100%` : "";
-    return `linear-gradient(150deg, rgba(${c[0]},${c[1]},${c[2]},${a}), var(--abyss) 62%${teal})`;
+    const a = (0.08 + 0.12 * L + (W > 0.6 ? 0.05 : 0)).toFixed(2);
+    return `rgba(${c[0]},${c[1]},${c[2]},${a})`;
   }
 
   // Cinematischer Eingriff: Klick -> Steuerung einklappen + Ort „lädt auf" (Anlauf)
