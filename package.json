@@ -19,6 +19,7 @@
     "branching-check": "npm run build && node tools/branching-check.mjs",
     "world-check": "npm run build && node tools/world-check.mjs",
     "coevolution-check": "npm run build && node tools/coevolution-check.mjs",
+    "phenomena-check": "npm run build && node tools/phenomena-check.mjs",
     "census-check": "npm run build && node tools/census-check.mjs",
     "seed-check": "npm run build && node tools/seed-check.mjs",
     "rarity-check": "npm run build && node tools/rarity-check.mjs",

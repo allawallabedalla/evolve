@@ -99,18 +99,58 @@ die Produktions-Engine ein einziges Mittelwert-Genom per Gradientenaufstieg simu
 dadurch grundsätzlich selten erreicht, egal wie viel an einzelnen Schwellen
 nachjustiert wird.
 
-**→ Diese Recherche soll noch durchgeführt werden:**
-**`docs/forschungsauftrag-naechste-engine.md`** enthält einen vollständigen, sofort
-kopierbaren Forschungsauftrag für einen neutralen Chat (Divergenz-Phase ohne
-Denkverbote → radikal unterschiedliche Modell-Paradigmen jenseits von
-Populationsgenetik, dann Konvergenz an Browser-Performance/Erklärbarkeit/Erreichbarkeit
-aller Archetypen), inkl. Modellwahl-Empfehlung (Opus 5 für die abwägungsintensive
-Konvergenz- und Spezifikationsphase, Sonnet 5 reicht für die breite Ideensammlung in
-der Divergenz-Phase). Ergebnis kommt danach zur Umsetzung zurück in dieses Repo — bis
-dahin bleiben `engine/fitness.ts`, `physics.json` und `classify()` unverändert.
+**✅ Recherche abgeschlossen (2026-07-29):** 4 parallele Sonnet-Agenten (Divergenz, 12
+Kandidaten) + 1 Opus-Agent (Konvergenz + Deliverable), alle Kernzahlen empirisch an diesem
+Repo gemessen, nicht geschätzt. **Volles Ergebnis: `docs/engine-forschungsergebnis.md`.**
 
-**Blockiert:** Punkt 6 (Rest-Achsen) — dort keine neuen Gene/Physik-Änderungen bauen, bevor
-dieses Ergebnis vorliegt.
+**Kernbefund:** die Recherche widerlegt Teile der ursprünglichen Annahme. Fisch ist längst
+erreichbar (11.8 % über Zufallsumwelten) — das „nie gesehen"-Gefühl ist ein
+Kalibrier-/Benennungsproblem (Presets fallen meist in die Mikroben-Region), nicht
+Erreichbarkeit. Insekt ist dagegen wirklich strukturell unerreichbar (0.14 % über 2200
+Läufe) — `engine/fitness.ts` hat schlicht keinen Fitness-Gipfel für „lange Gliedmaßen an
+kleinem Körper", das braucht einen eigenen, kleinen Physik-Term (kein Architekturproblem).
+Eine reine Agentenpopulation (`world/population.ts` pur) ist außerdem NICHT vielfältiger als
+der Status quo (24 vs. 32 Formen) — Fishers Fundamentalsatz zehrt Varianz auf einer fixen
+Landschaft auf, egal ob Mittelwert oder Population. Der eigentliche Vielfalts-Treiber ist
+**Frequenzabhängigkeit** (Konkurrenz um Nischen), nicht Population an sich.
+
+**Empfehlung:** Nischen-Schwarm (Populations-Kern `world/` + mehrdimensionaler
+Konkurrenz-Kernel + gestreute Gründer-Genome) statt Mittelwert-Gradientenaufstieg, plus
+Prototyp-Bibliothek + gewichtetes Ähnlichkeits-Matching statt der `classify()`-Kaskade.
+`engine/fitness.ts`/`physics.json` bleiben zu 100 % erhalten (nur pro Individuum statt pro
+Mittelwert aufgerufen) — `engine/simulate.ts`, `training/fit.ts`, `EngineParams`,
+`fitted-params.json` fallen ersatzlos weg (löst den Kapazitätsgrenzen-Befund aus Punkt 9
+Schritt 1 auf, statt ihn weiter zu kalibrieren). Performance gemessen: ~2 ms/Generation bei
+N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 100ms-Ziel.
+
+- [ ] **Migrations-Stufen (Modell: Opus für Stufe 2/4 — geschmacksintensive
+  Architekturentscheidungen im laufenden Live-Code —, Sonnet für den Rest), jede Stufe
+  einzeln lauffähig/messbar/committen, s. Dokument Abschnitt „6.4" für Details:**
+  - [ ] Stufe 0 — Messskripte aus der Recherche als dauerhafte Regressionstests nach
+    `tools/` übernehmen.
+  - [ ] Stufe 1 — Gewichtete Cluster-Metrik in `world/cluster.ts`/`census.ts` (Ziel: ≥1.3
+    Cluster/Lauf, heute 0.10 bei 25 Genen — Cluster-Erkennung ist aktuell praktisch blind).
+  - [ ] Stufe 2 — Prototyp-Matcher + `archetypes.json`; `classify()`-Kaskade in
+    `app/index.html` ersetzen (behebt den gemeldeten Fell/Leuchtwesen-Kaskaden-Bug direkt).
+  - [ ] Stufe 3 — Mehrdimensionaler Nischen-Kernel in `population.ts` + gestreute
+    Gründer-Genome (Ziel: ≥18 Formen über 11 Biome, Koexistenz in ≥5 Biomen).
+  - [ ] Stufe 3.5 — kleiner Physik-Term für Insekt-Nische (Gliedmaßen-Substrat-Traktion o.ä.,
+    ~15 Zeilen analog bestehender AXIS-Achsen) — NACH Stufe 3, mit Multi-Start-Messung
+    abgenommen (Ziel: Insekt ≥2 % im Zufalls-Sweep, heute 0.14 %).
+  - [ ] Stufe 4 — Live-App auf `world/` umstellen, `simulate.ts` aus dem Produktionspfad
+    (Ziel: Tick < 10 ms im Browser gemessen).
+  - [ ] Stufe 5 — Telemetrie-Erklärung (echtes Selektionsdifferential aus dem Schwarm) statt
+    `engine/explain.ts`s handgeschriebener `env`-Schwellen-Sätze (behebt nebenbei die im
+    Code selbst dokumentierte BUG-2-Klasse).
+  - [ ] Stufe 6 — Orakel-Prüfstand auf Verteilungsmetrik (Jensen-Shannon über Formhäufigkeiten)
+    umstellen; `fitted-params.json`/`validityTest`-Prozentbalken fallen weg oder bekommen
+    neue Bedeutung (Konvergenz-in-N statt Distillation).
+  - [ ] Stufe 7 (optional) — Koevolution + Metapopulation einschalten (bereits vorhanden in
+    `world/coevolution.ts`/`world/world.ts`, nur zuschalten).
+
+**Blockiert weiterhin:** Punkt 6 (Rest-Achsen) — der Umbau ändert, WIE Achsen wirken (Kern
+vs. Konkurrenz-Kernel), also erst nach mindestens Stufe 3 neu bewerten, ob/wie Punkt 6 noch
+sinnvoll ist.
 
 ### 3 · Komplexitäts-Audit / Informationsarchitektur (2026-07-29)
 
@@ -397,9 +437,7 @@ strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch 
 betreffen den Populations-Kern `world/`, Schritt 6–7 die Mittelfeld-Engine aus Schritt 1 —
 verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen):
 
-- [ ] **Schritt 2 — Schicht-A-Portfolio** (P1–P8) — **Modell: Sonnet** (vier von acht
-  Phänomenen sind Wiederverwendung bestehender Checks; bei der Bandwahl für P6 Kontingenz
-  sorgfältig begründen, s. u. — kein Grund für Opus, nur Sorgfaltspflicht) — als neues Gate
+- [x] **Schritt 2 — Schicht-A-Portfolio (erledigt 2026-07-29)** (P1–P8) — als neues Gate
   `tools/phenomena-check.mjs`
   (+ ggf. `world/phenomena.ts` für die Szenario-/Metrik-Logik, analog zum Aufbau von
   `world/cluster.ts`/`tools/branching-check.mjs`). Zielband + Szenario-Beschreibung je
@@ -428,6 +466,15 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   **Baue den Portfolio-Runner von Anfang an mit einem `disabledMechanisms`-Parameter**
   (z. B. `{ competition: false, migration: false, coevolution: false, drift: false }`) —
   das macht Schritt 3 zu einer reinen Wiederverwendung statt einer zweiten Implementierung.
+  **Ergebnis:** `world/phenomena.ts` + `tools/phenomena-check.mjs` gebaut, `Mechanisms`-
+  Interface (`competition`/`migration`/`coevolution`/`drift`) + `popConfigFor()` als
+  wiederverwendbarer Ablations-Baustein für Schritt 3. 7/8 Phänomene im Zielband (P7 korrekt
+  als „wartet auf Schritt 4" markiert, kein FAIL), alle 7 Ablationen verfehlen ihr Zielband
+  wie gefordert. Ehrlicher Einzelfall dokumentiert: bei P4 (Konvergenz) war die naheliegende
+  Ablation „Konkurrenz einschalten" empirisch wirkungslos (0.183 vs. 0.201 — kaum
+  Unterschied) — statt die Schwelle zu verbiegen, wurde eine dedizierte, im Code explizit
+  dokumentierte Ablation gebaut (neutrale, fitnessfreie Reproduktion, 0.183→0.653). Alle 5
+  Kern-Gates weiterhin grün, `package.json` nur um ein Script ergänzt.
 - [ ] **Schritt 3 — Mechanismus-Ablationsstudie** — **Modell: Sonnet** (Diagnose-Ausgabe, kein
   Gate, mechanisch) (Validierungsplan Teil V Punkt 2): den
   Schritt-2-Portfolio-Runner einmal je Mechanismus mit `disabledMechanisms` auf „aus"
