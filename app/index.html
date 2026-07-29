@@ -1530,6 +1530,7 @@ const TREE = [
     {n:"Krebstier · Arthropode", e:"🦀", cl:"Crustacea", era:"vor ~510 Mio. J.", evo:"Gliederfüßer mit Panzer und Scheren."},
     {n:"Insekt · Gliederfüßer", e:"🐜", cl:"Insecta", era:"vor ~400 Mio. J.", evo:"Erste Landgliederfüßer; Flügel (~325 Mio.) → artenreichste Gruppe."},
     {n:"Fisch · Aalform", e:"🐟", cl:"Fische", era:"vor ~530 Mio. J.", evo:"Erste Wirbeltiere — Wirbelsäule und Kiemen."},
+    {n:"Leuchtwesen · Tiefsee", e:"🪼", cl:"Ceratioidei", era:"vor ~150 Mio. J.", evo:"Biolumineszenz bei Fischen ab dem Jura — mind. 27× unabhängig entstanden, hier als Köder-Licht im ewigen Tiefsee-Dunkel."},
     {n:"Amphibie · Lurch", e:"🐸", cl:"Amphibia", era:"vor ~370 Mio. J.", evo:"Erste Landwirbeltiere — noch ans Wasser gebunden (Laich)."},
     {n:"Reptil · Echse", e:"🦎", cl:"Reptilia", era:"vor ~320 Mio. J.", evo:"Amnioten — das Ei mit Schale löst vom Wasser."},
     {n:"Gepanzertes Beutetier", e:"🐢", cl:"Reptilia", era:"vor ~230 Mio. J.", evo:"Panzer/Schild als Verteidigung gegen Räuber."},
@@ -2793,11 +2794,7 @@ let chalFilterReich = "alle", chalFilterDiff = "alle";
 const REICH_LABEL = { Mikrobe:"Reich der Mikroben", Protist:"Reich der Protisten", Pflanze:"Reich der Pflanzen", Pilz:"Reich der Pilze", Tier:"Reich der Tiere" };
 const KINGDOM_ICON = { Mikrobe:"rod", Protist:"amoeba", Pflanze:"flower", Pilz:"agaric", Tier:"fox" };
 const DIFF_LABEL = { leicht:"leicht", mittel:"mittel", schwer:"schwer" };
-// "Leuchtwesen · Tiefsee" ist eine echte classify()-Form (siehe dort, Reich Tier), fehlt aber
-// im Lebensbaum (TREE) und damit in FORM_KINGDOM — ein bestehender Genbuch-Lückenfall, hier
-// nur lokal überbrückt, damit der Reich-Filter der Herausforderungen nicht falsch leerläuft.
-const CHAL_KINGDOM_FALLBACK = { "Leuchtwesen · Tiefsee": "Tier" };
-function chalTargetKingdom(ch){ return ch.ziel.form ? (kingdomOf(ch.ziel.form) || CHAL_KINGDOM_FALLBACK[ch.ziel.form]) : ch.ziel.reich; }
+function chalTargetKingdom(ch){ return ch.ziel.form ? (kingdomOf(ch.ziel.form)) : ch.ziel.reich; }
 function chalTargetIcon(ch){ return ch.ziel.form ? formIcon(ch.ziel.form) : ic(KINGDOM_ICON[ch.ziel.reich]||"dot"); }
 function chalTargetLabel(ch){ return ch.ziel.form || REICH_LABEL[ch.ziel.reich] || ch.ziel.reich; }
 function withinGrenzen(e, grenzen){

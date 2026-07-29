@@ -332,11 +332,13 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
   Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
   (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe
   Priorität.
-- [ ] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee"** — die Form ist über `classify()` real
-  erreichbar (Reich Tier) und wird von den Herausforderungen genutzt, fehlt aber im `TREE`
-  (Genbuch) selbst, dadurch auch in `FORM_KINGDOM`. Für den Herausforderungen-Reich-Filter
-  lokal in `app/index.html` überbrückt (`CHAL_KINGDOM_FALLBACK`); der eigentliche
-  Lebensbaum-Eintrag (Ära/Evo-Notiz) fehlt weiterhin.
+- [x] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee" (behoben 2026-07-29)** — echter `TREE`-Eintrag
+  ergänzt (Reich Tier, `cl:"Ceratioidei"`, `era:"vor ~150 Mio. J."`, recherchiert: Davis/
+  Sparks/Smith 2016, Biolumineszenz bei Strahlenflossern ab dem Jura, ≥27× unabhängig
+  entstanden — deckt sich mit dem bereits vorhandenen Wikipedia-Ziel in `exemplar.js`).
+  `FORM_KINGDOM`/`FORM_STORY` füllen sich automatisch aus `TREE`; der lokale
+  `CHAL_KINGDOM_FALLBACK`-Workaround war dadurch komplett redundant und wurde entfernt.
+  `app-parity`/`mf-fidelity` weiterhin grün.
 - [x] **`docs/auslagerung/P5-ausgabe.json` aufräumen** (erledigt 2026-07-29) — Deletion
   hätte den historischen Kontext verloren, daher stattdessen `P5-aufgabe.md` mit einem
   klaren „ersetzt durch P8"-Hinweis versehen (JSON selbst unangetastet, bleibt als Archiv).
