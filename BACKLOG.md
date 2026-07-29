@@ -288,12 +288,36 @@ Repo-Abgleich (Teil VI des Dokuments) zeigt: Populations-Kern, Ko-Evolution, Met
 Cluster-basierte Arten und ein erster GA-Loop (`training/fit.ts`) existieren bereits und decken
 strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch komplett.
 
-> **Nachgeprüft (2026-07-29):** `world/population.ts` steht weiter bei `numGenes: 9`, während
-> die App/Engine inzwischen 25 Gene führt (s. Kopfzeile dieser Datei) — die Diskrepanz aus dem
-> Forschungsdokument besteht also unverändert, Schritt 1 ist noch nicht erledigt.
+> **Korrigiert (2026-07-29):** Der ursprüngliche Befund „`world/population.ts` (`numGenes: 9`)
+> vs. 25 Gene" trifft **nicht** den echten Engpass — `numGenes: 9` ist dort nur ein toter
+> Default; jeder tatsächliche Aufrufer (`world/world.ts`, `world/coevolution.ts`, alle
+> `*-check.mjs`-Gates, `cli/world-demo.ts`) übergibt bereits explizit `numGenes: 25`
+> (`phys.traits.length`). Eine Änderung an dieser einen Zeile wäre wirkungslos.
+>
+> Die reale Genom-Breiten-Lücke sitzt in **`training/fit.ts`**: `NUM_GENES = 9` ist dort hart
+> codiert und bestimmt die Länge von `EngineParams.responseRate`, das der GA fittet und in
+> `fitted-params.json` schreibt. `engine/simulate.ts` läuft aber inzwischen über alle 25 Gene
+> (`TRAITS.length`) — mit nur 9 `responseRate`-Werten wird `params.responseRate[g]` für die
+> Gene 10–24 `undefined`, wodurch diese Gene ab Generation 1 zu `NaN` werden. Bleibt bisher
+> unbemerkt, weil `tools/ecology-check.mjs` (eines der 5 Validierungs-Gates, nutzt
+> `fitted-params.json`) für seine Reich-Klassifikation nur die ersten Gen-Indizes (Größe,
+> Photosynthese, Mobilität, Struktur) liest — die NaN-Gene fließen nie in die Prüfung ein.
+> Genau das „ein spätere Loop misst ein verkürztes Modell"-Risiko aus dem Forschungsdokument,
+> nur eine Ebene tiefer als ursprünglich vermutet. (`engine/types.ts`s `DEFAULT_ENGINE_PARAMS`
+> hat denselben 9-Gene-Rest, wird aber nur vom archivierten `mockup/` + `cli/demo.ts` genutzt —
+> niedrige Priorität.)
 
-- [ ] **Schritt 1 — Genom-Breite vereinheitlichen**: `world/population.ts` auf die vollen
-  25 Gene aus `engine/types.ts` bringen, sonst misst jeder spätere Loop ein verkürztes Modell.
+- [ ] **Schritt 1 — `training/fit.ts` auf 25 Gene bringen**: `NUM_GENES` von `training/fit.ts`
+  dynamisch aus `phys.traits.length` lesen (statt hart 9), `BOUNDS`/`responseRate` entsprechend
+  auf 25 Einträge erweitern. Für die 15 bedingten Kosten-Gene (Stressor-Resistenzen/Nischen-
+  Mechaniken) den bereits im Live-App-Mittelfeld validierten `mutationAnchor` (Kern-Gene 0–9
+  neutral 0.5, restliche 15 niedrig 0.12 — s. „Mittelfeld-Fidelity-Fix v0.63.0" im Archiv) mit
+  ausgeben, statt ihn ungeankert zu lassen. GA neu laufen lassen (`npm run train`),
+  `fitted-params.json` neu erzeugen, alle 5 Gates (`pop-check`, `branching-check`,
+  `world-check`, `parity`, `ecology`) + `ecology-full`/`reality`/`app-parity`/`mf-fidelity`
+  gegenprüfen — `validityTest` sollte im 80–90 %-Band bleiben, sonst nachkalibrieren.
+  `world/population.ts`s `numGenes: 9`-Default kann bei Gelegenheit trotzdem auf 25 gesetzt
+  werden (Hygiene, kein funktionaler Effekt).
 - [ ] **Schritt 2 — Schicht-A-Portfolio** bauen: die 8 Phänomen-Szenarien (P1–P8) als
   eigenständige, deterministische Tests mit Zielband — je Szenario mit einer Ablation, die
   beweisen muss, dass das Phänomen bei abgeschalteter Kraft verschwindet (emergent, nicht
