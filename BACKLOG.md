@@ -259,6 +259,12 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
 - Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht
   Supabase-Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr);
   B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).
+- [ ] **`npm run seed-check` schlägt fehl** (Befund 2026-07-29, beim Prüfen von Punkt 9
+  entdeckt) — „Monomorpher Start (NN klein)" FAIL, NN=0.149 gegen Schwelle 0.12.
+  **Vorbestehend, nicht durch Punkt 9 verursacht** (auch mit dem alten `numGenes:9`-Default
+  bereits FAIL, per `git stash` gegengeprüft). Vermutlich eine zu eng kalibrierte Schwelle
+  in `tools/seed-check.mjs` für die inzwischen 25-dimensionale Nächste-Nachbar-Distanz — nicht
+  näher untersucht, geringe Priorität (betrifft nur die „Lebende Welt (Beta)"-Overlay-Startlogik).
 
 ### 8 · Gamification-Feinschliff
 
@@ -318,12 +324,107 @@ strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch 
   gegenprüfen — `validityTest` sollte im 80–90 %-Band bleiben, sonst nachkalibrieren.
   `world/population.ts`s `numGenes: 9`-Default kann bei Gelegenheit trotzdem auf 25 gesetzt
   werden (Hygiene, kein funktionaler Effekt).
-- [ ] **Schritt 2 — Schicht-A-Portfolio** bauen: die 8 Phänomen-Szenarien (P1–P8) als
-  eigenständige, deterministische Tests mit Zielband — je Szenario mit einer Ablation, die
-  beweisen muss, dass das Phänomen bei abgeschalteter Kraft verschwindet (emergent, nicht
-  hineinprogrammiert).
-- [ ] **Schritt 3** — Schicht B (Verteilungs-Fits) + Ausbau von `training/fit.ts` zum
-  Drei-Schicht-Loop mit Champion-Persistenz + Multi-Schicht-Report + Regressions-Gate.
+  **Ausstiegsregel (Identifizierbarkeit, Forschungsdokument Teil V Punkt 3):** bleibt
+  `validityTest` nach dieser Erweiterung UND nach Nachkalibrierungs-Versuchen dauerhaft
+  unter 80 %, ist das kein Kalibrierungsproblem mehr, sondern ein Signal, dass die
+  Mittelfeld-Engine-STRUKTUR das 25-Gene-Orakel nicht treffen kann. Dann NICHT weiter an
+  Parametern drehen — Befund hier im Backlog dokumentieren und Schritt 6/7 pausieren, bis
+  das strukturell geklärt ist (neuer, separater Punkt), statt stillschweigend mit einer zu
+  armen Engine weiterzuarbeiten.
+
+**Ab hier zwei unabhängige Spuren, die parallel begonnen werden können** (Schritt 2–3
+betreffen den Populations-Kern `world/`, Schritt 6–7 die Mittelfeld-Engine aus Schritt 1 —
+verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen):
+
+- [ ] **Schritt 2 — Schicht-A-Portfolio** (P1–P8) als neues Gate `tools/phenomena-check.mjs`
+  (+ ggf. `world/phenomena.ts` für die Szenario-/Metrik-Logik, analog zum Aufbau von
+  `world/cluster.ts`/`tools/branching-check.mjs`). Zielband + Szenario-Beschreibung je
+  Phänomen stehen in `docs/evolution-fidelity-loop.md`, Abschnitt **„### Schicht A —
+  Evolutionstheorie-Phänomene"** (Tabelle) und **„### 2. Die bekannten emergenten
+  Phänomene"**. Wichtig, um Doppelarbeit zu vermeiden — **vier der acht Phänomene haben
+  bereits eine funktionierende Referenz-Implementierung, die nur noch ins Portfolio-Format
+  gebracht werden muss**, statt neu gebaut zu werden:
+  - **P2 Branching** → `tools/branching-check.mjs` (σC<σK, ≥2 Cluster).
+  - **P3 Allopatrie** → `tools/world-check.mjs` (isolierte Orte divergieren).
+  - **P5 Red Queen** → `tools/coevolution-check.mjs` (anhaltende Merkmalsoszillation).
+  - **P8 Aussterben** → `tools/world-check.mjs` (Katastrophe senkt Diversität) — hier fehlt
+    noch die **Erholung** danach (world-check prüft nur den Einbruch); im Portfolio um
+    „Diversität steigt in den N Generationen nach der Katastrophe wieder" ergänzen.
+  Net-neu zu bauen: **P1 Radiation** (Nischen in einer Metapopulation öffnen, Δ Artenzahl
+  über `world/census.ts` messen), **P4 Konvergenz** (gleiche Umwelt, verschiedene
+  Start-Seeds → End-Distanz sollte klein sein), **P6 Kontingenz** (gleiche Umwelt, viele
+  Seeds → Varianz der Endzustände: muss > 0 UND unter einer plausiblen Obergrenze liegen —
+  Band selbst begründen und im Code kommentieren, keine Zahl ohne Begründung).
+  **P7 Verteilungsgesetze NICHT hier separat implementieren** — ruft stattdessen die
+  Fit-Funktion aus Schritt 4 (Schicht B) auf und prüft nur „Distanz unter Schwelle"; sonst
+  entsteht doppelte, potenziell widersprüchliche Logik.
+  **Pro Szenario zwingend:** ein Ablations-Lauf (die für dieses Phänomen ursächliche Kraft
+  abschalten) muss das Zielband **verfehlen** — sonst ist der Test kein Beweis für
+  Emergenz (Validierungsplan Teil V Punkt 1).
+  **Baue den Portfolio-Runner von Anfang an mit einem `disabledMechanisms`-Parameter**
+  (z. B. `{ competition: false, migration: false, coevolution: false, drift: false }`) —
+  das macht Schritt 3 zu einer reinen Wiederverwendung statt einer zweiten Implementierung.
+- [ ] **Schritt 3 — Mechanismus-Ablationsstudie** (Validierungsplan Teil V Punkt 2): den
+  Schritt-2-Portfolio-Runner einmal je Mechanismus mit `disabledMechanisms` auf „aus"
+  laufen lassen (Konkurrenz/Migration/Ko-Evolution/Drift einzeln), Matrix „Mechanismus ×
+  welches P-Ergebnis kippt" ausgeben (z. B. `tools/ablation-check.mjs`, druckt eine Tabelle,
+  kein hartes Pass/Fail nötig — das ist eine Diagnose-/Doku-Ausgabe, kein Gate). Bindet
+  Mechanismus kausal an Phänomen; Ergebnis kurz in diesem Backlog-Punkt oder einer neuen
+  Datei `docs/ablation-results.md` festhalten.
+- [ ] **Schritt 4 — Schicht-B-Metriken**: Referenzverteilungen mit Quelle (Anhang „Belegprinzip"
+  in `docs/evolution-fidelity-loop.md` beachten — **keine erfundenen Zahlen**, wo Unsicherheit
+  besteht ein Band statt eines Punktwerts) für Körpergrößen-Verteilung (log-normal), SAD
+  (Fisher 1943 log-series bzw. Preston 1948 log-normal), SAR (S≈c·Aᶻ, z≈0.2–0.35,
+  Arrhenius/Rosenzweig), trophische Pyramide (~10× Biomasse-Abnahme je Trophiestufe),
+  Merkmals-Kovarianz (Kleiber 1932 — bereits im Code als `kleiberDecades` in
+  `physics.json`/`engine/fitness.ts` vorhanden, hier nur der Realitäts-Abgleich). Score_B =
+  1 − normierte KS-/Earth-Mover-Distanz. `docs/biodiversity-reference.md` hat bereits die
+  Reich-Anteil-Kriterien C1–C6 (Schicht-A/Kingdom-Ebene, von `ecology-check.mjs` genutzt) —
+  das ist NICHT dasselbe wie Schicht B (Verteilungs-*Form*, nicht Reich-*Anteil*); als
+  Vorbild für den Belegprinzip-Stil trotzdem lesenswert. Neues Gate z. B.
+  `tools/distribution-check.mjs`.
+- [ ] **Schritt 5 — Gewichte & Schwellen festlegen** (Forschungsdokument „### Aggregat"):
+  `Fidelity = w_A·Score_A + w_B·Score_B + w_C·Score_C` mit Pro-Schicht-Mindestschwellen.
+  **Ausdrücklich KEINE Rückfrage nötig** — das ist laut Dokument eine bewusste, aber vom
+  Optimierer entkoppelte technische Entscheidung (Goodhart-Schutz), keine Produktentscheidung
+  des Nutzers; frühere Kalibrierungs-Entscheidungen in diesem Repo (z. B. BAL-5
+  Panzer-Grenzkosten, Kleiber-Rabatt, `mutationAnchor`-Werte) wurden genauso autonom
+  getroffen und dokumentiert. Anforderung: **als benannte, an einer Stelle zentrierte
+  Konstante ablegen** (z. B. `training/fidelity-config.ts`), NICHT über den Code verstreut,
+  mit einem Satz Begründung je Wert im Kommentar — damit spätere Korrektur billig bleibt.
+  Sinnvoller Startpunkt, falls keine bessere Begründung gefunden wird: gleich gewichtet
+  (w_A=w_B=w_C=1/3), Mindestschwelle je Schicht so, dass der aktuelle Stand (nach Schritt
+  2+4) knapp durchfällt statt knapp besteht — ein Prüfstand, der beim ersten Lauf grün ist,
+  prüft nichts.
+- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** (Forschungsdokument
+  Teil IV, „### 4.2 Die sechs Stationen im Detail" — Kandidat, Simulieren, Messen,
+  Optimierer, Selektion mit Holdout, Champion+Report). Baut auf Schritt 1 (25-Gene-Fitting)
+  UND Schritt 5 (Gewichte/Schwellen) auf; Schritt 2–4 liefern die Score_A/B/C-Messfunktionen,
+  die hier als Blackbox-Fitness des Optimierers eingehängt werden. Kandidat-Parameterraum
+  bleibt **ausschließlich kontinuierlich** (Mutationsrate, Selektionsschärfe, σ_C/σ_K, N,
+  responseRate, `mutationAnchor`) — **keine Struktur-Parameter** (s. Schritt 7). Champion +
+  vollständiger Metrik-Vektor versioniert speichern (z. B. `fidelity-champion.json`,
+  Zeitstempel + Seed, analog zu `fitted-params.json`), Report zeigt Trend über Iterationen
+  + welche Schicht limitiert. Holdout-Portfolio (Szenarien, die der Optimierer nicht sieht)
+  gegen Overfitting — Train/Test-Split wie in `training/fit.ts` bereits vorhanden, hier auf
+  alle drei Schichten ausweiten.
+- **Schritt 7 — bewusst NICHT bauen (Strukturentscheidung, Forschungsdokument § 4.2 [1]):**
+  eine nichtlineare Genotyp→Phänotyp-Abbildung (GRN/Epistase) bliebe der größte verbleibende
+  Realismus-Hebel, gehört aber laut Dokument ausdrücklich außerhalb der Auto-Schleife (sonst
+  überfittet der Optimierer die Struktur an seine eigene Messlatte). Falls der Fidelity-Loop
+  aus Schritt 6 dauerhaft bei Score_A hängen bleibt, obwohl Parameter längst ausgereizt sind,
+  ist DAS das Signal, dass dieser Punkt fällig wird — dann als neuer, eigener Backlog-Punkt
+  aufnehmen, nicht in Schritt 6 hineinquetschen.
+
+**Sicherheitshinweis für alle Schritte:** nichts hiervon berührt `app/index.html` direkt —
+Schritt 1/6 schreiben nur `fitted-params.json`/`fidelity-champion.json` (gelesen von
+`tools/ecology-check.mjs`/`cli/demo.ts`, NICHT von der Live-App, die ihre eigene
+hand-gepflegte `PARAMS`-Kopie inline hat), Schritt 2–4 sind neue, eigenständige
+`world/`+`tools/`-Dateien. Die „Live-App bleibt unangetastet"-Leitplanke aus
+`docs/rebuild-roadmap.md` ist damit für den gesamten Punkt 9 automatisch erfüllt — kein
+gesonderter Check nötig. Jeder Schritt einzeln committen, nach jedem Schritt die 5
+Kern-Gates (`pop-check`, `branching-check`, `world-check`, `parity`, `ecology`) plus alle
+neu hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
 
 Wird sukzessive abgearbeitet (kein automatischer Trigger mehr aktiv — Start ab
 Mi 2026-07-29).
