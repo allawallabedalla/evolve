@@ -101,6 +101,21 @@ Warum das der beste erste Baustein ist:
 Ausbaustufen: feste Startwelt (alle bekommen dieselbe) → Bestenliste nach *Generationenzahl*
 statt nach Wiederholung → „Welt der Woche" mit Vergleich der Ergebnisse (Verbundenheit).
 
+**Status (2026-07-27): umgesetzt, v0.75.0.** 271 Herausforderungen (Paket P8, extern
+zugeliefert und simulations-verifiziert — Details in `docs/influence-plan.md`) sind ins Spiel
+verdrahtet: neuer Button „Herausforderungen ↗", durchsuchbare/filterbare Liste (Reich,
+Schwierigkeit), Annehmen ohne jede Sperre. Wichtige Korrektur beim Verdrahten: eine
+Herausforderung startet im Zustand **„warten"** — die Uhr läuft erst los, sobald die Umwelt
+tatsächlich in der Beschränkung ist (sonst wäre „annehmen" oft eine Sofort-Pleite, weil die
+aktuellen Regler die oft eng gefasste Beschränkung fast nie schon zufällig erfüllen). Ebenso
+gefunden und behoben: das unbeeinflusste Start-Genom klassifiziert schon als „Protist ·
+Euglenoid · Mixotroph" — ohne Mindest-Generationenzahl (`CHAL_MIN_GENS`) wäre jede
+Protist-Herausforderung ein Sofort-Gewinn ganz ohne Zutun gewesen. Fortschritt (welche
+Herausforderung geschafft ist) übersteht „Neues Leben" (eigener localStorage-Schlüssel).
+Abbrechen/erneut versuchen jederzeit möglich, keine Strafe. Ausbaustufen (feste Startwelt,
+Bestenliste, „Welt der Woche") weiterhin offen — brauchen einen Server/Vergleichsraum, bewusst
+nicht Teil dieses Schritts.
+
 ### V2 · Trägheit der Welt — Eingriffe brauchen Zeit
 
 Statt sofortiger Regler-Wirkung: eine Änderung ist ein **Klimawandel**, der über N Generationen

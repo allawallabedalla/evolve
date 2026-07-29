@@ -400,3 +400,77 @@ klargestellt: das übernimmt `challenge-import-check.mjs` bereits auf unserer Se
 `P5-eingabe.json` zusätzlich um 12 `biomeBeispiele` ergänzt (alle Spiel-Biome mit ihrem
 ECHTEN, in der Engine gemessenen Konvergenz-Ergebnis über 800 Generationen) als Ausgangspunkt
 für plausiblere Vorschläge.
+
+### 2026-07-27 · P5-Zulieferung geprüft, echter Prüfstand-Bug gefunden, P8 als Nachfolgepaket (300 Stück)
+`P5-ausgabe.json` (28 Herausforderungen) geprüft: erst 14/28 durchgefallen ("nie erreichbar").
+Beim Nachforschen zwei getrennte Ursachen gefunden:
+1. **Echter Bug in `challenge-import-check.mjs`**: `sampleEnv()` hat die `STRESSORS`-Liste aus
+   `tools/lib/app-core.mjs` zweckfremd wiederverwendet, um zu entscheiden, welche Achsen ohne
+   `grenzen`-Eintrag unverändert bleiben. `oxygen` steht dort bewusst NICHT drin (die Liste dient
+   anderswo einem Reset-auf-0-Muster, oxygen resettet aber auf 1) — Folge: `oxygen` wurde bei
+   JEDER Stichprobe zufällig zwischen 0 und 1 gewürfelt statt beim zugesicherten neutralen Wert 1
+   zu bleiben. Behoben (Commit `1eaa20f`): 14 → 10 Fehlschläge.
+2. **Echtes Inhalts-Problem** (verbleibende 10): Ziele wie Nadelbaum, Sukkulente, Koralle wurden
+   aus biologischer Intuition heraus mit Beschränkungen versehen, die mit der tatsächlichen
+   Simulations-Logik nichts zu tun haben — Tiefen-Stichprobe (1500 statt 24 pro Fall) bestätigte:
+   6 der 10 sind bei 0/1500 echte Sackgassen, der Rest im Promille-Bereich.
+
+Daraus **P8** gebaut: 45.000-Stichproben-Simulationslauf über die 6 Regler ergab für 39 von 44
+Formen und alle 5 Reiche echte, gemessene "Envelopes" (Wertespannen + Beispiel-Umgebungen, die
+das Ziel nachweislich erreichen) plus Seltenheits-Zahl (`treffer`). `docs/auslagerung/P8-*`
+liefert diese Daten der externen KI mit, mit der Regel: jede eingeschränkte Achse muss die
+gemessene Spanne abdecken; bei sehr seltenen Zielen (`treffer` < ~50) reicht die grobe Envelope
+NICHT — dort muss eng um EIN konkretes Beispiel herum eingeschränkt werden (getestet an
+Nadelbaum: lockere Envelope-Beschränkung auf 2 Achsen → 0/24, enge 6-Achsen-Bindung an ein
+Beispiel → 8 % Trefferquote). `P8-beispiel.json` geprüft, besteht. Umfang diesmal: 300
+Herausforderungen. P5 selbst bleibt vorerst offen/unintegriert — P8 ist der vorgesehene
+Ersatz/die Erweiterung dafür.
+
+### 2026-07-27 · P8-Zulieferung geprüft (300 Herausforderungen)
+`docs/auslagerung/P8-herausforderungen.json` (300 Stück, externe Zulieferung) geprüft: **29/300
+durchgefallen** (nie erreichbar im Budget) — deutliche Verbesserung gegenüber P5 (dort 10/28,
+also ~36 %; hier ~9,7 %), die Envelope-Grounding-Methode wirkt. Da der Prüfstand alles-oder-
+nichts arbeitet, wurden die 29 Attrappen herausgefiltert (Regel aus P5-aufgabe.md §7: „lieber
+weniger Herausforderungen als eine, die niemand schaffen kann"). Ergebnis:
+**`docs/auslagerung/P8-ausgabe.json` — 271 Herausforderungen, alle einzeln simulations-verifiziert,
+`challenge-import-check` bestanden (0 Beanstandungen, nur milde Hinweise zu Schwierigkeits-
+Einstufung/Beschränkungs-Trennschärfe bei ~30 Einträgen — kein Fail).**
+Verdrahtung ins Spiel (neue UI, Fortschrittsanzeige) weiterhin NICHT Teil davon — eigene
+Entscheidung, noch offen.
+
+### 2026-07-27 · Textqualität der P8-Zulieferung geprüft — Nacharbeit nötig
+Stichprobe der 271 angenommenen Texte zeigte einen systematischen Grammatikfehler, den
+`challenge-import-check.mjs` nicht prüft (nur Länge/Ton/Umlaute, keine Grammatik): 226/271
+Beschreibungen enthielten „zu das Reich der Mikrobe" statt „zum Reich der Mikroben" (falsche
+Präposition UND falscher Numerus), und alle 271 Titel kamen aus nur 12 wiederverwendeten
+Vorlagen („Im stillen Winkel: X", „In der Gluthitze: X", …) — reines Mad-Libs, nicht die im
+Auftrag geforderte natürliche, variierte Prosa.
+
+Entschieden: **nicht** so übernommen. `tools/gen-challenge-text.mjs` (neu) erzeugt Titel +
+Beschreibung stattdessen selbst — deterministisch, aus einem festen Wortschatz je Achse/Richtung
+(dieselbe Technik wie `app/story.js`), auf Basis der bereits simulations-geprüften `ziel`/
+`grenzen`-Felder (die blieben unverändert). Ergebnis: 0 doppelte Titel, 0 doppelte
+Beschreibungen, 0 Grammatikfehler, erneut vollständig mit `challenge-import-check.mjs` bestanden
+(271/271). `docs/auslagerung/P8-ausgabe.json` enthält jetzt diesen selbst erzeugten Text.
+
+### S8 · Herausforderungen ins Spiel verdrahtet — erledigt (v0.75.0)
+271 Herausforderungen eingebaut: `tools/build-challenges.mjs` → `app/challenges.js` →
+neuer Button „Herausforderungen ↗" (Modal mit Suche + Reich-/Schwierigkeits-Filtern, capped auf
+60 gerenderte Treffer). Browser-Test (Playwright, `/opt/pw-browsers`) deckte zwei echte Bugs vor
+dem Release auf, beide behoben:
+1. **Sofort-Fehlschlag beim Annehmen**: eine Herausforderung mit eng gefasster Beschränkung
+   scheiterte im ALTEN Entwurf schon im ersten Frame nach „annehmen", weil die aktuellen Regler
+   die Beschränkung so gut wie nie zufällig schon erfüllen. Fix: neuer Zustand „warten" — die
+   Generationen-Uhr startet erst, wenn die Umwelt tatsächlich im Rahmen ist.
+2. **Sofort-Gewinn beim Annehmen**: das unbeeinflusste Start-Genom (alle 25 Gene auf 0,5)
+   klassifiziert schon als „Protist · Euglenoid · Mixotroph" — ohne Gegenmaßnahme wäre jede
+   Herausforderung mit diesem Ziel ein Gewinn ganz ohne Zutun gewesen. Fix: `CHAL_MIN_GENS = 5`,
+   ein „geschafft" zählt erst nach mindestens 5 echten Generationen im laufenden Zustand.
+Fortschritt (`completedChallenges`) übersteht „Neues Leben" (eigener localStorage-Schlüssel,
+unabhängig vom Spielstand). Kein Zwang: annehmen/aufgeben/erneut versuchen jederzeit ohne Folgen.
+`npm run app-parity` und `npm run story-check` weiterhin grün — keine Regression.
+
+Damit ist die ursprüngliche Aufgabe „Umwelt-Einfluss auslösen fertigstellen" (S0–S7) UND der
+daraus entstandene Bindungs-Baustein V1 (S8) abgeschlossen. Offen bleiben nur die
+Ausbaustufen aus `docs/bindung-konzept.md` (Bestenliste, „Welt der Woche" — brauchen einen
+Server) sowie das separat geführte Paket P7 (Qualitäts-Audit, nur Idee, nicht angefragt).

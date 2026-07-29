@@ -477,6 +477,41 @@
   .gb-tile .em { font-size: 1.3rem; line-height: 1.1; }
   .gb-tile .nm { font-size: .72rem; margin-top: 3px; color: var(--text); line-height: 1.2; }
   .gb-tile .cl { font-size: .61rem; color: var(--muted); margin-top: 2px; }
+
+  /* ---- Herausforderungen der Natur ---- */
+  .chalbtn { display: block; }
+  .chal-active { margin: 10px 16px 0; padding: 10px 12px; background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 12px; }
+  .chal-active[hidden] { display: none; }
+  .chal-active-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .chal-active-title { font-size: .82rem; font-weight: 700; color: var(--text); }
+  .chal-active-bar { margin-top: 7px; height: 5px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+  .chal-active-fill { height: 100%; background: var(--bio); border-radius: 999px; transition: width .3s ease; }
+  .chal-active-status { margin-top: 5px; font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+  .chal-active-status.violated { color: #c0653a; }
+  .chal-filters { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px; }
+  .chal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chal-chip { font-size: .72rem; color: var(--muted); background: var(--abyss); border: 1px solid var(--line-soft); border-radius: 999px;
+    padding: 4px 11px; cursor: pointer; font-family: inherit; }
+  .chal-chip.active { background: var(--bio); color: #06201a; font-weight: 700; border-color: var(--bio); }
+  .chal-count { font-size: .72rem; color: var(--muted); margin-bottom: 8px; }
+  .chal-list { display: flex; flex-direction: column; gap: 8px; }
+  .chal-item { display: flex; align-items: flex-start; gap: 11px; background: var(--abyss); border: 1px solid var(--line-soft);
+    border-radius: 12px; padding: 11px 13px; }
+  .chal-item.done { border-color: var(--bio-dim); }
+  .chal-item.active-now { border-color: var(--bio); box-shadow: 0 0 0 1px var(--bio) inset; }
+  .chal-item-icon { flex: 0 0 auto; width: 1.3rem; height: 1.3rem; color: var(--bio-dim); margin-top: 2px; }
+  .chal-item-body { flex: 1; min-width: 0; }
+  .chal-item-title { font-size: .88rem; font-weight: 700; color: var(--text); }
+  .chal-badge { font-size: .62rem; color: var(--bio-dim); font-weight: 700; margin-left: 6px; }
+  .chal-item-desc { font-size: .78rem; color: var(--muted); line-height: 1.5; margin-top: 3px; }
+  .chal-item-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .chal-tag { font-size: .62rem; font-family: var(--mono); color: var(--muted); background: var(--chamber); border: 1px solid var(--line-soft);
+    border-radius: 999px; padding: 2px 8px; }
+  .chal-tag.chal-diff-leicht { color: var(--bio-dim); }
+  .chal-tag.chal-diff-schwer { color: #c0653a; }
+  .chal-item-start { flex: 0 0 auto; align-self: center; min-width: 96px; }
+  .chal-empty { color: var(--muted); font-size: .82rem; padding: 20px 4px; text-align: center; }
+  .chal-more-hint { color: var(--muted); font-size: .72rem; padding: 8px 2px 0; text-align: center; }
   .gb-tile.found { border-color: var(--bio-dim); box-shadow: 0 0 0 1px rgba(95,156,131,.22), 0 0 14px rgba(95,156,131,.1); }
   .gb-tile.miss .em { filter: grayscale(1) brightness(.55); opacity: .5; }
   .gb-tile.miss .nm { color: var(--muted); }
@@ -631,7 +666,16 @@
       <div class="entry-row">
         <button class="disc" id="discBtn" title="Lebensbaum öffnen — die entdeckten Formen"><span id="discCount">0</span> Formen entdeckt · Lebensbaum ↗</button>
         <button class="disc worldbtn" id="worldBtn" title="Ein Umwelt-Ereignis auslösen, das die Welt deines Wesens verändert">Umwelt-Einfluss auslösen ↗</button>
+        <button class="disc chalbtn" id="chalBtn" title="Ein Ziel mit einer Beschränkung annehmen — keine Pflicht, eine Einladung">Herausforderungen ↗</button>
         <button class="link infl-undo" id="inflUndoBtn" hidden>↩ Einfluss zurücknehmen</button>
+      </div>
+      <div class="chal-active" id="chalActive" hidden>
+        <div class="chal-active-row">
+          <span class="chal-active-title" id="chalActiveTitle"></span>
+          <button class="link" id="chalAbandonBtn">aufgeben</button>
+        </div>
+        <div class="chal-active-bar"><div class="chal-active-fill" id="chalActiveFill"></div></div>
+        <div class="chal-active-status" id="chalActiveStatus"></div>
       </div>
     </div>
 
@@ -722,6 +766,24 @@
       </div>
       <p class="gb-sub" id="gbSub">—</p>
       <div id="gbBody"></div>
+    </div>
+  </div>
+
+  <div class="genbook" id="chal" role="dialog" aria-modal="true" aria-labelledby="chalTitle" hidden>
+    <div class="gb-card">
+      <div class="gb-head">
+        <h2 class="gb-title" id="chalTitle">Herausforderungen der Natur</h2>
+        <button id="chalClose" class="link">schließen</button>
+      </div>
+      <p class="gb-sub">Ein Ziel mit einer Beschränkung und einem Zeitrahmen — eine Einladung, keine Pflicht. Du darfst weiter alles einstellen; nur zählt jetzt, ob du es innerhalb der Regel schaffst.</p>
+      <div class="chal-filters">
+        <label class="sr-only" for="chalSearch">Herausforderungen durchsuchen</label>
+        <input type="search" id="chalSearch" class="infl-search" placeholder="Suchen — z. B. „Pilz" oder „Licht"" autocomplete="off">
+        <div class="chal-chips" id="chalReichChips"></div>
+        <div class="chal-chips" id="chalDiffChips"></div>
+      </div>
+      <div class="chal-count" id="chalCount"></div>
+      <div id="chalBody"></div>
     </div>
   </div>
 
@@ -822,12 +884,13 @@
 <script src="./vendor/supabase.js"></script>
 <script src="./influences.js"></script>
 <script src="./gene-explain.js"></script>
+<script src="./challenges.js"></script>
 <script src="./story-extra.js"></script>
 <script src="./story.js"></script>
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.74.0";
+const APP_VERSION = "v0.75.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 const PHYS = {
   lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
@@ -1530,6 +1593,7 @@ document.addEventListener("keydown", (e) => {
   if(e.key !== "Escape") return;
   const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
   const iSub=document.getElementById("inflSub"), iMain=document.getElementById("infl");
+  const ch=document.getElementById("chal");
   if(!gb.hidden){ closeGenbook(); }
   else if(!lg.hidden){ lg.hidden = true; }
   else if(!rv.hidden){ rv.hidden = true; }
@@ -1537,6 +1601,7 @@ document.addEventListener("keydown", (e) => {
   // Sub-Modal offen -> wie „Abbrechen" nur einen Schritt zurück; sonst ganz schließen.
   else if(iSub && !iSub.hidden){ closeInflSub(); }
   else if(iMain && !iMain.hidden){ closeInfl(); }
+  else if(ch && !ch.hidden){ closeChal(); }
 });
 // a11y (Audit): Tab-Fokus in einem offenen Modal halten (kein Wegtabben in den
 // unsichtbaren Hintergrund). Wirkt auf das oberste sichtbare aria-modal-Dialog.
@@ -2467,6 +2532,181 @@ function showInfoToast(msg){
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   infoToastTimer = setTimeout(()=>{ t.hidden = true; }, 2600);
 }
+// ---- Herausforderungen der Natur (Paket P8) ----
+// Ein Ziel (Reich/Form) + eine Beschränkung (grenzen, nur die 6 Regler) + ein Generationen-
+// Budget. Bewusst KEIN Zwang: der Spieler darf jederzeit alles einstellen, weiter spielen,
+// abbrechen oder erneut versuchen — nichts davon wird bestraft oder gesperrt. Nur das Ergebnis
+// (geschafft / Beschränkung verlassen / Budget um) bekommt eine kurze, klare Rückmeldung.
+const CHAL_KEY = "evolve_challenges_done_v1";
+let completedChallenges = new Set();
+try { completedChallenges = new Set(JSON.parse(localStorage.getItem(CHAL_KEY) || "[]")); } catch(e) {}
+function saveCompletedChallenges(){ try{ localStorage.setItem(CHAL_KEY, JSON.stringify([...completedChallenges])); }catch(e){} }
+
+let activeChallenge = null;   // {ch, startGen} — kein weiteres Feld noetig, Verstoss wird sofort ausgewertet
+let _chalOpener = null;
+let chalFilterReich = "alle", chalFilterDiff = "alle";
+
+const REICH_LABEL = { Mikrobe:"Reich der Mikroben", Protist:"Reich der Protisten", Pflanze:"Reich der Pflanzen", Pilz:"Reich der Pilze", Tier:"Reich der Tiere" };
+const KINGDOM_ICON = { Mikrobe:"rod", Protist:"amoeba", Pflanze:"flower", Pilz:"agaric", Tier:"fox" };
+const DIFF_LABEL = { leicht:"leicht", mittel:"mittel", schwer:"schwer" };
+// "Leuchtwesen · Tiefsee" ist eine echte classify()-Form (siehe dort, Reich Tier), fehlt aber
+// im Lebensbaum (TREE) und damit in FORM_KINGDOM — ein bestehender Genbuch-Lückenfall, hier
+// nur lokal überbrückt, damit der Reich-Filter der Herausforderungen nicht falsch leerläuft.
+const CHAL_KINGDOM_FALLBACK = { "Leuchtwesen · Tiefsee": "Tier" };
+function chalTargetKingdom(ch){ return ch.ziel.form ? (kingdomOf(ch.ziel.form) || CHAL_KINGDOM_FALLBACK[ch.ziel.form]) : ch.ziel.reich; }
+function chalTargetIcon(ch){ return ch.ziel.form ? formIcon(ch.ziel.form) : ic(KINGDOM_ICON[ch.ziel.reich]||"dot"); }
+function chalTargetLabel(ch){ return ch.ziel.form || REICH_LABEL[ch.ziel.reich] || ch.ziel.reich; }
+function withinGrenzen(e, grenzen){
+  for(const ax in grenzen){ const g=grenzen[ax], v=e[ax];
+    if(g.min!=null && v<g.min) return false;
+    if(g.max!=null && v>g.max) return false; }
+  return true;
+}
+
+function openChal(){
+  if(!window.EVOLVE_CHALLENGES) return;
+  _chalOpener = document.activeElement;
+  renderChalChips(); renderChalList();
+  _el("chal").hidden = false; _el("chalClose").focus();
+}
+function closeChal(){ _el("chal").hidden = true; if(_chalOpener && _chalOpener.focus) _chalOpener.focus(); _chalOpener = null; }
+document.getElementById("chalBtn").addEventListener("click", openChal);
+document.getElementById("chalClose").addEventListener("click", closeChal);
+document.getElementById("chalSearch").addEventListener("input", renderChalList);
+
+function renderChalChips(){
+  const reiche = ["alle","Mikrobe","Protist","Pflanze","Pilz","Tier"];
+  _el("chalReichChips").innerHTML = reiche.map(r =>
+    `<button type="button" class="chal-chip${chalFilterReich===r?' active':''}" data-r="${r}">${r==="alle"?"alle Reiche":r}</button>`).join("");
+  _el("chalReichChips").querySelectorAll(".chal-chip").forEach(b => b.onclick = () => { chalFilterReich = b.dataset.r; renderChalList(); renderChalChips(); });
+  const diffs = ["alle","leicht","mittel","schwer"];
+  _el("chalDiffChips").innerHTML = diffs.map(d =>
+    `<button type="button" class="chal-chip${chalFilterDiff===d?' active':''}" data-d="${d}">${d==="alle"?"alle Schwierigkeiten":d}</button>`).join("");
+  _el("chalDiffChips").querySelectorAll(".chal-chip").forEach(b => b.onclick = () => { chalFilterDiff = b.dataset.d; renderChalList(); renderChalChips(); });
+}
+
+function renderChalList(){
+  const all = window.EVOLVE_CHALLENGES || [];
+  const term = (_el("chalSearch").value||"").trim().toLowerCase();
+  const hits = all.filter(ch => {
+    if(chalFilterReich!=="alle" && chalTargetKingdom(ch)!==chalFilterReich) return false;
+    if(chalFilterDiff!=="alle" && ch.schwierigkeit!==chalFilterDiff) return false;
+    if(term && !ch.titel.toLowerCase().includes(term) && !ch.beschreibung.toLowerCase().includes(term) && !chalTargetLabel(ch).toLowerCase().includes(term)) return false;
+    return true;
+  });
+  _el("chalCount").textContent = hits.length + " von " + all.length + " Herausforderungen" + (completedChallenges.size ? " · " + completedChallenges.size + " geschafft" : "");
+  const shown = hits.slice(0, 60);
+  if(!shown.length){ _el("chalBody").innerHTML = `<div class="chal-empty">Keine Treffer.</div>`; return; }
+  const rows = shown.map(ch => {
+    const done = completedChallenges.has(ch.id);
+    const isActive = activeChallenge && activeChallenge.ch.id === ch.id;
+    const btnLabel = isActive ? "aktiv" : (done ? "erneut versuchen" : "annehmen");
+    return `<div class="chal-item${done?' done':''}${isActive?' active-now':''}">`+
+      `<div class="chal-item-icon">${chalTargetIcon(ch)}</div>`+
+      `<div class="chal-item-body">`+
+        `<div class="chal-item-title">${ch.titel}${done?' <span class="chal-badge">✓ geschafft</span>':''}</div>`+
+        `<div class="chal-item-desc">${ch.beschreibung}</div>`+
+        `<div class="chal-item-meta">`+
+          `<span class="chal-tag chal-diff-${ch.schwierigkeit}">${DIFF_LABEL[ch.schwierigkeit]}</span>`+
+          `<span class="chal-tag">${chalTargetLabel(ch)}</span>`+
+          `<span class="chal-tag">${ch.generationen.toLocaleString("de-DE")} Gen.</span>`+
+        `</div>`+
+      `</div>`+
+      `<button type="button" class="ctrl chal-item-start" data-id="${ch.id}"${isActive?' disabled':''}>${btnLabel}</button>`+
+    `</div>`;
+  }).join("");
+  const hint = hits.length > shown.length ? `<div class="chal-more-hint">${hits.length-shown.length} weitere — Suche oder Filter verfeinern</div>` : "";
+  _el("chalBody").innerHTML = `<div class="chal-list">${rows}</div>${hint}`;
+  _el("chalBody").querySelectorAll(".chal-item-start").forEach(b => b.onclick = () => startChallenge(b.dataset.id));
+}
+
+// "Annehmen" heißt NICHT "das Budget läuft sofort" — beim Annehmen erfüllen die aktuellen
+// Regler so gut wie nie schon die (oft eng an ein Beispiel gebundene) Beschränkung. Die
+// Herausforderung startet darum im Zustand "warten": die Uhr läuft erst los, sobald die
+// Umwelt tatsächlich im Rahmen ist. Erst danach zählt ein Verlassen der Beschränkung als
+// Abbruch. So wird "annehmen" zu einem Ziel, auf das man hinstellt, nicht zu einer Falle.
+function startChallenge(id){
+  const ch = (window.EVOLVE_CHALLENGES||[]).find(c => c.id===id);
+  if(!ch) return;
+  activeChallenge = { ch, phase: "warten", startGen: null };
+  closeChal();
+  showInfoToast("Herausforderung angenommen: " + ch.titel + " — stell die Regler passend ein.");
+  renderChalHUD();
+}
+function abandonChallenge(){
+  if(!activeChallenge) return;
+  const t = activeChallenge.ch.titel; activeChallenge = null; renderChalHUD();
+  showInfoToast("Herausforderung aufgegeben: " + t);
+}
+document.getElementById("chalAbandonBtn").addEventListener("click", abandonChallenge);
+
+function renderChalHUD(){
+  const el = _el("chalActive");
+  if(!activeChallenge){ el.hidden = true; return; }
+  const { ch, phase, startGen } = activeChallenge;
+  el.hidden = false;
+  _el("chalActiveTitle").textContent = ch.titel;
+  const status = _el("chalActiveStatus");
+  if(phase==="warten"){
+    _el("chalActiveFill").style.width = "0%";
+    status.textContent = "Stell die Regler passend ein, um die Uhr zu starten.";
+    status.classList.remove("violated");
+  } else {
+    const elapsed = Math.max(0, generation - startGen);
+    const pct = Math.min(100, Math.round(elapsed/ch.generationen*100));
+    _el("chalActiveFill").style.width = pct + "%";
+    status.textContent = `Generation ${elapsed.toLocaleString("de-DE")} / ${ch.generationen.toLocaleString("de-DE")} · im Rahmen`;
+    status.classList.remove("violated");
+  }
+}
+let chalToastTimer = null;
+function showChallengeToast(ch, kind){
+  const t = document.getElementById("toast");
+  const html = kind==="geschafft"
+    ? `${ic("dna")} Herausforderung geschafft: <b>${ch.titel}</b>`
+    : kind==="verlassen"
+    ? `Herausforderung verlassen: <b>${ch.titel}</b> — die Beschränkung wurde nicht eingehalten. Jederzeit erneut versuchbar.`
+    : `Herausforderung ausgelaufen: <b>${ch.titel}</b> — das Budget von ${ch.generationen.toLocaleString("de-DE")} Generationen ist um. Jederzeit erneut versuchbar.`;
+  t.innerHTML = html;
+  t.classList.toggle("legendary", kind==="geschafft");
+  t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  clearTimeout(toastTimer); clearTimeout(chalToastTimer);
+  chalToastTimer = setTimeout(() => { t.hidden = true; }, kind==="geschafft" ? 4600 : 3800);
+}
+// Pro Frame geprüft (nicht nur beim Generationssprung) — so meldet sich eine per Regler-Zug
+// verlassene Beschränkung sofort, auch waehrend pausiert ist.
+function challengeTick(){
+  if(!activeChallenge) return;
+  const ch = activeChallenge.ch;
+  const inBounds = withinGrenzen(env, ch.grenzen);
+  if(activeChallenge.phase==="warten"){
+    if(inBounds){ activeChallenge.phase="laeuft"; activeChallenge.startGen=generation; showInfoToast("Im Rahmen — die Uhr läuft: " + ch.titel); }
+    renderChalHUD(); return;
+  }
+  // Mindestens ein paar echte Generationen unter der Beschraenkung, sonst waere jede
+  // Herausforderung mit dem Reich Protist (bzw. der Form "Euglenoid · Mixotroph")
+  // ein Sofort-Gewinn: das unentwickelte Start-Genom klassifiziert schon als genau das,
+  // ganz ohne Zutun. CHAL_MIN_GENS macht daraus wieder ein echtes "geschafft".
+  const CHAL_MIN_GENS = 5;
+  const cur = classify(genome);
+  const matched = (generation - activeChallenge.startGen >= CHAL_MIN_GENS) &&
+    (ch.ziel.form ? cur.n===ch.ziel.form : cur.k===ch.ziel.reich);
+  if(matched){
+    completedChallenges.add(ch.id); saveCompletedChallenges();
+    showChallengeToast(ch, "geschafft");
+    activeChallenge = null; renderChalHUD(); return;
+  }
+  if(!inBounds){
+    showChallengeToast(ch, "verlassen");
+    activeChallenge = null; renderChalHUD(); return;
+  }
+  if(generation - activeChallenge.startGen >= ch.generationen){
+    showChallengeToast(ch, "abgelaufen");
+    activeChallenge = null; renderChalHUD(); return;
+  }
+  renderChalHUD();
+}
+
 // ---- Teilbarer Schnappschuss: Wesen im Habitat + Name + Ministory als Bild ----
 // Rein offline (Canvas → PNG). Web-Share-API, wo vorhanden (Mobil: native Teilen-Auswahl),
 // sonst Download-Fallback. Soziale Verbreitung als gesunde Motivation, kein Backend.
@@ -3377,6 +3617,7 @@ function frame(time){
       storyTick(steps);
     }
   }
+  challengeTick();
   // Geglaettete Anzeige: framerate-unabhaengiger gleitender Mittelwert (Zeitkonstante ~0.6s).
   const sm = 1 - Math.exp(-dt/0.6);
   for(let i=0;i<NG;i++) displayGenome[i] += (genome[i]-displayGenome[i])*sm;
@@ -3400,6 +3641,7 @@ document.querySelector(".gb-title").innerHTML = ic("dna") + " Lebensbaum";
 document.getElementById("discBtn").innerHTML = ic("dna") + ' Lebensbaum · <span id="discCount">0</span> entdeckt ↗';
 document.getElementById("worldBtn").innerHTML = ic("wind") + ' Umwelt-Einfluss auslösen ↗';
 document.getElementById("worldBtn").addEventListener("click", openInfl);
+document.getElementById("chalBtn").innerHTML = ic("dna") + ' Herausforderungen ↗';
 (function(){ const sb=document.getElementById("shareBtn"); if(sb){ sb.innerHTML = ic("share") + " Schnappschuss teilen ↗";
   sb.addEventListener("click", ()=>{ shareSnapshot().catch(()=>showInfoToast("Schnappschuss fehlgeschlagen")); }); } })();
 playBtn.innerHTML = ic("pause");
