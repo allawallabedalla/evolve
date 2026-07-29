@@ -6,7 +6,7 @@
 // Das ist die „Beobachten"-Ebene der Veränderung-IA (nicht schalten, nur ansehen).
 
 import type { World } from "./world.js";
-import { clusters } from "./cluster.js";
+import { clusters, selectionWeights } from "./cluster.js";
 import { describe, formKey, kingdomOf } from "./describe.js";
 import { rarityOf, type RarityTier } from "./rarity.js";
 
@@ -36,7 +36,11 @@ export function census(world: World, opts: CensusOptions = {}): Species[] {
 
   for (let i = 0; i < nPlaces; i++) {
     const place = world.places[i];
-    const cl = clusters(place.pop.genomes, { radius, minFraction });
+    // Selektions-gewichtete Metrik (Messung 1, docs/engine-forschungsergebnis.md):
+    // neutrale/driftende Gene zaehlen kaum, selektiv relevante Gene zaehlen voll —
+    // sonst ertrinkt die Cluster-Erkennung im Driftrauschen der bedingten Gene.
+    const weights = selectionWeights(place.pop.mean(), place.env, world.phys);
+    const cl = clusters(place.pop.genomes, { radius, minFraction, weights });
     for (const c of cl) {
       const key = formKey(c.centroid);
       let sp = byKey.get(key);

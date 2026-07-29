@@ -132,8 +132,17 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     nachgeprüft (u. a. Räuberland/Offenes Meer Fisch 100 %, Lichtlose Tiefsee Leuchtwesen
     100 %, A/B/C-Formenzahl 10/32/24, `fitness()` 339 ns/Aufruf) — alle reproduziert. Kein
     Gate (kein Pass/Fail), reine Referenzmessung für spätere Stufen.
-  - [ ] Stufe 1 — Gewichtete Cluster-Metrik in `world/cluster.ts`/`census.ts` (Ziel: ≥1.3
-    Cluster/Lauf, heute 0.10 bei 25 Genen — Cluster-Erkennung ist aktuell praktisch blind).
+  - [x] Stufe 1 (erledigt 2026-07-29) — `selectionWeights()` (neu in `world/cluster.ts`,
+    |∂fitness/∂g| am Populations-Mittel, Boden 0.15) + optionaler `weights`-Parameter für
+    `clusters()`/`dist()` (ohne `weights` exakt das alte Verhalten — `tools/research/*.mjs`
+    bewusst unverändert, misst weiter den Ist-Zustand). `world/census.ts` nutzt die neue
+    Metrik jetzt produktiv. Abnahme-Kriterium erreicht: **1.47 Cluster/Lauf** (vorher
+    0.10–1.23) auf identischem Setup wie `tools/research/proto.mjs`. Nebenbefund: bei
+    isolierten Orten OHNE Konkurrenz sinkt die gezählte Artenzahl leicht (5 statt 6) — das ist
+    korrekt, nicht ein Rückschritt: die alte Metrik zählte dort reines Driftrauschen
+    fälschlich als zweiten Cluster. `radius`/`minFraction` mussten nicht neu kalibriert werden
+    (Gate blieb mit unveränderten Defaults grün). Alle 5 Kern-Gates + `census-check`/
+    `phenomena-check`/`ablation-check`/`seed-check`/`rarity-check` weiterhin grün.
   - [ ] Stufe 2 — Prototyp-Matcher + `archetypes.json`; `classify()`-Kaskade in
     `app/index.html` ersetzen (behebt den gemeldeten Fell/Leuchtwesen-Kaskaden-Bug direkt).
   - [ ] Stufe 3 — Mehrdimensionaler Nischen-Kernel in `population.ts` + gestreute
