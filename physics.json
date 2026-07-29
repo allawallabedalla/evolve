@@ -154,5 +154,8 @@
   "windLethality": 0.85,
   "wWind": 1.0,
   "nfixYield": 0.35,
-  "nfixBase": 0.2
+  "nfixBase": 0.2,
+  "tractionYield": 2,
+  "tractionHeatFloor": 0.7,
+  "tractionScarcityCeiling": 0.5
 }

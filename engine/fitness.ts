@@ -222,7 +222,70 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (phys.nfixBase + (1 - phys.nfixBase) * (1 - env.foodAbundance)) *
     (1 - phys.exclusion * mobility);
 
-  const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix;
+  //    h) Gliedmassen-Substrat-Traktion (AXIS-20, Stufe 3.5): viele/lange Gliedmassen an
+  //       einem KLEINEN Koerper erschliessen ein eigenes, kleines Einkommen aus zerstreuter
+  //       Boden-/Unterholz-Nahrung (Laubstreu, Rindenritzen, Kleinstbeute) — das ist
+  //       Wendigkeit im ENGEN Substrat, nicht Reichweite nach oben (das leistet bereits
+  //       reachFromSize). Ein GROSSER Koerper kann das nicht ueber Groesse nachbilden:
+  //       (1-size) macht den Bonus exklusiv fuer kleine Baupläne, waehrend reachFromSize
+  //       einem grossen Koerper weiterhin billig dieselbe Reichweite gab und so die
+  //       Insekten-Nische (winziger Koerper + viele Gliedmassen) unerreichbar machte
+  //       (Multi-Start-Sweep: 0.14 %, docs/engine-forschungsergebnis.md Messung 3).
+  //       Braucht Mobilitaet (Durchsuchen des Substrats), nur an LAND (landFactor),
+  //       heterotroph (schliesst Photosynthese aus).
+  //       BEWUSST ein eigener, KLEINER additiver Kanal statt eines Multiplikators auf die
+  //       gesamte energyForage (wie senseBoost, urspruenglich versucht): ein Multiplikator
+  //       auf die volle Jagd-Einkommensbasis wirkt fuer JEDES Landtier mit etwas Gliedmasse
+  //       (nicht nur kleine/gliedmassenreiche) und kippt schon bei kleinen Werten die
+  //       Reich-Balance (Oekologie-Check C4: Tier > 55 %), lange bevor Insekt 2 % erreicht —
+  //       gemessen und verworfen. Als eigener, kleiner Kanal (Praezedenz: energyFilter/
+  //       energyNfix/energyAbsorb) bleibt der Vorteil auf die schmale Nische begrenzt.
+  //       Zusaetzlich exklusiv fuer den WIRKLICH insektoiden Bauplan: (1-armor)*(1-insulation)
+  //       schliesst gepanzerte (Krebstier/Koloss) und pelzige (Fell-Warmblueter) Baupläne
+  //       aus - ein dick gepanzerter oder pelziger Koerper ist per Definition NICHT das enge,
+  //       nackte Wendigkeits-Substrat-Profil eines Insekts, sondern loest sein Ueberleben
+  //       anders (Panzer/Fell). Ohne diese Exklusivitaet floss der Bonus in JEDES kleine,
+  //       gliedmaßenreiche Landtier (auch gepanzert/pelzig) und blaehte die gesamte
+  //       Tier-Nische in der Reich-Balance auf (gemessen, verworfen) - mit ihr bleibt er
+  //       eine schmale, plausibel begruendete Nische statt eines General-Boosts.
+  //       Skaliert zusaetzlich mit env.temperature: Gliedmassenreiche Kleinstwesen sind
+  //       ueberwiegend Ektotherme (Insekten/Spinnentiere) - ihre Stoffwechselrate und damit
+  //       ihre Aktivitaet im Unterholz haengt an der Umgebungswaerme, ohne eigene Heizung
+  //       (kein insulation-Ofen wie bei Endothermen, s. thermal-Abschnitt oben). In der Kaelte
+  //       gibt es kaum Landgliederfuesser (Wüsten/Steppen/Tropen sind ihr Kerngebiet, nicht
+  //       die Tundra). Das haelt den Kanal in kalten Umwelten inaktiv (dort gewinnt ohnehin
+  //       Fell/Isolation) und konzentriert ihn auf die Umwelten, in denen die Insekten-Nische
+  //       real existiert - ohne diese Kopplung war der Bonus ueber ALLE Temperaturen hinweg
+  //       aktiv und blaehte die Tier-Nische in kalten Umwelten unbegruendet auf (gemessen).
+  //       insectShape wird QUADRIERT: das schaerft den Peak auf Baupläne, die ALLE VIER
+  //       Bedingungen (viel Gliedmasse, wenig Groesse, wenig Panzer, wenig Fell) zugleich
+  //       GUT erfuellen, statt schon bei TEIL-Erfuellung (z. B. nur kleiner Koerper, mittel
+  //       viel Panzer/Limb) spuerbar auszuzahlen. Reduziert den Streueffekt auf generische
+  //       kleine/mobile Tiere (z. B. in der Raeuber-Beute-Koevolution, s.u.), die insectShape
+  //       nur maessig erfuellen.
+  //       Umwelt-Gate ECHTE Schwellen (analog aquaticWaterFloor/biolumDarkFloor), NICHT
+  //       linear: nur in WIRKLICHER Hitze (oberhalb tractionHeatFloor) UND WIRKLICHER
+  //       Nahrungsknappheit (unterhalb tractionScarcityCeiling) aktiv - die reale Nische
+  //       der Landgliederfuesser (Wueste/Trockensavanne, docs Messung 3 "Hitze-Duerre":
+  //       temperature .92, foodAbundance .3), NICHT jede gemaessigt-warme oder leicht
+  //       knappe Umwelt. Notwendig (gemessen): eine LINEARE Kopplung an env.temperature
+  //       (mit/ohne (1-foodAbundance)) trennte die Ziel-Nische nicht ausreichend von (a) der
+  //       Reich-Balance ueber den vollen Umwelt-Wuerfel (Oekologie-Check C4: Tier > 55 %,
+  //       weil auch gemaessigt warme/durchschnittliche Umwelten spuerbar mit-profitierten)
+  //       und (b) der Test-Umwelt der endogenen Raeuber-Beute-Koevolution (Rote Koenigin,
+  //       P5/coevolution-check: temperature=0.5, foodAbundance=0.75 - deutlich unterhalb
+  //       beider Schwellen, daher mit den Schwellen exakt 0 statt nur "klein"). Mit echten
+  //       Schwellen bleibt der Kanal fuer die weit ueberwiegende Mehrheit der Umwelten
+  //       GENAU NULL (kein Effekt auf ihre Selektion) und wirkt nur in der schmalen
+  //       Hitze-Duerre-artigen Nische, in der die Insekten-Nische real existiert.
+  const hot = clamp01((env.temperature - phys.tractionHeatFloor) / (1 - phys.tractionHeatFloor));
+  const dry = clamp01((phys.tractionScarcityCeiling - env.foodAbundance) / phys.tractionScarcityCeiling);
+  const insectShape = limb * clamp01(1 - size) * clamp01(1 - armor) * clamp01(1 - insulation);
+  const traction = insectShape * insectShape * landFactor * hot * dry;
+  const energyTraction = phys.tractionYield * mobility * traction * (1 - phys.exclusion * photo);
+
+  const totalEnergy =
+    energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix + energyTraction;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;

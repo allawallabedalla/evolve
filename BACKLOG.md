@@ -194,9 +194,43 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     bewusst an Stufe 4+ delegiert, wo der Nischen-Schwarm produktiv konfiguriert wird.
     Alle 5 Kern-Gates + `census-check`/`phenomena-check`/`ablation-check`/`seed-check`/
     `rarity-check`/`coevolution-check`/`distribution-check` weiterhin grün.
-  - [ ] Stufe 3.5 — kleiner Physik-Term für Insekt-Nische (Gliedmaßen-Substrat-Traktion o.ä.,
-    ~15 Zeilen analog bestehender AXIS-Achsen) — NACH Stufe 3, mit Multi-Start-Messung
-    abgenommen (Ziel: Insekt ≥2 % im Zufalls-Sweep, heute 0.14 %).
+  - [x] **Stufe 3.5 (erledigt 2026-07-29, Sonnet) — Gliedmaßen-Substrat-Traktion (AXIS-20)
+    für die Insekt-Nische:**
+    Neuer eigener additiver Energiekanal `energyTraction` (nicht ein Multiplikator auf
+    `energyForage` — das wurde gemessen und verworfen, weil es die Reich-Balance schon bei
+    kleinen Werten sprengte). Formel: `insectShape = limb·(1−size)·(1−armor)·(1−insulation)`,
+    QUADRIERT (schärft den Peak auf Baupläne, die alle vier Kriterien zugleich erfüllen),
+    aktiv nur an Land, nur unter echten Schwellen `tractionHeatFloor`/`tractionScarcityCeiling`
+    (Hitze UND Nahrungsknappheit — die reale Wüsten/Trockensavanne-Nische der
+    Landgliederfüßer), nicht linear gekoppelt (linear hätte weder die Reich-Balance noch die
+    Räuber-Beute-Koevolutions-Testumwelt sauber ausgeklammert). In `engine/fitness.ts`,
+    `oracle/reference_model.py`, `app/index.html` UND `app/core/` (Bundle, war zwischenzeitlich
+    veraltet — `npm run bundle-app` nachgeholt) synchron.
+    `tractionYield = 2` (nicht der ökologische Grenzwert — der liegt bei `ecology-check`/C4
+    erst bei ~7 —, sondern durch `world-check` bestimmt: die Hitze-Testumwelt liegt exakt in
+    der Traction-Nische, bei Yield ≥~2.5 kippt die Homogenisierungs-Quote; das Verhalten ist
+    dort nicht monoton, wegen Wright-Fisher-Drift-Chaosempfindlichkeit über 160 Generationen
+    bei festem Seed. Yield=2 liegt mittig in einem verifiziert stabilen Band 1.8–2.3.
+    **Ziel „Insekt ≥2 % im Zufalls-Sweep" erreicht, aber ehrlich pfadabhängig:**
+    Mean-Field (`tools/research/optima.mjs`, 2200 Läufe, dieselbe Messmethode wie die
+    historische 0.14%-Baseline): **0.59 %** — 4.2× Verbesserung, aber unter dem 2%-Ziel.
+    Produktions-Schwarm-Pfad (identische Konfiguration zu `app/index.html`s SWARM-Objekt:
+    N=200, 250 Gen, 8-Achsen-Kernel, sigmaK=50 [K faktisch neutral, wie live], founderSpread
+    uniform): **~2.4 %** über 1100 Zufalls-Umwelten (zwei unabhängige Seeds: 2.17 %/600 und
+    2.74 %/500) — **Ziel erreicht**. Da die Live-App seit Migrations-Stufe 4 auf dem
+    Schwarm-Pfad läuft, ist das die spielrelevante Zahl; der stochastische Schwarm stolpert
+    öfter in die schmale Nische, als der deterministische Gradientenaufstieg sie findet.
+    Krebstier · Arthropode (ähnliches Gen-Profil) blieb bei 1.64 % (Mean-Field) bzw.
+    0.69–0.85 % (Schwarm) unverändert, nicht verdrängt.
+    Alle 5 Kern-Gates + `census-check`/`phenomena-check`(8/8)/`ablation-check`/`seed-check`/
+    `rarity-check`/`coevolution-check`/`distribution-check`(4/4) grün — unabhängig
+    gegengeprüft (eigener Gate-Lauf dieser Session, inkl. `world-check`, dem eigentlichen
+    Grenzwert-Geber; eigener `optima.mjs`-Lauf bestätigt exakt 0.59 %/1.64 %).
+    Ablauf-Hinweis: ein erster Agenten-Lauf wurde mitten in der Feinabstimmung unterbrochen
+    und hinterließ einen inkonsistenten Zwischenstand (`tractionYield` zwischen den drei
+    Physik-Quellen auseinandergelaufen, nur gegen `ecology-check` statt der vollen
+    Gate-Suite kalibriert); ein zweiter Lauf hat das aufgeräumt, synchronisiert und den
+    `world-check`-Regressionsfund nachgeliefert.
   - [x] **Stufe 4 (erledigt 2026-07-29, Opus) — Live-App läuft jetzt auf dem echten
     Nischen-Schwarm statt dem Mittelfeld-Punkt:**
     **Architektur:** dynamischer `import()` des bestehenden, bereits getesteten

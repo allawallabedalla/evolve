@@ -204,7 +204,51 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["nfixBase"] + (1.0 - phys["nfixBase"]) * (1.0 - env["foodAbundance"]))
         * (1.0 - phys["exclusion"] * mobility)
     )
-    total_energy = energy_photo + energy_forage + energy_absorb + energy_aquatic + energy_glow + energy_filter + energy_nfix
+    # h) Gliedmassen-Substrat-Traktion (AXIS-20, Stufe 3.5): viele/lange Gliedmassen an einem
+    #    KLEINEN Koerper erschliessen ein eigenes, kleines Einkommen aus zerstreuter Boden-/
+    #    Unterholz-Nahrung (Laubstreu, Rindenritzen, Kleinstbeute) - Wendigkeit im ENGEN
+    #    Substrat, nicht Reichweite nach oben (das leistet reach_from_size). Ein GROSSER
+    #    Koerper kann das nicht ueber Groesse nachbilden: (1-size) macht den Bonus exklusiv
+    #    fuer kleine Baupläne. Braucht Mobilitaet, nur an LAND (land_factor), heterotroph.
+    #    BEWUSST ein eigener, kleiner additiver Kanal statt eines Multiplikators auf die
+    #    gesamte energy_forage (wie sense_boost, urspruenglich versucht): ein Multiplikator
+    #    auf die volle Jagd-Einkommensbasis wirkt fuer JEDES Landtier mit etwas Gliedmasse
+    #    und kippt schon bei kleinen Werten die Reich-Balance (Oekologie-Check C4: Tier >
+    #    55 %), lange bevor Insekt 2 % erreicht - gemessen und verworfen. Als eigener Kanal
+    #    (Praezedenz: energy_filter/energy_nfix/energy_absorb) bleibt der Vorteil schmal.
+    #    Zusaetzlich exklusiv fuer den wirklich insektoiden Bauplan: (1-armor)*(1-insulation)
+    #    schliesst gepanzerte (Krebstier/Koloss) und pelzige (Fell-Warmblueter) Baupläne aus -
+    #    ohne diese Exklusivitaet floss der Bonus in jedes kleine, gliedmaßenreiche Landtier
+    #    (auch gepanzert/pelzig) und blaehte die gesamte Tier-Nische auf (gemessen, verworfen).
+    # insect_shape wird quadriert: schaerft den Peak auf Baupläne, die ALLE VIER Bedingungen
+    # zugleich GUT erfuellen statt nur maessig - reduziert den Streueffekt auf generische
+    # kleine/mobile Tiere (z. B. in der Raeuber-Beute-Koevolution, s.u.), die insect_shape nur
+    # maessig erfuellen.
+    # Umwelt-Gate als ECHTE Schwellen (analog aquaticWaterFloor/biolumDarkFloor), NICHT linear:
+    # nur in WIRKLICHER Hitze (oberhalb tractionHeatFloor) UND WIRKLICHER Nahrungsknappheit
+    # (unterhalb tractionScarcityCeiling) aktiv - die reale Nische der Landgliederfuesser
+    # (Wueste/Trockensavanne, docs Messung 3 "Hitze-Duerre": temperature .92, foodAbundance
+    # .3), NICHT jede gemaessigt-warme oder leicht knappe Umwelt. Noetig (gemessen): eine
+    # LINEARE Kopplung an env["temperature"] (mit/ohne (1-foodAbundance)) trennte die
+    # Ziel-Nische nicht ausreichend von (a) der Reich-Balance ueber den vollen Umwelt-Wuerfel
+    # (Oekologie-Check C4: Tier > 55 %) und (b) der Test-Umwelt der endogenen Raeuber-Beute-
+    # Koevolution (Rote Koenigin, P5/coevolution-check: temperature=0.5, foodAbundance=0.75 -
+    # deutlich unterhalb beider Schwellen, daher mit den Schwellen exakt 0 statt nur "klein").
+    hot = _clamp01((env["temperature"] - phys["tractionHeatFloor"]) / (1.0 - phys["tractionHeatFloor"]))
+    dry = _clamp01((phys["tractionScarcityCeiling"] - env["foodAbundance"]) / phys["tractionScarcityCeiling"])
+    insect_shape = limb * _clamp01(1.0 - size) * _clamp01(1.0 - armor) * _clamp01(1.0 - insulation)
+    traction = insect_shape * insect_shape * land_factor * hot * dry
+    energy_traction = phys["tractionYield"] * mobility * traction * (1.0 - phys["exclusion"] * photo)
+    total_energy = (
+        energy_photo
+        + energy_forage
+        + energy_absorb
+        + energy_aquatic
+        + energy_glow
+        + energy_filter
+        + energy_nfix
+        + energy_traction
+    )
 
     m = phys["maintenance"]
     mq = phys["maintenanceQuad"]

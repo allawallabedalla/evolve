@@ -129,6 +129,9 @@ export interface Physics {
   wWind: number;
   nfixYield: number;
   nfixBase: number;
+  tractionYield: number;
+  tractionHeatFloor: number;
+  tractionScarcityCeiling: number;
   maintenance: {
     base: number;
     size: number;
