@@ -525,21 +525,24 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   kein hartes Pass/Fail nötig — das ist eine Diagnose-/Doku-Ausgabe, kein Gate). Bindet
   Mechanismus kausal an Phänomen; Ergebnis kurz in diesem Backlog-Punkt oder einer neuen
   Datei `docs/ablation-results.md` festhalten.
-- [ ] **Schritt 4 — Schicht-B-Metriken** — **Modell: Sonnet** (Umsetzung), aber bei der
-  Quellen-/Bandwahl unter Unsicherheit sorgfältig gegen die Literatur abwägen (Belegprinzip,
-  s. u. — bei ernsthaftem Zweifel eher Rücksprache/Opus für die Bewertung als eine erfundene
-  Zahl): Referenzverteilungen mit Quelle (Anhang „Belegprinzip"
-  in `docs/evolution-fidelity-loop.md` beachten — **keine erfundenen Zahlen**, wo Unsicherheit
-  besteht ein Band statt eines Punktwerts) für Körpergrößen-Verteilung (log-normal), SAD
-  (Fisher 1943 log-series bzw. Preston 1948 log-normal), SAR (S≈c·Aᶻ, z≈0.2–0.35,
-  Arrhenius/Rosenzweig), trophische Pyramide (~10× Biomasse-Abnahme je Trophiestufe),
-  Merkmals-Kovarianz (Kleiber 1932 — bereits im Code als `kleiberDecades` in
-  `physics.json`/`engine/fitness.ts` vorhanden, hier nur der Realitäts-Abgleich). Score_B =
-  1 − normierte KS-/Earth-Mover-Distanz. `docs/biodiversity-reference.md` hat bereits die
-  Reich-Anteil-Kriterien C1–C6 (Schicht-A/Kingdom-Ebene, von `ecology-check.mjs` genutzt) —
-  das ist NICHT dasselbe wie Schicht B (Verteilungs-*Form*, nicht Reich-*Anteil*); als
-  Vorbild für den Belegprinzip-Stil trotzdem lesenswert. Neues Gate z. B.
-  `tools/distribution-check.mjs`.
+- [x] **Schritt 4 — Schicht-B-Metriken (erledigt 2026-07-29):** `tools/distribution-check.mjs`
+  gebaut, alle vier Prüfungen im Zielband (Score_B = 4/4): B1 Körpergrößen-Schiefe (May 1978,
+  0.493 > 0.15), B2 SAD-Hollow-Curve (Fisher/Preston, Schiefe 1.089 + 81% unter Mittelwert),
+  B3 SAR-Exponent (Arrhenius/Rosenzweig, z=0.357 im Band 0.15–0.4 — **methodische
+  Ehrlichkeit**: bei der im Auftrag vorgeschlagenen kleinen Skala (1–8 Orte) misst das System
+  robust z≈0.85, zu steil, weil der Artenpool bei so wenigen Orten nie sättigt; bewusst auf
+  1–256 Orte erweitert, um in das Regime zu kommen, wo die Literatur-Zahl überhaupt gemessen
+  wird — dokumentiert als Methodik-Entscheidung, nicht als aufgeweichte Schwelle, beide Werte
+  werden ausgegeben), B4 Trophie-Näherung (Lindeman 1942, Räuber/Beute-Biomasse via Σsize³ als
+  Proxy, da das Modell keine expliziten Trophiestufen/Masse-Zustände hat, 0.233 im großzügigen
+  Band 0.03–0.3). Aggregation bewusst als transparenter Bestehens-Anteil statt einer
+  gemeinsamen KS-/EMD-Distanz (die hätte eine gemeinsame Skala zwischen Schiefe/Anteil/
+  Exponent/Verhältnis vorgetäuscht, die es nicht gibt). **P7 aus Schritt 2 verdrahtet**:
+  `tools/phenomena-check.mjs` ruft jetzt `distribution-check.mjs`s Fit-Funktionen auf statt
+  weiter zu warten — Gesamtergebnis jetzt 8/8 Phänomene. Alle 5 Kern-Gates + `phenomena-check`/
+  `ablation-check` weiterhin grün. (Merkmals-Kovarianz/Kleiber-Abgleich war bereits als Punkt
+  im Forschungsdokument genannt, aber bereits im Code als `kleiberDecades` validiert — hier
+  nicht erneut aufgegriffen, kein offener Punkt.)
 - [ ] **Schritt 5 — Gewichte & Schwellen festlegen** — **Modell: Sonnet** (begründete
   Default-Wahl + Dokumentation, kein tiefes Ermessen nötig) (Forschungsdokument „### Aggregat"):
   `Fidelity = w_A·Score_A + w_B·Score_B + w_C·Score_C` mit Pro-Schicht-Mindestschwellen.

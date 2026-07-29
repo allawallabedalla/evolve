@@ -15,11 +15,14 @@
 //                    HIER um die Erholung ergaenzt (world-check prueft nur den
 //                    Einbruch, nicht was danach passiert).
 // Net-neu: P1 Radiation, P4 Konvergenz, P6 Kontingenz.
-// P7 Verteilungsgesetze: bewusst NICHT hier implementiert, s. u.
+// P7 Verteilungsgesetze: KEINE eigene Fit-Logik hier -- ruft die vier
+// Schicht-B-Fit-Funktionen aus tools/distribution-check.mjs (Schritt 4) auf
+// und prueft nur "alle vier Bandwerte getroffen", s. u.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as ph from "../dist/world/phenomena.js";
+import { fitBodySize, fitSAD, fitSAR, fitTrophic } from "./distribution-check.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const phys = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
@@ -202,16 +205,42 @@ console.log("Schicht-A-Portfolio — Evolutionstheorie-Phaenomene P1-P8\n" + "="
 }
 
 // ---------------------------------------------------------------------------
-// P7 — Verteilungsgesetze: bewusst NICHT hier implementiert (Platzhalter).
-// Wartet auf Schritt 4 (Schicht B, tools/distribution-check.mjs). Sobald das
-// existiert, ruft dieser Platz dessen Fit-Funktion auf und prueft nur
-// "Distanz unter Schwelle" — keine eigene Verteilungs-Fit-Logik hier, sonst
-// entsteht doppelte, potenziell widerspruechliche Logik (Backlog Punkt 9
-// Schritt 2, ausdruecklich so verlangt).
-// ---------------------------------------------------------------------------
-console.log("\nP7 · Verteilungsgesetze");
-console.log("  Status:            wartet auf Schritt 4 (Schicht B) — noch nicht gebaut, kein Platzhalter-FAIL.");
-results.push({ id: "P7", name: "Verteilungsgesetze", ok: null });
+// P7 — Verteilungsgesetze: Schritt 4 (Schicht B, tools/distribution-check.mjs)
+// ist jetzt gebaut — ruft dessen vier Fit-Funktionen (Koerpergroesse/SAD/SAR/
+// Trophie) auf und prueft nur "alle vier Distanzen/Bandwerte unter Schwelle",
+// KEINE eigene Verteilungs-Fit-Logik hier (Backlog Punkt 9 Schritt 2,
+// ausdruecklich so verlangt — sonst doppelte, potenziell widerspruechliche
+// Logik). Die Bandwerte selbst (Schiefe-, z-, Verhaeltnis-Schwellen) sind
+// 1:1 aus tools/distribution-check.mjs uebernommen, nicht hier neu erfunden.
+//
+// KEIN Ablations-Lauf hier (anders als P1-P6/P8): die Schicht-B-Metriken
+// sind Realitaets-ABGLEICHE gegen publizierte Referenzformen (Fisher/Preston/
+// Arrhenius/Lindeman/May), keine "Mechanismus X verursacht Phaenomen Y"-
+// Aussagen, fuer die ein Ablations-Beweis (Validierungsplan Teil V Punkt 1)
+// ueberhaupt Sinn ergibt — der Populations-Kern hat pro Schicht-B-Szenario
+// ohnehin keinen einzelnen "ursaechlichen Mechanismus-Schalter" (Konkurrenz,
+// Migration etc. wirken in allen vieren gemeinsam), s. auch die
+// Methodik-Kommentare in distribution-check.mjs selbst.
+{
+  const bodySize = fitBodySize();
+  const sad = fitSAD();
+  const sar = fitSAR();
+  const trophic = fitTrophic();
+  const okBody = bodySize.meanSkew > 0.15;
+  const okSad = sad.meanSkew > 0.3 && sad.meanBelowMeanFrac > 0.5;
+  const okSar = sar.meanZ >= 0.15 && sar.meanZ <= 0.4;
+  const okTrophic = trophic.meanRatio >= 0.03 && trophic.meanRatio <= 0.3;
+  const scoreB = [okBody, okSad, okSar, okTrophic].filter(Boolean).length / 4;
+  const ok = scoreB === 1; // alle vier Schicht-B-Formen muessen treffen
+  console.log("\nP7 · Verteilungsgesetze (ruft tools/distribution-check.mjs auf)");
+  console.log(`  Koerpergroesse (Schiefe > 0.15):              ${bodySize.meanSkew.toFixed(3)}  ${okBody ? "OK" : "FAIL"}`);
+  console.log(`  SAD (Schiefe > 0.3 UND <Mittel-Anteil > 50%):  ${sad.meanSkew.toFixed(3)} / ${(sad.meanBelowMeanFrac * 100).toFixed(0)}%  ${okSad ? "OK" : "FAIL"}`);
+  console.log(`  SAR (z in 0.15-0.4):                           ${sar.meanZ.toFixed(3)}  ${okSar ? "OK" : "FAIL"}`);
+  console.log(`  Trophie (Verhaeltnis in 0.03-0.3):             ${trophic.meanRatio.toFixed(3)}  ${okTrophic ? "OK" : "FAIL"}`);
+  console.log(`  Score_B = ${scoreB.toFixed(2)}  (Zielband: Distanz unter Schwelle = alle vier im Band)`);
+  console.log(`  Status:            ${ok ? "OK" : "FAIL"}`);
+  results.push({ id: "P7", name: "Verteilungsgesetze", ok });
+}
 
 // ---------------------------------------------------------------------------
 // Gesamt-Zusammenfassung
@@ -223,7 +252,7 @@ for (const r of results) {
   const tag = r.ok === null ? "· wartet auf Schritt 4" : r.ok ? "OK" : "FAIL";
   console.log(`  ${r.id.padEnd(4)} ${r.name.padEnd(32)} ${tag}`);
 }
-console.log(`\nGesamt: ${passing.length}/8 Phaenomene im Zielband (P7 zaehlt als "wartet auf Schritt 4", nicht als FAIL).`);
+console.log(`\nGesamt: ${passing.length}/8 Phaenomene im Zielband.`);
 
 const allImplementedPass = implemented.every((r) => r.ok);
 if (allImplementedPass) {

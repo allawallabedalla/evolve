@@ -424,9 +424,10 @@ export function extinctionRecovery(phys: Physics, mechanisms: Mechanisms, seed =
 }
 
 // ---------------------------------------------------------------------------
-// P7 — Verteilungsgesetze: bewusst NICHT hier implementiert. Wartet auf
-// Schritt 4 (Schicht B, tools/distribution-check.mjs). Sobald das existiert,
-// ruft dieser Platz dessen Fit-Funktion auf und prueft nur "Distanz unter
-// Schwelle" -- keine eigene Verteilungs-Fit-Logik hier, sonst entsteht
-// doppelte, potenziell widerspruechliche Logik (s. Backlog Punkt 9 Schritt 2).
+// P7 — Verteilungsgesetze: bewusst NICHT hier implementiert (auch nicht nach
+// Schritt 4). tools/phenomena-check.mjs ruft direkt die vier Fit-Funktionen
+// aus tools/distribution-check.mjs (Schritt 4, Schicht B) auf und prueft nur
+// "alle vier Bandwerte getroffen" -- keine eigene Verteilungs-Fit-Logik hier,
+// sonst entstuende doppelte, potenziell widerspruechliche Logik (s. Backlog
+// Punkt 9 Schritt 2).
 // ---------------------------------------------------------------------------
