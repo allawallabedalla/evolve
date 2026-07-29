@@ -461,6 +461,40 @@ Drei Punkte aus dem Spielen der v0.70.0:
 
 ---
 
+## ⬜ Offen — Nutzer-Rückmeldung 2026-07-29 — Komplexitäts-Audit
+
+- [~] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — Konzept liegt vor,
+  Umsetzung offen.** *(Nutzer)* Audit + abgestimmter Bauplan in
+  **`docs/komplexitaets-audit.md`**.
+  **Befund:** die Hauptansicht zeigt ~49 gleichzeitig aktive UI-Elemente, bevor überhaupt ein
+  Modal geöffnet wird — 25 Gen-Balken permanent (auch die im Milieu irrelevanten), 12
+  gleichrangige Biom-Buttons neben 6 Reglern, zwei inkonsistente Umwelt-Bedienmuster (Regler
+  vs. Einfluss-Chips) und vier Modale mit je eigener Navigationslogik. Ursache ist kein
+  Einzelfehler, sondern ein Muster: die letzten Audit-Runden haben fast nur hinzugefügt und
+  erklärt, kaum je etwas entfernt oder gruppiert.
+  **Fitness-Physik/Achsen bleiben unangetastet** (Validität ~85 %, Parität ~1e-16, Reality
+  20/20) — das Problem sitzt in der Präsentation, nicht im Modell.
+  **Abgestimmte Informationsarchitektur** nach Zugriffshäufigkeit statt Feature-Vollständigkeit
+  (Details siehe Doc):
+  - **Prio 1** (immer sofort da): 6 Regler, Play/Pause/Tempo, Lebensbaum-Zähler als stiller
+    Fortschritts-Motivator.
+  - **Prio 2** (ein Klick, aber beworben): Biome als kompakter „Presets ↗" statt 12
+    Einzel-Buttons, Umwelt-Einfluss, Herausforderungen (Startansicht kuratiert statt 271
+    Einträge), Teilen als kleiner Ghost-Button.
+  - **Prio 3** (Submodal/Settings, bewusst vergraben): Weltkarte-Details, „So funktioniert's",
+    Engine-Info, Zahlen-Toggle, Login, Name bearbeiten, **Neu beginnen** (destruktiv, gehört
+    weg von der Kernbedienung).
+  Reduziert die Dauersicht im Kern auf 6 Regler + Zeitkontrolle + Zähler + 4 klar
+  sekundäre Buttons; sieben Nebenfunktionen wandern in ein „⋯ Details"-Aufklapp.
+  Statisches Vorher/Nachher-Layout-Mockup wurde gebaut und abgenommen (nicht im Repo, nur zur
+  Abstimmung). **Empfohlene Umsetzungsreihenfolge:** P0.1 Gene progressiv einblenden → Biome→
+  Presets-Umstellung → Prio-3-Nebenfunktionen ins Details-Panel bündeln → (P2) Inline-Fitness-
+  Kopie in `index.html` durch generierte Version ersetzen (schließt die Fehlerklasse des
+  10-Versionen-NaN-Bugs, s. u.). **Noch nicht umgesetzt** — Start ist Produktentscheidung des
+  Nutzers.
+
+---
+
 ## ⬜ Offen — Live-App
 
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
