@@ -25,11 +25,28 @@ const TARGET_HIGH = 90;
 // Skala fuer die Validitaets-Umrechnung: MAE 0 -> 100%, MAE >= 0.25 -> 0%.
 const VALIDITY_SCALE = 0.25;
 
+// ---- Genbreite ----
+// Bindend aus physics.json (== engine/types.ts TRAITS, s. Kommentar dort) gelesen,
+// NICHT hartcodiert - sonst fittet der GA nur einen Praefix der Gene und die
+// restlichen bleiben aus dem Vektor draussen (Befund 2026-07-29, s. BACKLOG.md Punkt 9).
+const physForBounds: Physics = JSON.parse(
+  readFileSync(join(ROOT, "physics.json"), "utf-8"),
+);
+const NUM_GENES = physForBounds.traits.length;
+// Erste 10 Gene = universelle Kern-Gene (Bau/Energie/Verteidigung), Rest = bedingte
+// Kosten-Gene (Stressor-Resistenzen/Nischen-Mechaniken) - dieselbe Konvention wie
+// mutationAnchor (s. engine/types.ts DEFAULT_ENGINE_PARAMS, app/index.html PARAMS).
+const KERN_GENE_COUNT = 10;
+const MUTATION_ANCHOR = Array.from({ length: NUM_GENES }, (_, i) =>
+  i < KERN_GENE_COUNT ? 0.5 : 0.12,
+);
+
 // ---- Parameter-Grenzen fuer den GA ----
-// Reihenfolge: responseRate[0..7] (8 Gene), mutationRate, selectionStrength, varianceWeight
+// Reihenfolge: responseRate[0..NUM_GENES-1], mutationRate, selectionStrength, varianceWeight.
+// mutationAnchor ist KEIN GA-Parameter - er ist a-priori aus der Kern/Kosten-Konvention
+// abgeleitet (s. oben) und wird in vecToParams() fix angehaengt.
 // responseRate/selectionStrength weiter gefasst, weil die Varianz-Daempfung die
 // effektiven Schritte verkleinert - schnelle Szenarien brauchen mehr Spielraum.
-const NUM_GENES = 9;
 const BOUNDS: [number, number][] = [
   ...Array.from({ length: NUM_GENES }, () => [0.005, 0.8] as [number, number]),
   [0.0, 0.12], // mutationRate
@@ -74,6 +91,7 @@ function vecToParams(v: number[]): EngineParams {
     mutationRate: v[NUM_GENES],
     selectionStrength: v[NUM_GENES + 1],
     varianceWeight: v[NUM_GENES + 2],
+    mutationAnchor: MUTATION_ANCHOR,
   };
 }
 
@@ -125,7 +143,7 @@ function maeToValidity(mae: number): number {
 }
 
 function main() {
-  const phys: Physics = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
+  const phys: Physics = physForBounds;
   const scenarios: Scenario[] = JSON.parse(
     readFileSync(join(ROOT, "scenarios.json"), "utf-8"),
   ).scenarios;
@@ -149,9 +167,10 @@ function main() {
   );
 
   // ---- Genetischer Algorithmus ----
-  // Budget skaliert mit der Parameterzahl (11 Dim bei 8 Genen).
-  const POP = 72;
-  const GENS = 140;
+  // Budget skaliert mit der Parameterzahl (DIM Dim bei NUM_GENES Genen, seit der
+  // 25-Gene-Erweiterung 28 statt vorher 12 - POP entsprechend angehoben).
+  const POP = 160;
+  const GENS = 160;
   const ELITE = 3;
   const TOURN = 3;
 
@@ -161,8 +180,13 @@ function main() {
   let scored = population.map((v) => ({ v, loss: evalLoss(v) }));
   scored.sort((a, b) => a.loss - b.loss);
 
+  // Zufalls-Immigranten je Generation (staendige Frischluft gegen vorzeitige
+  // Plateaubildung in dem seit der 25-Gen-Erweiterung deutlich groesseren Suchraum).
+  const IMMIGRANTS = Math.round(POP * 0.08);
+
   for (let gen = 0; gen < GENS; gen++) {
     const next: number[][] = scored.slice(0, ELITE).map((s) => s.v.slice());
+    for (let i = 0; i < IMMIGRANTS; i++) next.push(randomVector());
     while (next.length < POP) {
       // Turnierselektion
       const pick = () => {

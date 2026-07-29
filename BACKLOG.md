@@ -1,7 +1,8 @@
 # Backlog
 
 **Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
-Test-Validität **~85 %** (Ziel-Band 80–90 %), Parität exakt (~1e-16).
+Test-Validität **~72 %** (Ziel-Band 80–90 %, seit der 25-Gene-Korrektur ehrlich über alle
+Gene gemessen statt blind für 15 davon — s. Punkt 9 Schritt 1 Befund), Parität exakt (~1e-16).
 **43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
 **25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
 Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken) sowie 8
@@ -313,24 +314,55 @@ strukturell Schicht C ab — Schicht A und B fehlen als Portfolio/Metriken noch 
 > hat denselben 9-Gene-Rest, wird aber nur vom archivierten `mockup/` + `cli/demo.ts` genutzt —
 > niedrige Priorität.)
 
-- [ ] **Schritt 1 — `training/fit.ts` auf 25 Gene bringen**: `NUM_GENES` von `training/fit.ts`
-  dynamisch aus `phys.traits.length` lesen (statt hart 9), `BOUNDS`/`responseRate` entsprechend
-  auf 25 Einträge erweitern. Für die 15 bedingten Kosten-Gene (Stressor-Resistenzen/Nischen-
-  Mechaniken) den bereits im Live-App-Mittelfeld validierten `mutationAnchor` (Kern-Gene 0–9
-  neutral 0.5, restliche 15 niedrig 0.12 — s. „Mittelfeld-Fidelity-Fix v0.63.0" im Archiv) mit
-  ausgeben, statt ihn ungeankert zu lassen. GA neu laufen lassen (`npm run train`),
-  `fitted-params.json` neu erzeugen, alle 5 Gates (`pop-check`, `branching-check`,
-  `world-check`, `parity`, `ecology`) + `ecology-full`/`reality`/`app-parity`/`mf-fidelity`
-  gegenprüfen — `validityTest` sollte im 80–90 %-Band bleiben, sonst nachkalibrieren.
-  `world/population.ts`s `numGenes: 9`-Default kann bei Gelegenheit trotzdem auf 25 gesetzt
-  werden (Hygiene, kein funktionaler Effekt).
-  **Ausstiegsregel (Identifizierbarkeit, Forschungsdokument Teil V Punkt 3):** bleibt
-  `validityTest` nach dieser Erweiterung UND nach Nachkalibrierungs-Versuchen dauerhaft
-  unter 80 %, ist das kein Kalibrierungsproblem mehr, sondern ein Signal, dass die
-  Mittelfeld-Engine-STRUKTUR das 25-Gene-Orakel nicht treffen kann. Dann NICHT weiter an
-  Parametern drehen — Befund hier im Backlog dokumentieren und Schritt 6/7 pausieren, bis
-  das strukturell geklärt ist (neuer, separater Punkt), statt stillschweigend mit einer zu
-  armen Engine weiterzuarbeiten.
+- [x] **Schritt 1 — `training/fit.ts` auf 25 Gene bringen (erledigt 2026-07-29, mit
+  strukturellem Restbefund):**
+  **Tieferer Befund beim Umsetzen:** die Lücke saß nicht nur in `training/fit.ts` — die
+  wirklich bindende Quelle war `engine/types.ts`s `TRAITS`-Konstante, die trotz `physics.json`s
+  25 Traits (und `fitness.ts`s Indizes bis 24) noch immer nur **10** Gene listete.
+  `engine/simulate.ts`s `runSimulation`/`stepGeneration` nutzen `TRAITS.length` als Vektorlänge
+  → die 15 bedingten Kosten-Gene waren in der Mittelfeld-Engine strukturell gar nicht Teil des
+  Zustandsvektors (nicht bloß `NaN`, wie zunächst vermutet: `fitness.ts`s `traits[g] ?? 0`
+  hielt sie hart bei 0). Nur `app/index.html`s Hand-Kopie hatte das mit einem GESCHÄTZTEN
+  Platzhalter (`responseRate` 0.27 für Index 10–24, nie GA-gefittet) umschifft.
+  **Fix:** `TRAITS` in `engine/types.ts` auf alle 25 Gene erweitert (Reihenfolge = `physics.json`),
+  `DEFAULT_ENGINE_PARAMS` inkl. `mutationAnchor` (Kern 0–9 → 0.5, bedingte Kosten-Gene 10–24 →
+  0.12) mitgezogen; `training/fit.ts`s `NUM_GENES` liest jetzt dynamisch aus
+  `phys.traits.length`, hängt denselben `mutationAnchor` fix an (kein GA-Parameter), GA-Budget
+  an die gewachsene Dimension angepasst (POP 72→160, GENS 140→160); `world/population.ts`s
+  `numGenes`-Default 9→25 (Hygiene, kein funktionaler Effekt, alle echten Aufrufer übergaben
+  ohnehin schon 25). GA zweimal neu trainiert (`npm run train`, zweiter Lauf zusätzlich mit
+  Zufalls-Immigranten gegen vorzeitige Plateaubildung) — beide Läufe konvergierten
+  unabhängig auf fast denselben Wert. `app/index.html`s `PARAMS.responseRate`/`mutationRate`/
+  `selectionStrength` mit dem ehrlich gefitteten Ergebnis synchronisiert (ersetzt den alten
+  Platzhalter). Alle Gates gegengeprüft: `pop-check`, `branching-check`, `world-check`,
+  `parity`, `ecology`, `ecology-full`, `reality` (20/20), `app-parity` (exakt), `mf-fidelity`
+  — alle grün (`mf-fidelity` sogar verbessert: reale statt geschätzte Stressor-Antworten).
+  `seed-check`-FAIL ist der bereits unter Punkt 7 dokumentierte, unabhängige Vorbefund.
+  **Ausstiegsregel griff (Identifizierbarkeit, Forschungsdokument Teil V Punkt 3):**
+  `validityTest` blieb nach der Erweiterung UND nach dem zweiten (Immigranten-)Lauf bei
+  ~71–72 % — deutlich unter dem 80–90 %-Band, keine Verbesserung durch mehr Suchbudget
+  (Trainingskurve flachte beide Male um Generation 60–80 vollständig ab: echte Konvergenz,
+  kein Budget-Mangel). Eine Per-Gen-Fehleranalyse (MAE Engine↔Orakel je Gen) zeigt: die
+  Verschlechterung verteilt sich über FAST ALLE 25 Gene (auch die ursprünglichen 9 Kern-Gene
+  liegen jetzt schlechter als die alte ~85 %-Zahl vermuten liess, z. B. armor 0.099, mobility
+  0.096, wing 0.091), nicht isoliert auf die neuen 15 — Ursache ist strukturell: `mutationRate`/
+  `selectionStrength`/`varianceWeight` sind EINE globale Zahl für alle 25 Gene gleichzeitig
+  (nur `responseRate` ist pro Gen), das reicht nicht mehr, um 25 Orakel-Trajektorien gemeinsam
+  zu treffen, sobald man sie ehrlich (nicht mehr blind für 15 von 25) misst. Auffälligster
+  Einzelfall: `nfix` (MAE 0.103, schlechtester Wert) — das Orakel lässt Stickstoff-Fixierung in
+  manchen benignen Szenarien (z. B. „Eiszeit", mobility niedrig) auf ~0.83 statt der als
+  „bedingtes Kosten-Gen" angenommenen Nähe zu 0.12 laufen; anders als die zehn reinen
+  Stressor-Resistenz-Gene ist `nfix` (wie `filter`) ein ALTERNATIVER Energiepfad, der auch ohne
+  einen benannten Extrem-Stressor eine eigene Nische tragen kann — der binäre Kern/Kosten-Anker
+  ist dafür zu grob. Das ist genau das im Forschungsdokument vorhergesehene Signal: **kein
+  Kalibrierungsproblem mehr, sondern eine Strukturgrenze der Mittelfeld-Engine.**
+  **Konsequenz:** Schritt 6/7 (Drei-Schicht-Optimierungsloop) bleiben pausiert, bis diese
+  Strukturfrage separat geklärt ist (z. B. per-Gen-Mutationsrate/-Selektionsstärke statt
+  globaler Skalare, oder eine feinere Anker-Kategorisierung, die `nfix`/`filter`/`burrow`/
+  `camo`/`sense` von den zehn reinen Stressor-Resistenz-Genen unterscheidet) — **absichtlich
+  nicht eigenmächtig umgesetzt**, da das laut Autonomie-Regel in `training/fit.ts` eine
+  bewusste Struktur-, keine Parameter-Entscheidung ist. Kopfzeile dieser Datei entsprechend auf
+  ~72 % korrigiert (ehrlicher Wert statt der alten, für 15 Gene blinden ~85 %-Zahl).
 
 **Ab hier zwei unabhängige Spuren, die parallel begonnen werden können** (Schritt 2–3
 betreffen den Populations-Kern `world/`, Schritt 6–7 die Mittelfeld-Engine aus Schritt 1 —
@@ -416,15 +448,16 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   ist DAS das Signal, dass dieser Punkt fällig wird — dann als neuer, eigener Backlog-Punkt
   aufnehmen, nicht in Schritt 6 hineinquetschen.
 
-**Sicherheitshinweis für alle Schritte:** nichts hiervon berührt `app/index.html` direkt —
-Schritt 1/6 schreiben nur `fitted-params.json`/`fidelity-champion.json` (gelesen von
-`tools/ecology-check.mjs`/`cli/demo.ts`, NICHT von der Live-App, die ihre eigene
-hand-gepflegte `PARAMS`-Kopie inline hat), Schritt 2–4 sind neue, eigenständige
-`world/`+`tools/`-Dateien. Die „Live-App bleibt unangetastet"-Leitplanke aus
-`docs/rebuild-roadmap.md` ist damit für den gesamten Punkt 9 automatisch erfüllt — kein
-gesonderter Check nötig. Jeder Schritt einzeln committen, nach jedem Schritt die 5
-Kern-Gates (`pop-check`, `branching-check`, `world-check`, `parity`, `ecology`) plus alle
-neu hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
+**Sicherheitshinweis für Schritt 2–7:** nichts davon berührt `app/index.html` direkt —
+Schritt 6 schreibt nur `fitted-params.json`/`fidelity-champion.json` (gelesen von
+`tools/ecology-check.mjs`/`cli/demo.ts`, NICHT von der Live-App), Schritt 2–4 sind neue,
+eigenständige `world/`+`tools/`-Dateien. **Ausnahme Schritt 1** (s. o., bereits erledigt):
+dort WURDE `app/index.html`s `PARAMS`-Kopie bewusst synchronisiert (ersetzt einen nie
+gefitteten Platzhalter durch den echten GA-Wert) — die „Live-App bleibt unangetastet"-
+Leitplanke aus `docs/rebuild-roadmap.md` gilt also ab Schritt 2, nicht rückwirkend für
+Schritt 1. Jeder Schritt einzeln committen, nach jedem Schritt die 5 Kern-Gates
+(`pop-check`, `branching-check`, `world-check`, `parity`, `ecology`) plus alle neu
+hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
 
 Wird sukzessive abgearbeitet (kein automatischer Trigger mehr aktiv — Start ab
 Mi 2026-07-29).

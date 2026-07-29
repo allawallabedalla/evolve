@@ -16,6 +16,21 @@ export const TRAITS = [
   "structure",
   "wing",
   "biolum",
+  "detox",
+  "oxyEff",
+  "osmo",
+  "burrow",
+  "pigment",
+  "filter",
+  "camo",
+  "baro",
+  "sense",
+  "desicc",
+  "radres",
+  "fireres",
+  "frostres",
+  "windres",
+  "nfix",
 ] as const;
 export type TraitName = (typeof TRAITS)[number];
 
@@ -179,8 +194,11 @@ export interface EngineParams {
 }
 
 export const DEFAULT_ENGINE_PARAMS: EngineParams = {
-  responseRate: [0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15],
+  responseRate: TRAITS.map(() => 0.15),
   mutationRate: 0.03,
   selectionStrength: 1.5,
   varianceWeight: 0.5,
+  // Kern-Gene (Index 0..9) neutral bei 0.5, bedingte Kosten-Gene (10..24) niedrig bei
+  // 0.12 - s. mutationAnchor-Doc oben / app/index.html PARAMS fuer dieselbe Konvention.
+  mutationAnchor: TRAITS.map((_, i) => (i < 10 ? 0.5 : 0.12)),
 };

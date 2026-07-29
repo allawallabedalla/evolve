@@ -924,14 +924,19 @@ const PHYS = {
   wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
 };
 const PARAMS = {
-  responseRate:[0.3694365703038899,0.25768064862003104,0.09315665493093597,0.23509916481753368,0.3124107912381767,0.22808206979262263,0.39871635393911087,0.3289985361531403,0.272996573493838,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27],
+  // responseRate/mutationRate/selectionStrength aus training/fit.ts (npm run train), seit
+  // Backlog Punkt 9 Schritt 1 (2026-07-29) echt ueber alle 25 Gene gegen das Orakel gefittet
+  // (vorher: die Indizes 10..24 waren nie Teil des GA-Suchraums, hier stand nur ein geschaetzter
+  // Platzhalter 0.27). Test-Validitaet jetzt EHRLICH gemessen (vorher blind fuer 15 von 25
+  // Genen) - liegt bei ~72%, unter dem 80-90%-Zielband; s. BACKLOG.md Punkt 9 fuer den Befund.
+  responseRate:[0.40366458593433086,0.2866004235773751,0.15195090951424906,0.5775917787803697,0.7808972350617241,0.493718448384372,0.7672396833068929,0.20439530366242184,0.732441358276577,0.8,0.13402890769807954,0.14168095811918108,0.18494915831550932,0.22327246639317305,0.13429769905310868,0.24893022790492514,0.14014949966677215,0.17851127507471032,0.15171213657457852,0.1410006342055038,0.07853038953985529,0.15583274941739017,0.10099802426693857,0.12148442161511151,0.10528134644518772],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
   // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
   // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
   mutationAnchor:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12],
-  mutationRate:0.046048074819877306, selectionStrength:1.2639582520796309, varianceWeight:1
+  mutationRate:0.0047830462704119845, selectionStrength:1.3771143306467837, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));

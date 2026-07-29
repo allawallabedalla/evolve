@@ -37,7 +37,7 @@ function makeRandn(rng) {
 /** Defaults spiegeln das Orakel (ORACLE_POP/MUT_SD/SEL_POWER/RECOMB_PROB). */
 export const DEFAULT_POP_CONFIG = {
     size: 300,
-    numGenes: 9,
+    numGenes: 25, // Hygiene: alle echten Aufrufer uebergeben ohnehin explizit 25 (phys.traits.length).
     mutationSd: 0.06,
     selPower: 2.0,
     recombProb: 0.5,
