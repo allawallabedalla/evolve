@@ -534,6 +534,43 @@ Drei Punkte aus dem Spielen der v0.70.0:
   Augen, nie offline) verändern das Grundgefühl → **Produktentscheidung des Nutzers**, nicht
   eigenmächtig umsetzen.
 
+### „Umwelt-Einfluss auslösen" fertiggestellt + V1 „Herausforderungen" umgesetzt (v0.71.0–v0.75.0)
+Vollständiger Verlauf inkl. gemessener Befunde in `docs/influence-plan.md` (Stufen S0–S8),
+Nutzerbindungs-Konzept in `docs/bindung-konzept.md`. Kurzfassung:
+- ✅ **S4 Ehrliche Einordnung** — die 218 inaktiven Katalog-Faktoren tragen jetzt ein `layer`-
+  Etikett (welche Ebene fehlt) statt vage „kommt bald".
+- ✅ **S5 Modal fertig** — Suchfeld über den ganzen Katalog, Wirkungs-Vorschau (welche Achsen
+  ändern sich, vorher→nachher), „Einfluss zurücknehmen", sichtbarer Stressor-Stapel.
+- ✅ **S6 Chronik-Anbindung** — faktor-spezifische Erzähl-Zeilen für neu aktivierte Einflüsse.
+- ✅ **P3/P6** — Klartextnamen + Erklärungen für 218 Katalog-Faktoren bzw. alle 25 Gene, extern
+  zugeliefert und geprüft (`plain-import-check.mjs`/`gene-import-check.mjs`).
+- ✅ **S8 · Herausforderungen der Natur (V1)** — 271 simulations-verifizierte Herausforderungen
+  (Paket P8) spielbar: neuer Button „Herausforderungen ↗", Suche/Filter, HUD. Zwei echte
+  Logikfehler beim Verdrahten gefunden und behoben (Browser-Test, Playwright): Beschränkung
+  wird erst ab dem Moment gewertet, in dem die Umwelt sie tatsächlich erfüllt (Zustand
+  „warten" vor „läuft" — sonst sofortiges Scheitern), und ein Sofort-Gewinn für Protist-Ziele
+  (unbeeinflusstes Start-Genom klassifiziert von sich aus schon als Protist) ist durch eine
+  Mindest-Generationenzahl ausgeschlossen.
+
+**Offene Nachträge aus diesem Strang:**
+- [ ] **`docs/auslagerung/P5-ausgabe.json` aufräumen** — die ursprüngliche 28er-Lieferung
+  (10 davon nicht erreichbar) liegt noch auf `main`, ist durch P8 (271 Stück) ersetzt und nie
+  ins Spiel verdrahtet worden. Sollte entfernt oder klar als „ersetzt durch P8" markiert werden.
+- [ ] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee"** — die Form ist über `classify()` real
+  erreichbar (Reich Tier) und wird von den Herausforderungen genutzt, fehlt aber im `TREE`
+  (Genbuch) selbst, dadurch auch in `FORM_KINGDOM`. Für den Herausforderungen-Reich-Filter
+  lokal in `app/index.html` überbrückt (`CHAL_KINGDOM_FALLBACK`); der eigentliche Lebensbaum-
+  Eintrag (Ära/Evo-Notiz) fehlt weiterhin.
+- [ ] **P7 · Qualitäts-Audit** — zweiter Blick auf die bereits übernommenen P3-Erklärungen und
+  S6-Erzähl-Bausteine (nur als Idee notiert, nie als Paket beauftragt oder gebaut).
+- [ ] **V1-Ausbaustufen** (`docs/bindung-konzept.md`) — feste Startwelt für alle, Bestenliste
+  nach Generationenzahl, „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen Server/
+  Vergleichsraum (Supabase steht bereits) — bewusst nicht Teil der Erstversion.
+- [ ] **V2–V5** (`docs/bindung-konzept.md`) — Trägheit der Welt, Aussterben nur unter Beobachtung,
+  Wissen als Meta-Fortschritt, Verbundenheit über einen wöchentlichen festen Seed. Nur
+  recherchiert/vorgeschlagen, keine Umsetzung — nächste Empfehlung wäre V4 (Wissen als
+  Meta-Fortschritt), aber Start ist Produktentscheidung des Nutzers.
+
 ---
 
 ## ⬜ Offen — Nutzer-Rückmeldung 2026-07-29 — Komplexitäts-Audit
