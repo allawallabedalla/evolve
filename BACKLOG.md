@@ -126,8 +126,12 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
 - [ ] **Migrations-Stufen (Modell: Opus für Stufe 2/4 — geschmacksintensive
   Architekturentscheidungen im laufenden Live-Code —, Sonnet für den Rest), jede Stufe
   einzeln lauffähig/messbar/committen, s. Dokument Abschnitt „6.4" für Details:**
-  - [ ] Stufe 0 — Messskripte aus der Recherche als dauerhafte Regressionstests nach
-    `tools/` übernehmen.
+  - [x] Stufe 0 (erledigt 2026-07-29) — Messskripte aus der Recherche als
+    `tools/research/*.mjs` übernommen (ROOT-relative Pfade statt der Scratchpad-Absolutpfade
+    des Forschungsagenten), alle sechs gegen die Original-Kennzahlen im Dokument
+    nachgeprüft (u. a. Räuberland/Offenes Meer Fisch 100 %, Lichtlose Tiefsee Leuchtwesen
+    100 %, A/B/C-Formenzahl 10/32/24, `fitness()` 339 ns/Aufruf) — alle reproduziert. Kein
+    Gate (kein Pass/Fail), reine Referenzmessung für spätere Stufen.
   - [ ] Stufe 1 — Gewichtete Cluster-Metrik in `world/cluster.ts`/`census.ts` (Ziel: ≥1.3
     Cluster/Lauf, heute 0.10 bei 25 Genen — Cluster-Erkennung ist aktuell praktisch blind).
   - [ ] Stufe 2 — Prototyp-Matcher + `archetypes.json`; `classify()`-Kaskade in
