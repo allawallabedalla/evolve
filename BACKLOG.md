@@ -461,6 +461,64 @@ Drei Punkte aus dem Spielen der v0.70.0:
 
 ---
 
+## ⬜ Offen — Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29)
+
+Nutzer-Auftrag: die gesamte Oberfläche auf flachen Vektor-Illustrationsstil mit
+Siebdruck-Anmutung umstellen (Referenz: Two Dots, Mid-Century-Wissenschaftsposter) —
+nur Flächenfarben, kein Verlauf/Schatten, max. 5 Farben je Ansicht, Umgebungsvariablen
+als Farbsystem (Temperatur → Hintergrundton, Sauerstoff/Nährstoffe → Partikeldichte,
+Feuchtigkeit → Formensprache Welle↔Kristall, Strahlung/Druck → Lichtkeile), Lebewesen
+als reine modulare Silhouette mit einer Akzentfarbe für neu erworbene Merkmale.
+Konzept-Vorschau (Palettenvergleich + Live-Demo) vorab als Artifact abgestimmt,
+Palette **„Klippenlicht"** (Aubergine-Ink + dusty Lilac + Ringelblume-Akzent) gewählt.
+Branch `claude/flat-vector-simulation-ui-kttqxx`.
+
+- [x] **Phase 1 — Design-Tokens**: `:root`-Palette auf Klippenlicht umgestellt,
+  Neomorph-Schatten (`--shadow*`) durch flache Hairline-Konturen ersetzt, alle
+  `linear-/radial-gradient`-Stellen (Body-BG, Gen-/Vitalitätsbalken, Login-Card,
+  Flash-Effekte, Rarity-/Toast-Glows) geflacht, `backdrop-filter`-Blur aus allen
+  Modal-Scrims entfernt, Kontrastfixes für helle Schrift auf Akzentflächen,
+  Papierkorn-Overlay als globaler SVG-Filter (`feTurbulence`).
+- [x] **Phase 2 — Habitat-Renderer Canvas→SVG**: `drawHabitat()`/`drawMotes()`
+  laufen jetzt als echtes SVG-DOM statt Canvas-2D. Temperatur → Hintergrundfarbe,
+  Feuchtigkeit → Bodenform (weiche Welle ↔ harte Kristallkante), Strahlung/Druck
+  (UV+Strahlung+Tiefsee-Druck) → diagonale Lichtkeile, Sauerstoff+Nahrungsfülle →
+  Partikeldichte/-deckkraft. Alle bestehenden Regler/Stress-Chips (Gift, Hypoxie,
+  Salz, Schnee, Wasserstand) bleiben erhalten, jetzt flach statt Verlauf. Die
+  Kreatur selbst läuft vorerst weiter auf einem transparenten Canvas-Overlay über
+  der SVG-Bühne (Übergangslösung bis Phase 3).
+- [x] **Icon-Konsistenz-Audit**: 8 reine Strich-Icons (`snow`, `waves`, `dna`,
+  `globe`, `wind`, `mineral`, `link`, `fern` + `moss`/`mold`/`mycelium`) brachen
+  mit dem „kein Outline-Stil"-Prinzip → auf flache Silhouetten/kräftigere Striche
+  umgestellt. Letzte rohe Emoji (☁️ Cloud-Sync-Status, 👋 Onboarding-Hinweis)
+  durch flaches Icon ersetzt bzw. entfernt — der Rest der App nutzt bereits
+  durchgängig `ic()`/`formIcon()`.
+- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)**:
+  `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
+  (~800 Zeilen biologischer Sonderfälle: Biolumineszenz, Tarnung, Flugbauplan …)
+  von Canvas-2D auf modulares SVG umbauen — Körperkern + austauschbare Anbauteile
+  (Flossen, Membranen, Panzerplatten, Fühler) als eigene Elemente, Tiefe über
+  Layering + Helligkeitsstufen statt Schlagschatten, EINE Akzentfarbe für das
+  jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
+  seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
+  Erkennung für die Chronik auf). Geplant: an einen Opus-Subagenten delegiert
+  (geschmacksintensivster Teil), Sonnet bleibt Orchestrator/Integration.
+- [ ] **Phase 4 — Restliche UI**: Genom-Balken, Vitalitätsanzeige, Chronik,
+  Genbook, Baum-des-Lebens-SVG, Challenge-Liste auf dieselbe Palette + die
+  Hell/Dunkel-Hierarchieregel übertragen (Werte/Regler/Buttons bleiben die
+  einzigen hellen, hochkontrastigen Elemente).
+- [ ] **Phase 5 — Audit**: WCAG-Kontrast erneut prüfen, `prefers-reduced-motion`
+  erhalten, alle Biome/Extremregler/Mutationsfälle durchklicken.
+- [ ] **Zwei kleine Politur-Punkte aus Phase 2**: Himmel wirkt bei mittlerem
+  Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
+  die Wellenlinie am Boden (`groundPath()`) könnte mit mehr Stützpunkten runder
+  werden.
+
+Betrifft nur die Präsentationsschicht — `engine/`, `physics.json` und die
+Fitness-Validierung (`npm run parity`) sind unangetastet.
+
+---
+
 ## ⬜ Offen — Live-App
 
 Fast alle UX-/Gamification-Punkte **und** der Engine-Pass BAL-5 sind erledigt (s. „Erledigt").
