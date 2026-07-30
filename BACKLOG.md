@@ -1190,6 +1190,84 @@ Mi 2026-07-29).
 
 ---
 
+### 10 · Lebendige Welt — Roadmap (2026-07-30, Nutzerauftrag „groß denken")
+
+Ausgangsfrage: kann der Lebensbaum mit einfachen Mitteln mehr Formen bekommen, die auch
+im Spiel erreichbar sind? Antwort in zwei Schritten dokumentiert: **Bestand/Lücken**
+(`docs/lebensbaum-luecken.md`, Sweep-Werkzeuge `tools/research/gap-sweep.mjs` +
+`room-sweep.mjs`) und **Zielzustand/Roadmap** (`docs/roadmap-lebendige-welt.md`). Acht
+Phasen, zunehmend tiefer in der Architektur (Präsentation → Physik → Population → Welt).
+Erfindet keine neue Richtung — Phase 4/5/6/7 docken an bereits hier dokumentierte offene
+Fronten an (P1 Radiation aus Punkt 9, Parasitismus-Rückstellung aus Punkt 6,
+„zeitachse"-Layer aus `app/influences.js`, Populations-/Life-History-Ebene aus dem
+Breiten-Feld-Fazit). Auftrag „lege los, keine Rückfragen" (2026-07-30) — Status je Phase
+wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einsteigen kann.
+
+- [ ] **Phase 0 — Medium-Achse entwirren (Fundament).** `water` in diskretes Medium
+  (Land/Wasser) + stetige Feuchte/Tiefe trennen, Renderer-Schwellen (0.34/0.6) mit
+  Physik-Schwellen (`aquaticWaterFloor` 0.5, `absorbWaterFloor` 0.3) synchronisieren.
+  Bugfix `sense` (totes Gen, `senseForage` trägt die Wartungskosten nicht). Bugfix
+  `defenseFromBurrow` (wirkt auch in sessilen Organismen). Die 12 Presets nachrechnen —
+  4 von 12 widersprechen heute ihrem eigenen Namen (Räuberland→Fisch, Reiche
+  Kronen→Amöbe, Sonniger Sumpf→Strauch unter Wasser, Moderwald trockener als
+  Hitze-Dürre). **Blockiert Phase 2+3.** — **Modell: Sonnet** (klar spezifizierte
+  Physik-Korrektur, kein Ermessensspielraum) mit Opus-Rückfrage nur falls die neue
+  Schwellenwahl die Ökologie-Verteilung (C1–C6) spürbar verschiebt.
+- [ ] **Phase 1 — Pakete A/B/C sichtbar machen (44 → 66 Formen).** Reine
+  Präsentations-Arbeit, kein Physik-Risiko: 9 Extremophile (je ein Stressor-Gen), 6
+  Nischen-Formen (Grabtier, Stickstoff-Mikrobe, Filtrierschwimmer, sessiler Filtrierer,
+  Krill, Leuchtpilz), 7 Verfeinerungen (Details in `docs/lebensbaum-luecken.md` §6).
+  Je Form: Prototyp (`app/archetypes.js`, Zahlen aus dem Sweep gemittelt statt geraten),
+  TREE-Blatt (`app/index.html`), SVG-Icon (`ICONS`/`FICON`), gemessene Rarität
+  (`docs/rarity.json`, `npm run rarity-check`), Wikipedia-Link (`app/exemplar.js`),
+  Baum-Knoten (`docs/tree-of-life.json`). Nach jedem Paket den Sweep neu laufen lassen
+  und prüfen, dass keine Bestandsform an Erreichbarkeit verliert (Prototyp-Konkurrenz).
+  — **Modell: Sonnet.**
+- [ ] **Phase 2 — Amphibisch als echte Nische.** Kein neues Gen — ein Interaktionsterm
+  zwischen Landjagd- und Aquatik-Kanal, der im Übergangsband „beides mäßig gut" belohnt
+  (heute gewinnt dort meist ein liegengebliebenes Landtier, gemessen 23 % Fell-Warmblüter
+  exakt am Umschlagpunkt water=0.5). Erst danach ein dreiwertiger Medium-Toggle
+  (Land/Amphibisch/Wasser) im UI — vorher wäre „Hybrid" ein Etikettenschwindel (gemessen,
+  s. Chat-Verlauf 2026-07-30). Braucht Phase 0. — **Modell: Opus** für den
+  Interaktionsterm-Entwurf (Abwägung, wie stark ohne die reine Aquatik-/Landnische zu
+  entwerten), **Sonnet** für Umsetzung + Re-Validierung.
+- [ ] **Phase 3 — Habitat als Weltebene.** 10 Habitate mit eigenem Formprofil
+  (`tools/research/room-sweep.mjs`), als Rahmen über Medium + Reglern — **färbt, sperrt
+  nicht** (Pfeiler). Die zehn Stressor-Achsen an Habitate binden statt nur an
+  Zufalls-Karten (Druck→Tiefsee, Salz→Meer, Frost+Wind→Polar, Austrocknung→Wüste), damit
+  Paket A (Phase 1) an einem Ort findbar wird. Genbuch/Karte um räumliche Lesart
+  ergänzen. — **Modell: Opus** für die UI-/Interaktionsentscheidung (wie Habitate neben
+  den bestehenden Biom-Presets wirken, ohne Regler-Anzahl zu erhöhen, s. Komplexitäts-Audit
+  Punkt 3), **Sonnet** für Umsetzung.
+- [ ] **Phase 4 — Speziation.** Deckt sich mit **P1 Radiation** aus Punkt 9
+  (Schicht-A-Portfolio, dort bereits als „net-neu zu bauen" vorgesehen: Nischen in einer
+  Metapopulation öffnen, Δ Artenzahl über `world/census.ts` messen). Größter Hebel dieser
+  Roadmap — bricht die Grundannahme „eine Form = ein Genom-Punkt" auf, die dem heutigen
+  Lebensbaum zugrunde liegt. Mehrwöchiges Einzelvorhaben mit eigener Tuning-Runde gegen
+  C1–C6 (Muster aus Punkt 6: Filtrierer-Achse). — **Modell: Opus** für Mechanik-Entwurf,
+  **Sonnet** für Implementierung + Gates (analog Schritt 6/7 aus Punkt 9).
+- [ ] **Phase 5 — Symbiose/Parasitismus.** Bereits in Punkt 6 bewusst zurückgestellt
+  („Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu"). Baut auf
+  Phase 4 auf (dieselbe Grundvoraussetzung: mehr als ein Genom gleichzeitig in Beziehung).
+  Erweitert `world/coevolution.ts` (heute Räuber-Beute-Wettrüsten) um echte wechselseitige
+  Abhängigkeit. — **Modell: Opus** (Architektur), **Sonnet** (Umsetzung).
+- [ ] **Phase 6 — Zeitachse.** Bereits als „zeitachse"-Layer in `app/influences.js`
+  markiert, dort begründet: „ein zyklischer Jahresgang ist etwas anderes als ein hoher
+  oder tiefer Wert; die Engine kennt nur Momentaufnahmen." Öffnet Winterschlaf, Zug,
+  Laubfall, Saison-Tarnung. — **Modell: Opus** (Architektur: Umwelt wird Funktion der
+  Zeit statt Punktwert — größter struktureller Eingriff dieser Roadmap), **Sonnet**
+  (Umsetzung).
+- [ ] **Phase 7 — Populations-/Life-History-Ebene.** Bereits im Breiten-Feld-Fazit (Punkt
+  6) als legitime, nicht gebaute Erweiterung benannt: r/K-Strategie, Dispersal,
+  Sozialität, Generationszeit — keine Einzel-Gen-Phänotypen, gehört in `world/`, nicht in
+  die Fitness. — **Modell: Opus** (Architektur), **Sonnet** (Umsetzung).
+
+**Ab Phase 4 ist „Formenzahl" nicht mehr die richtige Metrik** — das System kippt von
+„handkuratierte Blätter" zu „ein Baum, der selbst wächst" (Details in
+`docs/roadmap-lebendige-welt.md`, Abschnitt „Größenordnung").
+
+---
+
 ## 🧭 Produkt-Pfeiler (Leitplanken)
 
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
