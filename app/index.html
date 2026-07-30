@@ -144,7 +144,13 @@
           steht das unter dem Artnamen. Auch <b>„Diese Umwelt formt gerade …"</b> ist an dieser Population
           gemessen und nicht geschätzt: für jedes Merkmal wird verglichen, wie stark es bei denen ausgeprägt
           ist, die gerade mehr Nachkommen hinterlassen — das ergibt direkt, um wie viel die Auslese den
-          Durchschnitt dieses Merkmals in dieser Generation verschiebt. Die Fitness-Physik dahinter
+          Durchschnitt dieses Merkmals in dieser Generation verschiebt. Und der Räuberdruck ist kein
+          bloßer Zahlenwert mehr: in derselben Welt lebt eine <b>zweite, unsichtbare Population</b> —
+          die Räuber. Sie sind auf eine bestimmte <b>Beutegröße</b> eingespielt; wer da hineinpasst, wird
+          häufiger erwischt, und die Linie weicht aus. Dann ziehen die Räuber nach. So entsteht ein
+          <b>Wettrüsten</b>, das nie fertig wird (in der Biologie: Rote-Königin-Dynamik). Dein
+          Räuber-Regler bleibt dabei genau der <b>Durchschnittsdruck</b>, den du eingestellt hast — die
+          Räuber verteilen ihn nur um. Die Fitness-Physik dahinter
           (Energie-Pfade, Stoffwechsel-Kosten, Stress-Achsen) ist dieselbe, die auch das wissenschaftliche
           Referenzmodell benutzt — der Browser rechnet sie nur mit weniger Individuen.
         </p>
@@ -325,7 +331,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.77.0";
+const APP_VERSION = "v0.78.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1412,8 +1418,151 @@ const SWARM = {
   // Rechenzeit-Deckel je Bild (von 16.7 ms bei 60 fps). Siehe simStepBudget().
   frameBudgetMs: 6,
 };
+// ======================= Koevolution: Räuber & Beute (Migrations-Stufe 7) =======================
+//
+// Bis hierher war `predation` ein REINER UMWELT-REGLER: ein einziger Zahlenwert, den
+// jedes Individuum gleich stark spürt. Das ist die halbe Wahrheit — echter Räuberdruck
+// ist nicht gleichverteilt, sondern hat ein BEUTESCHEMA: Räuber sind auf eine
+// Beutegröße eingespielt (Gape-Limitation, Suchbild), und wer da hineinpasst, wird
+// gefressen. Weicht die Beute in der Größe aus, folgen die Räuber nach — und der Druck
+// wandert mit. Das ist die Rote-Königin-Dynamik (Van Valen 1973): ein Wettrüsten, das
+// nie zur Ruhe kommt, und einer der stärksten realen Vielfalts-Treiber.
+//
+// Der Mechanismus selbst ist NICHT neu erfunden: world/coevolution.ts (`Ecosystem`)
+// implementiert ihn seit Migrations-Stufe 5 als geprüfte Verifikations-Mechanik
+// (npm run coevolution-check, phenomena-check P5). Hier wird er an das Live-Spiel
+// angeschlossen — mit derselben Vorschrift, aber auf dem Nischen-Schwarm der App.
+//
+// ARCHITEKTUR-ENTSCHEIDUNG (gemessen abgewogen, s. Bericht):
+// `Ecosystem` selbst wird NICHT benutzt. Die Klasse bringt ihre EIGENE Beute-Population
+// mit (ohne Nischen-Konkurrenz) — die App hat ihre Beute aber schon (`pop`, mit dem
+// 8-Achsen-Konkurrenz-Kernel aus Stufe 3/4). Angeschlossen wird stattdessen genau der
+// Haken, der in `world/population.ts` seit Stufe 1 für diesen Fall vorgesehen ist:
+// `weights()` nimmt eine INDIVIDUELLE Umwelt je Individuum entgegen und `reproduceWith()`
+// extern gerechnete Gewichte. Damit gilt hier Zeile für Zeile
+//     w_i = fitness(g_i, {...env, predation: P_i})^selPower · K_i / Dichte_i
+// also EXAKT `Ecosystem`s Formel, nur mit der Nischen-Konkurrenz der App darin — und
+// ohne dass der Konkurrenz-Kernel ein zweites Mal abgeschrieben werden musste.
+// `world/coevolution.ts` bleibt unverändert; coevolution-check/phenomena-check prüfen
+// weiterhin dieselbe eigenständige Klasse wie vorher.
+//
+// WIE DER REGLER UND DIE RÄUBER ZUSAMMENHÄNGEN (Kern-Entscheidung, gemessen):
+// Der Regler bleibt der BASISWERT — der Grunddruck der Umgebung (offenes Feld vs.
+// Dickicht). Die Räuber-Population verteilt diesen Druck nur UM: wer ins aktuelle
+// Beuteschema passt, trägt mehr, wer daneben liegt, weniger. Gerechnet wird das in
+// LOG-ODDS (Logit), nicht additiv wie in `Ecosystem`:
+//     P_i = σ( logit(pred) + k·(m_i − m̄) + c )
+// mit m_i = mittlere Gauß-Passung von Beutetier i zu allen Räubern auf der Größen-Achse.
+// Drei Eigenschaften, die genau die Leitplanken dieser Aufgabe erfüllen und die eine
+// additive Kopplung NICHT hat (beide wurden gebaut und gegeneinander gemessen):
+//   1. Bei Regler = 0 ist logit(0) = −∞, also P_i = 0 für ALLE — kein Wettrüsten aus dem
+//      Nichts in einer als sicher markierten Welt. Gemessen: mit und ohne Räuber
+//      Zeichen für Zeichen identischer Lauf (zeitl. SD 0.0331 / 0.0331, 2.32 / 2.32
+//      Cluster). Der Code steigt dort ohnehin vorher aus (COEVO.minPred).
+//   2. P_i bleibt IMMER in (0,1) — nichts klemmt. Additiv (`min(1, pred + P_i)`, wie in
+//      `Ecosystem`) klemmt bei hohem Regler massenhaft an der 1 und macht die Welt in
+//      Wahrheit MILDER, als der Regler sagt: gemessen sank der tatsächliche mittlere
+//      Druck bei „Räuberland" (Regler 0.90) auf 0.72–0.80.
+//   3. Der Versatz c wird je Generation per Newton so gewählt, dass mean(P_i) EXAKT
+//      dem Reglerwert entspricht (2–6 Schritte, gemessen). Der Regler behält also
+//      Wort für Wort seine alte Bedeutung — die Räuber entscheiden nur, WEN es trifft.
+//      Nachgemessen über 500 Generationen: 0.30→0.300, 0.45→0.450, 0.60→0.600,
+//      0.90→0.900. Damit bleibt auch alles, was auf dem alten Reglerwert kalibriert ist
+//      (Vitalitäts-Skala, Presets, Herausforderungen, Biom-Empfehlungen), gültig.
+//
+// GEMESSENE WIRKUNG. Zuerst headless (Node, exakt diese Konfiguration, 6 Seeds × 600
+// Generationen, Kennzahl = zeitliche SD der Größe des DOMINANTEN Clusters — also dessen,
+// was der Spieler als „dein Wesen" sieht — gegen denselben Lauf ohne Räuber):
+//   Regler 0.30   0.061 → 0.172   2.8×      ← klares Wettrüsten
+//   Regler 0.45   0.044 → 0.062   1.4×
+//   Regler 0.35   0.050 → 0.055   1.1×
+//   Regler 0.60   0.094 → 0.084   0.9×
+//   Regler 0.90   0.040 → 0.033   0.8×      ← kein Wettrüsten, s. u.
+// Danach im echten Browser über ALLE 12 Presets nachgemessen — die Tabelle steht unten
+// bei den Schwellen; sie bestätigt das Bild (Standard-Regler 2.8×, Eiszeit 1.9×,
+// Dichter Wald 1.7×, Räuberland 0.8×).
+// EHRLICHER BEFUND, nicht wegkalibriert: das Wettrüsten ist bei GERINGEM bis MITTLEREM
+// Räuberdruck am stärksten und bleibt bei extremem Druck aus. Der Grund ist die
+// Fitness-Physik, nicht die Kopplung: bei Regler 0.90 entkommt die Population über
+// MOBILITÄT (gemessen 0.78 statt 0.24 bei Regler 0.30) — also über eine ganz andere
+// Achse als die, auf der die Räuber suchen. Wer schnell genug ist, muss seine Größe
+// nicht ändern. Genau dafür gibt es den Indikator unten: der Hinweis erscheint nur,
+// wenn die Dynamik wirklich läuft, statt in jeder Welt dasselbe zu behaupten.
+//
+// VIELFALT (die Leitplanke aus Stufe 3/4, ≥1.3 Cluster/Lauf): unangetastet — mittlere
+// Clusterzahl ohne/mit Räubern in Node 1.97/1.90 (Regler 0.30), 2.07/2.02 (0.60),
+// 1.65/1.75 (0.45), 1.01/1.01 (0.90); im Browser über alle 12 Presets 1.58/1.56 im
+// Mittel. Die Größen-Streuung INNERHALB der Population bleibt ebenfalls stehen
+// (0.322 → 0.321). Stärkere Kopplungen (k ≥ 12) wurden mitgemessen und VERWORFEN: sie
+// treiben die Beute geschlossen in eine Ecke der Größen-Achse (Streuung 0.322 → 0.22),
+// und Vielfalt ist der Zweck dieses Schwarms.
+const COEVO = {
+  // Merkmals-Achse der Passung. SIZE (Index 1) — identisch zu DEFAULT_COEVO.matchAxis
+  // in world/coevolution.ts und zugleich eine der acht Nischen-Achsen des Schwarms.
+  axis: 1,
+  // Breite des Fang-Kernels (kleiner = spezialisierterer Räuber). 0.15 (der Wert aus
+  // world/coevolution.ts) bis 0.25 gemessen; 0.18 lag im Optimum (2.8× statt 2.4×/2.9×
+  // bei gleicher Vielfalt) und ist gegen die Streuung der Größen-Achse robust.
+  width: 0.18,
+  // Stärke der frequenzabhängigen Umverteilung in Log-Odds. k=4/6/8/12 gemessen:
+  // 2.8×/4.6×/5.7×/6.4× (zeitl. SD des Populationsmittels) — aber ab k≈8 sinkt die
+  // Größen-Streuung der Population messbar. k=6 ist der stärkste Wert, der die
+  // Vielfalt noch vollständig stehen lässt.
+  k: 6,
+  // Größe der Räuber-Population. 30/40/60/100 gemessen — praktisch gleiche Wirkung
+  // (Faktor 3.4×/3.0×/2.8×/2.4×), also entscheidet die Rechenzeit: die Kosten sind
+  // O(N_Beute · N_Räuber). 60 = 30 % der Beute; ökologisch sind Räuber ohnehin seltener
+  // als ihre Beute. (world/coevolution.ts nutzt für seinen Prüfstand 300 = Beutegröße;
+  // dort spielt Rechenzeit keine Rolle.)
+  nPred: 60,
+  // Räuber-Reproduktion: Grundviabilität × Beute-Treffer — Zahlen aus DEFAULT_COEVO
+  // (world/coevolution.ts), unverändert übernommen.
+  floor: 0.3, gain: 1.6,
+  // Newton-Schritte für die Mittelwert-Korrektur. Gemessen: 2–3 reichen fast immer,
+  // 6 ist die Obergrenze mit Abbruch bei |Fehler| < 1e-6.
+  newton: 6,
+  // An BEIDEN Enden des Reglers gibt es definitionsgemäß nichts umzuverteilen: bei 0
+  // ist niemand in Gefahr, bei 1 sind alle es. Dort läuft exakt der Code von vor
+  // dieser Stufe (pop.step) — und bei 0 sparen wir die Rechenzeit ganz.
+  minPred: 0.02, maxPred: 0.98,
+  // Ringpuffer der mittleren Räubergröße, in GENERATIONEN (nicht Sekunden) — die
+  // Dynamik ist eine Generationen-Größe und darf nicht vom Spieltempo abhängen.
+  traceLen: 60,
+  // Wann gilt die Rote-Königin-Dynamik als „läuft gerade"? ZWEI Bedingungen, beide nötig:
+  //   pSd  — Streuung des endogenen Drucks über die Beute: haben die Räuber überhaupt ein
+  //          Suchbild, oder trifft es alle gleich?
+  //   move — zeitliche Streuung der mittleren Räubergröße über die letzten `traceLen`
+  //          Generationen: FOLGEN die Räuber der Beute, oder stehen sie nur?
+  // SCHWELLEN IM ECHTEN BROWSER KALIBRIERT, nicht geschätzt (alle 12 Presets + die
+  // Standard-Reglerstellung, je ~25 s Einschwingen und ~26 s Messen, MIT und OHNE Räuber;
+  // „Faktor" = zeitliche SD der ANGEZEIGTEN Größe mit Räubern / ohne Räuber):
+  //     Preset               Regler  Faktor   pSd     move     Hinweis
+  //     Standard-Regler       0.30    2.8×    0.195   0.143    an
+  //     Lichtlose Tiefsee     0.50    1.5×    0.163   0.099    an
+  //     Moderwald             0.50    0.8×    0.303   0.106    an
+  //     Eiszeit               0.15    1.9×    0.170   0.064    aus
+  //     Dichter Wald          0.20    1.7×    0.139   0.092    aus
+  //     Sonniger Sumpf        0.10    1.6×    0.103   0.047    aus
+  //     Reiche Kronen         0.10    1.5×    0.105   0.073    aus
+  //     Hitze-Dürre           0.10    1.5×    0.084   0.015    aus
+  //     Offenes Meer          0.50    1.2×    0.357   0.036    aus
+  //     Sonniges Flachmeer    0.05    1.2×    0.045   0.021    aus
+  //     Urtümpel              0.10    1.0×    0.085   0.124    aus
+  //     Trüber See            0.55    0.7×    0.325   0.079    aus
+  //     Räuberland            0.90    0.8×    0.107   0.048    aus
+  // Bewusst STRENG gewählt: mit lockereren Schwellen (0.10/0.06) stand der Hinweis in
+  // 9 von 13 Welten und wäre Tapete geworden — die Leitplanke aus ui-calm-check ist
+  // „lieber nichts sagen als dauernd dasselbe". So bleibt er die Ausnahme (3 von 13).
+  // EHRLICHE GRENZE, nicht wegretuschiert: der Hinweis misst, was er behauptet — dass
+  // die Räuber ein Suchbild haben und ihm folgen. Er ist KEIN Versprechen, dass die
+  // angezeigte Größe sichtbar schwingt: „Moderwald" erfüllt beide Bedingungen deutlich,
+  // zeigt aber keinen erhöhten Faktor (dort weicht die Beute über andere Merkmale aus).
+  // Hysterese (EIN/AUS getrennt) + Mindest-Standzeit, damit nichts blinkt.
+  onSd: 0.15, offSd: 0.11, onMove: 0.08, offMove: 0.055, holdMs: 8000,
+};
 let POPCORE = null;      // { Population, clusters, selectionWeights } aus app/core/
 let pop = null;          // der laufende Schwarm (null = Mittelfeld-Rückfall)
+let predPop = null;      // die (unsichtbare) Räuber-Population; null = keine Koevolution
 let swarmForms = [];     // [{fraction, centroid}], dominanter Cluster zuerst
 let swarmSplit = null;   // {n, pct} — zweite, klar andere Bauform (Aufspaltung), sonst null
 let _censusDue = 0, _censusT = 0;   // Generationen bzw. Zeitpunkt seit dem letzten Zensus
@@ -1429,8 +1578,21 @@ window.__evolvePerf = () => ({
   warumLaeufe: _perf.why, msProWarum: _perf.why ? _perf.whyMs / _perf.why : 0,
   msSchlechtestesWarum: _perf.worstWhyMs,
   clusterAktuell: swarmForms.length,
+  // Stufe 7: Koevolution. `koevolutionLaeuft` ist false, wenn der Räuber-Regler an einem
+  // seiner beiden Enden steht (dann läuft exakt der Pfad von vor dieser Stufe).
+  raeuberN: predPop ? predPop.size : 0,
+  koevolutionLaeuft: !!predPop && env.predation > COEVO.minPred && env.predation <= COEVO.maxPred,
+  koevolutionGenerationen: _coevo.ran,
+  druckStreuung: _coevo.pSd,          // sd(P_i) über die Beute — hat der Räuber ein Suchbild?
+  raeuberBewegung: _coevo.move,       // zeitl. SD der mittleren Räubergröße — folgt er?
+  raeuberGroesse: _coevo.predMean,
+  wettruestenSichtbar: _coevo.active,
   generationenProFrameBudget: simStepBudget(),
 });
+// Nur für Messungen (Vorher/Nachher-Vergleich im Browser): Koevolution abschalten und
+// den Pfad von vor Migrations-Stufe 7 fahren. Kein Spiel-Bedienelement.
+window.__evolveCoevo = (on) => { if(on === false){ predPop = null; if(_coevo.active){ _coevo.active = false; renderStressChips(); } }
+  else spawnPredators(); return !!predPop; };
 window.__evolvePerfReset = () => { _perf.gens = 0; _perf.genMs = 0; _perf.census = 0; _perf.censusMs = 0; _perf.worstGenMs = 0; _perf.why = 0; _perf.whyMs = 0; _perf.worstWhyMs = 0; };
 
 // Den echten Populations-Kern nachladen. Wird EINMAL vor boot()/restore() awaited,
@@ -1457,6 +1619,10 @@ async function initSwarmCore(){
     for(let i=0;i<10;i++) warm.step(env, PHYS);
     POPCORE.clusters(warm.genomes, { radius: SWARM.radius, minFraction: SWARM.minFraction,
       weights: POPCORE.selectionWeights(warm.mean(), env, PHYS) });
+    // … und derselbe Warmlauf für den Koevolutions-Pfad (weights() mit individueller
+    // Umwelt ist eine ANDERE Aufrufform und wird sonst beim ersten Mal kalt optimiert).
+    const wp = new Float64Array(warm.size).fill(0.3);
+    warm.reproduceWith(warm.weights(env, PHYS, (i) => { const e = { ...env }; e.predation = wp[i]; return e; }));
   } catch(e){ /* Warmlauf ist reine Kür — ein Fehler hier darf das Spiel nicht stoppen */ }
   spawnSwarm(null);   // gestreute Gründer für das gerade laufende (frische) Leben
   // Anzeige auf den Schwarm-Zentroid nachziehen (newLineage() lief vor dem Modul-Ladevorgang).
@@ -1483,8 +1649,148 @@ function spawnSwarm(seedGenome){
     competition: { axes: SWARM.niche, sigmaC: SWARM.sigmaC, sigmaK: SWARM.sigmaK, kCenter: SWARM.kCenter },
   }, (lineageSeed + generation) >>> 0);
   if(seedGenome) pop.seedFrom(padGenome(seedGenome), SWARM.seedSpread);
+  spawnPredators();
   _censusDue = 0; _censusT = 0; swarmForms = []; swarmSplit = null;
   readSwarm();
+}
+
+// ---- Koevolution: die zweite, unsichtbare Population ----------------------------------
+//
+// Der Spieler sieht sie NICHT (kein zweites Wesen-Panel): die Leitplanke der App ist
+// „du steuerst nie das Wesen, nur seine Welt" — und die Räuber sind Teil der Welt, nicht
+// ein zweites Haustier. Sie hätten auch keine Bühne: die Karte, das Genbuch, die Chronik
+// und die Herausforderungen erzählen alle von EINER Linie. Sichtbar wird die Koevolution
+// deshalb nur da, wo sie etwas erklärt: in der Warum-Zeile (die Beträge rechnen den
+// endogenen Druck ab jetzt mit, s. swarmSelection()) und im Wettrüsten-Hinweis unten.
+const _coevo = {
+  P: null, match: null, food: null,   // wiederverwendete Puffer (keine Allokation je Generation)
+  env: null,                          // die individuelle Umwelt, EIN Objekt für alle Individuen
+  pSd: 0, move: 0, predMean: 0,       // Kennzahlen (s. COEVO.onSd/onMove)
+  trace: [],                          // mittlere Räubergröße der letzten COEVO.traceLen Generationen
+  active: false, since: 0,            // Zustand des Wettrüsten-Hinweises + Standzeit
+  ran: 0,                             // wie viele Generationen tatsächlich koevolutiv liefen
+};
+/** Die Räuber (neu) aufsetzen — bewusst OHNE Nischen-Konkurrenz, wie Ecosystem.predator. */
+function spawnPredators(){
+  predPop = null;
+  _coevo.trace.length = 0; _coevo.pSd = 0; _coevo.move = 0; _coevo.predMean = 0;
+  if(_coevo.active){ _coevo.active = false; if(typeof renderStressChips === "function") renderStressChips(); }
+  _coevo.since = 0; _coevo.ran = 0;
+  if(!POPCORE) return;
+  predPop = new POPCORE.Population({
+    size: COEVO.nPred, numGenes: NG, mutationSd: SWARM.mutationSd, selPower: SWARM.selPower,
+    recombProb: SWARM.recombProb, founderSpread: "uniform", competition: null,
+  }, ((lineageSeed ^ 0x9e3779b9) + generation) >>> 0);
+}
+
+/**
+ * Der endogene Räuberdruck P_i je Beutetier (0..1) — die eigentliche Koevolution.
+ *
+ * Gibt null zurück, wenn nichts umzuverteilen ist (kein Schwarm, keine Räuber, Regler an
+ * einem der beiden Enden). Dann läuft exakt der Pfad von vor Migrations-Stufe 7.
+ * Nebenprodukt `food` = Beute-Treffer je Räuber (dessen Reproduktions-Erfolg).
+ * Kosten: O(N_Beute · N_Räuber) Exponentiale + COEVO.newton Durchläufe über die Beute.
+ */
+function coevoPressure(){
+  if(!pop || !predPop) return null;
+  const base = env.predation;
+  if(!(base > COEVO.minPred) || base > COEVO.maxPred) return null;
+  const px = pop.genomes, qg = predPop.genomes, Np = px.length, Nq = qg.length;
+  if(!Np || !Nq) return null;
+  const A = COEVO.axis, inv2w2 = 1 / (2 * COEVO.width * COEVO.width);
+  if(!_coevo.P || _coevo.P.length !== Np){ _coevo.P = new Float64Array(Np); _coevo.match = new Float64Array(Np); }
+  if(!_coevo.food || _coevo.food.length !== Nq) _coevo.food = new Float64Array(Nq);
+  const P = _coevo.P, match = _coevo.match, food = _coevo.food;
+  match.fill(0);
+  // EIN Doppel-Durchlauf liefert beide Richtungen derselben paarweisen Passung:
+  // je Beutetier „wie gut passe ich ins Beuteschema", je Räuber „wie viel finde ich".
+  let predMean = 0;
+  for(let p=0;p<Nq;p++){
+    const z = qg[p][A]; predMean += z;
+    let f = 0;
+    for(let i=0;i<Np;i++){ const d = px[i][A] - z; const k = Math.exp(-d*d*inv2w2); match[i] += k; f += k; }
+    food[p] = f / Np;
+  }
+  predMean /= Nq;
+  let mbar = 0;
+  for(let i=0;i<Np;i++){ match[i] /= Nq; mbar += match[i]; }
+  mbar /= Np;
+  // Log-Odds des Reglerwerts + frequenzabhängige Verschiebung (zunächst als Logit in P).
+  const l0 = Math.log(base / (1 - base));
+  for(let i=0;i<Np;i++) P[i] = l0 + COEVO.k * (match[i] - mbar);
+  // Mittelwert-Korrektur: der Versatz `off`, für den mean(σ(logit_i + off)) == base gilt.
+  // Newton, weil d/doff mean(σ) = mean(σ(1−σ)) geschlossen vorliegt; monoton, also stabil.
+  let off = 0;
+  for(let it=0; it<COEVO.newton; it++){
+    let m = 0, d = 0;
+    for(let i=0;i<Np;i++){ const s = 1/(1+Math.exp(-(P[i]+off))); m += s; d += s*(1-s); }
+    m /= Np; d /= Np;
+    const e = m - base;
+    if(d < 1e-9 || Math.abs(e) < 1e-6) break;
+    off -= e / d;
+  }
+  let v = 0;
+  for(let i=0;i<Np;i++){ const s = 1/(1+Math.exp(-(P[i]+off))); P[i] = s; const dd = s - base; v += dd*dd; }
+  return { P, food, pSd: Math.sqrt(v/Np), predMean };
+}
+
+/** Die individuelle Umwelt eines Beutetiers — EIN wiederverwendetes Objekt, keine Allokation. */
+function coevoEnvOf(P){
+  if(!_coevo.env) _coevo.env = {};
+  const e = _coevo.env;
+  for(const k in env) e[k] = env[k];
+  return (i) => { e.predation = P[i]; return e; };
+}
+
+/** EINE Generation. Mit Räubern: Beute + Räuber pflanzen sich aus DEMSELBEN Zustand fort. */
+function simGeneration(){
+  const cp = coevoPressure();
+  if(!cp){
+    // Regler an einem Ende (oder kein Räuber): exakt der Pfad von vor Stufe 7. Die
+    // Kennzahlen müssen dabei ZURÜCKGESETZT werden — sonst bliebe der Wettrüsten-Hinweis
+    // an einem alten Messwert hängen, nachdem der Spieler den Räuber-Regler ganz
+    // heruntergezogen hat (genau der Fall, in dem er nichts mehr behaupten darf).
+    _coevo.pSd = 0; _coevo.trace.length = 0;
+    pop.step(env, PHYS); return;
+  }
+  // Reihenfolge wie in Ecosystem.step(): erst BEIDE Gewichte aus dem alten Zustand …
+  const w = pop.weights(env, PHYS, coevoEnvOf(cp.P));
+  const bw = predPop.weights(env, PHYS), nq = bw.length, pw = new Array(nq);
+  for(let p=0;p<nq;p++) pw[p] = bw[p] * (COEVO.floor + COEVO.gain * cp.food[p]);
+  // … dann fortpflanzen.
+  predPop.reproduceWith(pw);
+  pop.reproduceWith(w);
+  _coevo.pSd = cp.pSd; _coevo.predMean = cp.predMean; _coevo.ran++;
+  const tr = _coevo.trace;
+  tr.push(cp.predMean);
+  if(tr.length > COEVO.traceLen) tr.shift();
+}
+
+/**
+ * „Läuft das Wettrüsten gerade?" — wird im Zensus-Takt (nicht je Bild) ausgewertet.
+ * Bewusst KEIN Dauer-Hinweis: der Chip erscheint nur, wenn beide Kennzahlen über der
+ * Schwelle liegen, und verschwindet erst nach COEVO.holdMs wieder (Leitplanke aus
+ * ui-calm-check: keine zusätzliche Unruhe in der Anzeige).
+ */
+function updateCoevoState(){
+  const tr = _coevo.trace;
+  if(!predPop || tr.length < 12){ _coevo.move = 0; }
+  else {
+    let m = 0; for(const v of tr) m += v; m /= tr.length;
+    let s = 0; for(const v of tr) s += (v-m)*(v-m);
+    _coevo.move = Math.sqrt(s/tr.length);
+  }
+  const on = _coevo.active;
+  const want = _coevo.pSd >= (on ? COEVO.offSd : COEVO.onSd)
+            && _coevo.move >= (on ? COEVO.offMove : COEVO.onMove);
+  if(want === on) return;
+  const now = performance.now();
+  // Einschalten darf sofort (der Moment IST die Neuigkeit), ausschalten erst nach der
+  // Mindest-Standzeit — sonst flackert der Chip an der Schwelle.
+  if(want || now - _coevo.since >= COEVO.holdMs){
+    _coevo.active = want; _coevo.since = now;
+    if(typeof renderStressChips === "function") renderStressChips();
+  }
 }
 
 // Selektions-gewichteter Genom-Abstand (dieselbe Metrik wie die Cluster-Erkennung).
@@ -1549,6 +1855,7 @@ function readSwarm(){
     const other = classify(swarmForms[1].centroid, env);
     swarmSplit = { n: other.n, pct: Math.round(swarmForms[1].fraction * 100) };
   }
+  updateCoevoState();   // Wettrüsten-Hinweis im Zensus-Takt, nicht je Bild
   _perf.census++; _perf.censusMs += performance.now() - t0;
 }
 
@@ -1577,7 +1884,7 @@ function simStepBudget(){
 function simAdvance(steps){
   if(pop){
     const t0 = performance.now();
-    for(let i=0;i<steps;i++) pop.step(env, PHYS);
+    for(let i=0;i<steps;i++) simGeneration();
     const dt = performance.now() - t0;
     _genMsEma += (dt / steps - _genMsEma) * 0.15;
     _perf.gens += steps; _perf.genMs += dt;
@@ -2229,6 +2536,12 @@ function renderStressChips(){
   if(fir>0.05) chips.push(`<button class="stress-chip fir" data-ax="fire" title="Feuer-Regime — Feuerresistenz wird selektiert. Klicken zum Entfernen.">Feuer ✕</button>`);
   if(frs>0.05) chips.push(`<button class="stress-chip frs" data-ax="frost" title="Tiefer Frost — Frostschutz wird selektiert. Klicken zum Entfernen.">Frost ✕</button>`);
   if(wnd>0.05) chips.push(`<button class="stress-chip wnd" data-ax="wind" title="Wind-Exposition — Windhärte wird selektiert. Klicken zum Entfernen.">Wind ✕</button>`);
+  // Wettrüsten (Migrations-Stufe 7): KEIN Stressor mit Regler, sondern ein Zustand der
+  // lebenden Welt — deshalb ohne „✕" und ohne Klick. Er beantwortet die eine Frage, die
+  // die Koevolution beim Spieler aufwirft: „warum bewegt sich die Größe, obwohl ich
+  // nichts verändert habe?". Steht bewusst NUR da, wenn die Dynamik messbar läuft
+  // (COEVO.onSd/onMove) — sonst wäre es Tapete statt Information.
+  if(_coevo.active) chips.push(`<span class="stress-chip coevo" title="Die Räuber in dieser Welt sind auf eine bestimmte Beutegröße eingespielt. Wer da hineinpasst, wird häufiger erwischt — also verschiebt sich die Größe deiner Linie. Die Räuber ziehen nach, und das Ganze beginnt von vorn: ein Wettrüsten, das nicht zur Ruhe kommt. Der Räuber-Regler bleibt dabei genau der Durchschnittsdruck, den du eingestellt hast; die Räuber entscheiden nur, wen es trifft.">Wettrüsten mit Räubern</span>`);
   el.innerHTML = chips.join("");
   el.hidden = chips.length===0;
   el.querySelectorAll(".stress-chip").forEach(b=> b.onclick = ()=>{
@@ -2533,7 +2846,24 @@ const EXPLORE_IDEAS = [
 // unverändert. Ergebnis: 12/12 Presets nennen beim Umschalten plausible Merkmale
 // (Tiefsee → „Biolumineszenz ↑ · Filterapparat ↑"), 12/12 fallen eingeschwungen wieder
 // auf „Angepasst" zurück.
-const WHY_MS = 900, WHY_SMOOTH = 0.28, WHY_ENTER = 0.026, WHY_LEAVE = 0.012, WHY_STICKY = 1.35, WHY_HOLD = 2;
+// NACHKALIBRIERUNG DER ZWEI WECHSEL-BREMSEN MIT MIGRATIONS-STUFE 7 (Koevolution),
+// gemessen erzwungen und nicht kosmetisch: WHY_STICKY 1.35 → 1.8, WHY_HOLD 2 → 4.
+// Grund: Stufe 5 hat diese Werte gegen eine Welt kalibriert, die ZUR RUHE KOMMT. Mit
+// endogenen Räubern gibt es dieses Gleichgewicht per Konstruktion nicht mehr — die
+// Rangfolge der stärksten Merkmale bleibt in Bewegung, und dieselben Bremsen ließen
+// entsprechend mehr durch. Gemessen mit `npm run ui-calm-check`, Szenario „normal ·
+// eingeschwungen" (Grenze 6 Wechsel je 12 s), je 3 Läufe:
+//     Original-HEAD (ohne Koevolution)          0 · 0 · 0
+//     Koevolution, alte Bremsen (1.35 / 2)      6 · 8 · 4   ← 1 von 3 Läufen ROT
+//     Koevolution, neue Bremsen (1.8 / 4)       0 · 0 · 0   ← wieder auf HEAD-Niveau
+// Die MESSGRÖSSE (S_i, pull_i, alle Schwellen) bleibt unangetastet — verlangsamt wird
+// nur, wie schnell die ANZEIGE einem Wechsel folgen darf. Der didaktisch wichtige Moment
+// direkt nach einem Umwelt-Sprung ist nicht betroffen, weil `fresh` Trägheit UND
+// Haltezeit ohnehin einmal übergeht: im 12-Preset-Durchlauf nennen weiterhin 9 von 12
+// Presets beim Umschalten plausible Merkmale (Original-HEAD im identischen Lauf: 10 von
+// 12 — der Unterschied liegt im Rauschen einzelner Läufe), und 11 von 12 fallen nach
+// ~16 s wieder auf „Angepasst" zurück.
+const WHY_MS = 900, WHY_SMOOTH = 0.28, WHY_ENTER = 0.026, WHY_LEAVE = 0.012, WHY_STICKY = 1.8, WHY_HOLD = 4;
 // „Bewegt sich das Merkmal überhaupt?" (net-Schwelle, vorher inline 0.0002) und „ist die
 // Umwelt gesprungen?" (Summe der Änderungen über alle 16 Umwelt-Achsen SEIT DEM LETZTEN
 // BILD — ein Preset/Einfluss springt weit darüber, feines Regler-Ziehen bleibt darunter).
@@ -2570,7 +2900,16 @@ function swarmSelection(){
   if(!pop) return null;
   const G = pop.genomes, N = G.length, sd = SWARM.mutationSd;
   if(!N) return null;
-  const w = pop.weights(env, PHYS);
+  // MIGRATIONS-STUFE 7: `w` muss dasselbe Gewicht sein, nach dem simGeneration() Eltern
+  // zieht — sonst erklärt die Zeile eine andere Auslese als die, die gerade stattfindet.
+  // Läuft die Koevolution, gehört der endogene Räuberdruck also HIER hinein. Genau das
+  // löst das UX-Problem, das diese Stufe sonst hätte: „Größe ↑", obwohl der Spieler
+  // keinen Regler angefasst hat, ist dann keine unerklärte Behauptung mehr, sondern die
+  // gemessene Antwort auf ein Beuteschema, das sich bewegt. Die Räuber-Passung wird für
+  // die AKTUELLE Population neu gerechnet (die Indizes aus der letzten Fortpflanzung
+  // zeigen auf die Elterngeneration und wären hier falsch).
+  const cp = coevoPressure();
+  const w = cp ? pop.weights(env, PHYS, coevoEnvOf(cp.P)) : pop.weights(env, PHYS);
   let tw = 0; for(let j=0;j<N;j++) tw += w[j];
   if(!(tw > 0)) return null;
   const wm = tw / N;

@@ -435,20 +435,68 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     Arbeit (Orakel-Lauf bereits durchgerechnet, alle Dateien geändert) unterbrochen,
     bevor der Abschlussbericht geschrieben wurde — der Code-Stand selbst war
     vollständig und konsistent; diese Prüfung hat ihn nachträglich verifiziert.
-  - [ ] **Stufe 7 (optional) — bewusst nicht ohne Rückfrage eingeschaltet (bewertet
-    2026-07-30):** `world/coevolution.ts` UND `world/world.ts` tragen im eigenen
-    Datei-Kopf beide wörtlich den Vermerk „Berührt die Live-App NICHT" — sie wurden
-    absichtlich als reine Verifikations-Mechanik gebaut (liefern P5 Rote-Königin für
-    `phenomena-check`/`coevolution-check`), nicht als anschlussfertiges Live-Feature.
-    „Nur zuschalten" unterschätzt, was das für den Spieler bedeuten würde: Koevolution
-    fügt eine zweite, unsichtbare Räuber-Population hinzu, die den `predation`-Regler von
-    einem direkten Regler zu einem sich selbst bewegenden Ziel macht (Warum-Zeile/
-    Vitalität aus Stufe 5 müssten das erklären können); Metapopulation bedeutet mehrere
-    gleichzeitig existierende „Orte", die die Ein-Wesen-Ansicht der App nicht abbildet.
-    Das sind sichtbare neue Spielmechaniken/UX-Fragen, keine internen Korrektheits-Fixes
-    wie Stufe 3-6 — dieselbe Kategorie Entscheidung wie Punkt 5 („nicht eigenmächtig
-    umsetzen"). Bleibt entsprechend offen für eine bewusste Produkt-Entscheidung, nicht
-    für eine weitere Migrations-Stufe.
+  - [x] **Stufe 7, Teil Koevolution (erledigt 2026-07-30, Opus) — Räuber-Beute-Wettrüsten
+    ans Live-Spiel angeschlossen; Metapopulation bewusst weiter aus (Nutzer-Entscheidung
+    2026-07-30):**
+    `world/coevolution.ts`s `Ecosystem` selbst wird NICHT benutzt (bringt eine eigene
+    Beute-Population ohne Nischen-Konkurrenz mit — die App hat ihre Beute schon). Genutzt
+    wird stattdessen ein bereits vorhandener, bisher ungenutzter Haken:
+    `Population.reproduceWith(w)` in `world/population.ts` nimmt seit Stufe 1 extern
+    berechnete Gewichte entgegen. Neu: `weights(env, phys, envOf?)` — optionaler dritter
+    Parameter für eine INDIVIDUELLE Umwelt je Individuum (ohne `envOf` bitgleich zu vorher,
+    der Nischen-Konkurrenz-Kernel wird nicht dupliziert). Damit gilt in `app/index.html`
+    Zeile für Zeile `Ecosystem`s Formel, nur mit der Nischen-Konkurrenz der App darin.
+    `world/coevolution.ts` selbst unangetastet — `coevolution-check`/`phenomena-check` P5
+    zeichenweise identisch verifiziert (gegen Original-`population.ts` gegengebaut).
+    **Räuber-Population:** zweite, unsichtbare `Population` (N=60, ohne Nischen-Konkurrenz,
+    analog `Ecosystem.predator`), N/Kernel-Breite/Kopplungsstärke einzeln durchgemessen
+    (60 = 30 % der Beute wegen O(N_Beute·N_Räuber)-Kosten bei praktisch gleicher Wirkung
+    ab N=30; Kernel-Breite 0.18 im Optimum; Kopplung k=6, stärkste Stufe, die die
+    Größen-Streuung der Population noch nicht sichtbar einengt).
+    **Kopplung an den Regler — Kernentscheidung:** Log-Odds statt additiv
+    (`P_i = σ(logit(pred) + k·(m_i−m̄) + c)`, `c` je Generation per Newton so gewählt, dass
+    `mean(P_i)` EXAKT dem Reglerwert entspricht). Begründet gemessen gegen die additive
+    Variante aus `Ecosystem`: die klemmt bei hohem Regler massenhaft (gemessen: realer
+    Druck bei Regler 0.90 sank auf 0.72–0.80 statt 0.90) und würde die Bedeutung des
+    Reglers verfälschen. Mit Logit+Newton bleibt der Regler exakt das, was er war (0.30→
+    0.300, 0.90→0.900 über 500 Generationen) — **keine Nachkalibrierung** von
+    Vitalitäts-Skala/Presets/Herausforderungen/Biom-Empfehlungen nötig. Bei Regler=0 exakt
+    kein Zusatzdruck (logit(0)=−∞), an beiden Reglerenden läuft exakt der Pfad von vor
+    dieser Stufe.
+    **UI:** kein zweites Wesen-Panel (Leitplanke „nie das Wesen steuern, nur die Welt") —
+    stattdessen (a) `swarmSelection()` (Warum-Zeile, Stufe 5) rechnet jetzt mit denselben
+    modulierten Gewichten, nach denen tatsächlich fortgepflanzt wird, (b) ein Chip
+    „Wettrüsten mit Räubern" (ohne „✕", nichts zum Entfernen), der nur erscheint, wenn die
+    Dynamik über zwei Kennzahlen (Streuung des endogenen Drucks + Bewegung der mittleren
+    Räubergröße) messbar läuft — Schwellen über alle 12 Presets im Browser kalibriert,
+    bewusst streng (locker: 9/13 Welten zeigten den Chip → Tapete; gewählt: 3/13).
+    **Ehrlicher Befund, nicht wegretuschiert:** das Wettrüsten ist bei geringem/mittlerem
+    Räuberdruck am stärksten (Standard-Regler 2.8× höhere zeitliche Größen-Streuung als
+    ohne Räuber) und bleibt bei extremem Druck aus (Räuberland 0.8×) — dort entkommt die
+    Population über Mobilität (0.78 statt 0.24) statt über Größe, eine andere Achse als
+    die, auf der die Räuber suchen. Vielfalt unangetastet (mittlere Clusterzahl ohne/mit
+    Räubern über 12 Presets 1.58/1.56).
+    **Performance:** +0.35–0.38 ms/Generation (+19–21 %, real im Browser gemessen),
+    10-ms-Budget weiter mit ≥4× Reserve gehalten, `simStepBudget()` fällt von 3 auf 2
+    Generationen/Bild.
+    **Eine echte Regression gefunden und behoben:** `ui-calm-check` fiel mit den
+    Stufe-5-Bremsen 1 von 3 Läufen durch (6-8 Wechsel/12s statt ≤6) — die Bremsen waren
+    gegen eine Welt kalibriert, die zur Ruhe kommt, was mit endogenen Räubern per
+    Konstruktion nicht mehr gilt. `WHY_STICKY` 1.35→1.8, `WHY_HOLD` 2→4 (nur die
+    Anzeige-Trägheit, nicht die Messgröße) — danach wieder 0/0/0 über 3 Läufe.
+    **Getestet:** alle 5 Kern-Gates + `census-check`/`phenomena-check`(8/8)/
+    `ablation-check`/`seed-check`/`rarity-check`/`coevolution-check`/`distribution-check`
+    (4/4)/`exemplar-check`/`story-check`/`influence-check`/`ui-calm-check`/
+    `app-fitness-check` grün — unabhängig gegengeprüft (eigener Gate-Lauf + eigener
+    Playwright-Lauf dieser Session: Chip sichtbar bei Standard-Regler, `koevolutionLaeuft:
+    true`, 0 Konsolenfehler).
+    **Bewusst NICHT gemacht:** Metapopulation (vom Nutzer separat abgelehnt); kein
+    zweites Wesen-Panel/keine Räuber-Darstellung (Leitplanke); Räuber-Population wird
+    nicht persistiert (baut sich nach Neuladen in wenigen Generationen neu auf, unsichtbar
+    für den Spieler, analog zur Beute); `matchAxis` bleibt SIZE (identisch zur geprüften
+    Referenz, keine Neuerfindung); kein neues CI-Gate für die Live-Koevolution (nicht
+    beauftragt, Messwerte stehen als Tabellen im Quelltext).
+    `APP_VERSION` v0.77.0 → v0.78.0.
 
 **Damit ist die Engine-Grundlagenforschung (Punkt 2) im technischen Kern abgeschlossen**
 (Stufe 0-6 erledigt, Stufe 7 bewusst als Produkt-Entscheidung offen gelassen, nicht als

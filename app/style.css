@@ -110,6 +110,10 @@
   .stress-chip.fir { background: #b5652f; }
   .stress-chip.frs { background: #5b83a6; }
   .stress-chip.wnd { background: #7a8a92; }
+  /* Koevolution (Migrations-Stufe 7): KEIN Stressor mit Regler, sondern ein Zustand der
+     lebenden Welt — deshalb kein "✕" (nichts zum Entfernen) und eine eigene, ruhigere
+     Farbe. Erscheint nur, wenn die Rote-Königin-Dynamik messbar läuft. */
+  .stress-chip.coevo { background: #8a4a4a; cursor: default; }
 
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; }

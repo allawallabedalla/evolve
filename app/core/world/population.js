@@ -81,10 +81,20 @@ export class Population {
         const base = Array.from({ length: numGenes }, (_, k) => clamp01(genome[k] ?? 0.5));
         this.genomes = Array.from({ length: size }, () => base.map((v) => clamp01(v + this.randn() * spread)));
     }
-    /** Reproduktions-Gewichte je Individuum (Fitness^selPower, optional /Konkurrenz). */
-    weights(env, phys) {
+    /**
+     * Reproduktions-Gewichte je Individuum (Fitness^selPower, optional /Konkurrenz).
+     *
+     * `envOf` (optional, Migrations-Stufe 7 / Koevolution) erlaubt eine INDIVIDUELLE
+     * Umwelt je Individuum — genau das, was eine biotische Interaktion braucht: bei
+     * Räuber-Beute-Koevolution hängt der erlebte Praedationsdruck davon ab, wie gut ein
+     * Individuum ins aktuelle Beuteschema der Räuber passt, ist also KEIN globaler
+     * Umwelt-Wert mehr (world/coevolution.ts rechnet dasselbe von Hand). Ohne `envOf`
+     * ist das Verhalten bitgleich zu vorher; der Nischen-Konkurrenz-Kernel (K/Dichte)
+     * bleibt in beiden Fällen unverändert und wird NICHT dupliziert.
+     */
+    weights(env, phys, envOf) {
         const { selPower, competition } = this.cfg;
-        const base = this.genomes.map((g) => Math.pow(fitness(g, env, phys), selPower));
+        const base = this.genomes.map((g, i) => Math.pow(fitness(g, envOf ? envOf(i) : env, phys), selPower));
         if (!competition)
             return base;
         const axes = competitionAxes(competition);
