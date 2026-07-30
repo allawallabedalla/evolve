@@ -17,14 +17,26 @@
 // Gesamtzahl) und daher NUR auf einem diskreten Raster erreichbar
 // (Score_A in {0, 1/8, ..., 8/8}, Score_B in {0, 1/4, ..., 4/4} — s.
 // tools/phenomena-check.mjs bzw. tools/distribution-check.mjs). Score_C ist
-// dagegen eine kontinuierliche Distillations-Guete (training/fit.ts,
-// validityTest/100) und aktuell strukturell in Bewegung (s. Kommentar bei
-// MIN_SCORE_C unten) — das begruendet, warum die drei Schwellen nach
+// dagegen eine kontinuierliche Verteilungs-Naehe (Jensen-Shannon-Divergenz,
+// s. scoreCFromJsd() unten) — das begruendet, warum die drei Schwellen nach
 // unterschiedlicher Logik gewaehlt sind, statt einer einzigen Formel.
+//
+// SCHICHT C HAT SEIT MIGRATIONS-STUFE 6 (Punkt 2) EINE ANDERE MESSGRUNDLAGE.
+// Vorher: Distillations-Guete `validityTest/100` aus training/fit.ts (Pro-Gen-MAE
+// zwischen der Mittelfeld-Engine und einer gemittelten Orakel-Trajektorie).
+// Seit Stufe 4 laeuft die Live-App auf einem echten Populations-Schwarm; das Ziel
+// ist damit eine multimodale VERTEILUNG und das alte Surrogat ein MITTELWERT-Punkt.
+// Eine multimodale Verteilung laesst sich nicht in ihren Mittelwert destillieren —
+// `validityTest` misst seitdem nichts, was fuer das produktive System aussagt
+// (docs/engine-forschungsergebnis.md, "Ist das Zwei-Motoren-Prinzip noch richtig?").
+// Nachfolger ist ein KONVERGENZ-IN-N-Test: erzeugt der Browser-Schwarm (N=200)
+// dasselbe Arten-Frequenzspektrum wie ein Orakel-Schwarm mit sehr grossem N
+// (N=2000, unabhaengige zweite Implementierung in Python)? Gemessen von
+// tools/spectrum-check.mjs, Mathematik in tools/lib/spectrum.mjs.
 
 /** Gewichte. Gleich gewichtet (1/3 je Schicht): es gibt aktuell keine
  *  belastbare Begruendung, eine der drei Ground-Truth-Quellen (Theorie-
- *  Phaenomene / reale Verteilungsformen / Orakel-Distillation) hoeher zu
+ *  Phaenomene / reale Verteilungsformen / Orakel-Pruefstand) hoeher zu
  *  gewichten als die anderen — sie pruefen unabhaengige Arten von "falsch"
  *  (docs Teil II, Einleitung). Das ist der im Backlog-Text selbst genannte
  *  "sinnvolle Startpunkt, falls keine bessere Begruendung gefunden wird".
@@ -55,28 +67,98 @@ export const MIN_SCORE_A = 7 / 8;
  *  Gesamt-Gate faelschlich kippt. */
 export const MIN_SCORE_B = 3 / 4;
 
-/** Mindestschwelle Schicht C (Orakel-Distillation, training/fit.ts
- *  `validityTest`, hier auf 0..1 normiert = validityTest/100).
- *  0.80 uebernimmt bewusst die UNTERE Grenze des bereits an anderer Stelle
- *  abgestimmten Ziel-Bands (`TARGET_LOW = 80` in training/fit.ts) statt eine
- *  neue Zahl zu erfinden — dieselbe 80%-Schwelle, die schon den Prozentbalken
- *  der Trainings-Schleife definiert. Der aktuelle Stand nach Schritt 1
- *  (~71-72%, strukturelle Kapazitaetsgrenze der Mittelfeld-Engine, s.
- *  BACKLOG.md Punkt 9 Schritt 1) faellt damit ABSICHTLICH knapp durch das
- *  Gate — das ist der Beweis, dass diese Schwelle etwas prueft, statt beim
- *  ersten Lauf grün zu sein.
+/** Zielschwelle der Verteilungs-Konvergenz: Jensen-Shannon-Divergenz (Basis 2)
+ *  zwischen dem Formhaeufigkeits-Spektrum des Browser-Schwarms (N=200) und dem
+ *  des Orakel-Schwarms (grosses N). Direkt uebernommen aus dem Abnahmekriterium
+ *  der Migrationsplan-Tabelle (docs/engine-forschungsergebnis.md Abschnitt 6.4,
+ *  Stufe 6): "JS-Divergenz Browser-N=200 <-> Orakel-N=2000 < 0.15". Steht HIER,
+ *  damit die Zahl genau einmal im Repo existiert (tools/spectrum-check.mjs liest
+ *  sie von hier). */
+export const TARGET_JSD = 0.15;
+
+/**
+ * Score_C aus der gemessenen JS-Divergenz.
  *
- *  VORLAEUFIG / MUSS UEBERPRUEFT WERDEN: Score_C ist gerade strukturell in
- *  Bewegung. `docs/engine-forschungsergebnis.md` beschreibt eine laufende
- *  Architektur-Migration (Stufen 0-7, Stufe 0-2 bereits erledigt), die laut
- *  dortigem Abschnitt "Ist das Zwei-Motoren-Prinzip noch richtig?" das
- *  Distillations-Konzept (Mittelfeld-Engine gegen Orakel) selbst ersetzen
- *  koennte. Migrations-Stufe 6 definiert Score_C nach heutigem Kenntnisstand
- *  ohnehin neu (andere Messgrundlage als der heutige `validityTest`) — DANN
- *  muss dieser Wert erneut bewertet werden, nicht vorher automatisch vom
- *  Optimierer verschoben werden. Bis dahin ist 0.80 der beste verfuegbare,
- *  extern schon abgestimmte Anker. */
-export const MIN_SCORE_C = 0.8;
+ * Definition: Score_C = clamp01(1 - JSD).
+ *
+ * Warum diese Form und nicht `1 - JSD/TARGET_JSD` (die andere naheliegende
+ * Normierung): letztere faellt bei JSD >= 0.15 auf 0 und bleibt dort. Schicht C
+ * waere oberhalb der Schwelle FLACH — der Optimierungsloop (Punkt 9 Schritt 6)
+ * bekaeme kein Signal, in welche Richtung eine kaputte Verteilung zu reparieren
+ * ist, und die Trend-Kennzahl `fidelity` koennte einen sich weiter
+ * verschlechternden Schwarm nicht mehr von einem knapp verfehlten unterscheiden.
+ * `1 - JSD` ist auf dem ganzen Wertebereich streng monoton in der Metrik und
+ * braucht kein Abschneiden: Basis-2-JSD liegt per Konstruktion in [0,1]
+ * (0 = identische Verteilungen, 1 = disjunkte Traeger), ist also bereits ein
+ * 0..1-Score in der richtigen Richtung. Genau deshalb rechnet
+ * tools/lib/spectrum.mjs die Divergenz in Basis 2 und nicht in nats.
+ *
+ * WELCHE der gemessenen Divergenzen hier eingesetzt wird — gemessen entschieden:
+ * tools/spectrum-check.mjs berichtet zwei Lesarten. (a) die JS-Divergenz der ueber
+ * ALLE Testumwelten GEPOOLTEN Spektren und (b) die je Testumwelt einzeln
+ * gerechnete, dann gemittelte Divergenz. (b) ist die strengere Lesart (Biom-weise
+ * Abweichungen koennen sich im Pool teilweise aufheben) und entspricht dem
+ * Wortlaut von docs/evolution-fidelity-loop.md ("MITTLERE Verteilungsdistanz ...
+ * ueber ein Szenario-Portfolio"). Score_C nutzt trotzdem (a), aus einem
+ * gemessenen Grund: der RAUSCHBODEN (JSD zwischen disjunkten Seed-Haelften
+ * DERSELBEN Seite, also der Anteil, der reine Stichprobenstreuung ist) macht bei
+ * (b) rund die HAELFTE des Messwerts aus — 0.0373 von 0.0800 —, bei (a) rund ein
+ * Drittel und in absoluten Zahlen fuenfmal weniger: 0.0075 von 0.0218 (Orakel-Seite
+ * jeweils 0.0039 bzw. 0.0004). (b) rechnet je Umwelt aus nur 5 Laeufen, sein Wert
+ * haengt also merklich am Seed-Budget; (a) poolt 55 Laeufe je Seite. Eine
+ * Gate-Konstante auf einer Zahl zu verankern, die sich mit der Stichprobengroesse
+ * verschiebt, waere schlecht verankert. (b) und die schlechteste Einzelumwelt
+ * werden deshalb weiter BERICHTET (und liegen ebenfalls unter der Zielschwelle:
+ * 0.0800 bzw. 0.1486), aber nicht in die Schwellen-Entscheidung gehaengt.
+ *
+ * Nebenbei ist das jetzt NAEHER an der Spezifikation als der Vorgaenger: docs/
+ * evolution-fidelity-loop.md, Teil II, Schicht C fordert wortwoertlich
+ * "Score_C = 1 - mittlere Verteilungsdistanz Engine<->Orakel ueber ein
+ * Szenario-Portfolio" und ausdruecklich "nicht Punkt-fuer-Punkt, sondern als
+ * Verteilung". Der alte `validityTest` war genau das Gegenteil (Punkt-fuer-Punkt-
+ * MAE auf einer Mittelwert-Trajektorie) und nur ein Notbehelf, solange es keine
+ * Verteilung zu vergleichen gab. Statt der dort genannten Wasserstein/KS-Distanz
+ * steht hier die Jensen-Shannon-Divergenz, weil das Formhaeufigkeits-Spektrum
+ * KATEGORIAL ist (Formnamen ohne Ordnung) — Wasserstein und KS brauchen einen
+ * geordneten Traeger und sind darauf nicht definiert; JS ist das kategoriale
+ * Gegenstueck und ist die im Migrationsplan (Abschnitt 6.4) genannte Metrik.
+ */
+export function scoreCFromJsd(jsd: number): number {
+  return jsd < 0 ? 1 : jsd > 1 ? 0 : 1 - jsd;
+}
+
+/** Mindestschwelle Schicht C (Orakel-PRUEFSTAND: Verteilungs-Konvergenz in N,
+ *  gemessen von tools/spectrum-check.mjs, Score_C = scoreCFromJsd(JSD)).
+ *
+ *  0.85 ist KEINE neu erfundene Zahl, sondern `1 - TARGET_JSD`, also exakt das
+ *  bereits abgestimmte Stufe-6-Abnahmekriterium in Score-Richtung ausgedrueckt.
+ *  Dieselbe Logik wie beim Vorgaengerwert (der 0.80 aus `TARGET_LOW` in
+ *  training/fit.ts uebernahm): eine anderswo begruendete Grenze uebersetzen,
+ *  statt eine zweite zu erfinden.
+ *
+ *  ANDERS ALS VORHER BESTEHT SCHICHT C JETZT — und das ist kein Aufweichen der
+ *  Schwelle, sondern das Ergebnis: gemessen JSD = 0.0218 ueber 11 Biom-Presets
+ *  x 5 Laeufe (Browser N=200 gegen Orakel N=2000, je 250 Generationen, 11 000
+ *  bzw. 110 000 klassifizierte Individuen), also Score_C = 0.978 — knapp das
+ *  7-Fache der Schwellen-Reserve. Rauschboden 0.0075 (Browser) / 0.0004
+ *  (Orakel), gerechnet zwischen disjunkten Seed-Haelften derselben Seite; die
+ *  gemessene Divergenz ist also echt, aber winzig. Auch die strengeren Lesarten
+ *  bestehen: je Umwelt gemittelt 0.0800, schlechteste Einzelumwelt 0.1486
+ *  (Lichtlose Tiefsee), Cluster-Zentroid-Spektren 0.1451.
+ *  Der alte Wert ~0.72 war die strukturelle Kapazitaetsgrenze eines Surrogats,
+ *  das es nicht mehr gibt; die neue Frage ("ist N=200 gross genug?") hat eine
+ *  andere, gemessene Antwort: ja.
+ *
+ *  Folge fuer den Loop (Punkt 9 Schritt 6): Schicht C ist damit vom
+ *  Verbesserungs-Ziel zum REGRESSIONS-WAECHTER geworden. Sie kann weiterhin rot
+ *  werden — jede Aenderung an `PopulationConfig` der App (app/index.html SWARM),
+ *  an world/population.ts, an physics.json oder an app/archetypes.js verschiebt
+ *  das Spektrum und kann die Divergenz treiben; ein zu klein gewaehltes N faellt
+ *  hier auf. Dass eine Schicht beim ersten Lauf gruen ist, macht sie nur dann zu
+ *  einem Pruefstand, der nichts prueft, wenn sie NICHT rot werden KANN —
+ *  tools/fidelity-config-check.mjs belegt das Gegenteil mit einem
+ *  Gegentest-Szenario statt mit einem absichtlich verfehlten Ist-Stand. */
+export const MIN_SCORE_C = 1 - TARGET_JSD;
 
 /** Ergebnis einer Fidelity-Berechnung: die gewichtete Aggregat-Zahl, ob ALLE
  *  drei Pro-Schicht-Mindestschwellen erfuellt sind (nicht nur die gewichtete

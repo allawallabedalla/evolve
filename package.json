@@ -23,6 +23,8 @@
     "ablation-check": "npm run build && node tools/ablation-check.mjs",
     "distribution-check": "npm run build && node tools/distribution-check.mjs",
     "census-check": "npm run build && node tools/census-check.mjs",
+    "spectrum-check": "npm run build && node tools/spectrum-check.mjs",
+    "oracle-swarm": "npm run build && node tools/spectrum-check.mjs --oracle",
     "seed-check": "npm run build && node tools/seed-check.mjs",
     "rarity-check": "npm run build && node tools/rarity-check.mjs",
     "bundle-app": "npm run build && node tools/bundle-app-core.mjs",

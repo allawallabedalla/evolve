@@ -20,6 +20,18 @@ Die **Trainings-Schleife** (`training/`) kalibriert die schlanke Engine so, dass
 Ergebnisse des Orakels nachbildet — *Model Distillation*. Ein **Validitäts-Prozentwert**
 zeigt, wie nah wir schon dran sind.
 
+> **Stand-Hinweis (Migrations-Stufe 4–6, `BACKLOG.md` Punkt 2 /
+> `docs/engine-forschungsergebnis.md`):** Dieser Abschnitt und der Abschnitt
+> „Aktueller Stand der Validität" weiter unten beschreiben die **ursprüngliche**
+> Zwei-Motoren-Architektur. Die Live-App (`app/`) läuft inzwischen **nicht** mehr auf
+> dem Mittelfeld-Surrogat, sondern auf einem echten Populations-Schwarm
+> (`world/population.ts`, N=200); das Orakel ist vom *Destillations-Ziel* zum
+> **statistischen Prüfstand** geworden (Jensen-Shannon-Divergenz der Formhäufigkeiten,
+> `npm run spectrum-check`). Der Mittelfeld-Pfad und `fitted-params.json` existieren
+> weiter (CLI-Demo, `npm run ecology`, Rückfallpfad der App) — die Validitäts-Prozentzahl
+> bewertet aber nur noch **diesen** Pfad, nicht das Spiel. Die Prosa hier ist noch nicht
+> nachgezogen; maßgeblich ist `BACKLOG.md`.
+
 ### Warum nicht direkt das Orakel spielen?
 
 Das Orakel ist zu langsam für Echtzeit und seine Ergebnisse sind für Spieler unlesbar.
@@ -96,7 +108,9 @@ node dist/cli/demo.js "" 0.1 0.8 0.6 0.2 60
 ```
 physics.json          geteilte Fitness-Landschaft (Engine + Orakel)
 scenarios.json        Benchmark-Szenarien (train/test-Split)
-fitted-params.json    Ergebnis des Trainings (Parameter + Validität) — vom Mockup gelesen
+fitted-params.json    Ergebnis des Trainings (Parameter + Validität) des MITTELFELD-Pfads —
+                        gelesen von ecology-check, cli/demo, mockup, research-Skripten
+                        (nicht von der Live-App, s. Stand-Hinweis oben)
 engine/               schlanke Engine (TS): fitness, simulate, explain, report,
                         archetype (Klassifizierer), development (Genom→Bauplan)
 oracle/               Referenz-Orakel (Python) + benchmark/ + check_parity.py
@@ -119,6 +133,11 @@ gefundene Punkte (u. a. ein NaN-Fallback im Mockup, eine irreführende Ursachen-
 sind behoben.
 
 ## Aktueller Stand der Validität
+
+> **Veraltet, bewusst stehen gelassen** (s. Stand-Hinweis oben): die Zahlen dieses
+> Abschnitts stammen von vor der 25-Gen-Erweiterung und beziehen sich auf den
+> Mittelfeld-Pfad. Aktuell: `fitted-params.json` `validityTest` = 71.6 % für den
+> Mittelfeld-Pfad; Verteilungs-Treue des produktiven Schwarms: `npm run spectrum-check`.
 
 **Test-Validität ~82% — komfortabel im Ziel-Band (80–90%).** Train ≈ Test heißt: kein
 Overfitting, die Engine generalisiert ehrlich. Ein Engine-Optimierungs-Pass (aus

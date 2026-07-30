@@ -1,9 +1,43 @@
-// Trainings-Schleife: kalibriert die schlanke Engine gegen das Referenz-Orakel.
+// Trainings-Schleife: kalibriert die MITTELFELD-Engine gegen das Referenz-Orakel.
 //
 // Methode: genetischer Algorithmus (passenderweise!) sucht die Engine-Parameter,
 // die die Orakel-Trajektorien der TRAININGS-Szenarien am besten nachbilden.
 // Danach wird die Validitaet auf ZURUECKGEHALTENEN Test-Szenarien gemessen
-// (Overfitting-Schutz) - das ist die Zahl fuer den Prozentbalken.
+// (Overfitting-Schutz).
+//
+// ===========================================================================
+// GELTUNGSBEREICH — WICHTIG SEIT MIGRATIONS-STUFE 4 (BACKLOG.md Punkt 2)
+// ===========================================================================
+// Was hier gefittet wird, ist der MITTELFELD-PFAD: engine/simulate.ts
+// (`runSimulation`/`stepGeneration`), ein Gradientenaufstieg auf EINEM
+// Merkmals-Mittelwert. Dieser Pfad ist NICHT mehr das produktive System. Die
+// Live-App laeuft seit Migrations-Stufe 4 auf einem echten Populations-Schwarm
+// (world/population.ts, N=200) und benutzt weder `EngineParams` noch
+// fitted-params.json.
+//
+// `validityTrain`/`validityTest`/`trainMAE`/`testMAE` sind deshalb KEIN Mass fuer
+// die Realitaetstreue des Spiels. Sie messen genau eine Sache: wie gut die
+// Mittelfeld-Naeherung die (gemittelte) Orakel-Trajektorie nachzeichnet. Ein
+// Mittelwert kann eine multimodale Verteilung prinzipiell nicht abbilden — der
+// Mittelwert eines gespaltenen Schwarms liegt im leeren Tal dazwischen
+// (spike/FINDINGS.md); die verbleibende Luecke zum Ziel-Band ist zum Teil genau
+// diese strukturelle Grenze, nicht ein Kalibrierungsmangel.
+//
+// Die Guete des PRODUKTIVEN Systems misst seit Migrations-Stufe 6 ein anderer,
+// verteilungsbasierter Pruefstand: tools/spectrum-check.mjs (Jensen-Shannon-
+// Divergenz der Formhaeufigkeiten, Browser-N=200 gegen Orakel-N=2000). Das ist
+// auch die Quelle von Score_C im Realitaetstreue-Loop
+// (training/fidelity-config.ts) — nicht mehr `validityTest`.
+//
+// WARUM DAS TROTZDEM BLEIBT (statt geloescht zu werden, wie
+// docs/engine-forschungsergebnis.md Abschnitt 6.3 vorschlug): fitted-params.json
+// ist kein totes Gewicht. Es wird aktiv gelesen von tools/ecology-check.mjs
+// (`npm run ecology`, ein Gate), cli/demo.ts (`npm run demo`),
+// mockup/index.html sowie tools/research/{biome,reach}.mjs. Der Mittelfeld-Pfad
+// selbst ist ausserdem der dokumentierte Rueckfallpfad der App, wenn der
+// dynamische Import des Populations-Bundles fehlschlaegt (app/index.html, Stufe
+// 4/5). Solange diese Nutzer existieren, braucht der Pfad kalibrierte
+// Parameter — und die kommen von hier.
 //
 // Autonomie-Regel (mit dir abgestimmt): hier werden NUR kontinuierliche
 // Parameter automatisch gefittet. Struktur (neue Gene/Mechaniken) bleibt eine
@@ -20,6 +54,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", ".."); // dist/training -> repo root
 
 // ---- Ziel-Band (mit dir abgestimmt) ----
+// Gilt fuer den Mittelfeld-Pfad, s. GELTUNGSBEREICH oben — NICHT fuer die Live-App.
 const TARGET_LOW = 80;
 const TARGET_HIGH = 90;
 // Skala fuer die Validitaets-Umrechnung: MAE 0 -> 100%, MAE >= 0.25 -> 0%.
@@ -232,8 +267,14 @@ function main() {
 
   const output = {
     _comment:
-      "Automatisch von training/fit.ts erzeugt. Von Engine/Mockup gelesen. " +
-      "'validityTest' (zurueckgehaltene Szenarien) treibt den Prozentbalken.",
+      "Automatisch von training/fit.ts erzeugt. Gelesen von tools/ecology-check.mjs, " +
+      "cli/demo.ts, mockup/index.html und tools/research/{biome,reach}.mjs. " +
+      "GELTUNGSBEREICH: 'params' kalibriert AUSSCHLIESSLICH den Mittelfeld-Pfad " +
+      "(engine/simulate.ts). 'validityTest' ist die Distillations-Guete DIESES Pfads " +
+      "gegen das Orakel - NICHT die Realitaetstreue der Live-App: die laeuft seit " +
+      "Migrations-Stufe 4 auf dem Populations-Schwarm (world/population.ts) und liest " +
+      "diese Datei nicht. Guete des produktiven Systems: tools/spectrum-check.mjs " +
+      "(Jensen-Shannon-Divergenz der Formhaeufigkeiten).",
     params: bestParams,
     validityTrain,
     validityTest,
@@ -245,9 +286,11 @@ function main() {
   };
   writeFileSync(join(ROOT, "fitted-params.json"), JSON.stringify(output, null, 2), "utf-8");
 
-  console.log("\n=== Trainingsergebnis ===");
+  console.log("\n=== Trainingsergebnis (Mittelfeld-Pfad, NICHT die Live-App) ===");
   console.log(`Train-Validitaet: ${validityTrain.toFixed(1)}%`);
-  console.log(`Test-Validitaet (zurueckgehalten): ${validityTest.toFixed(1)}%  <- der Prozentbalken`);
+  console.log(
+    `Test-Validitaet (zurueckgehalten): ${validityTest.toFixed(1)}%  <- Distillations-Guete des Mittelfeld-Pfads`,
+  );
   console.log(`Ziel-Band: ${TARGET_LOW}-${TARGET_HIGH}%`);
   // Rundungskonsistent zum angezeigten Wert (1 Nachkommastelle).
   const shown = Math.round(validityTest * 10) / 10;
@@ -257,10 +300,16 @@ function main() {
       ? `im Ziel-Band (unteres Ende; roh ${validityTest.toFixed(2)}%).`
       : "im Ziel-Band."
     : shown > TARGET_HIGH
-      ? "ueber dem Band - Engine evtl. zu nah am schweren Modell."
-      : "unter dem Band - Engine muss reicher/besser kalibriert werden.";
+      ? "ueber dem Band - Mittelfeld-Naeherung evtl. zu nah am schweren Modell."
+      : "unter dem Band - die Mittelfeld-NAEHERUNG bildet die Orakel-Trajektorie " +
+        "unvollstaendig ab (zum Teil strukturell, s. GELTUNGSBEREICH oben). KEINE " +
+        "Aussage ueber die Live-App.";
   console.log(`Status: ${status}`);
   console.log("Gespeichert: fitted-params.json");
+  console.log(
+    "Hinweis: diese Zahl bewertet den Mittelfeld-Pfad. Die Verteilungs-Treue des\n" +
+      "produktiven Schwarms misst 'npm run spectrum-check' (Migrations-Stufe 6).",
+  );
 }
 
 main();

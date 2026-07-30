@@ -373,9 +373,59 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     `seed-check`/`rarity-check`/`coevolution-check`/`distribution-check`/`exemplar-check`/
     `story-check`/`influence-check`/`ui-calm-check` alle grün; `app-world-smoke`-Selektor-
     Timeout vorbestehend (Ausgabe zeichenweise identisch auf Original-HEAD verifiziert).
-  - [ ] Stufe 6 — Orakel-Prüfstand auf Verteilungsmetrik (Jensen-Shannon über Formhäufigkeiten)
-    umstellen; `fitted-params.json`/`validityTest`-Prozentbalken fallen weg oder bekommen
-    neue Bedeutung (Konvergenz-in-N statt Distillation).
+  - [x] **Stufe 6 (erledigt 2026-07-30, Opus) — Orakel als statistischer Prüfstand auf
+    Verteilungsmetrik statt Distillations-Ziel:**
+    Neue, unabhängige zweite Implementierung des Nischen-Schwarms in Python
+    (`oracle/reference_model.py`: `run_swarm_once`/`_swarm_weights`/`DEFAULT_SWARM`,
+    neu `oracle/swarm_reference.py` als Multi-Prozess-Rechenknecht) — Zeile für Zeile
+    dieselbe Vorschrift wie `Population.weights()` in `world/population.ts`
+    (unabhängig gegengeprüft: `base·K/(dichte/N+1e-9)`, inkl. Selbst-Term, identisch),
+    aber eigener RNG/eigene Sprache. Gibt bewusst die END-POPULATION zurück statt
+    eines Mittelwerts (`run_oracle`/`run_oracle_once`, das alte Distillations-Orakel,
+    bleibt Zeile für Zeile unangetastet — `npm run parity`/`npm run oracle` hängen
+    daran). Klassifikation bleibt zentral in Node (`matchArchetype()`), damit keine
+    dritte Formklassifikations-Kopie entsteht.
+    Neue Mess-Pipeline `tools/spectrum-check.mjs` + `tools/lib/spectrum.mjs`: Browser-
+    Produktionsschwarm (N=200) vs. Orakel-Schwarm (N=2000) über 11 Biom-Presets ×
+    5 Läufe × 250 Generationen, Jensen-Shannon-Divergenz (Basis 2, damit ∈[0,1]) über
+    die Formhäufigkeits-Spektren (Individuen-Ebene, nicht Cluster — sonst dominiert
+    Zählrauschen bei ~80 Beobachtungen/20 Formen), plus mittlere Clusterzahl-Abweichung
+    und Spearman-Rangkorrelation der Rarität.
+    **Ergebnis: JSD = 0.0218 (Ziel < 0.15), ≈7× Reserve.** Score_C = 0.978. Auch die
+    strengeren Lesarten bestehen (je Umwelt gemittelt statt gepoolt: 0.0800;
+    schlechteste Einzelumwelt Lichtlose Tiefsee: 0.1486; Cluster-Zentroid-Spektren:
+    0.1451). Damit ist N=200 als Produktionsgröße verteilungstreu — keine Nachjustierung
+    der App-Konfiguration nötig. Rauschboden separat gemessen (disjunkte Seed-Hälften):
+    0.0075 (Browser) / 0.0004 (Orakel) — die gemessene Divergenz ist echt, aber winzig.
+    Rechenzeit: Orakel-Seite ~45 min (5 Kerne), daher `npm run spectrum-check` (nutzt
+    das gecachte `.swarm-oracle.json`, gitignored, reproduzierbar) getrennt von
+    `npm run oracle-swarm` (der teure Neu-Lauf) — Diagnose-Skript ohne `process.exit(1)`
+    wie `tools/ablation-check.mjs`, kein reguläres CI-Gate.
+    **Bewusste Abweichung vom Migrationsplan-Text ("fitted-params.json löschen"):**
+    NICHT gelöscht — ist kein totes Gewicht, sondern aktiv gelesen von
+    `tools/ecology-check.mjs` (ein Gate), `cli/demo.ts`, `mockup/index.html`,
+    `tools/research/{biome,reach}.mjs`, und bleibt der dokumentierte Rückfallpfad der
+    App bei fehlgeschlagenem Bundle-Import. `training/fit.ts`/`fitted-params.json`s
+    Kommentare/Konsolentext ehrlich umformuliert (Geltungsbereich: kalibriert nur noch
+    den Mittelfeld-Pfad, keine Aussage über die Live-App), `README.md` mit
+    Stand-Hinweisen versehen statt die veraltete Prosa stillschweigend stehen zu lassen.
+    **`training/fidelity-config.ts` Schicht C neu definiert:** `Score_C = 1 - JSD`
+    (`scoreCFromJsd()`, monoton statt bei der Zielschwelle abgeschnitten — sonst kein
+    Optimierungssignal oberhalb von 0.15), `MIN_SCORE_C = 1 - TARGET_JSD = 0.85`
+    (ersetzt die vorläufige 0.80). `tools/fidelity-config-check.mjs` umgebaut: da der
+    Ist-Stand jetzt (anders als vorher, Score_C~0.72) alle drei Schichten mit Reserve
+    besteht, beweist das Skript "die Schwelle prüft etwas" jetzt über Gegentests statt
+    über einen absichtlich knapp verfehlten Ist-Stand (jede Schicht kann einzeln rot
+    werden; Goodhart-Schutz hält: Fidelity 0.80 bei kaputter Schicht C bleibt trotzdem
+    rot) — unabhängig nachvollzogen, alle sechs Teilprüfungen OK.
+    **Getestet:** alle 5 Kern-Gates + `census-check`/`phenomena-check`(8/8)/
+    `ablation-check`/`seed-check`/`rarity-check`/`coevolution-check`/
+    `distribution-check`(4/4)/`fidelity-config-check` grün — unabhängig gegengeprüft
+    (eigener Gate-Lauf dieser Session inkl. `npm run build`).
+    Ablauf-Hinweis: der erste Agenten-Lauf wurde nach Fertigstellung der eigentlichen
+    Arbeit (Orakel-Lauf bereits durchgerechnet, alle Dateien geändert) unterbrochen,
+    bevor der Abschlussbericht geschrieben wurde — der Code-Stand selbst war
+    vollständig und konsistent; diese Prüfung hat ihn nachträglich verifiziert.
   - [ ] Stufe 7 (optional) — Koevolution + Metapopulation einschalten (bereits vorhanden in
     `world/coevolution.ts`/`world/world.ts`, nur zuschalten).
 
@@ -787,14 +837,25 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   gewichteten Summe — Goodhart-Schutz) + `failingLayers`. Verifiziert:
   `computeFidelity(1.0, 1.0, 0.72)` (heutiger Stand) → Fidelity 0.907, fällt knapp durch,
   ausschließlich wegen Schicht C — genau wie gefordert kein Grün-beim-ersten-Lauf.
-- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **pausiert
-  (2026-07-29):** baut auf `training/fit.ts`/`fitted-params.json` auf, die laut
-  `docs/engine-forschungsergebnis.md` Migrationsplan (Punkt 2, Stufe 6) im Zuge der
-  laufenden Engine-Migration **ersatzlos entfallen** sollen (Score_C selbst wird dort neu
-  definiert — Verteilungs-Konvergenz-in-N statt Per-Gen-Distillation). Einen elaborierten
-  Optimierungsloop um eine Komponente zu bauen, die absehbar entfernt wird, wäre
-  widersprüchliche Arbeit. **Erst nach Abschluss/Entscheidung der Punkt-2-Migration (mind.
-  bis Stufe 6 dort) neu bewerten**, ob und in welcher Form dieser Schritt noch sinnvoll ist.
+- [ ] **Schritt 6 — `training/fit.ts` zum Drei-Schicht-Loop ausbauen** — **weiterhin bewusst
+  nicht gebaut, jetzt aus einem anderen Grund (neu bewertet 2026-07-30, nach Abschluss
+  Migrations-Stufe 6):** die ursprüngliche Pause-Begründung ("baut auf einer Komponente
+  auf, die ersatzlos entfällt") ist überholt — `fitted-params.json` entfällt NICHT
+  (Migrations-Stufe 6 hat das geprüft und bewusst anders entschieden, s. Punkt 2), und
+  Score_C ist jetzt real definiert (`scoreCFromJsd()`, `training/fidelity-config.ts`).
+  Ein Auto-Optimierungsloop wäre damit technisch nicht mehr widersprüchlich — aber
+  **aktuell ohne Ziel**: alle drei Schichten bestehen bereits mit deutlicher Reserve
+  (Score_A=1.0, Score_B=1.0, Score_C=0.978 bei Mindestschwelle 0.85 — kein Layer nah an
+  seiner Schwelle, s. `tools/fidelity-config-check.mjs`). Ein elaborierter Sechs-Stationen-
+  Optimierungsloop (Kandidat/Simulieren/Messen/Optimierer/Holdout-Selektion/Champion-
+  Report) für einen Parameterraum zu bauen, der gerade nichts zu reparieren hat, wäre
+  spekulative Infrastruktur ohne aktuellen Anlass — genau das Gegenteil von „kein
+  Vollständigkeits-Zwang". **Auslöser, ab dem sich der Bau lohnt:** eine künftige
+  Engine-/Physik-Änderung drückt eine der drei Schichten unter ihre Schwelle (oder nah
+  genug heran, dass Handkalibrierung mühsam wird) — dann liefert genau diese Situation
+  auch das Holdout-Portfolio zum Testen des Loops selbst. Bis dahin bleibt Handkalibrierung
+  (wie bei Migrations-Stufe 3/3.5 praktiziert: gemessen, dokumentiert, an einer Stelle
+  verankert) günstiger als die Wartungslast eines ungenutzten Optimierers.
   — **Modell: Opus** für
   den Loop-/Gate-Architekturentwurf (Overfitting-Vermeidung ist konzeptionell heikel),
   **Sonnet** für die Implementierung danach (Forschungsdokument

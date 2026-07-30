@@ -4,6 +4,11 @@ __pycache__/
 *.pyc
 .DS_Store
 .parity.json
+# Orakel-Schwarm-Referenz + Auftragsdatei (Migrations-Stufe 6, tools/spectrum-check.mjs):
+# ~25 MB End-Populations-Genome, in ~45 min neu erzeugbar (npm run oracle-swarm) —
+# gleiche Begruendung wie .parity.json: reproduzierbares Rechenergebnis, kein Quellcode.
+.swarm-oracle.json
+.swarm-oracle-job.json
 scratch*.png
 scratch*
 _*.mjs

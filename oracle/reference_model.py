@@ -439,3 +439,180 @@ def run_oracle(
             for g in range(n):
                 acc[t][g] += traj[t][g]
     return [[acc[t][g] / seeds for g in range(n)] for t in range(generations + 1)]
+
+
+# ===========================================================================
+# NISCHEN-SCHWARM: das Orakel als STATISTISCHER PRUEFSTAND (Migrations-Stufe 6)
+# ===========================================================================
+#
+# Warum es das oben Stehende NICHT ersetzt, sondern ergaenzt:
+#
+# `run_oracle_once`/`run_oracle` sind das DESTILLATIONS-Orakel. Sie kollabieren jede
+# Generation auf `_mean_vector` und mitteln zusaetzlich ueber 24 Seeds - genau richtig
+# fuer ihren Zweck (eine glatte Mittelwert-Trajektorie als Fit-Ziel fuer die
+# Mittelfeld-Engine, oracle/generate_benchmark.py -> training/fit.ts) und genau falsch
+# fuer die Frage dieser Stufe. Ein Schwarm, der sich in zwei Formen aufspaltet, hat
+# einen Mittelwert im leeren Tal dazwischen (spike/FINDINGS.md); eine multimodale
+# Verteilung laesst sich nicht in ihren Mittelwert destillieren
+# (docs/engine-forschungsergebnis.md, "Ist das Zwei-Motoren-Prinzip noch richtig?").
+# Beide Funktionen bleiben deshalb Zeile fuer Zeile unangetastet - `npm run parity`,
+# `npm run oracle` und der Mittelfeld-Pfad haengen daran.
+#
+# Die neue Frage ist eine ANDERE: erzeugt der Browser-Schwarm mit N=200 dasselbe
+# Arten-Frequenzspektrum wie ein Orakel-Schwarm mit sehr grossem N? Dafuer braucht der
+# Pruefstand (a) die END-POPULATION statt eines Mittelwerts und (b) dieselbe Dynamik wie
+# die Live-App, inklusive frequenzabhaengiger Nischen-Konkurrenz - sonst vergleicht man
+# zwei verschiedene Modelle statt zweier Populationsgroessen desselben Modells.
+#
+# Das ist damit auch keine "Ground Truth" mehr im alten Sinn, sondern die
+# GROSS-N-GRENZE des Modells, das die App bei N=200 laeuft, in einer unabhaengigen
+# zweiten Implementierung (Python vs. TypeScript, eigener RNG). Zwei Fehlerarten
+# fallen gleichzeitig auf: ein N=200, das zu klein ist (endliche Population verzerrt das
+# Spektrum), und ein Implementierungsfehler auf einer der beiden Seiten.
+#
+# Spiegel von world/population.ts (Population.weights/reproduceWith) - bewusst
+# NICHT bitgleich: die RNG-Stroeme sind verschieden, der Vergleich ist statistisch
+# (Formhaeufigkeiten), nicht deterministisch. Was uebereinstimmen MUSS, ist die
+# Rechenvorschrift.
+
+# Defaults spiegeln app/index.html's SWARM-Objekt (die Live-Konfiguration seit
+# Migrations-Stufe 4) - nur `size` ist hier bewusst gross, das ist der Zweck.
+DEFAULT_SWARM: Dict = {
+    "size": 2000,
+    "mutationSd": 0.05,
+    "selPower": 2.0,
+    "recombProb": 0.5,
+    # size, limb, photo, mobility, armor, wing, biolum, filter (Indizes in TRAITS)
+    "niche": [1, 2, 5, 6, 4, 8, 9, 15],
+    "sigmaC": 0.22,
+    "sigmaK": 50.0,
+    "kCenter": 0.5,
+    "founderSpread": "uniform",
+    "startSpread": 0.03,
+}
+
+
+def _swarm_weights(
+    pop: List[List[float]],
+    env: Dict[str, float],
+    phys: Dict,
+    cfg: Dict,
+) -> List[float]:
+    """Reproduktions-Gewichte: Fitness^selPower * K(x) / Konkurrenzdichte.
+
+    Zeile fuer Zeile dieselbe Vorschrift wie Population.weights() in
+    world/population.ts (mehrdimensionaler Kernel, Migrations-Stufe 3): die Dichte
+    aehnlich gelegener Konkurrenten wird ueber die euklidische Distanz UEBER ALLE
+    Nischen-Achsen gemessen, inklusive des Selbst-Terms exp(0)=1, und auf N normiert -
+    dadurch ist der Term N-unabhaengig und der Vergleich zweier Populationsgroessen
+    ueberhaupt sinnvoll.
+    """
+    sel_power = cfg["selPower"]
+    base = [fitness(ind, env, phys) ** sel_power for ind in pop]
+    axes = cfg.get("niche") or []
+    if not axes:
+        return base
+
+    n = len(pop)
+    sigma_c = cfg["sigmaC"]
+    sigma_k = cfg["sigmaK"]
+    k_center = cfg["kCenter"]
+    inv2c2 = 1.0 / (2.0 * sigma_c * sigma_c)
+    inv2k2 = 1.0 / (2.0 * sigma_k * sigma_k)
+
+    # Nur die Nischen-Achsen extrahieren: math.dist() rechnet die 8-dimensionale
+    # Distanz in C statt in einer Python-Schleife (gemessen 2.25x schneller als die
+    # ausgeschriebene Schleife, bitgleiches Ergebnis) - bei O(N^2) Paaren je Generation
+    # ist das der Unterschied zwischen 2.6 min und 6 min je Lauf bei N=2000.
+    cols = [[ind[a] for a in axes] for ind in pop]
+    center = [k_center] * len(axes)
+
+    dens = [1.0] * n  # Selbst-Term exp(0) = 1
+    for i in range(n):
+        ci = cols[i]
+        for j in range(i + 1, n):
+            d = math.dist(ci, cols[j])
+            e = math.exp(-d * d * inv2c2)
+            dens[i] += e
+            dens[j] += e
+
+    out = [0.0] * n
+    for i in range(n):
+        dk = math.dist(cols[i], center)
+        k = math.exp(-dk * dk * inv2k2)
+        out[i] = base[i] * k / (dens[i] / n + 1e-9)
+    return out
+
+
+def run_swarm_once(
+    env: Dict[str, float],
+    generations: int,
+    phys: Dict,
+    rng: random.Random,
+    cfg: Dict | None = None,
+    start: float = 0.5,
+) -> List[List[float]]:
+    """Ein Schwarm-Lauf. Gibt die END-POPULATION (alle Genome) zurueck, NICHT deren
+    Mittelwert - das ist der ganze Punkt dieser Funktion."""
+    c = dict(DEFAULT_SWARM)
+    if cfg:
+        c.update(cfg)
+    n_genes = len(TRAITS)
+    size = c["size"]
+    mut_sd = c["mutationSd"]
+    recomb = c["recombProb"]
+
+    if c["founderSpread"] == "uniform":
+        # Gestreute Gruender (Migrations-Stufe 3): oeffnet alle Einzugsgebiete
+        # gleichzeitig statt nur das um `start`.
+        pop = [[rng.random() for _ in range(n_genes)] for _ in range(size)]
+    else:
+        spread = c["startSpread"]
+        pop = [
+            [_clamp01(start + rng.gauss(0, spread)) for _ in range(n_genes)]
+            for _ in range(size)
+        ]
+
+    gauss = rng.gauss
+    rand = rng.random
+    for _ in range(generations):
+        w = _swarm_weights(pop, env, phys, c)
+        total = sum(w)
+        if total > 0:
+            parents_a = rng.choices(pop, weights=w, k=size)
+            parents_b = rng.choices(pop, weights=w, k=size)
+        else:
+            # Spiegel des Fallbacks in Population.reproduceWith(): ohne Gewicht wird
+            # gleichverteilt gezogen (sonst stirbt der Lauf an einer Division).
+            parents_a = [pop[int(rand() * size)] for _ in range(size)]
+            parents_b = [pop[int(rand() * size)] for _ in range(size)]
+        new_pop: List[List[float]] = []
+        for pa, pb in zip(parents_a, parents_b):
+            child = [0.0] * n_genes
+            for g in range(n_genes):
+                base = pb[g] if rand() < recomb else pa[g]
+                child[g] = _clamp01(base + gauss(0, mut_sd))
+            new_pop.append(child)
+        pop = new_pop
+
+    return pop
+
+
+def run_swarm(
+    env: Dict[str, float],
+    generations: int,
+    phys: Dict,
+    seeds: int = 5,
+    base_seed: int = 12345,
+    cfg: Dict | None = None,
+) -> List[List[List[float]]]:
+    """Mehrere unabhaengige Schwarm-Laeufe derselben Umwelt.
+
+    Gibt eine LISTE von End-Populationen zurueck (eine je Seed) und mittelt bewusst
+    NICHT: die Streuung ueber Seeds ist Teil des zu vergleichenden Signals (welche
+    Formen entstehen wie oft?), kein Rauschen, das man wegmitteln will.
+    """
+    return [
+        run_swarm_once(env, generations, phys, random.Random(base_seed + s * 7919), cfg)
+        for s in range(seeds)
+    ]
