@@ -108,19 +108,35 @@ räumliche Lesart ergänzen („diese Form lebt HIER", nicht nur „bei diesen W
 
 ## Phase 4 — Speziation: eine Welt zeigt mehrere Arten
 
-**Die größte einzelne Mechanik in dieser Roadmap — bereits als „P1 Radiation" in
-`docs/evolution-fidelity-loop.md` als net-neu zu bauen vorgesehen**, hier nur mit der
-Lebensbaum-Perspektive verbunden. Der reale Baum ist so ungleich (1,3 Mio. Gliederfüßer
-gegen 6,4k Säuger), weil eine erfolgreiche Bauform sich in viele Feinnischen aufspaltet
-(Käfer!). Unsere Engine kennt bewusst keine Artbildung — ein „Insekt" bleibt für immer EIN
-Insekt, egal wie lange die Welt läuft.
+**KORRIGIERT (2026-07-30): der Mechanismus existiert bereits und ist validiert — die
+Annahme „unsere Engine kennt bewusst keine Artbildung" (ursprüngliche Fassung dieses
+Abschnitts) war falsch.** `npm run phenomena-check` (`tools/phenomena-check.mjs`, deckt
+sich mit dem in BACKLOG.md Punkt 9 als „net-neu zu bauen" markierten P1) läuft **8/8**:
+P1 Adaptive Radiation, P2 Sympatrische Speziation/Branching, P3 Allopatrische Speziation,
+P4 Konvergente Evolution, P5 Rote-Königin-Dynamik, P6 Kontingenz, P8 Aussterben &
+Erholung, P7 Verteilungsgesetze — jedes mit Ablationsprobe (der treibende Mechanismus
+abgeschaltet verfehlt das Zielband nachweislich, kein Zufallstreffer). Die Bausteine
+dafür sind fertig: `world/population.ts` (Wright-Fisher-Schwarm, frequenzabhängige
+Konkurrenz), `world/cluster.ts` (Mehrgipfel-Erkennung, disruptive Selektion spaltet
+eine Population nachweislich in ≥2 Cluster, `branching-check.mjs`), `world/census.ts`
+(jeder Cluster wird EINZELN über `describe()` benannt und über Orte aggregiert — „eine
+Art ist eine Häufung, ihr Name kommt aus ihrem Genom", nicht aus einer Kaskade).
 
-Zielbild: eine konvergierte Population unter anhaltendem, disruptivem Druck (zwei
-Sub-Optima nah beieinander) zerfällt in zwei koexistierende Linien, die beide im selben
-Habitat sichtbar bleiben (Zensus zeigt zwei Arten statt einer). Das ist der einzige Hebel,
-der ein Habitat wirklich nach „Ökosystem" statt „ein Wesen mit Hintergrundbild" aussehen
-lässt — und der einzige Weg, wie z. B. „Insekt" sich später in mehrere eigenständige
-Formen auffächern könnte, ohne dass wir jede von Hand vorgeben.
+**Was tatsächlich fehlt, ist keine Mechanik, sondern eine Spieler-Ebene:** die
+Single-Habitat-Hauptansicht (`app/index.html`, Umgebung von `classify()`) zeigt nur
+EIN Wesen mit EINEM Namen. Die Aufspaltungs-/Zensus-Logik lebt im `world/`-Layer und
+ist heute nur über das separate „Lebende Welt (Beta)"-Overlay (Mehr-Orte-Ansicht)
+sichtbar. Die eigentliche offene Frage für einen Anschluss ist eine
+UX-/Architektur-Entscheidung, keine Physik-Frage: wie zeigt die Hauptansicht — deren
+ganze Prämisse „DEIN eines Wesen" ist (s. Produkt-Pfeiler) — dass sich die Population
+dahinter in zwei Linien gespalten hat, ohne diese Prämisse zu brechen? Mögliche
+Ansätze (nicht bewertet, nur skizziert): ein sanfter Hinweis „deine Linie steht an
+einer Weggabelung" (existiert in Ansätzen schon über `alt`/`margin` in
+`matchArchetype()`, s. `app/archetypes.js`); ein zweiter, kleinerer „Zweig" neben dem
+Hauptwesen; oder die Aufspaltung bewusst nur in der Lebende-Welt-Ansicht zeigen und die
+Hauptansicht einsträngig lassen (aktueller Zustand, aber dann bleibt das
+Lebensbaum-Wachstum auf die Beta-Ansicht beschränkt). Das ist ein eigener
+Design-Durchlauf mit dem Nutzer, kein Implementierungs-Task.
 
 ## Phase 5 — Beziehungen: Symbiose, Parasitismus
 

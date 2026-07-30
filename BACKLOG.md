@@ -1259,13 +1259,20 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   verworfen: Frost dominiert ohnehin, Wind haette nichts zusaetzlich sichtbar gemacht.
   Offen (kleinerer Nachtrag, kein Blocker): Genbuch/Karte um eine räumliche Lesart
   ergänzen („diese Form lebt HIER").
-- [ ] **Phase 4 — Speziation.** Deckt sich mit **P1 Radiation** aus Punkt 9
-  (Schicht-A-Portfolio, dort bereits als „net-neu zu bauen" vorgesehen: Nischen in einer
-  Metapopulation öffnen, Δ Artenzahl über `world/census.ts` messen). Größter Hebel dieser
-  Roadmap — bricht die Grundannahme „eine Form = ein Genom-Punkt" auf, die dem heutigen
-  Lebensbaum zugrunde liegt. Mehrwöchiges Einzelvorhaben mit eigener Tuning-Runde gegen
-  C1–C6 (Muster aus Punkt 6: Filtrierer-Achse). — **Modell: Opus** für Mechanik-Entwurf,
-  **Sonnet** für Implementierung + Gates (analog Schritt 6/7 aus Punkt 9).
+- [x] **Phase 4 — Speziation — Befund korrigiert (2026-07-30): Mechanik existiert
+  bereits, 8/8 validiert.** `npm run phenomena-check` (`tools/phenomena-check.mjs`) lief
+  bei der Bestandsaufnahme bereits grün für ALLE acht Phänomene inkl. P1 Adaptive
+  Radiation und P2 Sympatrische Speziation/Branching, je mit bestandener Ablationsprobe.
+  Der ursprüngliche Roadmap-Text („bricht die Grundannahme eine Form = ein Genom-Punkt")
+  ging von einem falschen Stand aus — Schritt 2 aus diesem Punkt 9 war schon 2026-07-29
+  erledigt, nur beim Roadmap-Entwurf nicht mit der Lebensbaum-Frage verknüpft worden.
+  `world/population.ts` + `world/cluster.ts` + `world/census.ts` liefern Mehrgipfel-
+  Erkennung + Pro-Cluster-Benennung bereits produktiv im „Lebende Welt"-Overlay. Die
+  echte offene Frage ist keine Physik-, sondern eine UX-Frage: die Single-Habitat-
+  Hauptansicht (`app/index.html`) zeigt bewusst nur EIN Wesen (Produkt-Pfeiler) — wie
+  sich eine Aufspaltung dort andeuten liesse, ohne diese Praemisse zu brechen, braucht
+  einen eigenen Design-Durchlauf mit dem Nutzer, s. docs/roadmap-lebendige-welt.md
+  Phase 4. — **Modell: Opus** fuer diesen Design-Durchlauf, sobald angefordert.
 - [ ] **Phase 5 — Symbiose/Parasitismus.** Bereits in Punkt 6 bewusst zurückgestellt
   („Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu"). Baut auf
   Phase 4 auf (dieselbe Grundvoraussetzung: mehr als ein Genom gleichzeitig in Beziehung).
