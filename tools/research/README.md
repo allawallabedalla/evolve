@@ -37,3 +37,7 @@ Aufruf: `npm run build` zuerst (Skripte importieren aus `dist/`), dann z. B.
 - `gap-sweep.mjs` — Lebensbaum-Lückenmessung: welche der 44 Formen von selbst entstehen,
   welche Gene hochlaufen ohne von einem Prototyp benannt zu werden, und wie stark die
   Selektion konkrete namenlose Nischen besetzt. Grundlage von `docs/lebensbaum-luecken.md`.
+- `room-sweep.mjs` — misst, ob eine grobe Lebensraum-Ebene über den 6 Reglern trägt:
+  Formprofil je Raum, Abdeckung des freien Regler-Würfels, und ob jedes der 12 Presets
+  auf etwas konvergiert, das zu seinem Namen passt. Befund in
+  `docs/lebensbaum-luecken.md` §7.

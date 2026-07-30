@@ -162,3 +162,57 @@ geprüft werden, dass keine Bestandsform unter ihre bisherige Erreichbarkeit fä
 Das wären **44 → 66 Formen** ohne eine einzige neue Engine-Mechanik. Alles darüber
 (Spinnentiere, Gräser, Parasiten, Speziation) braucht neue Achsen und gehört in den
 Backlog, nicht in dieses Paket.
+
+---
+
+## 7. Nachtrag: trägt eine grobe Raum-Ebene über den Reglern?
+
+Messung: `node tools/research/room-sweep.mjs 400` (10 vorgeschlagene Lebensräume als
+Spannen über den 6 Reglern + die Stressoren, die real dazugehören).
+
+**Was Räume bringen — jeder Raum hat ein eigenes Gesicht:**
+
+| Raum | Formen | Profil |
+|---|---|---|
+| Tiefsee | 11 | Euglenoid 58 %, **Leuchtwesen 25 %** |
+| Wüste | 6 | **Insekt 47 %**, Archaee 32 % |
+| Offenland / Steppe | 9 | **Kleines flinkes Tier 42 %**, Bakterie 36 % |
+| Wald | 15 | Bakterie 27 %, Archaee 22 %, **Kletterer 17 %** |
+| Flachmeer / Riff | 19 | Fisch 35 %, **Koralle 14 %** |
+| Boden / Höhle | 11 | Archaee 46 %, **Myzel 12 %, Flechte 6 %** |
+| Polar / Hochgebirge | 11 | Euglenoid 32 %, **Krebstier 31 %, Fell-Warmblüter 15 %** |
+
+**Was Räume NICHT bringen — Erreichbarkeit:** 30 Formen innerhalb der Räume, 32
+außerhalb. Die Raum-Ebene macht keine einzige zusätzliche Form erreichbar; sie ordnet
+nur, was ohnehin da ist. Die 11 Drift-Formen bleiben Drift-Formen.
+
+**Der eigentliche Befund — die `water`-Achse ist doppeldeutig.** Die Physik hat harte
+Schwellen bei `aquaticWaterFloor` 0.5 (ab hier lohnt sich ein stromlinienförmiger
+Schwimmer) und `absorbWaterFloor` 0.3 (ab hier lohnt sich Absorption); der Habitat-Renderer
+zieht seine eigenen bei 0.34 und 0.6. Im UI heißt der Regler durchgehend
+„trocken … unter Wasser", als wäre das ein stetiger Übergang. Dieselbe Zahl bedeutet
+einmal „feuchter Boden" und einmal „untergetaucht" — und die eingecheckten Presets
+benutzen sie auch tatsächlich widersprüchlich:
+
+| Preset | water | konvergiert auf | Problem |
+|---|---|---|---|
+| Räuberland (Landbiom) | 0.60 | Fisch · Aalform | über der Aquatik-Schwelle |
+| Reiche Kronen (Baumkronen) | 0.70 | Protist · Amöbe | Kronen unter Wasser |
+| Sonniger Sumpf | 0.95 | Verholzter Strauch | Strauch unter Wasser |
+| Dichter Wald | 0.85 | Laubbaum | nasser als der „Trübe See" (0.60) |
+| Urtümpel | 0.30 | Flechte · Symbiose | trockener als der Wald |
+| Moderwald | 0.12 | Myzel | trockener als „Hitze-Dürre" (0.15) |
+
+4 von 12 Presets konvergieren auf etwas, das ihrem eigenen Namen widerspricht. Und vom
+freien Regler-Würfel liegen **83 %** in gar keinem realen Lebensraum (grobe Hausnummer —
+die 10 Raum-Boxen sind hand-gezogen und eher eng).
+
+**Schlussfolgerung:** Eine Raum-Ebene ist als *Orientierung und Kohärenz* richtig, nicht
+als Erreichbarkeits-Hebel. Der saubere Schnitt wäre, `water` in zwei Dinge zu trennen —
+ein diskretes **Medium** (an Land / im Wasser) als Raum-Eigenschaft und eine stetige
+**Feuchte bzw. Tiefe** innerhalb des Mediums. Das ist zugleich der natürliche Ort für
+die Stressoren aus §2: Druck gehört in die Tiefsee, Salz ins Meer, Frost+Wind ins Polare,
+Austrocknung in die Wüste — heute kommen sie ausschließlich als Zufalls-Karten.
+
+Leitplanke: Ein Raum darf **färben, nicht sperren** (Pfeiler „keine Gates"). Der Regler
+behält seine volle Spanne; der Raum markiert nur den plausiblen Korridor.
