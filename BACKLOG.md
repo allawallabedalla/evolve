@@ -426,12 +426,24 @@ N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 1
     Arbeit (Orakel-Lauf bereits durchgerechnet, alle Dateien geändert) unterbrochen,
     bevor der Abschlussbericht geschrieben wurde — der Code-Stand selbst war
     vollständig und konsistent; diese Prüfung hat ihn nachträglich verifiziert.
-  - [ ] Stufe 7 (optional) — Koevolution + Metapopulation einschalten (bereits vorhanden in
-    `world/coevolution.ts`/`world/world.ts`, nur zuschalten).
+  - [ ] **Stufe 7 (optional) — bewusst nicht ohne Rückfrage eingeschaltet (bewertet
+    2026-07-30):** `world/coevolution.ts` UND `world/world.ts` tragen im eigenen
+    Datei-Kopf beide wörtlich den Vermerk „Berührt die Live-App NICHT" — sie wurden
+    absichtlich als reine Verifikations-Mechanik gebaut (liefern P5 Rote-Königin für
+    `phenomena-check`/`coevolution-check`), nicht als anschlussfertiges Live-Feature.
+    „Nur zuschalten" unterschätzt, was das für den Spieler bedeuten würde: Koevolution
+    fügt eine zweite, unsichtbare Räuber-Population hinzu, die den `predation`-Regler von
+    einem direkten Regler zu einem sich selbst bewegenden Ziel macht (Warum-Zeile/
+    Vitalität aus Stufe 5 müssten das erklären können); Metapopulation bedeutet mehrere
+    gleichzeitig existierende „Orte", die die Ein-Wesen-Ansicht der App nicht abbildet.
+    Das sind sichtbare neue Spielmechaniken/UX-Fragen, keine internen Korrektheits-Fixes
+    wie Stufe 3-6 — dieselbe Kategorie Entscheidung wie Punkt 5 („nicht eigenmächtig
+    umsetzen"). Bleibt entsprechend offen für eine bewusste Produkt-Entscheidung, nicht
+    für eine weitere Migrations-Stufe.
 
-**Blockiert weiterhin:** Punkt 6 (Rest-Achsen) — der Umbau ändert, WIE Achsen wirken (Kern
-vs. Konkurrenz-Kernel), also erst nach mindestens Stufe 3 neu bewerten, ob/wie Punkt 6 noch
-sinnvoll ist.
+**Damit ist die Engine-Grundlagenforschung (Punkt 2) im technischen Kern abgeschlossen**
+(Stufe 0-6 erledigt, Stufe 7 bewusst als Produkt-Entscheidung offen gelassen, nicht als
+Technik-Aufgabe). Punkt 6 (Rest-Achsen) ist damit entsperrt — s. dort.
 
 ### 3 · Komplexitäts-Audit / Informationsarchitektur (2026-07-29)
 
@@ -581,7 +593,7 @@ Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschied
   als Meta-Fortschritt). **Start ist Produktentscheidung des Nutzers**, nicht eigenmächtig
   umsetzen.
 
-### 6 · Große Brocken — Rest-Achsen (wartet auf Punkt 2)
+### 6 · Große Brocken — Rest-Achsen (Punkt 2 abgeschlossen, neu bewertet 2026-07-30 — s. u.)
 
 Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und AXIS-5
 (Biolumineszenz) erledigt (s. „Erledigt").
@@ -595,11 +607,26 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
   Gen `filter`, neuer Energiekanal, s. „Erledigt"). Offen bleibt nur der ursprünglich
   mitgemeinte Aasfresser-/Parasit-Teil, den es nie als eigenes Gen gab.
 
-- [ ] **Rest von AXIS-3 · Aasfresser/Parasit** — **Modell: Sonnet** — kein eigenes Gen bisher, geringe Priorität,
-  nur falls ein konkreter Katalog-Faktor es rechtfertigt (Gefahr sonst: reine
-  Muster-Wiederholung mit abnehmendem Grenznutzen, wie im Breiten-Ausbau dokumentiert).
-  **Nicht anfassen, bevor Punkt 2 (Engine-Grundlagenforschung) abgeschlossen ist** — die
-  hält `engine/fitness.ts`/`physics.json` bis dahin bewusst unverändert.
+- [x] **Rest von AXIS-3 · Aasfresser/Parasit — neu bewertet 2026-07-30, bewusst nicht
+  gebaut:** Punkt 2 ist jetzt technisch abgeschlossen (Stufe 0-6), die Blockade ist
+  entfallen — aber die zweite Bedingung aus dem ursprünglichen Eintrag ("nur falls ein
+  konkreter Katalog-Faktor es rechtfertigt") ist geprüft und NICHT erfüllt. Es gibt
+  keinen Katalog-Eintrag für „Aasfresser" (`grep` über `app/influences.js`: kein
+  Treffer). Der einzige einschlägige Eintrag ist „Parasitismus (+/–)"
+  (`app/influences.js` Z. ~1356) — der ist bereits mit `soon:true` markiert und explizit
+  aus den aktiven Faktoren ausgeschlossen (`tools/influence-check.mjs`: `active =
+  factors.filter(f => !f.soon)`), mit eigener Begründung im Datensatz selbst:
+  `layerGrund: "Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein
+  Milieu."` Genau dieselbe Zwei-Arten-Anforderung ist es, weswegen Migrations-Stufe 7
+  (Koevolution) gerade bewusst NICHT ohne Rückfrage eingeschaltet wurde (s. Punkt 2) —
+  ein einzelnes `parasite`-Gen im Ein-Organismus-Fitness-Modell würde die Sache nicht
+  wirklich abbilden (kein Wirt, keine Interaktion), sondern nur einen weiteren
+  Kosten-Nutzen-Regler nach demselben Muster wie die 15 bestehenden Konditional-Gene
+  hinzufügen — genau die im Ursprungseintrag selbst benannte Gefahr ("reine
+  Muster-Wiederholung mit abnehmendem Grenznutzen"). Damit besteht keine der beiden
+  Voraussetzungen für den Bau: kein aktiver Katalog-Faktor braucht es, und ein
+  ehrlicher Bau bräuchte dieselbe Zwei-Populations-Mechanik, die Stufe 7 als
+  Produkt-Entscheidung offen lässt.
 
 ### 7 · Live-App — Feinschliff & Aufräumen (kleinere Reste)
 
