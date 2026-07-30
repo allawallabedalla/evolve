@@ -123,9 +123,11 @@ Mittelwert aufgerufen) — `engine/simulate.ts`, `training/fit.ts`, `EngineParam
 Schritt 1 auf, statt ihn weiter zu kalibrieren). Performance gemessen: ~2 ms/Generation bei
 N=200 in Node → geschätzt 3-6 ms im Browser, 15-30× Sicherheitsabstand zum 100ms-Ziel.
 
-- [ ] **Migrations-Stufen (Modell: Opus für Stufe 2/4 — geschmacksintensive
+- [~] **Migrations-Stufen (Modell: Opus für Stufe 2/4 — geschmacksintensive
   Architekturentscheidungen im laufenden Live-Code —, Sonnet für den Rest), jede Stufe
   einzeln lauffähig/messbar/committen, s. Dokument Abschnitt „6.4" für Details:**
+  **Stufe 0-6 erledigt, Stufe 7 bewusst als offene Produkt-Entscheidung stehen gelassen
+  (s. dort) — technisch abgeschlossen.**
   - [x] Stufe 0 (erledigt 2026-07-29) — Messskripte aus der Recherche als
     `tools/research/*.mjs` übernommen (ROOT-relative Pfade statt der Scratchpad-Absolutpfade
     des Forschungsagenten), alle sechs gegen die Original-Kennzahlen im Dokument
@@ -875,14 +877,15 @@ verschiedene Code-Pfade, keine gegenseitige Abhängigkeit außer der angegebenen
   Unterschied) — statt die Schwelle zu verbiegen, wurde eine dedizierte, im Code explizit
   dokumentierte Ablation gebaut (neutrale, fitnessfreie Reproduktion, 0.183→0.653). Alle 5
   Kern-Gates weiterhin grün, `package.json` nur um ein Script ergänzt.
-- [ ] **Schritt 3 — Mechanismus-Ablationsstudie** — **Modell: Sonnet** (Diagnose-Ausgabe, kein
-  Gate, mechanisch) (Validierungsplan Teil V Punkt 2): den
-  Schritt-2-Portfolio-Runner einmal je Mechanismus mit `disabledMechanisms` auf „aus"
-  laufen lassen (Konkurrenz/Migration/Ko-Evolution/Drift einzeln), Matrix „Mechanismus ×
-  welches P-Ergebnis kippt" ausgeben (z. B. `tools/ablation-check.mjs`, druckt eine Tabelle,
-  kein hartes Pass/Fail nötig — das ist eine Diagnose-/Doku-Ausgabe, kein Gate). Bindet
-  Mechanismus kausal an Phänomen; Ergebnis kurz in diesem Backlog-Punkt oder einer neuen
-  Datei `docs/ablation-results.md` festhalten.
+- [x] **Schritt 3 — Mechanismus-Ablationsstudie (erledigt, Checkbox-Nachtrag 2026-07-30 —
+  Artefakte existierten bereits aus dieser Session, waren nur nicht abgehakt):**
+  `tools/ablation-check.mjs` (Mechanismus × Phänomen-Matrix, Diagnose-Ausgabe ohne
+  `process.exit(1)`, wie gefordert) + `docs/ablation-results.md` gebaut. Ergebnis
+  (s. Zusammenfassung oben bei Schritt 2 sowie `docs/ablation-results.md` im Detail):
+  Konkurrenz→nur P2, Migration→P1+P3 (gegensätzliche Vorzeichen), Koevolution→nur P5,
+  Drift→alle sieben; der P4/Konkurrenz-Sonderfall (empirisch wirkungslos, 0.183 vs. 0.201)
+  ehrlich dokumentiert statt die Schwelle zu verbiegen — dedizierte, im Code kommentierte
+  Ablation (neutrale fitnessfreie Reproduktion, 0.183→0.653) gebaut.
 - [x] **Schritt 4 — Schicht-B-Metriken (erledigt 2026-07-29):** `tools/distribution-check.mjs`
   gebaut, alle vier Prüfungen im Zielband (Score_B = 4/4): B1 Körpergrößen-Schiefe (May 1978,
   0.493 > 0.15), B2 SAD-Hollow-Curve (Fisher/Preston, Schiefe 1.089 + 81% unter Mittelwert),
