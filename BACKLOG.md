@@ -732,8 +732,34 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
 - [x] **`docs/auslagerung/P5-ausgabe.json` aufräumen** (erledigt 2026-07-29) — Deletion
   hätte den historischen Kontext verloren, daher stattdessen `P5-aufgabe.md` mit einem
   klaren „ersetzt durch P8"-Hinweis versehen (JSON selbst unangetastet, bleibt als Archiv).
-- [ ] **P7 · Qualitäts-Audit** — zweiter Blick auf die bereits übernommenen P3-Erklärungen und
-  S6-Erzähl-Bausteine (nur als Idee notiert, nie als Paket beauftragt oder gebaut).
+- [x] **P7 · Qualitäts-Audit (erledigt 2026-07-30, Sonnet):** Stichprobenbasiertes Audit, kein
+  Massen-Rewrite. **Gen-Erklärungen** (`app/gene-explain.js`, alle 25 vollständig gelesen +
+  Zeile für Zeile gegen `engine/fitness.ts` cross-geprüft): vier Einträge behaupteten einen
+  Effekt, den die Fitness-Funktion tatsächlich nicht (oder anders) modelliert — Größe (fälschlich
+  Kälteschutz behauptet, `thermal` nutzt nur `insulation`), Gliedmaßen (fälschlich generelle
+  Baukosten behauptet, es gibt kein `m.limb` in `maintenance`, nur `aquaticLimbDrag`),
+  Biolumineszenz (fälschlich "verrät die eigene Lage" behauptet, `biolumDefense` ist tatsächlich
+  ein positiver Verteidigungsterm), Sinne (fälschlich frühere Gefahrenerkennung behauptet, `sense`
+  wirkt nur über `senseBoost`/Beutefindung, nicht in `defenseScore`) — alle vier korrigiert.
+  **Katalog-Faktoren** (`app/influences.js`, 63 gezielt gestreute Stichproben über alle 9
+  `layer`-Kategorien + mechanischer Volltext-Duplikat-Scan über alle 284): zwei echte
+  Daten-Lücken gefunden (`"desc": "."` — ein Platzhalter statt Erklärtext bei „Habitat-Zerstörung"
+  und „Invasive Arten") und an der Quelle (`docs/faktoren-katalog.md`) behoben, dann neu generiert
+  (`npm run build-influences` bzw. `tools/build-influences.mjs`). Keine Rechtschreib-/
+  Grammatikfehler, keine biologisch falschen Aussagen, keine Redundanzen in der übrigen Stichprobe.
+  **Chronik-Bausteine** (`app/story.js`/`app/story-extra.js`, 104 generierte Zeilen über eine
+  Lagen-Suite + 54 stratifizierte `story-extra.js`-Zeilen): `story-extra.js` durchweg sauber; ein
+  Ton-Ausreißer in `story.js` gefunden (BLUETE-Pool: "…meinen dasselbe" — personifizierende
+  Intentions-Sprache, genau das Muster, das der bereits abgeschlossene "Chronik-Ton"-Beschluss
+  abschaffen wollte) und ersetzt ("…passen zueinander", gleiche Kadenz, `story-check`-Kennzahlen
+  unverändert 27 %/6 %).
+  **Bewusst NICHT verändert:** die knappen, fachbegriff-dichten `desc`-Fragmente der 66 aktiven
+  Faktoren (konsistentes systemweites Stilmuster, kein Einzelfehler); mehrere leicht-metaphorische
+  Chronik-Fragmente außerhalb des BLUETE-Bannwort-Musters (akzeptierte Bildsprache, Geschmack
+  statt Fehler).
+  Getestet: `build`/`story-check`/`influence-check`/`exemplar-check` grün, unabhängig
+  gegengeprüft (eigener Diff-Review + Gate-Lauf dieser Session).
+  Damit ist Backlog Punkt 7 vollständig abgeschlossen.
 - Optional: A4-Feinschliff (Ahnenlinie cloud-synchron via `ancestry`-Spalte — braucht
   Supabase-Schema; das In-App-Namensfeld ist bereits umgesetzt, kein `prompt()` mehr);
   B-Reste (Kontrast-Feintuning, autocomplete `new-password` bei Signup).

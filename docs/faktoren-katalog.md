@@ -465,10 +465,10 @@ jeder Ort eine eigene Linie sein darf. Die [Z]-Ebene ist der beste erste Schritt
 - **Konservierung: genetische Rettung / assistierte Migration / assisted gene flow**. [Z]
 - **Ernte-induzierte Evolution** — Fischerei→kleiner/früher reif; Trophäenjagd→kleinere Waffen; Wilderei→Stoßzahn-Verlust. [H]
 - **Resistenz-Evolution (Echtzeit)** — Antibiotika / Pestizide / Herbizide / Rodentizide / Impf-Druck. [H/P]
-- **Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren**. [Z]
+- **Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren** — Rodung und Straßenbau zerschneiden Lebensraum in offene, karge Restflächen; Populationen bleiben isoliert. [Z]
 - **Verschmutzung als Selektion** — Industrie-Melanismus, Hormon-Disruptoren, Licht/Lärm/thermisch, Eutrophierung (→ Speziations-Umkehr). [H/Z]
 - **Klimawandel (anthropogen)** — Range-Shifts, phänologische Verschiebung/Mismatch, Hitze-Toleranz, TSD-Skew, Hybridisierung durch Range-Kollision (Pizzly-Bär). [Z]
-- **Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme**. [P]
+- **Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme** — Neuer Fressfeind/Konkurrent ohne natürliche Gegenspieler verdrängt heimische Arten. [P]
 - **Urbanisierung / Urban-Evolution** — Hitzeinsel, Verhaltens-Zahmheit, U-Bahn-Mücke, weißer Klee ohne Cyanogenese. [Z]
 - **Defaunation / Trophic Downgrading / 6. Massenaussterben (HIREC)** — Extinktions-Filter (groß/langsam/spezialisiert zuerst). [Z/P]
 

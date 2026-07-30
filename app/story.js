@@ -540,7 +540,7 @@
   const BLUETE = [
     ["alles passt", ""],
     ["mehr Nachkommen als Verluste", ""],
-    ["diese Welt und dieser Körper meinen dasselbe", ""],
+    ["diese Welt und dieser Körper passen zueinander", ""],
     ["der Bauplan schöpft aus, was hier zu holen ist", ""],
     ["die Linie trägt", ""],
     ["hier wird nichts verschwendet", ""],

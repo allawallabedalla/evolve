@@ -2785,7 +2785,7 @@ window.INFLUENCES = [
      },
      {
       "name": "Habitat-Zerstörung & -Fragmentierung / Korridore / Straßen als Barrieren",
-      "desc": ".",
+      "desc": "Rodung und Straßenbau zerschneiden Lebensraum in offene, karge Restflächen; Populationen bleiben isoliert.",
       "plain": "Lebensraum-Verlust",
       "env": {
        "foodAbundance": 0.15,
@@ -2825,7 +2825,7 @@ window.INFLUENCES = [
      },
      {
       "name": "Invasive Arten / biotische Homogenisierung / Enemy-Release/EICA / Neuartige Ökosysteme",
-      "desc": ".",
+      "desc": "Neuer Fressfeind/Konkurrent ohne natürliche Gegenspieler verdrängt heimische Arten.",
       "plain": "Eingeschleppte Art (neuer Rivale)",
       "env": {
        "predation": 0.8,
