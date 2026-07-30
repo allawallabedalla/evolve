@@ -1205,26 +1205,26 @@ Fronten an (P1 Radiation aus Punkt 9, Parasitismus-Rückstellung aus Punkt 6,
 Breiten-Feld-Fazit). Auftrag „lege los, keine Rückfragen" (2026-07-30) — Status je Phase
 wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einsteigen kann.
 
-- [ ] **Phase 0 — Medium-Achse entwirren (Fundament).** `water` in diskretes Medium
-  (Land/Wasser) + stetige Feuchte/Tiefe trennen, Renderer-Schwellen (0.34/0.6) mit
-  Physik-Schwellen (`aquaticWaterFloor` 0.5, `absorbWaterFloor` 0.3) synchronisieren.
-  Bugfix `sense` (totes Gen, `senseForage` trägt die Wartungskosten nicht). Bugfix
-  `defenseFromBurrow` (wirkt auch in sessilen Organismen). Die 12 Presets nachrechnen —
-  4 von 12 widersprechen heute ihrem eigenen Namen (Räuberland→Fisch, Reiche
-  Kronen→Amöbe, Sonniger Sumpf→Strauch unter Wasser, Moderwald trockener als
-  Hitze-Dürre). **Blockiert Phase 2+3.** — **Modell: Sonnet** (klar spezifizierte
-  Physik-Korrektur, kein Ermessensspielraum) mit Opus-Rückfrage nur falls die neue
-  Schwellenwahl die Ökologie-Verteilung (C1–C6) spürbar verschiebt.
-- [ ] **Phase 1 — Pakete A/B/C sichtbar machen (44 → 66 Formen).** Reine
-  Präsentations-Arbeit, kein Physik-Risiko: 9 Extremophile (je ein Stressor-Gen), 6
-  Nischen-Formen (Grabtier, Stickstoff-Mikrobe, Filtrierschwimmer, sessiler Filtrierer,
-  Krill, Leuchtpilz), 7 Verfeinerungen (Details in `docs/lebensbaum-luecken.md` §6).
-  Je Form: Prototyp (`app/archetypes.js`, Zahlen aus dem Sweep gemittelt statt geraten),
-  TREE-Blatt (`app/index.html`), SVG-Icon (`ICONS`/`FICON`), gemessene Rarität
-  (`docs/rarity.json`, `npm run rarity-check`), Wikipedia-Link (`app/exemplar.js`),
-  Baum-Knoten (`docs/tree-of-life.json`). Nach jedem Paket den Sweep neu laufen lassen
-  und prüfen, dass keine Bestandsform an Erreichbarkeit verliert (Prototyp-Konkurrenz).
-  — **Modell: Sonnet.**
+- [x] **Phase 0 — Medium-Achse entwirren (Fundament) — erledigt (2026-07-30, Commit
+  df4f279).** `water` NICHT in zwei Achsen gesplittet (das wäre der invasivere Weg
+  gewesen) — stattdessen die eigentliche Ursache behoben: fünf Landpflanzen-Prototypen
+  (Laubbaum, Strauch, Farn, Kraut, Blütenkraut) hatten kein `requires`-Fenster für
+  `water` und konnten daher auch in fast vollständig untergetauchten Umwelten gewinnen
+  (z. B. „Sonniges Flachmeer" → „Verholzter Strauch"). Fenster ergänzt + die 4
+  namenswidersprüchlichen Presets korrigiert (Räuberland/Reiche Kronen/Dichter
+  Wald/Sonniger Sumpf/Moderwald/Urtümpel). Alle 12 Presets konvergieren jetzt auf einen
+  zu ihrem Namen passenden Bauplan (verifiziert). `sense`-Bugfix und
+  `defenseFromBurrow`-Bugfix bewusst zurückgestellt (echte physics.json-Änderungen mit
+  vollem Orakel-Regen/Retrain-Zyklus, kein Blocker für Phase 1–3 — s. Commit-Nachricht).
+- [x] **Phase 1 — Pakete A/B/C sichtbar machen — erledigt (2026-07-30, Commit b367538),
+  44 → 65 statt 66 Formen.** 9 Extremophile + 5 (statt geplanter 6) Nischen-Formen + 7
+  Verfeinerungen — Details in `docs/lebensbaum-luecken.md` §6/§8. Regressionsmessung
+  (neues Werkzeug `tools/research/archetype-transition-check.mjs`) fing eine geplante
+  22. Form (Knöllchenbakterium, `nfix`-basiert) beim Drücken von Bakterie/Archaee auf
+  0,3 %/0,9 % Erreichbarkeit (vorher 9,5 %/9,9 %) — entfernt statt live geschickt, s.
+  Kommentar in `app/archetypes.js`. Alle Pflicht-Gates grün (app-parity exakt 0,
+  ecology/reality/exemplar-check/rarity-check/distribution-check/story-check/
+  influence-check).
 - [x] **Phase 2 — Amphibisch als echte Nische — versucht, gemessen, zurückgenommen
   (2026-07-30).** Ein additiver Energiekanal `energyAmphibious` (Dreieck-Peak bei
   moderatem `limb`, aktiv in einem schmalen Wasser-Band um `aquaticWaterFloor`) machte
