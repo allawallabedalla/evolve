@@ -34,3 +34,6 @@ bewegen.
 
 Aufruf: `npm run build` zuerst (Skripte importieren aus `dist/`), dann z. B.
 `node tools/research/bench.mjs`.
+- `gap-sweep.mjs` — Lebensbaum-Lückenmessung: welche der 44 Formen von selbst entstehen,
+  welche Gene hochlaufen ohne von einem Prototyp benannt zu werden, und wie stark die
+  Selektion konkrete namenlose Nischen besetzt. Grundlage von `docs/lebensbaum-luecken.md`.
