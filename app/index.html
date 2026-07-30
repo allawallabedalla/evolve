@@ -235,6 +235,26 @@
         <button id="chalClose" class="link">schließen</button>
       </div>
       <p class="gb-sub">Ein Ziel mit einer Beschränkung und einem Zeitrahmen — eine Einladung, keine Pflicht. Du darfst weiter alles einstellen; nur zählt jetzt, ob du es innerhalb der Regel schaffst.</p>
+      <!-- Welt der Woche (V1-Ausbaustufe): steht bewusst HIER und nicht als eigener
+           Knopf im Hauptbildschirm — sie ist eine Herausforderung mit fester Startwelt,
+           also derselbe Denkrahmen, und die Einstiegsleiste bleibt bei ihren vier
+           Knöpfen (Komplexitäts-Audit P1.x). -->
+      <div class="wow" id="wowCard" hidden>
+        <div class="wow-head">
+          <span class="wow-eyebrow" id="wowEyebrow">Welt der Woche</span>
+          <span class="wow-week" id="wowWeek"></span>
+        </div>
+        <div class="wow-title" id="wowTitle">—</div>
+        <div class="wow-desc" id="wowDesc"></div>
+        <div class="wow-meta" id="wowMeta"></div>
+        <div class="wow-env" id="wowEnv"></div>
+        <div class="wow-actions">
+          <button type="button" class="ctrl" id="wowEnter">Diese Welt betreten</button>
+          <button type="button" class="link" id="wowShowRes">Ergebnisse ansehen ↗</button>
+        </div>
+        <p class="wow-note">Alle bekommen dieselbe Umwelt und denselben Zufall — nur so ist vergleichbar, in wie vielen Generationen es jemand geschafft hat. Verglichen wird zuerst die <b>Vielfalt</b>: welche Formen aus derselben Welt entstanden sind.</p>
+        <div class="wow-past" id="wowPast"></div>
+      </div>
       <!-- P1.4 (Komplexitaets-Audit): Startansicht ist eine kleine, kuratierte Auswahl
            statt aller 271 Einträge — die volle Liste (Suche/Filter unverändert erhalten)
            liegt einen Klick entfernt hinter "Alle … anzeigen" (renderChalCurated/
@@ -254,6 +274,19 @@
         <div class="chal-count" id="chalCount"></div>
         <div id="chalBody"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Ergebnis-Vergleich (V1-Ausbaustufe). Sub-Dialog über dem Herausforderungs-Modal,
+       dasselbe Verschachtelungs-Muster wie Umwelt-Einfluss -> Faktoren. -->
+  <div class="genbook" id="wowRes" role="dialog" aria-modal="true" aria-labelledby="wowResTitle" hidden>
+    <div class="gb-card">
+      <div class="gb-head">
+        <h2 class="gb-title" id="wowResTitle">Was andere daraus gemacht haben</h2>
+        <button id="wowResClose" class="link">↩ zurück</button>
+      </div>
+      <p class="gb-sub" id="wowResSub">—</p>
+      <div id="wowResBody"></div>
     </div>
   </div>
 
@@ -2286,6 +2319,8 @@ document.addEventListener("keydown", (e) => {
   // Sub-Modal offen -> wie „Abbrechen" nur einen Schritt zurück; sonst ganz schließen.
   else if(iSub && !iSub.hidden){ closeInflSub(); }
   else if(iMain && !iMain.hidden){ closeInfl(); }
+  // Ergebnis-Vergleich liegt ÜBER dem Herausforderungs-Modal — erst diese Ebene zurück.
+  else if(document.getElementById("wowRes") && !document.getElementById("wowRes").hidden){ closeWowRes(); }
   else if(ch && !ch.hidden){ closeChal(); }
   else if(dp && !dp.hidden){ closeDetails(); }
   else if(pp && !pp.hidden){ closePresets(); }
@@ -2342,10 +2377,14 @@ function timeStr(ms){
   if(h < 24) return h + " Std" + (r ? " "+r+" Min" : "");
   const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
 }
+/** Die 6 Regler-Eingaben auf den aktuellen `env`-Stand nachziehen (Laden, feste Startwelt). */
+function syncLeverInputs(){
+  LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
+}
 function applyState(s){
   if(Array.isArray(s.genome) && s.genome.length>=6) genome = padGenome(s.genome);
   if(s.env){ env = Object.assign(env, s.env);
-    LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
+    syncLeverInputs();
     if(typeof renderStressChips === "function") renderStressChips(); }
   generation = s.generation || 0;
   discovered = new Set(s.discovered || []);
@@ -3615,6 +3654,7 @@ function openChal(){
   if(!window.EVOLVE_CHALLENGES) return;
   _chalOpener = document.activeElement;
   renderChalChips(); renderChalList(); renderChalCurated();
+  wowShownWeek = null; renderWowCard();
   showChalCurated(true);
   _el("chal").hidden = false; _el("chalClose").focus();
 }
@@ -3653,9 +3693,19 @@ function chalItemHtml(ch){
         `<span class="chal-tag">${chalTargetLabel(ch)}</span>`+
         `<span class="chal-tag">${ch.generationen.toLocaleString("de-DE")} Gen.</span>`+
       `</div>`+
+      // V1-Ausbaustufe „feste Startwelt": zweiter, bewusst LEISER Weg in dieselbe
+      // Herausforderung — „annehmen" bleibt der unveränderte Sandkasten-Pfad (rührt
+      // dein Wesen nicht an), das hier startet ein neues Leben in der für alle
+      // gleichen Welt und macht die Generationenzahl damit erst vergleichbar.
+      `<button type="button" class="link chal-item-fixed" data-fixed="${ch.id}">gleiche Startwelt für alle ↗</button>`+
     `</div>`+
     `<button type="button" class="ctrl chal-item-start" data-id="${ch.id}"${isActive?' disabled':''}>${btnLabel}</button>`+
   `</div>`;
+}
+/** Klick-Verdrahtung beider Aktionen einer Karten-Liste (Volltliste UND Kurzauswahl). */
+function wireChalItems(host){
+  host.querySelectorAll(".chal-item-start").forEach(b => b.onclick = () => startChallenge(b.dataset.id));
+  host.querySelectorAll(".chal-item-fixed").forEach(b => b.onclick = () => openFixedWorld(b.dataset.fixed));
 }
 function renderChalList(){
   const all = window.EVOLVE_CHALLENGES || [];
@@ -3672,7 +3722,7 @@ function renderChalList(){
   const rows = shown.map(chalItemHtml).join("");
   const hint = hits.length > shown.length ? `<div class="chal-more-hint">${hits.length-shown.length} weitere — Suche oder Filter verfeinern</div>` : "";
   _el("chalBody").innerHTML = `<div class="chal-list">${rows}</div>${hint}`;
-  _el("chalBody").querySelectorAll(".chal-item-start").forEach(b => b.onclick = () => startChallenge(b.dataset.id));
+  wireChalItems(_el("chalBody"));
 }
 // P1.4 (Komplexitaets-Audit): deterministische Kurzauswahl statt Zufall/Re-Roll —
 // je ein Eintrag pro Reich (die 5 Top-Reiche der Reich-Chips), Schwierigkeit dabei
@@ -3702,7 +3752,7 @@ function renderChalCurated(){
   const picks = pickCuratedChallenges();
   const rows = picks.map(chalItemHtml).join("");
   _el("chalCuratedBody").innerHTML = rows ? `<div class="chal-list">${rows}</div>` : `<div class="chal-empty">Keine Auswahl verfügbar.</div>`;
-  _el("chalCuratedBody").querySelectorAll(".chal-item-start").forEach(b => b.onclick = () => startChallenge(b.dataset.id));
+  wireChalItems(_el("chalCuratedBody"));
   _el("chalShowAllBtn").textContent = "Alle " + all.length + " anzeigen ↗";
 }
 
@@ -3731,7 +3781,7 @@ function renderChalHUD(){
   if(!activeChallenge){ el.hidden = true; return; }
   const { ch, phase, startGen } = activeChallenge;
   el.hidden = false;
-  _el("chalActiveTitle").textContent = ch.titel;
+  _el("chalActiveTitle").textContent = (activeChallenge.worldKey ? worldKeyLabel(activeChallenge.worldKey) + " · " : "") + ch.titel;
   const status = _el("chalActiveStatus");
   if(phase==="warten"){
     _el("chalActiveFill").style.width = "0%";
@@ -3780,7 +3830,13 @@ function challengeTick(){
   if(matched){
     completedChallenges.add(ch.id); saveCompletedChallenges();
     showChallengeToast(ch, "geschafft");
-    activeChallenge = null; renderChalHUD(); return;
+    // Nur Läufe aus einer FESTEN Startwelt sind vergleichbar (gleiche Umwelt, gleicher
+    // Zufalls-Seed) — ein Sandkasten-Lauf wandert bewusst nicht in den Vergleichsraum.
+    const wk = activeChallenge.worldKey;
+    const usedGens = generation - activeChallenge.startGen;
+    activeChallenge = null; renderChalHUD();
+    if(wk) recordWorldResult(wk, ch, usedGens, cur);
+    return;
   }
   if(!inBounds){
     showChallengeToast(ch, "verlassen");
@@ -3792,6 +3848,350 @@ function challengeTick(){
   }
   renderChalHUD();
 }
+
+// ============================================================================
+// V1-Ausbaustufen: feste Startwelt · Bestenliste · „Welt der Woche"
+// (docs/bindung-konzept.md, Abschnitt 3 V1/V5 — die drei offenen Punkte)
+//
+// GRUNDGEDANKE. Eine Herausforderung im Sandkasten („annehmen") ist NICHT
+// vergleichbar: jeder startet mit anderen Reglern, aus einem anderen Genom und
+// mit einem anderen Zufalls-Seed. Eine Generationenzahl aus so einem Lauf sagt
+// über Können nichts aus. Deshalb hängen die drei Ausbaustufen an EINEM
+// Mechanismus: der festen Startwelt. Erst wenn Umwelt UND Seed für alle gleich
+// sind, ist „in wie vielen Generationen" eine ehrliche Größe — und erst dann ist
+// „welche Form ist bei dir daraus geworden" eine echte Überraschung statt eines
+// Vergleichs von Äpfeln mit Birnen.
+//
+// REPRODUZIERBARKEIT — GEMESSEN, nicht angenommen. Der Schwarm ist ein reiner
+// mulberry32-Prozess: `new Population(cfg, seed)` erzeugt bei founderSpread
+// "uniform" für denselben Seed dieselben N Gründer, und `pop.step(env, PHYS)` zieht
+// danach deterministisch weiter — kein Aufruf im Simulationspfad liest die Uhr, und
+// wie die Generationen auf Frames verteilt werden, ändert die Zufalls-Folge nicht.
+// Nachgemessen im Browser (Chromium, je zwei unabhängige Ladevorgänge derselben
+// festen Startwelt):
+//   * 400 Generationen von Hand gerechnet: max|Δ| über alle 25 Gene = 0 (bitgleich,
+//     Schwarm-Mittel wie gezeigtes Genom, gleiche Form).
+//   * 300 Generationen mit der ECHTEN Zeitschleife (Frame-Timing, Zensus an der
+//     Wanduhr): max|Δ| = 0, gleiche Form.
+// Damit ist „in wie vielen Generationen" eine ehrliche, geräteunabhängige Größe.
+// Die einzige verbleibende Zeitabhängigkeit sitzt im ABLESEN, nicht im Rechnen:
+// readSwarm() läuft im Zensus-Takt (u. a. censusMaxMs, also Wanduhr), und bei einem
+// GESPALTENEN Schwarm entscheidet die Kontinuitäts-Regel (stickyFraction) anhand des
+// zuletzt gezeigten Genoms, welcher Cluster „dein Wesen" ist — ein sehr langsames
+// Gerät kann dort einen Takt später umschalten. ENTSCHEIDUNG: das wird NICHT
+// wegprogrammiert. Ein fester Zensus-Takt würde die Anzeige auf schwachen Geräten
+// einfrieren lassen (genau der Grund, warum censusMaxMs existiert), der Effekt
+// betrifft nur den Moment des Umschaltens zwischen zwei koexistierenden Formen, und
+// die Herausforderung wird ohnehin erst nach CHAL_MIN_GENS entschieden.
+//
+// LEITPLANKEN (docs/bindung-konzept.md Abschnitt 2): kein Streak, kein Login-Bonus,
+// keine Frist. Eine verpasste Woche bleibt spielbar (die letzten Wochen stehen als
+// Liste in der Karte), niemand verliert etwas, und die Bestenliste ist bewusst dem
+// Vielfalts-Bild NACHgeordnet.
+// ============================================================================
+
+/** FNV-1a (32 bit) — kleiner, stabiler String-Hash für alle abgeleiteten Seeds. */
+function fnv1a32(s){
+  let h = 0x811c9dc5;
+  for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+/**
+ * ISO-Kalenderwoche als Schlüssel, z. B. "2026-W31" — in UTC gerechnet, damit die
+ * Welt der Woche für alle Spieler zur selben Sekunde wechselt (bei lokaler Zeit
+ * hätten Neuseeland und Kalifornien fast einen Tag lang verschiedene Welten).
+ * Bewusst clientseitig: kein Server-Cron, kein Job, nichts, das ausfallen kann.
+ */
+function isoWeekKey(date){
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = d.getUTCDay() || 7;                       // Mo=1 … So=7
+  d.setUTCDate(d.getUTCDate() + 4 - day);               // auf den Donnerstag der Woche
+  const yStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+  const week = Math.ceil(((d.getTime() - yStart) / 86400000 + 1) / 7);
+  return d.getUTCFullYear() + "-W" + String(week).padStart(2, "0");
+}
+const WEEK_MS = 7 * 86400000;
+function weekKeyBack(n){ return isoWeekKey(new Date(Date.now() - n * WEEK_MS)); }
+
+/**
+ * Die feste Startwelt einer Herausforderung: Seed + die 6 Regler.
+ *
+ * Die Umwelt kommt aus der Beschränkung SELBST — je begrenzter Regler die MITTE
+ * seines erlaubten Bereichs. Das hat drei Vorteile gegenüber einer handkuratierten
+ * Liste: (a) die Startwelt erfüllt die Beschränkung per Konstruktion, die Uhr läuft
+ * also ab Generation 0 statt erst nach dem Herumsuchen im „warten"-Zustand;
+ * (b) sie ist für alle 271 Herausforderungen definiert, ohne dass irgendwer 271
+ * (bzw. je Woche eine) Welten von Hand pflegen muss; (c) sie ist aus den Daten
+ * nachrechenbar. Die restlichen (unbeschränkten) Regler kommen deterministisch aus
+ * dem Seed, in einem moderaten Korridor 0.15…0.85 — so bleibt Spielraum, ohne dass
+ * ein Neugeborenes in einem Extrem strandet. Auf 2 Nachkommastellen gerundet, weil
+ * die Regler in 0.01-Schritten laufen: die angezeigte Zahl IST die gespielte Welt.
+ */
+function startWorldFor(ch, worldKey){
+  const seed = fnv1a32("seed|" + worldKey + "|" + ch.id) || 1;
+  const r = mulberry32(fnv1a32("env|" + worldKey + "|" + ch.id));
+  const e = {};
+  for(const l of LEVERS){
+    const g = ch.grenzen[l.key];
+    if(g){
+      const lo = (g.min == null ? 0 : g.min), hi = (g.max == null ? 1 : g.max);
+      e[l.key] = Math.round(((lo + hi) / 2) * 100) / 100;
+    } else {
+      e[l.key] = Math.round((0.15 + r() * 0.7) * 100) / 100;
+    }
+  }
+  return { seed, env: e };
+}
+/** Nächstgelegenes Biom-Preset — gibt der Welt einen NAMEN statt sechs Zahlen. */
+function nearestBiome(e){
+  let best = BIOMES[0], bd = Infinity;
+  for(const b of BIOMES){
+    let d = 0;
+    for(const l of LEVERS){ const x = b.env[l.key] - e[l.key]; d += x * x; }
+    if(d < bd){ bd = d; best = b; }
+  }
+  return { biome: best, dist: Math.sqrt(bd) };
+}
+/**
+ * Die Welt einer bestimmten Kalenderwoche — rein aus dem Wochen-Schlüssel abgeleitet.
+ * „schwer" ist ausgeschlossen: die Wochenwelt ist eine Einladung an alle, nicht die
+ * Kür. Fällt der Pool weg, wird auf den vollen Katalog zurückgegriffen.
+ */
+function weeklyWorld(weekKey){
+  const all = window.EVOLVE_CHALLENGES || [];
+  if(!all.length) return null;
+  const pool = all.filter(c => c.schwierigkeit !== "schwer");
+  const list = pool.length ? pool : all;
+  const ch = list[fnv1a32("welt-der-woche|" + weekKey) % list.length];
+  const sw = startWorldFor(ch, "w:" + weekKey);
+  const nb = nearestBiome(sw.env);
+  return { weekKey, worldKey: "w:" + weekKey, ch, seed: sw.seed, env: sw.env,
+           ort: nb.dist < 0.22 ? nb.biome.n : ("nahe " + nb.biome.n), ortIco: nb.biome.ico };
+}
+function weekLabel(weekKey){
+  const m = /^(\d{4})-W(\d{2})$/.exec(weekKey);
+  return m ? ("KW " + (+m[2]) + " / " + m[1]) : weekKey;
+}
+function worldKeyLabel(wk){
+  return wk === "fest" ? "feste Startwelt"
+       : wk.startsWith("w:") ? ("Welt der Woche · " + weekLabel(wk.slice(2)))
+       : wk;
+}
+
+// ---- Eigene Ergebnisse (lokal — gehören dem Spieler, auch ohne Konto) ----
+const WOW_KEY = "evolve_world_results_v1";
+let wowMine = {};   // "<worldKey>|<challengeId>" -> {gens, form, ts}
+try { wowMine = JSON.parse(localStorage.getItem(WOW_KEY) || "{}") || {}; } catch(e) { wowMine = {}; }
+function saveWowMine(){ try{ localStorage.setItem(WOW_KEY, JSON.stringify(wowMine)); }catch(e){} }
+
+/**
+ * Ein geschaffter Lauf aus einer festen Startwelt.
+ * Lokal wird IMMER die Bestleistung behalten; in die Cloud geht nur, wer angemeldet
+ * ist — und auch nur, wenn der neue Lauf den eigenen alten schlägt.
+ */
+function recordWorldResult(worldKey, ch, gens, arch){
+  if(!(gens >= 5) || gens > ch.generationen) return;   // spiegelt CHAL_MIN_GENS + Budget
+  const k = worldKey + "|" + ch.id;
+  const prev = wowMine[k];
+  const best = !prev || gens < prev.gens;
+  if(best){ wowMine[k] = { gens, form: arch.n, ts: Date.now() }; saveWowMine(); }
+  setTimeout(() => showInfoToast(
+    best ? `Geschafft in ${gens.toLocaleString("de-DE")} Generationen — als ${arch.n}.`
+         : `Geschafft in ${gens.toLocaleString("de-DE")} Generationen (deine Bestzeit: ${prev.gens.toLocaleString("de-DE")}).`
+  ), 4800);   // erst NACH dem „geschafft"-Toast, sonst überschreiben sie sich
+  if(best) pushWorldResult(worldKey, ch, gens, arch);
+}
+/**
+ * Ergebnis in den Vergleichsraum schreiben. Alles hier ist KÜR: fehlt die Tabelle
+ * (Schema noch nicht eingespielt), fehlt das Netz oder ist niemand angemeldet, bleibt
+ * das lokale Ergebnis stehen und das Spiel merkt nichts davon. Deshalb wird jeder
+ * Fehler geschluckt und nur in die Konsole notiert.
+ */
+async function pushWorldResult(worldKey, ch, gens, arch){
+  if(!session || !sb) return;
+  try {
+    const own = await sb.from("challenge_results").select("generations")
+      .eq("user_id", session.user.id).eq("world_key", worldKey).eq("challenge_id", ch.id).maybeSingle();
+    if(own.error) throw own.error;
+    if(own.data && own.data.generations <= gens) return;   // alte Bestzeit bleibt stehen
+    const { error } = await sb.from("challenge_results").upsert({
+      user_id: session.user.id, world_key: worldKey, challenge_id: ch.id,
+      generations: gens, form: arch.n, kingdom: kingdomOf(arch.n) || "—",
+    }, { onConflict: "user_id,world_key,challenge_id" });
+    if(error) throw error;
+  } catch(e){
+    console.warn("Vergleichsraum: Ergebnis nicht übertragen (Tabelle challenge_results vorhanden?).", e && e.message || e);
+  }
+}
+/** Alle Ergebnisse einer Welt lesen — über die anonymisierte View challenge_board. */
+async function fetchWorldBoard(worldKey, chId){
+  const { data, error } = await sb.from("challenge_board")
+    .select("generations, form, kingdom, is_me")
+    .eq("world_key", worldKey).eq("challenge_id", chId)
+    .order("generations", { ascending: true }).limit(400);
+  if(error) throw error;
+  return data || [];
+}
+
+// ---- Eine feste Startwelt betreten ----
+/**
+ * Ein NEUES Leben in einer für alle gleichen Welt. Das ist ein echter Schnitt (neuer
+ * Seed, neue Umwelt, Generation 0) — deshalb dieselbe Zustimmung und dieselbe
+ * Ahnenlinien-Buchung wie bei „Neu beginnen". Der Sandkasten-Pfad „annehmen" bleibt
+ * davon unberührt und rührt das laufende Wesen weiterhin nicht an.
+ */
+async function enterFixedWorld(chId, worldKey){
+  const ch = (window.EVOLVE_CHALLENGES || []).find(c => c.id === chId);
+  if(!ch) return false;
+  const ok = await uiConfirm(
+    `„${ch.titel}" in der ${worldKeyLabel(worldKey)} beginnen? Alle starten hier mit derselben Umwelt und demselben Zufall — nur so ist vergleichbar, in wie vielen Generationen es jemand schafft. Dein jetziges Wesen zieht dafür in die Ahnenlinie.`,
+    "Welt betreten");
+  if(!ok) return false;
+  ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
+  if(ancestry.length > 12) ancestry = ancestry.slice(-12);
+  const sw = startWorldFor(ch, worldKey);
+  // wie newLineage(), nur mit FESTEM Seed und FESTER Umwelt statt Math.random()
+  genome = new Array(NG).fill(0.5); generation = 0;
+  lineageSeed = sw.seed;
+  rng = mulberry32(lineageSeed); randn = makeRandn();
+  creatureName = "";
+  Object.assign(env, sw.env);
+  env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;
+  syncLeverInputs();
+  if(typeof renderStressChips === "function") renderStressChips();
+  spawnSwarm(null);   // gestreute Gründer aus lineageSeed -> für alle Spieler dieselben
+  displayGenome = genome.slice();
+  committedArch = classify(genome); candArch = null; candCount = 0;
+  lastBiome = worldKeyLabel(worldKey);
+  document.getElementById("biomeTag").textContent = lastBiome;
+  document.querySelectorAll(".biome.active").forEach(x => x.classList.remove("active"));
+  document.getElementById("genReadout").textContent = "Generation 0";
+  document.getElementById("reveal").hidden = true;
+  activeChallenge = { ch, phase: "warten", startGen: null, worldKey };
+  closeWowRes(); closeChal();
+  updatePanels(); updateBonding(); saveState(); storyReset();
+  challengeTick();   // Umwelt liegt per Konstruktion im Rahmen -> Uhr läuft ab Generation 0
+  return true;
+}
+function openFixedWorld(chId){ enterFixedWorld(chId, "fest"); }
+
+// ---- Karte „Welt der Woche" im Herausforderungs-Modal ----
+let wowShownWeek = null;   // null = aktuelle Woche
+function renderWowCard(){
+  const card = _el("wowCard");
+  if(!card) return;
+  const weekKey = wowShownWeek || isoWeekKey(new Date());
+  const w = weeklyWorld(weekKey);
+  if(!w){ card.hidden = true; return; }
+  card.hidden = false;
+  const isNow = weekKey === isoWeekKey(new Date());
+  _el("wowEyebrow").textContent = isNow ? "Welt der Woche" : "Frühere Welt";
+  _el("wowWeek").textContent = weekLabel(weekKey);
+  _el("wowTitle").textContent = w.ch.titel;
+  _el("wowDesc").textContent = w.ch.beschreibung;
+  _el("wowMeta").innerHTML =
+    `<span class="chal-tag">${ic(w.ortIco)} ${w.ort}</span>`+
+    `<span class="chal-tag chal-diff-${w.ch.schwierigkeit}">${DIFF_LABEL[w.ch.schwierigkeit]}</span>`+
+    `<span class="chal-tag">${chalTargetLabel(w.ch)}</span>`+
+    `<span class="chal-tag">${w.ch.generationen.toLocaleString("de-DE")} Gen.</span>`;
+  // Die sechs Startregler ausgeschrieben — das ist der greifbare Beweis für „dieselbe
+  // Welt für alle": jeder kann nachsehen, dass er genau hier anfängt.
+  _el("wowEnv").innerHTML = `<span>Startregler:</span>` +
+    LEVERS.map(l => `<span title="${l.name}">${ic(l.ico)}${w.env[l.key].toFixed(2)}</span>`).join("");
+  const mine = wowMine[w.worldKey + "|" + w.ch.id];
+  const old = _el("wowCard").querySelector(".wow-mine");
+  if(old) old.remove();
+  if(mine){
+    const d = document.createElement("div");
+    d.className = "wow-mine";
+    d.textContent = `dein Ergebnis: ${mine.gens.toLocaleString("de-DE")} Generationen · ${mine.form}`;
+    _el("wowEnv").after(d);
+  }
+  _el("wowEnter").textContent = mine ? "Noch einmal versuchen" : "Diese Welt betreten";
+  // Verpasste Wochen bleiben spielbar — ohne Nachhol-Druck, als ruhige Liste.
+  const past = [1,2,3].map(n => weekKeyBack(n));
+  _el("wowPast").innerHTML = `<span class="wow-past-lab">frühere Wochen (bleiben spielbar):</span>`+
+    (isNow ? "" : `<button type="button" class="link" data-wk="">diese Woche</button>`)+
+    past.filter(k => k !== weekKey).map(k => `<button type="button" class="link" data-wk="${k}">${weekLabel(k)}</button>`).join("");
+  _el("wowPast").querySelectorAll("button[data-wk]").forEach(b => b.onclick = () => {
+    wowShownWeek = b.dataset.wk || null; renderWowCard();
+  });
+  _el("wowEnter").onclick = () => enterFixedWorld(w.ch.id, w.worldKey);
+  _el("wowShowRes").onclick = () => openWowRes(w.worldKey, w.ch.id);
+}
+
+// ---- Ergebnis-Vergleich: zuerst VIELFALT, dann Generationenzahl ----
+let _wowResOpener = null;
+function closeWowRes(){
+  const el = _el("wowRes"); if(!el || el.hidden) return;
+  el.hidden = true;
+  if(_wowResOpener && _wowResOpener.focus) _wowResOpener.focus();
+  _wowResOpener = null;
+}
+async function openWowRes(worldKey, chId){
+  const ch = (window.EVOLVE_CHALLENGES || []).find(c => c.id === chId);
+  if(!ch) return;
+  _wowResOpener = document.activeElement;
+  _el("wowResSub").textContent = worldKeyLabel(worldKey) + " · " + ch.titel;
+  _el("wowResBody").innerHTML = `<div class="wowr-empty">lade Ergebnisse …</div>`;
+  _el("wowRes").hidden = false;
+  _el("wowResClose").focus();
+  let rows = null, failed = false;
+  try { rows = await fetchWorldBoard(worldKey, chId); }
+  catch(e){ failed = true; console.warn("Vergleichsraum: Ergebnisse nicht ladbar (View challenge_board vorhanden?).", e && e.message || e); }
+  if(_el("wowRes").hidden) return;   // inzwischen geschlossen
+  renderWowRes(worldKey, ch, rows, failed);
+}
+function renderWowRes(worldKey, ch, rows, failed){
+  const mine = wowMine[worldKey + "|" + ch.id];
+  const mineHtml = mine
+    ? `<div class="wowr-head">Du hast diese Welt in <b>${mine.gens.toLocaleString("de-DE")}</b> Generationen geschafft — als <b>${mine.form}</b>.</div>`
+    : `<div class="wowr-head">Du hast diese Welt noch nicht geschafft. Es gibt keine Frist und nichts zu verpassen — sie bleibt offen.</div>`;
+  if(failed || !rows){
+    _el("wowResBody").innerHTML = mineHtml +
+      `<div class="wowr-empty">Der gemeinsame Vergleichsraum ist gerade nicht erreichbar. Dein eigenes Ergebnis bleibt hier trotzdem stehen.</div>`;
+    return;
+  }
+  if(!rows.length){
+    _el("wowResBody").innerHTML = mineHtml +
+      `<div class="wowr-empty">Noch hat niemand ein Ergebnis aus dieser Welt geteilt.${session ? "" : " Ergebnisse teilen geht mit einem Konto (Details ⋯ → Konto) — <b>ansehen</b> kannst du sie immer, auch ohne."}</div>`;
+    return;
+  }
+  // (1) Vielfalt: welche Formen sind aus DERSELBEN Welt entstanden?
+  const byForm = new Map();
+  for(const r of rows){
+    const e = byForm.get(r.form) || { n: 0, mine: false };
+    e.n++; e.mine = e.mine || !!r.is_me; byForm.set(r.form, e);
+  }
+  const forms = [...byForm.entries()].sort((a,b) => b[1].n - a[1].n || a[0].localeCompare(b[0], "de"));
+  const maxN = forms[0][1].n;
+  const formsHtml = forms.map(([nm, e]) =>
+    `<div class="wowr-form${e.mine?" mine":""}">`+
+      `<span class="wowr-ic">${formIcon(nm)}</span>`+
+      `<span class="wowr-nm">${nm}${e.mine?" · du":""}</span>`+
+      `<span class="wowr-bar"><span style="width:${Math.round(e.n/maxN*100)}%"></span></span>`+
+      `<span class="wowr-n">${e.n}</span>`+
+    `</div>`).join("");
+  const spielerWort = rows.length === 1 ? "Ein Spieler hat" : `${rows.length} Spieler haben`;
+  const formWort = forms.length === 1 ? "eine einzige Form" : `${forms.length} verschiedene Formen`;
+  // (2) Generationenzahl — bewusst DANACH und ohne Namen: es geht um die Welt, nicht
+  //     um Personen. Wer weit hinten liegt, sieht trotzdem seine eigene Zeile.
+  const top = rows.slice(0, 10);
+  const myIdx = rows.findIndex(r => r.is_me);
+  const rankRow = (r, i) => `<li class="${r.is_me?"mine":""}">`+
+      `<span class="wowr-pos">${i+1}.</span>`+
+      `<span class="wowr-gen">${r.generations.toLocaleString("de-DE")} Gen.</span>`+
+      `<span>${formIcon(r.form)} ${r.form}${r.is_me?" · du":""}</span></li>`;
+  let rankHtml = top.map(rankRow).join("");
+  if(myIdx >= top.length) rankHtml += `<li class="mine"><span class="wowr-pos">…</span></li>` + rankRow(rows[myIdx], myIdx);
+  _el("wowResBody").innerHTML = mineHtml +
+    `<div class="wowr-sec">Vielfalt — was aus dieser Welt geworden ist</div>`+
+    `<p class="gb-sub">${spielerWort} aus derselben Startwelt ${formWort} hervorgebracht.</p>`+
+    `<div class="wowr-forms">${formsHtml}</div>`+
+    `<div class="wowr-sec">In wie wenigen Generationen</div>`+
+    `<ol class="wowr-rank">${rankHtml}</ol>`;
+}
+document.getElementById("wowResClose").addEventListener("click", closeWowRes);
 
 // ---- Teilbarer Schnappschuss: Wesen im Habitat + Name + Ministory als Bild ----
 // Rein offline (Canvas → PNG). Web-Share-API, wo vorhanden (Mobil: native Teilen-Auswahl),

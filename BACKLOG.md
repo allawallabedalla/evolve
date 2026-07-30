@@ -739,16 +739,49 @@ simulations-verifizierte Herausforderungen spielbar (Button „Herausforderungen
 Suche/Filter, HUD), schließt genau die Kompetenz-Lücke aus der Diagnose. **Damit ist dieser
 Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschieden:
 
-- [ ] **V1-Ausbaustufen** — **Modell: Opus** (Spieldesign-/Architektur-Abwägungen mit viel
-  Ermessen — erst nach Produktentscheidung des Nutzers starten) — feste Startwelt für alle,
-  Bestenliste nach Generationenzahl, „Welt der Woche" mit Ergebnis-Vergleich. Brauchen einen
-  Server/Vergleichsraum (Supabase steht bereits) — bewusst nicht Teil der Erstversion.
-- [ ] **V2–V5** (`docs/bindung-konzept.md`) — **Modell: Opus** (aus demselben Grund wie oben;
-  ebenfalls erst nach Produktentscheidung) — Trägheit der Welt, Aussterben nur unter
-  Beobachtung, Wissen als Meta-Fortschritt, Verbundenheit über einen wöchentlichen festen
-  Seed. Nur recherchiert/vorgeschlagen, keine Umsetzung — nächste Empfehlung wäre V4 (Wissen
-  als Meta-Fortschritt). **Start ist Produktentscheidung des Nutzers**, nicht eigenmächtig
-  umsetzen.
+- [x] **V1-Ausbaustufen (erledigt 2026-07-30, Opus) — feste Startwelt, Bestenliste, „Welt der
+  Woche":** Nutzer-Entscheidung „ja, starten". Alle drei Stufen hängen an EINEM Mechanismus,
+  der festen Startwelt: eine Sandkasten-Herausforderung ist grundsätzlich nicht vergleichbar
+  (jeder startet mit anderen Reglern/Genom/Seed).
+  **1. Feste Startwelt** — für jede der 271 Herausforderungen aus ihren eigenen Daten
+  abgeleitet: beschränkte Regler auf die Mitte ihres erlaubten Bereichs, unbeschränkte
+  deterministisch aus dem Weltschlüssel-Seed (Korridor 0.15–0.85), Schwarm-Gründer aus
+  demselben Seed. Die Welt erfüllt die Beschränkung damit per Konstruktion — die Uhr läuft
+  ab Generation 0 statt erst nach Suchen im „warten"-Zustand — und existiert für alle 271
+  ohne Pflegeaufwand. **Determinismus gemessen** (Chromium, zwei unabhängige Ladevorgänge):
+  400 Generationen von Hand + 300 mit echter Zeitschleife → beide Male max|Δ| über alle 25
+  Gene = 0, identische Form (der Schwarm ist ein reiner mulberry32-Prozess, nichts liest die
+  Uhr). Erreichbar über eine leise Zweitaktion „gleiche Startwelt für alle ↗" auf jeder
+  Herausforderungs-Karte — „annehmen" bleibt unverändert der unberührte Sandkasten-Pfad.
+  **2. Bestenliste** — neue Supabase-Tabelle `challenge_results` (streng privat, RLS wie
+  `creatures`) + anonymisierende View `challenge_board` (liefert nur Generationenzahl/Form/
+  Reich/„das war ich", nie eine `user_id`) in `supabase/schema.sql`. Primärschlüssel
+  (user_id, world_key, challenge_id) verhindert Fluten, `generations >= 5` spiegelt
+  `CHAL_MIN_GENS`. Anti-Manipulation bewusst minimal (Client ist autoritativ, keine
+  Server-Simulation, kein E-Sport-Titel) — explizit nicht gebaut: signierte Läufe,
+  Nachsimulation, Replay-Prüfung.
+  **3. Welt der Woche** — deterministisch aus der ISO-Kalenderwoche in UTC (kein Server-Cron,
+  Wechsel für alle zur selben Sekunde), „schwer" ausgeschlossen (Einladung, keine Kür). Der
+  Vergleich zeigt zuerst die **Vielfalt** der entstandenen Formen, danach erst die
+  Generationenzahl — ohne Namen. Letzte 3 Wochen bleiben spielbar, kein Nachhol-Druck.
+  Wohnort: oben im bestehenden „Herausforderungen ↗"-Modal, kein neuer Hauptbildschirm-Knopf
+  (Komplexitäts-Audit hatte die Hauptansicht bewusst entlastet). V5 aus
+  `docs/bindung-konzept.md` war inhaltsgleich mit „Welt der Woche" und damit miterledigt.
+  **Alle Leitplanken aus `docs/bindung-konzept.md` gewahrt:** kein Streak/Login-Bonus, keine
+  Frist, kein Verfall, verpasste Wochen bleiben spielbar, kein Vollständigkeits-Balken.
+  **⚠️ Manuelle Aktion nötig:** `supabase/schema.sql`s neuer Block (`challenge_results` +
+  `challenge_board`) ist NICHT automatisch auf der Live-Datenbank angewendet — das Skript
+  muss einmal im Supabase-Dashboard (SQL Editor) ausgeführt werden. Bis dahin bleibt die
+  Funktion lokal nutzbar (eigene Bestzeit in `localStorage`), der Cloud-Vergleich scheitert
+  sauber und unauffällig (abgefangen, „Der gemeinsame Vergleichsraum ist gerade nicht
+  erreichbar" statt Fehler).
+  **Getestet:** alle 20 Gates grün (inkl. `ui-calm-check`, `app-parity` exakt 0) — unabhängig
+  gegengeprüft (eigener Gate-Lauf + eigener Playwright-Lauf: feste Welt betreten, Regler/Seed/
+  Generation-0-Reset/aktive-Herausforderungs-Karte alle korrekt bestätigt, 0 Konsolenfehler).
+- [ ] **V2/V3** (`docs/bindung-konzept.md`) — **Modell: Opus** (Produktentscheidung, nicht
+  eigenmächtig umsetzen) — Trägheit der Welt (Eingriffe brauchen Zeit), Aussterben nur unter
+  Beobachtung. Beide verändern das Grundgefühl des Spiels stärker als V1/V4/V5 und sind laut
+  `docs/bindung-konzept.md` bewusst als eigene, spätere Entscheidung markiert.
 
 ### 6 · Große Brocken — Rest-Achsen (Punkt 2 abgeschlossen, neu bewertet 2026-07-30 — s. u.)
 

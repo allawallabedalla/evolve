@@ -554,11 +554,60 @@
   .chal-tag.chal-diff-leicht { color: var(--bio-dim); }
   .chal-tag.chal-diff-schwer { color: var(--danger); }
   .chal-item-start { flex: 0 0 auto; align-self: center; min-width: 96px; }
+  /* Zweitaktion der Karte: bewusst leiser als „annehmen". Hoehere Spezifitaet, weil
+     .link weiter unten `font: inherit` setzt und eine reine Klassen-Regel ueberschriebe. */
+  .chal-item .chal-item-fixed { margin-top: 6px; font-size: .68rem; padding: 2px 0;
+    color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--line); }
+  .chal-item .chal-item-fixed:hover { color: var(--bio-dim); border-bottom-color: var(--bio-dim); }
   .chal-empty { color: var(--muted); font-size: .82rem; padding: 20px 4px; text-align: center; }
   .chal-more-hint { color: var(--muted); font-size: .72rem; padding: 8px 2px 0; text-align: center; }
   /* ---- P1.4 (Komplexitaets-Audit): kuratierte Kurzauswahl vor der Volltliste ----
      Gemeinsame Klassen fuer Herausforderungen- UND Umwelt-Einfluss-Katalog, damit
      beide Modale denselben "Alle … anzeigen"-Bedienschritt gleich aussehen lassen. */
+  /* ---- Welt der Woche + Ergebnis-Vergleich (V1-Ausbaustufe) ----
+     Bewusst ohne neue Farbwerte: dieselben Token wie die Herausforderungs-Karten,
+     nur mit einem ruhigen Akzent-Rand, damit die Wochenwelt oben im Modal als
+     eigener Block lesbar ist, ohne zu blinken oder zu drängen. */
+  .wow { background: var(--abyss); border: 1px solid var(--bio-dim); border-radius: 14px; padding: 13px 15px; margin: 4px 0 14px; }
+  .wow[hidden] { display: none; }
+  .wow-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .wow-eyebrow { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--bio-dim); font-weight: 700; }
+  .wow-week { font-family: var(--mono); font-size: .66rem; color: var(--muted); }
+  .wow-title { font-size: .92rem; font-weight: 700; color: var(--text); margin-top: 5px; line-height: 1.35; }
+  .wow-desc { font-size: .78rem; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+  .wow-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .wow-meta .ic { width: .95em; height: .95em; vertical-align: -.12em; }
+  .wow-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 11px; }
+  .wow-note { font-size: .7rem; color: var(--muted); line-height: 1.5; margin: 9px 0 0; }
+  .wow-env { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 11px; margin-top: 8px;
+    font-family: var(--mono); font-size: .66rem; color: var(--muted); }
+  .wow-env .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
+  .wow-past { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-top: 9px; font-size: .68rem; color: var(--muted); }
+  .wow-past .wow-past-lab { margin-right: 2px; }
+  .wow-past .link, .wow-actions .link { font-size: .74rem; }
+  .wow-mine { font-size: .72rem; font-family: var(--mono); color: var(--bio-dim); margin-top: 7px; }
+  /* Vielfalts-Tafel: Formhäufigkeit als ruhiger Balken, kein Punkte-Ranking. */
+  .wowr-head { font-size: .8rem; color: var(--text); line-height: 1.55; margin: 4px 0 12px; }
+  .wowr-sec { font-size: .66rem; letter-spacing: .09em; text-transform: uppercase; color: var(--bio-dim);
+    font-weight: 700; margin: 18px 0 8px; }
+  .wowr-forms { display: flex; flex-direction: column; gap: 6px; }
+  /* Raster statt flex: die Balken MÜSSEN an derselben Kante beginnen, sonst sähen zwei
+     gleich häufige Formen unterschiedlich häufig aus (unterschiedlich lange Namen). */
+  .wowr-form { display: grid; grid-template-columns: 1.05rem minmax(0, 12rem) 1fr auto;
+    align-items: center; gap: 9px; font-size: .78rem; color: var(--text); }
+  @media (max-width: 520px) { .wowr-form { grid-template-columns: 1.05rem minmax(0, 7.5rem) 1fr auto; } }
+  .wowr-form.mine { color: var(--bio-dim); font-weight: 700; }
+  .wowr-form .wowr-ic { width: 1.05rem; height: 1.05rem; color: var(--bio-dim); }
+  .wowr-form .wowr-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wowr-form .wowr-bar { height: 6px; border-radius: 999px; background: var(--line-soft); overflow: hidden; min-width: 40px; }
+  .wowr-form .wowr-bar span { display: block; height: 100%; background: var(--bio); border-radius: 999px; }
+  .wowr-form .wowr-n { flex: 0 0 auto; font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+  .wowr-rank { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  .wowr-rank li { display: flex; align-items: center; gap: 9px; font-size: .76rem; color: var(--muted); }
+  .wowr-rank li.mine { color: var(--bio-dim); font-weight: 700; }
+  .wowr-rank .wowr-pos { flex: 0 0 22px; font-family: var(--mono); font-size: .68rem; text-align: right; }
+  .wowr-rank .wowr-gen { font-family: var(--mono); }
+  .wowr-empty { color: var(--muted); font-size: .8rem; line-height: 1.6; padding: 10px 0; }
   .catalog-curated-note { color: var(--muted); font-size: .78rem; margin: 2px 0 10px; line-height: 1.5; }
   .catalog-showall { display: block; width: 100%; text-align: center; margin: 12px 0 4px; }
   .catalog-showall[hidden] { display: none; }   /* selbes [hidden]-vs-display-Bugfix-Muster wie bei .infl-cats oben */

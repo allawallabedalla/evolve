@@ -112,9 +112,45 @@ gefunden und behoben: das unbeeinflusste Start-Genom klassifiziert schon als „
 Euglenoid · Mixotroph" — ohne Mindest-Generationenzahl (`CHAL_MIN_GENS`) wäre jede
 Protist-Herausforderung ein Sofort-Gewinn ganz ohne Zutun gewesen. Fortschritt (welche
 Herausforderung geschafft ist) übersteht „Neues Leben" (eigener localStorage-Schlüssel).
-Abbrechen/erneut versuchen jederzeit möglich, keine Strafe. Ausbaustufen (feste Startwelt,
-Bestenliste, „Welt der Woche") weiterhin offen — brauchen einen Server/Vergleichsraum, bewusst
-nicht Teil dieses Schritts.
+Abbrechen/erneut versuchen jederzeit möglich, keine Strafe.
+
+**Ausbaustufen (2026-07-30): umgesetzt.** Alle drei hängen an EINEM Mechanismus — der
+**festen Startwelt**. Eine Sandkasten-Herausforderung ist grundsätzlich nicht vergleichbar
+(jeder startet mit anderen Reglern, anderem Genom, anderem Seed), eine Generationenzahl daraus
+sagt über Können nichts. Deshalb:
+
+1. **Feste Startwelt.** Jede der 271 Herausforderungen hat eine aus ihren eigenen Daten
+   abgeleitete Startwelt: je *beschränkter* Regler steht auf der **Mitte seines erlaubten
+   Bereichs**, unbeschränkte Regler kommen deterministisch aus dem Weltschlüssel-Seed
+   (Korridor 0,15–0,85), der Schwarm startet mit gestreuten Gründern aus demselben Seed.
+   Drei Vorteile gegenüber einer handkuratierten Liste: die Startwelt erfüllt die
+   Beschränkung per Konstruktion (die Uhr läuft ab Generation 0 statt erst nach Suchen im
+   „warten"-Zustand), sie existiert für alle 271 ohne Pflegeaufwand, und sie ist aus den
+   Daten nachrechenbar. Erreichbar über eine bewusst leise Zweitaktion auf jeder Karte
+   („gleiche Startwelt für alle ↗"); „annehmen" bleibt unverändert der Sandkasten-Pfad.
+   **Determinismus gemessen** (Chromium, je zwei unabhängige Ladevorgänge derselben Welt):
+   400 Generationen von Hand gerechnet → max|Δ| über alle 25 Gene **= 0**; 300 Generationen
+   mit der echten Zeitschleife (Frame-Timing, Zensus an der Wanduhr) → ebenfalls **0**,
+   gleiche Form. Der Schwarm ist ein reiner mulberry32-Prozess; nichts im Simulationspfad
+   liest die Uhr. Verbleibende Zeitabhängigkeit nur im **Ablesen** (Zensus-Takt entscheidet
+   bei gespaltenem Schwarm einen Takt früher/später, welcher Cluster „dein Wesen" ist) —
+   bewusst nicht wegprogrammiert, weil ein fester Zensus-Takt die Anzeige auf schwachen
+   Geräten einfrieren ließe.
+2. **Bestenliste nach Generationenzahl.** Neue Supabase-Tabelle `challenge_results` plus
+   anonymisierende View `challenge_board` (`supabase/schema.sql`). Anti-Manipulation bewusst
+   minimal — der Client ist autoritativ, es gibt keine Server-Simulation und das hier ist
+   kein E-Sport-Titel: Schreiben nur angemeldet und nur die eigene Zeile (RLS), genau **ein**
+   Eintrag je Spieler und Welt (Primärschlüssel, kein Fluten), `generations >= 5` spiegelt
+   `CHAL_MIN_GENS`. Ausdrücklich *nicht* gebaut: signierte Läufe, Nachsimulation, Replay.
+3. **„Welt der Woche".** Deterministisch aus der **ISO-Kalenderwoche in UTC** abgeleitet
+   (`2026-W31` → Herausforderung + Startwelt), rein clientseitig — kein Server-Cron, nichts,
+   das ausfallen kann; UTC, damit die Welt für alle zur selben Sekunde wechselt. Der
+   Ergebnis-Vergleich zeigt **zuerst die Vielfalt** („6 Spieler haben aus derselben Startwelt
+   4 verschiedene Formen hervorgebracht", Formhäufigkeit als Balken) und erst danach die
+   Generationenzahl — ohne Namen, weil es um die Welt geht und nicht um Personen. Die letzten
+   Wochen bleiben spielbar und stehen als ruhige Liste in der Karte: kein Nachhol-Druck, keine
+   Frist, kein Verfall. Wohnort: oben im bestehenden Modal „Herausforderungen ↗" statt als
+   neuer Knopf im Hauptbildschirm (der Komplexitäts-Audit hat die Hauptansicht entlastet).
 
 ### V2 · Trägheit der Welt — Eingriffe brauchen Zeit
 
@@ -148,6 +184,9 @@ Fortschrittsbaum, ohne ein Fortschrittsbalken zu sein.
 Ein wöchentlicher fester Startzustand (Seed). Alle spielen dieselbe Welt; am Ende sieht man,
 welche Formen andere hervorgebracht haben. Supabase steht bereits. Kein Wettbewerb um Punkte,
 sondern um **Vielfalt** — „drei Spieler haben aus dieser Welt einen Pilz gemacht, du einen Fisch".
+
+**Status (2026-07-30): umgesetzt als dritte V1-Ausbaustufe** (Details oben unter V1) — V5 war
+inhaltsgleich mit „Welt der Woche" und wird nicht zusätzlich gebaut.
 
 ---
 
