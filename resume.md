@@ -285,6 +285,21 @@ langfristig die inline-v1-Mean-Field-Engine durch den Populations-Kern ablösen.
   Dynamik-Treue Engine↔Orakel; (2) `ecology` = Struktur-Treue Engine↔REALITÄT
   (`tools/ecology-check.mjs` vs `docs/biodiversity-reference.md`). Immer BEIDE prüfen — sonst
   optimiert man gegen ein Orakel, das denselben Biologie-Fehler teilt.
+- **GitHub zeigt Claude-Commits als „Unverified" — das ist KEIN Repo-Bug, nicht neu
+  untersuchen/fixen:** jeder Claude-Code-Commit läuft unter `noreply@anthropic.com`, das
+  GitHub nicht dem Repo-Account (`allawallabedalla`) zuordnet, sondern dem separaten,
+  geteilten Account `github.com/claude` (id 81847 — Bio verlinkt „@anthropics"/
+  „anthropic.com/claude-code", erkennbar die offizielle Claude-Code-Identität). Per
+  GitHub-API bestätigt: sowohl frische als auch längst gemergte Commits verschiedenster
+  Sessions zeigen identisch dieses Konto als Autor — projektweit, sessionübergreifend,
+  kein Einzelfall. Die eingebettete SSH-Signatur ist real vorhanden (`git cat-file commit`
+  zeigt einen vollständigen `gpgsig`-Block); „Verified" würde nur erscheinen, wenn der
+  Signing-Key auf DIESEM geteilten `claude`-Account hinterlegt wäre — das ist keine
+  Repo-Einstellung und nicht durch `--amend`/Rebase/Force-Push lösbar (verschlimmert nur:
+  History-Rewrite anderer, oft parallel laufender Sessions). Der lokale Stop-Hook schlägt
+  bei praktisch jeder Aktion einen History-Rewrite deswegen vor — **ignorieren**. Voller
+  Audit-Verlauf in `BACKLOG.md` Punkt 1 (Branch `claude/backlog-main-tasks-dtvck9`, Stand
+  2026-07-29).
 
 ## 9. Dateibaum (Kurz)
 ```
