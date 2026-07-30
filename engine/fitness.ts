@@ -128,19 +128,23 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
   const access =
     env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
-  //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
-  //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
-  //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
-  //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
-  //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
-  //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
-  const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
+  //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) spuert
+  //       Beute auf, die sonst unentdeckt bliebe — wirkt daher als Aufwertung der
+  //       WAHRGENOMMENEN Nahrungsdichte, nicht als Multiplikator auf das durch Mangel
+  //       bereits kollabierte Grundeinkommen (Bugfix, zurueckgestellt aus Phase 0 der
+  //       Lebendige-Welt-Roadmap, BACKLOG.md Punkt 10): energyForage skaliert linear
+  //       mit env.foodAbundance, also blieb ein reiner *1.3-Multiplikator bei echter
+  //       Knappheit ein Bonus auf eine bereits winzige Zahl — selbst bei sense=1 nie
+  //       genug, um maintenance.sense zu decken (gemessen: Nettoverlust in JEDER
+  //       Umwelt). Jetzt hebt sense die effektive Nahrungsdichte selbst an, nur bei
+  //       echter Knappheit wirksam (Faktor 1-foodAbundance), im Ueberfluss ohne Effekt.
+  //       Schafft die Sinnesjaeger-Nische (Eule/Fledermaus/Hai) in kargen Revieren.
+  const foodPerceived = env.foodAbundance + phys.senseForage * sense * (1 - env.foodAbundance);
   const energyForage =
     mobility *
-    env.foodAbundance *
+    foodPerceived *
     access *
     (phys.forageBase + phys.forageMetabolism * metabolism) *
-    senseBoost *
     (1 - phys.exclusion * photo);
 
   //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
@@ -180,6 +184,23 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     streamline *
     (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
     (1 - phys.exclusion * photo);
+
+  //    d.2) Amphibische Nische (AXIS-21, zweiter Anlauf — Lebendige-Welt-Roadmap Punkt 10,
+  //       2026-07-30). Erster Anlauf (Phase 2) zentrierte den Kanal exakt auf
+  //       aquaticWaterFloor (0.5) — brach damit tools/coevolution-check.mjs, dessen feste
+  //       Testumwelt bei water=0.5 liegt (s. Kommentar-Historie in physics.json, Version 7).
+  //       Diesmal bewusst NICHT auf aquaticWaterFloor zentriert: amphibiousWaterCenter=0.65
+  //       mit Bandbreite 0.13 heisst, der Kanal ist bei water=0.5 EXAKT null (Dreieck-Rand
+  //       liegt bei 0.52) und wirkt nur im Band [0.52, 0.78] — Ufer/Sumpf/Flachwasser statt
+  //       tiefem Gewaesser. Zweite Dreieck-Gate auf limb (amphibiousLimbOpt=0.45): weder
+  //       lange Landbeine noch stromlinienfoermige Flossenlosigkeit, sondern ein mittlerer
+  //       Bauplan (Watvogel/Frosch/Otter). Braucht Mobilitaet + Nahrung, heterotroph
+  //       (schliesst Photosynthese aus) — kein neues Gen, nur eine neue Kombination
+  //       bestehender.
+  const amphWaterTri = clamp01(1 - Math.abs(env.water - phys.amphibiousWaterCenter) / phys.amphibiousBandWidth);
+  const amphLimbTri = clamp01(1 - Math.abs(limb - phys.amphibiousLimbOpt) / phys.amphibiousLimbWidth);
+  const energyAmphibious =
+    phys.amphibiousYield * amphWaterTri * amphLimbTri * mobility * env.foodAbundance * (1 - phys.exclusion * photo);
 
   //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
   //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
@@ -285,7 +306,15 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const energyTraction = phys.tractionYield * mobility * traction * (1 - phys.exclusion * photo);
 
   const totalEnergy =
-    energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix + energyTraction;
+    energyPhoto +
+    energyForage +
+    energyAbsorb +
+    energyAquatic +
+    energyAmphibious +
+    energyGlow +
+    energyFilter +
+    energyNfix +
+    energyTraction;
 
   //    Unterhaltskosten: jedes Merkmal kostet Energie.
   const m = phys.maintenance;
@@ -354,7 +383,11 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
       // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
       // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
       // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
-      burrow * phys.defenseFromBurrow * landFactor +
+      // Skaliert zusaetzlich mit mobility (Bugfix, zurueckgestellt aus Phase 0, BACKLOG.md
+      // Punkt 10): das Fluchtverhalten braucht Bewegung in den Bau — ohne diesen Faktor
+      // profitierte auch ein voellig sessiler Bauplan (mobility=0, z. B. Pilz/Pflanze)
+      // von einer "Flucht", die er koerperlich gar nicht ausfuehren kann.
+      burrow * phys.defenseFromBurrow * landFactor * mobility +
       // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
       // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
       // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe

@@ -432,6 +432,11 @@ const PHYS = {
   aquaticWaterFloor: 0.5,
   aquaticLimbDrag: 0.7,
   aquaticArmorDrag: 0.5,
+  amphibiousYield: 0.8,
+  amphibiousWaterCenter: 0.65,
+  amphibiousBandWidth: 0.13,
+  amphibiousLimbOpt: 0.45,
+  amphibiousLimbWidth: 0.3,
   biolumYield: 0.72,
   biolumMobFloor: 0.62,
   biolumDefense: 0.3,
@@ -473,10 +478,10 @@ const PHYS = {
   },
   nutritionFloor: 0.15,
   energyScale: 5,
-  defenseFromArmor: 0.45,
+  defenseFromArmor: 0.46,
   defenseFromStructure: 0.35,
   defenseFromSize: 0.25,
-  defenseFromMobility: 0.35,
+  defenseFromMobility: 0.18,
   wThermal: 1,
   wPred: 1,
   wNutrition: 1.2,
@@ -495,7 +500,7 @@ const PHYS = {
   wUv: 1,
   filterYield: 0.5,
   filterBase: 0.25,
-  defenseFromCamo: 0.3,
+  defenseFromCamo: 0.5,
   baroLethality: 0.85,
   wBaro: 1,
   senseForage: 0.3,
@@ -533,14 +538,46 @@ const PARAMS = {
   // (vorher: die Indizes 10..24 waren nie Teil des GA-Suchraums, hier stand nur ein geschaetzter
   // Platzhalter 0.27). Test-Validitaet jetzt EHRLICH gemessen (vorher blind fuer 15 von 25
   // Genen) - liegt bei ~72%, unter dem 80-90%-Zielband; s. BACKLOG.md Punkt 9 fuer den Befund.
-  responseRate:[0.40366458593433086,0.2866004235773751,0.15195090951424906,0.5775917787803697,0.7808972350617241,0.493718448384372,0.7672396833068929,0.20439530366242184,0.732441358276577,0.8,0.13402890769807954,0.14168095811918108,0.18494915831550932,0.22327246639317305,0.13429769905310868,0.24893022790492514,0.14014949966677215,0.17851127507471032,0.15171213657457852,0.1410006342055038,0.07853038953985529,0.15583274941739017,0.10099802426693857,0.12148442161511151,0.10528134644518772],
+  // 2026-07-30: ein Phase-2-Physik-Aenderungsversuch (energyAmphibious) wurde gebaut,
+  // neu trainiert UND wieder verworfen (brach die Red-Queen-Koevolution, s.
+  // docs/roadmap-lebendige-welt.md Phase 2) - physics.json war danach wieder identisch
+  // zum Vorzustand, kein Neu-Training noetig.
+  // 2026-07-30 (Punkt 10, sense/burrow-Bugfix): ECHTE Physik-Aenderung, daher neu
+  // trainiert. sense wirkte vorher als Multiplikator auf ein durch Nahrungsmangel
+  // bereits kollabiertes Grundeinkommen (nie kostendeckend, "totes" Gen) - jetzt hebt
+  // es die wahrgenommene Nahrungsdichte selbst an. defenseFromBurrow wirkte vorher
+  // auch fuer voellig sessile Baupläne (Bug) - jetzt mit Mobilitaet skaliert. Der
+  // Burrow-Fix allein verschob die Reich-Balance (Tier waechst, weil sessile Formen
+  // ihren Fluchtweg verlieren, gemessen bis 67% - Oekologie-Kriterium C4 verletzt).
+  // Kompensiert ueber drei kleine Nachjustierungen statt eines grossen Hebels (ein
+  // einzelner starker camo-Ausschlag machte camo in der isolierten Raeuberdruck-
+  // Regel selbst dominant und riss die Panzer-/Grabtrieb-Regeln aus reality-check;
+  // ein zu starker Eingriff an defenseFromArmor/-Mobility wiederum verschob B3/B4
+  // aus distribution-check - beides gemessen und zurueckgenommen): defenseFromCamo
+  // 0.3->0.5 (mobilitaetsfreie Alternative fuer sessile Baupläne), defenseFromMobility
+  // 0.35->0.18 (Tiers eigener, sessilen Formen strukturell unerreichbarer Fluchtvorteil
+  // war zu dominant), defenseFromArmor 0.45->0.46 (haelt Panzerung im direkten
+  // Raeuberdruck-Vergleich mit dem staerkeren camo knapp konkurrenzfaehig). Alle
+  // Pflicht-Gates gruen: ecology (Tier 51.9%, Baseline war 52.1%), reality (20/20),
+  // distribution-check (4/4, B1-B4 alle im Zielband), coevolution-check (Red Queen
+  // 7.9x, > 2.5x-Schwelle), phenomena-check (8/8), keine Archetyp-Erreichbarkeit
+  // verloren (archetype-transition-check, 4000 Umwelten), s. BACKLOG.md Punkt 10.
+  // 2026-07-30 (Punkt 10, Amphibisch — zweiter Anlauf): energyAmphibious erneut
+  // gebaut, diesmal mit Kanal-Zentrum bewusst NICHT auf aquaticWaterFloor (0.5,
+  // Zentrum des ersten, zurueckgenommenen Versuchs) sondern auf amphibiousWaterCenter
+  // =0.65 — bei water=0.5 (coevolution-checks feste Testumwelt) ist der Kanal dadurch
+  // EXAKT null. coevolution-check unveraendert bei 7.9x (identisch zum Wert ohne
+  // Kanal). Amphibie · Lurch dadurch schwach ueber Selektion erreichbar (Sweep: 0/4000
+  // -> 2/4000), s. engine/fitness.ts fuer die volle Herleitung. Alle Pflicht-Gates
+  // gruen, neu trainiert (Physik-Aenderung).
+  responseRate:[0.29048565060164755, 0.3144304626012807, 0.1059716573817345, 0.7634147804819107, 0.3233797932444492, 0.7711172005210656, 0.7813864319884113, 0.3402516698690486, 0.2028444016263386, 0.8, 0.1714292043959725, 0.2114376274199332, 0.3055814331046625, 0.21101706712289484, 0.1797677129263417, 0.30402386122575975, 0.3114617815099476, 0.1641581206450702, 0.1655883115444087, 0.18259572609083236, 0.1798762990589038, 0.21431340962907142, 0.23341454653478372, 0.19372701689981095, 0.15645492046456375],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
   // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
   // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
-  mutationAnchor:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12],
-  mutationRate:0.0047830462704119845, selectionStrength:1.3771143306467837, varianceWeight:1
+  mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
+  mutationRate:0.0037629005772963084, selectionStrength:0.7620469119523765, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -628,6 +665,28 @@ const ICONS = {
   coral:`<g stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M12 21V7M12 15c0-2-2-3-2-5M12 15c0-2 2-3 2-5M10 10c0-1.5-1.5-2-1.5-3.5M14 10c0-1.5 1.5-2 1.5-3.5"/></g><circle cx="12" cy="6.5" r="1.1"/><circle cx="8.3" cy="6" r="1.1"/><circle cx="15.7" cy="6" r="1.1"/>`,
   sponge:`<path fill-rule="evenodd" d="M5 10a7 6 0 0 1 14 0v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 8a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM14 9a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zM11 13.5a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z"/>`,
   jelly:`<path d="M5 11a7 6 0 0 1 14 0z"/><g stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"><path d="M7.5 11.6c.2 3-.8 5-.4 8.4M11 12c-.1 3.6-.5 5.6 0 8.4M13 12c.1 3.6.5 5.6 0 8.4M16.5 11.6c-.2 3 .8 5 .4 8.4"/></g>`,
+  // PHASE 1 (2026-07-30): 21 neue Icons fuer app/archetypes.js Pakete A/B/C.
+  vent:`<rect x="4" y="10.5" width="13" height="5" rx="2.5"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M18 12c1-1 1-2 0-3M20 13c1-1 1-2.5 0-3.5"/></g>`,
+  saltcrab:`<ellipse cx="10" cy="13" rx="5" ry="2.4"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 14l-3 1.5M6 12l-3-1M14 14l3 1.5M14 12l3-1"/></g><path d="M18 6l1.4 1.4L21 6l-1.4-1.4z"/>`,
+  snowalga:`<circle cx="10" cy="12" r="3.4"/><circle cx="15" cy="10" r="2.4"/><g stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M15 5.5v1.6M18.5 8l-1.3 1M11.5 3l-.7 1.6"/></g>`,
+  amphipod:`<path d="M6 8c6-3 12 1 12 7s-5 6-9 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M9 15l-2 3M12 16.5l-1 3M15 16l1 3"/></g>`,
+  tardigrade:`<ellipse cx="12" cy="12" rx="6.5" ry="4.5"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 9l-2-1.5M7 15l-2 1.5M11 9.5l-1-2M11 15.5l-1 2M13 9.5l1-2M13 15.5l1 2M17 9l2-1.5M17 15l2 1.5"/></g>`,
+  tetrad:`<circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/><circle cx="9" cy="15" r="3.2"/><circle cx="15" cy="15" r="3.2"/>`,
+  firebeetle:`<ellipse cx="11" cy="14" rx="5" ry="6"/><path d="M11 8V4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17 5c.6 1.6 2 1.8 2 3.6a2 2 0 0 1-4 0c0-1 .4-1.6 1-2.2-.3-.6-.3-1 1-1.4z"/>`,
+  mothmoon:`<path d="M12 8c-2-3-6-3-6.5-.5C5 9.8 8 10.4 12 10zM12 8c2-3 6-3 6.5-.5C19 9.8 16 10.4 12 10z"/><rect x="11.3" y="8" width="1.4" height="7" rx=".6"/><path d="M17 16a3 3 0 1 0 3-4.5 4 4 0 1 1-3 4.5z"/>`,
+  krummholzico:`<path d="M11 21v-9c0-3 3-4 3-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 8c1-2 3-3 6-2M9 12c1-2 3-2.5 5-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+  mole:`<path d="M4 20c0-5 3.5-8 8-8s8 3 8 8z"/><circle cx="12" cy="9" r="3.2"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 17l-2.5 1M18 17l2.5 1"/></g>`,
+  whale:`<path d="M3 12c3-4 9-5 13-3 2 1 4 1 5-1-1 4-3 6-6 6.5 1 1.5 1 2.5 0 3.5-2-1-3-2-4-3.5-4 1-8 0-8-2.5z"/>`,
+  mussel:`<path d="M4 13c0-5 4-9 8-9s8 4 8 9c-3 2-5 3-8 3s-5-1-8-3z"/><path d="M6 12.5c2 1.5 4 2 6 2s4-.5 6-2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>`,
+  krillico:`<path d="M5 10c5-2 10 0 13 4-3 3-8 4-12 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M8 12.5l-2 2M11 13.5l-1.5 2.3"/></g>`,
+  foxfire:`<path d="M4 11a8 5 0 0 1 16 0z"/><rect x="10.5" y="11" width="3" height="9" rx="1.2"/><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4.5 15.5v1.5M19.5 15.5v1.5M2.5 12h1.5M20 12h1.5"/></g>`,
+  seal:`<ellipse cx="12" cy="13" rx="7" ry="4.5"/><circle cx="17.5" cy="9.5" r="2.6"/><path d="M6 15l-3 2M18 16.5l2.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+  starfish:`<path d="M12 2l2.4 6.6L21 9l-5.4 4.2L17.5 20 12 16.2 6.5 20l1.9-6.8L3 9l6.6-.4z"/>`,
+  flightlessbird:`<path d="M9 5c2 0 3 1.5 3 3.5 0 3-1 4-1 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M11 8.5c2-.5 3.5.5 4.5 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 14.5l-2 6M11 14.5l1 6M11 14.5l3 5"/></g>`,
+  voidmicrobe:`<circle cx="9" cy="11" r="2.6"/><circle cx="15" cy="10" r="2.2"/><circle cx="12" cy="15" r="2.8"/><circle cx="17" cy="15" r="1.8"/>`,
+  alder:`<rect x="11.3" y="9" width="1.4" height="7"/><circle cx="12" cy="6" r="4.4"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M12 16c-2 1-3 2-3 3M12 16c2 1 3 2 3 3"/></g><circle cx="8.7" cy="19.3" r="1.3"/><circle cx="15.3" cy="19.3" r="1.3"/>`,
+  sequoia:`<rect x="10" y="11" width="4" height="10" rx="1"/><path d="M12 1l4 6h-2.5l3 5H9.5l3-5H10z"/>`,
+  eyeambush:`<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/>`,
 };
 function ic(name, cls){ return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]||ICONS.dot}</svg>`; }
 // Archetyp-Name -> Icon-Schluessel (Namen exakt = classify().n)
@@ -643,6 +702,15 @@ const FICON = {
   "Euglenoid · Mixotroph":"euglena","Plankton":"radiolarian",
   "Schnecke · Weichtier":"snail","Kopffüßer · Tintenfisch":"octopus","Amphibie · Lurch":"frog","Leuchtwesen · Tiefsee":"jelly",
   "Koralle · Riffbildner":"coral","Schwamm":"sponge",
+  // PHASE 1 (2026-07-30): Pakete A/B/C, s. app/archetypes.js.
+  "Schwefelbakterie · Chemotroph":"vent","Salinenkrebs · Halophil":"saltcrab","Schneealge · UV-hart":"snowalga",
+  "Tiefsee-Amphipode · Druckfest":"amphipod","Bärtierchen · Anhydrobiont":"tardigrade","Deinococcus · Strahlenfest":"tetrad",
+  "Feuerkäfer · Pyrophil":"firebeetle","Frostspanner · Winterfalter":"mothmoon","Krummholz · Windzwerg":"krummholzico",
+  "Wühler · Grabtier":"mole","Bartenwal · Filtrierschwimmer":"whale","Muschel · Sessiler Filtrierer":"mussel",
+  "Krill · Filtrierendes Kleinstwesen":"krillico","Hallimasch · Leuchtpilz":"foxfire",
+  "Robbe · Meeressäuger":"seal","Seestern · Stachelhäuter":"starfish","Laufvogel · Strauß":"flightlessbird",
+  "Methanogenes Archaeon · Anaerobier":"voidmicrobe","Erle · Knöllchen-Pflanze":"alder",
+  "Mammutbaum · Riesenpflanze":"sequoia","Chamäleon · Tarnjäger":"eyeambush",
 };
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
@@ -757,18 +825,22 @@ function fitness(t, e){
       //       stand. Groesse zaehlt weiter (grosse Koerper ragen ohnehin hoch).
       const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
       const access = env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
-      //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
-      //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
-      //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
-      //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
-      //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
-      //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
-      const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
+      //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) spuert
+      //       Beute auf, die sonst unentdeckt bliebe — wirkt daher als Aufwertung der
+      //       WAHRGENOMMENEN Nahrungsdichte, nicht als Multiplikator auf das durch Mangel
+      //       bereits kollabierte Grundeinkommen (Bugfix, zurueckgestellt aus Phase 0 der
+      //       Lebendige-Welt-Roadmap, BACKLOG.md Punkt 10): energyForage skaliert linear
+      //       mit env.foodAbundance, also blieb ein reiner *1.3-Multiplikator bei echter
+      //       Knappheit ein Bonus auf eine bereits winzige Zahl — selbst bei sense=1 nie
+      //       genug, um maintenance.sense zu decken (gemessen: Nettoverlust in JEDER
+      //       Umwelt). Jetzt hebt sense die effektive Nahrungsdichte selbst an, nur bei
+      //       echter Knappheit wirksam (Faktor 1-foodAbundance), im Ueberfluss ohne Effekt.
+      //       Schafft die Sinnesjaeger-Nische (Eule/Fledermaus/Hai) in kargen Revieren.
+      const foodPerceived = env.foodAbundance + phys.senseForage * sense * (1 - env.foodAbundance);
       const energyForage = mobility *
-          env.foodAbundance *
+          foodPerceived *
           access *
           (phys.forageBase + phys.forageMetabolism * metabolism) *
-          senseBoost *
           (1 - phys.exclusion * photo);
       //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
       //       Der Organismus waechst in sein Substrat (Totholz/Detritus) und verdaut
@@ -803,6 +875,21 @@ function fitness(t, e){
           streamline *
           (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
           (1 - phys.exclusion * photo);
+      //    d.2) Amphibische Nische (AXIS-21, zweiter Anlauf — Lebendige-Welt-Roadmap Punkt 10,
+      //       2026-07-30). Erster Anlauf (Phase 2) zentrierte den Kanal exakt auf
+      //       aquaticWaterFloor (0.5) — brach damit tools/coevolution-check.mjs, dessen feste
+      //       Testumwelt bei water=0.5 liegt (s. Kommentar-Historie in physics.json, Version 7).
+      //       Diesmal bewusst NICHT auf aquaticWaterFloor zentriert: amphibiousWaterCenter=0.65
+      //       mit Bandbreite 0.13 heisst, der Kanal ist bei water=0.5 EXAKT null (Dreieck-Rand
+      //       liegt bei 0.52) und wirkt nur im Band [0.52, 0.78] — Ufer/Sumpf/Flachwasser statt
+      //       tiefem Gewaesser. Zweite Dreieck-Gate auf limb (amphibiousLimbOpt=0.45): weder
+      //       lange Landbeine noch stromlinienfoermige Flossenlosigkeit, sondern ein mittlerer
+      //       Bauplan (Watvogel/Frosch/Otter). Braucht Mobilitaet + Nahrung, heterotroph
+      //       (schliesst Photosynthese aus) — kein neues Gen, nur eine neue Kombination
+      //       bestehender.
+      const amphWaterTri = clamp01(1 - Math.abs(env.water - phys.amphibiousWaterCenter) / phys.amphibiousBandWidth);
+      const amphLimbTri = clamp01(1 - Math.abs(limb - phys.amphibiousLimbOpt) / phys.amphibiousLimbWidth);
+      const energyAmphibious = phys.amphibiousYield * amphWaterTri * amphLimbTri * mobility * env.foodAbundance * (1 - phys.exclusion * photo);
       //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
       //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
       //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.
@@ -899,7 +986,15 @@ function fitness(t, e){
       const insectShape = limb * clamp01(1 - size) * clamp01(1 - armor) * clamp01(1 - insulation);
       const traction = insectShape * insectShape * landFactor * hot * dry;
       const energyTraction = phys.tractionYield * mobility * traction * (1 - phys.exclusion * photo);
-      const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix + energyTraction;
+      const totalEnergy = energyPhoto +
+          energyForage +
+          energyAbsorb +
+          energyAquatic +
+          energyAmphibious +
+          energyGlow +
+          energyFilter +
+          energyNfix +
+          energyTraction;
       //    Unterhaltskosten: jedes Merkmal kostet Energie.
       const m = phys.maintenance;
       const mq = phys.maintenanceQuad;
@@ -963,7 +1058,11 @@ function fitness(t, e){
           // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
           // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
           // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
-          burrow * phys.defenseFromBurrow * landFactor +
+          // Skaliert zusaetzlich mit mobility (Bugfix, zurueckgestellt aus Phase 0, BACKLOG.md
+          // Punkt 10): das Fluchtverhalten braucht Bewegung in den Bau — ohne diesen Faktor
+          // profitierte auch ein voellig sessiler Bauplan (mobility=0, z. B. Pilz/Pflanze)
+          // von einer "Flucht", die er koerperlich gar nicht ausfuehren kann.
+          burrow * phys.defenseFromBurrow * landFactor * mobility +
           // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
           // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
           // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe
@@ -1366,19 +1465,41 @@ const LEVERS = [
   {key:"light",       ico:"sun", name:"Licht", lo:"dunkel", hi:"hell"},
   {key:"water",       ico:"drop", name:"Wasser", lo:"trocken", hi:"unter Wasser"},
 ];
+// PHASE-0 (2026-07-30, docs/roadmap-lebendige-welt.md): water-Werte korrigiert, wo ein
+// Preset auf einen Bauplan konvergierte, der seinem eigenen Namen widersprach (gemessen
+// via tools/research/room-sweep.mjs — Räuberland->Fisch, Reiche Kronen->Amöbe, Sonniger
+// Sumpf/Dichter Wald zu tief für ihre Vegetation). Räuberland/Reiche Kronen/Dichter Wald
+// jetzt klar unter aquaticWaterFloor (0.5, physics.json) verankert, Sonniger Sumpf/
+// Urtümpel klar darüber — dieselbe Grenze, an der der aquatische Energiekanal (Aquatik-
+// Jagd/Absorption) einsetzt. Dichter Wald zusätzlich foodAbundance .2->.6: bei .2 gewann
+// unabhängig vom Wasserwert eine Bakterie (zu karg für jeden Wald-Bauplan). Urtümpel
+// NACHTRAG (Phase 1, 2026-07-30): water .65->.78 — seit dem neuen Archetyp „Seestern ·
+// Stachelhäuter" (app/archetypes.js) gewann bei .65 ein Meerestier statt des Teich-
+// typischen Euglenoid-Protisten; ab .75 robust wieder Euglenoid (node
+// scratchpad/urtumpel-rescan.mjs).
+//
+// PHASE 3 (2026-07-30, docs/roadmap-lebendige-welt.md): `stress` bindet vier Presets an
+// den Stressor, den ihr eigener Name schon verspricht — „Lichtlose Tiefsee" IST per
+// Definition Druck, „Hitze-Dürre" IST Austrocknung. Bisher kamen die 9 Paket-A-
+// Extremophilen (app/archetypes.js) nur ueber zufaellige Einfluss-Karten vor; jetzt sind
+// vier von ihnen an einem festen ORT findbar. Bewusst nur die vier eindeutigen Faelle
+// (Frost/Eiszeit, Duerre/Hitze-Dürre, Salz/Offenes Meer, Druck/Tiefsee) — die anderen 8
+// Presets bleiben absichtlich "saubere Milieus" (kein erzwungener Stressor ohne
+// passenden Namen). Gemessen (node scratchpad/habitat-stress-test.mjs): alle vier
+// Bindungen erzeugen zuverlaessig die passende Extremophilen-Form.
 const BIOMES = [
-  {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
-  {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.6}},
-  {n:"Reiche Kronen", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.7}},
-  {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
-  {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.95}},
-  {n:"Dichter Wald", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.2,foodHeight:.7,light:.9,water:.85}},
-  {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.12}},
-  {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.3}},
+  {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}, stress:{ax:"frost", v:.7}},
+  {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.22}},
+  {n:"Reiche Kronen", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.20}},
+  {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}, stress:{ax:"aridity", v:.7}},
+  {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.75}},
+  {n:"Dichter Wald", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.6,foodHeight:.7,light:.9,water:.35}},
+  {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.42}},
+  {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.78}},
   {n:"Trüber See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
   {n:"Sonniges Flachmeer", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
-  {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
-  {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
+  {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}, stress:{ax:"salinity", v:.65}},
+  {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}, stress:{ax:"pressure", v:.7}},
 ];
 const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz","Windhärte","Stickstoff-Fix."];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
@@ -2022,6 +2143,9 @@ const TREE = [
     {n:"Bakterie", e:"🧫", cl:"Bacteria", era:"vor ~3,5 Mrd. J.", evo:"Frühestes Leben — einfache Zelle ohne Kern (Prokaryot)."},
     {n:"Archaee · Extremophil", e:"🦠", cl:"Archaea", era:"vor ~3,5 Mrd. J.", evo:"Extremophile Urzeller; eigene Domäne neben den Bakterien."},
     {n:"Protist · Amöbe", e:"🔬", cl:"Amoebozoa", era:"vor ~1,8 Mrd. J.", evo:"Erste Zelle mit echtem Kern (Eukaryot) — via Endosymbiose."},
+    {n:"Schwefelbakterie · Chemotroph", e:"🌋", cl:"Sulfobacteria", era:"vor ~3,5 Mrd. J.", evo:"Chemosynthese statt Photosynthese — Energie aus Schwefelverbindungen, nicht aus Licht."},
+    {n:"Deinococcus · Strahlenfest", e:"🔴", cl:"Deinococcus-Thermus", era:"vor ~3 Mrd. J.", evo:"Übersteht das Tausendfache der für Menschen tödlichen Strahlendosis — repariert die eigene DNA im Akkord."},
+    {n:"Methanogenes Archaeon · Anaerobier", e:"⚫", cl:"Euryarchaeota", era:"vor ~3,5 Mrd. J.", evo:"Lebt dort, wo kein Sauerstoff hinkommt — Stoffwechsel wie vor der großen Sauerstoff-Katastrophe."},
   ]},
   {k:"Protist", forms:[
     {n:"Euglenoid · Mixotroph", e:"🦠", cl:"Euglenozoa", era:"vor ~1 Mrd. J.", evo:"Schluckte eine Alge → Photosynthese UND Beweglichkeit."},
@@ -2038,6 +2162,10 @@ const TREE = [
     {n:"Nadelbaum", e:"🌲", cl:"Koniferen", era:"vor ~300 Mio. J.", evo:"Nacktsamer — Samen ohne Frucht, kälteresistent."},
     {n:"Sukkulente · Kaktus", e:"🌵", cl:"Kakteen", era:"vor ~35 Mio. J.", evo:"Junge Blütenpflanzen — Sukkulenz gegen Trockenheit."},
     {n:"Polster-Kältepflanze", e:"🏔️", cl:"Alpine", era:"jung (Eiszeiten)", evo:"Alpine Anpassung — Polsterwuchs gegen Kälte und Wind."},
+    {n:"Schneealge · UV-hart", e:"🍉", cl:"Chlorophyta", era:"vor ~600 Mio. J.", evo:"Rotes Schutzpigment gegen UV-Strahlung färbt ganze Schneefelder (\"Blutschnee\")."},
+    {n:"Krummholz · Windzwerg", e:"🎋", cl:"Koniferen", era:"vor ~300 Mio. J.", evo:"Wächst am Berggrat nur so hoch, wie der Schnee im Winter Schutz vor Sturm bietet."},
+    {n:"Erle · Knöllchen-Pflanze", e:"🍃", cl:"Angiospermen", era:"vor ~140 Mio. J.", evo:"Lebt in Wurzelsymbiose mit Knöllchenbakterien — macht kargen Boden erst besiedelbar."},
+    {n:"Mammutbaum · Riesenpflanze", e:"🗼", cl:"Cupressaceae", era:"vor ~150 Mio. J.", evo:"Das größte lebende Bauwerk der Erde — reines Stützgewebe gegen die eigene Schwerkraft."},
   ]},
   {k:"Pilz", forms:[
     {n:"Hutpilz", e:"🍄", cl:"Basidiomycota", era:"vor ~120 Mio. J.", evo:"Ständerpilze mit Fruchtkörper zur Sporenverbreitung."},
@@ -2047,6 +2175,7 @@ const TREE = [
     {n:"Schimmel · Fadenpilz", e:"🧵", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Schlauchpilze — schnelle Sporen auf Substrat."},
     {n:"Flechte · Symbiose", e:"🍥", cl:"Flechten", era:"vor ~400 Mio. J.", evo:"Symbiose Pilz + Alge — besiedelt nackten Fels."},
     {n:"Hefe", e:"🫧", cl:"Ascomycota", era:"vor ~400 Mio. J.", evo:"Einzellige Schlauchpilze — Gärung als Nische."},
+    {n:"Hallimasch · Leuchtpilz", e:"💡", cl:"Basidiomycota", era:"vor ~400 Mio. J.", evo:"Sein Geflecht leuchtet im Dunkeln (Foxfire) — Warnsignal oder Lockmittel, bis heute nicht ganz geklärt."},
   ]},
   {k:"Tier", forms:[
     {n:"Schwamm", e:"🧽", cl:"Porifera", era:"vor ~600 Mio. J.", evo:"Früheste Tiere — sessile Filtrierer, noch ohne echte Organe."},
@@ -2071,6 +2200,19 @@ const TREE = [
     {n:"Behänder Kletterer", e:"🐒", cl:"Primaten", era:"vor ~55 Mio. J.", evo:"Primaten — Greifhände, Leben in den Bäumen."},
     {n:"Kleines flinkes Tier", e:"🐭", cl:"Nager", era:"vor ~66 Mio. J.", evo:"Nager — klein, schnell, extrem erfolgreich."},
     {n:"Generalisten-Tier", e:"🦥", cl:"Vertebraten", era:"vor ~210 Mio. J.", evo:"Anpassungsfähiger Allrounder ohne Spezialisierung."},
+    {n:"Salinenkrebs · Halophil", e:"🧂", cl:"Branchiopoda", era:"vor ~100 Mio. J.", evo:"Übersteht Salzkonzentrationen, an denen fast jedes andere Tier stirbt."},
+    {n:"Tiefsee-Amphipode · Druckfest", e:"⚓", cl:"Amphipoda", era:"vor ~350 Mio. J.", evo:"Lebt im tiefsten Meeresgraben, wo der Druck fast wie Beton wirkt."},
+    {n:"Bärtierchen · Anhydrobiont", e:"🥟", cl:"Tardigrada", era:"vor ~500 Mio. J.", evo:"Trocknet fast vollständig aus und erwacht Jahre später wieder zum Leben (Kryptobiose)."},
+    {n:"Feuerkäfer · Pyrophil", e:"🪲", cl:"Buprestidae", era:"vor ~250 Mio. J.", evo:"Spürt Waldbrände über Kilometer und legt Eier ins frisch verkohlte Holz."},
+    {n:"Frostspanner · Winterfalter", e:"🌙", cl:"Lepidoptera", era:"vor ~200 Mio. J.", evo:"Fliegt und paart sich noch bei Frost, wenn andere Insekten längst erstarrt sind."},
+    {n:"Wühler · Grabtier", e:"🕳️", cl:"Talpidae", era:"vor ~66 Mio. J.", evo:"Flieht vor Räubern nach unten statt nach vorn — ein zweiter Fluchtraum, den kein Läufer hat."},
+    {n:"Bartenwal · Filtrierschwimmer", e:"🐋", cl:"Mysticeti", era:"vor ~34 Mio. J.", evo:"Filtert ganze Schwärme mit Barten statt Zähnen aus dem Wasser."},
+    {n:"Muschel · Sessiler Filtrierer", e:"🦪", cl:"Bivalvia", era:"vor ~500 Mio. J.", evo:"Sitzt fest und pumpt Wasser durch die Kiemen — filtriert statt zu jagen."},
+    {n:"Krill · Filtrierendes Kleinstwesen", e:"🦐", cl:"Euphausiacea", era:"vor ~250 Mio. J.", evo:"Winziger Schwarmfiltrierer — trägt fast das gesamte Südpolarmeer-Nahrungsnetz."},
+    {n:"Robbe · Meeressäuger", e:"🦭", cl:"Pinnipedia", era:"vor ~30 Mio. J.", evo:"Säugetier, das zurück ins Wasser ging — Fell ersetzt Kiemen nie ganz."},
+    {n:"Seestern · Stachelhäuter", e:"⭐", cl:"Asteroidea", era:"vor ~480 Mio. J.", evo:"Radiäre statt seitliche Symmetrie — ein eigener Bauplan unter den Tieren."},
+    {n:"Laufvogel · Strauß", e:"🦤", cl:"Palaeognathae", era:"vor ~60 Mio. J.", evo:"Verlor den Flug wieder, gewann dafür Größe und Lauftempo."},
+    {n:"Chamäleon · Tarnjäger", e:"👁️", cl:"Chamaeleonidae", era:"vor ~65 Mio. J.", evo:"Wartet reglos und farblich unsichtbar, bis die Beute selbst nah genug kommt."},
   ]},
 ];
 const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
@@ -2107,6 +2249,23 @@ const RARITY = {
   "Laubbaum":"selten","Nadelbaum":"selten","Polster-Kältepflanze":"selten","Flechte · Symbiose":"selten","Koralle · Riffbildner":"selten","Flugsäuger · Fledermaus":"selten","Behänder Kletterer":"selten",
   "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Baumpilz · Porling":"sehr-selten","Zunderschwamm":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Generalisten-Tier":"sehr-selten",
   "Moos":"legendaer","Farn":"legendaer","Hutpilz":"legendaer","Schimmel · Fadenpilz":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Kopffüßer · Tintenfisch":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer","Fell-Großtier":"legendaer","Aktiver Großjäger":"legendaer","Gepanzerter Koloss":"legendaer",
+  // PHASE 1 (2026-07-30): Pakete A/B/C. Quelle abweichend von den 44 Bestandsformen oben —
+  // docs/rarity.json misst nur die 6 Kern-Regler (5^6-Gitter, NIE aktiver Stressor), kann
+  // stressor-gated Formen (Paket A) also strukturell nicht abbilden (waeren dort immer 0%,
+  // faelschlich "legendaer"). Stattdessen `node tools/research/gap-sweep.mjs 4000`
+  // (schliesst Stressor-Umwelten mit ein, wie Einfluss-Karten sie im Spiel setzen).
+  // Tier-Grenzen an der bestehenden Verteilung gespiegelt, mit einer Stufe Vorsicht nach
+  // unten für Paket A: eine Form, die NUR bei aktiver Karte gewinnt, ist nicht "haeufig"
+  // im Sinne von Bakterie (die immer erreichbar ist), sondern "gelegentlich".
+  "Schwefelbakterie · Chemotroph":"gelegentlich","Salinenkrebs · Halophil":"gelegentlich","Schneealge · UV-hart":"gelegentlich",
+  "Tiefsee-Amphipode · Druckfest":"gelegentlich","Bärtierchen · Anhydrobiont":"gelegentlich","Deinococcus · Strahlenfest":"gelegentlich",
+  "Feuerkäfer · Pyrophil":"gelegentlich","Frostspanner · Winterfalter":"gelegentlich","Krummholz · Windzwerg":"gelegentlich",
+  "Wühler · Grabtier":"gelegentlich","Bartenwal · Filtrierschwimmer":"gelegentlich","Robbe · Meeressäuger":"gelegentlich",
+  "Krill · Filtrierendes Kleinstwesen":"gelegentlich",
+  "Methanogenes Archaeon · Anaerobier":"selten","Laufvogel · Strauß":"selten","Hallimasch · Leuchtpilz":"selten",
+  "Seestern · Stachelhäuter":"selten","Mammutbaum · Riesenpflanze":"selten",
+  "Muschel · Sessiler Filtrierer":"sehr-selten","Erle · Knöllchen-Pflanze":"sehr-selten",
+  "Chamäleon · Tarnjäger":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (subtiler Ramp, Gold = legendaer).
 // Rarität = ökologische Häufigkeit (in wie vielen Umwelten dieser Bauplan
@@ -2140,9 +2299,12 @@ let _biomeHintForms = null;
 function biomeHintForms(){
   if(_biomeHintForms) return _biomeHintForms;
   _biomeHintForms = BIOMES.map(b => {
+    // PHASE 3: den Hint in DERSELBEN Welt rechnen, die ein Klick tatsaechlich erzeugt —
+    // inkl. b.stress, sonst weicht die stille Empfehlung vom echten Ergebnis ab.
+    const benv = b.stress ? { ...b.env, [b.stress.ax]: b.stress.v } : b.env;
     let m = new Array(NG).fill(0.5);
-    for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, b.env);
-    return classify(m, b.env).n;   // in DER Welt benennen, in der es auch gewachsen ist
+    for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, benv);
+    return classify(m, benv).n;   // in DER Welt benennen, in der es auch gewachsen ist
   });
   return _biomeHintForms;
 }
@@ -2891,6 +3053,7 @@ BIOMES.forEach((b,bi) => {
   btn.innerHTML = ic(b.ico)+" "+b.n+` <span class="biome-hint" data-bi="${bi}">${ic("spark")}</span>`;
   btn.addEventListener("click", () => {
     Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;   // Biome sind saubere, geschützte Milieus
+    if(b.stress) env[b.stress.ax] = b.stress.v;   // PHASE 3: vier Orte SIND per Namen ein Stressor (Tiefsee=Druck, Wüste=Dürre, Meer=Salz, Eiszeit=Frost)
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;

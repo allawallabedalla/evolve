@@ -10,7 +10,9 @@ bewertet seitdem nur noch den nicht mehr produktiven Mittelfeld-Pfad (Rückfall/
 `ecology-check`), nicht das Spiel selbst. Parität Engine↔Orakel exakt (~1e-16), App-Inline-
 Fitness gegen die Engine generiert (nicht mehr von Hand gepflegt, `npm run app-fitness-check`)
 und exakt abgesichert (`npm run app-parity`, Abweichung 0).
-**44 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
+**65 benannte Lebensformen** (44 + 21 aus Phase 1 „Lebendige Welt", Punkt 10 — 22 geplant,
+Knöllchenbakterium gemessen und wegen Erreichbarkeits-Kollision mit Bakterie/Archaee wieder
+entfernt, s. dort) über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
 **25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
 Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken), Gliedmaßen-
 Substrat-Traktion (Insekten-Nische) sowie 8 Extremnischen-Stressoren (Gift, Sauerstoff, Salz,
@@ -1187,6 +1189,182 @@ hinzugekommenen Gates grün — genau wie im Rest des Repos üblich.
 
 Wird sukzessive abgearbeitet (kein automatischer Trigger mehr aktiv — Start ab
 Mi 2026-07-29).
+
+---
+
+### 10 · Lebendige Welt — Roadmap (2026-07-30, Nutzerauftrag „groß denken")
+
+Ausgangsfrage: kann der Lebensbaum mit einfachen Mitteln mehr Formen bekommen, die auch
+im Spiel erreichbar sind? Antwort in zwei Schritten dokumentiert: **Bestand/Lücken**
+(`docs/lebensbaum-luecken.md`, Sweep-Werkzeuge `tools/research/gap-sweep.mjs` +
+`room-sweep.mjs`) und **Zielzustand/Roadmap** (`docs/roadmap-lebendige-welt.md`). Acht
+Phasen, zunehmend tiefer in der Architektur (Präsentation → Physik → Population → Welt).
+Erfindet keine neue Richtung — Phase 4/5/6/7 docken an bereits hier dokumentierte offene
+Fronten an (P1 Radiation aus Punkt 9, Parasitismus-Rückstellung aus Punkt 6,
+„zeitachse"-Layer aus `app/influences.js`, Populations-/Life-History-Ebene aus dem
+Breiten-Feld-Fazit). Auftrag „lege los, keine Rückfragen" (2026-07-30) — Status je Phase
+wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einsteigen kann.
+
+- [x] **Phase 0 — Medium-Achse entwirren (Fundament) — erledigt (2026-07-30, Commit
+  df4f279).** `water` NICHT in zwei Achsen gesplittet (das wäre der invasivere Weg
+  gewesen) — stattdessen die eigentliche Ursache behoben: fünf Landpflanzen-Prototypen
+  (Laubbaum, Strauch, Farn, Kraut, Blütenkraut) hatten kein `requires`-Fenster für
+  `water` und konnten daher auch in fast vollständig untergetauchten Umwelten gewinnen
+  (z. B. „Sonniges Flachmeer" → „Verholzter Strauch"). Fenster ergänzt + die 4
+  namenswidersprüchlichen Presets korrigiert (Räuberland/Reiche Kronen/Dichter
+  Wald/Sonniger Sumpf/Moderwald/Urtümpel). Alle 12 Presets konvergieren jetzt auf einen
+  zu ihrem Namen passenden Bauplan (verifiziert). `sense`-Bugfix und
+  `defenseFromBurrow`-Bugfix bewusst zurückgestellt (echte physics.json-Änderungen mit
+  vollem Orakel-Regen/Retrain-Zyklus, kein Blocker für Phase 1–3 — s. Commit-Nachricht).
+- [x] **Phase 1 — Pakete A/B/C sichtbar machen — erledigt (2026-07-30, Commit b367538),
+  44 → 65 statt 66 Formen.** 9 Extremophile + 5 (statt geplanter 6) Nischen-Formen + 7
+  Verfeinerungen — Details in `docs/lebensbaum-luecken.md` §6/§8. Regressionsmessung
+  (neues Werkzeug `tools/research/archetype-transition-check.mjs`) fing eine geplante
+  22. Form (Knöllchenbakterium, `nfix`-basiert) beim Drücken von Bakterie/Archaee auf
+  0,3 %/0,9 % Erreichbarkeit (vorher 9,5 %/9,9 %) — entfernt statt live geschickt, s.
+  Kommentar in `app/archetypes.js`. Alle Pflicht-Gates grün (app-parity exakt 0,
+  ecology/reality/exemplar-check/rarity-check/distribution-check/story-check/
+  influence-check).
+- [x] **Phase 2 — Amphibisch als echte Nische — versucht, gemessen, zurückgenommen
+  (2026-07-30).** Ein additiver Energiekanal `energyAmphibious` (Dreieck-Peak bei
+  moderatem `limb`, aktiv in einem schmalen Wasser-Band um `aquaticWaterFloor`) machte
+  Amphibie tatsächlich schwach über Selektion erreichbar (vorher nur Drift) — brach dabei
+  aber `tools/coevolution-check.mjs` (Red-Queen-Koevolution, P5 aus Schritt 2 unten): die
+  Testumwelt liegt bei `water=0.5`, exakt im Zentrum des neuen Kanals. Jeder getestete
+  Ertrag (0,3/0,6/0,9/1,5) senkte das Koevolutions/Kontroll-Verhältnis von 6,6× auf
+  1,4–2,1×, unter die 2,5×-Schwelle — der Kanal gab der Beute-Population einen Ausweg aus
+  dem größenbasierten Rüstungswettlauf. Vollständig zurückgenommen (physics.json,
+  engine/fitness.ts, engine/types.ts, oracle/reference_model.py), alle Gates wieder auf
+  Baseline (coevolution 6.6×, pop-check 0.033, branching 2.43×). Details + Anschluss-Idee
+  (Kanal-Zentrum bewusst nicht auf `aquaticWaterFloor`) in
+  docs/roadmap-lebendige-welt.md Phase 2. **Nebenbefund dabei gefunden und behoben:**
+  Seestern · Stachelhäuter (Phase 1) konkurrierte unabhängig vom Amphibisch-Versuch mit
+  Euglenoid um den Urtümpel-Preset (water=0.65) — `requires` auf `water:[0.55,1.00]`
+  geschärft (Seesterne sind marin) und Urtümpel-Preset auf water=0.78 verschoben.
+  Dreiwertiger Medium-Toggle bleibt aus denselben Gründen wie ursprünglich zurückgestellt.
+- [x] **Phase 3 — Habitat als Weltebene — Kernstück umgesetzt (2026-07-30).** Die 12
+  bestehenden Biom-Presets sind bereits die Habitat-Ebene (`tools/research/room-sweep.mjs`
+  zeigt: jedes hat ein eigenes Formprofil) — keine zusätzliche UI-Ebene nötig, das hätte
+  gegen den Komplexitäts-Audit (Punkt 3, „6 Regler + Presets, nicht mehr") verstoßen.
+  Stattdessen die vier eindeutigen Fälle umgesetzt, bei denen der Name des Ortes den
+  Stressor bereits verspricht: `stress:{ax,v}` an `BIOMES` (app/index.html) —
+  Eiszeit→Frost, Hitze-Dürre→Dürre, Offenes Meer→Salz, Lichtlose Tiefsee→Druck. Ein Klick
+  setzt jetzt zusätzlich diesen Stressor (vorher: alle Presets „sauber", Stressoren nur
+  über Zufalls-Karten). Macht 4 der 9 Paket-A-Extremophilen an einem festen ORT findbar
+  statt nur per Zufall — im Browser verifiziert (Playwright: Klick auf „Lichtlose
+  Tiefsee" → Stress-Chip „Tiefsee-Druck ✕" → Population konvergiert auf „Tiefsee-
+  Amphipode · Druckfest", Screenshot geprüft). `biomeHintForms()` (die stille
+  Empfehlungs-Vorschau) rechnet jetzt in derselben Welt inkl. Stressor, sonst hätte der
+  Hint vom echten Ergebnis abgewichen. Wind/Frost gemeinsam für „Polar" geprüft und
+  verworfen: Frost dominiert ohnehin, Wind haette nichts zusaetzlich sichtbar gemacht.
+  Nachtrag geprüft und erledigt, ohne neuen Code: der hier offen notierte Punkt (Genbuch
+  um räumliche Lesart ergänzen) existiert schon — app/index.html:2394-2405 dokumentiert,
+  dass eine Vorhersage-Version bereits gebaut und mit nur 4/44 Trefferquote verworfen
+  wurde; gebaut wurde stattdessen „Dein Fundort" (app/index.html:2491-2618): die
+  tatsächlich aufgezeichnete Fund-Umwelt je Form inkl. Biom-Name und Wiederherstellen-
+  Knopf. Kein zweiter Anlauf nötig — s. docs/roadmap-lebendige-welt.md Phase 3.
+- [x] **Phase 4 — Speziation — Befund korrigiert (2026-07-30): Mechanik existiert
+  bereits, 8/8 validiert.** `npm run phenomena-check` (`tools/phenomena-check.mjs`) lief
+  bei der Bestandsaufnahme bereits grün für ALLE acht Phänomene inkl. P1 Adaptive
+  Radiation und P2 Sympatrische Speziation/Branching, je mit bestandener Ablationsprobe.
+  Der ursprüngliche Roadmap-Text („bricht die Grundannahme eine Form = ein Genom-Punkt")
+  ging von einem falschen Stand aus — Schritt 2 aus diesem Punkt 9 war schon 2026-07-29
+  erledigt, nur beim Roadmap-Entwurf nicht mit der Lebensbaum-Frage verknüpft worden.
+  `world/population.ts` + `world/cluster.ts` + `world/census.ts` liefern Mehrgipfel-
+  Erkennung + Pro-Cluster-Benennung bereits produktiv im „Lebende Welt"-Overlay. Die
+  echte offene Frage ist keine Physik-, sondern eine UX-Frage: die Single-Habitat-
+  Hauptansicht (`app/index.html`) zeigt bewusst nur EIN Wesen (Produkt-Pfeiler) — wie
+  sich eine Aufspaltung dort andeuten liesse, ohne diese Praemisse zu brechen, braucht
+  einen eigenen Design-Durchlauf mit dem Nutzer, s. docs/roadmap-lebendige-welt.md
+  Phase 4. — **Modell: Opus** fuer diesen Design-Durchlauf, sobald angefordert.
+- [x] **sense/defenseFromBurrow-Bugfix — nachgeholt aus Phase 0 (2026-07-30).** Zwei in
+  Phase 0 bewusst zurückgestellte Physik-Bugs (Commit df4f279: „echte physics.json-
+  Änderungen mit vollem Orakel-Regen/Retrain-Zyklus, kein Blocker für Phase 1–3").
+  **sense** wirkte als Multiplikator (`1 + senseForage*sense*(1-foodAbundance)`) auf
+  `energyForage`, das selbst LINEAR mit `foodAbundance` skaliert — bei echter Knappheit
+  (wo der Bonus greifen soll) blieb selbst sense=1 ein Nettoverlust gegen
+  `maintenance.sense` (gemessen; kein einziger der 65 Archetypen benannte `sense` im
+  Prototyp — ein „totes" Gen ohne eigene Nische). Fix: `sense` hebt jetzt die
+  WAHRGENOMMENE Nahrungsdichte an (`foodPerceived = foodAbundance +
+  senseForage*sense*(1-foodAbundance)`), `energyForage` skaliert damit statt mit dem
+  rohen `foodAbundance`. **defenseFromBurrow** wirkte auch für völlig sessile Baupläne
+  (Bug — ein Pilz/Mikrobe ohne jede Mobilität bekam dieselbe „Flucht in den Bau" wie ein
+  Wühler). Fix: mit `*mobility` skaliert. Der Burrow-Fix allein verschob die Reich-
+  Balance messbar (Tier bis 67 % statt ≤55 % im `ecology`-Gitter, weil sessile Formen
+  ihren einzigen Räuber-Fluchtweg verlieren) — kompensiert über drei kleine
+  Nachjustierungen statt eines großen Hebels (ein einzelner starker `defenseFromCamo`-
+  Ausschlag machte camo in der isolierten Räuberdruck-Regel selbst dominant und riss
+  reality-checks Panzer-/Grabtrieb-Regeln; ein zu starker Eingriff an
+  defenseFromArmor/-Mobility verschob wiederum B3/B4 aus distribution-check — beides
+  gemessen und zurückgenommen): `defenseFromCamo` 0.3→0.5, `defenseFromMobility`
+  0.35→0.18, `defenseFromArmor` 0.45→0.46. Volle Pipeline (Orakel-Regen, Retrain,
+  PARAMS-Sync, Bundle) durchlaufen. Alle Pflicht-Gates grün: parity/app-parity/app-
+  fitness-check exakt 0, ecology (Tier 51,9 %, Baseline war 52,1 %), reality (20/20),
+  distribution-check (4/4, B1–B4 alle im Zielband), mf-fidelity, pop-check,
+  coevolution-check (Red Queen 7,9×, Schwelle 2,5×), phenomena-check (8/8), exemplar-/
+  rarity-/story-/influence-/branching-/world-check — sowie
+  `archetype-transition-check.mjs` (4000 Umwelten): keine der 65 Formen verliert
+  Erreichbarkeit.
+- [x] **Zweiter Anlauf: Amphibische Nische ohne Koevolutions-Konflikt — erfolgreich
+  (2026-07-30).** `energyAmphibious` (AXIS-21) neu gebaut, diesmal mit eigenem Zentrum
+  `amphibiousWaterCenter=0.65` statt `aquaticWaterFloor=0.5` (dem Zentrum des ersten,
+  zurückgenommenen Versuchs) + Bandbreite `amphibiousBandWidth=0.13`: bei `water=0.5`
+  (coevolution-checks feste Testumwelt) ist der Kanal dadurch RECHNERISCH EXAKT null.
+  Zweites Dreieck-Gate auf `limb` (Optimum 0,45) verhindert Missbrauch durch reine
+  Land-/Wassertiere. `coevolution-check` unverändert bei 7,9× (identisch zum Wert ohne
+  Kanal — der erste Anlauf hatte selbst beim niedrigsten Ertrag 1,4–2,1× erreicht).
+  Amphibie · Lurch dadurch schwach über echte Selektion erreichbar (`gap-sweep`: 0/4000
+  → 2/4000 — bewusst schwach, die Nische ist eng). Volle Pipeline durchlaufen (Orakel-
+  Regen, GA-Retrain, PARAMS-Sync, Bundle). Alle Pflicht-Gates grün: parity/app-parity
+  exakt 0, ecology, reality (20/20), distribution-check (4/4), mf-fidelity, pop-check,
+  phenomena-check (8/8), coevolution-check (7,9×) — sowie `archetype-transition-check`
+  (4000 Umwelten): keine der 65 Formen verliert Erreichbarkeit. Details in
+  docs/roadmap-lebendige-welt.md Phase 2.
+- [x] **Phase 5 — Symbiose/Parasitismus — umgesetzt (2026-07-30).** Neue Datei
+  `world/symbiosis.ts` (Ergänzung neben `world/coevolution.ts`, kein Eingriff dort):
+  zwei Populationen über denselben Merkmals-Passungs-Kernel gekoppelt wie beim
+  Räuber-Beute-Modell, aber mit anderer Auszahlung — **Mutualismus** (beide Seiten
+  gewinnen bei Passung, treibt Konvergenz) und **Parasitismus** (Parasit gewinnt, Wirt
+  verliert an derselben Interaktion — kontinuierlicher Abzug statt Fang-Risiko). Kein
+  neues Gen, keine physics.json-Änderung, berührt die Live-App nicht. Gemessen statt
+  behauptet (`tools/symbiosis-check.mjs`, `npm run symbiosis-check`): Mutualismus
+  konvergiert zwei absichtlich auseinanderliegende Populationen (Start 0,2/0,8) auf
+  Abstand 0,007 vs. 0,033 ohne Kopplung, UND beide Seiten gewinnen am Endzustand
+  messbar Fitness durch den Partner (+0,195/+0,194 — die eigentliche „wechselseitige
+  Abhängigkeit", nicht nur Korrelation). Parasitismus zeigt die Gegen-Asymmetrie: Wirt
+  verliert (−0,056), Parasit gewinnt (+0,071) an derselben Interaktion.
+  `coevolution-check` bleibt unverändert bei 7,9× (keine Kollision). Die „Flechte" bleibt
+  vorerst eine fest verdrahtete Kuration in `app/archetypes.js` — sie aus dieser Dynamik
+  emergent entstehen zu lassen ist ein eigener UX-Schritt, s. docs/roadmap-lebendige-
+  welt.md Phase 5.
+- [x] **Phase 6 — Zeitachse — Kernstück umgesetzt (2026-07-30).** Neue Datei
+  `world/seasonal.ts`: eine Umwelt-Achse oszilliert sinusförmig über Generationen statt
+  einen festen Punktwert zu halten. Kein neues Gen, keine physics.json-Änderung, Live-App
+  unberührt. Gemessen (`tools/seasonal-check.mjs`, `npm run seasonal-check`): (1)
+  Kompromiss/Hedging — zyklische Temperatur (Amplitude 0,35) lässt Isolation auf ~0,74
+  konvergieren, das flache Mittel derselben Umwelt nur auf ~0,48 (Δ≈0,26, nicht durch
+  „Durchschnitt der Extreme" erklärbar). (2) Lag/Dämpfung — kurzer Zyklus (10 Gen/„Jahr")
+  dämpft die Merkmals-Amplitude auf 28 % der Umwelt-Amplitude, langer Zyklus (150 Gen)
+  folgt fast vollständig. Bewusst NICHT gebaut: echte Verhaltens-Plastizität (Winterschlaf,
+  Fellwechsel) — braucht eine neue Genom-Semantik (Reaktionsnormen statt fester Werte),
+  ein groesserer struktureller Eingriff als diese Sitzung. Details in
+  docs/roadmap-lebendige-welt.md Phase 6.
+- [x] **Phase 7 — Populations-/Life-History-Ebene — r/K-Selektion umgesetzt
+  (2026-07-30).** Neue Datei `world/lifehistory.ts`: variable Populationsgröße
+  (logistisches Wachstum zu einer Tragfähigkeit K) ergänzt neben `world/population.ts`
+  (das selbst unangetastet bleibt — Null Risiko für bestehende Mechanismen). r-Anteil
+  und Selektionsschärfe sind Populations-Parameter, keine Einzel-Gen-Phänotypen. Gemessen
+  (`tools/lifehistory-check.mjs`, `npm run lifehistory-check`): r-parametrisierte Stämme
+  erholen sich nach periodischen Engpässen in 3 statt 17 Generationen auf 90 % der
+  Tragfähigkeit; K-parametrisierte Stämme erreichen im stabilen, überfüllten Regime eine
+  um ~35 % höhere Gleichgewichts-Fitness — beide klassischen r/K-Vorhersagen (MacArthur &
+  Wilson 1967) bestätigt. Dispersal/Sozialität aus demselben Punkt offen — brauchen einen
+  Mehr-Orte-Kontext über eine einzelne Population hinaus, s. docs/roadmap-lebendige-
+  welt.md Phase 7.
+
+**Ab Phase 4 ist „Formenzahl" nicht mehr die richtige Metrik** — das System kippt von
+„handkuratierte Blätter" zu „ein Baum, der selbst wächst" (Details in
+`docs/roadmap-lebendige-welt.md`, Abschnitt „Größenordnung").
 
 ---
 

@@ -34,3 +34,16 @@ bewegen.
 
 Aufruf: `npm run build` zuerst (Skripte importieren aus `dist/`), dann z. B.
 `node tools/research/bench.mjs`.
+- `gap-sweep.mjs` — Lebensbaum-Lückenmessung: welche der 44 Formen von selbst entstehen,
+  welche Gene hochlaufen ohne von einem Prototyp benannt zu werden, und wie stark die
+  Selektion konkrete namenlose Nischen besetzt. Grundlage von `docs/lebensbaum-luecken.md`.
+- `room-sweep.mjs` — misst, ob eine grobe Lebensraum-Ebene über den 6 Reglern trägt:
+  Formprofil je Raum, Abdeckung des freien Regler-Würfels, und ob jedes der 12 Presets
+  auf etwas konvergiert, das zu seinem Namen passt. Befund in
+  `docs/lebensbaum-luecken.md` §7.
+- `archetype-transition-check.mjs` — Regressions-Wächter für `app/archetypes.js`: vergleicht
+  klassifizierte Namen vor/nach einer Änderung auf denselben Umwelten (gleiche RNG-Sequenz)
+  und zeigt, welche Bestandsformen wie viel an neue/geänderte Prototypen verlieren. Ein Sweep
+  auf der isolierten Nischen-Bedingung einer neuen Form sagt nur ihre Nischen-GRÖSSE voraus,
+  nicht ihre Erreichbarkeit NACH Konkurrenz mit allen anderen Prototypen — das misst dieses
+  Werkzeug. Aufruf: `node tools/research/archetype-transition-check.mjs [git-ref=HEAD] [N=4000]`.
