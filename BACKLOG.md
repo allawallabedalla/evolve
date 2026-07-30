@@ -505,8 +505,46 @@ Technik-Aufgabe). Punkt 6 (Rest-Achsen) ist damit entsperrt — s. dort.
     Kernschleife unverändert), `app-parity`/`mf-fidelity` grün, `ui-calm-check`-Fail als
     vorbestehend/unabhängig verifiziert (identisch auf unverändertem HEAD reproduziert).
     **Noch offen aus P1-P2:** Datei-Aufsplittung (P1.5, reine Infrastruktur ohne
-    Spieler-Sichtbarkeit — niedrigere Priorität als P1.3/1.4), Inline-Fitness-Kopie
-    eliminieren (P2.6).
+    Spieler-Sichtbarkeit — niedrigere Priorität als P1.3/1.4).
+  - [x] **P2.6 umgesetzt (2026-07-30, Sonnet) — Inline-Fitness-Kopie generiert statt von
+    Hand gepflegt:** neues `tools/bundle-app-fitness.mjs` erzeugt `const PHYS = {...}` +
+    `function fitness(t, e){...}` in `app/index.html` direkt aus `physics.json` (minus
+    `_comment`/`traits`/`traitLabels`) und dem bereits von `tsc` kompilierten, von
+    `parity`/`app-parity` geprüften `dist/engine/fitness.js` — **nicht neu abgetippt**,
+    dasselbe Prinzip wie `tools/bundle-app-core.mjs`. `fitness(t,e)` bleibt für alle
+    bestehenden Aufrufer unverändert (2-Argument-Signatur, `PHYS` implizit): der
+    kompilierte Code wird umbenannt (`_engineFitness`) und in einem eigenen
+    Function-Scope INNERHALB des dünnen `fitness(t,e){...return
+    _engineFitness(t,e,PHYS);}`-Wrappers verschachtelt (vermeidet eine
+    `const clamp01`-Neudeklarations-Kollision mit der Datei-weiten Kopie).
+    **Bemerkenswertes Detail, das die Regex-Grenze schützt:** `tools/lib/app-core.mjs`/
+    `tools/app-parity.mjs` finden den Block über
+    `/function fitness\(t, e\)\{[\s\S]*?\n\}/` (stoppt an der ERSTEN bündigen `}`) — der
+    verschachtelte `_engineFitness`-Körper wird deshalb komplett eingerückt, sodass seine
+    eigene schließende Klammer nie bündig steht und die Regex ungestört bis zur äußeren
+    Wrapper-Klammer läuft. Ohne diese Einrückung hätte die Regex nach `_engineFitness`
+    abgeschnitten und `return _engineFitness(...)` verschluckt — exakt die stille
+    NaN-Fehlerklasse, die dieses Sub-Ziel beheben soll. Eigener JS-Objektliteral-
+    Serializer statt `JSON.stringify` für `PHYS` (unquoted keys), weil
+    `tools/mf-fidelity.mjs` einzelne Werte per unquoted-key-Regex ausliest — mit
+    gequoteten JSON-Schlüsseln wäre dieses bestehende Gate still gebrochen.
+    Als echtes Gate verdrahtet (`npm run app-fitness-check`, prüft Drift zwischen
+    generiertem und committetem Stand, `process.exit(1)` bei Abweichung — bewusst kein
+    stilles Diagnose-Skript, weil der ganze Sinn ist, Vergessen strukturell
+    unmöglich zu machen, nicht nur sichtbar zu machen), plus `npm run bundle-app`
+    ruft es jetzt automatisch mit auf — genau der Schritt, den Migrations-Stufe 3.5
+    vergessen hatte.
+    `app-parity`: Max-Abweichung jetzt **exakt 0** (vorher numerisch ~0, jetzt identischer
+    Code). Alle 15 angeforderten Gates + `app-fitness-check` grün, unabhängig
+    gegengeprüft (eigener Gate-Lauf plus eigener Playwright-Aufruf dieser Session:
+    `window.fitness(...)` direkt im Browser aufgerufen, endliches Ergebnis, 0
+    Konsolenfehler, Schwarm lief weiter).
+    **Bewusst nicht gemacht:** nicht zu einem `import()` aus `app/core/` umgebaut — bleibt
+    zwingend synchroner Inline-Code, weil `fitness()` schon beim App-Boot für
+    `classify()`/`matchArchetype()` gebraucht wird, bevor irgendein `import()` auflöst
+    (Migrations-Stufe 2/4); nicht mit `bundle-app-core.mjs` zu einer Datei
+    zusammengelegt (unterschiedliche Ziele — eigene Datei bündeln vs. `app/index.html`
+    an Ort und Stelle ändern — getrennt einfacher zu diagnostizieren).
 
 ### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — eigener Branch, läuft parallel
 

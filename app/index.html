@@ -1021,37 +1021,113 @@
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
 const APP_VERSION = "v0.77.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
+// AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
+// Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
 const PHYS = {
-  lightAccessBase: 0.4, structureLightFloor: 0.3, photoSizeFloor: 0.7, exclusion: 0.8,
-  reachFromLimb: 0.65, reachFromSize: 0.35, heightPenalty: 1.5, forageBase: 0.55, forageMetabolism: 0.9,
-  flightSizePenalty: 1.5, flightMetabFloor: 0.35, flightReach: 0.75, defenseFromFlight: 0.2,
-  absorbYield: 1.3, absorbBase: 0.4, absorbMetabolism: 0.85, absorbWaterFloor: 0.3,
-  aquaticYield: 1.4, aquaticBase: 0.4, aquaticWaterFloor: 0.5, aquaticLimbDrag: 0.7, aquaticArmorDrag: 0.5,
-  biolumYield: 0.72, biolumMobFloor: 0.62, biolumDefense: 0.3, biolumDarkFloor: 0.3,
+  lightAccessBase: 0.4,
+  structureLightFloor: 0.3,
+  photoSizeFloor: 0.7,
+  exclusion: 0.8,
+  reachFromLimb: 0.65,
+  reachFromSize: 0.35,
+  heightPenalty: 1.5,
+  forageBase: 0.55,
+  forageMetabolism: 0.9,
+  flightSizePenalty: 1.5,
+  flightMetabFloor: 0.35,
+  flightReach: 0.75,
+  defenseFromFlight: 0.2,
+  absorbYield: 1.3,
+  absorbBase: 0.4,
+  absorbMetabolism: 0.85,
+  absorbWaterFloor: 0.3,
+  aquaticYield: 1.4,
+  aquaticBase: 0.4,
+  aquaticWaterFloor: 0.5,
+  aquaticLimbDrag: 0.7,
+  aquaticArmorDrag: 0.5,
+  biolumYield: 0.72,
+  biolumMobFloor: 0.62,
+  biolumDefense: 0.3,
+  biolumDarkFloor: 0.3,
   endothermyMetabFloor: 0.5,
+  photoTempOpt: 0.6,
+  photoTempStrength: 0.6,
+  maintenance: {
+    base: 0.05,
+    size: 0.22,
+    insulation: 0.12,
+    armor: 0.15,
+    metabolism: 0.16,
+    photosynthesis: 0.14,
+    mobility: 0.15,
+    structure: 0.15,
+    wing: 0.16,
+    biolum: 0.14,
+    detox: 0.07,
+    oxyEff: 0.07,
+    osmo: 0.07,
+    burrow: 0.11,
+    pigment: 0.07,
+    filter: 0.12,
+    camo: 0.12,
+    baro: 0.07,
+    sense: 0.12,
+    desicc: 0.07,
+    radres: 0.07,
+    fireres: 0.07,
+    frostres: 0.07,
+    windres: 0.07,
+    nfix: 0.12
+  },
+  maintenanceQuad: {
+    metabolism: 0.22,
+    mobility: 0.25,
+    armor: 0.15
+  },
+  nutritionFloor: 0.15,
+  energyScale: 5,
+  defenseFromArmor: 0.45,
+  defenseFromStructure: 0.35,
+  defenseFromSize: 0.25,
+  defenseFromMobility: 0.35,
+  wThermal: 1,
+  wPred: 1,
+  wNutrition: 1.2,
+  floor: 0.02,
+  eps: 0.02,
+  toxLethality: 0.9,
+  wTox: 1,
+  insulWaterLoss: 1,
+  hypoxiaSeverity: 0.9,
+  wOxy: 1,
+  salinityLethality: 0.85,
+  wOsmo: 1,
   kleiberDecades: 0.6,
-  photoTempOpt: 0.6, photoTempStrength: 0.6,
-  toxLethality: 0.9, wTox: 1.0, insulWaterLoss: 1.0,
-  hypoxiaSeverity: 0.9, wOxy: 1.0,
-  salinityLethality: 0.85, wOsmo: 1.0,
   defenseFromBurrow: 0.4,
-  uvLethality: 0.85, wUv: 1.0,
-  filterYield: 0.5, filterBase: 0.25,
+  uvLethality: 0.85,
+  wUv: 1,
+  filterYield: 0.5,
+  filterBase: 0.25,
   defenseFromCamo: 0.3,
-  baroLethality: 0.85, wBaro: 1.0,
+  baroLethality: 0.85,
+  wBaro: 1,
   senseForage: 0.3,
-  desiccLethality: 0.85, wDesicc: 1.0,
-  radLethality: 0.85, wRad: 1.0,
-  fireLethality: 0.85, wFire: 1.0,
-  frostLethality: 0.85, wFrost: 1.0,
-  windLethality: 0.85, wWind: 1.0,
-  nfixYield: 0.35, nfixBase: 0.2,
-  tractionYield: 2, tractionHeatFloor: 0.7, tractionScarcityCeiling: 0.5,
-  maintenance: { base:0.05, size:0.22, insulation:0.12, armor:0.15, metabolism:0.16, photosynthesis:0.14, mobility:0.15, structure:0.15, wing:0.16, biolum:0.14, detox:0.07, oxyEff:0.07, osmo:0.07, burrow:0.11, pigment:0.07, filter:0.12, camo:0.12, baro:0.07, sense:0.12, desicc:0.07, radres:0.07, fireres:0.07, frostres:0.07, windres:0.07, nfix:0.12 },
-  maintenanceQuad: { metabolism:0.22, mobility:0.25, armor:0.15 },
-  nutritionFloor: 0.15, energyScale: 5.0,
-  defenseFromArmor:0.45, defenseFromStructure:0.35, defenseFromSize:0.25, defenseFromMobility:0.35,
-  wThermal:1.0, wPred:1.0, wNutrition:1.2, floor:0.02, eps:0.02
+  desiccLethality: 0.85,
+  wDesicc: 1,
+  radLethality: 0.85,
+  wRad: 1,
+  fireLethality: 0.85,
+  wFire: 1,
+  frostLethality: 0.85,
+  wFrost: 1,
+  windLethality: 0.85,
+  wWind: 1,
+  nfixYield: 0.35,
+  nfixBase: 0.2,
+  tractionYield: 2,
+  tractionHeatFloor: 0.7,
+  tractionScarcityCeiling: 0.5
 };
 // PARAMS — die gefitteten Mittelfeld-Parameter.
 //
@@ -1183,98 +1259,419 @@ const FICON = {
 };
 function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
 
+// AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
+// Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
 function fitness(t, e){
-  const [insulation,size,limb,metabolism,armor,photo,mobility,structure,wing=0,biolum=0,detox=0,oxyEff=0,osmo=0,burrow=0,pigment=0,filter=0,camo=0,baro=0,sense=0,desicc=0,radres=0,fireres=0,frostres=0,windres=0,nfix=0]=t;
-  // Endothermie (Biologie-Audit): Fell hält Wärme, aber ohne metabolischen Ofen
-  // gibt es kaum Körperwärme zu halten -> Kälte braucht Isolation UND Stoffwechsel.
-  const endoFactor = PHYS.endothermyMetabFloor+(1-PHYS.endothermyMetabFloor)*metabolism;
-  // Fell wirkt unter Wasser kaum (Luft-Einschluss wird verdrängt) -> keine pelzigen
-  // Tiefsee-Warmblüter; die Tiefsee gehört Fischen/Kopffüßern.
-  const effInsul = insulation*endoFactor*(1-PHYS.insulWaterLoss*e.water);
-  const dT = effInsul-(1-e.temperature);
-  const thermal = 1-dT*dT;
-  // „An Land" (0..1): 1 außerhalb tiefen Wassers, 0 im offenen Wasser. Landjagd UND
-  // Flug sind terrestrisch/aerisch — unter Wasser jagt man schwimmend (aquatisch).
-  const landFactor = 1-clamp01((e.water-PHYS.aquaticWaterFloor)/(1-PHYS.aquaticWaterFloor));
-  // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Unter Wasser kein Flug.
-  const flight = wing*clamp01(1-size*PHYS.flightSizePenalty)*(PHYS.flightMetabFloor+(1-PHYS.flightMetabFloor)*metabolism)*landFactor;
-  const structureLight = PHYS.structureLightFloor+(1-PHYS.structureLightFloor)*e.foodHeight;
-  const lightAccess = PHYS.lightAccessBase+(1-PHYS.lightAccessBase)*structure*structureLight;
-  const photoSize = PHYS.photoSizeFloor+(1-PHYS.photoSizeFloor)*size;
-  // Temperatur-Abhängigkeit (Biologie-Audit): Photosynthese hat ein Optimum; Kälte/Hitze senken sie.
-  const _dtp = e.temperature-PHYS.photoTempOpt, photoThermal = clamp01(1-PHYS.photoTempStrength*_dtp*_dtp);
-  const energyPhoto = photo*e.light*e.water*lightAccess*photoSize*photoThermal*(1-PHYS.exclusion*mobility);
-  // Biologie-Audit: Gliedmaßen erschließen hohes Futter nur an LAND (limb*landFactor).
-  // Unter Wasser schwimmt man hinauf — kein Tiefsee-Wesen mit langen Beinen/Flügeln.
-  const reach = clamp01(limb*PHYS.reachFromLimb*landFactor+size*PHYS.reachFromSize+flight*PHYS.flightReach);
-  const access = e.foodHeight<=reach?1:clamp01(1-(e.foodHeight-reach)*PHYS.heightPenalty);
-  const senseBoost = 1+PHYS.senseForage*sense*(1-e.foodAbundance);   // Sinne (AXIS-13): findet knappe Beute
-  const energyForage = mobility*e.foodAbundance*access*(PHYS.forageBase+PHYS.forageMetabolism*metabolism)*senseBoost*(1-PHYS.exclusion*photo);
-  // Absorption/Zersetzung (Osmotrophie): sessile Heterotrophie (Pilze/Mikroben).
-  const substrate = e.foodAbundance*(PHYS.absorbWaterFloor+(1-PHYS.absorbWaterFloor)*e.water);
-  const energyAbsorb = PHYS.absorbYield*(PHYS.absorbBase+PHYS.absorbMetabolism*metabolism)*substrate*(1-PHYS.exclusion*photo)*(1-PHYS.exclusion*mobility);
-  // Aquatische Jagd (AXIS-4): schwimmende Heterotrophie, braucht keine Reichweite,
-  // belohnt stromlinienfoermige (wenig Gliedmassen/Panzer) mobile Koerper im tiefen Wasser.
-  const aquaHabitat = clamp01((e.water-PHYS.aquaticWaterFloor)/(1-PHYS.aquaticWaterFloor));
-  const streamline = clamp01(1-limb*PHYS.aquaticLimbDrag-armor*PHYS.aquaticArmorDrag);
-  const energyAquatic = PHYS.aquaticYield*mobility*e.foodAbundance*aquaHabitat*streamline*(PHYS.aquaticBase+(1-PHYS.aquaticBase)*metabolism)*(1-PHYS.exclusion*photo);
-  // Biolumineszenz (AXIS-5): Leuchten lockt/beleuchtet Beute — nur im ECHTEN Dunkeln
-  // (unterhalb biolumDarkFloor; sonst überstrahlt Tageslicht das Leuchten).
-  const dark = clamp01((PHYS.biolumDarkFloor-e.light)/PHYS.biolumDarkFloor), glow = biolum*dark;
-  const energyGlow = PHYS.biolumYield*glow*(PHYS.biolumMobFloor+(1-PHYS.biolumMobFloor)*mobility)*e.foodAbundance*(1-PHYS.exclusion*photo);
-  // Filtrieren (AXIS-3): sessiles Sieben schwebender Partikel im Wasser — braucht weder
-  // Mobilität noch Stromlinie (Schwamm/Koralle/Muschel). Heterotroph (schließt Photo aus).
-  const energyFilter = PHYS.filterYield*filter*aquaHabitat*(PHYS.filterBase+(1-PHYS.filterBase)*e.foodAbundance)*(1-PHYS.exclusion*photo);
-  // Stickstoff-Fixierung (AXIS-19): nährstoff-unabhängige Energie, v.a. bei knappem Futter; sessil.
-  const energyNfix = PHYS.nfixYield*nfix*(PHYS.nfixBase+(1-PHYS.nfixBase)*(1-e.foodAbundance))*(1-PHYS.exclusion*mobility);
-  // Gliedmassen-Substrat-Traktion (AXIS-20): viele/lange Gliedmassen an einem KLEINEN
-  // Koerper erschliessen ein eigenes, kleines Einkommen aus zerstreuter Boden-/Unterholz-
-  // Nahrung - ein grosser Koerper kann das nicht ueber Groesse nachbilden (das leistet
-  // reachFromSize). Braucht Mobilitaet, nur an Land, heterotroph. Eigener kleiner Kanal
-  // (wie Filter/Nfix) statt Multiplikator auf energyForage - siehe engine/fitness.ts.
-  // Echte Schwellen (analog aquaticWaterFloor/biolumDarkFloor) statt linearer Kopplung -
-  // aktiv nur in Hitze-Duerre-artigen Umwelten (heiss UND nahrungsarm), siehe engine/fitness.ts.
-  const hot = clamp01((e.temperature-PHYS.tractionHeatFloor)/(1-PHYS.tractionHeatFloor));
-  const dry = clamp01((PHYS.tractionScarcityCeiling-e.foodAbundance)/PHYS.tractionScarcityCeiling);
-  const insectShape = limb*clamp01(1-size)*clamp01(1-armor)*clamp01(1-insulation);
-  const traction = insectShape*insectShape*landFactor*hot*dry;
-  const energyTraction = PHYS.tractionYield*mobility*traction*(1-PHYS.exclusion*photo);
-  const total = energyPhoto+energyForage+energyAbsorb+energyAquatic+energyGlow+energyFilter+energyNfix+energyTraction;
-  const m=PHYS.maintenance, mq=PHYS.maintenanceQuad;
-  // Kleibersche Allometrie: massenspezifische Stoffwechselkosten sinken mit der Masse
-  // (Gesamt-Stoffwechsel ~ Masse^0.75). Rabatt nur auf die Stoffwechsel-Kosten -> große
-  // aktive Endotherme werden energetisch tragbar, ohne dass Masse selbst gratis wird.
-  const kleiber = Math.pow(10, -0.25*PHYS.kleiberDecades*size);
-  const maint = m.base+size*m.size+insulation*m.insulation+armor*m.armor+metabolism*m.metabolism*kleiber+photo*m.photosynthesis+mobility*m.mobility+structure*m.structure+wing*m.wing+biolum*m.biolum+detox*m.detox+oxyEff*m.oxyEff+osmo*m.osmo+burrow*m.burrow+pigment*m.pigment+filter*m.filter+camo*m.camo+baro*m.baro+sense*m.sense+desicc*m.desicc+radres*m.radres+fireres*m.fireres+frostres*m.frostres+windres*m.windres+nfix*m.nfix+metabolism*metabolism*mq.metabolism*kleiber+mobility*mobility*mq.mobility+armor*armor*mq.armor;
-  const nutrition = PHYS.nutritionFloor+(1-PHYS.nutritionFloor)*sigmoid((total-maint)*PHYS.energyScale);
-  const defense = clamp01(armor*PHYS.defenseFromArmor+structure*PHYS.defenseFromStructure+size*PHYS.defenseFromSize+mobility*PHYS.defenseFromMobility+flight*PHYS.defenseFromFlight+biolum*dark*PHYS.biolumDefense+burrow*PHYS.defenseFromBurrow*landFactor+camo*PHYS.defenseFromCamo);
-  const predSurv = 1-e.predation*(1-defense);
-  // Chemischer Stress (AXIS-6): giftiges Milieu tötet ohne Entgiftung. toxicity kommt
-  // NICHT über die 6 Regler, sondern über Umwelt-Einflüsse (Serpentin, Schwefel/Säure).
-  const toxicity = e.toxicity||0, toxSurv = clamp01(1-toxicity*(1-detox)*PHYS.toxLethality);
-  // Sauerstoffmangel (AXIS-7): dünne Höhenluft / anoxisches Wasser (oxygen<1) stresst
-  // hohen Stoffwechsel, außer oxyEff (effiziente Atmung) puffert. oxygen kommt NICHT
-  // über die 6 Regler, sondern über Umwelt-Einflüsse (Dünne Höhenluft/Hypoxie).
-  const oxygen = e.oxygen==null?1:e.oxygen, oxySurv = clamp01(1-(1-oxygen)*metabolism*(1-oxyEff)*PHYS.hypoxiaSeverity);
-  // Osmotischer Stress (AXIS-8): salziges Milieu (Salzsee, Ästuar, Salzboden) zieht Wasser
-  // aus dem Körper, außer osmo (Osmoregulation) puffert. salinity kommt NICHT über die 6
-  // Regler, sondern über Umwelt-Einflüsse (Salinität/Brine).
-  const salinity = e.salinity||0, osmoSurv = clamp01(1-salinity*(1-osmo)*PHYS.salinityLethality);
-  // UV-Stress (AXIS-10): starke UV-Strahlung schädigt DNA, außer Schutzpigment puffert.
-  const uv = e.uv||0, uvSurv = clamp01(1-uv*(1-pigment)*PHYS.uvLethality);
-  // Druck-Stress (AXIS-12): Tiefsee-Druck ohne Druck-Anpassung tödlich.
-  const pressure = e.pressure||0, baroSurv = clamp01(1-pressure*(1-baro)*PHYS.baroLethality);
-  // Austrocknung (AXIS-14): extreme Trockenheit ohne Austrocknungs-Toleranz tödlich.
-  const aridity = e.aridity||0, desiccSurv = clamp01(1-aridity*(1-desicc)*PHYS.desiccLethality);
-  // Ionisierende Strahlung (AXIS-15): radioaktives Milieu ohne Strahlungsresistenz tödlich.
-  const radiation = e.radiation||0, radSurv = clamp01(1-radiation*(1-radres)*PHYS.radLethality);
-  // Feuer (AXIS-16): wiederkehrende Brände ohne Feuer-Anpassung tödlich.
-  const fire = e.fire||0, fireSurv = clamp01(1-fire*(1-fireres)*PHYS.fireLethality);
-  // Frost (AXIS-17): tiefer Frost ohne Kryoprotektion tödlich.
-  const frost = e.frost||0, frostSurv = clamp01(1-frost*(1-frostres)*PHYS.frostLethality);
-  // Wind (AXIS-18): mechanischer Dauerstress ohne Windhärte tödlich.
-  const wind = e.wind||0, windSurv = clamp01(1-wind*(1-windres)*PHYS.windLethality);
-  return Math.max(Math.pow(thermal,PHYS.wThermal)*Math.pow(predSurv,PHYS.wPred)*Math.pow(nutrition,PHYS.wNutrition)*Math.pow(toxSurv,PHYS.wTox)*Math.pow(oxySurv,PHYS.wOxy)*Math.pow(osmoSurv,PHYS.wOsmo)*Math.pow(uvSurv,PHYS.wUv)*Math.pow(baroSurv,PHYS.wBaro)*Math.pow(desiccSurv,PHYS.wDesicc)*Math.pow(radSurv,PHYS.wRad)*Math.pow(fireSurv,PHYS.wFire)*Math.pow(frostSurv,PHYS.wFrost)*Math.pow(windSurv,PHYS.wWind), PHYS.floor);
+  // Koerper unten = dist/engine/fitness.js, umbenannt zu _engineFitness (eigener
+  // Function-Scope, damit clamp01/sigmoid/Trait-Indizes nicht mit den top-level
+  // Deklarationen weiter oben kollidieren). PHYS kommt aus dem const-Block oben.
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const sigmoid = (x) => 1 / (1 + Math.exp(-x));
+  // Trait-Indizes (Reihenfolge = TRAITS in types.ts)
+  const INSULATION = 0;
+  const SIZE = 1;
+  const LIMB = 2;
+  const METABOLISM = 3;
+  const ARMOR = 4;
+  const PHOTO = 5;
+  const MOBILITY = 6;
+  const STRUCTURE = 7;
+  const WING = 8;
+  const BIOLUM = 9;
+  const DETOX = 10;
+  const OXYEFF = 11;
+  const OSMO = 12;
+  const BURROW = 13;
+  const PIGMENT = 14;
+  const FILTER = 15;
+  const CAMO = 16;
+  const BARO = 17;
+  const SENSE = 18;
+  const DESICC = 19;
+  const RADRES = 20;
+  const FIRERES = 21;
+  const FROSTRES = 22;
+  const WINDRES = 23;
+  const NFIX = 24;
+  function _engineFitness(traits, env, phys) {
+      const insulation = traits[INSULATION];
+      const size = traits[SIZE];
+      const limb = traits[LIMB];
+      const metabolism = traits[METABOLISM];
+      const armor = traits[ARMOR];
+      const photo = traits[PHOTO];
+      const mobility = traits[MOBILITY];
+      const structure = traits[STRUCTURE];
+      const wing = traits[WING];
+      const biolum = traits[BIOLUM] ?? 0;
+      const detox = traits[DETOX] ?? 0;
+      const oxyEff = traits[OXYEFF] ?? 0;
+      const osmo = traits[OSMO] ?? 0;
+      const burrow = traits[BURROW] ?? 0;
+      const pigment = traits[PIGMENT] ?? 0;
+      const filter = traits[FILTER] ?? 0;
+      const camo = traits[CAMO] ?? 0;
+      const baro = traits[BARO] ?? 0;
+      const sense = traits[SENSE] ?? 0;
+      const desicc = traits[DESICC] ?? 0;
+      const radres = traits[RADRES] ?? 0;
+      const fireres = traits[FIRERES] ?? 0;
+      const frostres = traits[FROSTRES] ?? 0;
+      const windres = traits[WINDRES] ?? 0;
+      const nfix = traits[NFIX] ?? 0;
+      // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
+      // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
+      // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
+      // bildete ein Tiefsee-Schwimmer absurde Beine/Fluegel fuers "hohe" Futter.
+      const landFactor = 1 - clamp01((env.water - phys.aquaticWaterFloor) / (1 - phys.aquaticWaterFloor));
+      // Flug (AXIS-1): nur leichte, aktive Koerper fliegen. Grosse Masse (size) macht
+      // Fluegel wirkungslos, hoher Stoffwechsel treibt den Flug an. Unter Wasser kein
+      // Flug (landFactor). Zwei Auszahlungen: (a) erreicht hohe Nahrung, (b) Flucht.
+      const flight = wing *
+          clamp01(1 - size * phys.flightSizePenalty) *
+          (phys.flightMetabFloor + (1 - phys.flightMetabFloor) * metabolism) *
+          landFactor;
+      // 1) Thermoregulation (universell): ideale Isolation = Kaelte.
+      //    Quadratisch (glatter Peak, kein Knick) - verhindert das Ueberschwingen /
+      //    die Oszillation der gradientenbasierten Engine bei mittlerer Temperatur.
+      //    Endothermie (Biologie-Audit): Fell HAELT Waerme, aber ohne metabolischen
+      //    "Ofen" gibt es kaum Koerperwaerme zu halten -> Kaelte-Anpassung braucht
+      //    Isolation UND Stoffwechsel (echte Warmblueter = Fell + hoher Stoffwechsel).
+      const endoFactor = phys.endothermyMetabFloor + (1 - phys.endothermyMetabFloor) * metabolism;
+      //    Fell wirkt UNTER WASSER kaum (Biologie): Isolation hält warm, indem sie Luft
+      //    einschliesst - Wasser verdrängt die Luft. Darum ist die Tiefsee voller Fische
+      //    und Kopffuesser, nicht pelziger Warmblueter. Ohne diese Kopplung zuechtete die
+      //    Engine „Fell-Wesen unter Wasser". effInsulation sinkt mit dem Wasser.
+      const effInsulation = insulation * endoFactor * (1 - phys.insulWaterLoss * env.water);
+      const thermalIdeal = 1 - env.temperature;
+      const dT = effInsulation - thermalIdeal;
+      const thermal = 1 - dT * dT;
+      // 2) Energie - zwei Strategien, gegenseitig ausschliessend.
+      //    a) Photosynthese: braucht Licht UND Wasser.
+      //       Stuetzgewebe hilft dem Licht nur bei echter vertikaler Konkurrenz
+      //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
+      //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
+      const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
+      const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight;
+      //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
+      //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
+      const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
+      //       Temperatur-Abhaengigkeit (Biologie-Audit): Photosynthese hat ein
+      //       Temperatur-Optimum; in starker Kaelte/Hitze sinkt die Enzym-Leistung.
+      //       Milde Glocke -> Kaelte-Standorte (Tundra) tragen weniger Pflanzen.
+      const photoThermal = clamp01(1 - phys.photoTempStrength * (env.temperature - phys.photoTempOpt) * (env.temperature - phys.photoTempOpt));
+      const energyPhoto = photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
+      //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
+      //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
+      //       Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND
+      //       (limb*landFactor). Unter Wasser greift man hohes Futter nicht mit langen
+      //       Beinen - man schwimmt hinauf (aquatische Jagd). So bildet der Tiefsee-
+      //       Schwimmer keine absurden Beine/Fluegel mehr, nur weil das Futter "hoch"
+      //       stand. Groesse zaehlt weiter (grosse Koerper ragen ohnehin hoch).
+      const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
+      const access = env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
+      //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
+      //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
+      //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
+      //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
+      //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
+      //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
+      const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
+      const energyForage = mobility *
+          env.foodAbundance *
+          access *
+          (phys.forageBase + phys.forageMetabolism * metabolism) *
+          senseBoost *
+          (1 - phys.exclusion * photo);
+      //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
+      //       Der Organismus waechst in sein Substrat (Totholz/Detritus) und verdaut
+      //       extrazellulaer - braucht daher KEINE Mobilitaet (Gegenteil der Jagd).
+      //       - heterotroph  -> schliesst Photosynthese aus (1 - exclusion*photo)
+      //       - sessil       -> schliesst Mobilitaet aus    (1 - exclusion*mobility)
+      //       - Enzyme       -> zahlt auf Stoffwechsel ein
+      //       - Zersetzung ist ein Nass-Prozess -> skaliert mit Feuchte (water)
+      //       - Substrat = totes organisches Material -> skaliert mit foodAbundance
+      //       Ohne diesen Term hatten Pilze/sessile Zersetzer null Nahrungsenergie -
+      //       biologisch falsch (Pilze sind hoch erfolgreich). Das schafft den
+      //       Fitness-Gipfel "heterotroph + sessil" = Reich der Pilze/Mikroben.
+      const substrate = env.foodAbundance * (phys.absorbWaterFloor + (1 - phys.absorbWaterFloor) * env.water);
+      const energyAbsorb = phys.absorbYield *
+          (phys.absorbBase + phys.absorbMetabolism * metabolism) *
+          substrate *
+          (1 - phys.exclusion * photo) *
+          (1 - phys.exclusion * mobility);
+      //    d) Aquatische Jagd (AXIS-4): schwimmende Heterotrophie im Wasserkoerper.
+      //       Anders als Landjagd braucht Schwimmen KEINE Reichweite (Gliedmassen) -
+      //       Nahrung wird im offenen Wasser erschwommen. Belohnt Mobilitaet, aber
+      //       einen STROMLINIENFOERMIGEN Koerper: Gliedmassen und Panzer erzeugen
+      //       Wasserwiderstand (Drag). Nur im tiefen Wasser wirksam (aquaticWaterFloor),
+      //       heterotroph -> schliesst Photosynthese aus. Schafft den Fitness-Gipfel
+      //       "schlank + mobil im Wasser" = Fisch/Aal, Kopffuesser, Amphibie.
+      const aquaHabitat = clamp01((env.water - phys.aquaticWaterFloor) / (1 - phys.aquaticWaterFloor));
+      const streamline = clamp01(1 - limb * phys.aquaticLimbDrag - armor * phys.aquaticArmorDrag);
+      const energyAquatic = phys.aquaticYield *
+          mobility *
+          env.foodAbundance *
+          aquaHabitat *
+          streamline *
+          (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
+          (1 - phys.exclusion * photo);
+      //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
+      //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
+      //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.
+      //       Aktive Koerper nutzen es besser (Lockjagd), heterotroph (schliesst Photo aus).
+      // „Dunkel" nur unterhalb biolumDarkFloor (Tiefsee/Hoehle) — sonst ueberstrahlt Tageslicht
+      // das Leuchten und es bliebe reine Kostenlast. Haelt Leuchtwesen eine schmale Nische.
+      const dark = clamp01((phys.biolumDarkFloor - env.light) / phys.biolumDarkFloor);
+      const glow = biolum * dark;
+      const energyGlow = phys.biolumYield *
+          glow *
+          (phys.biolumMobFloor + (1 - phys.biolumMobFloor) * mobility) *
+          env.foodAbundance *
+          (1 - phys.exclusion * photo);
+      //    f) Filtrieren / Suspensionsfressen (AXIS-3): schwebende Partikel (Plankton,
+      //       Detritus) aus dem Wasser sieben. Anders als die aktive Jagd braucht das WEDER
+      //       Mobilitaet NOCH Stromlinienform — ein SESSILER Filtrierer (Schwamm, Koralle,
+      //       Muschel, Seepocke) pumpt Wasser durch Filterstrukturen. Rewards das Gen 'filter',
+      //       skaliert mit Wasserkoerper (aquaHabitat) + Partikel-Angebot (foodAbundance),
+      //       heterotroph (schliesst Photosynthese aus). Schafft die aquatische Sessil-
+      //       Filtrier-Nische als eigenen Energieweg (bisher nur schwach ueber Absorption).
+      const energyFilter = phys.filterYield *
+          filter *
+          aquaHabitat *
+          (phys.filterBase + (1 - phys.filterBase) * env.foodAbundance) *
+          (1 - phys.exclusion * photo);
+      //    g) Stickstoff-Fixierung / Chemosynthese (AXIS-19): manche Organismen erschliessen
+      //       Naehrstoffe unabhaengig vom Futter-Angebot — Rhizobien/Cyanobakterien fixieren
+      //       Luft-Stickstoff, Chemolithotrophe oxidieren Mineralien. Der Gewinn zaehlt VOR ALLEM
+      //       bei KNAPPEN Naehrstoffen (1 - foodAbundance): Pionier auf armem Boden (Erle/Klee,
+      //       mikrobielle Krusten). Metabolisch teuer -> sessil/langsam (schliesst Mobilitaet aus),
+      //       kostet Unterhalt (maintenance.nfix). Kein Universal-Bonus, sondern eine Armut-Nische.
+      const energyNfix = phys.nfixYield *
+          nfix *
+          (phys.nfixBase + (1 - phys.nfixBase) * (1 - env.foodAbundance)) *
+          (1 - phys.exclusion * mobility);
+      //    h) Gliedmassen-Substrat-Traktion (AXIS-20, Stufe 3.5): viele/lange Gliedmassen an
+      //       einem KLEINEN Koerper erschliessen ein eigenes, kleines Einkommen aus zerstreuter
+      //       Boden-/Unterholz-Nahrung (Laubstreu, Rindenritzen, Kleinstbeute) — das ist
+      //       Wendigkeit im ENGEN Substrat, nicht Reichweite nach oben (das leistet bereits
+      //       reachFromSize). Ein GROSSER Koerper kann das nicht ueber Groesse nachbilden:
+      //       (1-size) macht den Bonus exklusiv fuer kleine Baupläne, waehrend reachFromSize
+      //       einem grossen Koerper weiterhin billig dieselbe Reichweite gab und so die
+      //       Insekten-Nische (winziger Koerper + viele Gliedmassen) unerreichbar machte
+      //       (Multi-Start-Sweep: 0.14 %, docs/engine-forschungsergebnis.md Messung 3).
+      //       Braucht Mobilitaet (Durchsuchen des Substrats), nur an LAND (landFactor),
+      //       heterotroph (schliesst Photosynthese aus).
+      //       BEWUSST ein eigener, KLEINER additiver Kanal statt eines Multiplikators auf die
+      //       gesamte energyForage (wie senseBoost, urspruenglich versucht): ein Multiplikator
+      //       auf die volle Jagd-Einkommensbasis wirkt fuer JEDES Landtier mit etwas Gliedmasse
+      //       (nicht nur kleine/gliedmassenreiche) und kippt schon bei kleinen Werten die
+      //       Reich-Balance (Oekologie-Check C4: Tier > 55 %), lange bevor Insekt 2 % erreicht —
+      //       gemessen und verworfen. Als eigener, kleiner Kanal (Praezedenz: energyFilter/
+      //       energyNfix/energyAbsorb) bleibt der Vorteil auf die schmale Nische begrenzt.
+      //       Zusaetzlich exklusiv fuer den WIRKLICH insektoiden Bauplan: (1-armor)*(1-insulation)
+      //       schliesst gepanzerte (Krebstier/Koloss) und pelzige (Fell-Warmblueter) Baupläne
+      //       aus - ein dick gepanzerter oder pelziger Koerper ist per Definition NICHT das enge,
+      //       nackte Wendigkeits-Substrat-Profil eines Insekts, sondern loest sein Ueberleben
+      //       anders (Panzer/Fell). Ohne diese Exklusivitaet floss der Bonus in JEDES kleine,
+      //       gliedmaßenreiche Landtier (auch gepanzert/pelzig) und blaehte die gesamte
+      //       Tier-Nische in der Reich-Balance auf (gemessen, verworfen) - mit ihr bleibt er
+      //       eine schmale, plausibel begruendete Nische statt eines General-Boosts.
+      //       Skaliert zusaetzlich mit env.temperature: Gliedmassenreiche Kleinstwesen sind
+      //       ueberwiegend Ektotherme (Insekten/Spinnentiere) - ihre Stoffwechselrate und damit
+      //       ihre Aktivitaet im Unterholz haengt an der Umgebungswaerme, ohne eigene Heizung
+      //       (kein insulation-Ofen wie bei Endothermen, s. thermal-Abschnitt oben). In der Kaelte
+      //       gibt es kaum Landgliederfuesser (Wüsten/Steppen/Tropen sind ihr Kerngebiet, nicht
+      //       die Tundra). Das haelt den Kanal in kalten Umwelten inaktiv (dort gewinnt ohnehin
+      //       Fell/Isolation) und konzentriert ihn auf die Umwelten, in denen die Insekten-Nische
+      //       real existiert - ohne diese Kopplung war der Bonus ueber ALLE Temperaturen hinweg
+      //       aktiv und blaehte die Tier-Nische in kalten Umwelten unbegruendet auf (gemessen).
+      //       insectShape wird QUADRIERT: das schaerft den Peak auf Baupläne, die ALLE VIER
+      //       Bedingungen (viel Gliedmasse, wenig Groesse, wenig Panzer, wenig Fell) zugleich
+      //       GUT erfuellen, statt schon bei TEIL-Erfuellung (z. B. nur kleiner Koerper, mittel
+      //       viel Panzer/Limb) spuerbar auszuzahlen. Reduziert den Streueffekt auf generische
+      //       kleine/mobile Tiere (z. B. in der Raeuber-Beute-Koevolution, s.u.), die insectShape
+      //       nur maessig erfuellen.
+      //       Umwelt-Gate ECHTE Schwellen (analog aquaticWaterFloor/biolumDarkFloor), NICHT
+      //       linear: nur in WIRKLICHER Hitze (oberhalb tractionHeatFloor) UND WIRKLICHER
+      //       Nahrungsknappheit (unterhalb tractionScarcityCeiling) aktiv - die reale Nische
+      //       der Landgliederfuesser (Wueste/Trockensavanne, docs Messung 3 "Hitze-Duerre":
+      //       temperature .92, foodAbundance .3), NICHT jede gemaessigt-warme oder leicht
+      //       knappe Umwelt. Notwendig (gemessen): eine LINEARE Kopplung an env.temperature
+      //       (mit/ohne (1-foodAbundance)) trennte die Ziel-Nische nicht ausreichend von (a) der
+      //       Reich-Balance ueber den vollen Umwelt-Wuerfel (Oekologie-Check C4: Tier > 55 %,
+      //       weil auch gemaessigt warme/durchschnittliche Umwelten spuerbar mit-profitierten)
+      //       und (b) der Test-Umwelt der endogenen Raeuber-Beute-Koevolution (Rote Koenigin,
+      //       P5/coevolution-check: temperature=0.5, foodAbundance=0.75 - deutlich unterhalb
+      //       beider Schwellen, daher mit den Schwellen exakt 0 statt nur "klein"). Mit echten
+      //       Schwellen bleibt der Kanal fuer die weit ueberwiegende Mehrheit der Umwelten
+      //       GENAU NULL (kein Effekt auf ihre Selektion) und wirkt nur in der schmalen
+      //       Hitze-Duerre-artigen Nische, in der die Insekten-Nische real existiert.
+      const hot = clamp01((env.temperature - phys.tractionHeatFloor) / (1 - phys.tractionHeatFloor));
+      const dry = clamp01((phys.tractionScarcityCeiling - env.foodAbundance) / phys.tractionScarcityCeiling);
+      const insectShape = limb * clamp01(1 - size) * clamp01(1 - armor) * clamp01(1 - insulation);
+      const traction = insectShape * insectShape * landFactor * hot * dry;
+      const energyTraction = phys.tractionYield * mobility * traction * (1 - phys.exclusion * photo);
+      const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix + energyTraction;
+      //    Unterhaltskosten: jedes Merkmal kostet Energie.
+      const m = phys.maintenance;
+      const mq = phys.maintenanceQuad;
+      // Kleibersche Allometrie (Biologie-Audit): die MASSENSPEZIFISCHen Stoffwechselkosten
+      // sinken mit der Koerpermasse (Gesamt-Stoffwechsel ~ Masse^0.75 -> pro Gramm ~
+      // Masse^-0.25). Grosse Koerper "verbrennen" pro Einheit Stoffwechsel weniger -
+      // Groessenoekonomie. size (0..1) spannt kleiberDecades Groessenordnungen an Masse
+      // auf; der Rabatt gilt NUR den Stoffwechsel-Kosten (nicht dem Grundpreis fuer Masse
+      // selbst, m.size). So werden grosse, aktive Endotherme energetisch ueberhaupt erst
+      // tragbar, ohne dass Masse "gratis" wird.
+      const kleiber = Math.pow(10, -0.25 * phys.kleiberDecades * size);
+      const maintenance = m.base +
+          size * m.size +
+          insulation * m.insulation +
+          armor * m.armor +
+          metabolism * m.metabolism * kleiber +
+          photo * m.photosynthesis +
+          mobility * m.mobility +
+          structure * m.structure +
+          wing * m.wing +
+          biolum * m.biolum +
+          detox * m.detox +
+          oxyEff * m.oxyEff +
+          osmo * m.osmo +
+          burrow * m.burrow +
+          pigment * m.pigment +
+          filter * m.filter +
+          camo * m.camo +
+          baro * m.baro +
+          sense * m.sense +
+          desicc * m.desicc +
+          radres * m.radres +
+          fireres * m.fireres +
+          frostres * m.frostres +
+          windres * m.windres +
+          nfix * m.nfix +
+          // Steigende Grenzkosten: hoher Stoffwechsel/hohe Mobilitaet/Panzerung werden
+          // ueberproportional teuer -> innere Optima statt Dauer-Saettigung bei 1.
+          // Panzer-Grenzkosten (BAL-5): ohne sie war "gepanzert + mobil" ein fast
+          // universeller Gewinner (~30% aller Umwelten drei Panzer-Formen) -> Verteilung
+          // entzerrt, mittlere Umwelten bringen wieder vielfaeltige Baupläne.
+          metabolism * metabolism * mq.metabolism * kleiber +
+          mobility * mobility * mq.mobility +
+          armor * armor * mq.armor;
+      // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
+      // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
+      // (keine "tote Zone"), OHNE dem Wesen Gratis-Energie zu geben - der Anreiz, sich
+      // auf einen echten Energiepfad festzulegen, bleibt erhalten.
+      const rawNutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+      const nutrition = phys.nutritionFloor + (1 - phys.nutritionFloor) * rawNutrition;
+      // 3) Praedation: Verteidigung aus Panzer + Stuetzgewebe + Groesse, plus
+      //    Flucht durch Mobilitaet.
+      const defenseScore = clamp01(armor * phys.defenseFromArmor +
+          structure * phys.defenseFromStructure +
+          size * phys.defenseFromSize +
+          mobility * phys.defenseFromMobility +
+          flight * phys.defenseFromFlight +
+          // Gegenbeleuchtung/Schreck-Leuchten: wirkt nur im echten Dunkeln (dark).
+          biolum * dark * phys.biolumDefense +
+          // Graben (AXIS-9): fossoriale Flucht in den Boden — ein Bau/Versteck entzieht
+          // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
+          // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
+          // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
+          burrow * phys.defenseFromBurrow * landFactor +
+          // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
+          // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
+          // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe
+          // -> eigene, billige Verteidigungs-Nische (Stabschrecke, Gespenstschrecke, Chamäleon).
+          camo * phys.defenseFromCamo);
+      const predSurvival = 1 - env.predation * (1 - defenseScore);
+      // 4) Chemischer Stress (AXIS-6 Extremchemie): giftige Milieus (Schwermetalle,
+      //    Schwefel/Säure, Serpentin) töten, WENN keine Entgiftung vorliegt. Das Gen
+      //    'detox' neutralisiert den Toxin-Druck, kostet aber Unterhalt (maintenance.detox)
+      //    -> in sauberen Umwelten (toxicity 0) ist detox reine Last und wird wegselektiert;
+      //    nur in giftigen Nischen entsteht der Extremophile/Metallophyt. toxicity ist eine
+      //    Umwelt-Dimension, die NICHT über die 6 Regler kommt, sondern über Umwelt-Einflüsse.
+      const toxicity = env.toxicity ?? 0;
+      const toxSurvival = clamp01(1 - toxicity * (1 - detox) * phys.toxLethality);
+      // 5) Sauerstoffmangel (AXIS-7 Hypoxie): duenne Hoehenluft / sauerstoffarmes Wasser.
+      //    oxygen<1 bedeutet Unterversorgung. Wer viel Stoffwechsel faehrt (metabolism),
+      //    braucht viel O2 und leidet am staerksten; das Gen 'oxyEff' (effiziente Atmung/
+      //    Sauerstoffbindung, vgl. Hoehen-Haemoglobin) neutralisiert den Druck, kostet
+      //    aber Unterhalt (maintenance.oxyEff) -> auf Meereshoehe (oxygen=1) reine Last,
+      //    wird wegselektiert; nur in Hypoxie-Nischen entsteht der Hoehen-/Anoxie-Spezialist.
+      //    oxygen ist eine Umwelt-Dimension aus Umwelt-Einfluessen, NICHT aus den 6 Reglern.
+      const oxygen = env.oxygen ?? 1;
+      const oxySurvival = clamp01(1 - (1 - oxygen) * metabolism * (1 - oxyEff) * phys.hypoxiaSeverity);
+      // 6) Osmotischer Stress (AXIS-8 Salinitaet): salzige Milieus (Salzsee/Brine, Aestuar,
+      //    Salzboden, Meerspray) ziehen dem Koerper osmotisch Wasser aus - toedlich, WENN
+      //    keine Osmoregulation (Ionenpumpen/kompatible Solute) vorliegt. Das Gen 'osmo'
+      //    neutralisiert den Salzdruck, kostet aber Unterhalt (maintenance.osmo) -> in
+      //    Suesswasser/Nicht-Salz-Milieus (salinity 0) reine Last, wird wegselektiert; nur
+      //    in salzigen Nischen entsteht der Halophyt/Salzspezialist (Salzkrebschen, Queller).
+      //    salinity ist eine Umwelt-Dimension aus Umwelt-Einfluessen, NICHT aus den 6 Reglern.
+      const salinity = env.salinity ?? 0;
+      const osmoSurvival = clamp01(1 - salinity * (1 - osmo) * phys.salinityLethality);
+      // 7) UV-Stress (AXIS-10): starke UV-Strahlung (Höhe, Ozonloch, junge Atmosphäre)
+      //    schädigt die DNA, WENN keine Schutzpigmente (Melanin/Flavonoide/Sporopollenin)
+      //    vorliegen. Das Gen 'pigment' puffert den UV-Schaden, kostet aber Unterhalt
+      //    (maintenance.pigment) -> ohne UV reine Last, wird wegselektiert; nur unter UV
+      //    entsteht der pigmentierte Spezialist. uv kommt über Umwelt-Einflüsse, nicht die 6 Regler.
+      const uv = env.uv ?? 0;
+      const uvSurvival = clamp01(1 - uv * (1 - pigment) * phys.uvLethality);
+      // 8) Druck-Stress (AXIS-12 Tiefsee): extremer hydrostatischer Druck der Tiefsee/Tiefe
+      //    zerstört Membranen/Proteine, WENN keine Druck-Anpassung (piezolyte Solute, druck-
+      //    stabile Enzyme) vorliegt. Das Gen 'baro' puffert, kostet aber Unterhalt -> ohne
+      //    Druck reine Last (wegselektiert), nur in der Tiefsee der Piezophile. pressure kommt
+      //    über Umwelt-Einflüsse (Tiefsee/Hadal), nicht die 6 Regler.
+      const pressure = env.pressure ?? 0;
+      const baroSurvival = clamp01(1 - pressure * (1 - baro) * phys.baroLethality);
+      // 9) Austrocknung (AXIS-14 Anhydrobiose): extreme Trockenheit/geringe Luftfeuchte
+      //    entzieht dem Gewebe Wasser, toedlich WENN keine Austrocknungs-Toleranz vorliegt
+      //    (kompatible Solute/Trehalose, Resurrektions-Physiologie). 'desicc' puffert,
+      //    kostet Unterhalt -> nur in ariden Nischen der Xerophyt/Anhydrobiont (Baerentierchen,
+      //    Auferstehungspflanze). aridity kommt ueber Umwelt-Einfluesse (Duerre/Aridifizierung).
+      const aridity = env.aridity ?? 0;
+      const desiccSurvival = clamp01(1 - aridity * (1 - desicc) * phys.desiccLethality);
+      // 10) Ionisierende Strahlung (AXIS-15): radioaktive Boeden (Selen/Arsen/Radon, Uran-
+      //     Erz) und kosmische Strahlung erzeugen DNA-Doppelstrangbrueche, toedlich WENN
+      //     keine Strahlungsresistenz (redundante Genome, DNA-Reparatur wie bei Deinococcus,
+      //     Baertierchen). 'radres' puffert, kostet Unterhalt -> nur in Strahlungs-Nischen.
+      //     radiation kommt ueber Umwelt-Einfluesse, nicht die 6 Regler.
+      const radiation = env.radiation ?? 0;
+      const radSurvival = clamp01(1 - radiation * (1 - radres) * phys.radLethality);
+      // 11) Feuer (AXIS-16 Pyrophyt): wiederkehrende Braende (Savanne, mediterranes Buschland)
+      //     toeten, WENN keine Feuer-Anpassung vorliegt (Korkrinde, unterirdische Lignotuber,
+      //     serotine Zapfen). 'fireres' puffert, kostet Unterhalt -> nur in Feuer-Regimen der
+      //     Pyrophyt. fire kommt ueber Umwelt-Einfluesse (Feuer-Regime), nicht die 6 Regler.
+      const fire = env.fire ?? 0;
+      const fireSurvival = clamp01(1 - fire * (1 - fireres) * phys.fireLethality);
+      // 12) Frost (AXIS-17 Kryoprotektion): tiefer Frost bildet Eiskristalle, die Zellen
+      //     zerreissen — toedlich OHNE Frostschutz (Frostschutzproteine, Glycerol, kontrolliertes
+      //     Ausfrieren wie beim Waldfrosch / antarktischen Eisfisch). Anders als Fell (das nur
+      //     Waerme haelt) verhindert 'frostres' den Gefrierschaden selbst. Kostet Unterhalt.
+      //     frost kommt ueber Umwelt-Einfluesse (Eiszeit/Permafrost), nicht die 6 Regler.
+      const frost = env.frost ?? 0;
+      const frostSurvival = clamp01(1 - frost * (1 - frostres) * phys.frostLethality);
+      // 13) Wind/Exposition (AXIS-18): Dauerwind/Sturm uebt mechanischen Stress aus (Austrocknung,
+      //     Abbrechen, Umwerfen) — abgefedert durch Windhaerte (biegsame/verholzte Stiele, Krueppel-
+      //     wuchs, Verankerung). 'windres' puffert, kostet Unterhalt -> nur an windexponierten
+      //     Standorten (Grat/Kueste/Steppe) der windharte Krueppel. wind kommt ueber Umwelt-Einfluesse.
+      const wind = env.wind ?? 0;
+      const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
+      const fit = Math.pow(thermal, phys.wThermal) *
+          Math.pow(predSurvival, phys.wPred) *
+          Math.pow(nutrition, phys.wNutrition) *
+          Math.pow(toxSurvival, phys.wTox) *
+          Math.pow(oxySurvival, phys.wOxy) *
+          Math.pow(osmoSurvival, phys.wOsmo) *
+          Math.pow(uvSurvival, phys.wUv) *
+          Math.pow(baroSurvival, phys.wBaro) *
+          Math.pow(desiccSurvival, phys.wDesicc) *
+          Math.pow(radSurvival, phys.wRad) *
+          Math.pow(fireSurvival, phys.wFire) *
+          Math.pow(frostSurvival, phys.wFrost) *
+          Math.pow(windSurvival, phys.wWind);
+      return Math.max(fit, phys.floor);
+  }
+  return _engineFitness(t, e, PHYS);
 }
 
 // Stochastische Drift fuer den Spiel-Modus (mittelwertfrei um das validierte
