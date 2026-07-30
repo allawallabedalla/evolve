@@ -89,18 +89,22 @@ Amphibien-Nische wäre er ein Etikettenschwindel.
 
 ## Phase 3 — Habitat als Weltebene
 
-Voraussetzung: Phase 0 (Medium sauber) + idealerweise Phase 1 (genug Formen, dass ein
-Habitat nicht nach drei Bakterien-Treffern leer wirkt). Aus der Raum-Messung
-(`tools/research/room-sweep.mjs`, §7): 10 Habitate haben je ein eigenes Gesicht
-(Tiefsee→Leuchtwesen 25 %, Wüste→Insekt 47 %, Steppe→flinkes Tier 42 %), machen aber nichts
-zusätzlich erreichbar — sie ordnen.
+**Kernstück umgesetzt (2026-07-30).** Aus der Raum-Messung (`tools/research/room-sweep.mjs`,
+§7): 10 Habitate haben je ein eigenes Gesicht (Tiefsee→Leuchtwesen 25 %, Wüste→Insekt 47 %,
+Steppe→flinkes Tier 42 %), machen aber nichts zusätzlich erreichbar — sie ordnen. Die 12
+bestehenden Biom-Presets SIND diese Habitat-Ebene bereits; eine separate neue UI-Schicht
+hätte den Komplexitäts-Audit (Punkt 3) verletzt. Stattdessen die vier eindeutigen Fälle
+umgesetzt, wo der Ortsname den Stressor schon verspricht: `stress:{ax,v}` an `BIOMES`
+(app/index.html) — Eiszeit→Frost, Hitze-Dürre→Dürre, Offenes Meer→Salz, Lichtlose
+Tiefsee→Druck. Macht 4 der 9 Paket-A-Extremophilen an einem festen Ort statt nur per
+Zufalls-Karte findbar. Wind+Frost gemeinsam für Eiszeit geprüft (`node
+scratchpad/eiszeit-frostwind.mjs`) und verworfen: Frost dominiert ohnehin, Wind hätte
+nichts zusätzlich sichtbar gemacht — kein eigener „Polar"-Fall im heutigen Preset-Satz.
+Im Browser verifiziert (Playwright + Screenshot): Klick auf „Lichtlose Tiefsee" → Chip
+„Tiefsee-Druck ✕" → Population konvergiert auf „Tiefsee-Amphipode · Druckfest".
 
-- Habitat als Rahmen über Medium + Reglern, **färbt, sperrt nicht** (Pfeiler).
-- Die zehn Stressor-Achsen an Habitate binden statt nur an Zufalls-Karten: Druck→Tiefsee,
-  Salz→Meer, Frost+Wind→Polar, Austrocknung→Wüste. Damit werden die 9 Extremophilen aus
-  Phase 1 an einem **Ort** findbar, nicht nur per Ereignis-Glück.
-- Genbuch/Karte bekommt eine räumliche Lesart: „diese Form lebt HIER", nicht nur „bei diesen
-  Werten".
+Offen (kleinerer Nachtrag, kein Blocker für den Rest der Roadmap): Genbuch/Karte um eine
+räumliche Lesart ergänzen („diese Form lebt HIER", nicht nur „bei diesen Werten").
 
 ## Phase 4 — Speziation: eine Welt zeigt mehrere Arten
 

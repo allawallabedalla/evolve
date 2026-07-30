@@ -1242,14 +1242,23 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   Euglenoid um den Urtümpel-Preset (water=0.65) — `requires` auf `water:[0.55,1.00]`
   geschärft (Seesterne sind marin) und Urtümpel-Preset auf water=0.78 verschoben.
   Dreiwertiger Medium-Toggle bleibt aus denselben Gründen wie ursprünglich zurückgestellt.
-- [ ] **Phase 3 — Habitat als Weltebene.** 10 Habitate mit eigenem Formprofil
-  (`tools/research/room-sweep.mjs`), als Rahmen über Medium + Reglern — **färbt, sperrt
-  nicht** (Pfeiler). Die zehn Stressor-Achsen an Habitate binden statt nur an
-  Zufalls-Karten (Druck→Tiefsee, Salz→Meer, Frost+Wind→Polar, Austrocknung→Wüste), damit
-  Paket A (Phase 1) an einem Ort findbar wird. Genbuch/Karte um räumliche Lesart
-  ergänzen. — **Modell: Opus** für die UI-/Interaktionsentscheidung (wie Habitate neben
-  den bestehenden Biom-Presets wirken, ohne Regler-Anzahl zu erhöhen, s. Komplexitäts-Audit
-  Punkt 3), **Sonnet** für Umsetzung.
+- [x] **Phase 3 — Habitat als Weltebene — Kernstück umgesetzt (2026-07-30).** Die 12
+  bestehenden Biom-Presets sind bereits die Habitat-Ebene (`tools/research/room-sweep.mjs`
+  zeigt: jedes hat ein eigenes Formprofil) — keine zusätzliche UI-Ebene nötig, das hätte
+  gegen den Komplexitäts-Audit (Punkt 3, „6 Regler + Presets, nicht mehr") verstoßen.
+  Stattdessen die vier eindeutigen Fälle umgesetzt, bei denen der Name des Ortes den
+  Stressor bereits verspricht: `stress:{ax,v}` an `BIOMES` (app/index.html) —
+  Eiszeit→Frost, Hitze-Dürre→Dürre, Offenes Meer→Salz, Lichtlose Tiefsee→Druck. Ein Klick
+  setzt jetzt zusätzlich diesen Stressor (vorher: alle Presets „sauber", Stressoren nur
+  über Zufalls-Karten). Macht 4 der 9 Paket-A-Extremophilen an einem festen ORT findbar
+  statt nur per Zufall — im Browser verifiziert (Playwright: Klick auf „Lichtlose
+  Tiefsee" → Stress-Chip „Tiefsee-Druck ✕" → Population konvergiert auf „Tiefsee-
+  Amphipode · Druckfest", Screenshot geprüft). `biomeHintForms()` (die stille
+  Empfehlungs-Vorschau) rechnet jetzt in derselben Welt inkl. Stressor, sonst hätte der
+  Hint vom echten Ergebnis abgewichen. Wind/Frost gemeinsam für „Polar" geprüft und
+  verworfen: Frost dominiert ohnehin, Wind haette nichts zusaetzlich sichtbar gemacht.
+  Offen (kleinerer Nachtrag, kein Blocker): Genbuch/Karte um eine räumliche Lesart
+  ergänzen („diese Form lebt HIER").
 - [ ] **Phase 4 — Speziation.** Deckt sich mit **P1 Radiation** aus Punkt 9
   (Schicht-A-Portfolio, dort bereits als „net-neu zu bauen" vorgesehen: Nischen in einer
   Metapopulation öffnen, Δ Artenzahl über `world/census.ts` messen). Größter Hebel dieser

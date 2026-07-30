@@ -1423,19 +1423,29 @@ const LEVERS = [
 // Stachelhäuter" (app/archetypes.js) gewann bei .65 ein Meerestier statt des Teich-
 // typischen Euglenoid-Protisten; ab .75 robust wieder Euglenoid (node
 // scratchpad/urtumpel-rescan.mjs).
+//
+// PHASE 3 (2026-07-30, docs/roadmap-lebendige-welt.md): `stress` bindet vier Presets an
+// den Stressor, den ihr eigener Name schon verspricht — „Lichtlose Tiefsee" IST per
+// Definition Druck, „Hitze-Dürre" IST Austrocknung. Bisher kamen die 9 Paket-A-
+// Extremophilen (app/archetypes.js) nur ueber zufaellige Einfluss-Karten vor; jetzt sind
+// vier von ihnen an einem festen ORT findbar. Bewusst nur die vier eindeutigen Faelle
+// (Frost/Eiszeit, Duerre/Hitze-Dürre, Salz/Offenes Meer, Druck/Tiefsee) — die anderen 8
+// Presets bleiben absichtlich "saubere Milieus" (kein erzwungener Stressor ohne
+// passenden Namen). Gemessen (node scratchpad/habitat-stress-test.mjs): alle vier
+// Bindungen erzeugen zuverlaessig die passende Extremophilen-Form.
 const BIOMES = [
-  {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
+  {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}, stress:{ax:"frost", v:.7}},
   {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.22}},
   {n:"Reiche Kronen", ico:"grain", env:{temperature:.5,predation:.1,foodAbundance:.9,foodHeight:.85,light:.5,water:.20}},
-  {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}},
+  {n:"Hitze-Dürre", ico:"flame", env:{temperature:.92,predation:.1,foodAbundance:.3,foodHeight:.1,light:.9,water:.15}, stress:{ax:"aridity", v:.7}},
   {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.75}},
   {n:"Dichter Wald", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.6,foodHeight:.7,light:.9,water:.35}},
   {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.42}},
   {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.78}},
   {n:"Trüber See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
   {n:"Sonniges Flachmeer", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
-  {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},
-  {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}},
+  {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}, stress:{ax:"salinity", v:.65}},
+  {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}, stress:{ax:"pressure", v:.7}},
 ];
 const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz","Windhärte","Stickstoff-Fix."];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
@@ -2235,9 +2245,12 @@ let _biomeHintForms = null;
 function biomeHintForms(){
   if(_biomeHintForms) return _biomeHintForms;
   _biomeHintForms = BIOMES.map(b => {
+    // PHASE 3: den Hint in DERSELBEN Welt rechnen, die ein Klick tatsaechlich erzeugt —
+    // inkl. b.stress, sonst weicht die stille Empfehlung vom echten Ergebnis ab.
+    const benv = b.stress ? { ...b.env, [b.stress.ax]: b.stress.v } : b.env;
     let m = new Array(NG).fill(0.5);
-    for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, b.env);
-    return classify(m, b.env).n;   // in DER Welt benennen, in der es auch gewachsen ist
+    for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, benv);
+    return classify(m, benv).n;   // in DER Welt benennen, in der es auch gewachsen ist
   });
   return _biomeHintForms;
 }
@@ -2986,6 +2999,7 @@ BIOMES.forEach((b,bi) => {
   btn.innerHTML = ic(b.ico)+" "+b.n+` <span class="biome-hint" data-bi="${bi}">${ic("spark")}</span>`;
   btn.addEventListener("click", () => {
     Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;   // Biome sind saubere, geschützte Milieus
+    if(b.stress) env[b.stress.ax] = b.stress.v;   // PHASE 3: vier Orte SIND per Namen ein Stressor (Tiefsee=Druck, Wüste=Dürre, Meer=Salz, Eiszeit=Frost)
     LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
     renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
