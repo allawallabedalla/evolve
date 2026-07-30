@@ -59,7 +59,14 @@ await page.waitForTimeout(2200);
 try { await page.click("text=Alle 25 Gene zeigen", { timeout: 2000 }); await page.waitForTimeout(600); } catch { /* schon offen */ }
 
 const data = await page.evaluate(() => {
-  const APP_FONTS = /^(ui-sans-serif|ui-monospace|Georgia|Fraunces|Space Grotesk|Space Mono)$/;
+  // Die erlaubten Familien werden NICHT hart kodiert, sondern aus den @font-face-Regeln
+  // der Seite abgeleitet — sonst meldet das Werkzeug nach jedem Schriftwechsel falschen
+  // Alarm. Generische UI-Schlüsselwörter gelten zusätzlich als in Ordnung, damit ein
+  // reiner System-Stack (ohne Webfonts) nicht als Fehler gilt.
+  const declared = new Set();
+  for (const f of document.fonts) if (f.family) declared.add(f.family.replace(/"/g, "").trim());
+  const GENERIC = new Set(["ui-sans-serif", "ui-monospace", "ui-serif", "system-ui", "-apple-system"]);
+  const isAppFont = fam => declared.has(fam) || GENERIC.has(fam);
   const first = f => f.split(",")[0].replace(/"/g, "").trim();
 
   // --- 1./2. sichtbare Text-Elemente ---
@@ -95,7 +102,7 @@ const data = await page.evaluate(() => {
     formTotal++;
     const cs = getComputedStyle(el);
     const fam = first(cs.fontFamily);
-    if (APP_FONTS.test(fam)) { formOk++; continue; }
+    if (isAppFont(fam)) { formOk++; continue; }
     const k = `${fam} | .${String(el.className || el.type || el.tagName).split(" ")[0]}`;
     formBad[k] = (formBad[k] || 0) + 1;
   }

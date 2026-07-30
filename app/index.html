@@ -1,7 +1,14 @@
+<!-- lang="de" ist keine Formalie: ohne die Sprachangabe greift `hyphens: auto` bei den
+     deutschen Gen-Labels nicht ("Strahlungsresistenz" & Co., s. docs/typografie-audit.md). -->
+<html lang="de">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 <title>Evolve — Bio-Kammer</title>
+<!-- Die beiden selbst gehosteten Schriften vorladen: sie werden vom CSS erst nach dem
+     Stylesheet-Parse entdeckt, was sonst ein sichtbares Umspringen der Schrift gibt. -->
+<link rel="preload" href="./fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="./fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="./style.css">
 
 <!-- Siebdruck-Anmutung: ein einziger SVG-Rauschfilter (kein Rasterbild) liegt als

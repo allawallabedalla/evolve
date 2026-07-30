@@ -1,5 +1,44 @@
 # Typografie-Audit — Blick moderner Game-Apps
 
+> ## Status: umgesetzt
+>
+> Die Empfehlungen aus Abschnitt 5 sind eingebaut. Auf Wunsch des Nutzers **nicht**
+> mit einer organischen Display-Serif (der erste Vorschlag war Fraunces), sondern mit
+> einer geometrischen Grotesk: **Archivo** (variabel, `wght` + `wdth`) trägt Display
+> *und* UI, **JetBrains Mono** nur noch die Ziffern-Readouts. Beide selbst gehostet
+> unter `app/fonts/` (120 KB zusammen, latin-Subset, kein CDN).
+>
+> | Messung | vorher | nachher |
+> | --- | --- | --- |
+> | sichtbarer Text < 12 px | 65–68 % | **0 %** |
+> | sichtbarer Text < 11 px | 42–48 % | **0 %** |
+> | kleinster Grad | 9,9 px | **12 px** |
+> | distinkte Größen (sichtbar) | 15 | **8** |
+> | distinkte Typo-Kombinationen | 30–34 | **22** |
+> | Monospace-Anteil | 47 % | **9 %** |
+> | `var(--mono)`-Regeln | 37 | **8** |
+> | Bedienelemente auf Browser-Schrift | 28 / 71 | **0 / 71** |
+> | Gen-Labels mit Überlauf | 1 (+32,7 px) | **0** |
+> | Gen-Labels zweizeilig | 3 | **0** |
+> | Passungs-Zahl | 11,2 px | **38 px** |
+> | Skalen-Kontrast | 3,0 : 1 | **3,7 : 1** |
+>
+> Nachprüfbar mit `npm run type-audit`; `npm run type-check` ist dasselbe als Gate
+> (Exit 1 bei Text < 12 px, > 10 Größen, Bedienelement auf Browser-Schrift oder
+> Label-Überlauf). `npm run ui-calm-check` läuft weiterhin durch.
+>
+> **Ehrlich bleiben bei zwei Punkten:**
+> 1. Der Skalen-Kontrast liegt bei 3,7 : 1 und damit noch unter den 5–8 : 1 aus
+>    Abschnitt 3.3. Das ist teilweise Arithmetik: die Untergrenze von 9,9 auf 12 px zu
+>    heben *staucht* das Verhältnis zwangsläufig. Der Boden war das wichtigere Problem;
+>    ein größerer Kontrast wäre nur über eine noch größere Display-Stufe zu holen und
+>    das sollte eine gestalterische Entscheidung sein, keine Kennzahl-Kosmetik.
+> 2. `Austrocknungs-Tol.` und `Stickstoff-Fix.` sind in den Daten **weiterhin
+>    abgekürzt**. Abschnitt 4.1 kritisiert das, aber ausgeschrieben passen sie auch in
+>    der proportionalen Grotesk nicht einzeilig in die 118-px-Spalte — sie
+>    auszuschreiben würde die zweizeiligen Zeilen wieder einführen, die gerade
+>    beseitigt wurden. Offen, bewusst.
+
 **Anlass** (Nutzer, 2026-07): *„die wirkt irgendwie nicht so cool."*
 
 Das ist ein präzises Gefühl mit einer messbaren Ursache. Die Palette („Klippenlicht",
@@ -243,15 +282,17 @@ Die Palette bleibt. Nur die Stimme wird ersetzt.
 Alle drei sind OFL-lizenziert, als variable `woff2` selbst hostbar (kein CDN, passt
 zum offline-fähigen Aufbau der App):
 
-| Rolle | Vorschlag | Warum |
-| --- | --- | --- |
-| **Display** — Wortmarke, Artname, Panel-Titel | **Fraunces** (variable: `wght`, `opsz`, `SOFT`, `WONK`) | organisch-warme Serif mit echtem Charakter; die `SOFT`/`WONK`-Achsen geben genau das „lebendige" Gefühl, das zum Thema passt, und ersetzen Georgia-Kursiv durch eine *Entscheidung* |
-| **UI / Text** — Labels, Buttons, Fließtext | **Space Grotesk** (variable `wght` 300–700) | moderne Grotesk mit Eigenwilligkeit statt Inter-Neutralität; enge Laufweite liest im Kleinen „Spiel" statt „Formular" |
-| **Daten** — nur Ziffern & Mikro-Meta | **Space Mono** | ist die monospacige Schwester von Space Grotesk → automatische Kohärenz; als *Gewürz* auf ~5 % des Textes reduziert |
+Der erste Vorschlag war eine organische Display-Serif (Fraunces). Der Nutzer wollte
+es **weniger organisch** — umgesetzt ist daher die geometrische Variante:
 
-Risikoärmere Alternative, falls nur eine neue Schrift gewünscht ist: **Fraunces
-für Display behalten, UI auf Inter Tight** — weniger Charakter, aber keine
-Umstellungsrisiken bei den Laufweiten.
+| Rolle | Umgesetzt | Warum |
+| --- | --- | --- |
+| **Display** — Wortmarke, Artname, Panel-Titel | **Archivo**, `wdth` 112 %, `wght` 700–800 | geometrische Grotesk, flach und graphisch — passt genau zur Siebdruck-Richtung; leicht expandiert + schwer liest „modernes Spiel", ohne Ornament oder Eigenwilligkeit |
+| **UI / Text** — Labels, Buttons, Fließtext | **Archivo**, `wdth` 100 %, `wght` 400–700 | dieselbe Datei: die Display-Stimme entsteht aus der **Breitenachse**, nicht aus einer zweiten Familie. Eine Schrift, zwei Stimmen, ~90 KB |
+| **Daten** — nur Ziffern-Readouts | **JetBrains Mono** | echte Tabellenziffern, sachlich statt retro-verspielt (darum nicht Space Mono); als *Gewürz* auf 9 % des Textes reduziert |
+
+Der Trick ist die `wdth`-Achse: sie liefert den Display-Kontrast, ohne eine zweite
+Schriftfamilie einzuführen — daher nur **zwei** Dateien für drei Stimmen.
 
 > Wichtig: Der Effekt kommt zu ~70 % aus **Punkt 5.2/5.3 (Skala, Rollen,
 > Mono-Rückbau)**, nicht aus der Schriftdatei. Wer keine Webfonts einbinden will,

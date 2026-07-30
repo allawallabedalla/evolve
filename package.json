@@ -35,6 +35,7 @@
     "influence-check": "node tools/influence-check.mjs",
     "ui-calm-check": "node tools/ui-calm-check.mjs",
     "type-audit": "node tools/type-audit.mjs",
+    "type-check": "node tools/type-audit.mjs --strict",
     "layer-import-check": "node tools/layer-import-check.mjs",
     "story-import-check": "node tools/story-import-check.mjs",
     "build-story-extra": "node tools/build-story-extra.mjs",
