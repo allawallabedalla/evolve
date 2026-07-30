@@ -697,10 +697,31 @@ Von den ursprünglich geplanten Achsen sind AXIS-1 (Flug), AXIS-4 (Aquatik) und 
 
 **Modell:** Sonnet — durchweg kleine, klar umrissene Fixes/Cleanups.
 
-- [ ] **CLS-4-Rest · schmale Größenfenster** — einige seltene Formen (Nadelbaum, Blütenkraut,
-  Hutpilz) hängen weiter an engen Klassifikations-Fenstern. Kein Attraktor-Problem mehr
-  (BAL-5 hat die Mitte entzerrt) — eher eine `classify()`-Grenz-Feinjustierung, geringe
-  Priorität.
+- [x] **CLS-4-Rest · schmale Größenfenster (erledigt 2026-07-30, Sonnet):** der Backlog-Eintrag
+  maß mit dem falschen Werkzeug — `tools/research/optima.mjs` klassifiziert über die
+  **veraltete** Kaskade (`tools/research/classify.mjs`), nicht über das seit Migrations-Stufe 2
+  produktive `matchArchetype()`. Mit dem echten Matcher nachgemessen (11 Biome × 500 Starts,
+  `tools/lib/app-core.mjs`, `fitness()` gegen `dist/engine/fitness.js` auf 0 Abweichung
+  verifiziert): **Nadelbaum ist mit 4.13 % gar nicht selten** (Rang ~8 von ~100 Formen) — das
+  war ein reines Messartefakt der Alt-Kaskade, keine echte Rarität. **Hutpilz** bestätigt
+  unauffällig (1.35 %). Nur **Blütenkraut** blieb real selten (0.45 %) — Ursache gefunden:
+  sein Prototyp in `app/archetypes.js` nannte nur 5 Gene (fehlendes `size`, dessen Streuung
+  mit sd=0.244 hauchdünn über der automatischen Aufnahmeschwelle SD_MAX=0.235 aus
+  `tools/research/archetype-derive.mjs` lag), während die direkten Nachbarn (Nadelbaum/Farn/
+  Laubbaum/Strauch) alle 6 Gene nennen — `matchArchetype()`s Spezifitäts-Bonus
+  (`specificityBonus=0.55`) bevorzugt bei Grenzfällen strukturell den vollständiger
+  spezifizierten Prototyp. Behoben durch `size:.63` (Mittelwert über 8 Mio. Kraut-Genome im
+  alten Blütenkraut-Zweig, dieselbe Geometrie-Methode wie Schritt 1 von
+  `archetype-derive.mjs`, nur unterhalb dessen automatischer Schwelle) — kein neuer
+  Physik-Term nötig, reine Matcher-Vervollständigung. **Ergebnis: Blütenkraut 0.45 % → 1.00 %
+  (+122 %).** Ehrlich mitgemessene Nebenwirkung: Farn 1.05 % → 0.62 % (−41 % relativ) — Farn
+  hatte bisher selbst vom unvollständigen Blütenkraut-Prototyp mitprofitiert (gewann dessen
+  Grenzfälle strukturell, nicht weil es ihnen distanzmäßig näher lag); die Korrektur gleicht
+  diese Asymmetrie aus, statt sie nur zu verschieben. Farn bleibt in ~8/11 Biomen sichtbar,
+  weit über dem 0.14-%-Krisenbereich, der die Formen ursprünglich auffällig gemacht hatte —
+  Trade-off geprüft und für tragbar befunden.
+  Alle 17 Gates grün (inkl. `app-parity` 0, `app-fitness-check`), unabhängig gegengeprüft
+  (eigener Gate-Lauf dieser Session).
 - [x] **Lebensbaum-Lücke „Leuchtwesen · Tiefsee" (behoben 2026-07-29)** — echter `TREE`-Eintrag
   ergänzt (Reich Tier, `cl:"Ceratioidei"`, `era:"vor ~150 Mio. J."`, recherchiert: Davis/
   Sparks/Smith 2016, Biolumineszenz bei Strahlenflossern ab dem Jura, ≥27× unabhängig

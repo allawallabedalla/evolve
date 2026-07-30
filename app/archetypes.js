@@ -160,7 +160,19 @@ window.ARCHETYPES = {
 
     { key:"bluetenkraut", k:"Pflanze", n:"Blütenkraut", e:"🌸",
       // if(photo>0.75 && struct<0.42)
-      proto:{ insulation:.30, armor:.25, photosynthesis:.87, mobility:.20, structure:.24 } },
+      // KURATION (CLS-4-Rest, 2026-07-30): `size` lag mit sd=0.244 hauchdünn über der
+      // automatischen SD_MAX=0.235-Aufnahmeschwelle (archetype-derive.mjs) und blieb
+      // deshalb bisher unbenannt — mit nur 5 statt 6 Genen hatte der Prototyp im
+      // Spezifitäts-Bonus (matchArchetype()) einen strukturellen Nachteil gegen seine
+      // 6-Gene-Nachbarn Nadelbaum/Farn/Laubbaum/Strauch und verlor Grenzfälle an sie,
+      // obwohl er ihnen distanzmäßig nicht unterlegen war (gemessen: reine
+      // Fenster-Ziehung, die laut alter Kaskade zu 100% "Blütenkraut" ist, wurde vom
+      // echten Matcher in der Fallback-Welt nur zu 41.5% auch so genannt, 11.5% davon
+      // gingen an Nadelbaum). size:.63 = Mittelwert über 8 Mio. gleichverteilte
+      // Kraut-Genome im Blütenkraut-Zweig (dieselbe Geometrie-Methode wie
+      // archetype-derive.mjs Schritt 1, hier nur unterhalb ihrer eigenen Schwelle).
+      proto:{ insulation:.30, size:.63, armor:.25, photosynthesis:.87, mobility:.20,
+              structure:.24 } },
 
     { key:"farn", k:"Pflanze", n:"Farn", e:"🌿",
       // if(struct<0.42 && size>0.35), photo<=0.75
