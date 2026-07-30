@@ -629,7 +629,7 @@ Technik-Aufgabe). Punkt 6 (Rest-Achsen) ist damit entsperrt — s. dort.
     zusammengelegt (unterschiedliche Ziele — eigene Datei bündeln vs. `app/index.html`
     an Ort und Stelle ändern — getrennt einfacher zu diagnostizieren).
 
-### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — eigener Branch, läuft parallel
+### 4 · Flacher Vektor-/Siebdruck-Stil (Redesign, 2026-07-29) — Phase 1+2 auf diesen Branch nachgezogen (2026-07-30)
 
 Nutzer-Auftrag: die gesamte Oberfläche auf flachen Vektor-Illustrationsstil mit
 Siebdruck-Anmutung umstellen (Referenz: Two Dots, Mid-Century-Wissenschaftsposter) —
@@ -663,6 +663,42 @@ Branch `claude/flat-vector-simulation-ui-kttqxx`.
   umgestellt. Letzte rohe Emoji (☁️ Cloud-Sync-Status, 👋 Onboarding-Hinweis)
   durch flaches Icon ersetzt bzw. entfernt — der Rest der App nutzt bereits
   durchgängig `ic()`/`formIcon()`.
+
+**Nachtrag 2026-07-30 (Opus) — Phase 1+2 vom separaten Redesign-Branch
+(`claude/flat-vector-simulation-ui-kttqxx`) auf diesen Branch nachgezogen** (Nutzer-
+Entscheidung: Redesign hier statt auf dem separaten Branch weiterführen). **Kein
+`git merge`** — der Redesign-Branch war vom 28.7., also vor der kompletten
+Engine-Migration dieser Session; ein Merge hätte `app/index.html` massiv zerschossen.
+Stattdessen die tatsächlichen Netto-Änderungen (484 + 29 Zeilen, deutlich weniger als
+die 2881 Zeilen Rohdiff zwischen den Branch-Spitzen vermuten ließen) als eigenständige
+Arbeit mit derselben Intention auf den aktuellen Stand übertragen; CSS landet jetzt in
+`app/style.css` (existierte auf dem Redesign-Branch noch nicht, s. Punkt 3 P1.5).
+**Sechs notwendige Korrekturen über die Vorlage hinaus gefunden und behoben:**
+fehlendes `ctx.clearRect()` (Kreatur hätte sich Bild für Bild überlagert, da
+`drawHabitat()` das Canvas nicht mehr flächig füllt), fehlendes `z-index` auf
+Gen-Anzeige/Biom-Tag/Stress-Chips (verschwanden unter der neuen SVG-Bühne),
+Schnappschuss-Teilen rasterisiert jetzt auch die SVG-Ebene (sonst nur Silhouette ohne
+Welt), a11y-Label auf die neue Bühnen-Struktur verschoben, UV-Schleier zusätzlich zu
+den neuen Lichtkeilen behalten (sonst verlorene Regler-Wirkung), Reveal-Schleier hell
+statt dunkel (Kartentext ist dunkle Schrift, ein dunkler Schleier wäre unlesbar
+gewesen), `--muted` von `#6a5a68` auf `#645463` nachjustiert (lag bei `#6a5a68` auf
+`--bg-top` bei rasiermesserdünnen 4.50:1 AA-Kontrast, jetzt 5.05:1).
+**Ein echter, unabhängig bestätigter Bug gefunden und behoben** (vordatiert auf HEAD,
+nicht durch das Redesign verursacht): `.gene .fill`/`.vit-fill` waren `<span>`s mit
+`display: inline` (Standard) innerhalb eines Grid-Containers — blieben dadurch 0×0 und
+zeigten nur die Kontur-Hairline, keine Füllfarbe. Fix: `display: block` ergänzt (2
+Zeilen, `app/style.css`), Gen-Balken und Passungs-Balken zeigen jetzt wieder ihre
+Füllung.
+**Bewusst nicht angefasst:** die "matschige" Mitteltemperatur-Mischfarbe
+(`mix(kalt,warm,T)` bei T≈0.5 wirkt entsättigt) — das ist die wörtliche Vorlage des
+Redesign-Branchs, keine Regression; eine dritte Farbstufe wäre eine eigene, nicht
+beauftragte Geschmacks-Entscheidung und bleibt offen für eine spätere bewusste Wahl.
+Getestet: alle 20 Gates grün (inkl. `ui-calm-check`, `app-parity` exakt 0), eigener
+Playwright-Lauf mit WCAG-Kontrastmessung (alle Text/Fläche-Paare ≥4.5:1) und
+Performance-Vergleich (SVG-Bühne + Papierkorn-Filter kosten nichts messbar) —
+unabhängig gegengeprüft (eigener Gate-Lauf + eigener Screenshot-Vergleich diese
+Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
+
 - [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)** — **Modell: Opus**
   (geschmacksintensivster Teil, Sonnet bleibt Orchestrator/Integration):
   `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
