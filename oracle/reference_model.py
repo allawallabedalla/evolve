@@ -177,8 +177,20 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["aquaticBase"] + (1.0 - phys["aquaticBase"]) * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
-    # d.2) Amphibische Nische — VERSUCHT UND WIEDER ENTFERNT (Phase 2, 2026-07-30): brach
-    #    tools/coevolution-check.mjs (Red Queen P5), s. engine/fitness.ts fuer den Befund.
+    # d.2) Amphibische Nische (AXIS-21, zweiter Anlauf, 2026-07-30): Dreieck-Gate auf water
+    #    (Zentrum amphibiousWaterCenter=0.65, NICHT aquaticWaterFloor=0.5 - bei water=0.5
+    #    exakt null, s. engine/fitness.ts fuer den vollen Befund) UND auf limb (mittlerer
+    #    Bauplan). Braucht Mobilitaet + Nahrung, heterotroph (schliesst Photo aus).
+    amph_water_tri = _clamp01(1.0 - abs(env["water"] - phys["amphibiousWaterCenter"]) / phys["amphibiousBandWidth"])
+    amph_limb_tri = _clamp01(1.0 - abs(limb - phys["amphibiousLimbOpt"]) / phys["amphibiousLimbWidth"])
+    energy_amphibious = (
+        phys["amphibiousYield"]
+        * amph_water_tri
+        * amph_limb_tri
+        * mobility
+        * env["foodAbundance"]
+        * (1.0 - phys["exclusion"] * photo)
+    )
     # e) Biolumineszenz (AXIS-5): Leuchtorgan lockt/beleuchtet Beute, NUR im Dunkeln
     #    (dark = 1-light). Nahrungs-Einkommen dort, wo Photo tot ist; aktive Koerper
     #    nutzen es besser; heterotroph (schliesst Photo aus). Kosten: maintenance.biolum.
@@ -248,6 +260,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + energy_forage
         + energy_absorb
         + energy_aquatic
+        + energy_amphibious
         + energy_glow
         + energy_filter
         + energy_nfix

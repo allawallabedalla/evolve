@@ -78,14 +78,23 @@ gegeneinander antreten sollen. Vollständig zurückgenommen (physics.json,
 engine/fitness.ts, engine/types.ts, oracle/reference_model.py) statt live geschickt —
 Befund in den jeweiligen Dateien dokumentiert.
 
-**Für einen zweiten Anlauf:** das Zentrum des Kanals müsste bewusst NICHT auf
-`aquaticWaterFloor` fallen (der Koevolutions-Test sitzt genau dort), oder der Bonus
-müsste an eine Bedingung gekoppelt werden, die die reine Größen-Verteidigungs-Nische der
-Koevolutions-Testumwelt (Räuberdruck ohne Wasser-Kontext) nicht berührt. Amphibie bleibt
-bis dahin ein „legendärer" Drift-Fang wie Moos oder Farn — kein Rückschritt gegenüber dem
-Ausgangszustand, nur kein Fortschritt. Ein dreiwertiger Medium-Toggle (Land/Amphibisch/
-Wasser) im UI bleibt aus denselben Gründen wie ursprünglich zurückgestellt: ohne echte
-Amphibien-Nische wäre er ein Etikettenschwindel.
+**Zweiter Anlauf — erfolgreich (2026-07-30, Punkt 10 im Backlog).** Genau der oben
+skizzierte Ansatz umgesetzt: `energyAmphibious` neu gebaut, diesmal mit einem eigenen
+Zentrum `amphibiousWaterCenter=0.65` (statt `aquaticWaterFloor=0.5`) und Bandbreite
+`amphibiousBandWidth=0.13` — bei `water=0.5` (coevolution-checks feste Testumwelt) ist
+der Kanal dadurch RECHNERISCH EXAKT null (Dreieck-Rand liegt bei 0,52), nicht nur
+klein. `coevolution-check` blieb dadurch unverändert bei 7,9× (identisch zum Wert ohne
+Kanal) — der erste Anlauf hatte selbst beim niedrigsten Ertragswert das Verhältnis auf
+1,4–2,1× gedrückt, diesmal keine messbare Änderung. Zweites Dreieck-Gate auf `limb`
+(Optimum 0,45, Breite 0,3) verhindert, dass reine Landtiere oder reine Schwimmer vom
+Kanal profitieren. Amphibie · Lurch dadurch schwach über echte Selektion erreichbar
+(`gap-sweep`: 0/4000 → 2/4000 — „schwach" wie von Anfang an erwartet, die Nische ist per
+Definition schmal). Alle Pflicht-Gates grün: ecology, reality (20/20), distribution-check
+(4/4), phenomena-check (8/8), coevolution-check (7,9×), keine Archetyp-Erreichbarkeit
+verloren (`archetype-transition-check`, 4000 Umwelten). Ein dreiwertiger Medium-Toggle
+(Land/Amphibisch/Wasser) im UI ist damit fundiert möglich, aber ein eigener, noch nicht
+begonnener UX-Schritt — Amphibie ist jetzt eine echte (wenn auch seltene) Nische, kein
+reiner Drift-Fang mehr.
 
 ## Phase 3 — Habitat als Weltebene
 

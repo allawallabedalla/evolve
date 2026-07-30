@@ -1305,14 +1305,21 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   rarity-/story-/influence-/branching-/world-check — sowie
   `archetype-transition-check.mjs` (4000 Umwelten): keine der 65 Formen verliert
   Erreichbarkeit.
-- [ ] **Zweiter Anlauf: Amphibische Nische ohne Koevolutions-Konflikt.** Phase 2 wurde
-  gebaut, gemessen und zurückgenommen (s. o.) — ein additiver Energiekanal exakt am
-  Land/Wasser-Übergang brach den Red-Queen-Test, weil dessen feste Testumwelt
-  (`water=0.5`) exakt im Zentrum des neuen Kanals lag. Möglicher Ansatz für einen
-  zweiten Anlauf (aus docs/roadmap-lebendige-welt.md Phase 2 übernommen): das Zentrum
-  des Kanals bewusst NICHT auf `aquaticWaterFloor` legen, sondern leicht versetzt, damit
-  die coevolution-check-Testumwelt außerhalb des Kanal-Peaks liegt. Noch nicht
-  begonnen — offen für eine künftige Sitzung.
+- [x] **Zweiter Anlauf: Amphibische Nische ohne Koevolutions-Konflikt — erfolgreich
+  (2026-07-30).** `energyAmphibious` (AXIS-21) neu gebaut, diesmal mit eigenem Zentrum
+  `amphibiousWaterCenter=0.65` statt `aquaticWaterFloor=0.5` (dem Zentrum des ersten,
+  zurückgenommenen Versuchs) + Bandbreite `amphibiousBandWidth=0.13`: bei `water=0.5`
+  (coevolution-checks feste Testumwelt) ist der Kanal dadurch RECHNERISCH EXAKT null.
+  Zweites Dreieck-Gate auf `limb` (Optimum 0,45) verhindert Missbrauch durch reine
+  Land-/Wassertiere. `coevolution-check` unverändert bei 7,9× (identisch zum Wert ohne
+  Kanal — der erste Anlauf hatte selbst beim niedrigsten Ertrag 1,4–2,1× erreicht).
+  Amphibie · Lurch dadurch schwach über echte Selektion erreichbar (`gap-sweep`: 0/4000
+  → 2/4000 — bewusst schwach, die Nische ist eng). Volle Pipeline durchlaufen (Orakel-
+  Regen, GA-Retrain, PARAMS-Sync, Bundle). Alle Pflicht-Gates grün: parity/app-parity
+  exakt 0, ecology, reality (20/20), distribution-check (4/4), mf-fidelity, pop-check,
+  phenomena-check (8/8), coevolution-check (7,9×) — sowie `archetype-transition-check`
+  (4000 Umwelten): keine der 65 Formen verliert Erreichbarkeit. Details in
+  docs/roadmap-lebendige-welt.md Phase 2.
 - [ ] **Phase 5 — Symbiose/Parasitismus.** Bereits in Punkt 6 bewusst zurückgestellt
   („Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu"). Baut auf
   Phase 4 auf (dieselbe Grundvoraussetzung: mehr als ein Genom gleichzeitig in Beziehung).

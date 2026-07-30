@@ -93,6 +93,11 @@ export interface Physics {
   aquaticWaterFloor: number;
   aquaticLimbDrag: number;
   aquaticArmorDrag: number;
+  amphibiousYield: number;
+  amphibiousWaterCenter: number;
+  amphibiousBandWidth: number;
+  amphibiousLimbOpt: number;
+  amphibiousLimbWidth: number;
   biolumYield: number;
   biolumMobFloor: number;
   biolumDefense: number;

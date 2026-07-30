@@ -432,6 +432,11 @@ const PHYS = {
   aquaticWaterFloor: 0.5,
   aquaticLimbDrag: 0.7,
   aquaticArmorDrag: 0.5,
+  amphibiousYield: 0.8,
+  amphibiousWaterCenter: 0.65,
+  amphibiousBandWidth: 0.13,
+  amphibiousLimbOpt: 0.45,
+  amphibiousLimbWidth: 0.3,
   biolumYield: 0.72,
   biolumMobFloor: 0.62,
   biolumDefense: 0.3,
@@ -557,14 +562,22 @@ const PARAMS = {
   // distribution-check (4/4, B1-B4 alle im Zielband), coevolution-check (Red Queen
   // 7.9x, > 2.5x-Schwelle), phenomena-check (8/8), keine Archetyp-Erreichbarkeit
   // verloren (archetype-transition-check, 4000 Umwelten), s. BACKLOG.md Punkt 10.
-  responseRate:[0.4333943553688783, 0.36601879116280045, 0.2821859421922405, 0.8, 0.1674539917253926, 0.7572987479471139, 0.8, 0.2578509160190461, 0.2624019639100219, 0.7355848698557009, 0.23210361753782177, 0.1400121402209555, 0.2194351463841636, 0.5312593663051782, 0.18126869519637848, 0.2808062803244104, 0.3123588077612707, 0.2198561799238116, 0.23384869026853475, 0.15538591226450046, 0.12846429050384459, 0.2076404149858236, 0.14694217581771465, 0.17364614420314795, 0.13234484324138496],
+  // 2026-07-30 (Punkt 10, Amphibisch — zweiter Anlauf): energyAmphibious erneut
+  // gebaut, diesmal mit Kanal-Zentrum bewusst NICHT auf aquaticWaterFloor (0.5,
+  // Zentrum des ersten, zurueckgenommenen Versuchs) sondern auf amphibiousWaterCenter
+  // =0.65 — bei water=0.5 (coevolution-checks feste Testumwelt) ist der Kanal dadurch
+  // EXAKT null. coevolution-check unveraendert bei 7.9x (identisch zum Wert ohne
+  // Kanal). Amphibie · Lurch dadurch schwach ueber Selektion erreichbar (Sweep: 0/4000
+  // -> 2/4000), s. engine/fitness.ts fuer die volle Herleitung. Alle Pflicht-Gates
+  // gruen, neu trainiert (Physik-Aenderung).
+  responseRate:[0.29048565060164755, 0.3144304626012807, 0.1059716573817345, 0.7634147804819107, 0.3233797932444492, 0.7711172005210656, 0.7813864319884113, 0.3402516698690486, 0.2028444016263386, 0.8, 0.1714292043959725, 0.2114376274199332, 0.3055814331046625, 0.21101706712289484, 0.1797677129263417, 0.30402386122575975, 0.3114617815099476, 0.1641581206450702, 0.1655883115444087, 0.18259572609083236, 0.1798762990589038, 0.21431340962907142, 0.23341454653478372, 0.19372701689981095, 0.15645492046456375],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
   // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
   // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
   mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
-  mutationRate:0.0038476481152717543, selectionStrength:0.9310294296049265, varianceWeight:1
+  mutationRate:0.0037629005772963084, selectionStrength:0.7620469119523765, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -862,15 +875,21 @@ function fitness(t, e){
           streamline *
           (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
           (1 - phys.exclusion * photo);
-      //    d.2) Amphibische Nische — VERSUCHT UND WIEDER ENTFERNT (Phase 2, Lebendige-Welt-
-      //       Roadmap, 2026-07-30). Ein additiver Energiekanal exakt am Land/Wasser-Uebergang
-      //       (water=aquaticWaterFloor, Dreieck-Peak bei moderatem limb) machte Amphibie
-      //       tatsaechlich schwach erreichbar, brach aber tools/coevolution-check.mjs (Red
-      //       Queen P5): die Testumwelt liegt bei water=0.5 — exakt am Zentrum des Kanals.
-      //       Jeder getestete Ertrag (0.3/0.6/0.9/1.5) senkte das Koevolutions/Kontroll-
-      //       Verhaeltnis von 6.6x auf 1.4-2.1x, unter die 2.5x-Schwelle: der Kanal gab der
-      //       Beute-Population einen Ausweg aus dem groessenbasierten Ruestungswettlauf.
-      //       Siehe docs/roadmap-lebendige-welt.md Phase 2 fuer den vollen Befund.
+      //    d.2) Amphibische Nische (AXIS-21, zweiter Anlauf — Lebendige-Welt-Roadmap Punkt 10,
+      //       2026-07-30). Erster Anlauf (Phase 2) zentrierte den Kanal exakt auf
+      //       aquaticWaterFloor (0.5) — brach damit tools/coevolution-check.mjs, dessen feste
+      //       Testumwelt bei water=0.5 liegt (s. Kommentar-Historie in physics.json, Version 7).
+      //       Diesmal bewusst NICHT auf aquaticWaterFloor zentriert: amphibiousWaterCenter=0.65
+      //       mit Bandbreite 0.13 heisst, der Kanal ist bei water=0.5 EXAKT null (Dreieck-Rand
+      //       liegt bei 0.52) und wirkt nur im Band [0.52, 0.78] — Ufer/Sumpf/Flachwasser statt
+      //       tiefem Gewaesser. Zweite Dreieck-Gate auf limb (amphibiousLimbOpt=0.45): weder
+      //       lange Landbeine noch stromlinienfoermige Flossenlosigkeit, sondern ein mittlerer
+      //       Bauplan (Watvogel/Frosch/Otter). Braucht Mobilitaet + Nahrung, heterotroph
+      //       (schliesst Photosynthese aus) — kein neues Gen, nur eine neue Kombination
+      //       bestehender.
+      const amphWaterTri = clamp01(1 - Math.abs(env.water - phys.amphibiousWaterCenter) / phys.amphibiousBandWidth);
+      const amphLimbTri = clamp01(1 - Math.abs(limb - phys.amphibiousLimbOpt) / phys.amphibiousLimbWidth);
+      const energyAmphibious = phys.amphibiousYield * amphWaterTri * amphLimbTri * mobility * env.foodAbundance * (1 - phys.exclusion * photo);
       //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
       //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
       //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.
@@ -967,7 +986,15 @@ function fitness(t, e){
       const insectShape = limb * clamp01(1 - size) * clamp01(1 - armor) * clamp01(1 - insulation);
       const traction = insectShape * insectShape * landFactor * hot * dry;
       const energyTraction = phys.tractionYield * mobility * traction * (1 - phys.exclusion * photo);
-      const totalEnergy = energyPhoto + energyForage + energyAbsorb + energyAquatic + energyGlow + energyFilter + energyNfix + energyTraction;
+      const totalEnergy = energyPhoto +
+          energyForage +
+          energyAbsorb +
+          energyAquatic +
+          energyAmphibious +
+          energyGlow +
+          energyFilter +
+          energyNfix +
+          energyTraction;
       //    Unterhaltskosten: jedes Merkmal kostet Energie.
       const m = phys.maintenance;
       const mq = phys.maintenanceQuad;
