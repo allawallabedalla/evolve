@@ -2155,7 +2155,8 @@ function renderGenbook(){
   document.getElementById("gbSub").innerHTML =
     `<b class="chip-val" style="color:var(--bio-dim)">${found}</b> von ${TREE_TOTAL} Formen in deinen Welten aufgetaucht` +
     ` · <b style="color:var(--gold)">${legendFound}/${legendTotal}</b> extrem selten. ` +
-    `Seltene Formen gewinnen nur in engen Nischen — forme neue Umwelten, um andere zu sehen. „???" heißt: hier noch nicht gesehen. Fahr über eine Kachel: wann &amp; wie sie entstand.`;
+    `Seltene Formen gewinnen nur in engen Nischen — forme neue Umwelten, um andere zu sehen. „???" heißt: hier noch nicht gesehen. Fahr über eine Kachel: wann &amp; wie sie entstand. ` +
+    `<b>Klick auf eine gefundene Form:</b> ihr Bauplan, der gemessene Kausalpfad dahinter — und die Welt, in der du sie gefunden hast.`;
   const body = document.getElementById("gbBody");
   body.innerHTML = "";
   // Raritaets-Legende: erklaert die Faerbung, ohne zum Sammeln zu zwingen.
@@ -2220,10 +2221,20 @@ gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
 
 // Klick auf eine entdeckte Form -> Detail-Panel mit Beschreibung (Wikipedia-Auszug).
 const gbDetail = document.createElement("div"); gbDetail.id="gbDetail"; gbDetail.hidden=true;
+// a11y: seit die Erkenntnisse hier drin einen KNOPF haben („diese Umwelt wiederherstellen"),
+// muss dieses Panel ein echter Dialog sein — die Tab-Falle weiter unten haelt den Fokus
+// sonst im darunterliegenden Genbuch fest und der Knopf waere per Tastatur unerreichbar.
+gbDetail.setAttribute("role","dialog"); gbDetail.setAttribute("aria-modal","true");
+gbDetail.setAttribute("aria-label","Erkenntnis zur Form");
 gbDetail.innerHTML = `<div id="gbdBody"></div>`;
 document.body.appendChild(gbDetail);
-gbDetail.addEventListener("click", e=>{ if(e.target.id==="gbDetail" || e.target.closest(".gbd-x")) gbDetail.hidden=true; });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !gbDetail.hidden) gbDetail.hidden=true; });
+let _gbdOpener = null;   // Fokus-Rueckgabe beim Schliessen (dieselbe Konvention wie openGenbook)
+function closeGbDetail(){
+  gbDetail.hidden = true;
+  if(_gbdOpener && _gbdOpener.focus) _gbdOpener.focus();
+  _gbdOpener = null;
+}
+gbDetail.addEventListener("click", e=>{ if(e.target.id==="gbDetail" || e.target.closest(".gbd-x")) closeGbDetail(); });
 const _wikiCache = {};
 async function wikiExtract(title){
   if(_wikiCache[title]!==undefined) return _wikiCache[title];
@@ -2234,6 +2245,235 @@ async function wikiExtract(title){
     const ex = (j.type==="disambiguation") ? null : (j.extract||null);
     return _wikiCache[title]=ex;
   }catch(e){ return _wikiCache[title]=null; }
+}
+// ============================================================================
+// ERKENNTNISSE — „Wissen als Meta-Fortschritt" (BACKLOG Punkt 5, V4 aus
+// docs/bindung-konzept.md). Was bleibt, wenn ein Wesen geht: nicht Macht,
+// sondern Verständnis.
+//
+// WOHNORT: ausschliesslich im Detail-Panel des Lebensbaums, das eine entdeckte
+// Form ohnehin schon oeffnet. KEIN neues Element im Hauptbildschirm, kein neuer
+// Knopf in der Einstiegsleiste — der Komplexitaets-Audit hat die Hauptansicht
+// bewusst entlastet (docs/komplexitaets-audit.md, P0.2/P1.3), und der Text sagt
+// selbst, dass der bereits gebaute Lebensbaum ZUM Fortschrittsbaum wird.
+//
+// WAS FREIGESCHALTET WIRD (der V4-Text nennt drei BEISPIELE, keine Pflichtliste;
+// die „reale Klade" ist bereits seit dem Genbuch-Detail da — Klade, Aera, Evo-Notiz
+// und Wikipedia-Auszug. Neu ist deshalb bewusst NUR, was noch fehlt):
+//
+//   (1) BAUPLAN — die Merkmale, auf die sich diese Form festlegt, aus dem
+//       gemessenen Prototyp in app/archetypes.js. Der Spieler hat bisher NUR die
+//       Gen-Balken SEINES Wesens gesehen, nie den Bauplan einer Form. Damit wird
+//       aus „ich habe einen Nadelbaum bekommen" ein „ich weiss, was einen
+//       Nadelbaum ausmacht".
+//
+//   (2) KAUSALPFAD — welche Umwelt-Achse aus genau diesen Merkmalen einen Gewinn
+//       macht. GEMESSEN an derselben fitness()-Funktion, die auch die Auslese
+//       treibt, nicht behauptet: fuer jedes festgelegte Merkmal wird die relative
+//       Steigung d(Fitness)/d(Gen) an BEIDEN Enden jeder der 16 Achsen gerechnet.
+//       Eine Aussage entsteht nur, wenn die Steigung dabei das VORZEICHEN WECHSELT
+//       (an einem Ende zahlt das Merkmal sich aus, am anderen kostet es) und die
+//       guenstige Seite zum Prototyp passt. Das ist die schaerfste Form der Frage
+//       „warum gerade DIESE Form?" — und sie ist nirgends sonst in der App.
+//
+//   (3) FUNDORT — die Welt, in der DU diese Form zum ersten Mal gesehen hast,
+//       samt Knopf „diese Umwelt wiederherstellen". Das ist eine TATSACHE, keine
+//       Vorhersage.
+//
+// AUSDRUECKLICH VERWORFEN (gemessen, nicht aus dem Bauch): eine abgeleitete
+// „hier wohnt sie"-Welt je Form. Zwei Ableitungen wurden gebaut und geprueft —
+// (a) Umwelt aus den staerksten Achsen des Prototyp-Vorsprungs, (b) dieselbe
+// Achsenwahl mit anschliessender deterministischer Konvergenz. Ergebnis: die so
+// gebaute Welt bringt in 4 von 44 Faellen wirklich die Form hervor (Reich: 14/44).
+// Ein Knopf, der „hier wohnt sie" verspricht und in 90 % der Faelle etwas anderes
+// liefert, waere schlechter als keiner. Ausserdem waere er ein Farm-Werkzeug —
+// und Sammel-Druck ist genau das, was die Leitplanken ausschliessen.
+//
+// KEIN FORTSCHRITTSBALKEN: es gibt keinen Erkenntnis-Zaehler, keine Quote, keine
+// „x von 44 Erkenntnissen"-Zeile und keinen Freischalt-Jingle. Eine Erkenntnis ist
+// einfach da, sobald die Form da ist — man findet sie beim Nachschlagen, nicht
+// weil ein Abzeichen blinkt.
+//
+// RUECKWIRKEND: (1) und (2) haengen ausschliesslich am `discovered`-Set und sind
+// damit fuer JEDEN bestehenden Spielstand sofort vollstaendig da — wer schon 20
+// Formen hat, hat sofort 20 Erkenntnisse. Nur (3) kann es nicht sein: eine
+// Erinnerung an einen Fund, den niemand aufgezeichnet hat, liesse sich nur
+// erfinden. Alte Funde sagen das offen statt etwas zu behaupten.
+// ============================================================================
+const INSIGHT_COMMIT = 0.18;   // ab dieser Abweichung vom neutralen Koerper legt sich ein Prototyp fest
+const INSIGHT_MIN    = 0.25;   // Mindest-Hebel einer Achse, sonst wird nichts behauptet
+const INSIGHT_MAX    = 3;      // hoechstens drei Saetze — eine Erkenntnis, kein Datenblatt
+const INSIGHT_EPS    = 0.01;
+// Die zwei Pole jeder der 16 Achsen in Spielsprache (dieselben 16 wie WHY_ENV_KEYS;
+// hier eigenstaendig, weil dieser Block VOR der Warum-Zeile im Dokument steht).
+const AX_POLE = {
+  temperature:["kalt","heiß"], predation:["ohne Räuber","voller Räuber"],
+  foodAbundance:["knappe Nahrung","üppige Nahrung"], foodHeight:["Futter am Boden","Futter hoch oben"],
+  light:["dunkel","hell"], water:["trocken","tief im Wasser"],
+  toxicity:["giftfrei","giftig"], oxygen:["sauerstoffarm","sauerstoffreich"],
+  salinity:["salzfrei","salzig"], uv:["ohne UV","starkes UV"],
+  pressure:["ohne Druck","Tiefsee-Druck"], aridity:["feucht","ausgedörrt"],
+  radiation:["ohne Strahlung","verstrahlt"], fire:["ohne Feuer","Feuer-Regime"],
+  frost:["frostfrei","tiefer Frost"], wind:["windstill","stürmisch"],
+};
+const axLow  = ax => ax==="oxygen" ? 0.05 : 0.02;
+const axHigh = ax => ax==="oxygen" ? 1    : 0.98;
+/** Prototyp-Genom einer Form: benannte Gene aus `proto`, der Rest auf dem Ruhewert. */
+function protoGenome(f){
+  const g = PARAMS.mutationAnchor.slice(0, NG);
+  for(const k in f.proto){ const i = ARCH.genes.indexOf(k); if(i>=0 && i<NG) g[i] = f.proto[k]; }
+  return g;
+}
+/** Bezugs-Umwelt der Messung: Mitte des Plausibilitaetsfensters, sonst neutral. */
+function insightEnv(f){
+  const e = { temperature:.5, predation:.5, foodAbundance:.5, foodHeight:.5, light:.5, water:.5,
+              toxicity:0, oxygen:1, salinity:0, uv:0, pressure:0, aridity:0, radiation:0, fire:0, frost:0, wind:0 };
+  if(f.requires) for(const k in f.requires){ const r = f.requires[k]; if(e[k]!==undefined) e[k] = (r[0]+r[1])/2; }
+  return e;
+}
+/** Relative Steigung d(Fitness)/d(Gen i) / Fitness — vergleichbar ueber Umwelten hinweg. */
+function traitSlope(g, i, e){
+  const up=g.slice(); up[i]=Math.min(1, up[i]+INSIGHT_EPS);
+  const dn=g.slice(); dn[i]=Math.max(0, dn[i]-INSIGHT_EPS);
+  const f0 = fitness(g, e);
+  if(!(f0 > 0)) return 0;
+  return (fitness(up,e)-fitness(dn,e))/(2*INSIGHT_EPS)/f0;
+}
+// Gerechnet wird erst beim Aufschlagen einer Form und dann gecacht: ~5 Merkmale ×
+// 16 Achsen × 2 Enden × 3 fitness() = rund 500 Aufrufe, also deutlich unter 1 ms.
+const _insightCache = {};
+function formInsight(name){
+  if(_insightCache[name] !== undefined) return _insightCache[name];
+  const f = ARCH.forms.find(x => x.n === name);
+  if(!f) return _insightCache[name] = null;
+  const g = protoGenome(f), e0 = insightEnv(f), anchor = PARAMS.mutationAnchor;
+  const traits = [];
+  for(const k in f.proto){
+    const i = ARCH.genes.indexOf(k); if(i<0 || i>=NG) continue;
+    const d = f.proto[k] - anchor[i];
+    if(Math.abs(d) < INSIGHT_COMMIT) continue;
+    traits.push({ i, v:f.proto[k], up:d>0, dev:Math.abs(d) });
+  }
+  traits.sort((a,b)=>b.dev-a.dev);
+  const best = {};
+  for(const t of traits){
+    for(const ax in AX_POLE){
+      const dl = traitSlope(g, t.i, Object.assign({}, e0, {[ax]:axLow(ax)}));
+      const dh = traitSlope(g, t.i, Object.assign({}, e0, {[ax]:axHigh(ax)}));
+      if(dl*dh >= 0) continue;                      // kein Vorzeichenwechsel -> diese Achse entscheidet nichts
+      const hiFav = t.up ? (dh > dl) : (dh < dl);
+      const fav = hiFav ? dh : dl;
+      if(t.up ? !(fav > 0) : !(fav < 0)) continue;  // die guenstige Seite muss zum Prototyp passen
+      const str = Math.abs(dh - dl);
+      if(str < INSIGHT_MIN) continue;
+      if(!best[t.i] || str > best[t.i].str) best[t.i] = { i:t.i, up:t.up, ax, hiFav, str };
+    }
+  }
+  const causes = Object.keys(best).map(k => best[k]).sort((x,y)=>y.str-x.str).slice(0, INSIGHT_MAX);
+  return _insightCache[name] = { traits: traits.slice(0, 5), causes, requires: f.requires || null };
+}
+
+// Fundort-Aufzeichnung: eigener localStorage-Schluessel (dieselbe Loesung wie die
+// Herausforderungs-Fortschritte CHAL_KEY und die Chronik CHRON_KEY). Bewusst NICHT
+// in die Cloud-Zeile: `creatures` hat keine Spalte dafuer, und ein Schema-Umbau fuer
+// eine Erinnerung waere die falsche Reihenfolge — die Ahnenlinie wird aus genau
+// demselben Grund lokal gehalten.
+const DISC_KEY = "evolve_discovery_v1";
+let discoveryLog = {};
+try { discoveryLog = JSON.parse(localStorage.getItem(DISC_KEY) || "{}") || {}; } catch(e) { discoveryLog = {}; }
+function saveDiscoveryLog(){ try{ localStorage.setItem(DISC_KEY, JSON.stringify(discoveryLog)); }catch(e){} }
+function recordDiscovery(name){
+  if(discoveryLog[name]) return;
+  const w = {};
+  for(const ax in AX_POLE){ const v = env[ax]; w[ax] = +((v==null ? (ax==="oxygen"?1:0) : v).toFixed(3)); }
+  discoveryLog[name] = { env:w, gen:generation, who:creatureName || null, biome:lastBiome || null, ts:Date.now() };
+  saveDiscoveryLog();
+}
+/** Die aufgezeichnete Fund-Umwelt wiederherstellen (alle 16 Achsen, inkl. Stressoren). */
+function restoreDiscoveryEnv(name){
+  const rec = discoveryLog[name]; if(!rec || !rec.env) return;
+  for(const ax in AX_POLE) if(rec.env[ax] != null) env[ax] = rec.env[ax];
+  syncLeverInputs();
+  renderStressChips();
+  lastBiome = "Fundort · " + name;
+  document.getElementById("biomeTag").textContent = lastBiome;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  closeGbDetail();
+  closeGenbook();
+  if(typeof storyEnvChanged === "function") storyEnvChanged();
+}
+// Zwei der 25 Gen-Namen sind Plural („Gliedmaßen", „Sinne") — ohne das stünde da
+// „Gliedmaßen wird zur Last".
+const INS_PLURAL = new Set([2, 18]);
+const insVerb = (i, up) => INS_PLURAL.has(i) ? (up ? "lohnen sich" : "werden zur Last")
+                                            : (up ? "lohnt sich"  : "wird zur Last");
+// Der Wesensname stammt aus einer freien Eingabe (uiPrompt) und landet hier in innerHTML.
+const insEsc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function renderInsight(name){
+  const ins = formInsight(name);
+  if(!ins) return "";
+  const gx = window.GENE_EXPLAIN || [];
+  let h = `<div class="ins">`;
+  // (1) Bauplan
+  if(ins.traits.length){
+    h += `<div class="ins-h">Bauplan</div>`+
+         `<p class="ins-note">Die Merkmale, auf die sich diese Form festlegt — der Prototyp, an dem die Benennung jedes Genom misst. Der feine Strich zeigt einen unbestimmten Körper.</p>`+
+         `<div class="ins-rows">`;
+    for(const t of ins.traits){
+      const anchor = PARAMS.mutationAnchor[t.i];
+      h += `<div class="ins-row" title="${gx[t.i] ? gx[t.i].replace(/"/g,"&quot;") : ""}">`+
+             `<span class="ins-nm">${GENE_LABELS[t.i]}</span>`+
+             `<span class="ins-bar"><i class="ins-fill" style="width:${(t.v*100).toFixed(1)}%"></i>`+
+             `<i class="ins-anchor" style="left:${(anchor*100).toFixed(1)}%"></i></span>`+
+             `<span class="ins-val">${t.up?"↑":"↓"} ${t.v.toFixed(2)}</span>`+
+           `</div>`;
+    }
+    h += `</div>`;
+  }
+  // (2) Kausalpfad
+  h += `<div class="ins-h">Kausalpfad</div>`;
+  if(ins.causes.length){
+    h += `<p class="ins-note">Gemessen an derselben Fitness-Rechnung, die auch die Auslese treibt: an welcher Umwelt genau diese Merkmale kippen.</p><ul class="ins-causes">`;
+    for(const c of ins.causes){
+      const pole = AX_POLE[c.ax][c.hiFav ? 1 : 0];
+      h += `<li><span class="ins-cause-h"><b class="ins-ax">${pole}</b> <span class="ins-arrow">→</span> <b>${GENE_LABELS[c.i]}</b> ${insVerb(c.i, c.up)}</span>`+
+           (gx[c.i] ? `<span class="ins-why">${gx[c.i]}</span>` : "")+`</li>`;
+    }
+    h += `</ul>`;
+  } else {
+    h += `<p class="ins-note">Keine einzelne Achse entscheidet über diesen Bauplan — er entsteht aus dem Zusammenspiel mehrerer, und keine davon dreht die Rechnung für sich allein um.</p>`;
+  }
+  if(ins.requires){
+    const parts = [];
+    for(const k in ins.requires){ const r = ins.requires[k]; if(AX_POLE[k]) parts.push(`${AXIS_LABEL[k]} ${r[0].toFixed(2)}–${r[1].toFixed(2)}`); }
+    if(parts.length) h += `<p class="ins-req">Plausibel nur bei: ${parts.join(" · ")} <span class="ins-req-n">(weiches Fenster, kein Verbot)</span></p>`;
+  }
+  // (3) Fundort
+  const rec = discoveryLog[name];
+  h += `<div class="ins-h">Dein Fundort</div>`;
+  if(rec){
+    const chips = [];
+    for(const l of LEVERS){
+      const v = rec.env[l.key]; if(v == null) continue;
+      chips.push(`<span class="ins-chip" title="${AXIS_LABEL[l.key]} ${v.toFixed(2)} — ${AX_POLE[l.key][0]} … ${AX_POLE[l.key][1]}">`+
+                 `${AXIS_LABEL[l.key]} <b>${v.toFixed(2)}</b></span>`);
+    }
+    // Verborgene Stressoren nur, wenn sie damals wirklich anlagen (dieselbe Schwelle
+    // wie die Wegwerf-Chips im Hauptbildschirm, renderStressChips()).
+    for(const ax in AX_POLE){
+      if(LEVERS.some(l=>l.key===ax)) continue;
+      const v = rec.env[ax]; if(v == null) continue;
+      if(ax==="oxygen" ? v >= 0.95 : v <= 0.05) continue;
+      chips.push(`<span class="ins-chip ins-chip-stress" title="${AXIS_LABEL[ax]} ${v.toFixed(2)}">${AX_POLE[ax][ax==="oxygen"?0:1]}</span>`);
+    }
+    const when = new Date(rec.ts).toLocaleDateString("de-DE");
+    h += `<p class="ins-note">Zum ersten Mal gesehen am ${when}${rec.who?` — dein Wesen hieß <b>${insEsc(rec.who)}</b>`:""}, in Generation ${Number(rec.gen||0).toLocaleString("de-DE")}${rec.biome?`, Umwelt „${insEsc(rec.biome)}"`:""}.</p>`+
+         `<div class="ins-chips">${chips.join("")}</div>`+
+         `<button class="ins-restore" data-form="${name.replace(/"/g,"&quot;")}">diese Umwelt wiederherstellen ↗</button>`;
+  } else {
+    h += `<p class="ins-note">Nicht aufgezeichnet — diese Form war schon im Genbuch, bevor der Fundort mitgeschrieben wurde. Bauplan und Kausalpfad oben gelten trotzdem.</p>`;
+  }
+  return h + `</div>`;
 }
 gbBodyEl.addEventListener("click", async (e)=>{
   const tile = e.target.closest(".gb-tile.found"); if(!tile) return;
@@ -2246,13 +2486,21 @@ gbBodyEl.addEventListener("click", async (e)=>{
     `<h3>${name}</h3><div class="gbd-meta">${clade}${era?" · "+era:""}</div>`+
     `<p class="gbd-evo">${evo}</p>`+
     (aw ? `<div class="gbd-wiki" id="gbdWiki"><span class="gbd-load">lädt Beschreibung …</span></div>`+
-          `<a class="gbd-link" href="${aw.wiki}" target="_blank" rel="noopener">≈ in echt: ${aw.name} — auf Wikipedia lesen ↗</a>` : "");
+          `<a class="gbd-link" href="${aw.wiki}" target="_blank" rel="noopener">≈ in echt: ${aw.name} — auf Wikipedia lesen ↗</a>` : "")+
+    renderInsight(name);
+  _gbdOpener = document.activeElement;
   gbDetail.hidden=false;
+  const _x = gbDetail.querySelector(".gbd-x"); if(_x) _x.focus();   // Fokus in den Dialog holen
   if(aw){
     const ex = await wikiExtract(title);
     const box = document.getElementById("gbdWiki");
     if(box) box.innerHTML = ex ? ex : `<span class="gbd-load">Keine Kurzbeschreibung gefunden — nutze den Link.</span>`;
   }
+});
+// „Umwelt wiederherstellen" liegt im Detail-Panel (eigener Overlay-Knoten, nicht in gbBody).
+gbDetail.addEventListener("click", (e)=>{
+  const b = e.target.closest(".ins-restore"); if(!b) return;
+  restoreDiscoveryEnv(b.dataset.form);
 });
 // A5: Onboarding-Startimpuls fuer echte Erstbesucher.
 // P1.3: der Pulse zeigt jetzt auf "Presets ↗" statt auf einen Biom-Button direkt im
@@ -2312,7 +2560,10 @@ document.addEventListener("keydown", (e) => {
   const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
   const iSub=document.getElementById("inflSub"), iMain=document.getElementById("infl");
   const ch=document.getElementById("chal"), dp=document.getElementById("detailsPanel"), pp=document.getElementById("presetsPanel");
-  if(!gb.hidden){ closeGenbook(); }
+  // Das Form-Detail liegt ÜBER dem Genbuch — Escape geht erst diese Ebene zurueck
+  // (frueher schlossen sich beide auf einmal, weil es dafuer einen eigenen Listener gab).
+  if(!gbDetail.hidden){ closeGbDetail(); }
+  else if(!gb.hidden){ closeGenbook(); }
   else if(!lg.hidden){ lg.hidden = true; }
   else if(!rv.hidden){ rv.hidden = true; }
   // S5: das Einfluss-Modal fehlte hier bisher komplett — Escape tat nichts.
@@ -2347,8 +2598,12 @@ function showToast(a){
   const rk = rarityOf(a.n), rm = RARITY_META[rk], rare = rm.rank>=2;
   const lead = rk==="legendaer" ? "Extrem seltene Form" : rare ? ("Seltene Form · "+rm.label) : "Neue Form";
   t.innerHTML = formIcon(a.n) + " " + lead + ": " + a.n +
-    (rare ? ` <span class="toast-rar" style="color:${rm.col}"><i class="gb-dot" style="background:${rm.col}"></i></span>` : "");
+    (rare ? ` <span class="toast-rar" style="color:${rm.col}"><i class="gb-dot" style="background:${rm.col}"></i></span>` : "") +
+    // V4 (Erkenntnisse): eine ruhige Ortsangabe, kein Freischalt-Jingle — der Fund selbst
+    // bleibt der Moment, diese Zeile sagt nur, wo das Wissen dazu nachzulesen ist.
+    `<div class="toast-note">Bauplan und Kausalpfad stehen im Lebensbaum.</div>`;
   t.classList.toggle("legendary", rk==="legendaer");
+  t.classList.remove("milestone"); t.classList.add("hasnote");
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   // Seltene Fänge bleiben etwas länger stehen, damit der Moment sitzt.
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, rare?4600:3200);
@@ -2364,7 +2619,7 @@ function showKingdomMilestone(kd, a, awakenedCount){
   t.innerHTML = `<div class="toast-ms-h">${formIcon(a.n)} Ein neues Reich: <b>${kd}</b></div>`+
     `<div class="toast-ms-sub">${a.n} — ${KINGDOM_WONDER[kd]||""}</div>`+
     `<div class="toast-ms-prog">${prog}</div>`;
-  t.classList.remove("legendary"); t.classList.add("milestone");
+  t.classList.remove("legendary"); t.classList.remove("hasnote"); t.classList.add("milestone");
   t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.hidden = true; t.classList.remove("milestone"); }, all?6400:5200);
   const d = document.querySelector(".disc"); if(d){ d.classList.remove("pulse"); void d.offsetWidth; d.classList.add("pulse"); }
@@ -5163,7 +5418,9 @@ function frame(time){
           // Erstes Wesen eines Reiches? -> Reich-Meilenstein statt normalem Fund-Toast.
           const kd = kingdomOf(cur.n);
           const newKingdom = kd && !awakenedKingdoms(discovered).has(kd);
-          discovered.add(cur.n); saveState();
+          discovered.add(cur.n);
+          recordDiscovery(cur.n);   // Erkenntnis (3): die Welt des Fundes festhalten
+          saveState();
           if(newKingdom) showKingdomMilestone(kd, cur, awakenedKingdoms(discovered).size);
           else showToast(cur);
           // Chronik: der Fund bekommt seine Erzähl-Zeile (Reich schlägt Einzelfund).

@@ -629,6 +629,41 @@
   #gbDetail .gbd-link { display: inline-block; font-size: .8rem; color: var(--bio-dim); text-decoration: underline; text-underline-offset: 3px; }
   #gbDetail .gbd-x { position: absolute; top: 14px; right: 18px; z-index: 1; background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--muted); cursor: pointer; }
   #gbDetail .gbd-x:hover { color: var(--text); }
+  /* ---- Erkenntnisse (BACKLOG Punkt 5 / V4): Bauplan, Kausalpfad, Fundort ----
+     Bewusst als ruhiger Anhang UNTER der bestehenden Beschreibung, nicht als eigenes
+     Overlay: es ist Nachschlage-Wissen, kein Ereignis. Keine Zaehler, keine Quote,
+     keine Balken ueber "wie viele Erkenntnisse" — nur der Inhalt selbst. */
+  #gbDetail .ins { margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+  #gbDetail .ins-h { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin: 14px 0 5px; }
+  #gbDetail .ins-h:first-child { margin-top: 0; }
+  #gbDetail .ins-note { font-size: .74rem; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }
+  #gbDetail .ins-rows { display: grid; gap: 5px; margin-bottom: 2px; }
+  #gbDetail .ins-row { display: grid; grid-template-columns: 8.4rem 1fr 3.1rem; align-items: center; gap: 8px;
+    font-size: .74rem; color: var(--text); }
+  #gbDetail .ins-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #gbDetail .ins-bar { position: relative; height: 7px; border-radius: 4px; background: var(--chamber-2);
+    box-shadow: var(--shadow-inset); overflow: hidden; }
+  #gbDetail .ins-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bio); border-radius: 4px; }
+  #gbDetail .ins-anchor { position: absolute; top: -1px; bottom: -1px; width: 1px; background: var(--line);
+    opacity: .95; }
+  #gbDetail .ins-val { font-family: var(--mono); font-size: .68rem; color: var(--bio-dim); text-align: right; }
+  #gbDetail .ins-causes { list-style: none; margin: 0 0 2px; padding: 0; display: grid; gap: 8px; }
+  #gbDetail .ins-causes li { border-left: 2px solid var(--line); padding-left: 9px; }
+  #gbDetail .ins-cause-h { display: block; font-size: .8rem; color: var(--text); line-height: 1.45; }
+  #gbDetail .ins-ax { color: var(--bio-dim); }
+  #gbDetail .ins-arrow { color: var(--muted); }
+  #gbDetail .ins-why { display: block; font-size: .71rem; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+  #gbDetail .ins-req { font-size: .71rem; color: var(--muted); font-family: var(--mono); margin: 8px 0 0; line-height: 1.5; }
+  #gbDetail .ins-req-n { font-family: var(--sans); font-style: italic; }
+  #gbDetail .ins-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 10px; }
+  #gbDetail .ins-chip { font-size: .66rem; font-family: var(--mono); color: var(--bio-dim);
+    background: var(--chamber-2); border-radius: 999px; padding: 2px 8px; box-shadow: var(--shadow-sm); }
+  #gbDetail .ins-chip b { color: var(--text); }
+  #gbDetail .ins-chip-stress { color: var(--warn); font-family: var(--sans); }
+  #gbDetail .ins-restore { font-size: .76rem; color: var(--bio-dim); background: none; border: none;
+    padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  #gbDetail .ins-restore:hover { color: var(--text); }
   /* ---- Raritaet (Entdeckungs-Tiefe) ---- */
   .gb-tile .gb-rar { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-size: .56rem;
     letter-spacing: .04em; text-transform: uppercase; opacity: .9; }
@@ -654,6 +689,10 @@
   #gbTip .tip-era { color: var(--bio-dim); font-family: var(--mono); font-size: .68rem; margin: 3px 0 2px; }
   .toast.legendary { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
+  /* Erkenntnis-Hinweis im Fund-Toast: bewusst leise (kleiner, gedaempft, keine Farbe) —
+     eine Ortsangabe, kein Freischalt-Ritual. */
+  .toast .toast-note { font-size: .68rem; color: var(--muted); margin-top: 3px; font-weight: 400; }
+  .toast.hasnote { border-radius: 14px; text-align: center; max-width: min(86%, 320px); line-height: 1.35; }
   /* Reich-Meilenstein: mehrzeiliger, wärmerer Moment (kein Pill). */
   .toast.milestone { border-radius: 14px; padding: 12px 18px; max-width: min(86%, 340px); text-align: center; line-height: 1.4;
     box-shadow: 0 0 0 1px var(--bio-dim); }

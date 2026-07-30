@@ -778,6 +778,37 @@ Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschied
   **Getestet:** alle 20 Gates grün (inkl. `ui-calm-check`, `app-parity` exakt 0) — unabhängig
   gegengeprüft (eigener Gate-Lauf + eigener Playwright-Lauf: feste Welt betreten, Regler/Seed/
   Generation-0-Reset/aktive-Herausforderungs-Karte alle korrekt bestätigt, 0 Konsolenfehler).
+- [x] **V4 (erledigt 2026-07-30, Opus) — Wissen als Meta-Fortschritt:** ausschließlich im
+  bestehenden Lebensbaum-Detail-Panel (Klick auf eine gefundene Form) — kein neues
+  Hauptbildschirm-Element, kein Fortschrittsbalken, kein Erkenntnis-Zähler. Drei Blöcke pro
+  Form: **(1) Bauplan** — die festgelegten Merkmale aus dem gemessenen Prototyp
+  (`app/archetypes.js`), erstmals der Bauplan EINER FORM statt nur der Gen-Balken des eigenen
+  Wesens. **(2) Kausalpfad** — GEMESSEN an derselben `fitness()`, die auch die Auslese
+  treibt (relative Steigung d(Fitness)/d(Gen) an beiden Enden aller 16 Umwelt-Achsen; eine
+  Aussage nur bei Vorzeichenwechsel + Mindesthebel 0.25), nicht behauptet. 107 Aussagen über
+  42 von 44 Formen (Euglenoid/Plankton bekommen einen ehrlichen Ersatzsatz statt einer
+  schwachen Behauptung). **(3) Dein Fundort** — die Welt des ersten Fundes (alle 16 Achsen,
+  Generation, Wesensname, Biom), plus „diese Umwelt wiederherstellen ↗".
+  **Bewusst verworfen (gemessen, nicht aus dem Bauch):** eine abgeleitete „hier wohnt sie"-
+  Welt je Form — zwei Ableitungsverfahren gebaut und geprüft, trafen nur 4/44 Formen wirklich.
+  Ein Knopf, der das verspricht und in 90% der Fälle etwas anderes liefert, wäre ein
+  Farm-Werkzeug und schlechter als keiner.
+  **Keine neue Umwelt-Achse als Dauerregler** (hätte Punkt 3 P1.3/1.4 widersprochen) —
+  stattdessen holt „Fundort wiederherstellen" die 10 verborgenen Stressoren gezielt als die
+  dafür vorgesehenen Wegwerf-Chips zurück, nie als neues Dauer-Bedienelement.
+  **Rückwirkend:** Bauplan/Kausalpfad hängen nur am `discovered`-Set — für jeden bestehenden
+  Spielstand sofort vollständig da; Fundort kann es für vor dieser Änderung entdeckte Formen
+  naturgemäß nicht sein und sagt das offen, statt etwas zu erfinden.
+  a11y: Detail-Panel wurde zum echten Dialog (Fokus-Falle + Fokus-Rückgabe), Escape-Kette
+  entflochten (Form-Detail schließt zuerst, Lebensbaum bleibt offen — vorher schlossen beide
+  auf einmal).
+  **Getestet:** alle 20 Gates grün (`app-parity` exakt 0) — unabhängig gegengeprüft (eigener
+  Gate-Lauf + eigener Playwright-Lauf: Bauplan-Balken/Kausalpfad-Sätze für „Leuchtwesen ·
+  Tiefsee" mit vorab gesetztem `discovered`-Set visuell bestätigt, „Fundort nicht
+  aufgezeichnet" korrekt für ungeloggte Altfunde, 0 Konsolenfehler außer dem erwarteten,
+  abgefangenen Wikipedia-Sandbox-Block).
+  Damit ist Backlog Punkt 5 (Nutzerbindung) inhaltlich abgeschlossen — V1/V4/V5 umgesetzt,
+  V2/V3 bleiben bewusst offene Produktentscheidungen.
 - [ ] **V2/V3** (`docs/bindung-konzept.md`) — **Modell: Opus** (Produktentscheidung, nicht
   eigenmächtig umsetzen) — Trägheit der Welt (Eingriffe brauchen Zeit), Aussterben nur unter
   Beobachtung. Beide verändern das Grundgefühl des Spiels stärker als V1/V4/V5 und sind laut
