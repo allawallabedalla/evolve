@@ -63,14 +63,29 @@ sichtbaren Freischalt-Pfad statt einem Rausch-Nebeneffekt.
 
 ## Phase 2 — Der ehrliche Übergang: Amphibisch als echte Nische
 
-**Neue, aber kleine Mechanik** (kein neues Gen — ein Interaktionsterm zwischen
-bestehenden Kanälen). Heute gewinnt an der Land/Wasser-Grenze meist ein liegengebliebenes
-Landtier (Fell-Warmblüter 23 % exakt am Umschlagpunkt), weil Landjagd und aquatische Jagd
-hart gegeneinander konkurrieren statt sich zu ergänzen. Ein Fitness-Bonus für „kann beides
-mäßig gut" im Übergangsband (analog zu den sechs bestehenden Energiekanälen, siehe
-BACKLOG.md „6 Energiekanäle") macht Amphibie vom Drift-Zufall zu einer echten, ansteuerbaren
-Form — **erst danach** ist ein dreiwertiger Medium-Toggle (Land/Amphibisch/Wasser) im UI
-ehrlich.
+**Versucht, gemessen, wieder zurückgenommen (2026-07-30).** Ein neuer additiver
+Energiekanal `energyAmphibious` (Dreieck-Peak bei moderatem `limb`, aktiv nur in einem
+schmalen Wasser-Band um `aquaticWaterFloor`) machte Amphibie tatsächlich schwach über
+Selektion erreichbar (vorher nur über Drift). Er brach dabei aber ein bereits
+validiertes, für das Projekt zentrales Phänomen: die Räuber-Beute-Koevolution
+(„Red Queen", P5 in der Schicht-A-Phänomen-Portfolio aus BACKLOG.md Punkt 9,
+geprüft von `tools/coevolution-check.mjs`). Die Testumwelt dafür liegt exakt bei
+`water=0.5` — dem Zentrum des neuen Kanals. Jeder getestete Ertragswert (0,3 / 0,6 /
+0,9 / 1,5) senkte das Koevolutions/Kontroll-Verhältnis von der Baseline 6,6× auf
+1,4–2,1×, unter die geforderte 2,5×-Schwelle: der Kanal gab der Beute-Population einen
+Ausweg aus dem größenbasierten Rüstungswettlauf, wo eigentlich Panzer/Größe/Mobilität
+gegeneinander antreten sollen. Vollständig zurückgenommen (physics.json,
+engine/fitness.ts, engine/types.ts, oracle/reference_model.py) statt live geschickt —
+Befund in den jeweiligen Dateien dokumentiert.
+
+**Für einen zweiten Anlauf:** das Zentrum des Kanals müsste bewusst NICHT auf
+`aquaticWaterFloor` fallen (der Koevolutions-Test sitzt genau dort), oder der Bonus
+müsste an eine Bedingung gekoppelt werden, die die reine Größen-Verteidigungs-Nische der
+Koevolutions-Testumwelt (Räuberdruck ohne Wasser-Kontext) nicht berührt. Amphibie bleibt
+bis dahin ein „legendärer" Drift-Fang wie Moos oder Farn — kein Rückschritt gegenüber dem
+Ausgangszustand, nur kein Fortschritt. Ein dreiwertiger Medium-Toggle (Land/Amphibisch/
+Wasser) im UI bleibt aus denselben Gründen wie ursprünglich zurückgestellt: ohne echte
+Amphibien-Nische wäre er ein Etikettenschwindel.
 
 ## Phase 3 — Habitat als Weltebene
 

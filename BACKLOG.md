@@ -1225,14 +1225,23 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   Baum-Knoten (`docs/tree-of-life.json`). Nach jedem Paket den Sweep neu laufen lassen
   und prüfen, dass keine Bestandsform an Erreichbarkeit verliert (Prototyp-Konkurrenz).
   — **Modell: Sonnet.**
-- [ ] **Phase 2 — Amphibisch als echte Nische.** Kein neues Gen — ein Interaktionsterm
-  zwischen Landjagd- und Aquatik-Kanal, der im Übergangsband „beides mäßig gut" belohnt
-  (heute gewinnt dort meist ein liegengebliebenes Landtier, gemessen 23 % Fell-Warmblüter
-  exakt am Umschlagpunkt water=0.5). Erst danach ein dreiwertiger Medium-Toggle
-  (Land/Amphibisch/Wasser) im UI — vorher wäre „Hybrid" ein Etikettenschwindel (gemessen,
-  s. Chat-Verlauf 2026-07-30). Braucht Phase 0. — **Modell: Opus** für den
-  Interaktionsterm-Entwurf (Abwägung, wie stark ohne die reine Aquatik-/Landnische zu
-  entwerten), **Sonnet** für Umsetzung + Re-Validierung.
+- [x] **Phase 2 — Amphibisch als echte Nische — versucht, gemessen, zurückgenommen
+  (2026-07-30).** Ein additiver Energiekanal `energyAmphibious` (Dreieck-Peak bei
+  moderatem `limb`, aktiv in einem schmalen Wasser-Band um `aquaticWaterFloor`) machte
+  Amphibie tatsächlich schwach über Selektion erreichbar (vorher nur Drift) — brach dabei
+  aber `tools/coevolution-check.mjs` (Red-Queen-Koevolution, P5 aus Schritt 2 unten): die
+  Testumwelt liegt bei `water=0.5`, exakt im Zentrum des neuen Kanals. Jeder getestete
+  Ertrag (0,3/0,6/0,9/1,5) senkte das Koevolutions/Kontroll-Verhältnis von 6,6× auf
+  1,4–2,1×, unter die 2,5×-Schwelle — der Kanal gab der Beute-Population einen Ausweg aus
+  dem größenbasierten Rüstungswettlauf. Vollständig zurückgenommen (physics.json,
+  engine/fitness.ts, engine/types.ts, oracle/reference_model.py), alle Gates wieder auf
+  Baseline (coevolution 6.6×, pop-check 0.033, branching 2.43×). Details + Anschluss-Idee
+  (Kanal-Zentrum bewusst nicht auf `aquaticWaterFloor`) in
+  docs/roadmap-lebendige-welt.md Phase 2. **Nebenbefund dabei gefunden und behoben:**
+  Seestern · Stachelhäuter (Phase 1) konkurrierte unabhängig vom Amphibisch-Versuch mit
+  Euglenoid um den Urtümpel-Preset (water=0.65) — `requires` auf `water:[0.55,1.00]`
+  geschärft (Seesterne sind marin) und Urtümpel-Preset auf water=0.78 verschoben.
+  Dreiwertiger Medium-Toggle bleibt aus denselben Gründen wie ursprünglich zurückgestellt.
 - [ ] **Phase 3 — Habitat als Weltebene.** 10 Habitate mit eigenem Formprofil
   (`tools/research/room-sweep.mjs`), als Rahmen über Medium + Reglern — **färbt, sperrt
   nicht** (Pfeiler). Die zehn Stressor-Achsen an Habitate binden statt nur an

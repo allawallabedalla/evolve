@@ -448,8 +448,15 @@ window.ARCHETYPES = {
       // erwies sich als geometrisch inkohaerent — Treffer verteilten sich auf Koralle (33%),
       // Euglenoid (21%) UND Zunderschwamm (13%), drei verschiedene Reiche/Kaskaden-Aeste,
       // kein einheitlicher Attraktor. Werte = Fenster-Mitte der eigenen Filterbedingung.
+      // requires water auf 0.55 angehoben (NACHTRAG Phase 2, 2026-07-30): Seesterne sind
+      // marin, kein Land/Wasser-Uebergangstier. Mit dem neuen energyAmphibious-Kanal
+      // (schmale Nische um aquaticWaterFloor=0.5) fing Seestern faelschlich das GESAMTE
+      // Uebergangsband (water 0.42-0.72) — genau die Nische, die eigentlich Amphibie
+      // erreichbar machen sollte (gemessen: node scratchpad/moderwald-refix.mjs). Ab 0.55
+      // (klar oberhalb des Bandes) bleibt Seestern echtes Meerestier, Amphibie bekommt
+      // ihre eigene schmale Nische zurueck.
       proto:{ size:.35, limbLength:.45, armor:.55, mobility:.35 },
-      requires:{ water:[0.40,1.00] } },
+      requires:{ water:[0.55,1.00] } },
     { key:"laufvogel", k:"Tier", n:"Laufvogel · Strauß", e:"🦤",
       // burrow im Sweep-Mittel spurios hoch (0.75) — Artefakt aus hoher Raeuberdruck-
       // Selektion in denselben Umwelten, nicht Teil des Laufvogel-Bauplans (Kuration).

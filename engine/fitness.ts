@@ -181,6 +181,16 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
     (1 - phys.exclusion * photo);
 
+  //    d.2) Amphibische Nische — VERSUCHT UND WIEDER ENTFERNT (Phase 2, Lebendige-Welt-
+  //       Roadmap, 2026-07-30). Ein additiver Energiekanal exakt am Land/Wasser-Uebergang
+  //       (water=aquaticWaterFloor, Dreieck-Peak bei moderatem limb) machte Amphibie
+  //       tatsaechlich schwach erreichbar, brach aber tools/coevolution-check.mjs (Red
+  //       Queen P5): die Testumwelt liegt bei water=0.5 — exakt am Zentrum des Kanals.
+  //       Jeder getestete Ertrag (0.3/0.6/0.9/1.5) senkte das Koevolutions/Kontroll-
+  //       Verhaeltnis von 6.6x auf 1.4-2.1x, unter die 2.5x-Schwelle: der Kanal gab der
+  //       Beute-Population einen Ausweg aus dem groessenbasierten Ruestungswettlauf.
+  //       Siehe docs/roadmap-lebendige-welt.md Phase 2 fuer den vollen Befund.
+
   //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
   //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
   //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.

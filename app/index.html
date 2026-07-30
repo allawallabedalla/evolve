@@ -533,13 +533,18 @@ const PARAMS = {
   // (vorher: die Indizes 10..24 waren nie Teil des GA-Suchraums, hier stand nur ein geschaetzter
   // Platzhalter 0.27). Test-Validitaet jetzt EHRLICH gemessen (vorher blind fuer 15 von 25
   // Genen) - liegt bei ~72%, unter dem 80-90%-Zielband; s. BACKLOG.md Punkt 9 fuer den Befund.
-  responseRate:[0.40366458593433086,0.2866004235773751,0.15195090951424906,0.5775917787803697,0.7808972350617241,0.493718448384372,0.7672396833068929,0.20439530366242184,0.732441358276577,0.8,0.13402890769807954,0.14168095811918108,0.18494915831550932,0.22327246639317305,0.13429769905310868,0.24893022790492514,0.14014949966677215,0.17851127507471032,0.15171213657457852,0.1410006342055038,0.07853038953985529,0.15583274941739017,0.10099802426693857,0.12148442161511151,0.10528134644518772],
+  // 2026-07-30: ein Phase-2-Physik-Aenderungsversuch (energyAmphibious) wurde gebaut,
+  // neu trainiert UND wieder verworfen (brach die Red-Queen-Koevolution, s.
+  // docs/roadmap-lebendige-welt.md Phase 2) - diese Werte sind unveraendert die zuletzt
+  // committeten, nicht neu trainiert (physics.json ist wieder identisch zum Vorzustand,
+  // ein Neu-Training haette nur GA-Rauschen ohne echten Grund eingefuehrt).
+  responseRate:[0.40366458593433086, 0.2866004235773751, 0.15195090951424906, 0.5775917787803697, 0.7808972350617241, 0.493718448384372, 0.7672396833068929, 0.20439530366242184, 0.732441358276577, 0.8, 0.13402890769807954, 0.14168095811918108, 0.18494915831550932, 0.22327246639317305, 0.13429769905310868, 0.24893022790492514, 0.14014949966677215, 0.17851127507471032, 0.15171213657457852, 0.1410006342055038, 0.07853038953985529, 0.15583274941739017, 0.10099802426693857, 0.12148442161511151, 0.10528134644518772],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
   // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
   // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
-  mutationAnchor:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12],
+  mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
   mutationRate:0.0047830462704119845, selectionStrength:1.3771143306467837, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
@@ -834,6 +839,15 @@ function fitness(t, e){
           streamline *
           (phys.aquaticBase + (1 - phys.aquaticBase) * metabolism) *
           (1 - phys.exclusion * photo);
+      //    d.2) Amphibische Nische — VERSUCHT UND WIEDER ENTFERNT (Phase 2, Lebendige-Welt-
+      //       Roadmap, 2026-07-30). Ein additiver Energiekanal exakt am Land/Wasser-Uebergang
+      //       (water=aquaticWaterFloor, Dreieck-Peak bei moderatem limb) machte Amphibie
+      //       tatsaechlich schwach erreichbar, brach aber tools/coevolution-check.mjs (Red
+      //       Queen P5): die Testumwelt liegt bei water=0.5 — exakt am Zentrum des Kanals.
+      //       Jeder getestete Ertrag (0.3/0.6/0.9/1.5) senkte das Koevolutions/Kontroll-
+      //       Verhaeltnis von 6.6x auf 1.4-2.1x, unter die 2.5x-Schwelle: der Kanal gab der
+      //       Beute-Population einen Ausweg aus dem groessenbasierten Ruestungswettlauf.
+      //       Siehe docs/roadmap-lebendige-welt.md Phase 2 fuer den vollen Befund.
       //    e) Biolumineszenz (AXIS-5): ein Leuchtorgan lockt/beleuchtet Beute — aber NUR
       //       im Dunkeln (dark = 1-light). Wo Photosynthese tot ist und normale Reichweite
       //       nichts bringt (Tiefsee/Hoehle), schafft das Leuchten ein Nahrungs-Einkommen.
@@ -1404,7 +1418,11 @@ const LEVERS = [
 // jetzt klar unter aquaticWaterFloor (0.5, physics.json) verankert, Sonniger Sumpf/
 // Urtümpel klar darüber — dieselbe Grenze, an der der aquatische Energiekanal (Aquatik-
 // Jagd/Absorption) einsetzt. Dichter Wald zusätzlich foodAbundance .2->.6: bei .2 gewann
-// unabhängig vom Wasserwert eine Bakterie (zu karg für jeden Wald-Bauplan).
+// unabhängig vom Wasserwert eine Bakterie (zu karg für jeden Wald-Bauplan). Urtümpel
+// NACHTRAG (Phase 1, 2026-07-30): water .65->.78 — seit dem neuen Archetyp „Seestern ·
+// Stachelhäuter" (app/archetypes.js) gewann bei .65 ein Meerestier statt des Teich-
+// typischen Euglenoid-Protisten; ab .75 robust wieder Euglenoid (node
+// scratchpad/urtumpel-rescan.mjs).
 const BIOMES = [
   {n:"Eiszeit", ico:"snow", env:{temperature:.08,predation:.15,foodAbundance:.55,foodHeight:.15,light:.4,water:.5}},
   {n:"Räuberland", ico:"fang", env:{temperature:.5,predation:.9,foodAbundance:.8,foodHeight:.15,light:.5,water:.22}},
@@ -1413,7 +1431,7 @@ const BIOMES = [
   {n:"Sonniger Sumpf", ico:"sun", env:{temperature:.55,predation:.1,foodAbundance:.18,foodHeight:.1,light:.95,water:.75}},
   {n:"Dichter Wald", ico:"conifer", env:{temperature:.5,predation:.2,foodAbundance:.6,foodHeight:.7,light:.9,water:.35}},
   {n:"Moderwald", ico:"agaric", env:{temperature:.5,predation:.5,foodAbundance:.05,foodHeight:.05,light:.05,water:.42}},
-  {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.65}},
+  {n:"Urtümpel", ico:"cell", env:{temperature:.35,predation:.1,foodAbundance:.05,foodHeight:.05,light:.1,water:.78}},
   {n:"Trüber See", ico:"waves", env:{temperature:.55,predation:.55,foodAbundance:.28,foodHeight:.05,light:.1,water:.6}},
   {n:"Sonniges Flachmeer", ico:"alga", env:{temperature:.4,predation:.05,foodAbundance:.05,foodHeight:.05,light:.88,water:.85}},
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}},

@@ -175,6 +175,8 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (phys["aquaticBase"] + (1.0 - phys["aquaticBase"]) * metabolism)
         * (1.0 - phys["exclusion"] * photo)
     )
+    # d.2) Amphibische Nische — VERSUCHT UND WIEDER ENTFERNT (Phase 2, 2026-07-30): brach
+    #    tools/coevolution-check.mjs (Red Queen P5), s. engine/fitness.ts fuer den Befund.
     # e) Biolumineszenz (AXIS-5): Leuchtorgan lockt/beleuchtet Beute, NUR im Dunkeln
     #    (dark = 1-light). Nahrungs-Einkommen dort, wo Photo tot ist; aktive Koerper
     #    nutzen es besser; heterotroph (schliesst Photo aus). Kosten: maintenance.biolum.
