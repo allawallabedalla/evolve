@@ -1,14 +1,21 @@
 # Backlog
 
-**Stand:** 2026-07 · Live-App `app/index.html`, deployt via GitHub Pages von `main`.
-Test-Validität **~72 %** (Ziel-Band 80–90 %, seit der 25-Gene-Korrektur ehrlich über alle
-Gene gemessen statt blind für 15 davon — s. Punkt 9 Schritt 1 Befund), Parität exakt (~1e-16).
-**43 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
+**Stand:** 2026-07-30 · Live-App `app/index.html`, deployt via GitHub Pages von `main`. Läuft
+seit Migrations-Stufe 4 (Punkt 2) auf einem echten Populations-Schwarm (`world/population.ts`,
+N=200), nicht mehr auf dem alten Mittelfeld-Gradientenaufstieg.
+**Verteilungs-Treue (Schicht C seit Migrations-Stufe 6):** Jensen-Shannon-Divergenz
+Browser-Schwarm (N=200) ↔ Orakel-Schwarm (N=2000) = **0.0218** (Ziel < 0.15, `npm run
+spectrum-check`) — die alte "Test-Validität ~72%" (Mittelfeld-Distillation, `validityTest`)
+bewertet seitdem nur noch den nicht mehr produktiven Mittelfeld-Pfad (Rückfall/CLI-Demo/
+`ecology-check`), nicht das Spiel selbst. Parität Engine↔Orakel exakt (~1e-16), App-Inline-
+Fitness gegen die Engine generiert (nicht mehr von Hand gepflegt, `npm run app-fitness-check`)
+und exakt abgesichert (`npm run app-parity`, Abweichung 0).
+**44 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
 **25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
-Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken) sowie 8
-Extremnischen-Stressoren (Gift, Sauerstoff, Salz, UV, Druck, Austrocknung, Strahlung, Feuer,
-Frost, Wind) + Kleibersche Allometrie. Realitäts-Regel-Check (`npm run reality`): **20/20**.
-App-Inline-Fitness gegen die Engine abgesichert (`npm run app-parity`, exakt).
+Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken), Gliedmaßen-
+Substrat-Traktion (Insekten-Nische) sowie 8 Extremnischen-Stressoren (Gift, Sauerstoff, Salz,
+UV, Druck, Austrocknung, Strahlung, Feuer, Frost, Wind) + Kleibersche Allometrie.
+Realitäts-Regel-Check (`npm run reality`): **20/20**.
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -452,9 +459,10 @@ Technik-Aufgabe). Punkt 6 (Rest-Achsen) ist damit entsperrt — s. dort.
 **Modell:** Sonnet — Konzept + Priorisierung liegen bereits fertig abgestimmt vor
 (`docs/komplexitaets-audit.md`), hier nur noch Ausführung nach Plan.
 
-- [~] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — Konzept liegt vor,
-  Umsetzung offen.** *(Nutzer)* Audit + abgestimmter Bauplan in
-  **`docs/komplexitaets-audit.md`**.
+- [x] **„Das ganze Spiel wirkt extrem überladen und unübersichtlich" — vollständig umgesetzt
+  (2026-07-30).** *(Nutzer)* Audit + abgestimmter Bauplan in
+  **`docs/komplexitaets-audit.md`**, alle Empfehlungen P0-P2 umgesetzt bzw. begründet
+  abgegrenzt (P1.5 JS-Teil, s. dort).
   **Befund:** die Hauptansicht zeigt ~49 gleichzeitig aktive UI-Elemente, bevor überhaupt ein
   Modal geöffnet wird — 25 Gen-Balken permanent (auch die im Milieu irrelevanten), 12
   gleichrangige Biom-Buttons neben 6 Reglern, zwei inkonsistente Umwelt-Bedienmuster (Regler
