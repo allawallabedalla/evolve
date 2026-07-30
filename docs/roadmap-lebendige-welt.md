@@ -220,12 +220,26 @@ aufbauen.
 
 ## Phase 7 — Populations-/Life-History-Ebene
 
-**Bereits explizit als legitime, noch nicht gebaute Erweiterung benannt** (BACKLOG.md
-„Breiten-Feld"): r/K-Strategie, Dispersal, Sozialität, Generationszeit. Keine
-Einzel-Gen-Phänotypen mehr, sondern Eigenschaften der Population/Welt — der Unterschied
-zwischen „ein Schwarm kleiner, schnell reifender Insekten" und „ein K-Stratege mit langer
-Jugend" wird heute nirgends abgebildet, obwohl er real einer der größten Bauplan-Unterschiede
-ist.
+**r/K-Selektion umgesetzt (2026-07-30).** Neue Datei `world/lifehistory.ts` —
+`world/population.ts` hält die Populationsgröße bislang IMMER fest (jede Generation
+genau so viele Nachkommen wie Eltern); echte r/K-Selektion (MacArthur & Wilson 1967)
+braucht aber eine Größe, die selbst auf die Umwelt reagiert. `stepVariableSize()`
+ergänzt genau das — logistisches Wachstum zu einer Tragfähigkeit K, r-Anteil und
+Selektionsschärfe als Populations-Parameter, kein neues Gen, `population.ts` selbst
+bleibt unangetastet (Null Risiko für die bereits validierten Mechanismen).
+
+Zwei Vorhersagen der klassischen Theorie gemessen (`tools/lifehistory-check.mjs`,
+`npm run lifehistory-check`): (1) nach periodischen Engpässen (alle 60 Generationen auf
+10 % der Tragfähigkeit gecrasht) erholt sich ein r-parametrisierter Stamm in 3
+Generationen auf 90 % der Tragfähigkeit, ein K-parametrisierter Stamm braucht 17 — der
+klassische r-Vorteil in instabilen Umwelten. (2) in einem stabilen, überfüllten Regime
+(kein Engpass, Start bei voller Tragfähigkeit) erreicht der K-Stamm eine um ~35 % höhere
+mittlere Fitness am Gleichgewicht (0,34 vs. 0,25) — der klassische K-Vorteil bei
+Ressourcen-Knappheit/Konkurrenz statt roher Nachkommenzahl. Dispersal und Sozialität aus
+demselben „Breiten-Feld"-Punkt bleiben offen — beides bräuchte einen echten Mehr-Orte-
+Kontext (Wanderung zwischen Populationen, Gruppen-Fitness-Effekte), der über eine einzelne
+Population hinausgeht; ein natürlicher nächster Schritt auf diesem Fundament, aber
+außerhalb des Rahmens dieser Sitzung.
 
 ---
 

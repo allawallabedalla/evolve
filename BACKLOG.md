@@ -1349,10 +1349,18 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   Fellwechsel) — braucht eine neue Genom-Semantik (Reaktionsnormen statt fester Werte),
   ein groesserer struktureller Eingriff als diese Sitzung. Details in
   docs/roadmap-lebendige-welt.md Phase 6.
-- [ ] **Phase 7 — Populations-/Life-History-Ebene.** Bereits im Breiten-Feld-Fazit (Punkt
-  6) als legitime, nicht gebaute Erweiterung benannt: r/K-Strategie, Dispersal,
-  Sozialität, Generationszeit — keine Einzel-Gen-Phänotypen, gehört in `world/`, nicht in
-  die Fitness. — **Modell: Opus** (Architektur), **Sonnet** (Umsetzung).
+- [x] **Phase 7 — Populations-/Life-History-Ebene — r/K-Selektion umgesetzt
+  (2026-07-30).** Neue Datei `world/lifehistory.ts`: variable Populationsgröße
+  (logistisches Wachstum zu einer Tragfähigkeit K) ergänzt neben `world/population.ts`
+  (das selbst unangetastet bleibt — Null Risiko für bestehende Mechanismen). r-Anteil
+  und Selektionsschärfe sind Populations-Parameter, keine Einzel-Gen-Phänotypen. Gemessen
+  (`tools/lifehistory-check.mjs`, `npm run lifehistory-check`): r-parametrisierte Stämme
+  erholen sich nach periodischen Engpässen in 3 statt 17 Generationen auf 90 % der
+  Tragfähigkeit; K-parametrisierte Stämme erreichen im stabilen, überfüllten Regime eine
+  um ~35 % höhere Gleichgewichts-Fitness — beide klassischen r/K-Vorhersagen (MacArthur &
+  Wilson 1967) bestätigt. Dispersal/Sozialität aus demselben Punkt offen — brauchen einen
+  Mehr-Orte-Kontext über eine einzelne Population hinaus, s. docs/roadmap-lebendige-
+  welt.md Phase 7.
 
 **Ab Phase 4 ist „Formenzahl" nicht mehr die richtige Metrik** — das System kippt von
 „handkuratierte Blätter" zu „ein Baum, der selbst wächst" (Details in
