@@ -150,13 +150,19 @@ window.ARCHETYPES = {
 
     { key:"laubbaum", k:"Pflanze", n:"Laubbaum", e:"🌳",
       // if(struct>0.6 && size>0.5) mit insul<=0.4
+      // requires water (PHASE-0, 2026-07-30): fehlte bisher jedes Plausibilitaets-Fenster,
+      // dadurch gewann ein Landbaum-Prototyp auch in fast vollstaendig untergetauchten
+      // Umwelten (gemessen: "Sonniges Flachmeer"-Preset water=0.85 -> Laubbaum-Verwandter
+      // "Verholzter Strauch"). Obergrenze knapp unter aquaticWaterFloor (0.5): ab dort
+      // uebernimmt ohnehin der eigene aquatische Energiekanal.
       proto:{ insulation:.12, size:.82, armor:.21, photosynthesis:.86, mobility:.10,
-              structure:.89 } },
+              structure:.89 }, requires:{ water:[0.05,0.65] } },
 
     { key:"strauch", k:"Pflanze", n:"Verholzter Strauch", e:"🪴",
       // if(struct>0.55), aber nicht gross genug fuer einen Baum
+      // requires water: s. Laubbaum-Kommentar — derselbe fehlende Fenster-Befund.
       proto:{ insulation:.18, size:.24, armor:.15, photosynthesis:.83, mobility:.10,
-              structure:.83 } },
+              structure:.83 }, requires:{ water:[0.05,0.65] } },
 
     { key:"bluetenkraut", k:"Pflanze", n:"Blütenkraut", e:"🌸",
       // if(photo>0.75 && struct<0.42)
@@ -172,16 +178,19 @@ window.ARCHETYPES = {
       // Kraut-Genome im Blütenkraut-Zweig (dieselbe Geometrie-Methode wie
       // archetype-derive.mjs Schritt 1, hier nur unterhalb ihrer eigenen Schwelle).
       proto:{ insulation:.30, size:.63, armor:.25, photosynthesis:.87, mobility:.20,
-              structure:.24 } },
+              structure:.24 }, requires:{ water:[0.05,0.70] } },
 
     { key:"farn", k:"Pflanze", n:"Farn", e:"🌿",
       // if(struct<0.42 && size>0.35), photo<=0.75
+      // requires water: Farne moegen es feucht/schattig, aber nicht untergetaucht — s.
+      // Laubbaum-Kommentar (PHASE-0, 2026-07-30).
       proto:{ insulation:.30, size:.70, armor:.25, photosynthesis:.60, mobility:.20,
-              structure:.22 } },
+              structure:.22 }, requires:{ water:[0.15,0.75] } },
 
     { key:"kraut", k:"Pflanze", n:"Kraut · niedrige Pflanze", e:"☘️",
-      // Auffang-Zweig der Pflanzen
-      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47 } },
+      // Auffang-Zweig der Pflanzen. requires water: s. Laubbaum-Kommentar.
+      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47 },
+      requires:{ water:[0.05,0.70] } },
 
     // ===== Reich TIERE — heterotroph + mobil ====================================
     // Kaskaden-Tor: mob>0.45 && photo<0.4
