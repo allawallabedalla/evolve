@@ -187,11 +187,36 @@ Single-Habitat-Hauptansicht ist eine Produktentscheidung, keine Physik-Frage).
 
 ## Phase 6 — Zeit: Jahreszeiten, Tag/Nacht
 
-**Bereits als „zeitachse"-Layer in `app/influences.js` markiert**, dort explizit als
-strukturell anders begründet: „ein zyklischer Jahresgang ist etwas anderes als ein hoher
-oder tiefer Wert; die Engine kennt nur Momentaufnahmen." Öffnet eine ganze Klasse realer
-Anpassungen, die heute unmöglich sind: Winterschlaf, Zug, Laubfall, Fellwechsel,
-Saison-Tarnung — alles Verhalten über Zeit, nicht Zustand an einem Punkt.
+**Kernstück umgesetzt (2026-07-30).** Neue Datei `world/seasonal.ts`: eine Umwelt-Achse
+oszilliert sinusförmig über Generationen statt einen festen Punktwert zu halten —
+derselbe Populations-Kern wie überall sonst, nur bekommt er bei jedem Schritt eine
+ANDERE Momentaufnahme statt immer derselben. Kein neues Gen, keine physics.json-
+Änderung, berührt die Live-App nicht (dieselbe additive Vorgehensweise wie Phase 5).
+
+Zwei strukturell verschiedene Effekte gemessen (`tools/seasonal-check.mjs`,
+`npm run seasonal-check`), die eine Punkt-Umwelt prinzipiell nicht zeigen kann: (1)
+**Kompromiss/Hedging** — eine zyklisch schwankende Temperatur (Amplitude 0,35 um 0,5)
+lässt die Population auf eine Isolation von ~0,74 konvergieren, während dieselbe
+Population unter dem FLACHEN Mittel derselben Umwelt (Temperatur konstant 0,5) bei
+~0,48 landet — ein Unterschied von ~0,26, nicht durch die naive Erwartung „Durchschnitt
+der Extreme = Umwelt beim Mittelwert" erklärbar. Die multiplikative, floor-begrenzte
+Fitness-Landschaft bestraft Unterkühlung im Winter-Extrem stärker als Überisolation im
+Sommer-Extrem, die Population hedged entsprechend nach oben. (2) **Lag/Dämpfung** — bei
+kurzer Zyklusdauer (10 Generationen je „Jahr") oszilliert das Merkmalsmittel nur mit
+28 % der Umwelt-Amplitude (kann dem schnellen Wechsel nicht folgen), bei langer
+Zyklusdauer (150 Generationen) mit >100 % (folgt fast vollständig, sogar leichtes
+Überschwingen) — ein generisches Merkmal periodisch angetriebener dynamischer Systeme,
+hier zum ersten Mal überhaupt messbar.
+
+**Was hier bewusst NICHT gebaut wurde:** echte Verhaltens-PLASTIZITÄT innerhalb eines
+Lebens (Winterschlaf, Fellwechsel, Zug) — das würde eine neue Klasse von Genen brauchen
+(Reaktionsnormen: ein Gen kodiert nicht mehr einen festen Wert, sondern eine Funktion der
+Zeit, z. B. „Fellwechsel-Amplitude/-Phase"), die sich innerhalb der Lebenszeit EINES
+Individuums ändern, nicht nur über Generationen selektiert werden — ein deutlich
+größerer struktureller Eingriff (neue Genom-Semantik, nicht nur ein neuer Umwelt-
+Generator) und explizit außerhalb des Rahmens dieser Sitzung. Was hier steht, ist das
+Fundament dafür: die Umwelt selbst kann jetzt „atmen", eine spätere Sitzung kann darauf
+aufbauen.
 
 ## Phase 7 — Populations-/Life-History-Ebene
 

@@ -1337,12 +1337,18 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   vorerst eine fest verdrahtete Kuration in `app/archetypes.js` — sie aus dieser Dynamik
   emergent entstehen zu lassen ist ein eigener UX-Schritt, s. docs/roadmap-lebendige-
   welt.md Phase 5.
-- [ ] **Phase 6 — Zeitachse.** Bereits als „zeitachse"-Layer in `app/influences.js`
-  markiert, dort begründet: „ein zyklischer Jahresgang ist etwas anderes als ein hoher
-  oder tiefer Wert; die Engine kennt nur Momentaufnahmen." Öffnet Winterschlaf, Zug,
-  Laubfall, Saison-Tarnung. — **Modell: Opus** (Architektur: Umwelt wird Funktion der
-  Zeit statt Punktwert — größter struktureller Eingriff dieser Roadmap), **Sonnet**
-  (Umsetzung).
+- [x] **Phase 6 — Zeitachse — Kernstück umgesetzt (2026-07-30).** Neue Datei
+  `world/seasonal.ts`: eine Umwelt-Achse oszilliert sinusförmig über Generationen statt
+  einen festen Punktwert zu halten. Kein neues Gen, keine physics.json-Änderung, Live-App
+  unberührt. Gemessen (`tools/seasonal-check.mjs`, `npm run seasonal-check`): (1)
+  Kompromiss/Hedging — zyklische Temperatur (Amplitude 0,35) lässt Isolation auf ~0,74
+  konvergieren, das flache Mittel derselben Umwelt nur auf ~0,48 (Δ≈0,26, nicht durch
+  „Durchschnitt der Extreme" erklärbar). (2) Lag/Dämpfung — kurzer Zyklus (10 Gen/„Jahr")
+  dämpft die Merkmals-Amplitude auf 28 % der Umwelt-Amplitude, langer Zyklus (150 Gen)
+  folgt fast vollständig. Bewusst NICHT gebaut: echte Verhaltens-Plastizität (Winterschlaf,
+  Fellwechsel) — braucht eine neue Genom-Semantik (Reaktionsnormen statt fester Werte),
+  ein groesserer struktureller Eingriff als diese Sitzung. Details in
+  docs/roadmap-lebendige-welt.md Phase 6.
 - [ ] **Phase 7 — Populations-/Life-History-Ebene.** Bereits im Breiten-Feld-Fazit (Punkt
   6) als legitime, nicht gebaute Erweiterung benannt: r/K-Strategie, Dispersal,
   Sozialität, Generationszeit — keine Einzel-Gen-Phänotypen, gehört in `world/`, nicht in
