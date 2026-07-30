@@ -504,8 +504,33 @@ Technik-Aufgabe). Punkt 6 (Rest-Achsen) ist damit entsperrt — s. dort.
     (Presets/Fokus-Falle/Escape, beide Kataloge kuratiert→voll, Suche weiterhin funktionsfähig,
     Kernschleife unverändert), `app-parity`/`mf-fidelity` grün, `ui-calm-check`-Fail als
     vorbestehend/unabhängig verifiziert (identisch auf unverändertem HEAD reproduziert).
-    **Noch offen aus P1-P2:** Datei-Aufsplittung (P1.5, reine Infrastruktur ohne
-    Spieler-Sichtbarkeit — niedrigere Priorität als P1.3/1.4).
+  - [x] **P1.5 — CSS-Teil erledigt (2026-07-30, Sonnet), JS-Teil bewusst nicht gemacht:**
+    `<style>...</style>` (694 Zeilen) aus `app/index.html` nach `app/style.css` ausgelagert,
+    per `<link rel="stylesheet">` eingebunden — wortwörtlicher Inhalt, keine Umformatierung.
+    Keine Custom-Property-/JS-Schreibkopplung gefunden, die das hätte brechen können (nur
+    lesende `var(--...)`-Nutzung in Inline-Styles/Template-Strings). Playwright bestätigt:
+    `style.css` lädt mit 200, 0 Konsolenfehler/fehlgeschlagene Requests, `--abyss`-Variable
+    korrekt aufgelöst, Screenshots (Hauptansicht + Presets-Panel) zeigen keine visuelle
+    Abweichung. **Der JS-Teil ("JS in Module") wurde bewusst NICHT gemacht** — verletzt sonst
+    eine bereits an genau dieser Datei getroffene Architektur-Entscheidung: Migrations-Stufe 4
+    hat sich explizit GEGEN `type="module"` fürs ~4000-Zeilen-Hauptskript entschieden ("zu
+    großer Blast-Radius"), und nur neue, unabhängige Features (das "Lebende Welt"-Overlay)
+    bewusst ENTKOPPELT als eigenes Modul gebaut, gerade damit ein Ladefehler dort die App nicht
+    mitreißt. Eine Umstellung des Hauptskripts würde diese Entkopplung wieder aufheben (globaler
+    Skript-Kontext → viele Modul-Scopes mit strikten Export/Import-Grenzen) — ein Umbau mit
+    hohem Risiko für eine Datei, die diese Session bereits mehrere fein kalibrierte Änderungen
+    bekommen hat (Warum-Zeile-Hysterese aus Stufe 5, P2.6s Regex-Grenzen-empfindliche
+    Fitness-Einbettung). Ohne einen echten spielerischen Nutzen überwiegt das Risiko den
+    Infrastruktur-Gewinn — bleibt offen, bis ein konkreter Anlass (z. B. ein Build-Schritt, der
+    mehrere Quelldateien wieder zu einer `index.html` zusammenführt, ohne den Laufzeit-Kontext
+    zu ändern) das Risiko senkt.
+    **Getestet:** `build`, `app-parity`(0), `app-fitness-check`, `pop-check`/
+    `branching-check`/`world-check`/`parity`/`ecology`/`mf-fidelity`/`census-check`/
+    `phenomena-check`(8/8)/`seed-check`/`rarity-check`/`coevolution-check`/
+    `distribution-check`(4/4)/`exemplar-check`/`story-check`/`influence-check` alle grün —
+    unabhängig gegengeprüft (eigener Gate-Lauf + eigener Playwright-Screenshot dieser Session).
+    Damit ist Punkt 3 (Komplexitäts-Audit) inhaltlich abgeschlossen (P0-P2 umgesetzt bzw.
+    begründet abgegrenzt).
   - [x] **P2.6 umgesetzt (2026-07-30, Sonnet) — Inline-Fitness-Kopie generiert statt von
     Hand gepflegt:** neues `tools/bundle-app-fitness.mjs` erzeugt `const PHYS = {...}` +
     `function fitness(t, e){...}` in `app/index.html` direkt aus `physics.json` (minus
