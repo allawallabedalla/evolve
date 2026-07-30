@@ -159,13 +159,31 @@ Design-Durchlauf mit dem Nutzer, kein Implementierungs-Task.
 
 ## Phase 5 — Beziehungen: Symbiose, Parasitismus
 
-**Bereits bewusst zurückgestellt** (BACKLOG.md: „Parasitismus braucht eine zweite Art als
-Gegenspieler, nicht nur ein Milieu"), hier als Fortsetzung von Phase 4 eingeordnet, weil
-beide dieselbe Grundvoraussetzung brauchen: mehr als ein Genom gleichzeitig in Beziehung.
-Erweitert `world/coevolution.ts` (heute: Räuber-Beute-Wettrüsten) um echte wechselseitige
-Abhängigkeit — Wirt/Parasit (~40 % aller realen Arten!), Mutualismus (Bestäuber↔Blüte,
-Pilz↔Wurzel). Die „Flechte" ist heute schon eine Pilz+Alge-Symbiose, aber fest verdrahtet,
-nicht emergent — Phase 5 würde solche Paare aus der Dynamik selbst entstehen lassen.
+**Umgesetzt (2026-07-30).** Neben `world/coevolution.ts` (Räuber-Beute, antagonistisch,
+treibt Divergenz) jetzt `world/symbiosis.ts`: zwei Populationen über denselben
+Merkmals-Passungs-Kernel gekoppelt, aber mit strukturell anderer Auszahlung —
+**Mutualismus** (beide Seiten gewinnen bei guter Passung, treibt Konvergenz statt
+Divergenz) und **Parasitismus** (Parasit gewinnt, Wirt verliert an derselben Interaktion —
+kontinuierlicher Energie-Abzug statt Fang-Risiko). Kein neues Gen, keine physics.json-
+Änderung — reine `world/`-Ergänzung wie `coevolution.ts` selbst, berührt die Live-App
+nicht.
+
+Beide Behauptungen gemessen, nicht behauptet (`tools/symbiosis-check.mjs`,
+`npm run symbiosis-check`, dieselbe Methode wie `coevolution-check.mjs`): (1)
+Mutualismus — zwei Populationen mit absichtlich auseinanderliegenden Start-Mittelwerten
+(0,2 / 0,8 auf der Passungs-Achse) konvergieren unter Kopplung auf 0,007 Abstand, ohne
+Kopplung bleiben sie bei 0,033 (< 50 %-Schwelle klar erfüllt); am ko-adaptierten
+Endzustand gewinnen BEIDE Seiten messbar an Fitness durch den Partner (+0,195 / +0,194) —
+das ist die echte wechselseitige Abhängigkeit, nicht nur Korrelation. (2) Parasitismus —
+der Wirt verliert am Endzustand messbar Fitness durch den Parasiten (−0,056), der Parasit
+gewinnt an genau derselben Interaktion (+0,071): die Asymmetrie unterscheidet dies
+strukturell von Mutualismus. `coevolution-check` bleibt unverändert bei 7,9× (keine
+Kollision mit dem bestehenden Räuber-Beute-Modell). Die „Flechte" (Pilz+Alge) bleibt
+weiterhin eine fest verdrahtete Archetyp-Kuration in `app/archetypes.js` — ein Schritt,
+solche Paare aus DIESER Dynamik heraus tatsächlich als eigene Formen im Genbuch
+entstehen zu lassen, ist ein eigener, noch nicht begonnener UX-Schritt (dieselbe
+Grenze wie bei Phase 4: die Mechanik existiert im `world/`-Layer, ihre Anbindung an die
+Single-Habitat-Hauptansicht ist eine Produktentscheidung, keine Physik-Frage).
 
 ## Phase 6 — Zeit: Jahreszeiten, Tag/Nacht
 

@@ -1320,11 +1320,23 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   phenomena-check (8/8), coevolution-check (7,9×) — sowie `archetype-transition-check`
   (4000 Umwelten): keine der 65 Formen verliert Erreichbarkeit. Details in
   docs/roadmap-lebendige-welt.md Phase 2.
-- [ ] **Phase 5 — Symbiose/Parasitismus.** Bereits in Punkt 6 bewusst zurückgestellt
-  („Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu"). Baut auf
-  Phase 4 auf (dieselbe Grundvoraussetzung: mehr als ein Genom gleichzeitig in Beziehung).
-  Erweitert `world/coevolution.ts` (heute Räuber-Beute-Wettrüsten) um echte wechselseitige
-  Abhängigkeit. — **Modell: Opus** (Architektur), **Sonnet** (Umsetzung).
+- [x] **Phase 5 — Symbiose/Parasitismus — umgesetzt (2026-07-30).** Neue Datei
+  `world/symbiosis.ts` (Ergänzung neben `world/coevolution.ts`, kein Eingriff dort):
+  zwei Populationen über denselben Merkmals-Passungs-Kernel gekoppelt wie beim
+  Räuber-Beute-Modell, aber mit anderer Auszahlung — **Mutualismus** (beide Seiten
+  gewinnen bei Passung, treibt Konvergenz) und **Parasitismus** (Parasit gewinnt, Wirt
+  verliert an derselben Interaktion — kontinuierlicher Abzug statt Fang-Risiko). Kein
+  neues Gen, keine physics.json-Änderung, berührt die Live-App nicht. Gemessen statt
+  behauptet (`tools/symbiosis-check.mjs`, `npm run symbiosis-check`): Mutualismus
+  konvergiert zwei absichtlich auseinanderliegende Populationen (Start 0,2/0,8) auf
+  Abstand 0,007 vs. 0,033 ohne Kopplung, UND beide Seiten gewinnen am Endzustand
+  messbar Fitness durch den Partner (+0,195/+0,194 — die eigentliche „wechselseitige
+  Abhängigkeit", nicht nur Korrelation). Parasitismus zeigt die Gegen-Asymmetrie: Wirt
+  verliert (−0,056), Parasit gewinnt (+0,071) an derselben Interaktion.
+  `coevolution-check` bleibt unverändert bei 7,9× (keine Kollision). Die „Flechte" bleibt
+  vorerst eine fest verdrahtete Kuration in `app/archetypes.js` — sie aus dieser Dynamik
+  emergent entstehen zu lassen ist ein eigener UX-Schritt, s. docs/roadmap-lebendige-
+  welt.md Phase 5.
 - [ ] **Phase 6 — Zeitachse.** Bereits als „zeitachse"-Layer in `app/influences.js`
   markiert, dort begründet: „ein zyklischer Jahresgang ist etwas anderes als ein hoher
   oder tiefer Wert; die Engine kennt nur Momentaufnahmen." Öffnet Winterschlaf, Zug,
