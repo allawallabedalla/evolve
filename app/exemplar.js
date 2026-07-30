@@ -39,6 +39,28 @@ const ARCH_WIKI = {
   "Kopffüßer · Tintenfisch": ["Tintenfisch","Kopffüßer"], "Amphibie · Lurch": ["Amphibie","Amphibien"],
   "Koralle · Riffbildner": ["Koralle","Korallen"], "Schwamm": ["Schwamm","Schwämme"],
   "Leuchtwesen · Tiefsee": ["Anglerfisch","Tiefseeanglerfische"],
+  // PHASE 1 (2026-07-30): Pakete A/B/C, s. app/archetypes.js.
+  "Schwefelbakterie · Chemotroph": ["Schwefelbakterium","Schwefelbakterien"],
+  "Salinenkrebs · Halophil": ["Salinenkrebs","Salinenkrebse"],
+  "Schneealge · UV-hart": ["Schneealge","Schneealge"],
+  "Tiefsee-Amphipode · Druckfest": ["Flohkrebs","Flohkrebse"],
+  "Bärtierchen · Anhydrobiont": ["Bärtierchen","Bärtierchen"],
+  "Deinococcus · Strahlenfest": ["Deinococcus radiodurans","Deinococcus radiodurans"],
+  "Feuerkäfer · Pyrophil": ["Prachtkäfer","Prachtkäfer"],
+  "Frostspanner · Winterfalter": ["Kleiner Frostspanner","Kleiner Frostspanner"],
+  "Krummholz · Windzwerg": ["Krummholz","Krummholz"],
+  "Wühler · Grabtier": ["Maulwurf","Maulwürfe"],
+  "Bartenwal · Filtrierschwimmer": ["Bartenwal","Bartenwale"],
+  "Muschel · Sessiler Filtrierer": ["Muschel","Muscheln"],
+  "Krill · Filtrierendes Kleinstwesen": ["Krill","Krill"],
+  "Hallimasch · Leuchtpilz": ["Hallimasch","Hallimasch"],
+  "Robbe · Meeressäuger": ["Robbe","Robben"],
+  "Seestern · Stachelhäuter": ["Seestern","Seesterne"],
+  "Laufvogel · Strauß": ["Laufvögel","Laufvögel"],
+  "Methanogenes Archaeon · Anaerobier": ["Archaeen","Archaeen"],
+  "Erle · Knöllchen-Pflanze": ["Erlen","Erlen"],
+  "Mammutbaum · Riesenpflanze": ["Mammutbäume","Mammutbäume"],
+  "Chamäleon · Tarnjäger": ["Chamäleons","Chamäleons"],
 };
 
 /** Reales Vorbild + Wikipedia-URL zu einem konkreten App-Archetyp-Namen (Hauptansicht). */

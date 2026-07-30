@@ -216,3 +216,42 @@ Austrocknung in die Wüste — heute kommen sie ausschließlich als Zufalls-Kart
 
 Leitplanke: Ein Raum darf **färben, nicht sperren** (Pfeiler „keine Gates"). Der Regler
 behält seine volle Spanne; der Raum markiert nur den plausiblen Korridor.
+
+---
+
+## 8. Nachtrag: Umsetzung Paket A/B/C (2026-07-30) — 44 → 65, nicht 66
+
+Umgesetzt: 9 Extremophile (Paket A), 5 von 6 geplanten Nischen-Formen (Paket B) und
+7 Verfeinerungen (Paket C) — **21 statt 22 neue Formen**. Details, Prototyp-Herkunft und
+Kurationen stehen als Kommentare direkt in `app/archetypes.js`.
+
+**Knöllchenbakterium (Stickstoff-Mikrobe) wurde gebaut, gemessen und wieder entfernt.**
+Regressionsmessung (`node tools/research/archetype-transition-check.mjs`, vergleicht klassifizierte Namen vor/
+nach der Änderung auf denselben 4000 Umwelten) zeigte: die neue Form drückte Bakterie von
+9,5 % auf 0,3 % und Archaee von 9,9 % auf 1,4 % Erreichbarkeit — die zwei häufigsten Formen
+des ganzen Baums wären in die „sehr selten"-Stufe gerutscht. Ursache: `nfix` hat zwar einen
+echten Umwelt-Treiber (`engine/fitness.ts`: Ertrag skaliert mit `(1-foodAbundance)`), aber
+der Ertrag ist nie null (`nfixBase=0.2` auch bei voller Nahrung) — das Gen driftet also
+IMMER leicht nach oben, nicht nur unter Not. Ein Prototyp, der nfix nennt und sonst fast
+identisch zu Bakterie ist, gewinnt dadurch jeden Bakterie-Bauplan mit nur leicht erhöhtem
+nfix. Weder ein schärferes `requires`-Fenster (`foodAbundance<0.30`) noch eine höhere
+Schwelle (`nfix:.97`) lösten das strukturell. Deckt sich mit dem bereits in BACKLOG.md
+Punkt 6 dokumentierten Befund: „nfix … der binäre Kern/Kosten-Anker ist dafür zu grob" —
+eine Physik-, keine Namensfrage. Bleibt offen für einen späteren Anlauf, sobald diese
+Struktur überarbeitet ist.
+
+**Wühler (Grabtier, burrow) hatte denselben Verdacht, hielt der Messung aber stand.**
+`burrow` läuft laut §2 auch bei 26,7 % aller Umwelten hoch, aber anders als `nfix`
+korreliert es ECHT mit Räuberdruck (`predSurvival` gewichtet `defenseScore` mit
+`env.predation` — ohne Räuber ist Graben reine Wartungslast ohne Nutzen). Gemessen: Median-
+Prädation der Wühler-Treffer lag bei 0,72, nur 11 % hatten `predation<0,4`. Ein zusätzliches
+`requires:{predation:[0.40,1.00]}` schärft eine bereits reale Korrelation, statt eine
+fehlende zu erzwingen — Erreichbarkeit blieb bei ~5 %, Fell-Warmblüter/Reptil/Kleines
+flinkes Tier fielen NICHT unter ihre alte Erreichbarkeit.
+
+**Lehre für künftige Pakete:** Ein Sweep auf der isolierten Nischen-Bedingung (wie in §6
+gemessen) sagt nur die Nischen-GRÖSSE voraus, nicht die Erreichbarkeit NACH Konkurrenz mit
+allen anderen Prototypen. Vor jedem weiteren Formen-Paket: `node tools/research/archetype-transition-check.mjs`
+(oder eine feste Version davon) gegen die vorherige `archetypes.js`-Fassung laufen lassen
+und prüfen, ob eine Bestandsform aus dem „häufig"-Tier herausfällt — nicht nur, ob die neue
+Form selbst plausibel erreichbar ist.

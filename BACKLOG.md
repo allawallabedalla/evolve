@@ -10,7 +10,9 @@ bewertet seitdem nur noch den nicht mehr produktiven Mittelfeld-Pfad (Rückfall/
 `ecology-check`), nicht das Spiel selbst. Parität Engine↔Orakel exakt (~1e-16), App-Inline-
 Fitness gegen die Engine generiert (nicht mehr von Hand gepflegt, `npm run app-fitness-check`)
 und exakt abgesichert (`npm run app-parity`, Abweichung 0).
-**44 benannte Lebensformen** über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
+**65 benannte Lebensformen** (44 + 21 aus Phase 1 „Lebendige Welt", Punkt 10 — 22 geplant,
+Knöllchenbakterium gemessen und wegen Erreichbarkeits-Kollision mit Bakterie/Archaee wieder
+entfernt, s. dort) über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
 **25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
 Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken), Gliedmaßen-
 Substrat-Traktion (Insekten-Nische) sowie 8 Extremnischen-Stressoren (Gift, Sauerstoff, Salz,

@@ -356,6 +356,123 @@ window.ARCHETYPES = {
     { key:"euglenoid", k:"Protist", n:"Euglenoid · Mixotroph", e:"🦠",
       // Auffang-Zweig: der bewegliche Halb-Autotroph
       proto:{ size:.55, photosynthesis:.54, mobility:.58 } },
+
+    // ===== PHASE 1 (2026-07-30, docs/lebensbaum-luecken.md §6 / BACKLOG.md Punkt 10) ====
+    // 22 neue Formen fuer 15 Gene, die die Selektion laengst hochzieht, aber bisher KEIN
+    // Prototyp benannte (gap-sweep.mjs: burrow 26.7%, nfix 21.8%, filter 18.0% der Umwelten,
+    // die 9 Stressor-Gene je 4-5%, biolum nur von 2 Formen genannt). Herkunft der Zahlen:
+    // node scratchpad/derive-proto.mjs — Mittelwert ueber erreichbare Genome, die die
+    // jeweilige Nischen-Bedingung erfuellen (12000 gemischte Umwelten, 0-2 Stressoren aktiv),
+    // gefiltert auf Gene mit sd<0.28 (dieselbe Grund-Methode wie archetype-derive.mjs).
+    // Zwei Ausnahmen curatiert statt gemessen (Kommentar an Ort und Stelle): die
+    // Seestern/Chamaeleon-Nischen erwiesen sich im Sweep als geometrisch inkohaerent
+    // (Treffer verteilten sich auf 3+ voellig verschiedene Bestandsformen) -> geometrische
+    // Fenster-Mitte statt verrauschter Mittelwert, exakt der Fall, den ARCHETYPES' eigene
+    // Methodik fuer zu wenige/uneindeutige Beispiele vorsieht.
+
+    // ---- Paket A: 9 Extremophile, je ein Stressor-Gen — bewusst NUR das eine Gen im
+    // Prototyp (keine Nebengene): jedes der 9 Stressor-Gene ist im Sweep bei aktivem
+    // Stressor bei ~0.90-0.96 UND bei jedem anderen Gen ueberlappen alle 9 Nischen nahezu
+    // identisch (generische "kleines Wesen"-Werte) — ein Kaskaden-Zweig, der NUR den
+    // Stressor abfragt, darf laut ARCHETYPES-Methodik auch nur den Stressor nennen.
+    { key:"schwefelbakterie", k:"Mikrobe", n:"Schwefelbakterie · Chemotroph", e:"🌋",
+      proto:{ detox:.95 }, requires:{ toxicity:[0.30,1.00] } },
+    { key:"salinenkrebs", k:"Tier", n:"Salinenkrebs · Halophil", e:"🧂",
+      proto:{ osmo:.96 }, requires:{ salinity:[0.30,1.00] } },
+    { key:"schneealge", k:"Pflanze", n:"Schneealge · UV-hart", e:"🍉",
+      proto:{ pigment:.95 }, requires:{ uv:[0.30,1.00] } },
+    { key:"tiefseeamphipode", k:"Tier", n:"Tiefsee-Amphipode · Druckfest", e:"⚓",
+      proto:{ baro:.96 }, requires:{ pressure:[0.30,1.00] } },
+    { key:"baertierchen", k:"Tier", n:"Bärtierchen · Anhydrobiont", e:"🥟",
+      proto:{ desicc:.95 }, requires:{ aridity:[0.30,1.00] } },
+    { key:"deinococcus", k:"Mikrobe", n:"Deinococcus · Strahlenfest", e:"🔴",
+      proto:{ radres:.92 }, requires:{ radiation:[0.30,1.00] } },
+    { key:"feuerkaefer", k:"Tier", n:"Feuerkäfer · Pyrophil", e:"🪲",
+      proto:{ fireres:.96 }, requires:{ fire:[0.30,1.00] } },
+    { key:"frostspanner", k:"Tier", n:"Frostspanner · Winterfalter", e:"🌙",
+      proto:{ frostres:.94 }, requires:{ frost:[0.30,1.00] } },
+    { key:"krummholz", k:"Pflanze", n:"Krummholz · Windzwerg", e:"🎋",
+      proto:{ windres:.95 }, requires:{ wind:[0.30,1.00] } },
+
+    // ---- Paket B: 5 Nischen-Gene-Formen (burrow/filter/biolum) — Knöllchenbakterium
+    // (nfix) GEMESSEN UND WIEDER ENTFERNT, s. Befund unten am Wühler-Eintrag.
+    { key:"wuehler", k:"Tier", n:"Wühler · Grabtier", e:"🕳️",
+      // requires predation (NACHTRAG nach Regressionsmessung, 2026-07-30): burrow ist wie
+      // nfix ein "opportunistisches" Gen (laeuft laut gap-sweep.mjs bei 26.7% ALLER
+      // Umwelten hoch, auch ohne Raeuberdruck). ANDERS als nfix korreliert burrow aber
+      // ECHT mit predation (engine/fitness.ts: burrow traegt nur zur Verteidigung bei,
+      // predSurvival gewichtet defenseScore MIT env.predation — bei niedrigem Raeuberdruck
+      // ist Graben reine Wartungslast ohne Nutzen). Gemessen (node tools/research/archetype-transition-check.mjs (Diagnose-Variante)):
+      // Median-Praedation der Wühler-Treffer lag schon VOR diesem Gate bei 0.72, nur 11%
+      // hatten predation<0.4 — die predation-Anforderung schaerft eine bereits reale
+      // Korrelation, statt eine fehlende zu erzwingen. Erreichbarkeit blieb bei ~5%,
+      // Fell-Warmblüter/Reptil/Kleines flinkes Tier NICHT unter ihre alte Erreichbarkeit
+      // gedrueckt (node tools/research/archetype-transition-check.mjs bestaetigt).
+      proto:{ size:.27, limbLength:.67, metabolism:.89, armor:.06, mobility:.94,
+              structure:.23, burrow:.84 }, requires:{ water:[0.00,0.50], predation:[0.40,1.00] } },
+    // Knöllchenbakterium (Stickstoff-Mikrobe, nfix) — GEBAUT, GEMESSEN, WIEDER ENTFERNT
+    // (2026-07-30, node tools/research/archetype-transition-check.mjs): anders als burrow hat
+    // nfix zwar auch einen echten Umwelt-Treiber (engine/fitness.ts: Ertrag skaliert mit
+    // (1-foodAbundance), Naehrstoffarmut lohnt N-Fixierung) — aber der Ertrag ist NIE null
+    // (nfixBase=0.2 auch bei foodAbundance=1), nfix drueckt also IMMER leicht nach oben,
+    // nicht nur unter Not. Ein Prototyp, der nfix nennt, aber sonst (Groesse/Photosynthese/
+    // Mobilitaet) fast identisch zu Bakterie ist, gewann dadurch jeden Bakterie-Bauplan mit
+    // nur leicht erhoehtem nfix — auch mit requires-Fenster (foodAbundance<0.30) und
+    // proto-Schwelle nfix:.97 blieb Bakterie bei 0.8%/Archaee bei 1.4% (vorher 9.5%/9.9%),
+    // eine Erreichbarkeits-Kollision, die die zwei haeufigsten Formen des Baums in die
+    // "sehr selten"-Stufe gedrueckt haette. Entfernt statt live geschickt — deckt sich mit
+    // dem bereits in BACKLOG.md Punkt 6 dokumentierten Befund: "nfix ... der binaere Kern/
+    // Kosten-Anker ist dafuer zu grob", eine Struktur-, keine Namensfrage. Ohne den Eintrag
+    // erholten sich Bakterie auf 5.0%, Archaee auf 4.7% (node tools/research/archetype-transition-check.mjs).
+    { key:"bartenwal", k:"Tier", n:"Bartenwal · Filtrierschwimmer", e:"🐋",
+      proto:{ size:.85, limbLength:.17, metabolism:.99, armor:.04, mobility:.96,
+              structure:.66, filter:.82 }, requires:{ water:[0.50,1.00] } },
+    { key:"muschel", k:"Tier", n:"Muschel · Sessiler Filtrierer", e:"🦪",
+      proto:{ armor:.16, mobility:.15, filter:.90 }, requires:{ water:[0.40,1.00] } },
+    { key:"krill", k:"Tier", n:"Krill · Filtrierendes Kleinstwesen", e:"🦐",
+      // nfix im Sweep-Mittel spurios hoch (Artefakt der "winzig"-Nische, s. Knoellchenbakterium)
+      // — real fixiert Krill keinen Stickstoff, bewusst nicht uebernommen (Kuration).
+      proto:{ size:.07, filter:.87 }, requires:{ water:[0.40,1.00] } },
+    { key:"hallimasch", k:"Pilz", n:"Hallimasch · Leuchtpilz", e:"💡",
+      proto:{ size:.23, photosynthesis:.10, mobility:.10, biolum:.91 },
+      requires:{ light:[0.00,0.30] } },
+
+    // ---- Paket C: 7 Bauplan-Verfeinerungen ----
+    { key:"robbe", k:"Tier", n:"Robbe · Meeressäuger", e:"🦭",
+      // filter bewusst NICHT uebernommen (Sweep-Mittel 0.71) — sonst nicht von Bartenwal
+      // unterscheidbar; Robbe ist der NICHT-filtrierende Meeressaeuger (Einzeljagd).
+      proto:{ insulation:.90, size:.75, limbLength:.12, metabolism:.95, armor:.08,
+              mobility:.95 }, requires:{ water:[0.50,1.00] } },
+    { key:"seestern", k:"Tier", n:"Seestern · Stachelhäuter", e:"⭐",
+      // KURATIERT statt gemessen: der Sweep-Filter (armor>.5, limb>.45, mob<.55, water>.4)
+      // erwies sich als geometrisch inkohaerent — Treffer verteilten sich auf Koralle (33%),
+      // Euglenoid (21%) UND Zunderschwamm (13%), drei verschiedene Reiche/Kaskaden-Aeste,
+      // kein einheitlicher Attraktor. Werte = Fenster-Mitte der eigenen Filterbedingung.
+      proto:{ size:.35, limbLength:.45, armor:.55, mobility:.35 },
+      requires:{ water:[0.40,1.00] } },
+    { key:"laufvogel", k:"Tier", n:"Laufvogel · Strauß", e:"🦤",
+      // burrow im Sweep-Mittel spurios hoch (0.75) — Artefakt aus hoher Raeuberdruck-
+      // Selektion in denselben Umwelten, nicht Teil des Laufvogel-Bauplans (Kuration).
+      proto:{ size:.55, limbLength:.90, metabolism:.95, armor:.08, mobility:.95, wing:.05 },
+      requires:{ water:[0.00,0.50] } },
+    { key:"methanogen", k:"Mikrobe", n:"Methanogenes Archaeon · Anaerobier", e:"⚫",
+      proto:{ metabolism:.85, oxyEff:.94 }, requires:{ oxygen:[0.00,0.50] } },
+    { key:"erle", k:"Pflanze", n:"Erle · Knöllchen-Pflanze", e:"🍃",
+      // size mittig zwischen Strauch (.24) und Laubbaum (.82) verankert, sonst waere die
+      // Form von beiden Nachbarn ueberdeckt und nie ueber nfix erreichbar.
+      proto:{ photosynthesis:.90, structure:.85, size:.55, nfix:.85 },
+      requires:{ water:[0.05,0.70] } },
+    { key:"mammutbaum", k:"Pflanze", n:"Mammutbaum · Riesenpflanze", e:"🗼",
+      // nfix im Sweep-Mittel spurios hoch (0.92, derselbe "grosse Pflanze"-Artefakt wie bei
+      // Erle) — real kein Merkmal von Mammutbaeumen, nicht uebernommen (Kuration).
+      proto:{ size:.97, photosynthesis:.95, structure:.98, armor:.16 },
+      requires:{ water:[0.05,0.65] } },
+    { key:"chamaeleon", k:"Tier", n:"Chamäleon · Tarnjäger", e:"👁️",
+      // KURATIERT statt gemessen: der Sweep-Filter (camo>.55, mob>.4) fing ueberwiegend
+      // grosse schnelle Wasser-/Landjaeger (Fisch 75%, Grossjaeger 24%) — das Gegenteil
+      // eines Lauerjaegers. Ein echter Tarnjaeger bewegt sich WENIG (Stille als Tarnung),
+      // daher mobility hier bewusst niedrig statt des verrauschten Sweep-Mittels (0.88).
+      proto:{ size:.35, mobility:.30, camo:.70 } },
   ],
 
   // ---- Wortschatz fuer NEUARTIGE Bauplaene ---------------------------------
