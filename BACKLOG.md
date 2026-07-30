@@ -1257,8 +1257,12 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   Empfehlungs-Vorschau) rechnet jetzt in derselben Welt inkl. Stressor, sonst hätte der
   Hint vom echten Ergebnis abgewichen. Wind/Frost gemeinsam für „Polar" geprüft und
   verworfen: Frost dominiert ohnehin, Wind haette nichts zusaetzlich sichtbar gemacht.
-  Offen (kleinerer Nachtrag, kein Blocker): Genbuch/Karte um eine räumliche Lesart
-  ergänzen („diese Form lebt HIER").
+  Nachtrag geprüft und erledigt, ohne neuen Code: der hier offen notierte Punkt (Genbuch
+  um räumliche Lesart ergänzen) existiert schon — app/index.html:2394-2405 dokumentiert,
+  dass eine Vorhersage-Version bereits gebaut und mit nur 4/44 Trefferquote verworfen
+  wurde; gebaut wurde stattdessen „Dein Fundort" (app/index.html:2491-2618): die
+  tatsächlich aufgezeichnete Fund-Umwelt je Form inkl. Biom-Name und Wiederherstellen-
+  Knopf. Kein zweiter Anlauf nötig — s. docs/roadmap-lebendige-welt.md Phase 3.
 - [x] **Phase 4 — Speziation — Befund korrigiert (2026-07-30): Mechanik existiert
   bereits, 8/8 validiert.** `npm run phenomena-check` (`tools/phenomena-check.mjs`) lief
   bei der Bestandsaufnahme bereits grün für ALLE acht Phänomene inkl. P1 Adaptive

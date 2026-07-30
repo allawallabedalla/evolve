@@ -103,8 +103,18 @@ nichts zusätzlich sichtbar gemacht — kein eigener „Polar"-Fall im heutigen 
 Im Browser verifiziert (Playwright + Screenshot): Klick auf „Lichtlose Tiefsee" → Chip
 „Tiefsee-Druck ✕" → Population konvergiert auf „Tiefsee-Amphipode · Druckfest".
 
-Offen (kleinerer Nachtrag, kein Blocker für den Rest der Roadmap): Genbuch/Karte um eine
-räumliche Lesart ergänzen („diese Form lebt HIER", nicht nur „bei diesen Werten").
+**Nachtrag geprüft und erledigt, ohne neuen Code (2026-07-30).** Der hier ursprünglich
+offen notierte Punkt — Genbuch um eine räumliche Lesart ergänzen — existiert bereits, nur
+anders als hier zunächst angenommen. app/index.html:2394-2405 dokumentiert, dass eine
+Vorhersage-Version bereits gebaut UND verworfen wurde (Umwelt aus dem Prototyp-Vorsprung
+abgeleitet, zwei Varianten geprüft, Trefferquote nur 4/44 bzw. 14/44 — „ein Knopf, der
+‚hier wohnt sie' verspricht und in 90 % der Fälle etwas anderes liefert, wäre schlechter
+als keiner"). Gebaut wurde stattdessen die ehrliche Version: „Dein Fundort"
+(app/index.html:2491-2618, `discoveryLog`) zeigt je entdeckter Form die TATSÄCHLICH
+aufgezeichnete Umwelt beim ersten Fund, inkl. Biom-Name und einem Knopf „diese Umwelt
+wiederherstellen". Das ist exakt die räumliche Lesart, nur belegt statt geraten. Kein
+weiterer Bedarf — ein zweiter Anlauf auf die verworfene Vorhersage-Variante würde eine
+bereits gemessene und dokumentierte Entscheidung dieses Projekts wieder aufreißen.
 
 ## Phase 4 — Speziation: eine Welt zeigt mehrere Arten
 
