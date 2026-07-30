@@ -131,14 +131,16 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         access = 1.0
     else:
         access = _clamp01(1.0 - (env["foodHeight"] - reach) * phys["heightPenalty"])
-    # Sinne (AXIS-13): geschaerfte Wahrnehmung findet knappe Beute; Bonus ~ (1-food).
-    sense_boost = 1.0 + phys["senseForage"] * sense * (1.0 - env["foodAbundance"])
+    # Sinne (AXIS-13): hebt die WAHRGENOMMENE Nahrungsdichte an (findet Beute, die
+    # sonst unentdeckt bliebe) statt als Multiplikator auf ein durch Mangel bereits
+    # kollabiertes Grundeinkommen zu wirken (Bugfix, s. engine/fitness.ts). Nur bei
+    # echter Knappheit wirksam (1-foodAbundance), im Ueberfluss ohne Effekt.
+    food_perceived = env["foodAbundance"] + phys["senseForage"] * sense * (1.0 - env["foodAbundance"])
     energy_forage = (
         mobility
-        * env["foodAbundance"]
+        * food_perceived
         * access
         * (phys["forageBase"] + phys["forageMetabolism"] * metabolism)
-        * sense_boost
         * (1.0 - phys["exclusion"] * photo)
     )
 
@@ -298,7 +300,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + mobility * phys["defenseFromMobility"]
         + flight * phys["defenseFromFlight"]
         + biolum * dark * phys["biolumDefense"]
-        + burrow * phys["defenseFromBurrow"] * land_factor  # AXIS-9: fossoriale Flucht, nur an Land
+        + burrow * phys["defenseFromBurrow"] * land_factor * mobility  # AXIS-9: fossoriale Flucht, nur an Land + Bewegung in den Bau
         + camo * phys["defenseFromCamo"]  # AXIS-11: visuelle Krypsis, drag-frei
     )
     pred_survival = 1.0 - env["predation"] * (1.0 - defense)

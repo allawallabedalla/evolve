@@ -473,10 +473,10 @@ const PHYS = {
   },
   nutritionFloor: 0.15,
   energyScale: 5,
-  defenseFromArmor: 0.45,
+  defenseFromArmor: 0.46,
   defenseFromStructure: 0.35,
   defenseFromSize: 0.25,
-  defenseFromMobility: 0.35,
+  defenseFromMobility: 0.18,
   wThermal: 1,
   wPred: 1,
   wNutrition: 1.2,
@@ -495,7 +495,7 @@ const PHYS = {
   wUv: 1,
   filterYield: 0.5,
   filterBase: 0.25,
-  defenseFromCamo: 0.3,
+  defenseFromCamo: 0.5,
   baroLethality: 0.85,
   wBaro: 1,
   senseForage: 0.3,
@@ -535,17 +535,36 @@ const PARAMS = {
   // Genen) - liegt bei ~72%, unter dem 80-90%-Zielband; s. BACKLOG.md Punkt 9 fuer den Befund.
   // 2026-07-30: ein Phase-2-Physik-Aenderungsversuch (energyAmphibious) wurde gebaut,
   // neu trainiert UND wieder verworfen (brach die Red-Queen-Koevolution, s.
-  // docs/roadmap-lebendige-welt.md Phase 2) - diese Werte sind unveraendert die zuletzt
-  // committeten, nicht neu trainiert (physics.json ist wieder identisch zum Vorzustand,
-  // ein Neu-Training haette nur GA-Rauschen ohne echten Grund eingefuehrt).
-  responseRate:[0.40366458593433086, 0.2866004235773751, 0.15195090951424906, 0.5775917787803697, 0.7808972350617241, 0.493718448384372, 0.7672396833068929, 0.20439530366242184, 0.732441358276577, 0.8, 0.13402890769807954, 0.14168095811918108, 0.18494915831550932, 0.22327246639317305, 0.13429769905310868, 0.24893022790492514, 0.14014949966677215, 0.17851127507471032, 0.15171213657457852, 0.1410006342055038, 0.07853038953985529, 0.15583274941739017, 0.10099802426693857, 0.12148442161511151, 0.10528134644518772],
+  // docs/roadmap-lebendige-welt.md Phase 2) - physics.json war danach wieder identisch
+  // zum Vorzustand, kein Neu-Training noetig.
+  // 2026-07-30 (Punkt 10, sense/burrow-Bugfix): ECHTE Physik-Aenderung, daher neu
+  // trainiert. sense wirkte vorher als Multiplikator auf ein durch Nahrungsmangel
+  // bereits kollabiertes Grundeinkommen (nie kostendeckend, "totes" Gen) - jetzt hebt
+  // es die wahrgenommene Nahrungsdichte selbst an. defenseFromBurrow wirkte vorher
+  // auch fuer voellig sessile Baupläne (Bug) - jetzt mit Mobilitaet skaliert. Der
+  // Burrow-Fix allein verschob die Reich-Balance (Tier waechst, weil sessile Formen
+  // ihren Fluchtweg verlieren, gemessen bis 67% - Oekologie-Kriterium C4 verletzt).
+  // Kompensiert ueber drei kleine Nachjustierungen statt eines grossen Hebels (ein
+  // einzelner starker camo-Ausschlag machte camo in der isolierten Raeuberdruck-
+  // Regel selbst dominant und riss die Panzer-/Grabtrieb-Regeln aus reality-check;
+  // ein zu starker Eingriff an defenseFromArmor/-Mobility wiederum verschob B3/B4
+  // aus distribution-check - beides gemessen und zurueckgenommen): defenseFromCamo
+  // 0.3->0.5 (mobilitaetsfreie Alternative fuer sessile Baupläne), defenseFromMobility
+  // 0.35->0.18 (Tiers eigener, sessilen Formen strukturell unerreichbarer Fluchtvorteil
+  // war zu dominant), defenseFromArmor 0.45->0.46 (haelt Panzerung im direkten
+  // Raeuberdruck-Vergleich mit dem staerkeren camo knapp konkurrenzfaehig). Alle
+  // Pflicht-Gates gruen: ecology (Tier 51.9%, Baseline war 52.1%), reality (20/20),
+  // distribution-check (4/4, B1-B4 alle im Zielband), coevolution-check (Red Queen
+  // 7.9x, > 2.5x-Schwelle), phenomena-check (8/8), keine Archetyp-Erreichbarkeit
+  // verloren (archetype-transition-check, 4000 Umwelten), s. BACKLOG.md Punkt 10.
+  responseRate:[0.4333943553688783, 0.36601879116280045, 0.2821859421922405, 0.8, 0.1674539917253926, 0.7572987479471139, 0.8, 0.2578509160190461, 0.2624019639100219, 0.7355848698557009, 0.23210361753782177, 0.1400121402209555, 0.2194351463841636, 0.5312593663051782, 0.18126869519637848, 0.2808062803244104, 0.3123588077612707, 0.2198561799238116, 0.23384869026853475, 0.15538591226450046, 0.12846429050384459, 0.2076404149858236, 0.14694217581771465, 0.17364614420314795, 0.13234484324138496],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
   // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
   // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
   mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
-  mutationRate:0.0047830462704119845, selectionStrength:1.3771143306467837, varianceWeight:1
+  mutationRate:0.0038476481152717543, selectionStrength:0.9310294296049265, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -793,18 +812,22 @@ function fitness(t, e){
       //       stand. Groesse zaehlt weiter (grosse Koerper ragen ohnehin hoch).
       const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
       const access = env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
-      //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
-      //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
-      //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
-      //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
-      //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
-      //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
-      const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
+      //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) spuert
+      //       Beute auf, die sonst unentdeckt bliebe — wirkt daher als Aufwertung der
+      //       WAHRGENOMMENEN Nahrungsdichte, nicht als Multiplikator auf das durch Mangel
+      //       bereits kollabierte Grundeinkommen (Bugfix, zurueckgestellt aus Phase 0 der
+      //       Lebendige-Welt-Roadmap, BACKLOG.md Punkt 10): energyForage skaliert linear
+      //       mit env.foodAbundance, also blieb ein reiner *1.3-Multiplikator bei echter
+      //       Knappheit ein Bonus auf eine bereits winzige Zahl — selbst bei sense=1 nie
+      //       genug, um maintenance.sense zu decken (gemessen: Nettoverlust in JEDER
+      //       Umwelt). Jetzt hebt sense die effektive Nahrungsdichte selbst an, nur bei
+      //       echter Knappheit wirksam (Faktor 1-foodAbundance), im Ueberfluss ohne Effekt.
+      //       Schafft die Sinnesjaeger-Nische (Eule/Fledermaus/Hai) in kargen Revieren.
+      const foodPerceived = env.foodAbundance + phys.senseForage * sense * (1 - env.foodAbundance);
       const energyForage = mobility *
-          env.foodAbundance *
+          foodPerceived *
           access *
           (phys.forageBase + phys.forageMetabolism * metabolism) *
-          senseBoost *
           (1 - phys.exclusion * photo);
       //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
       //       Der Organismus waechst in sein Substrat (Totholz/Detritus) und verdaut
@@ -1008,7 +1031,11 @@ function fitness(t, e){
           // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
           // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
           // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
-          burrow * phys.defenseFromBurrow * landFactor +
+          // Skaliert zusaetzlich mit mobility (Bugfix, zurueckgestellt aus Phase 0, BACKLOG.md
+          // Punkt 10): das Fluchtverhalten braucht Bewegung in den Bau — ohne diesen Faktor
+          // profitierte auch ein voellig sessiler Bauplan (mobility=0, z. B. Pilz/Pflanze)
+          // von einer "Flucht", die er koerperlich gar nicht ausfuehren kann.
+          burrow * phys.defenseFromBurrow * landFactor * mobility +
           // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
           // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
           // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe

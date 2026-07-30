@@ -115,18 +115,22 @@ export function fitness(traits, env, phys) {
     //       stand. Groesse zaehlt weiter (grosse Koerper ragen ohnehin hoch).
     const reach = clamp01(limb * phys.reachFromLimb * landFactor + size * phys.reachFromSize + flight * phys.flightReach);
     const access = env.foodHeight <= reach ? 1 : clamp01(1 - (env.foodHeight - reach) * phys.heightPenalty);
-    //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) erschliesst
-    //       Beute effizienter — aber der Vorteil zaehlt VOR ALLEM bei KNAPPER Nahrung
-    //       (seltene Beute aufspueren); im Ueberfluss braucht man keine Suche. Darum
-    //       skaliert der Bonus mit (1 - foodAbundance). Selbstbegrenzend: blaeht reiche
-    //       Jaeger NICHT auf, schafft aber die Sinnesjaeger-Nische (Eule/Fledermaus/Hai)
-    //       in kargen Revieren. Kostet Unterhalt (maintenance.sense).
-    const senseBoost = 1 + phys.senseForage * sense * (1 - env.foodAbundance);
+    //       Sinne (AXIS-13): geschaerfte Wahrnehmung (Augen/Riechen/Echolot) spuert
+    //       Beute auf, die sonst unentdeckt bliebe — wirkt daher als Aufwertung der
+    //       WAHRGENOMMENEN Nahrungsdichte, nicht als Multiplikator auf das durch Mangel
+    //       bereits kollabierte Grundeinkommen (Bugfix, zurueckgestellt aus Phase 0 der
+    //       Lebendige-Welt-Roadmap, BACKLOG.md Punkt 10): energyForage skaliert linear
+    //       mit env.foodAbundance, also blieb ein reiner *1.3-Multiplikator bei echter
+    //       Knappheit ein Bonus auf eine bereits winzige Zahl — selbst bei sense=1 nie
+    //       genug, um maintenance.sense zu decken (gemessen: Nettoverlust in JEDER
+    //       Umwelt). Jetzt hebt sense die effektive Nahrungsdichte selbst an, nur bei
+    //       echter Knappheit wirksam (Faktor 1-foodAbundance), im Ueberfluss ohne Effekt.
+    //       Schafft die Sinnesjaeger-Nische (Eule/Fledermaus/Hai) in kargen Revieren.
+    const foodPerceived = env.foodAbundance + phys.senseForage * sense * (1 - env.foodAbundance);
     const energyForage = mobility *
-        env.foodAbundance *
+        foodPerceived *
         access *
         (phys.forageBase + phys.forageMetabolism * metabolism) *
-        senseBoost *
         (1 - phys.exclusion * photo);
     //    c) Absorption / Zersetzung (Osmotrophie): SESSILE Heterotrophie.
     //       Der Organismus waechst in sein Substrat (Totholz/Detritus) und verdaut
@@ -330,7 +334,11 @@ export function fitness(traits, env, phys) {
         // dem Räuber die Beute. Wirkt nur an LAND (landFactor); im offenen Wasser gibt es
         // keinen Bau. Eine BILLIGE Verteidigung ohne Panzer-Drag: schafft die fossoriale
         // Nische (Maulwurf/Wühlmaus) als Alternative zu Panzerung/Größe bei Räuberdruck.
-        burrow * phys.defenseFromBurrow * landFactor +
+        // Skaliert zusaetzlich mit mobility (Bugfix, zurueckgestellt aus Phase 0, BACKLOG.md
+        // Punkt 10): das Fluchtverhalten braucht Bewegung in den Bau — ohne diesen Faktor
+        // profitierte auch ein voellig sessiler Bauplan (mobility=0, z. B. Pilz/Pflanze)
+        // von einer "Flucht", die er koerperlich gar nicht ausfuehren kann.
+        burrow * phys.defenseFromBurrow * landFactor * mobility +
         // Tarnung (AXIS-11): visuelle Krypsis (Färbung/Muster/Form) lässt den Räuber die
         // Beute übersehen. Anders als Panzer erzeugt sie KEINEN Wasser-Drag (auch für
         // schlanke Schwimmer nutzbar: Plattfisch/Tintenfisch) und braucht kein Stützgewebe

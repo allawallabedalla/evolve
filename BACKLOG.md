@@ -1277,6 +1277,42 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   sich eine Aufspaltung dort andeuten liesse, ohne diese Praemisse zu brechen, braucht
   einen eigenen Design-Durchlauf mit dem Nutzer, s. docs/roadmap-lebendige-welt.md
   Phase 4. — **Modell: Opus** fuer diesen Design-Durchlauf, sobald angefordert.
+- [x] **sense/defenseFromBurrow-Bugfix — nachgeholt aus Phase 0 (2026-07-30).** Zwei in
+  Phase 0 bewusst zurückgestellte Physik-Bugs (Commit df4f279: „echte physics.json-
+  Änderungen mit vollem Orakel-Regen/Retrain-Zyklus, kein Blocker für Phase 1–3").
+  **sense** wirkte als Multiplikator (`1 + senseForage*sense*(1-foodAbundance)`) auf
+  `energyForage`, das selbst LINEAR mit `foodAbundance` skaliert — bei echter Knappheit
+  (wo der Bonus greifen soll) blieb selbst sense=1 ein Nettoverlust gegen
+  `maintenance.sense` (gemessen; kein einziger der 65 Archetypen benannte `sense` im
+  Prototyp — ein „totes" Gen ohne eigene Nische). Fix: `sense` hebt jetzt die
+  WAHRGENOMMENE Nahrungsdichte an (`foodPerceived = foodAbundance +
+  senseForage*sense*(1-foodAbundance)`), `energyForage` skaliert damit statt mit dem
+  rohen `foodAbundance`. **defenseFromBurrow** wirkte auch für völlig sessile Baupläne
+  (Bug — ein Pilz/Mikrobe ohne jede Mobilität bekam dieselbe „Flucht in den Bau" wie ein
+  Wühler). Fix: mit `*mobility` skaliert. Der Burrow-Fix allein verschob die Reich-
+  Balance messbar (Tier bis 67 % statt ≤55 % im `ecology`-Gitter, weil sessile Formen
+  ihren einzigen Räuber-Fluchtweg verlieren) — kompensiert über drei kleine
+  Nachjustierungen statt eines großen Hebels (ein einzelner starker `defenseFromCamo`-
+  Ausschlag machte camo in der isolierten Räuberdruck-Regel selbst dominant und riss
+  reality-checks Panzer-/Grabtrieb-Regeln; ein zu starker Eingriff an
+  defenseFromArmor/-Mobility verschob wiederum B3/B4 aus distribution-check — beides
+  gemessen und zurückgenommen): `defenseFromCamo` 0.3→0.5, `defenseFromMobility`
+  0.35→0.18, `defenseFromArmor` 0.45→0.46. Volle Pipeline (Orakel-Regen, Retrain,
+  PARAMS-Sync, Bundle) durchlaufen. Alle Pflicht-Gates grün: parity/app-parity/app-
+  fitness-check exakt 0, ecology (Tier 51,9 %, Baseline war 52,1 %), reality (20/20),
+  distribution-check (4/4, B1–B4 alle im Zielband), mf-fidelity, pop-check,
+  coevolution-check (Red Queen 7,9×, Schwelle 2,5×), phenomena-check (8/8), exemplar-/
+  rarity-/story-/influence-/branching-/world-check — sowie
+  `archetype-transition-check.mjs` (4000 Umwelten): keine der 65 Formen verliert
+  Erreichbarkeit.
+- [ ] **Zweiter Anlauf: Amphibische Nische ohne Koevolutions-Konflikt.** Phase 2 wurde
+  gebaut, gemessen und zurückgenommen (s. o.) — ein additiver Energiekanal exakt am
+  Land/Wasser-Übergang brach den Red-Queen-Test, weil dessen feste Testumwelt
+  (`water=0.5`) exakt im Zentrum des neuen Kanals lag. Möglicher Ansatz für einen
+  zweiten Anlauf (aus docs/roadmap-lebendige-welt.md Phase 2 übernommen): das Zentrum
+  des Kanals bewusst NICHT auf `aquaticWaterFloor` legen, sondern leicht versetzt, damit
+  die coevolution-check-Testumwelt außerhalb des Kanal-Peaks liegt. Noch nicht
+  begonnen — offen für eine künftige Sitzung.
 - [ ] **Phase 5 — Symbiose/Parasitismus.** Bereits in Punkt 6 bewusst zurückgestellt
   („Parasitismus braucht eine zweite Art als Gegenspieler, nicht nur ein Milieu"). Baut auf
   Phase 4 auf (dieselbe Grundvoraussetzung: mehr als ein Genom gleichzeitig in Beziehung).
