@@ -417,7 +417,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.84.0";
+const APP_VERSION = "v0.85.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -5184,7 +5184,7 @@ function drawMotes(time){
 // GESTAFFELTE MIGRATION: `CREATURE_SVG` listet die bereits portierten Reiche. Alles
 // andere zeichnet unveraendert weiter auf dem Canvas darunter. Damit ist jeder
 // Zwischenstand lauffaehig und pruefbar, statt 800 Zeilen auf einen Schlag zu kippen.
-const CREATURE_SVG = new Set(["Protist", "Mikrobe", "Pilz", "Sessil", "Pflanze"]);
+const CREATURE_SVG = new Set(["Protist", "Mikrobe", "Pilz", "Sessil", "Pflanze", "Tier"]);
 const cSvg = document.getElementById("creatureSvg");
 const cRoot = document.getElementById("creatureRoot");
 // Zwei FESTE Ebenen statt einer flachen Liste: das Leuchten muss immer HINTER dem
@@ -5270,6 +5270,9 @@ function drawCreature(g, time, a){
     } else if(a.k==="Pflanze"){
       creatureGlowSvg(g, cx, CH*0.9, time);
       drawPlantSvg(g, cx, CH*0.9, breath, time, rnd, a);
+    } else if(a.k==="Tier"){
+      creatureGlowSvg(g, cx, CH*0.6, time);
+      drawAnimalSvg(g, cx, CH*0.6, breath, time, rnd, a);
     } else if(a.k==="Mikrobe"){
       creatureGlowSvg(g, cx, CH*0.6, time);
       drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
@@ -5351,6 +5354,24 @@ function flagellumPoints(x0, y0, seg, len, amp, phase){
 function halfEllipse(cx, cy, rx, ry, side){
   const sweep = side === "top" ? 1 : 0;
   return `M${(cx-rx).toFixed(1)},${cy.toFixed(1)}A${rx.toFixed(1)},${ry.toFixed(1)} 0 0 ${sweep} ${(cx+rx).toFixed(1)},${cy.toFixed(1)}Z`;
+}
+/**
+ * Beliebiger Ellipsen-Bogen (Ersatz fuer ctx.ellipse/ctx.arc mit Start-/Endwinkel).
+ * Bewusst als Polylinie ABGETASTET statt als A-Befehl: die Flag-Kombinatorik von SVGs
+ * Bogen-Befehl (large-arc/sweep) ist bei uebersteuerten Winkeln (> pi, negative
+ * Richtung) fehleranfaellig, das Abtasten ist bei diesen Groessen visuell identisch
+ * und kann nicht "falsch herum" laufen.
+ */
+function arcPath(cx, cy, rx, ry, rot, a0, a1, close){
+  const n = Math.max(8, Math.round(Math.abs(a1-a0) / (Math.PI/16)));
+  const cr = Math.cos(rot), sr = Math.sin(rot);
+  let d = "";
+  for(let i=0;i<=n;i++){
+    const t = a0 + (a1-a0)*i/n;
+    const ex = rx*Math.cos(t), ey = ry*Math.sin(t);
+    d += (i?"L":"M") + (cx + ex*cr - ey*sr).toFixed(1) + "," + (cy + ex*sr + ey*cr).toFixed(1);
+  }
+  return close ? d+"Z" : d;
 }
 
 // ===== Reich PROTISTEN (SVG) =====
@@ -5919,6 +5940,301 @@ function drawPlant(g, bx, by, breath, time, rnd, a){
     for(let i=0;i<36;i++){ const t=rnd(); const x=lerp(bx,topX,t),y=lerp(by,topY,t); const d=rnd()*Math.PI*2;
       ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(d)*5,y+Math.sin(d)*5); ctx.stroke(); } }
   roots();
+}
+
+// ===== Reich TIERE (SVG) — der groesste Zeichner, 10 Sonderbauplaene + Vierbeiner =====
+function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct,wing=0]=g;
+  const kind = a.e;
+  const R = (26 + size*46) * breath;
+  cy += Math.sin(time*0.0018)*3;
+  const pr = mulberry32((lineageSeed^0x9e3779b9)>>>0);
+  const dR=(pr()-0.5)*52, dG=(pr()-0.5)*44, dB=(pr()-0.5)*40;
+  const tint = c => [c[0]+dR, c[1]+dG, c[2]+dB];
+  const warm = mix([150,120,90],[190,150,110], metab);
+  const cool = mix([120,140,150],[150,120,90], envLive.temperature);
+  const body = tint(mix(cool, warm, 0.5));
+  const dark = body.map(c=>c*0.7);
+  const EYE = "#0a1512", GLINT = flatCol([250,247,236]);
+  const P = (k,d,o) => cAttr(cEl(k,"path"), Object.assign({ d }, o));
+  const E = (k,ex,ey,rx,ry,fill,rot) => cAttr(cEl(k,"ellipse"), { cx:0, cy:0, rx:rx.toFixed(1), ry:ry.toFixed(1), fill,
+    transform:`translate(${ex.toFixed(1)},${ey.toFixed(1)})${rot?` rotate(${(rot*180/Math.PI).toFixed(1)})`:""}` });
+  const dot = (x,y,r) => `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+
+  if(kind==="🐌"){   // Schnecke: Schleimfuss + Spiralhaus + Fuehler
+    const L=R*2.2, foot=flatCol(mix(body,[150,175,155],0.4));
+    P("an-foot", `M${(cx-L*0.5).toFixed(1)},${(cy+R*0.5).toFixed(1)}Q${(cx-L*0.55).toFixed(1)},${(cy+R*0.1).toFixed(1)} ${(cx-L*0.3).toFixed(1)},${(cy+R*0.1).toFixed(1)}`
+      +`L${(cx+L*0.35).toFixed(1)},${(cy+R*0.1).toFixed(1)}Q${(cx+L*0.55).toFixed(1)},${(cy+R*0.15).toFixed(1)} ${(cx+L*0.5).toFixed(1)},${(cy+R*0.5).toFixed(1)}Z`, { fill: foot });
+    const hx=cx+L*0.42, hy=cy+R*0.12;
+    E("an-head", hx, hy, R*0.3, R*0.34, foot);
+    let ant=""; let tip="";
+    for(const o of [-1,1]){ ant += `M${(hx+R*0.08).toFixed(1)},${(hy-R*0.2).toFixed(1)}L${(hx+R*0.28+o*R*0.05).toFixed(1)},${(hy-R*0.65).toFixed(1)}`;
+      tip += dot(hx+R*0.28+o*R*0.05, hy-R*0.68, R*0.06); }
+    P("an-ant", ant, { stroke: foot, "stroke-width": (R*0.09).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    P("an-atip", tip, { fill: GLINT, "fill-opacity": .9 });
+    const shx=cx-L*0.1, shy=cy-R*0.2, sr=R*0.98;
+    cAttr(cEl("an-shell","circle"), { cx:shx.toFixed(1), cy:shy.toFixed(1), r:sr.toFixed(1), fill: flatCol(mix(body,[185,145,95],armor)) });
+    let sp="";
+    for(let i=0;i<=44;i++){ const t=i/44, ang=t*Math.PI*5, rr=sr*(1-t*0.92);
+      sp += (i?"L":"M") + (shx+Math.cos(ang)*rr).toFixed(1) + "," + (shy+Math.sin(ang)*rr).toFixed(1); }
+    P("an-spiral", sp, { stroke: flatCol(dark), "stroke-width": (R*0.11).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    return;
+  }
+  if(kind==="🐙"){   // Kopffuesser: Mantel + Tentakel
+    const hr=R*0.95;
+    E("an-mantle", cx, cy-R*0.2, hr, hr*1.15, flatCol(body));
+    let ten="";
+    const nT=6;
+    for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5), sx=cx+t*hr*1.4, sw=Math.sin(time*0.004+i)*R*0.25;
+      ten += `M${sx.toFixed(1)},${(cy+hr*0.4).toFixed(1)}Q${(sx+sw).toFixed(1)},${(cy+hr*1.0).toFixed(1)} ${(sx+t*R*0.6+sw).toFixed(1)},${(cy+hr*1.5).toFixed(1)}`; }
+    P("an-ten", ten, { stroke: flatCol(body), "stroke-width": (R*0.26).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    let ey="", gl="";
+    for(const o of [-1,1]){ ey += dot(cx+o*hr*0.4, cy-R*0.25, R*0.17); gl += dot(cx+o*hr*0.4-R*0.04, cy-R*0.31, R*0.06); }
+    P("an-eye", ey, { fill: EYE }); P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🐸"){   // Amphibie: gedrungen, gespreizte Beine, Augen oben
+    const W=R*1.3, H=R*0.9, amb=flatCol(mix(body,[110,170,110],0.55));
+    let legs="";
+    for(const o of [-1,1]) legs += `M${(cx+o*W*0.5).toFixed(1)},${(cy+H*0.15).toFixed(1)}Q${(cx+o*W*1.05).toFixed(1)},${(cy+H*0.25).toFixed(1)} ${(cx+o*W*0.9).toFixed(1)},${(cy+H*0.9).toFixed(1)}L${(cx+o*W*1.2).toFixed(1)},${(cy+H*0.98).toFixed(1)}`;
+    for(const o of [-1,1]) legs += `M${(cx+o*W*0.3).toFixed(1)},${(cy+H*0.5).toFixed(1)}L${(cx+o*W*0.5).toFixed(1)},${(cy+H*1.02).toFixed(1)}`;
+    P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": (R*0.2).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    E("an-body", cx, cy, W, H, amb);
+    const blink=(Math.sin(time*0.0011)>0.97)?0.15:1;
+    let bulge="", ey="", gl="";
+    for(const o of [-1,1]){ bulge += dot(cx+o*W*0.42, cy-H*0.72, R*0.3); gl += dot(cx+o*W*0.42-R*0.04, cy-H*0.8, R*0.05); }
+    P("an-bulge", bulge, { fill: amb });
+    for(const o of [-1,1]) E("an-eye"+o, cx+o*W*0.42, cy-H*0.72, R*0.15, R*0.15*blink, EYE);
+    P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🪱"){   // Wurm: gegliederter Schlauch
+    const segs=7+Math.round(size*6), L=R*2.6, seg=L/segs;
+    const wy=i=>cy+Math.sin(time*0.004+i*0.7)*R*0.25;
+    let sp="", ri="";
+    for(let i=0;i<=segs;i++){ const x=cx-L/2+seg*i; sp += (i?"L":"M") + x.toFixed(1) + "," + wy(i).toFixed(1); }
+    for(let i=1;i<segs;i++){ const x=cx-L/2+seg*i; ri += `M${x.toFixed(1)},${(wy(i)-R*0.32).toFixed(1)}L${x.toFixed(1)},${(wy(i)+R*0.32).toFixed(1)}`; }
+    P("an-worm", sp, { stroke: flatCol(mix(body,[190,120,130],0.4)), "stroke-width": (R*0.72).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    P("an-rings", ri, { stroke: flatCol(dark), "stroke-width": 1.2, fill:"none" });
+    P("an-eye", dot(cx-L/2-R*0.05, wy(0)-R*0.1, R*0.08), { fill: EYE });
+    return;
+  }
+  if(kind==="🐟"){   // Fisch: Stromlinien-Koerper + Flossen
+    const L=R*1.7, H=R*0.85, sw=Math.sin(time*0.006)*0.3;
+    cAttr(cEl("an-tail","polygon"), { points:`0,0 ${(R*0.55).toFixed(1)},${(-R*0.5).toFixed(1)} ${(R*0.55).toFixed(1)},${(R*0.5).toFixed(1)}`,
+      fill: flatCol(dark), transform:`translate(${(cx+L*0.9).toFixed(1)},${cy.toFixed(1)}) rotate(${(sw*180/Math.PI).toFixed(1)})` });
+    cAttr(cEl("an-dorsal","polygon"), { points:`${cx.toFixed(1)},${(cy-H*0.95).toFixed(1)} ${(cx+R*0.5).toFixed(1)},${(cy-H*0.5).toFixed(1)} ${(cx-R*0.3).toFixed(1)},${(cy-H*0.5).toFixed(1)}`,
+      fill: flatCol(mix(body,dark,0.4)) });
+    E("an-body", cx, cy, L, H, flatCol(body));
+    cAttr(cEl("an-pect","ellipse"), { cx:0, cy:(R*0.2).toFixed(1), rx:(R*0.35).toFixed(1), ry:(R*0.16).toFixed(1), fill: flatCol(mix(body,dark,0.4)),
+      transform:`translate(${(cx-L*0.2).toFixed(1)},${(cy+H*0.35).toFixed(1)}) rotate(${((0.5+Math.sin(time*0.005)*0.2)*180/Math.PI).toFixed(1)})` });
+    const scaleEl = cEl("an-scales","path");
+    if(armor>0.4){ let s="";
+      for(let i=0;i<5;i++) s += arcPath(cx+L*0.4-i*L*0.25, cy, H*0.7, H*0.7, 0, -0.9, 0.9, false);
+      cAttr(scaleEl, { d:s, stroke: flatCol([30,40,40]), "stroke-opacity": .35, "stroke-width": 1, fill:"none", opacity: 1 });
+    } else cAttr(scaleEl, { opacity: 0 });
+    P("an-gill", arcPath(cx-L*0.35, cy, H*0.5, H*0.5, 0, -0.7, 0.7, false),
+      { stroke: flatCol(dark), "stroke-width": 1.5, fill:"none" });
+    P("an-eye", dot(cx-L*0.62, cy-H*0.15, R*0.12), { fill: EYE });
+    P("an-glint", dot(cx-L*0.66, cy-H*0.2, R*0.05), { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🐜"){   // Insekt: 3 Segmente, 6 Beine, Fuehler
+    const s=R*0.62;
+    let legs="";
+    for(let i=0;i<3;i++) for(const sd of [-1,1]){ const bx2=cx-s*0.5+i*s*0.5, sw=Math.sin(time*0.008+i+sd)*4;
+      legs += `M${bx2.toFixed(1)},${cy.toFixed(1)}Q${(bx2+sd*s*0.6).toFixed(1)},${(cy+s*0.3).toFixed(1)} ${(bx2+sd*s*0.9+sw).toFixed(1)},${(cy+s*0.9).toFixed(1)}`; }
+    P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
+    const bcol = flatCol(body);
+    P("an-segs", dot(cx+s*0.95,cy,s*0.85)+dot(cx,cy,s*0.6)+dot(cx-s*0.9,cy-s*0.1,s*0.5), { fill: bcol });
+    let ant="";
+    for(const sd of [-1,1]) ant += `M${(cx-s*1.05).toFixed(1)},${(cy-s*0.3).toFixed(1)}Q${(cx-s*1.5).toFixed(1)},${(cy-s*0.9).toFixed(1)} ${(cx-s*1.25+sd*s*0.3).toFixed(1)},${(cy-s*1.1).toFixed(1)}`;
+    P("an-ant", ant, { stroke: flatCol(dark), "stroke-width": 1.5, fill:"none" });
+    const shellEl = cEl("an-shell","path");
+    if(armor>0.5) cAttr(shellEl, { d: arcPath(cx+s*0.95, cy, s*0.85, s*0.85, 0, -1.2, 1.2, false),
+      stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1, fill:"none", opacity: 1 });
+    else cAttr(shellEl, { opacity: 0 });
+    P("an-eye", dot(cx-s*1.05, cy-s*0.2, s*0.12), { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🦀"){   // Krebstier: breiter Panzer + Scheren
+    const W=R*1.3, H=R*0.78, shell=flatCol(mix(body,[185,90,70],0.55));
+    let legs="";
+    for(let i=0;i<4;i++) for(const sd of [-1,1]){ const ax=cx+sd*W*0.5, ay=cy-H*0.2+i*H*0.32, sw=Math.sin(time*0.006+i+sd)*3;
+      legs += `M${ax.toFixed(1)},${ay.toFixed(1)}Q${(ax+sd*R*0.5).toFixed(1)},${(ay+R*0.1).toFixed(1)} ${(ax+sd*R*0.85+sw).toFixed(1)},${(ay+R*0.4).toFixed(1)}`; }
+    P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": 3, "stroke-linecap":"round", fill:"none" });
+    E("an-body", cx, cy, W, H, shell);
+    let arms="", pincer="";
+    for(const sd of [-1,1]){ const cxx=cx+sd*W*0.85, cyy=cy-H*0.7;
+      arms += `M${(cx+sd*W*0.6).toFixed(1)},${(cy-H*0.3).toFixed(1)}L${cxx.toFixed(1)},${cyy.toFixed(1)}`;
+      E("an-claw"+sd, cxx, cyy-R*0.15, R*0.3, R*0.19, shell, sd*0.5);
+      pincer += `M${(cxx-R*0.22).toFixed(1)},${(cyy-R*0.28).toFixed(1)}L${(cxx+R*0.22).toFixed(1)},${(cyy-R*0.1).toFixed(1)}`; }
+    P("an-arms", arms, { stroke: flatCol(dark), "stroke-width": 4, "stroke-linecap":"round", fill:"none" });
+    P("an-pincer", pincer, { stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
+    let stalk="", ey="";
+    for(const sd of [-1,1]){ stalk += `M${(cx+sd*R*0.2).toFixed(1)},${(cy-H*0.7).toFixed(1)}L${(cx+sd*R*0.25).toFixed(1)},${(cy-H*1.05).toFixed(1)}`;
+      ey += dot(cx+sd*R*0.25, cy-H*1.12, R*0.1); }
+    P("an-stalk", stalk, { stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
+    P("an-eye", ey, { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🦋"){   // Fluginsekt: schlanker Koerper + 4 flatternde Fluegel
+    const flap=0.5+0.5*Math.abs(Math.sin(time*0.006));
+    const wc=flatCol(mix(body,[150,120,195],0.5)), dc=flatCol(dark);
+    for(const sd of [-1,1]){
+      const tr = `translate(${cx.toFixed(1)},${cy.toFixed(1)}) scale(${(sd*flap).toFixed(3)},1)`;
+      cAttr(cEl("an-w1"+sd,"ellipse"), { cx:(R*0.72).toFixed(1), cy:(-R*0.42).toFixed(1), rx:(R*0.72).toFixed(1), ry:(R*0.56).toFixed(1), fill: wc,
+        transform: tr + ` rotate(${(0.32*180/Math.PI).toFixed(1)},${(R*0.72).toFixed(1)},${(-R*0.42).toFixed(1)})` });
+      cAttr(cEl("an-w2"+sd,"ellipse"), { cx:(R*0.6).toFixed(1), cy:(R*0.52).toFixed(1), rx:(R*0.5).toFixed(1), ry:(R*0.42).toFixed(1), fill: wc,
+        transform: tr + ` rotate(${(-0.22*180/Math.PI).toFixed(1)},${(R*0.6).toFixed(1)},${(R*0.52).toFixed(1)})` });
+      cAttr(cEl("an-w3"+sd,"ellipse"), { cx:(R*0.85).toFixed(1), cy:(-R*0.44).toFixed(1), rx:(R*0.2).toFixed(1), ry:(R*0.16).toFixed(1), fill: dc,
+        transform: tr + ` rotate(${(0.32*180/Math.PI).toFixed(1)},${(R*0.85).toFixed(1)},${(-R*0.44).toFixed(1)})` });
+    }
+    E("an-body", cx, cy, R*0.16, R*0.62, dc);
+    let ant="", gl="";
+    for(const sd of [-1,1]){ ant += `M${(cx+sd*R*0.06).toFixed(1)},${(cy-R*0.5).toFixed(1)}Q${(cx+sd*R*0.3).toFixed(1)},${(cy-R*0.95).toFixed(1)} ${(cx+sd*R*0.46).toFixed(1)},${(cy-R*0.82).toFixed(1)}`;
+      gl += dot(cx+sd*R*0.46, cy-R*0.84, R*0.05); }
+    P("an-ant", ant, { stroke: dc, "stroke-width": 1.5, "stroke-linecap":"round", fill:"none" });
+    P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🐦"){   // Vogel: Rumpf + spitze schlagende Fluegel + Schnabel + Schwanz
+    const flap=Math.sin(time*0.007)*0.55;
+    cAttr(cEl("an-btail","polygon"), { points:`${(cx+R*0.6).toFixed(1)},${cy.toFixed(1)} ${(cx+R*1.35).toFixed(1)},${(cy-R*0.28).toFixed(1)} ${(cx+R*1.35).toFixed(1)},${(cy+R*0.28).toFixed(1)}`,
+      fill: flatCol(dark) });
+    E("an-body", cx, cy, R*0.85, R*0.6, flatCol(body));
+    for(const sd of [-1,1])
+      P("an-wing"+sd, `M0,0Q${(sd*R*1.35).toFixed(1)},${(-R*0.32).toFixed(1)} ${(sd*R*1.55).toFixed(1)},${(R*0.18).toFixed(1)}`
+        +`Q${(sd*R*0.9).toFixed(1)},${(R*0.12).toFixed(1)} 0,${(R*0.22).toFixed(1)}Z`,
+        { fill: flatCol(mix(body,dark,0.45)),
+          transform:`translate(${cx.toFixed(1)},${(cy-R*0.08).toFixed(1)}) rotate(${((sd*(0.28+flap))*180/Math.PI).toFixed(1)})` });
+    cAttr(cEl("an-head","circle"), { cx:(cx-R*0.72).toFixed(1), cy:(cy-R*0.32).toFixed(1), r:(R*0.42).toFixed(1), fill: flatCol(body) });
+    cAttr(cEl("an-beak","polygon"), { points:`${(cx-R*1.05).toFixed(1)},${(cy-R*0.36).toFixed(1)} ${(cx-R*1.45).toFixed(1)},${(cy-R*0.24).toFixed(1)} ${(cx-R*1.05).toFixed(1)},${(cy-R*0.12).toFixed(1)}`,
+      fill: flatCol(mix(body,[215,165,60],0.75)) });
+    P("an-eye", dot(cx-R*0.82, cy-R*0.4, R*0.1), { fill: EYE });
+    P("an-glint", dot(cx-R*0.85, cy-R*0.44, R*0.04), { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+  if(kind==="🦇"){   // Fledermaus: dunkler Rumpf + gefingerte Hautfluegel + Ohren
+    const flap=0.35+0.4*Math.sin(time*0.008);
+    const wc=flatCol(mix(body,[70,60,85],0.6)), bc=flatCol(mix(body,[55,48,66],0.6));
+    for(const sd of [-1,1]){
+      P("an-wing"+sd, `M0,${(-R*0.1).toFixed(1)}L${(sd*R*1.5).toFixed(1)},${(-R*0.42).toFixed(1)}`
+        +`Q${(sd*R*1.2).toFixed(1)},${(R*0.02).toFixed(1)} ${(sd*R*1.28).toFixed(1)},${(R*0.32).toFixed(1)}`
+        +`Q${(sd*R*0.95).toFixed(1)},${(R*0.08).toFixed(1)} ${(sd*R*0.9).toFixed(1)},${(R*0.42).toFixed(1)}`
+        +`Q${(sd*R*0.62).toFixed(1)},${(R*0.14).toFixed(1)} ${(sd*R*0.5).toFixed(1)},${(R*0.46).toFixed(1)}`
+        +`L0,${(R*0.22).toFixed(1)}Z`,
+        { fill: wc, transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${(sd*flap*180/Math.PI).toFixed(1)})` });
+    }
+    E("an-body", cx, cy, R*0.32, R*0.5, bc);
+    cAttr(cEl("an-head","circle"), { cx:cx.toFixed(1), cy:(cy-R*0.5).toFixed(1), r:(R*0.28).toFixed(1), fill: bc });
+    let ears="", gl="";
+    for(const sd of [-1,1]){ ears += `M${(cx+sd*R*0.1).toFixed(1)},${(cy-R*0.68).toFixed(1)}L${(cx+sd*R*0.3).toFixed(1)},${(cy-R*1.06).toFixed(1)}L${(cx+sd*R*0.02).toFixed(1)},${(cy-R*0.78).toFixed(1)}Z`;
+      gl += dot(cx+sd*R*0.11, cy-R*0.52, R*0.06); }
+    P("an-ears", ears, { fill: bc });
+    P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
+
+  // ===== Vierbeiner-Grundbauplan (inkl. fliegender Vogel) =====
+  const tx=cx+R*0.95, ty=cy+R*0.12, wag=Math.sin(time*0.004)*0.22;
+  const tailEl = cEl("an-tail","path"), foxEl = cEl("an-foxtail","ellipse");
+  cAttr(foxEl, { opacity: 0 }); cAttr(tailEl, { opacity: 0 });
+  if(kind==="🦊"){ cAttr(foxEl, { cx:(R*0.55).toFixed(1), cy:0, rx:(R*0.85).toFixed(1), ry:(R*0.42).toFixed(1),
+      fill: flatCol(tint(mix(body,[240,244,238],0.4))), opacity: 1,
+      transform:`translate(${tx.toFixed(1)},${ty.toFixed(1)}) rotate(${((0.5+wag)*180/Math.PI).toFixed(1)})` });
+  } else if(kind==="🐒"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}C${(tx+R*0.8).toFixed(1)},${(ty-R*0.3).toFixed(1)} ${(tx+R*1.15).toFixed(1)},${(ty+R*0.8+wag*18).toFixed(1)} ${(tx+R*0.5).toFixed(1)},${(ty+R*1.1).toFixed(1)}`,
+      stroke: flatCol(dark), "stroke-width": (4+size*3).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: 1 });
+  } else if(kind==="🐺"||kind==="🦎"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}Q${(tx+R*0.7).toFixed(1)},${(ty+R*0.1+wag*14).toFixed(1)} ${(tx+R*1.0).toFixed(1)},${(ty+R*0.5).toFixed(1)}`,
+      stroke: flatCol(dark), "stroke-width": (6+size*5).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: 1 });
+  } else if(kind==="🐭"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}Q${(tx+R*0.9).toFixed(1)},${(ty-R*0.2).toFixed(1)} ${(tx+R*1.25).toFixed(1)},${(ty+R*0.6+wag*16).toFixed(1)}`,
+      stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none", opacity: 1 });
+  } else if(kind==="🦏"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}L${(tx+R*0.35).toFixed(1)},${(ty+R*0.4).toFixed(1)}`,
+      stroke: flatCol(dark), "stroke-width": 5, "stroke-linecap":"round", fill:"none", opacity: 1 });
+  }
+  const FORM = ({
+    "🐺":{bw:1.42,bh:0.72,legL:1.5}, "🦊":{bw:1.25,bh:0.8,legL:1.15},
+    "🐭":{bw:1.0,bh:0.95,legL:0.62}, "🐒":{bw:0.9,bh:1.12,legL:1.6},
+    "🐻":{bw:1.32,bh:1.04,legL:0.92}, "🦥":{bw:1.14,bh:0.92,legL:1.0},
+    "🦎":{bw:1.58,bh:0.56,legL:0.8}, "🐦":{bw:0.82,bh:1.02,legL:1.4},
+    "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
+  })[kind] || {bw:1.08,bh:0.98,legL:1.0};
+  const bw=FORM.bw, bh=FORM.bh;
+  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.3 + 0.7*limb)*5);
+  const legLen = (12 + limb*40)*FORM.legL;
+  let lp="";
+  for(let i=0;i<legs;i++){
+    const t = legs===1?0.5:i/(legs-1);
+    const lx = cx + (t-0.5)*R*bw*1.35;
+    const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
+    lp += `M${lx.toFixed(1)},${(cy+R*bh*0.5).toFixed(1)}Q${(lx+swing*0.4).toFixed(1)},${(cy+R*bh*0.5+legLen*0.6).toFixed(1)} ${(lx+swing).toFixed(1)},${(cy+R*bh*0.5+legLen).toFixed(1)}`;
+  }
+  P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none" });
+  const furEl = cEl("an-fur","path");
+  if(insul>0.4){ let f="";
+    const n=Math.round(30+insul*50);
+    for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2, r1=0.92, r2=(1.05+insul*0.18+rnd()*0.06);
+      f += `M${(cx+Math.cos(ang)*r1*R*bw).toFixed(1)},${(cy+Math.sin(ang)*r1*R*bh).toFixed(1)}L${(cx+Math.cos(ang)*r2*R*bw).toFixed(1)},${(cy+Math.sin(ang)*r2*R*bh).toFixed(1)}`; }
+    cAttr(furEl, { d:f, stroke: flatCol([230,238,230]), "stroke-opacity": (0.25+insul*0.4).toFixed(2), "stroke-width": 1.4, fill:"none", opacity: 1 });
+  } else cAttr(furEl, { opacity: 0 });
+  E("an-body", cx, cy, R*bw, R*bh, flatCol(body));
+  // HINWEIS: der Canvas-Zweig hat hier noch Vogel-Fluegel/Schwanzfedern und einen
+  // "🐦"-Eintrag in FORM — das ist im Original TOTER CODE, weil der Vogel weiter oben
+  // per return abgehandelt wird und diese Stelle nie erreicht. Bewusst nicht mitportiert
+  // (der FORM-Eintrag bleibt als harmlose Datenzeile stehen).
+  // Panzer + Stacheln
+  const shellEl = cEl("an-shell","path"), shringEl = cEl("an-shring","path"), spikeEl = cEl("an-spike","path");
+  if(armor>0.5){
+    cAttr(shellEl, { d: arcPath(cx, cy-R*bh*0.15, R*bw*0.9, R*bh*0.82, 0, Math.PI*0.95, Math.PI*2.05, true),
+      fill: flatCol(mix([90,100,110],[60,70,80],armor)), opacity: 1 });
+    let ri="";
+    for(let i=1;i<4;i++) ri += arcPath(cx, cy-R*bh*0.15, R*bw*0.9*i/4, R*bh*0.82*i/4, 0, Math.PI, Math.PI*2, false);
+    cAttr(shringEl, { d:ri, stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1.5, fill:"none", opacity: 1 });
+  } else { cAttr(shellEl, { opacity: 0 }); cAttr(shringEl, { opacity: 0 }); }
+  if(armor>0.6){ let s="";
+    for(let i=0;i<5;i++){ const ax=cx+(i-2)*R*bw*0.3, ay=cy-R*bh*0.82;
+      s += `M${(ax-3).toFixed(1)},${ay.toFixed(1)}L${(ax+3).toFixed(1)},${ay.toFixed(1)}L${ax.toFixed(1)},${(ay-8-armor*10).toFixed(1)}Z`; }
+    cAttr(spikeEl, { d:s, fill: flatCol(mix([120,130,140],[80,90,100],armor)), opacity: 1 });
+  } else cAttr(spikeEl, { opacity: 0 });
+  // Kopf + Ohren
+  const hx=cx-R*bw*0.92, hy=cy-R*bh*0.22;
+  const EARS = { "🦊":[[-0.1,-0.5,0.16,0.42,-0.2,0],[0.28,-0.48,0.16,0.42,0.2,0]],
+                 "🐭":[[-0.02,-0.42,0.26,0.26,0,1],[0.38,-0.4,0.26,0.26,0,1]],
+                 "🐺":[[0.02,-0.5,0.14,0.32,-0.1,0],[0.3,-0.48,0.14,0.32,0.1,0]],
+                 "🐒":[[-0.4,-0.02,0.16,0.18,0,1],[0.4,-0.02,0.16,0.18,0,1]],
+                 "🐻":[[-0.05,-0.45,0.22,0.22,0,1],[0.35,-0.43,0.22,0.22,0,1]] }[kind];
+  for(let i=0;i<2;i++){
+    const re = cEl("an-earR"+i,"ellipse"), pe = cEl("an-earP"+i,"path");
+    const e = EARS && EARS[i];
+    if(e && e[5]){ cAttr(re, { cx:0, cy:0, rx:(R*e[2]).toFixed(1), ry:(R*e[3]).toFixed(1), fill: flatCol(dark), opacity: 1,
+        transform:`translate(${(hx+R*e[0]).toFixed(1)},${(hy+R*e[1]).toFixed(1)}) rotate(${(e[4]*180/Math.PI).toFixed(1)})` }); }
+    else cAttr(re, { opacity: 0 });
+    if(e && !e[5]){ const ew=R*e[2], eh=R*e[3];
+      cAttr(pe, { d:`M${(-ew).toFixed(1)},${eh.toFixed(1)}L${ew.toFixed(1)},${eh.toFixed(1)}L0,${(-eh).toFixed(1)}Z`, fill: flatCol(dark), opacity: 1,
+        transform:`translate(${(hx+R*e[0]).toFixed(1)},${(hy+R*e[1]).toFixed(1)}) rotate(${(e[4]*180/Math.PI).toFixed(1)})` }); }
+    else cAttr(pe, { opacity: 0 });
+  }
+  E("an-head", hx, hy, R*0.5, R*0.45, flatCol(body));
+  // Schnauze
+  const snout = kind==="🐺"?1.0 : kind==="🦊"?0.62 : kind==="🦏"?0.8 : kind==="🐻"?0.55 : kind==="🐒"?0.0 : kind==="🐦"?0.0 : kind==="🐭"?0.5 : 0.45;
+  const snoutEl = cEl("an-snout","ellipse"), noseEl = cEl("an-nose","path");
+  if(snout>0.2){
+    cAttr(snoutEl, { cx:0, cy:0, rx:(R*0.2*snout+R*0.12).toFixed(1), ry:(R*0.22).toFixed(1), fill: flatCol(body), opacity: 1,
+      transform:`translate(${(hx-R*0.42*snout).toFixed(1)},${(hy+R*0.1).toFixed(1)})` });
+    cAttr(noseEl, { d: dot(hx-R*(0.4*snout+0.18), hy+R*0.1, R*0.06), fill: flatCol(dark), opacity: 1 });
+  } else { cAttr(snoutEl, { opacity: 0 }); cAttr(noseEl, { opacity: 0 }); }
+  const beakEl = cEl("an-beak","polygon");
+  if(kind==="🐦") cAttr(beakEl, { points:`${(hx-R*0.48).toFixed(1)},${(hy+R*0.02).toFixed(1)} ${(hx-R*0.18).toFixed(1)},${(hy-R*0.08).toFixed(1)} ${(hx-R*0.18).toFixed(1)},${(hy+R*0.14).toFixed(1)}`,
+    fill: flatCol(mix([232,182,80],[240,140,60],metab)), opacity: 1 });
+  else cAttr(beakEl, { opacity: 0 });
+  const hornEl = cEl("an-horn","polygon");
+  if(kind==="🦏"){ const nx=hx-R*0.55, ny=hy+R*0.16;
+    cAttr(hornEl, { points:`${(nx-R*0.06).toFixed(1)},${ny.toFixed(1)} ${(nx+R*0.1).toFixed(1)},${ny.toFixed(1)} ${(nx-R*0.02).toFixed(1)},${(ny-R*0.5).toFixed(1)}`,
+      fill: flatCol(mix(body,[238,238,225],0.55)), opacity: 1 });
+  } else cAttr(hornEl, { opacity: 0 });
+  const blink = (Math.sin(time*0.0009)>0.985)?0.1:1;
+  E("an-eye", hx-R*0.15, hy-R*0.05, R*0.11, R*0.13*blink, EYE);
+  P("an-glint", dot(hx-R*0.18, hy-R*0.09, R*0.04), { fill: GLINT, "fill-opacity": .9 });
 }
 
 function drawAnimal(g, cx, cy, breath, time, rnd, a){

@@ -701,10 +701,12 @@ Performance-Vergleich (SVG-Bühne + Papierkorn-Filter kosten nichts messbar) —
 unabhängig gegengeprüft (eigener Gate-Lauf + eigener Screenshot-Vergleich diese
 Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
 
-- [~] **Phase 3 — Kreatur-Silhouetten — Infrastruktur + 2 von 6 Reichen portiert
-  (2026-07-31)** — **Modell: Opus**. Bewusst GESTAFFELT statt 800 Zeilen auf einen
-  Schlag: `CREATURE_SVG` listet die portierten Reiche, alles andere zeichnet
-  unverändert auf dem Canvas darunter weiter. Jeder Zwischenstand ist damit lauffähig.
+- [x] **Phase 3 — Kreatur-Silhouetten — ALLE 6 REICHE auf SVG portiert (2026-07-31)** —
+  **Modell: Opus**. Bewusst GESTAFFELT statt 800 Zeilen auf einen Schlag:
+  `CREATURE_SVG` listete die jeweils portierten Reiche, alles andere zeichnete
+  unverändert auf dem Canvas darunter weiter — jeder Zwischenstand war lauffähig und
+  einzeln prüfbar. **Nachweis am Ende: das Canvas bleibt vollständig leer (0 Pixel),
+  die Kreatur kommt komplett aus dem SVG.**
   **Fertig:**
   - Eigene SVG-Ebene `#creatureSvg` über der Bühne, gleiche 720×560-viewBox.
   - **Retained-Mode-Renderer** (`cEl`/`cAttr`/`cBegin`/`cEnd`): Elemente werden einmal
@@ -727,10 +729,18 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     auf dem geteilten Bild unsichtbar) — verifiziert, 6.582 sichtbare Pixel.
   - Portiert: **Protist** (Euglenoid, Radiolarie), **Mikrobe** (Amöbe, Archaee,
     Bakterien-Kolonie), **Pilz** (Hutpilz, Baumpilz, Schimmel, Flechte, Hefe/Myzel),
-    **Sessil** (Koralle, Schwamm) und **Pflanze** (Baum, Kaktus, Strauch, Kraut,
-    Nadelbaum, Blütenkraut, Grünalge, Moos, Farn, generische Kältepflanze) — **22 Formen,
-    5 von 6 Reichen**. Koralle/Schwamm sind Reich „Tier", werden aber bodenständig
-    gezeichnet und hängen deshalb an der Pseudo-Kategorie „Sessil".
+    **Sessil** (Koralle, Schwamm), **Pflanze** (Baum, Kaktus, Strauch, Kraut, Nadelbaum,
+    Blütenkraut, Grünalge, Moos, Farn, generisch) und **Tier** (Schnecke, Kopffüßer,
+    Amphibie, Wurm, Fisch, Insekt, Krebstier, Fluginsekt, Vogel, Fledermaus + der
+    Vierbeiner-Grundbauplan mit Schwanz-, Ohren-, Schnauzen-, Panzer- und
+    Stachel-Varianten) — **42 geprüfte Formen, alle 6 Reiche**. Koralle/Schwamm sind
+    Reich „Tier", werden aber bodenständig gezeichnet und hängen deshalb an der
+    Pseudo-Kategorie „Sessil".
+  - Neuer Helfer `arcPath()` für Teil-Bögen (Ersatz für `ctx.ellipse/arc` mit Start-/
+    Endwinkel): bewusst **abgetastet** statt als SVG-`A`-Befehl — dessen
+    large-arc/sweep-Flags sind bei übersteuerten oder negativen Winkeln fehleranfällig,
+    das Abtasten ist bei diesen Größen visuell identisch und kann nicht „falsch herum"
+    laufen.
   - **A/B gegen den Canvas-Original-Pfad gemessen** (`CREATURE_SVG` zur Laufzeit
     umschalten, beide Fassungen rastern, Bounding-Box der echten Pixel vergleichen):
     Abweichung 0–8 px über alle geprüften Formen, Koralle pixelgleich. Die verbleibende
@@ -746,18 +756,37 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     Größen mit Farben. Der Baum lag dadurch 14 px daneben, nach der Korrektur 6 px.
     **Regel: Werte, die `rnd()` verbrauchen, VOR dem Objektliteral in der Original-
     reihenfolge in Variablen berechnen — nie im Literal inline.**
+  - **Zweiter Fehlertyp, ebenfalls vom A/B-Test gefunden: ein übersehener
+    `return`-Zweig.** Der Vogel (🐦) hat im Original einen EIGENEN Bauplan mit frühem
+    `return`; ich hatte ihn zunächst in den Vierbeiner-Zweig fallen lassen — 47 px
+    daneben, nach dem Nachziehen 3 px. Dabei fiel auf, dass die vogelspezifischen Teile
+    IM Vierbeiner-Zweig (Flügel, Schwanzfedern, `FORM["🐦"]`) im Original **toter Code**
+    sind, weil sie nie erreicht werden; bewusst nicht mitportiert und im Code vermerkt.
+  - **Abschluss-Prüfungen:** Canvas bleibt leer (0 Pixel), Schnappschuss zeigt die
+    Kreatur (5.402 Pixel), 15 s freie Evolution über einen Reichswechsel hinweg ohne
+    JS-Fehler und **ohne Element-Leck** (Pool-Größe = DOM-Kinder, alte Teile werden
+    beim Formwechsel geräumt).
+  - **Nicht gelöscht:** die alten Canvas-Zeichner (`drawAnimal`/`drawPlant`/… ~800
+    Zeilen) stehen weiterhin im Code, sind aber unerreichbar, seit alle Reiche in
+    `CREATURE_SVG` stehen. Bewusst stehen gelassen — das Entfernen ist eine eigene,
+    unabhängig prüfbare Aufräum-Aktion und gehört nicht in denselben Schritt wie die
+    Migration.
   - Gemessen: end-to-end 60 fps auf beiden Pfaden, **keine Regression**. (Ein
     Mikro-Benchmark zeigte scheinbar 41 ms/Bild für Canvas gegen 0,02 ms für SVG —
     das ist irreführend, weil SVG die Rasterung an den Compositor abgibt und die enge
     Messschleife die Canvas-Rasterung staut. Kein Performance-Gewinn behauptet.)
   - Gates: `ui-calm-check`, `app-parity` grün; Resize, `prefers-reduced-motion` und
     Reich-Wechsel (SVG↔Canvas, Reste werden geräumt) einzeln verifiziert.
-  **Offen:** nur noch **Tier** (`drawAnimal`, ~280 Zeilen, dickster Brocken mit den
-  meisten Sonderfällen: Flugbauplan, Tarnung, Panzerung, Hörner/Augen je Art).
-  Ebenfalls offen: die **Akzentfarbe für das neu erworbene Modul** (braucht die
-  Erkennungslogik „welches Modul ist seit der letzten committeten Form neu" plus je
-  Reich eine Gen→Körperteil-Zuordnung) — sinnvoll erst, wenn auch Tier portiert ist,
-  sonst doppelte Arbeit.
+  **Offen aus dem ursprünglichen Phase-3-Auftrag:** die **Akzentfarbe für das neu
+  erworbene Modul** (EINE Akzentfarbe markiert das Körperteil, das seit der letzten
+  committeten Form dazugekommen ist). Braucht zwei Dinge, die es noch nicht gibt: eine
+  Erkennungslogik „welches Gen ist seit dem letzten Form-Commit am stärksten gestiegen"
+  (kann auf der bestehenden Formkipp-Erkennung der Chronik aufbauen) und je Reich eine
+  **Gen→Körperteil-Zuordnung** (z. B. `armor`→Panzer/Stacheln, `limb`→Beine,
+  `insul`→Fell, `wing`→Flügel). Jetzt gut machbar, weil alle Zeichner modular sind und
+  jedes Anbauteil ein eigenes Element mit stabilem Schlüssel hat.
+  **Ebenfalls offen (neu, klein):** die ~800 Zeilen unerreichbarer Canvas-Zeichner
+  entfernen — eigene Aufräum-Aktion, s. o.
 - [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
   Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
   hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,
