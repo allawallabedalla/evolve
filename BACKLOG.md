@@ -725,19 +725,33 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     und ein später einsetzendes Leuchten läge vor dem Körper.
   - **Schnappschuss-Export** rasterisiert die neue Ebene mit (sonst wäre die Kreatur
     auf dem geteilten Bild unsichtbar) — verifiziert, 6.582 sichtbare Pixel.
-  - Portiert: **Protist** (Euglenoid, Radiolarie) und **Mikrobe** (Amöbe, Archaee,
-    Bakterien-Kolonie). Alle fünf Formen per Screenshot gegengeprüft.
+  - Portiert: **Protist** (Euglenoid, Radiolarie), **Mikrobe** (Amöbe, Archaee,
+    Bakterien-Kolonie), **Pilz** (Hutpilz, Baumpilz, Schimmel, Flechte, Hefe/Myzel) und
+    **Sessil** (Koralle, Schwamm) — 12 Formen. Koralle/Schwamm sind Reich „Tier", werden
+    aber bodenständig gezeichnet und hängen deshalb an der Pseudo-Kategorie „Sessil".
+  - **A/B gegen den Canvas-Original-Pfad gemessen** (`CREATURE_SVG` zur Laufzeit
+    umschalten, beide Fassungen rastern, Bounding-Box der echten Pixel vergleichen):
+    Abweichung 0–8 px über alle 12 Formen, Koralle pixelgleich. Die verbleibende
+    Differenz geht auf den entfernten Schlagschatten zurück, der die alphabasierte Box
+    aufblähte. **Merke für den Rest der Migration:** `getBBox()` taugt dafür NICHT — es
+    transformiert bei rotierten Kindern das Rechteck statt der Ellipse und meldete
+    17–22 px Scheinabweichung für die zwei rotierten Formen; erst der Pixelvergleich
+    zeigte, dass die Zeichnung stimmt.
+  - Beim Portieren beachtet: die `rnd()`-Aufrufe müssen in **derselben Reihenfolge und
+    Anzahl** fallen wie im Original — die Sequenz bestimmt Versatz, Größen und Sprenkel
+    jeder Form.
   - Gemessen: end-to-end 60 fps auf beiden Pfaden, **keine Regression**. (Ein
     Mikro-Benchmark zeigte scheinbar 41 ms/Bild für Canvas gegen 0,02 ms für SVG —
     das ist irreführend, weil SVG die Rasterung an den Compositor abgibt und die enge
     Messschleife die Canvas-Rasterung staut. Kein Performance-Gewinn behauptet.)
   - Gates: `ui-calm-check`, `app-parity` grün; Resize, `prefers-reduced-motion` und
     Reich-Wechsel (SVG↔Canvas, Reste werden geräumt) einzeln verifiziert.
-  **Offen:** Pflanze, Tier, Pilz, Sessil (Koralle/Schwamm) — die vier großen, dazu
-  `drawAnimal` (~280 Zeilen) als dickster Brocken. Ebenfalls offen: die **Akzentfarbe
-  für das neu erworbene Modul** (braucht die Erkennungslogik „welches Modul ist seit
-  der letzten committeten Form neu" plus je Reich eine Gen→Körperteil-Zuordnung) —
-  sinnvoll erst, wenn alle Reiche auf SVG sind, sonst doppelte Arbeit.
+  **Offen:** **Pflanze** (~170 Zeilen) und **Tier** (`drawAnimal`, ~280 Zeilen, dickster
+  Brocken mit den meisten Sonderfällen: Flugbauplan, Tarnung, Panzerung). Ebenfalls
+  offen: die **Akzentfarbe für das neu erworbene Modul** (braucht die Erkennungslogik
+  „welches Modul ist seit der letzten committeten Form neu" plus je Reich eine
+  Gen→Körperteil-Zuordnung) — sinnvoll erst, wenn alle Reiche auf SVG sind, sonst
+  doppelte Arbeit.
 - [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
   Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
   hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,

@@ -417,7 +417,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.82.0";
+const APP_VERSION = "v0.83.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -5184,7 +5184,7 @@ function drawMotes(time){
 // GESTAFFELTE MIGRATION: `CREATURE_SVG` listet die bereits portierten Reiche. Alles
 // andere zeichnet unveraendert weiter auf dem Canvas darunter. Damit ist jeder
 // Zwischenstand lauffaehig und pruefbar, statt 800 Zeilen auf einen Schlag zu kippen.
-const CREATURE_SVG = new Set(["Protist", "Mikrobe"]);
+const CREATURE_SVG = new Set(["Protist", "Mikrobe", "Pilz", "Sessil"]);
 const cSvg = document.getElementById("creatureSvg");
 const cRoot = document.getElementById("creatureRoot");
 // Zwei FESTE Ebenen statt einer flachen Liste: das Leuchten muss immer HINTER dem
@@ -5253,14 +5253,27 @@ function drawCreature(g, time, a){
   // Zeichner exakt dieselben Koordinaten wie der Canvas-Pfad benutzen koennen
   // (Canvas rechnet in CSS-Pixeln der Breite CW, die viewBox ist fest 720 breit).
   // Damit ist die Migration geometrisch verlustfrei — kein Nachjustieren von Radien.
-  const svgKingdom = CREATURE_SVG.has(a.k) && !(a.e==="🪸" || a.e==="🧽");
+  // Koralle/Schwamm sind Reich "Tier", werden aber bodenstaendig gezeichnet — sie
+  // haengen deshalb an der Pseudo-Kategorie "Sessil", nicht an a.k.
+  const sessile = a.e==="🪸" || a.e==="🧽";
+  const svgKingdom = sessile ? CREATURE_SVG.has("Sessil") : CREATURE_SVG.has(a.k);
   if(svgKingdom){
     cSvg.style.display = "";
     cBegin();
     cAttr(cRoot, { transform: `scale(${(720/(CW||720)).toFixed(4)})` });
-    creatureGlowSvg(g, cx, CH*0.6, time);
-    if(a.k==="Mikrobe") drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
-    else drawProtistSvg(g, cx, CH*0.6, breath, time, rnd, a);
+    if(sessile){
+      creatureGlowSvg(g, cx, CH*0.9, time);
+      drawSessileSvg(g, cx, CH*0.9, breath, time, rnd, a);
+    } else if(a.k==="Pilz"){
+      creatureGlowSvg(g, cx, CH*0.9, time);
+      drawFungusSvg(g, cx, CH*0.9, breath, time, rnd, a);
+    } else if(a.k==="Mikrobe"){
+      creatureGlowSvg(g, cx, CH*0.6, time);
+      drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
+    } else {
+      creatureGlowSvg(g, cx, CH*0.6, time);
+      drawProtistSvg(g, cx, CH*0.6, breath, time, rnd, a);
+    }
     cEnd();
     return;
   }
@@ -5326,6 +5339,15 @@ function flagellumPoints(x0, y0, seg, len, amp, phase){
   let p = "";
   for(let i=0;i<=seg;i++) p += `${(x0+i*len).toFixed(1)},${(y0+Math.sin(phase+i*0.6)*amp).toFixed(1)} `;
   return p.trim();
+}
+/**
+ * Halbe Ellipse als Pfad — der SVG-Ersatz fuer `ctx.ellipse(...,0,Math.PI)` bzw.
+ * `(...,Math.PI,0)`. SVGs y-Achse zeigt nach unten: von links nach rechts ist
+ * sweep-flag 1 der Weg ueber OBEN, sweep-flag 0 der ueber UNTEN.
+ */
+function halfEllipse(cx, cy, rx, ry, side){
+  const sweep = side === "top" ? 1 : 0;
+  return `M${(cx-rx).toFixed(1)},${cy.toFixed(1)}A${rx.toFixed(1)},${ry.toFixed(1)} 0 0 ${sweep} ${(cx+rx).toFixed(1)},${cy.toFixed(1)}Z`;
 }
 
 // ===== Reich PROTISTEN (SVG) =====
@@ -5393,6 +5415,137 @@ function drawMicrobeSvg(g, cx, cy, breath, time, rnd, a){
       transform: `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` });
   }
   cAttr(cEl("bac-core","circle"), { cx:cx.toFixed(1), cy:cy.toFixed(1), r:(R*0.42).toFixed(1), fill: flatCol([140,195,165]) });
+}
+
+// ===== Reich PILZE (SVG) =====
+// Wichtig: die rnd()-Aufrufe muessen in DERSELBEN Reihenfolge und Anzahl fallen wie im
+// Canvas-Original — die Sequenz bestimmt Form-Details (Versatz, Groessen, Sprenkel).
+function drawFungusSvg(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind = a.e;
+  const pr = mulberry32((lineageSeed^0x27d4eb2f)>>>0);
+  const capTone = [[210,180,150],[200,120,90],[180,170,120],[150,110,150],[190,90,90]][Math.floor(pr()*5)];
+  // Myzel-Faeden am Boden (gemeinsam) — 10 Kurven in EINEM Pfad statt 10 Canvas-Zuegen
+  const myc = () => {
+    let d = "";
+    for(let i=0;i<10;i++){ const q=(rnd()-0.5);
+      d += `M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+q*40).toFixed(1)},${(by+4).toFixed(1)} ${(bx+q*80).toFixed(1)},${(by+2+rnd()*6).toFixed(1)}`; }
+    cAttr(cEl("fun-myc","path"), { d, stroke: flatCol([210,200,180]), "stroke-opacity": .28, "stroke-width": 1, fill: "none" });
+  };
+
+  if(kind==="🍄"){   // Hutpilz: Stiel + Kappe + Lamellen
+    const caps = 1+Math.round(size*2);
+    for(let c=0;c<caps;c++){
+      const off=(c-(caps-1)/2)*22*(0.6+rnd()*0.5);
+      const h=(30+size*70)*breath*(0.7+rnd()*0.5), cw=16+size*30;
+      cAttr(cEl("fun-stem"+c,"path"), {
+        d: `M${(bx+off).toFixed(1)},${by.toFixed(1)}Q${(bx+off+Math.sin(time*0.001+c)*4).toFixed(1)},${(by-h*0.6).toFixed(1)} ${(bx+off).toFixed(1)},${(by-h).toFixed(1)}`,
+        stroke: flatCol([224,214,196]), "stroke-width": (5+size*6).toFixed(1), "stroke-linecap": "round", fill: "none" });
+      cAttr(cEl("fun-gill"+c,"path"), { d: halfEllipse(bx+off, by-h+2, cw*0.8, 4, "bottom"),
+        fill: flatStep([235,228,210], -1), "fill-opacity": .9 });
+      cAttr(cEl("fun-cap"+c,"path"), { d: halfEllipse(bx+off, by-h, cw, cw*0.62, "top"), fill: flatCol(capTone) });
+      let sp = "";
+      for(let d2=0;d2<5;d2++){ const sx=bx+off+(rnd()-0.5)*cw*1.3, sy=by-h-rnd()*cw*0.4, sr=1.5+rnd()*2;
+        sp += `M${(sx-sr).toFixed(1)},${sy.toFixed(1)}a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(sr*2).toFixed(1)},0a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(-sr*2).toFixed(1)},0`; }
+      cAttr(cEl("fun-dots"+c,"path"), { d: sp, fill: flatCol([255,255,255]), "fill-opacity": .4 });
+    }
+    myc(); return;
+  }
+  if(kind==="🪵"||kind==="🟤"){   // Baumpilz: gestapelte Konsolen am Totholz
+    cAttr(cEl("fun-wood","rect"), { x:(bx-6).toFixed(1), y:(by-90).toFixed(1), width:12, height:92,
+      fill: flatCol([70,50,38]), "fill-opacity": .9 });
+    const shelves = 3+Math.round(size*4);
+    for(let i=0;i<shelves;i++){
+      const y=by-14-i*(16+size*10), w=(20+size*30)*(1-i*0.08), side=i%2?1:-1;
+      const d = halfEllipse(bx+side*4, y, w, 7+size*5, "bottom");
+      cAttr(cEl("fun-shelf"+i,"path"), { d,
+        fill: flatCol(mix(capTone,[120,90,70],0.5).map(c=>c*(0.8+i*0.05))),
+        stroke: flatCol([30,24,18]), "stroke-opacity": .4, "stroke-width": 1 });
+    }
+    return;
+  }
+  if(kind==="🧵"){   // Schimmel: Sporentraeger-Punkte auf Faeden
+    const n = 14+Math.round(size*18);
+    let threads = "", heads = "";
+    const headCol = mix(capTone,[120,130,120],0.4);
+    for(let i=0;i<n;i++){
+      const x=bx+(rnd()-0.5)*120, h=10+rnd()*(30+size*40);
+      threads += `M${x.toFixed(1)},${by.toFixed(1)}Q${(x+Math.sin(time*0.002+i)*3).toFixed(1)},${(by-h*0.6).toFixed(1)} ${x.toFixed(1)},${(by-h).toFixed(1)}`;
+      const r=2+rnd()*2.5;
+      heads += `M${(x-r).toFixed(1)},${(by-h).toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+    }
+    cAttr(cEl("fun-thr","path"), { d: threads, stroke: flatCol([200,205,190]), "stroke-opacity": .5, "stroke-width": 1, fill: "none" });
+    cAttr(cEl("fun-head","path"), { d: heads, fill: flatCol(headCol) });
+    return;
+  }
+  if(kind==="🍥"){   // Flechte: krustige Lappen, halb Alge
+    const lobes = 8+Math.round(size*8);
+    for(let i=0;i<lobes;i++){
+      const ang=Math.PI+(i/(lobes-1))*Math.PI, rr=(20+size*46)*(0.7+rnd()*0.6);
+      const x=bx+Math.cos(ang)*rr, y=by+Math.sin(ang)*rr*0.4;
+      cAttr(cEl("fun-lobe"+i,"ellipse"), { cx:0, cy:0, rx:(8+rnd()*7).toFixed(1), ry:(5+rnd()*4).toFixed(1),
+        fill: flatCol(mix([150,170,120],[120,160,140], rnd())),
+        transform: `translate(${x.toFixed(1)},${(y-3).toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` });
+    }
+    let sor = "";
+    for(let i=0;i<10;i++){ const x=bx+(rnd()-0.5)*70, y=by-2-rnd()*8;
+      sor += `M${(x-2).toFixed(1)},${y.toFixed(1)}a2,2 0 1 0 4,0a2,2 0 1 0 -4,0`; }
+    cAttr(cEl("fun-sor","path"), { d: sor, fill: flatCol([180,200,150]), "fill-opacity": .5 });
+    return;
+  }
+  // Hefe / Myzel: knospende Zellhaufen
+  const cells = 10+Math.round(size*14);
+  for(let i=0;i<cells;i++){
+    const ang=rnd()*Math.PI*2, rr=rnd()*(16+size*26);
+    const x=bx+Math.cos(ang)*rr, y=by-8-Math.abs(Math.sin(ang))*rr*0.5;
+    const col = flatCol(mix(capTone,[220,215,180],0.5).map(c=>c*(0.85+rnd()*0.25)));
+    const cr = 4+rnd()*5;
+    cAttr(cEl("fun-cell"+i,"circle"), { cx:x.toFixed(1), cy:y.toFixed(1), r:cr.toFixed(1), fill: col });
+    const bud = rnd()>0.5;
+    const be = cEl("fun-bud"+i,"circle");
+    cAttr(be, bud ? { cx:(x+cr*0.8).toFixed(1), cy:(y-cr*0.6).toFixed(1), r:(cr*0.5).toFixed(1), fill: col, opacity: 1 }
+                  : { opacity: 0 });
+  }
+  myc();
+}
+
+// ===== Sessile Tiere (SVG): Koralle / Schwamm =====
+function drawSessileSvg(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  if(a.e==="🪸"){   // Koralle: verzweigte Aeste + Polypen
+    const col = mix([180,120,110],[150,175,135],photo);
+    let stems = "", tips = "";
+    const branch = (x,y,ang,len,w,depth) => {
+      if(depth<=0||len<7){ const r=Math.max(2,w*0.6);
+        tips += `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+        return; }
+      const ex=x+Math.cos(ang)*len, ey=y+Math.sin(ang)*len;
+      // Strichstaerke variiert je Ast -> je Tiefe ein eigener Pfad statt eines Sammelpfads
+      cAttr(cEl("cor-b"+depth+"-"+stems.length,"path"), {
+        d:`M${x.toFixed(1)},${y.toFixed(1)}L${ex.toFixed(1)},${ey.toFixed(1)}`,
+        stroke: flatCol(col), "stroke-width": w.toFixed(1), "stroke-linecap": "round", fill: "none" });
+      stems += "x";
+      branch(ex,ey,ang-0.5-rnd()*0.25,len*0.72,w*0.7,depth-1);
+      branch(ex,ey,ang+0.5+rnd()*0.25,len*0.72,w*0.7,depth-1);
+    };
+    const base=(55+size*95)*breath;
+    branch(bx,by,-Math.PI/2,base*0.5,6+struct*9,4);
+    cAttr(cEl("cor-tips","path"), { d: tips, fill: flatCol(mix(col,[120,205,155],0.55)) });
+    return;
+  }
+  // Schwamm: fassfoermiger Filtrierer mit Oskulum + Poren
+  const h=(50+size*95)*breath, w=22+size*30;
+  const col = mix([170,140,120],[150,165,145],photo);
+  cAttr(cEl("spo-body","path"), {
+    d: `M${(bx-w).toFixed(1)},${by.toFixed(1)}Q${(bx-w*1.15).toFixed(1)},${(by-h).toFixed(1)} ${(bx-w*0.5).toFixed(1)},${(by-h).toFixed(1)}`
+     + `L${(bx+w*0.5).toFixed(1)},${(by-h).toFixed(1)}Q${(bx+w*1.15).toFixed(1)},${(by-h).toFixed(1)} ${(bx+w).toFixed(1)},${by.toFixed(1)}Z`,
+    fill: flatCol(col) });
+  cAttr(cEl("spo-osc","ellipse"), { cx:bx.toFixed(1), cy:(by-h).toFixed(1), rx:(w*0.32).toFixed(1), ry:(w*0.13).toFixed(1),
+    fill: flatStep(col,-2), "fill-opacity": .85 });
+  let pores = "";
+  for(let i=0;i<16;i++){ const px=bx+(rnd()-0.5)*w*1.5, py=by-rnd()*h*0.9, r=1.5+rnd()*2;
+    pores += `M${(px-r).toFixed(1)},${py.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`; }
+  cAttr(cEl("spo-por","path"), { d: pores, fill: flatStep(col,-2), "fill-opacity": .5 });
 }
 
 function drawPlant(g, bx, by, breath, time, rnd, a){
