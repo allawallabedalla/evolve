@@ -175,6 +175,10 @@
   .hab-stage { position: relative; }
   .hab-stage svg { display: block; width: 100%; height: auto; border-radius: 16px; }
   .hab-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 16px; }
+  /* Kreatur-SVG (Phase 3): liegt wie das Canvas absolut ueber der Buehne, damit beide
+     Ebenen dieselbe Flaeche decken — ohne dies wuerde `.hab-stage svg` das zweite SVG
+     als Block DARUNTER stapeln statt darueber legen. */
+  .hab-stage #creatureSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   /* Umwelt-Einfluss-Cinematik: kurzer tongefärbter Blitz + leichtes Beben aufs Habitat */
   .viewport::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; border-radius: 16px; z-index: 4; }
   .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: vpShake .5s ease; }

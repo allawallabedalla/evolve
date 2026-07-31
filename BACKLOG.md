@@ -701,16 +701,43 @@ Performance-Vergleich (SVG-Bühne + Papierkorn-Filter kosten nichts messbar) —
 unabhängig gegengeprüft (eigener Gate-Lauf + eigener Screenshot-Vergleich diese
 Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
 
-- [ ] **Phase 3 — Kreatur-Silhouetten (offen, größter Rest-Brocken)** — **Modell: Opus**
-  (geschmacksintensivster Teil, Sonnet bleibt Orchestrator/Integration):
-  `drawAnimal/drawPlant/drawFungus/drawMicrobe/drawProtist/drawSessile`
-  (~800 Zeilen biologischer Sonderfälle: Biolumineszenz, Tarnung, Flugbauplan …)
-  von Canvas-2D auf modulares SVG umbauen — Körperkern + austauschbare Anbauteile
-  (Flossen, Membranen, Panzerplatten, Fühler) als eigene Elemente, Tiefe über
-  Layering + Helligkeitsstufen statt Schlagschatten, EINE Akzentfarbe für das
-  jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
-  seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
-  Erkennung für die Chronik auf).
+- [~] **Phase 3 — Kreatur-Silhouetten — Infrastruktur + 2 von 6 Reichen portiert
+  (2026-07-31)** — **Modell: Opus**. Bewusst GESTAFFELT statt 800 Zeilen auf einen
+  Schlag: `CREATURE_SVG` listet die portierten Reiche, alles andere zeichnet
+  unverändert auf dem Canvas darunter weiter. Jeder Zwischenstand ist damit lauffähig.
+  **Fertig:**
+  - Eigene SVG-Ebene `#creatureSvg` über der Bühne, gleiche 720×560-viewBox.
+  - **Retained-Mode-Renderer** (`cEl`/`cAttr`/`cBegin`/`cEnd`): Elemente werden einmal
+    angelegt, danach werden nur noch geänderte Attribute geschrieben — nötig, weil die
+    Silhouetten pro Bild animiert sind (Pseudopodien morphen, Geißeln peitschen) und
+    ein `innerHTML`-Neubau je Bild zu teuer wäre.
+  - **Geometrisch verlustfreie Migration:** der Wurzel-Transform `scale(720/CW)` lässt
+    die portierten Zeichner exakt dieselben Koordinaten benutzen wie der Canvas-Pfad
+    (Canvas rechnet in CSS-Pixeln der Breite CW, die viewBox ist fest 720) — kein
+    Nachjustieren von Radien, kein Größensprung. Bei Resize verifiziert.
+  - **Zwei Stil-Brüche beseitigt**, die Canvas erzwungen hatte: `ctx.shadowBlur`
+    (weicher Schlagschatten + Biolumineszenz-Schein) → gestufte Halo-Ringe bzw.
+    Helligkeitsstufen (`flatStep`); `ctx.filter = "saturate(.68) brightness(1.08)"`
+    → dieselbe Rechnung einmal pro Farbe (`flatCol`), also gleiches Bild ohne
+    Filter-Ebene.
+  - **Zwei feste Ebenen** (`#cGlowLayer`/`#cBodyLayer`) statt einer flachen Liste —
+    sonst hinge die Z-Reihenfolge davon ab, wann ein Element zum ersten Mal entsteht,
+    und ein später einsetzendes Leuchten läge vor dem Körper.
+  - **Schnappschuss-Export** rasterisiert die neue Ebene mit (sonst wäre die Kreatur
+    auf dem geteilten Bild unsichtbar) — verifiziert, 6.582 sichtbare Pixel.
+  - Portiert: **Protist** (Euglenoid, Radiolarie) und **Mikrobe** (Amöbe, Archaee,
+    Bakterien-Kolonie). Alle fünf Formen per Screenshot gegengeprüft.
+  - Gemessen: end-to-end 60 fps auf beiden Pfaden, **keine Regression**. (Ein
+    Mikro-Benchmark zeigte scheinbar 41 ms/Bild für Canvas gegen 0,02 ms für SVG —
+    das ist irreführend, weil SVG die Rasterung an den Compositor abgibt und die enge
+    Messschleife die Canvas-Rasterung staut. Kein Performance-Gewinn behauptet.)
+  - Gates: `ui-calm-check`, `app-parity` grün; Resize, `prefers-reduced-motion` und
+    Reich-Wechsel (SVG↔Canvas, Reste werden geräumt) einzeln verifiziert.
+  **Offen:** Pflanze, Tier, Pilz, Sessil (Koralle/Schwamm) — die vier großen, dazu
+  `drawAnimal` (~280 Zeilen) als dickster Brocken. Ebenfalls offen: die **Akzentfarbe
+  für das neu erworbene Modul** (braucht die Erkennungslogik „welches Modul ist seit
+  der letzten committeten Form neu" plus je Reich eine Gen→Körperteil-Zuordnung) —
+  sinnvoll erst, wenn alle Reiche auf SVG sind, sonst doppelte Arbeit.
 - [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
   Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
   hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,

@@ -58,6 +58,11 @@
             <rect id="hUvOverlay" x="0" y="0" width="720" height="560" fill="#c4aade" fill-opacity="0"></rect>
             <g id="hMotes"></g>
           </svg>
+          <!-- Phase 3 (flacher Vektor-Stil): die Kreatur zieht vom Canvas auf eigenes
+               SVG-DOM um. Eigene Ebene ueber der Buehne, gleiche 720x560-viewBox.
+               Solange nicht alle Reiche portiert sind, bleibt das Canvas darunter als
+               Rueckfall fuer die noch nicht umgestellten Reiche (s. CREATURE_SVG). -->
+          <svg id="creatureSvg" viewBox="0 0 720 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g id="creatureRoot"><g id="cGlowLayer"></g><g id="cBodyLayer"></g></g></svg>
           <canvas id="habitat" width="720" height="560" aria-hidden="true"></canvas>
         </div>
         <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -412,7 +417,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.81.0";
+const APP_VERSION = "v0.82.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -4883,8 +4888,8 @@ function _wrapText(c, text, x, y, maxW, lh, maxLines){
 // Fuer den Schnappschuss muss die SVG-Ebene erst zu einem Bild rasterisiert werden —
 // sonst zeigte das geteilte Bild nur noch die Silhouette ohne ihre Welt. Der Klon traegt
 // ausschliesslich literale Farbwerte (keine CSS-Variablen), ist also selbsttragend.
-function habitatSvgImage(w, h){
-  const clone = hSvg.cloneNode(true);
+function habitatSvgImage(w, h, node){
+  const clone = (node || hSvg).cloneNode(true);
   clone.setAttribute("xmlns", SVGNS);
   clone.setAttribute("width", w); clone.setAttribute("height", h);
   const str = new XMLSerializer().serializeToString(clone);
@@ -4903,7 +4908,13 @@ async function shareSnapshot(){
   c.fillStyle = "#0a1a18"; c.fillRect(0,0,cv.width,cv.height);
   try { c.drawImage(await habitatSvgImage(W, src.height), 0, 0, W, src.height); }
   catch(e){ console.warn("Habitat-Ebene fuer den Schnappschuss nicht rasterisierbar", e); }
-  c.drawImage(src, 0, 0);                                  // das echte Habitat-Bild (Wesen in seiner Welt)
+  c.drawImage(src, 0, 0);                                  // Canvas-Ebene (noch nicht portierte Reiche)
+  // Phase 3: die Kreatur liegt fuer portierte Reiche im eigenen SVG — ohne diese Zeile
+  // waere sie auf dem geteilten Bild unsichtbar (nur die leere Welt).
+  if(cSvg.style.display !== "none"){
+    try { c.drawImage(await habitatSvgImage(W, src.height, cSvg), 0, 0, W, src.height); }
+    catch(e){ console.warn("Kreatur-Ebene fuer den Schnappschuss nicht rasterisierbar", e); }
+  }
   const y0 = src.height;
   c.fillStyle = "#0c1c1a"; c.fillRect(0, y0, W, capH);
   c.fillStyle = "rgba(95,156,131,.55)"; c.fillRect(0, y0, W, 2);   // Trennlinie
@@ -5160,6 +5171,75 @@ function drawMotes(time){
   });
 }
 
+// ============================================================================
+// PHASE 3 — Kreatur als flaches SVG statt Canvas-2D.
+//
+// Warum ueberhaupt: die Buehne ist seit Phase 2 SVG, die Kreatur war der letzte
+// Canvas-Rest ("Uebergangsloesung bis Phase 3"). Canvas erzwingt ausserdem zwei
+// Stil-Bruecher, die der flache Siebdruck-Stil ausdruecklich verbietet:
+// `ctx.shadowBlur` (weicher Schlagschatten + Biolumineszenz-Schein) und
+// `ctx.filter = "saturate() brightness()"`. Beides gibt es hier nicht mehr — Tiefe
+// entsteht ueber Schichtung und Helligkeitsstufen, Leuchten ueber gestufte Flaechen.
+//
+// GESTAFFELTE MIGRATION: `CREATURE_SVG` listet die bereits portierten Reiche. Alles
+// andere zeichnet unveraendert weiter auf dem Canvas darunter. Damit ist jeder
+// Zwischenstand lauffaehig und pruefbar, statt 800 Zeilen auf einen Schlag zu kippen.
+const CREATURE_SVG = new Set(["Protist", "Mikrobe"]);
+const cSvg = document.getElementById("creatureSvg");
+const cRoot = document.getElementById("creatureRoot");
+// Zwei FESTE Ebenen statt einer flachen Liste: das Leuchten muss immer HINTER dem
+// Koerper liegen. Bei einer einzigen Liste haengt die Z-Reihenfolge davon ab, wann ein
+// Element zum ersten Mal entsteht — ein Leuchten, das erst spaeter einsetzt (Gen steigt
+// ueber die Schwelle), wuerde sonst vor dem Koerper landen.
+const cGlowLayer = document.getElementById("cGlowLayer");
+const cBodyLayer = document.getElementById("cBodyLayer");
+
+// --- Retained Mode -------------------------------------------------------------
+// Die Silhouetten sind pro Bild animiert (Pseudopodien morphen, Geisseln peitschen).
+// Das SVG je Bild neu zu bauen (innerHTML) waere teuer; stattdessen werden Elemente
+// EINMAL nach Schluessel angelegt und danach nur noch Attribute geschrieben.
+const _cPool = new Map();
+let _cUsed = new Set();
+function cEl(key, tag, parent){
+  let e = _cPool.get(key);
+  if(!e){ e = document.createElementNS(SVGNS, tag); _cPool.set(key, e); (parent || cBodyLayer).appendChild(e); }
+  _cUsed.add(key);
+  return e;
+}
+/** Attribute setzen — nur schreiben, was sich wirklich geaendert hat. */
+function cAttr(e, o){
+  for(const k in o){
+    const v = String(o[k]);
+    if(e.getAttribute(k) !== v) e.setAttribute(k, v);
+  }
+  return e;
+}
+function cBegin(){ _cUsed = new Set(); }
+/** Was dieses Bild nicht benutzt wurde, verschwindet (Formwechsel laesst nichts stehen). */
+function cEnd(){
+  for(const [k, e] of _cPool){
+    if(_cUsed.has(k)) continue;
+    e.remove(); _cPool.delete(k);
+  }
+}
+
+// --- Flache Farbmathematik -----------------------------------------------------
+// Der alte Canvas-Pfad legte `saturate(0.68) brightness(1.08)` als Filter ueber die
+// GESAMTE Zeichnung (Pastell-Tiere, Design v2). Ein SVG-Filter waere derselbe
+// Nicht-flach-Trick; stattdessen wird dieselbe Rechnung einmal pro Farbe angewandt,
+// sodass das Ergebnis dem bisherigen Bild entspricht, ohne Filter-Ebene.
+const _SAT = 0.68, _BRI = 1.08;
+function flatCol(c){
+  const L = 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2];
+  const f = v => Math.max(0, Math.min(255, (L + _SAT*(v-L)) * _BRI));
+  return `rgb(${f(c[0])|0},${f(c[1])|0},${f(c[2])|0})`;
+}
+/** Helligkeitsstufe statt Schlagschatten: Tiefe entsteht durch gestaffelte Helligkeit. */
+function flatStep(c, step){
+  const k = 1 + step*0.16;
+  return flatCol([c[0]*k, c[1]*k, c[2]*k]);
+}
+
 function drawCreature(g, time, a){
   a = a || classify(g);
   // Form-Details aus lineageSeed (stabil pro Leben) statt aus dem driftenden Genom
@@ -5167,6 +5247,28 @@ function drawCreature(g, time, a){
   const rnd = mulberry32((lineageSeed ^ 0x5bd1e995) >>> 0);
   const breath = reduceMotion ? 1 : 1 + 0.025*Math.sin(time*0.0016);
   const cx = CW/2;
+
+  // --- SVG-Pfad (bereits portierte Reiche) --------------------------------------
+  // Der Wurzel-Transform skaliert die viewBox-Einheiten so, dass die PORTIERTEN
+  // Zeichner exakt dieselben Koordinaten wie der Canvas-Pfad benutzen koennen
+  // (Canvas rechnet in CSS-Pixeln der Breite CW, die viewBox ist fest 720 breit).
+  // Damit ist die Migration geometrisch verlustfrei — kein Nachjustieren von Radien.
+  const svgKingdom = CREATURE_SVG.has(a.k) && !(a.e==="🪸" || a.e==="🧽");
+  if(svgKingdom){
+    cSvg.style.display = "";
+    cBegin();
+    cAttr(cRoot, { transform: `scale(${(720/(CW||720)).toFixed(4)})` });
+    creatureGlowSvg(g, cx, CH*0.6, time);
+    if(a.k==="Mikrobe") drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
+    else drawProtistSvg(g, cx, CH*0.6, breath, time, rnd, a);
+    cEnd();
+    return;
+  }
+  // Nicht portiert -> SVG-Ebene leeren, damit keine Reste eines vorherigen Reiches
+  // ueber der Canvas-Zeichnung stehen bleiben.
+  if(_cPool.size){ cBegin(); cEnd(); }
+  cSvg.style.display = "none";
+
   ctx.save();
   // Biolumineszenz (AXIS-5): leuchtende Wesen bekommen einen kräftigen, pulsierenden
   // Cyan-Schein — sichtbar besonders in dunklen Umwelten.
@@ -5197,6 +5299,100 @@ function drawCreature(g, time, a){
     drawProtist(g, cx, CH*0.6, breath, time, rnd, a);
   }
   ctx.restore();
+}
+
+// ===== SVG-Zeichner (Phase 3) ==================================================
+// Regeln, die fuer ALLE portierten Reiche gelten:
+//   · nur Flaechenfarben, keine Verlaeufe, kein Blur, kein Filter
+//   · Tiefe durch Schichtung + flatStep()-Helligkeitsstufen
+//   · Biolumineszenz als GESTUFTE Halo-Ringe (Siebdruck), nicht als weicher Schein
+
+/** Flaches Leuchten: 3 konzentrische, halbtransparente Ringe statt shadowBlur. */
+function creatureGlowSvg(g, cx, cy, time){
+  const bl = g[9]||0;
+  if(bl <= 0.4) return;
+  const pulse = reduceMotion ? 1 : 0.75 + 0.25*Math.sin(time*0.003);
+  const base = 34 + bl*30*pulse;
+  for(let i=0;i<3;i++){
+    cAttr(cEl("glow"+i, "circle", cGlowLayer), {
+      cx: cx.toFixed(1), cy: cy.toFixed(1), r: (base*(1 - i*0.26)).toFixed(1),
+      fill: "#78e8ff", "fill-opacity": (0.07 + 0.06*bl*pulse*(i+1)).toFixed(3),
+    });
+  }
+}
+
+/** Geissel als Polyline — eine Attribut-Schreibung je Bild statt 14 Canvas-Segmente. */
+function flagellumPoints(x0, y0, seg, len, amp, phase){
+  let p = "";
+  for(let i=0;i<=seg;i++) p += `${(x0+i*len).toFixed(1)},${(y0+Math.sin(phase+i*0.6)*amp).toFixed(1)} `;
+  return p.trim();
+}
+
+// ===== Reich PROTISTEN (SVG) =====
+function drawProtistSvg(g, cx, cy, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const R=(14+size*34)*breath;
+  cy += Math.sin(time*0.002)*2;
+  if(a.n.startsWith("Plankton")){   // Radiolarie: Stern mit Stacheln
+    const spikes = 10+Math.round(size*8);
+    let d = "";
+    for(let i=0;i<spikes;i++){ const ang=i/spikes*Math.PI*2;
+      d += `M${cx.toFixed(1)},${cy.toFixed(1)}L${(cx+Math.cos(ang)*R*1.7).toFixed(1)},${(cy+Math.sin(ang)*R*1.7).toFixed(1)}`; }
+    cAttr(cEl("rad-spikes","path"), { d, stroke: flatCol([150,220,210]), "stroke-opacity": .7, "stroke-width": 1.4, fill: "none" });
+    cAttr(cEl("rad-core","circle"), { cx: cx.toFixed(1), cy: cy.toFixed(1), r: (R*0.7).toFixed(1),
+      fill: flatCol([120,200,190]), "fill-opacity": .55, stroke: flatCol([180,240,230]), "stroke-opacity": .6 });
+    return;
+  }
+  // Euglenoid: gruene Spindel mit peitschender Geissel + Augenfleck
+  const wob = 1 + 0.08*Math.sin(time*0.004);
+  const rot = (Math.sin(time*0.0016)*0.2 * 180/Math.PI).toFixed(2);
+  const grp = cAttr(cEl("eug","g"), { transform: `translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${rot})` });
+  const put = (key, tag) => { const e = cEl(key, tag); if(e.parentNode !== grp) grp.appendChild(e); return e; };
+  cAttr(put("eug-body","ellipse"), { cx:0, cy:0, rx:(R*1.4*wob).toFixed(1), ry:(R*0.7).toFixed(1), fill: flatCol([110,180,110]) });
+  for(let i=0;i<4;i++)   // Chloroplasten: eine Helligkeitsstufe dunkler = Tiefe ohne Schatten
+    cAttr(put("eug-chl"+i,"ellipse"), { cx:((i-1.5)*R*0.5).toFixed(1), cy:0, rx:(R*0.22).toFixed(1), ry:(R*0.4).toFixed(1),
+      fill: flatStep([110,180,110], -1), "fill-opacity": .7 });
+  cAttr(put("eug-eye","circle"), { cx:(-R*1.0).toFixed(1), cy:(-R*0.2).toFixed(1), r:(R*0.14).toFixed(1), fill: flatCol([240,80,60]), "fill-opacity": .9 });
+  cAttr(put("eug-fla","polyline"), { points: flagellumPoints(R*1.35, 0, 14, 5, 7, time*0.012),
+    stroke: flatCol([150,210,150]), "stroke-opacity": .8, "stroke-width": 1.5, fill: "none", "stroke-linecap": "round" });
+}
+
+// ===== Reich MIKROBEN (SVG) =====
+function drawMicrobeSvg(g, cx, cy, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const name = a.n;
+  const R = (16+size*40)*breath;
+  cy += Math.sin(time*0.002)*2;
+  if(name.startsWith("Protist")){   // Amoebe mit wandernden Pseudopodien
+    let d = "";
+    for(let i=0;i<=20;i++){ const ang=i/20*Math.PI*2, rr=R*(1+0.22*Math.sin(time*0.0025+i*1.7));
+      d += (i?"L":"M") + (cx+Math.cos(ang)*rr).toFixed(1) + "," + (cy+Math.sin(ang)*rr).toFixed(1); }
+    cAttr(cEl("amo-body","path"), { d: d+"Z", fill: flatCol([150,175,150]) });
+    cAttr(cEl("amo-nuc","circle"), { cx:(cx+R*0.2).toFixed(1), cy:cy.toFixed(1), r:(R*0.3).toFixed(1), fill: flatStep([90,150,120],-1), "fill-opacity": .75 });
+    cAttr(cEl("amo-vac","circle"), { cx:(cx-R*0.3).toFixed(1), cy:(cy-R*0.2).toFixed(1), r:(R*0.15).toFixed(1), fill: flatStep([200,230,210],1), "fill-opacity": .5 });
+    return;
+  }
+  if(name.startsWith("Archaee")){   // Extremophil: Staebchen mit Geissel
+    const warm = envLive.temperature > 0.5;
+    const body = warm ? [200,120,90] : [120,170,190];
+    const tail = warm ? [230,160,120] : [150,200,220];
+    const grp = cAttr(cEl("arc","g"), { transform: `translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(17.19)` });
+    const put = (key, tag) => { const e = cEl(key, tag); if(e.parentNode !== grp) grp.appendChild(e); return e; };
+    cAttr(put("arc-body","ellipse"), { cx:0, cy:0, rx:(R*1.3).toFixed(1), ry:(R*0.5).toFixed(1), fill: flatCol(body) });
+    cAttr(put("arc-fla","polyline"), { points: flagellumPoints(R*1.3, 0, 12, 6, 5, time*0.01),
+      stroke: flatCol(tail), "stroke-opacity": .7, "stroke-width": 1.5, fill: "none", "stroke-linecap": "round" });
+    return;
+  }
+  // Bakterie: Staebchen/Kokken-Kolonie
+  const n = 3+Math.round(size*5);
+  for(let i=0;i<n;i++){
+    const ang = i/n*Math.PI*2 + time*0.0004, rr = R*0.5;
+    const x = cx+Math.cos(ang)*rr, y = cy+Math.sin(ang)*rr;
+    cAttr(cEl("bac"+i,"ellipse"), { cx:0, cy:0, rx:(R*0.5).toFixed(1), ry:(R*0.28).toFixed(1),
+      fill: flatCol(mix([120,180,150],[150,200,170], rnd())),
+      transform: `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` });
+  }
+  cAttr(cEl("bac-core","circle"), { cx:cx.toFixed(1), cy:cy.toFixed(1), r:(R*0.42).toFixed(1), fill: flatCol([140,195,165]) });
 }
 
 function drawPlant(g, bx, by, breath, time, rnd, a){
