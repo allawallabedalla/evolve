@@ -412,7 +412,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.80.1";
+const APP_VERSION = "v0.80.2";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1525,6 +1525,13 @@ let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,w
 // sind bereits kuratierte/geprüfte Welten, kein freies Herumdrehen.
 let envDraft = null;
 let _draftPreviewTimer = null;
+// Welches Medium-Band (Land/Wasser) gerade FEST gilt, d. h. mit dem aktuellen `env.water`
+// übereinstimmt — im Unterschied zur bloss angeklickten Auswahl WÄHREND eines Entwurfs.
+// null = kein Medium fest (Regler in voller Spanne). Bug-Fix (2026-07-31): "Los" rief
+// bisher immer resetMediumUI() und liess die gerade gewählte Land/Wasser-Auswahl wieder
+// verschwinden, obwohl env.water exakt in diesem Band lag — sah aus wie "Umschalter
+// wirkt nicht". Jetzt bleibt eine COMMITTETE Wahl über Los/Verwerfen hinweg bestehen.
+let committedMedium = null;
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -2818,17 +2825,21 @@ function timeStr(ms){
   const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
 }
 /** Die 6 Regler-Eingaben auf den aktuellen `env`-Stand nachziehen (Laden, feste Startwelt,
-    Preset/Einfluss/Fundort). Setzt den water-Regler vorher auf volle Spanne zurück (kein
-    Medium-Band) — sonst würde ein kuratierter Preset-Wert außerhalb des zuletzt aktiven
-    Bands per min/max-Clamping verfälscht (z. B. Moderwald water=0.42). Räumt ausserdem
-    einen offenen Entwurf weg (Nutzer-Idee, 2026-07-31): jede Sofort-Anwendung ersetzt
-    die Grundlage, auf der ein alter Entwurf aufbaute. */
-function syncLeverInputs(){
-  if(typeof resetMediumUI === "function") resetMediumUI();
+    Preset/Einfluss/Fundort, oder Los/Verwerfen eines Entwurfs). Räumt einen offenen
+    Entwurf weg. `preserveMedium=true` (nur Los/Verwerfen) behält ein bereits COMMITTETES
+    Land/Wasser-Band bei — ohne diesen Unterschied setzte Los den water-Regler sofort
+    wieder auf volle Spanne zurück, obwohl env.water exakt im gewählten Band lag (Bug,
+    sah aus wie "Umschalter wirkt nicht"). Bei Preset/Einfluss/Fundort (Default, kein
+    Argument) bleibt der alte Schutz bestehen: der water-Regler geht auf volle Spanne
+    zurück, sonst würde ein kuratierter Preset-Wert außerhalb des Bands per min/max-
+    Clamping verfälscht (z. B. Moderwald water=0.42). */
+function syncLeverInputs(preserveMedium){
   envDraft = null;
   if(typeof _draftPreviewTimer !== "undefined") clearTimeout(_draftPreviewTimer);
   const db = document.getElementById("draftbar"); if(db) db.hidden = true;
   LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
+  if(preserveMedium && committedMedium && typeof applyMediumUI === "function") applyMediumUI(committedMedium, env);
+  else if(typeof resetMediumUI === "function") resetMediumUI();
 }
 function applyState(s){
   if(Array.isArray(s.genome) && s.genome.length>=6) genome = padGenome(s.genome);
@@ -3072,21 +3083,25 @@ function setWaterLabel(name, poleLo, poleHi){
   waterEndsEl[0].textContent = poleLo;
   waterEndsEl[1].textContent = poleHi;
 }
-/** Manueller Umschalter: water-Regler auf ein enges Medium-Band festlegen, den Wert im
-    ENTWURF zwingend hinein (Clamp) — für freie Erkundung ohne Preset. Wird nur aus dem
-    Klick-Handler unten gerufen, der `envDraft` vorher garantiert anlegt. */
-function applyMediumUI(medium){
+/** water-Regler auf ein enges Medium-Band festlegen, den Wert im ZIEL-Objekt zwingend
+    hinein (Clamp). `target` ist envDraft waehrend des Ziehens (Default) oder env direkt
+    beim Wiederherstellen einer bereits committeten Wahl nach Los/Verwerfen — setzt NICHT
+    `committedMedium` selbst (das entscheiden die Aufrufer, s. commitDraft()). */
+function applyMediumUI(medium, target){
+  const e = target || envDraft;
   const b = MEDIUM_BANDS[medium];
-  envDraft.water = Math.min(b.hi, Math.max(b.lo, envDraft.water));
-  waterInputEl.min = b.lo; waterInputEl.max = b.hi; waterInputEl.value = envDraft.water;
-  document.getElementById("v-water").textContent = envDraft.water.toFixed(2);
+  e.water = Math.min(b.hi, Math.max(b.lo, e.water));
+  waterInputEl.min = b.lo; waterInputEl.max = b.hi; waterInputEl.value = e.water;
+  document.getElementById("v-water").textContent = e.water.toFixed(2);
   setWaterLabel(b.name, b.poleLo, b.poleHi);
   [...mediumsEl.children].forEach(c => c.classList.toggle("active", c.dataset.medium === medium));
 }
 /** Preset/Einfluss/Fundort hat water bereits auf einen eigenen Wert gesetzt: Regler auf
     volle Spanne + Original-Beschriftung zurück, Umschalter zeigt „keine Auswahl" — der
-    Wert bleibt unverändert, unabhängig davon, ob er in einer der beiden Bänder liegt. */
+    Wert bleibt unverändert, unabhängig davon, ob er in einer der beiden Bänder liegt.
+    Loescht auch eine evtl. committetes Medium-Band (eine fremd gesetzte Welt ersetzt es). */
 function resetMediumUI(){
+  committedMedium = null;
   waterInputEl.min = 0; waterInputEl.max = 1; waterInputEl.value = env.water;
   document.getElementById("v-water").textContent = env.water.toFixed(2);
   setWaterLabel(WATER_LEVER_DEF.name, WATER_LEVER_DEF.lo, WATER_LEVER_DEF.hi);
@@ -3150,15 +3165,20 @@ function computeDraftPreview(){
 }
 function commitDraft(){
   if(!envDraft) return;
+  // Welches Medium gerade im Entwurf angeklickt ist, wird jetzt VERBINDLICH — sonst
+  // vergisst syncLeverInputs() gleich wieder, dass der Spieler es bewusst gewaehlt hat.
+  committedMedium = [...mediumsEl.children].find(c => c.classList.contains("active"))?.dataset.medium || null;
   Object.assign(env, envDraft);
-  syncLeverInputs();   // räumt envDraft/Leiste/Medium auf und zieht die Regler auf den neuen Live-Stand
+  syncLeverInputs(true);   // räumt envDraft/Leiste auf, behaelt committedMedium bei
   lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
   document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
   dismissOnboard(); storyEnvChanged();
 }
 function discardDraft(){
   if(!envDraft) return;
-  syncLeverInputs();   // envDraft=null, Regler zurück auf den unveränderten Live-Stand
+  // committedMedium bewusst UNVERAENDERT lassen: env selbst aendert sich beim Verwerfen
+  // nicht, eine vorher committete Land/Wasser-Wahl gilt also unveraendert weiter.
+  syncLeverInputs(true);   // envDraft=null, Regler zurück auf den unveränderten Live-Stand
 }
 document.getElementById("draftGoBtn").addEventListener("click", commitDraft);
 document.getElementById("draftDiscardBtn").addEventListener("click", discardDraft);
