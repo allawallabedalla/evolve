@@ -398,7 +398,7 @@
             <h3 id="wlChronHead">Chronik — Arten <button id="wlChronToggle" class="wl-chron-toggle" title="Zwischen Liste und Ähnlichkeits-Baum wechseln">Baum ⇄</button></h3>
             <ul id="wlChronik"></ul>
             <div id="wlTree" hidden></div>
-            <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = in wie vielen Umwelten diese Form gewinnt (häufig … <span style="color:var(--gold)">extrem selten</span>).</p>
+            <p class="wl-hint">Emergente Arten, prozedural benannt. Rarität = in wie vielen Umwelten diese Form gewinnt (häufig … <span style="color:var(--gold-ink)">extrem selten</span>).</p>
           </div>
         </div>
       </div>
@@ -416,7 +416,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.87.0";
+const APP_VERSION = "v0.87.1";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -2407,7 +2407,7 @@ function renderGenbook(){
   const legendTotal = Object.values(RARITY).filter(t=>t==="legendaer").length;
   document.getElementById("gbSub").innerHTML =
     `<b class="chip-val" style="color:var(--bio-dim)">${found}</b> von ${TREE_TOTAL} Formen in deinen Welten aufgetaucht` +
-    ` · <b style="color:var(--gold)">${legendFound}/${legendTotal}</b> extrem selten. ` +
+    ` · <b style="color:var(--gold-ink)">${legendFound}/${legendTotal}</b> extrem selten. ` +
     `Seltene Formen gewinnen nur in engen Nischen — forme neue Umwelten, um andere zu sehen. „???" heißt: hier noch nicht gesehen. Fahr über eine Kachel: wann &amp; wie sie entstand. ` +
     `<b>Klick auf eine gefundene Form:</b> ihr Bauplan, der gemessene Kausalpfad dahinter — und die Welt, in der du sie gefunden hast.`;
   const body = document.getElementById("gbBody");
@@ -6231,7 +6231,7 @@ try {
   const { realExample, archetypeWiki } = await import("./exemplar.js");
   window.__archetypeWiki = archetypeWiki;   // Brücke fürs Genbuch (Klick-Beschreibung)
 
-  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#2f86ad", "sehr selten":"#7d55c4", "extrem selten":"var(--gold)" };
+  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#2f86ad", "sehr selten":"#7d55c4", "extrem selten":"var(--gold-ink)" };
   const ic = window.__ic || (() => "");
 
   const el = (id) => document.getElementById(id);

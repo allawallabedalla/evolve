@@ -827,9 +827,27 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
   über keinen Button erreichbar (`openWorld()`-Bindung an `worldBtn` bewusst
   auskommentiert seit Umwelt-Einfluss den Button übernommen hat) — aufgefallen bei
   diesem Check, nicht Teil des Palette-Auftrags, hier nur vermerkt.
-- [ ] **Phase 5 — Audit** — **Modell: Sonnet** (Checkliste abarbeiten): WCAG-Kontrast erneut
-  prüfen, `prefers-reduced-motion` erhalten, alle Biome/Extremregler/Mutationsfälle
-  durchklicken.
+- [x] **Phase 5 — Audit — erledigt (2026-07-31), automatisiert statt durchgeklickt.**
+  Als wiederholbares Skript gebaut, nicht von Hand abgehakt — so ist es nach jeder
+  künftigen Design-Änderung erneut fahrbar.
+  **1. WCAG-Kontrast:** alle Elemente mit eigenem Textinhalt in 6 Ansichten
+  (Hauptbildschirm, Lebensbaum, Herausforderungen, Presets, Umwelt-Einfluss, Details)
+  gegen ihren tatsächlich gerenderten Hintergrund gemessen — der Hintergrund wird dabei
+  den DOM-Baum hochgesucht, bis eine deckende Fläche kommt, statt ihn zu raten. Groß-/
+  Fettschrift bekommt korrekt die 3:1-Schwelle, alles andere 4,5:1.
+  **Ein echter Fund:** der Zähler „x/15 extrem selten" im Lebensbaum stand in `--gold`
+  (#b98a2e) und erreichte auf `--chamber` nur **2,8:1**. Behoben durch ein neues Token
+  `--gold-ink` (#8a6416, 4,7:1) — dieselbe Trennung Fläche/Text, die die Palette bei
+  `--bio`/`--bio-dim` schon macht: `--gold` bleibt für Ränder, Punkte und Glows, die
+  Textrolle bekommt den dunkleren Ton. Alle vier Text-Verwendungen umgestellt (inkl.
+  `RTONE` im JS und der Legende im Welt-Overlay). **Danach 0 Verstöße bei ~770
+  geprüften Textelementen.**
+  **2. Presets/Extremregler:** alle 12 Presets angeklickt und alle 6 Regler auf 0 und 1
+  gefahren — jedes Mal wird gezeichnet, keine leere Bühne.
+  **3. Mutationsfälle:** jedes der 25 Gene einzeln auf 0 und 1 (50 Fälle) durch
+  `classify()` + Zeichner geschickt — alle 50 zeichnen, keine Ausnahme, kein Absturz.
+  **4. `prefers-reduced-motion`:** eigener Browser-Kontext, Animationen aus
+  (`animationName: none`), keine Fehler.
 - [x] **Zwei kleine Politur-Punkte aus Phase 2 — erledigt (2026-07-31).** Helligkeitskurve
   in `drawHabitat()` von linear auf `Math.pow(L,0.6)`-Ease umgestellt (bright(0.5) jetzt
   ~0.83 statt 0.75, Enden L=0/1 unverändert). `groundPath()` von 10 auf 16 Stützpunkte,
