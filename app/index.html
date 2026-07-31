@@ -412,7 +412,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.80.3";
+const APP_VERSION = "v0.80.4";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -3547,7 +3547,8 @@ const WHY_STILL = 0.0024, WHY_JUMP = 0.08;
 // (LEAVE/STILL exakt gleich, ENTER 1.5 % empfindlicher: 0.026/12 vs. 0.0022).
 const WHY_MF_SCALE = 12;
 const _why = { t: 0, ema: new Array(NG).fill(0), on: new Array(NG).fill(0), sig: "", shown: [],
-               hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null), env: null };
+               hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null), env: null,
+               stableSince: null };   // Punkt 11: Generation, seit der die Form ununterbrochen steht
 // Die 16 Umwelt-Achsen, an denen ein „Sprung" erkannt wird (6 Regler + 10 Stressoren).
 const WHY_ENV_KEYS = ["temperature","predation","foodAbundance","foodHeight","light","water",
   "toxicity","oxygen","salinity","uv","pressure","aridity","radiation","fire","frost","wind"];
@@ -3722,19 +3723,29 @@ function updateWhy(g, force){
   // Die Textzeile hängt NUR an den drei stärksten — Zappeln weiter unten im Feld
   // darf sie nicht neu schreiben.
   const sig = strong.map(p=>p.i+":"+p.dir).join(",");
-  if(sig === _why.sig && !force){ _pressTop = strong.length ? { i: strong[0].i, dir: strong[0].dir } : null; return; }
-  _why.sig = sig;
   // Bewegt sich nichts (mehr) nennenswert -> das Wesen ist angepasst -> Neugier-Anstoß.
+  // Punkt 11 (Zeitgefuehl-Recherche): waehrend die Form steht wird der Text bewusst NICHT
+  // durch die sig-Kurzschluss-Optimierung unten uebersprungen, sondern bei jedem Takt (WHY_MS
+  // ~900ms, kein Flacker-Risiko) neu geschrieben — nur so kann "seit N Generationen stabil"
+  // live mitzaehlen. _why.stableSince merkt sich die Generation, seit der sig() leer ist;
+  // sobald die Umwelt wieder etwas formt (strong.length>0), wird der Zaehler zurueckgesetzt.
   if(!strong.length){
+    if(_why.stableSince === null) _why.stableSince = generation;
+    _why.sig = sig;
     // Neugier-Anstoß (sanftes Ziel, KEIN Zwang): eine leise Einladung zum Weiterspielen, die
     // zugleich Ursache→Wirkung lehrt. Stabil je Form (Hash) -> kein Flackern; wechselt bei Änderung.
     const a = committedArch || classify(g);
     let h = 0; for(let k=0;k<a.n.length;k++) h = (h*31 + a.n.charCodeAt(k)) & 0x7fffffff;
     const idea = EXPLORE_IDEAS[h % EXPLORE_IDEAS.length];
-    el.innerHTML = `<b>Angepasst</b> an diese Umwelt — die Form steht.  <span class="why-idea">${idea}</span>`;
+    const stableGens = generation - _why.stableSince;
+    const ageTxt = stableGens >= 1 ? ` <span class="why-age">· seit ${stableGens.toLocaleString("de-DE")} Generationen stabil</span>` : "";
+    el.innerHTML = `<b>Angepasst</b> an diese Umwelt — die Form steht.${ageTxt}  <span class="why-idea">${idea}</span>`;
     _pressTop = null;   // Chronik: nichts bewegt sich -> Gleichgewichts-Zeile wird möglich
     return;
   }
+  _why.stableSince = null;   // Umwelt formt wieder etwas -> Stabilitaets-Zaehler zuruecksetzen
+  if(sig === _why.sig && !force){ _pressTop = { i: strong[0].i, dir: strong[0].dir }; return; }
+  _why.sig = sig;
   _pressTop = { i: strong[0].i, dir: strong[0].dir };   // Chronik: stärkster Druck
   const chips = strong.map(p=>`${GENE_LABELS[p.i]} <span class="${p.dir>0?"up":"down"}">${p.dir>0?"↑":"↓"}</span>`).join(" · ");
   el.innerHTML = `Diese Umwelt formt gerade: ${chips}`;
@@ -4916,10 +4927,15 @@ const HAB_FIG_LIGHT=[156,127,160];
 // Boden-Formensprache: weiche Welle (Feuchtigkeit hoch) <-> harte Kristallkante (trocken).
 // Feste 720x560-Buehne (SVG-viewBox) — deshalb keine CW/CH-Abhaengigkeit noetig.
 function groundPath(humidity){
-  const n=10, pts=[];
+  // Politur (Redesign Punkt 4): mehr Stuetzpunkte fuer eine rundere Wellenlinie
+  // (vorher n=10, sichtbar kantig bei feuchten Welt-Voreinstellungen).
+  const n=16, pts=[];
+  // Phasenschritt an n skaliert (war fest 0.85 bei n=10 = 8.5 Gesamtphase) -
+  // mehr Stuetzpunkte ohne die Wellenform selbst zu verdichten/verzerren.
+  const phaseStep = 8.5 / n;
   for(let i=0;i<=n;i++){
     const x=(720/n)*i;
-    const wave = 460 + Math.sin(i*0.85)*14;
+    const wave = 460 + Math.sin(i*phaseStep)*14;
     const crystal = 452 + (i%2===0 ? -22 : 18);
     pts.push([x, lerp(crystal, wave, humidity)]);
   }
@@ -4947,7 +4963,10 @@ function drawHabitat(){
   // Regler-Wirkungen und Stress-Overlays bleiben erhalten (Vegetation, Licht, Schnee,
   // Wasserstand, Gift/Hypoxie/Salz/UV-Schleier) — nur als flache Flaechen statt Verlaeufe.
   const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
-  const bright = lerp(0.5, 1, L);
+  // Politur (Redesign Punkt 4): reines lerp(0.5,1,L) liess mittleres Licht zu dunkel
+  // wirken (0.5 -> bright 0.75). Ease-Kurve hebt die Mitte an, ohne die Enden (L=0/1)
+  // zu veraendern: bright(0.5) jetzt ~0.83 statt 0.75.
+  const bright = lerp(0.5, 1, Math.pow(L, 0.6));
 
   // Himmel: EINE flache Flaeche (kein Verlauf) auf der kalt<->warm-Achse.
   const sky = mix(HAB_COLD, HAB_WARM, T).map(c => c*bright);

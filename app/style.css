@@ -335,6 +335,7 @@
   .why .up { color: var(--bio-dim); font-weight: var(--w-bold); }
   .why .down { color: var(--warn); font-weight: var(--w-bold); }   /* gleiche Warn-Farbe wie .gene.sel-down */
   .why .why-idea { display: inline-block; color: var(--bio-dim); font-style: italic; opacity: .92; }
+  .why .why-age { color: var(--muted); opacity: .85; }
   .gene .num { font-family: var(--mono); font-size: var(--fs-xs); color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
   /* Progressive Disclosure: die genauen Zahlen sind standardmäßig aus (Rauschen für Laien),
      die Balken zeigen die Ausprägung. Über den Toggle einblendbar (Lab-Tiefe auf Wunsch). */
