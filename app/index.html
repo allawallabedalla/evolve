@@ -95,10 +95,17 @@
     <div class="panel console">
       <h2>Umwelt formen</h2>
       <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
-      <p class="console-framing"><b>Presets ↗</b> setzen eine fertige Welt · <b>Regler</b> justieren sie fein · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
-      <div class="onboard" id="onboard" hidden>Öffne <b>Presets ↗</b>, dreh einen <b>Regler</b> oder löse einen <b>Umwelt-Einfluss ↗</b> aus — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
+      <p class="console-framing"><b>Presets ↗</b> setzen eine fertige Welt sofort · <b>Regler</b> entwerfen eine neue, <b>Los</b> übernimmt sie · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
+      <div class="onboard" id="onboard" hidden>Öffne <b>Presets ↗</b> für eine fertige Welt, oder dreh einen <b>Regler</b> und drück <b>Los</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
       <div class="mediums-row"><span class="mlabel">Lebensraum</span><div class="mediums" id="mediums"></div></div>
       <div id="levers"></div>
+      <div class="draftbar" id="draftbar" hidden>
+        <p class="draft-preview" id="draftPreview"></p>
+        <div class="draft-actions">
+          <button class="draft-go" id="draftGoBtn">Los</button>
+          <button class="link draft-discard" id="draftDiscardBtn">Verwerfen</button>
+        </div>
+      </div>
       <div class="controls">
         <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter"></button>
         <div class="speeds" id="speeds"></div>
@@ -406,7 +413,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.79.0";
+const APP_VERSION = "v0.80.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1510,6 +1517,15 @@ const NG = GENE_LABELS.length;
 const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
 let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0,uv:0,pressure:0,aridity:0,radiation:0,fire:0,frost:0,wind:0};
+// Entwurfs-Umwelt (Nutzer-Idee, 2026-07-31): Regler/Medium-Umschalter schreiben NICHT
+// mehr direkt in `env` (das treibt die laufende Simulation), sondern in `envDraft` — das
+// lebende Wesen laeuft unter der ALTEN Welt unbeeinflusst weiter, waehrend eine stille
+// Vorschau zeigt, wohin der Entwurf fuehren wuerde. Erst "Los" uebernimmt envDraft -> env.
+// null = kein Entwurf aktiv (Regler zeigen exakt den Live-Stand). Presets/Umwelt-Einfluesse/
+// Fundort-Wiederherstellung bleiben Sofort-Anwendung (kein Umweg über den Entwurf) — sie
+// sind bereits kuratierte/geprüfte Welten, kein freies Herumdrehen.
+let envDraft = null;
+let _draftPreviewTimer = null;
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -2805,9 +2821,14 @@ function timeStr(ms){
 /** Die 6 Regler-Eingaben auf den aktuellen `env`-Stand nachziehen (Laden, feste Startwelt,
     Preset/Einfluss/Fundort). Setzt den water-Regler vorher auf volle Spanne zurück (kein
     Medium-Band) — sonst würde ein kuratierter Preset-Wert außerhalb des zuletzt aktiven
-    Bands per min/max-Clamping verfälscht (z. B. Moderwald water=0.42). */
+    Bands per min/max-Clamping verfälscht (z. B. Moderwald water=0.42). Räumt ausserdem
+    einen offenen Entwurf weg (Nutzer-Idee, 2026-07-31): jede Sofort-Anwendung ersetzt
+    die Grundlage, auf der ein alter Entwurf aufbaute. */
 function syncLeverInputs(){
   if(typeof resetMediumUI === "function") resetMediumUI();
+  envDraft = null;
+  if(typeof _draftPreviewTimer !== "undefined") clearTimeout(_draftPreviewTimer);
+  const db = document.getElementById("draftbar"); if(db) db.hidden = true;
   LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
 }
 function applyState(s){
@@ -3011,11 +3032,12 @@ LEVERS.forEach(l => {
     <div class="ends"><span>${l.lo}</span><span>${l.hi}</span></div>`;
   leversEl.appendChild(d);
   d.querySelector("input").addEventListener("input", ev => {
-    env[l.key] = +ev.target.value;
-    document.getElementById("v-"+l.key).textContent = env[l.key].toFixed(2);
-    lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
-    document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));  // K5: eigene Umwelt -> kein Preset aktiv
-    dismissOnboard(); storyEnvChanged();
+    // Nutzer-Idee (2026-07-31): Regler schreiben in den ENTWURF, nicht in die laufende
+    // Welt — das lebende Wesen laeuft unter der alten Welt weiter, bis "Los" faellt.
+    const de = draftEnv();
+    de[l.key] = +ev.target.value;
+    document.getElementById("v-"+l.key).textContent = de[l.key].toFixed(2);
+    showDraftBar(); scheduleDraftPreview();
   });
 });
 
@@ -3051,13 +3073,14 @@ function setWaterLabel(name, poleLo, poleHi){
   waterEndsEl[0].textContent = poleLo;
   waterEndsEl[1].textContent = poleHi;
 }
-/** Manueller Umschalter: water-Regler auf ein enges Medium-Band festlegen, env.water
-    zwingend hinein (Clamp) — für freie Erkundung ohne Preset. */
+/** Manueller Umschalter: water-Regler auf ein enges Medium-Band festlegen, den Wert im
+    ENTWURF zwingend hinein (Clamp) — für freie Erkundung ohne Preset. Wird nur aus dem
+    Klick-Handler unten gerufen, der `envDraft` vorher garantiert anlegt. */
 function applyMediumUI(medium){
   const b = MEDIUM_BANDS[medium];
-  env.water = Math.min(b.hi, Math.max(b.lo, env.water));
-  waterInputEl.min = b.lo; waterInputEl.max = b.hi; waterInputEl.value = env.water;
-  document.getElementById("v-water").textContent = env.water.toFixed(2);
+  envDraft.water = Math.min(b.hi, Math.max(b.lo, envDraft.water));
+  waterInputEl.min = b.lo; waterInputEl.max = b.hi; waterInputEl.value = envDraft.water;
+  document.getElementById("v-water").textContent = envDraft.water.toFixed(2);
   setWaterLabel(b.name, b.poleLo, b.poleHi);
   [...mediumsEl.children].forEach(c => c.classList.toggle("active", c.dataset.medium === medium));
 }
@@ -3075,16 +3098,71 @@ function resetMediumUI(){
   btn.className = "medium"; btn.dataset.medium = key; btn.textContent = lbl;
   btn.addEventListener("click", () => {
     if(btn.classList.contains("active")) return;   // schon aktiv -> nichts zu tun
+    const de = draftEnv();
     const b = MEDIUM_BANDS[key];
-    env.water = (b.lo + b.hi) / 2;   // neue Welt: Band-Mitte als Startpunkt, wie Phase-0-Vorbild
+    de.water = (b.lo + b.hi) / 2;   // neuer Entwurf: Band-Mitte als Startpunkt, wie Phase-0-Vorbild
     applyMediumUI(key);
-    lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
-    document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
-    dismissOnboard(); storyEnvChanged();
+    showDraftBar(); scheduleDraftPreview();
   });
   mediumsEl.appendChild(btn);
 });
 resetMediumUI();
+
+// ---- Entwurf: Vorschau + Los/Verwerfen (Nutzer-Idee, 2026-07-31) ----------------------
+// Regler/Medium-Umschalter schreiben oben bereits in envDraft statt env. Hier die
+// Klammer drumherum: den Entwurf anlegen, die Leiste einblenden, nach kurzer Pause im
+// Ziehen eine ECHTE (nicht geratene) Vorschau rechnen — derselbe stepGeneration()-
+// Mittelfeld-Pfad, den biomeHintForms() schon fuer die Presets nutzt, hier aber ab dem
+// AKTUELLEN Genom (`genome`) statt neutral 0.5, weil die Aussage "deine Linie" gilt,
+// nicht "irgendeine Linie". Eine fruehere, rein aus der Reglerstellung geratene Vorschau
+// ("hier wohnt sie") wurde in einer frueheren Sitzung explizit verworfen (nur 4/44 bzw.
+// 14/44 Trefferquote) — das hier ist deshalb bewusst gerechnet, nicht geraten.
+const draftbarEl = document.getElementById("draftbar");
+const draftPreviewEl = document.getElementById("draftPreview");
+/** Entwurf anlegen (Kopie der aktuellen Live-Welt), falls noch keiner existiert. */
+function draftEnv(){ return envDraft || (envDraft = { ...env }); }
+function showDraftBar(){ draftbarEl.hidden = false; }
+function scheduleDraftPreview(){
+  draftPreviewEl.textContent = "… wird berechnet";
+  clearTimeout(_draftPreviewTimer);
+  _draftPreviewTimer = setTimeout(computeDraftPreview, 220);   // Debounce: nicht bei jedem Zieh-Tick rechnen
+}
+/** Bis zu 3 Regler, die am weitesten von der Mitte abweichen, als Alltagswoerter — aus
+    denselben lo/hi-Texten der LEVERS, keine erfundene zweite Beschreibung. */
+function draftWorldBlurb(e){
+  const picks = LEVERS
+    .map(l => ({ word: e[l.key] >= 0.5 ? l.hi : l.lo, dev: Math.abs(e[l.key]-0.5) }))
+    .filter(x => x.dev > 0.18)
+    .sort((a,b) => b.dev-a.dev)
+    .slice(0,3)
+    .map(x => x.word);
+  if(!picks.length) return "Ausgeglichenes Milieu";
+  return picks[0].charAt(0).toUpperCase() + picks[0].slice(1) + (picks.length>1 ? ", "+picks.slice(1).join(", ") : "");
+}
+function computeDraftPreview(){
+  if(!envDraft) return;
+  let m = genome.slice();
+  for(let i=0; i<BIOME_HINT_GENS; i++) m = stepGeneration(m, envDraft);
+  const res = classify(m, envDraft);
+  const blurb = draftWorldBlurb(envDraft);
+  const aw = (!res.novel && window.__archetypeWiki) ? window.__archetypeWiki(res.n) : null;
+  draftPreviewEl.innerHTML = `<b class="draft-blurb">${blurb}</b> — deine Linie würde sich in diese Richtung entwickeln: <b>${res.n}</b>` +
+    (aw ? ` <a href="${aw.wiki}" target="_blank" rel="noopener">≈ wie ${aw.name} ↗</a>` : "");
+}
+function commitDraft(){
+  if(!envDraft) return;
+  Object.assign(env, envDraft);
+  syncLeverInputs();   // räumt envDraft/Leiste/Medium auf und zieht die Regler auf den neuen Live-Stand
+  lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  dismissOnboard(); storyEnvChanged();
+}
+function discardDraft(){
+  if(!envDraft) return;
+  syncLeverInputs();   // envDraft=null, Regler zurück auf den unveränderten Live-Stand
+}
+document.getElementById("draftGoBtn").addEventListener("click", commitDraft);
+document.getElementById("draftDiscardBtn").addEventListener("click", discardDraft);
 
 // Verborgene Stressoren (toxicity/oxygen/salinity/… kommen NUR über Biome/Umwelt-
 // Einflüsse, haben also bewusst KEINEN Regler — siehe P1.3-Kommentar bei LEVERS oben,

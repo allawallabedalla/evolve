@@ -1334,6 +1334,26 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   engt Band korrekt ein, Presets bleiben unverzerrt, erneuter Toggle-Klick nach einem
   Preset funktioniert. `app-fitness-check` bestätigt: reine UI-Änderung, Physik-Bundle
   unverändert. Details in docs/roadmap-lebendige-welt.md Phase 2.
+- [x] **Entwurf statt Sofort-Wirkung: Regler → Vorschau → „Los" (UI-Nachtrag,
+  2026-07-31).** Nutzer-Feedback: freies Regler-Drehen fühlte sich zu volatil an, weil
+  jeder Dreh sofort die laufende Welt änderte. Umgebaut auf zwei Phasen: Regler/Medium-
+  Umschalter schreiben jetzt in `envDraft` statt `env` — das lebende Wesen entwickelt
+  sich unter der ALTEN Welt unbeeinflusst weiter, während eine Leiste unter den Reglern
+  eine ECHTE (gerechnete, nicht geratene) Vorschau zeigt: `stepGeneration()` (derselbe
+  Mittelfeld-Pfad, den `biomeHintForms()` schon für Presets nutzt) ab dem *aktuellen*
+  Genom, debounced (~220ms) nach der letzten Reglerbewegung. Text-Vorschau kombiniert
+  eine Kurzbeschreibung der Welt (aus den vorhandenen LEVERS-Polwörtern, nichts neu
+  erfunden) mit der wahrscheinlichen Zielform + deren realem Vorbild aus `exemplar.js`
+  (`window.__archetypeWiki`) — bewusst NICHT rein aus der Reglerstellung geraten, das
+  wurde in einer früheren Sitzung schon einmal versucht und mit nur 4/44–14/44
+  Trefferquote verworfen. „Los" übernimmt `envDraft → env`, „Verwerfen" verwirft ihn;
+  Presets/Umwelt-Einflüsse/Fundort-Wiederherstellung bleiben bewusst Sofort-Anwendung
+  (kuratierte, bereits geprüfte Welten) und räumen einen offenen Entwurf automatisch weg
+  (`syncLeverInputs()`). Bug gefunden und behoben: `.draftbar[hidden]` fehlte —
+  `display: flex` aus der Klassen-Regel gewann sonst gegen die UA-Regel `[hidden]`
+  (dasselbe Muster wie der frühere Komplexitäts-Audit-Fund P1.4). Im Browser verifiziert
+  (Playwright): Generation-Zähler läuft während des Entwurfs unbeeinflusst weiter, Los/
+  Verwerfen/Preset-Override funktionieren, keine JS-Fehler.
 - [x] **Phase 5 — Symbiose/Parasitismus — umgesetzt (2026-07-30).** Neue Datei
   `world/symbiosis.ts` (Ergänzung neben `world/coevolution.ts`, kein Eingriff dort):
   zwei Populationen über denselben Merkmals-Passungs-Kernel gekoppelt wie beim
