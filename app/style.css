@@ -205,6 +205,9 @@
     color: var(--ink); background: var(--cream); border: 1px solid var(--line-soft);
     padding: 3px 9px; border-radius: 999px;
   }
+  /* Jahr/Jahreszeit: zweite Stimme im selben Chip — der zyklische Zeitbezug steht
+     bewusst leiser als die lineare Generationszahl (kein zweites Widget, kein Balken). */
+  .gen-readout .season { color: var(--muted); }
   .biome-tag {
     position: absolute; top: 12px; right: 14px; z-index: 3;
     font-size: var(--fs-sm); color: var(--ink); background: var(--cream);

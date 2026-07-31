@@ -35,7 +35,7 @@
     <!-- Habitat + Identitaet -->
     <div class="panel viewport-panel">
       <div class="viewport">
-        <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span></div>
+        <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span><span class="season" id="seasonReadout" title="Die Temperatur schwingt über ein „Jahr“ von 600 Generationen — kein Ziel, nur der Rhythmus der Welt. Während einer Herausforderung steht sie still."></span></div>
         <div class="biome-tag" id="biomeTag">freie Umwelt</div>
         <div class="stress-chips" id="stressChips" hidden></div>
         <!-- Phase 2 (flacher Vektor-Stil): die Buehne ist echtes SVG-DOM — flache Flaechen
@@ -412,7 +412,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.80.5";
+const APP_VERSION = "v0.81.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1535,6 +1535,51 @@ let _draftPreviewTimer = null;
 // verschwinden, obwohl env.water exakt in diesem Band lag — sah aus wie "Umschalter
 // wirkt nicht". Jetzt bleibt eine COMMITTETE Wahl über Los/Verwerfen hinweg bestehen.
 let committedMedium = null;
+// ============================================================================
+// JAHRESZEITEN (Punkt 11, aus der Zeitgefuehl-Recherche; Physik aus world/seasonal.ts,
+// Phase 6 — dort validiert (npm run seasonal-check), aber bis jetzt bewusst nicht in der
+// Live-App verdrahtet).
+//
+// WARUM ueberhaupt: der Nutzer vermisste einen "zeitlichen Bezug". Ein Fortschrittsbalken
+// verbietet sich (Leitplanke "kein Vollstaendigkeits-Balken"), weil er ein Ende behauptet,
+// das Evolution nicht hat. Ein ZYKLUS behauptet keins — er ist Rhythmus, kein Ziel
+// (Don't Starve / Animal Crossing). Kosten fuer den Spieler: null. Kein Grind, keine Frist.
+//
+// ARCHITEKTUR — dieselbe Trennung wie env/envDraft:
+//   env      = die NOMINALE Welt. Gehoert dem Spieler. Regler, Speicherstand, Presets,
+//              Herausforderungs-Grenzen und die Entwurfs-Vorschau lesen NUR diese.
+//   envLive  = env + Jahreszeiten-Versatz. Das ist "die Welt gerade jetzt": Evolution,
+//              Selektions-Messung der Warum-Zeile, Passung und die gezeichnete Buehne.
+// Wuerde die Jahreszeit in `env` selbst schreiben, wanderten die Regler sichtbar davon,
+// Speicherstaende wuerden verfaelscht und Herausforderungen zufaellig verletzt.
+//
+// ACHSE: Temperatur — die einzige Achse, die schon die Himmels-/Bodenfarbe traegt. Die
+// Jahreszeit wird damit OHNE neues Widget sichtbar (genau das Ziel: erlebter Rhythmus
+// statt Zahl). Amplitude bewusst klein: die Welt soll atmen, nicht kippen.
+const SEASON = { axis: "temperature", amplitude: 0.10, period: 600 };
+const SEASON_NAMES = ["Frühling", "Sommer", "Herbst", "Winter"];
+// Die abgeleitete Live-Umwelt. EIN persistentes Objekt (nicht je Generation neu angelegt —
+// simGeneration() laeuft bis zu ~40x je Bild).
+const envLive = { ...env };
+/** Anteil im Jahr, 0..1 — 0 = Fruehlingsanfang. */
+function seasonPhase(gen){ return ((gen % SEASON.period) + SEASON.period) % SEASON.period / SEASON.period; }
+function seasonName(gen){ return SEASON_NAMES[Math.floor(seasonPhase(gen) * 4) % 4]; }
+function seasonYear(gen){ return Math.floor(gen / SEASON.period) + 1; }
+/**
+ * envLive aus env + Jahreszeit neu berechnen. Muss vor jedem Lesen von envLive laufen
+ * (Simulation, Zeichnen, Passung) — billig genug fuer den Frame-Takt.
+ *
+ * WAEHREND EINER HERAUSFORDERUNG steht die Jahreszeit still: `challengeTick()` prueft
+ * `withinGrenzen(env, ...)` und wertet ein Verlassen der Grenzen sofort als Abbruch — eine
+ * schwankende Temperatur wuerde laufende Versuche zufaellig zerstoeren. Ausserdem sind
+ * Herausforderungs-Ergebnisse nur vergleichbar, wenn alle dieselbe Umwelt bekommen.
+ */
+function updateEnvLive(){
+  for(const k in env) envLive[k] = env[k];
+  if(activeChallenge) return;   // eingefroren: siehe oben
+  const off = SEASON.amplitude * Math.sin(2 * Math.PI * seasonPhase(generation));
+  envLive[SEASON.axis] = clamp01(env[SEASON.axis] + off);
+}
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
@@ -1960,7 +2005,7 @@ function coevoPressure(){
 function coevoEnvOf(P){
   if(!_coevo.env) _coevo.env = {};
   const e = _coevo.env;
-  for(const k in env) e[k] = env[k];
+  for(const k in envLive) e[k] = envLive[k];   // Jahreszeit gilt auch fuer die Raeuber
   return (i) => { e.predation = P[i]; return e; };
 }
 
@@ -1973,11 +2018,11 @@ function simGeneration(){
     // an einem alten Messwert hängen, nachdem der Spieler den Räuber-Regler ganz
     // heruntergezogen hat (genau der Fall, in dem er nichts mehr behaupten darf).
     _coevo.pSd = 0; _coevo.trace.length = 0;
-    pop.step(env, PHYS); return;
+    pop.step(envLive, PHYS); return;
   }
   // Reihenfolge wie in Ecosystem.step(): erst BEIDE Gewichte aus dem alten Zustand …
-  const w = pop.weights(env, PHYS, coevoEnvOf(cp.P));
-  const bw = predPop.weights(env, PHYS), nq = bw.length, pw = new Array(nq);
+  const w = pop.weights(envLive, PHYS, coevoEnvOf(cp.P));
+  const bw = predPop.weights(envLive, PHYS), nq = bw.length, pw = new Array(nq);
   for(let p=0;p<nq;p++) pw[p] = bw[p] * (COEVO.floor + COEVO.gain * cp.food[p]);
   // … dann fortpflanzen.
   predPop.reproduceWith(pw);
@@ -2104,6 +2149,7 @@ function simStepBudget(){
 
 /** `steps` Generationen weiter — der einzige Ort, an dem die Zeit voranschreitet. */
 function simAdvance(steps){
+  updateEnvLive();   // Jahreszeit dieses Schrittes (env selbst bleibt unberuehrt)
   if(pop){
     const t0 = performance.now();
     for(let i=0;i<steps;i++) simGeneration();
@@ -2116,7 +2162,7 @@ function simAdvance(steps){
     if(_censusDue >= SWARM.censusEvery || performance.now() - _censusT >= SWARM.censusMaxMs) readSwarm();
   } else {
     // Rückfall (app/core/ nicht ladbar): altes Mittelfeld-Regime.
-    for(let i=0;i<steps;i++){ genome = stepGeneration(genome, env, randn); generation++; }
+    for(let i=0;i<steps;i++){ genome = stepGeneration(genome, envLive, randn); generation++; }
   }
 }
 
@@ -3424,7 +3470,8 @@ function updatePanels(g, a){
   if(cv) cv.setAttribute("aria-label", `Generation ${generation}, Form: ${a.n}`);
   // A3: Vitalitaet = wie gut passt das Wesen zur AKTUELLEN Umwelt (Fitness).
   // Live -> dreht man einen Regler, sackt sie kurz ab und erholt sich beim Anpassen.
-  const vit = vitality(g, env);
+  // envLive: "aktuell" schliesst die Jahreszeit ein — die Passung atmet mit dem Jahr.
+  const vit = vitality(g, envLive);
   const vf = document.getElementById("vitFill");
   vf.style.width = (vit*100).toFixed(0) + "%";
   vf.style.background = vit < 0.4 ? "var(--danger)"
@@ -3553,6 +3600,18 @@ const WHY_MF_SCALE = 12;
 const _why = { t: 0, ema: new Array(NG).fill(0), on: new Array(NG).fill(0), sig: "", shown: [],
                hold: new Array(NG).fill(0), wTxt: new Array(NG).fill(null), env: null,
                stableSince: null };   // Punkt 11: Generation, seit der die Form ununterbrochen steht
+// Grobe Stufen fuer "seit über N Generationen stabil" — s. Begruendung in updateWhy().
+// MULTIPLIKATIV (x5), nicht feingliedrig: bei Tempo "schnell" rasen Tausende Generationen
+// durch ein 12-s-Fenster, eine lineare Leiter (50/100/250/500…) wuerde darin mehrfach
+// umspringen und allein schon fast das ganze Ruhe-Budget von ui-calm-check aufbrauchen
+// (gemessen: 3 -> 6 Wechsel). Mit x5-Stufen kostet jeder weitere Wechsel die fuenffache
+// Dauer — die Anzeige bleibt bei JEDEM Tempo ruhig, die Aussage ("schon lange") bleibt.
+const STABLE_STEPS = [100, 500, 2500, 10000, 50000, 250000];
+function stableStepOf(gens){
+  let s = 0;
+  for(const k of STABLE_STEPS){ if(gens >= k) s = k; else break; }
+  return s;   // 0 = noch zu kurz, um von "stabil seit" zu sprechen
+}
 // Die 16 Umwelt-Achsen, an denen ein „Sprung" erkannt wird (6 Regler + 10 Stressoren).
 const WHY_ENV_KEYS = ["temperature","predation","foodAbundance","foodHeight","light","water",
   "toxicity","oxygen","salinity","uv","pressure","aridity","radiation","fire","frost","wind"];
@@ -3586,8 +3645,10 @@ function swarmSelection(){
   // gemessene Antwort auf ein Beuteschema, das sich bewegt. Die Räuber-Passung wird für
   // die AKTUELLE Population neu gerechnet (die Indizes aus der letzten Fortpflanzung
   // zeigen auf die Elterngeneration und wären hier falsch).
+  // envLive statt env: die Zeile MUSS dieselbe Auslese erklaeren, die simGeneration()
+  // gerade fahrt — inklusive Jahreszeit-Versatz, sonst behauptet sie eine andere Welt.
   const cp = coevoPressure();
-  const w = cp ? pop.weights(env, PHYS, coevoEnvOf(cp.P)) : pop.weights(env, PHYS);
+  const w = cp ? pop.weights(envLive, PHYS, coevoEnvOf(cp.P)) : pop.weights(envLive, PHYS);
   let tw = 0; for(let j=0;j<N;j++) tw += w[j];
   if(!(tw > 0)) return null;
   const wm = tw / N;
@@ -3726,23 +3787,28 @@ function updateWhy(g, force){
   }
   // Die Textzeile hängt NUR an den drei stärksten — Zappeln weiter unten im Feld
   // darf sie nicht neu schreiben.
-  const sig = strong.map(p=>p.i+":"+p.dir).join(",");
   // Bewegt sich nichts (mehr) nennenswert -> das Wesen ist angepasst -> Neugier-Anstoß.
-  // Punkt 11 (Zeitgefuehl-Recherche): waehrend die Form steht wird der Text bewusst NICHT
-  // durch die sig-Kurzschluss-Optimierung unten uebersprungen, sondern bei jedem Takt (WHY_MS
-  // ~900ms, kein Flacker-Risiko) neu geschrieben — nur so kann "seit N Generationen stabil"
-  // live mitzaehlen. _why.stableSince merkt sich die Generation, seit der sig() leer ist;
-  // sobald die Umwelt wieder etwas formt (strong.length>0), wird der Zaehler zurueckgesetzt.
+  // Punkt 11 (Zeitgefuehl-Recherche): dazu ein ZEITBEZUG ("seit über N Generationen").
+  //
+  // ⚠️ Der Zaehler ist bewusst GROB GESTUFT (STABLE_STEPS), nicht generationsgenau.
+  // Erster Anlauf zeigte die exakte Zahl — die aendert sich bei jedem WHY_MS-Takt und
+  // liess `npm run ui-calm-check` von 2 auf 106 Wechsel je 12 s hochschnellen (Richtwert
+  // 6). Genau das Zappeln, gegen das dieses Gate nach einer Nutzer-Beschwerde gebaut
+  // wurde. Die AUSSAGE ist "schon lange", nicht "genau 137" — die Stufen tragen sie
+  // vollstaendig und die Zeile wechselt ueber einen ganzen Lauf nur eine Handvoll Mal.
+  // Damit bleibt auch der sig-Kurzschluss unten wirksam: gleicher Text -> kein Schreiben.
+  const stableStep = !strong.length && _why.stableSince !== null ? stableStepOf(generation - _why.stableSince) : 0;
+  const sig = strong.map(p=>p.i+":"+p.dir).join(",") + "|" + stableStep;
   if(!strong.length){
     if(_why.stableSince === null) _why.stableSince = generation;
+    if(sig === _why.sig && !force){ _pressTop = null; return; }
     _why.sig = sig;
     // Neugier-Anstoß (sanftes Ziel, KEIN Zwang): eine leise Einladung zum Weiterspielen, die
     // zugleich Ursache→Wirkung lehrt. Stabil je Form (Hash) -> kein Flackern; wechselt bei Änderung.
     const a = committedArch || classify(g);
     let h = 0; for(let k=0;k<a.n.length;k++) h = (h*31 + a.n.charCodeAt(k)) & 0x7fffffff;
     const idea = EXPLORE_IDEAS[h % EXPLORE_IDEAS.length];
-    const stableGens = generation - _why.stableSince;
-    const ageTxt = stableGens >= 1 ? ` <span class="why-age">· seit ${stableGens.toLocaleString("de-DE")} Generationen stabil</span>` : "";
+    const ageTxt = stableStep ? ` <span class="why-age">· seit über ${stableStep.toLocaleString("de-DE")} Generationen stabil</span>` : "";
     el.innerHTML = `<b>Angepasst</b> an diese Umwelt — die Form steht.${ageTxt}  <span class="why-idea">${idea}</span>`;
     _pressTop = null;   // Chronik: nichts bewegt sich -> Gleichgewichts-Zeile wird möglich
     return;
@@ -4966,6 +5032,13 @@ function drawHabitat(){
   // -> Partikel (in drawMotes), Strahlung/Druck -> diagonale Lichtkeile. Alle uebrigen
   // Regler-Wirkungen und Stress-Overlays bleiben erhalten (Vegetation, Licht, Schnee,
   // Wasserstand, Gift/Hypoxie/Salz/UV-Schleier) — nur als flache Flaechen statt Verlaeufe.
+  // Die Buehne zeigt die Welt GERADE JETZT, also mit Jahreszeit. Ein lokales Shadowing
+  // lenkt saemtliche env.-Lesezugriffe dieser Funktion auf envLive um (drawHabitat
+  // schreibt nirgends in env — nur lesen). Eigener updateEnvLive()-Aufruf, weil
+  // drawHabitat() auch ausserhalb des Simulationstakts laeuft (Preset-Klick, Pause,
+  // Umwelt-Einfluss) und dann sonst eine veraltete Welt zeichnen wuerde.
+  updateEnvLive();
+  const env = envLive;
   const T=env.temperature, L=env.light, W=env.water, FH=env.foodHeight, FA=env.foodAbundance;
   // Politur (Redesign Punkt 4): reines lerp(0.5,1,L) liess mittleres Licht zu dunkel
   // wirken (0.5 -> bright 0.75). Ease-Kurve hebt die Mitte an, ohne die Enden (L=0/1)
@@ -5783,6 +5856,17 @@ function frame(time){
         }
       }
       document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");
+      // Jahr/Jahreszeit — der ZYKLISCHE Zeitbezug neben der linearen Zahl. Waehrend einer
+      // Herausforderung steht die Jahreszeit still (s. updateEnvLive), das sagt die Zeile
+      // dann auch, statt eine Jahreszeit zu behaupten, die gerade nicht wirkt.
+      // Nur schreiben, wenn sich der Text WIRKLICH aendert (~4x je 600 Generationen statt
+      // je Bild) — dieselbe Disziplin wie bei den Gen-Balken in updateWhy(), damit der
+      // Ruhe-Check (npm run ui-calm-check) keine unnoetige DOM-Bewegung sieht.
+      const _sr = document.getElementById("seasonReadout");
+      if(_sr){
+        const _st = activeChallenge ? "" : ` · Jahr ${seasonYear(generation)} · ${seasonName(generation)}`;
+        if(_sr.textContent !== _st) _sr.textContent = _st;
+      }
       storyTick(steps);
     }
   }

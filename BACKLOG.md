@@ -1427,22 +1427,45 @@ Norns, Pokémon-Snap-artige Naturfotografie-Spiele, thatgamecompany-Bindungsdesi
 Volle Recherche inkl. Quellen im Session-Verlauf, hier nur die daraus abgeleiteten,
 noch offenen Ideen:
 
-- [ ] **Dormante `world/seasonal.ts`-Oszillation in die Live-App einspeisen** —
-  **Modell: Opus** (Produktentscheidung: welche Achse, welche Amplitude/Periode sind
-  Geschmacksfragen, nicht nur Verdrahtung). Bisher laut Phase 6 (Punkt 10) bewusst
-  „Live-App unberührt" — nur als Forschungsnachweis (`tools/seasonal-check.mjs`)
-  validiert. Idee: eine Umweltachse spürbar zyklisch schwingen lassen (analog Don't
-  Starve/Animal Crossing: Zeit als erlebter Rhythmus, nicht als Zahl), optional locker
-  an die echte Kalenderjahreszeit gekoppelt (deckt sich mit der bestehenden Leitplanke
-  „echte Erdzeit-Reihenfolge" unter „Wertschätzung für die Natur"). Kein Balken, kein
-  Ziel — reine Ambiance.
-- [x] **Alter/Stabilitäts-Text statt Zahl — erledigt (2026-07-31).** „Angepasst — die
-  Form steht" bekommt einen Zeitbezug („seit N Generationen stabil"). `_why.stableSince`
-  merkt sich die Generation, seit der die Form ununterbrochen steht, wird
-  zurückgesetzt sobald die Umwelt wieder etwas formt. Umgeht bewusst die
-  sig-Kurzschluss-Optimierung der Warum-Zeile nur im Stabilitäts-Zweig (Takt bleibt bei
-  WHY_MS ~900 ms, kein Flacker-Risiko). Playwright-geprüft: Zähler startet erst ab der
-  zweiten stabilen Generation, zählt sauber hoch.
+- [x] **Jahreszeiten in der Live-App — erledigt (2026-07-31).** Die seit Phase 6 dormante
+  `world/seasonal.ts`-Oszillation ist jetzt verdrahtet. **Achse Temperatur**, Amplitude
+  0.10, Periode 600 Generationen (≈75 s bei Standardtempo). Temperatur gewählt, weil sie
+  als einzige Achse schon die Himmels-/Bodenfarbe trägt — die Jahreszeit wird damit ohne
+  neues Widget sichtbar (Ziel: erlebter Rhythmus statt Zahl). Dazu eine leise
+  „Jahr N · Jahreszeit"-Zeile im bestehenden Generations-Chip.
+  **Architektur (analog env/envDraft):** `env` bleibt die NOMINALE Welt (Regler,
+  Speicherstand, Presets, Herausforderungs-Grenzen, Entwurfs-Vorschau lesen nur diese),
+  `envLive` = env + Versatz treibt Evolution, Selektions-Messung der Warum-Zeile, Passung
+  und Bühne. Gemessen: `env.temperature` bleibt bei 0.50, während `envLive` über das Jahr
+  0.40↔0.60 schwingt; Speicherstand enthält nur den Nominalwert.
+  **Während einer Herausforderung steht die Jahreszeit still** — `challengeTick()` wertet
+  jedes Verlassen von `ch.grenzen` sofort als Abbruch, eine schwankende Temperatur würde
+  laufende Versuche zufällig zerstören und die Vergleichbarkeit brechen. Über ein ganzes
+  Jahr verifiziert: `envLive` bleibt dann exakt nominal.
+  **Verifiziert, dass „Angepasst — die Form steht" erreichbar bleibt** (die Sorge bei
+  einer dauernd schwingenden Umwelt): Form setzt sich und hält über 190+ Generationen
+  durch einen Jahreszeitwechsel; die Passung „atmet" dabei sanft mit (41–46 %).
+- [x] **Alter/Stabilitäts-Text statt Zahl — erledigt (2026-07-31), mit nachgezogener
+  Regressions-Korrektur.** „Angepasst — die Form steht" bekommt einen Zeitbezug („seit
+  über N Generationen stabil"). `_why.stableSince` merkt sich die Generation, seit der
+  die Form ununterbrochen steht, und wird zurückgesetzt, sobald die Umwelt wieder etwas
+  formt.
+  **⚠️ Lehre — der erste Anlauf (Commit 6e8b29e) war eine echte Regression.** Er zeigte
+  die EXAKTE Generationszahl und umging dafür den sig-Kurzschluss der Warum-Zeile. Damit
+  änderte sich die Zeile bei jedem WHY_MS-Takt: `npm run ui-calm-check` fiel von 3/2/3
+  auf 26/106/52 Wechsel je 12 s (Richtwert 6) — genau das Zappeln, gegen das dieses Gate
+  nach einer Nutzer-Beschwerde gebaut wurde. Ursache des Fehlers war NICHT die Idee,
+  sondern das Vorgehen: es lief nur ein selbstgeschriebener Playwright-Check, der die
+  FUNKTION bestätigte, aber nicht das Projekt-Gate, das genau diese Klasse von Schaden
+  abdeckt. **Regel daraus: bei jeder Änderung an der Warum-Zeile/den Gen-Balken gehört
+  `npm run ui-calm-check` zum Pflichtprogramm, nicht ein Eigenbau-Check.**
+  **Korrektur:** die Zahl wird auf eine MULTIPLIKATIVE Leiter gerundet
+  (`STABLE_STEPS` = 100/500/2.500/10.000/50.000/250.000, ×5 je Stufe) und der
+  sig-Kurzschluss wieder genutzt (die Stufe ist Teil der Signatur). Eine lineare Leiter
+  (50/100/250/500…) reichte NICHT: bei Tempo „schnell" rasen Tausende Generationen durch
+  ein 12-s-Fenster und die Leiter allein brauchte schon 6 von 6 Wechseln auf
+  (gemessen, isoliert mit Amplitude 0). Mit ×5-Stufen: **2/1/2 — ruhiger als die
+  ursprüngliche Baseline.** Die Aussage („schon lange") bleibt vollständig erhalten.
 - [x] **Onboarding-Selbstcheck — erledigt (2026-07-31).** Gegengeprüft: `#onboard`,
   Regler-Tooltips, Presets/Herausforderungen/Umwelt-Einfluss-Buttons hatten alle schon
   ein `title`. **Eine echte Lücke gefunden:** die neuen Land/Wasser-Medium-Buttons
@@ -1459,6 +1482,18 @@ noch offenen Ideen:
 - **Verletzlichkeit sichtbar lassen — bestätigt, kein Task.** Companion-Bindungs-
   Forschung (Yu-kai Chou u. a.) bestätigt: gezeigte Schwäche/Kampf („0 % Passung ·
   kämpft") ist Teil der emotionalen Bindung, kein Zustand, den man wegdesignen sollte.
+- [ ] **`npm run app-world-smoke` ist rot — VORBESTEHEND, Ursache offen** — **Modell:
+  Sonnet** (eingegrenzter Fehler, kein Ermessensspielraum). Beim Gate-Lauf zur
+  Jahreszeiten-Änderung aufgefallen: Schritt 2 des Smoke-Tests bricht ab —
+  `page.waitForSelector("#infl:not([hidden]) .infl-cat")` läuft in den Timeout, obwohl
+  der Locator die 10 Kategorie-Buttons FINDET („resolved to 10 elements"); Playwright
+  hält sie nur nicht für sichtbar. Die drei Schritte davor sind grün.
+  **Nicht durch die Arbeit dieser Sitzung verursacht — belegt:** identisch rot bei
+  `38f3424` UND bei `a72391d` (Stand vor allen UI-Änderungen dieser Sitzung, damals so
+  auf main). Erster Verdacht: Null-Größe/Deckkraft während der Öffnen-Animation des
+  Einfluss-Modals, also evtl. ein reines Test-Timing-Problem und kein echter
+  Nutzer-Schaden — das Modal lässt sich von Hand bedienen. Vor einem Fix erst
+  entscheiden, ob der Test oder die UI falsch liegt.
 
 ---
 
