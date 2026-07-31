@@ -766,11 +766,23 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     Kreatur (5.402 Pixel), 15 s freie Evolution über einen Reichswechsel hinweg ohne
     JS-Fehler und **ohne Element-Leck** (Pool-Größe = DOM-Kinder, alte Teile werden
     beim Formwechsel geräumt).
-  - **Nicht gelöscht:** die alten Canvas-Zeichner (`drawAnimal`/`drawPlant`/… ~800
-    Zeilen) stehen weiterhin im Code, sind aber unerreichbar, seit alle Reiche in
-    `CREATURE_SVG` stehen. Bewusst stehen gelassen — das Entfernen ist eine eigene,
-    unabhängig prüfbare Aufräum-Aktion und gehört nicht in denselben Schritt wie die
-    Migration.
+  - **Aufgeräumt (2026-07-31, eigener Schritt nach der Migration):** die sechs alten
+    Canvas-Zeichner und das Canvas selbst sind entfernt — **−652 Zeilen, −39 KB**.
+    Vorher belegt, dass der Pfad wirklich tot war: `classify()` liefert nur die fünf
+    Reiche aus `archetypes.js`, erzeugte Namen erben `k` vom nächsten Verwandten, und
+    Koralle/Schwamm hängen an der Emoji-Prüfung — alle in `CREATURE_SVG`. Mit entfernt:
+    `<canvas id="habitat">`, `ctx`/`canvas`-Referenzen, `ctx.setTransform` in `resize()`,
+    das `ctx.clearRect` der Bildschleife und die zugehörige CSS-Regel. `shareSnapshot()`
+    nimmt die Bildgröße jetzt aus `CW/CH × DPR` statt aus dem Canvas-Element und rastert
+    zwei SVG-Ebenen übereinander (verifiziert: 424×330, 7.282 sichtbare Pixel).
+    Der leere `if(svgKingdom)`-Gegenzweig bleibt als stiller Schutz stehen (räumt die
+    Ebene, falls je ein Reich ohne Zeichner dazukommt).
+    **Beim Löschen selbst ein Fehler passiert und gefunden:** der zeilenbasierte
+    Löschbereich riss `drawAnimalSvg` mit, das zwischen zwei alten Zeichnern lag — der
+    Rendering-Test schlug sofort mit `drawAnimalSvg is not defined` an, die Funktion kam
+    aus dem letzten Commit zurück. **Lehre: Blöcke nach Zeilennummern zu löschen ist bei
+    verschachtelten Einfügungen unsicher; nach Funktionsnamen vorgehen und danach die
+    erwartete Menge gegenprüfen** (genau das hat den Fehler hier aufgedeckt).
   - Gemessen: end-to-end 60 fps auf beiden Pfaden, **keine Regression**. (Ein
     Mikro-Benchmark zeigte scheinbar 41 ms/Bild für Canvas gegen 0,02 ms für SVG —
     das ist irreführend, weil SVG die Rasterung an den Compositor abgibt und die enge
@@ -799,8 +811,7 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     **Bewusst KEIN Text-Label dazu:** Warum-Zeile und `#speciesEdge` erklären ohnehin
     schon, was sich gerade verändert; eine dritte Textstelle wäre Doppelung (und der
     Nutzer hat in dieser Sitzung bereits eine redundante Textzeile entfernen lassen).
-  **Offen (neu, klein):** die ~800 Zeilen unerreichbarer Canvas-Zeichner entfernen —
-  eigene Aufräum-Aktion, s. o.
+  **Damit ist Punkt 4 (Redesign) bis auf Phase 5 (Audit) abgeschlossen.**
 - [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
   Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
   hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,

@@ -174,7 +174,6 @@
      transparent darueber und zeichnet nur noch die Kreatur (Phase 3 loest es ab). */
   .hab-stage { position: relative; }
   .hab-stage svg { display: block; width: 100%; height: auto; border-radius: 16px; }
-  .hab-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 16px; }
   /* Kreatur-SVG (Phase 3): liegt wie das Canvas absolut ueber der Buehne, damit beide
      Ebenen dieselbe Flaeche decken — ohne dies wuerde `.hab-stage svg` das zweite SVG
      als Block DARUNTER stapeln statt darueber legen. */
