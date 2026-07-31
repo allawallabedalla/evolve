@@ -1433,11 +1433,11 @@ noch offenen Ideen:
   seiner Genetik-Mechanik gelitten. Lohnt sich, `#onboard`/Regler-Erklärungen der
   eigenen App mit frischem Blick gegenzuprüfen statt anzunehmen, dass sie reichen —
   noch nicht durchgeführt.
-- [ ] **Schnappschuss-Moment** — **Modell: Opus** (neue Feature-Idee, kein reiner
-  Fix). Inspiriert von Naturfotografie-Spielen (Pokémon Snap/Bugsnax/Alba): einen
-  Discovery- oder Stabilisierungs-Moment einer Linie visuell festhalten (nicht nur
-  Chronik-Text) — würde sich mit dem Schnappschuss-Teilen-Feature und der Chronik
-  überschneiden, braucht eigenen Design-Durchlauf.
+- **Schnappschuss-Moment — verworfen (2026-07-31, Nutzer-Entscheidung).** Inspiriert
+  von Naturfotografie-Spielen (Pokémon Snap/Bugsnax/Alba): ein internes Album mit
+  Discovery-/Stabilisierungs-Momenten einer Linie. **Begründung:** deckt sich bereits
+  mit dem Lebensbaum/Genbuch — ein zusätzliches internes Album wäre redundant zur
+  bestehenden Entdeckungs-Übersicht.
 - **Verletzlichkeit sichtbar lassen — bestätigt, kein Task.** Companion-Bindungs-
   Forschung (Yu-kai Chou u. a.) bestätigt: gezeigte Schwäche/Kampf („0 % Passung ·
   kämpft") ist Teil der emotionalen Bindung, kein Zustand, den man wegdesignen sollte.
