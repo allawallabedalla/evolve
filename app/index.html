@@ -417,7 +417,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.83.0";
+const APP_VERSION = "v0.84.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -5184,7 +5184,7 @@ function drawMotes(time){
 // GESTAFFELTE MIGRATION: `CREATURE_SVG` listet die bereits portierten Reiche. Alles
 // andere zeichnet unveraendert weiter auf dem Canvas darunter. Damit ist jeder
 // Zwischenstand lauffaehig und pruefbar, statt 800 Zeilen auf einen Schlag zu kippen.
-const CREATURE_SVG = new Set(["Protist", "Mikrobe", "Pilz", "Sessil"]);
+const CREATURE_SVG = new Set(["Protist", "Mikrobe", "Pilz", "Sessil", "Pflanze"]);
 const cSvg = document.getElementById("creatureSvg");
 const cRoot = document.getElementById("creatureRoot");
 // Zwei FESTE Ebenen statt einer flachen Liste: das Leuchten muss immer HINTER dem
@@ -5267,6 +5267,9 @@ function drawCreature(g, time, a){
     } else if(a.k==="Pilz"){
       creatureGlowSvg(g, cx, CH*0.9, time);
       drawFungusSvg(g, cx, CH*0.9, breath, time, rnd, a);
+    } else if(a.k==="Pflanze"){
+      creatureGlowSvg(g, cx, CH*0.9, time);
+      drawPlantSvg(g, cx, CH*0.9, breath, time, rnd, a);
     } else if(a.k==="Mikrobe"){
       creatureGlowSvg(g, cx, CH*0.6, time);
       drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
@@ -5483,8 +5486,10 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
     for(let i=0;i<lobes;i++){
       const ang=Math.PI+(i/(lobes-1))*Math.PI, rr=(20+size*46)*(0.7+rnd()*0.6);
       const x=bx+Math.cos(ang)*rr, y=by+Math.sin(ang)*rr*0.4;
-      cAttr(cEl("fun-lobe"+i,"ellipse"), { cx:0, cy:0, rx:(8+rnd()*7).toFixed(1), ry:(5+rnd()*4).toFixed(1),
-        fill: flatCol(mix([150,170,120],[120,160,140], rnd())),
+      // Reihenfolge wie im Original: Farbe VOR den Radien (s. Hinweis beim Baum).
+      const col = flatCol(mix([150,170,120],[120,160,140], rnd()));
+      const lrx = 8+rnd()*7, lry = 5+rnd()*4;
+      cAttr(cEl("fun-lobe"+i,"ellipse"), { cx:0, cy:0, rx:lrx.toFixed(1), ry:lry.toFixed(1), fill: col,
         transform: `translate(${x.toFixed(1)},${(y-3).toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` });
     }
     let sor = "";
@@ -5546,6 +5551,202 @@ function drawSessileSvg(g, bx, by, breath, time, rnd, a){
   for(let i=0;i<16;i++){ const px=bx+(rnd()-0.5)*w*1.5, py=by-rnd()*h*0.9, r=1.5+rnd()*2;
     pores += `M${(px-r).toFixed(1)},${py.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`; }
   cAttr(cEl("spo-por","path"), { d: pores, fill: flatStep(col,-2), "fill-opacity": .5 });
+}
+
+// ===== Reich PFLANZEN (SVG) =====
+function drawPlantSvg(g, bx, by, breath, time, rnd, a){
+  const [insul,size,limb,metab,armor,photo,mob,struct]=g;
+  const kind = a.e;
+  const sway = Math.sin(time*0.0012)*(0.06+0.05*(1-struct));
+  const pr = mulberry32((lineageSeed^0x51ed2701)>>>0);
+  const hue = (pr()-0.5);
+  const leafBase = mix([70,150,80],[140,220,120],photo);
+  const leafCol = [leafBase[0]+hue*22, leafBase[1]+hue*46, leafBase[2]+hue*18];
+  const leafVar = () => leafCol.map(c=>c*(0.82+rnd()*0.32));
+  const dot = (x,y,r) => `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+  // Wurzeln (gemeinsam) — 4 Kurven in EINEM Pfad
+  const roots = () => {
+    let d = "";
+    for(let i=0;i<4;i++){ const q=(i-1.5)*0.5;
+      d += `M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+q*20).toFixed(1)},${(by+12).toFixed(1)} ${(bx+q*40).toFixed(1)},${(by+26).toFixed(1)}`; }
+    cAttr(cEl("pl-root","path"), { d, stroke: flatCol([120,90,60]), "stroke-opacity": .5, "stroke-width": 2, fill: "none" });
+  };
+
+  if(kind==="🌳"){   // Baum: Stamm + runde Krone aus Blattblobs
+    const h=(80+size*150+struct*60)*breath, w=6+struct*16;
+    const topX=bx+Math.sin(sway)*h*0.25, topY=by-h;
+    cAttr(cEl("pl-trunk","path"), {
+      d:`M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+Math.sin(sway)*h*0.1).toFixed(1)},${(by-h*0.5).toFixed(1)} ${topX.toFixed(1)},${topY.toFixed(1)}`,
+      stroke: flatCol(mix([90,66,44],[120,92,60],photo)), "stroke-width": w.toFixed(1), "stroke-linecap": "round", fill: "none" });
+    const cr=26+size*32, blobs=6+Math.round(photo*6);
+    for(let i=0;i<blobs;i++){ const ang=i/blobs*Math.PI*2;
+      const cxp=topX+Math.cos(ang)*cr*(0.5+rnd()*0.5), cyp=topY+Math.sin(ang)*cr*(0.4+rnd()*0.4)-cr*0.2;
+      // Reihenfolge zwingend wie im Original: Farbe VOR Radius. Objekt-Eigenschaften
+      // werden in Schreibreihenfolge ausgewertet — stuende der Radius im Literal vor
+      // dem fill, zoege er die rnd()-Sequenz vor und Groessen/Farben waeren vertauscht.
+      const col = flatCol(leafVar());
+      const rr = cr*(0.42+rnd()*0.3);
+      cAttr(cEl("pl-blob"+i,"circle"), { cx:cxp.toFixed(1), cy:cyp.toFixed(1), r:rr.toFixed(1), fill: col }); }
+    cAttr(cEl("pl-crown","circle"), { cx:topX.toFixed(1), cy:(topY-size*18).toFixed(1), r:(cr*0.9).toFixed(1), fill: flatCol(leafCol) });
+    roots(); return;
+  }
+
+  if(kind==="🌵"){   // Kaktus: Saeule + Ridges + Dornen + Bluete
+    const h=(70+size*120)*breath, w=13+struct*16;
+    const col=mix([56,110,66],[92,150,92],photo);
+    cAttr(cEl("pl-cact","path"), {
+      d:`M${(bx-w).toFixed(1)},${by.toFixed(1)}L${(bx-w).toFixed(1)},${(by-h+w).toFixed(1)}`
+       +`A${w.toFixed(1)},${w.toFixed(1)} 0 0 1 ${(bx+w).toFixed(1)},${(by-h+w).toFixed(1)}L${(bx+w).toFixed(1)},${by.toFixed(1)}Z`,
+      fill: flatCol(col) });
+    const armEl = cEl("pl-arm","path");
+    if(size>0.4){ const ay=by-h*0.5;
+      cAttr(armEl, { d:`M${(bx+w*0.4).toFixed(1)},${ay.toFixed(1)}Q${(bx+w*2.1).toFixed(1)},${ay.toFixed(1)} ${(bx+w*2.1).toFixed(1)},${(ay-h*0.26).toFixed(1)}`,
+        stroke: flatCol(col), "stroke-width": (w*0.9).toFixed(1), "stroke-linecap": "round", fill: "none", opacity: 1 });
+    } else cAttr(armEl, { opacity: 0 });
+    let ridge = "";
+    for(let i=-1;i<=1;i++) ridge += `M${(bx+i*w*0.42).toFixed(1)},${(by-w*0.4).toFixed(1)}L${(bx+i*w*0.42).toFixed(1)},${(by-h*0.92).toFixed(1)}`;
+    cAttr(cEl("pl-ridge","path"), { d: ridge, stroke: flatCol([20,50,30]), "stroke-opacity": .35, "stroke-width": 1.5, fill: "none" });
+    let spine = "";
+    for(let i=0;i<20;i++){ const t=rnd(), y=by-w-t*(h-w*1.4), s=(rnd()>0.5?1:-1);
+      spine += `M${(bx+s*w*0.55).toFixed(1)},${y.toFixed(1)}L${(bx+s*(w*0.55+5)).toFixed(1)},${(y+2).toFixed(1)}`; }
+    cAttr(cEl("pl-spine","path"), { d: spine, stroke: flatCol([232,236,210]), "stroke-opacity": .7, "stroke-width": 1, fill: "none" });
+    // Bluete nur bei feucht + hell — envLive, damit die Jahreszeit auch hier gilt
+    const bloom = envLive.water>0.6 && envLive.light>0.7;
+    for(let k=0;k<5;k++){ const ang=k/5*Math.PI*2, e=cEl("pl-pet"+k,"ellipse");
+      cAttr(e, bloom ? { cx:0, cy:0, rx:5, ry:3, fill: flatCol([240,150,180]), "fill-opacity": .92, opacity: 1,
+        transform:`translate(${(bx+Math.cos(ang)*7).toFixed(1)},${(by-h+Math.sin(ang)*7).toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` } : { opacity: 0 }); }
+    cAttr(cEl("pl-bcore","circle"), bloom
+      ? { cx:bx.toFixed(1), cy:(by-h).toFixed(1), r:3.4, fill: flatCol([250,220,120]), "fill-opacity": .95, opacity: 1 }
+      : { opacity: 0 });
+    roots(); return;
+  }
+
+  if(kind==="🪴"){   // Strauch: mehrere kurze Staemme mit Blattbuescheln
+    const stems=3+Math.round(struct*2);
+    const stemCol=mix([90,70,50],[120,95,62],photo);
+    for(let s=0;s<stems;s++){
+      const off=(s-(stems-1)/2)*14, h=(45+size*70+struct*30)*breath*(0.7+rnd()*0.5);
+      const tx=bx+off+Math.sin(sway+s)*8, ty=by-h;
+      cAttr(cEl("pl-st"+s,"path"), {
+        d:`M${(bx+off*0.4).toFixed(1)},${by.toFixed(1)}Q${(bx+off).toFixed(1)},${(by-h*0.5).toFixed(1)} ${tx.toFixed(1)},${ty.toFixed(1)}`,
+        stroke: flatCol(stemCol), "stroke-width": (4+struct*6).toFixed(1), "stroke-linecap": "round", fill: "none" });
+      for(let l=0;l<4;l++){ const la=(l/4)*Math.PI*2;
+        cAttr(cEl("pl-lf"+s+"-"+l,"ellipse"), { cx:0, cy:0, rx:(12+photo*8).toFixed(1), ry:(6+photo*4).toFixed(1), fill: flatCol(leafVar()),
+          transform:`translate(${(tx+Math.cos(la)*10).toFixed(1)},${(ty+Math.sin(la)*10).toFixed(1)}) rotate(${(la*180/Math.PI).toFixed(1)})` }); }
+    }
+    roots(); return;
+  }
+
+  if(kind==="☘️"){   // Kraut: niedrige Boden-Rosette
+    const n=5+Math.round(photo*6);
+    for(let i=0;i<n;i++){ const spread=Math.PI*1.1;
+      const ang=-Math.PI/2 - spread/2 + (i/(n-1))*spread + Math.sin(time*0.002+i)*0.05;
+      const len=(26+size*36+photo*30)*breath*(0.8+rnd()*0.4);
+      cAttr(cEl("pl-ros"+i,"ellipse"), { cx:0, cy:(-len*0.5).toFixed(1), rx:(7+photo*6).toFixed(1), ry:(len*0.5).toFixed(1), fill: flatCol(leafVar()),
+        transform:`translate(${bx.toFixed(1)},${by.toFixed(1)}) rotate(${((ang+Math.PI/2)*180/Math.PI).toFixed(1)})` }); }
+    roots(); return;
+  }
+
+  if(kind==="🌲"){   // Nadelbaum: Stamm + gestaffelte Nadel-Dreiecke
+    const h=(90+size*150)*breath, w=6+struct*12;
+    cAttr(cEl("pl-ntr","path"), { d:`M${bx.toFixed(1)},${by.toFixed(1)}L${(bx+Math.sin(sway)*10).toFixed(1)},${(by-h).toFixed(1)}`,
+      stroke: flatCol(mix([84,60,42],[110,84,54],photo)), "stroke-width": w.toFixed(1), "stroke-linecap": "round", fill: "none" });
+    const tiers=4+Math.round(size*3);
+    const needleCol=mix([40,95,70],[80,150,100],photo);
+    for(let i=0;i<tiers;i++){ const t=i/(tiers-1);
+      const ty=by-h*0.18-t*h*0.72, tw=(46+size*40)*(1-t*0.72), th=h*0.26;
+      cAttr(cEl("pl-tier"+i,"polygon"), {
+        points:`${(bx-tw/2+Math.sin(sway)*8*t).toFixed(1)},${ty.toFixed(1)} ${(bx+tw/2+Math.sin(sway)*8*t).toFixed(1)},${ty.toFixed(1)} ${(bx+Math.sin(sway)*10*t).toFixed(1)},${(ty-th).toFixed(1)}`,
+        fill: flatCol([needleCol[0]*(0.85+t*0.25),needleCol[1]*(0.85+t*0.25),needleCol[2]*(0.85+t*0.25)]) }); }
+    const snowEl = cEl("pl-snow","path");
+    if(insul>0.5){ let s="";
+      for(let i=0;i<tiers;i++){ const t=i/(tiers-1), ty=by-h*0.18-t*h*0.72-h*0.24;
+        s += dot(bx+Math.sin(sway)*10*t, ty, 3); }
+      cAttr(snowEl, { d:s, fill: flatCol([230,240,238]), "fill-opacity": .55, opacity: 1 });
+    } else cAttr(snowEl, { opacity: 0 });
+    roots(); return;
+  }
+
+  if(kind==="🌸"){   // Bluetenkraut: Stiel + Blueten
+    const h=(50+size*90+photo*40)*breath;
+    const topX=bx+Math.sin(sway)*h*0.3, topY=by-h;
+    cAttr(cEl("pl-fst","path"), {
+      d:`M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+Math.sin(sway)*h*0.15).toFixed(1)},${(by-h*0.5).toFixed(1)} ${topX.toFixed(1)},${topY.toFixed(1)}`,
+      stroke: flatCol(mix([70,140,70],[110,180,90],photo)), "stroke-width": (3+struct*4).toFixed(1), "stroke-linecap": "round", fill: "none" });
+    for(const s of [-1,1])
+      cAttr(cEl("pl-fl"+s,"ellipse"), { cx:(s*12).toFixed(1), cy:0, rx:14, ry:6, fill: flatCol(leafVar()),
+        transform:`translate(${lerp(bx,topX,0.5).toFixed(1)},${lerp(by,topY,0.5).toFixed(1)}) rotate(${(s*0.7*180/Math.PI).toFixed(1)})` });
+    const petals=5+Math.round(photo*4), pr2=mulberry32((lineageSeed^0xB5297A4D)>>>0);
+    const pc=[[240,150,180],[250,200,110],[180,150,240],[240,120,120],[150,200,240]][Math.floor(pr2()*5)];
+    for(let k=0;k<petals;k++){ const ang=k/petals*Math.PI*2 + Math.sin(time*0.002)*0.05;
+      cAttr(cEl("pl-fp"+k,"ellipse"), { cx:0, cy:0, rx:9, ry:5, fill: flatCol(pc),
+        transform:`translate(${(topX+Math.cos(ang)*9).toFixed(1)},${(topY+Math.sin(ang)*9).toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` }); }
+    cAttr(cEl("pl-fc","circle"), { cx:topX.toFixed(1), cy:topY.toFixed(1), r:5.5, fill: flatCol([250,220,120]), "fill-opacity": .95 });
+    roots(); return;
+  }
+
+  if(kind==="🟢"||kind==="🌱"){   // Gruenalge / Moos: niedrige Boden-Polster
+    const moss = kind==="🌱";
+    const blobs = moss ? 16 : 10;
+    for(let i=0;i<blobs;i++){ const ang=Math.PI+(i/(blobs-1))*Math.PI;
+      const rr=(18+size*40)*(0.6+rnd()*0.7);
+      const x=bx+Math.cos(ang)*rr*0.9, y=by+Math.sin(ang)*rr*0.35;
+      // Reihenfolge wie im Original: Farbe VOR dem Radius (s. Hinweis beim Baum).
+      const col = flatCol(leafVar());
+      const br = moss?(4+rnd()*4):(6+rnd()*7);
+      cAttr(cEl("pl-mb"+i,"circle"), { cx:x.toFixed(1), cy:(y-(moss?4:2)).toFixed(1), r:br.toFixed(1), fill: col }); }
+    const hairEl = cEl("pl-hair","path");
+    if(moss){ let s="";
+      for(let i=0;i<20;i++){ const x=bx+(rnd()-0.5)*70;
+        s += `M${x.toFixed(1)},${by.toFixed(1)}L${(x+(rnd()-0.5)*4).toFixed(1)},${(by-8-rnd()*8).toFixed(1)}`; }
+      cAttr(hairEl, { d:s, stroke: flatCol(leafCol.map(c=>c*0.8)), "stroke-width": 1, fill: "none", opacity: 1 });
+    } else cAttr(hairEl, { opacity: 0 });
+    return;
+  }
+
+  if(kind==="🌿" && struct<0.42){   // Farn: bogige Wedel mit Fiederblaettern
+    const fronds=4+Math.round(photo*4);
+    for(let f=0;f<fronds;f++){ const dir=(f-(fronds-1)/2)/fronds;
+      const len=(60+size*80+photo*50)*breath*(0.8+rnd()*0.4);
+      const ex=bx+dir*len*1.1, ey=by-len*0.75;
+      cAttr(cEl("pl-fr"+f,"path"), {
+        d:`M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+dir*len*0.4).toFixed(1)},${(by-len*0.7).toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`,
+        stroke: flatCol(leafCol), "stroke-width": 2.5, "stroke-linecap": "round", fill: "none" });
+      for(let s=1;s<=8;s++){ const t=s/9;
+        const px=lerp(bx,ex,t), py=lerp(by,ey,t) - Math.sin(t*Math.PI)*8;
+        const pl=(6+photo*8)*(1-t*0.6);
+        for(const sd of [-1,1])
+          cAttr(cEl("pl-pin"+f+"-"+s+"-"+sd,"ellipse"), { cx:0, cy:0, rx:pl.toFixed(1), ry:2.5, fill: flatCol(leafVar()),
+            transform:`translate(${(px+sd*pl*0.6).toFixed(1)},${py.toFixed(1)}) rotate(${(dir*0.5*180/Math.PI).toFixed(1)})` }); } }
+    roots(); return;
+  }
+
+  // Kaeltepflanze / generisch: schlanker Stamm + Blaetter + Behaarung
+  const woody = struct>0.55;
+  const h = (60 + size*150 + struct*70) * breath;
+  const w = 5 + struct*16;
+  const stemCol = woody ? mix([90,66,44],[120,92,60],photo) : mix([70,120,60],[120,170,90],photo);
+  const topX=bx+Math.sin(sway)*h*0.5, topY=by-h;
+  cAttr(cEl("pl-gst","path"), {
+    d:`M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+Math.sin(sway)*h*0.2).toFixed(1)},${(by-h*0.5).toFixed(1)} ${topX.toFixed(1)},${topY.toFixed(1)}`,
+    stroke: flatCol(stemCol), "stroke-width": w.toFixed(1), "stroke-linecap": "round", fill: "none" });
+  const leaves = 3+Math.round(photo*9);
+  for(let i=0;i<leaves;i++){
+    const t=(i+1)/(leaves+1);
+    const lx=lerp(bx,topX,t), ly=lerp(by,topY,t*0.98);
+    const side = i%2?1:-1;
+    const ls = (9+photo*20)*(0.6+t*0.6);
+    const ang = side*(0.5+0.5*rnd()) + Math.sin(time*0.002+i)*0.06;
+    cAttr(cEl("pl-gl"+i,"ellipse"), { cx:(side*ls*0.8).toFixed(1), cy:0, rx:ls.toFixed(1), ry:(ls*0.42).toFixed(1), fill: flatCol(leafCol),
+      transform:`translate(${lx.toFixed(1)},${ly.toFixed(1)}) rotate(${(ang*180/Math.PI).toFixed(1)})` });
+  }
+  const fuzzEl = cEl("pl-fuzz","path");
+  if(insul>0.5){ let s="";
+    for(let i=0;i<36;i++){ const t=rnd(), x=lerp(bx,topX,t), y=lerp(by,topY,t), d2=rnd()*Math.PI*2;
+      s += `M${x.toFixed(1)},${y.toFixed(1)}L${(x+Math.cos(d2)*5).toFixed(1)},${(y+Math.sin(d2)*5).toFixed(1)}`; }
+    cAttr(fuzzEl, { d:s, stroke: flatCol([220,235,225]), "stroke-opacity": .6, "stroke-width": 1, fill: "none", opacity: 1 });
+  } else cAttr(fuzzEl, { opacity: 0 });
+  roots();
 }
 
 function drawPlant(g, bx, by, breath, time, rnd, a){
