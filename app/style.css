@@ -184,11 +184,18 @@
   @keyframes vpFlash { 0%{ opacity: 0; } 18%{ opacity: 1; } 100%{ opacity: 0; } }
   @keyframes vpShake { 0%,100%{ transform: translateX(0); } 20%{ transform: translateX(-3px); } 40%{ transform: translateX(3px); } 60%{ transform: translateX(-2px); } 80%{ transform: translateX(2px); } }
   @media (prefers-reduced-motion: reduce) { .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: none; } }
-  /* Schnell-Einstiege direkt unter dem Bild (gestapelt, volle Breite) */
-  .entry-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; }
-  .entry-row .disc { margin: 0; text-align: center; border-color: var(--line-soft);
-    box-shadow: var(--shadow-sm); padding: 8px 10px; }
+  /* Schnell-Einstiege direkt unter dem Bild: 2x2-Icon-Raster statt vollbreiter
+     Text-Pillen (Nutzer-Wunsch) — spart Hoehe, bevor ueberhaupt ein Regler sichtbar
+     ist. Labels bleiben sichtbar (kein reines Icon-Raetselraten), title-Tooltips
+     tragen weiterhin die lange Erklaerung je Kachel. */
+  .entry-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 16px 14px; }
+  .entry-row .disc { display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 5px; margin: 0; text-align: center; border-color: var(--line-soft);
+    box-shadow: var(--shadow-sm); border-radius: 14px; padding: 14px 8px 12px; }
   .entry-row .disc:hover { border-color: var(--bio-dim); }
+  .entry-row .disc .entry-ic { width: 1.6rem; height: 1.6rem; }
+  .entry-row .disc .entry-label { font-size: var(--fs-sm); font-weight: var(--w-bold); color: var(--bio-dim); }
+  .entry-row .disc .entry-sub { font-size: var(--fs-meta); color: var(--muted); }
   /* Ueberlagerungen des Habitats: seit die Buehne selbst positioniert ist (.hab-stage)
      und im DOM NACH den Chips steht, brauchen diese eine eigene Stapel-Ebene — sonst
      verschwinden sie darunter. Bleiben unter dem Blitz-Overlay (.viewport::after, z-index 4). */
