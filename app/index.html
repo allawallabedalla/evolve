@@ -97,6 +97,7 @@
       <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
       <p class="console-framing"><b>Presets ↗</b> setzen eine fertige Welt · <b>Regler</b> justieren sie fein · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
       <div class="onboard" id="onboard" hidden>Öffne <b>Presets ↗</b>, dreh einen <b>Regler</b> oder löse einen <b>Umwelt-Einfluss ↗</b> aus — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
+      <div class="mediums-row"><span class="mlabel">Lebensraum</span><div class="mediums" id="mediums"></div></div>
       <div id="levers"></div>
       <div class="controls">
         <button class="ctrl play" id="playBtn" aria-label="Pause oder Weiter"></button>
@@ -405,7 +406,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.78.0";
+const APP_VERSION = "v0.79.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -2801,8 +2802,12 @@ function timeStr(ms){
   if(h < 24) return h + " Std" + (r ? " "+r+" Min" : "");
   const d = Math.floor(h/24); return d + " Tag" + (d>1?"e":"") + (h%24 ? " "+(h%24)+" Std" : "");
 }
-/** Die 6 Regler-Eingaben auf den aktuellen `env`-Stand nachziehen (Laden, feste Startwelt). */
+/** Die 6 Regler-Eingaben auf den aktuellen `env`-Stand nachziehen (Laden, feste Startwelt,
+    Preset/Einfluss/Fundort). Setzt den water-Regler vorher auf volle Spanne zurück (kein
+    Medium-Band) — sonst würde ein kuratierter Preset-Wert außerhalb des zuletzt aktiven
+    Bands per min/max-Clamping verfälscht (z. B. Moderwald water=0.42). */
 function syncLeverInputs(){
+  if(typeof resetMediumUI === "function") resetMediumUI();
   LEVERS.forEach(l => { const el=document.getElementById("s-"+l.key); if(el){ el.value=env[l.key]; document.getElementById("v-"+l.key).textContent=(+env[l.key]).toFixed(2); } });
 }
 function applyState(s){
@@ -3001,7 +3006,7 @@ async function boot(){
 const leversEl = document.getElementById("levers");
 LEVERS.forEach(l => {
   const d = document.createElement("div"); d.className="lever";
-  d.innerHTML = `<div class="row"><span class="name"><span class="ico">${ic(l.ico)}</span>${l.name}</span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
+  d.innerHTML = `<div class="row"><span class="name"><span class="ico">${ic(l.ico)}</span><span class="lbl">${l.name}</span></span><span class="val" id="v-${l.key}">${env[l.key].toFixed(2)}</span></div>
     <input type="range" min="0" max="1" step="0.01" id="s-${l.key}" value="${env[l.key]}" aria-label="${l.name}">
     <div class="ends"><span>${l.lo}</span><span>${l.hi}</span></div>`;
   leversEl.appendChild(d);
@@ -3013,6 +3018,73 @@ LEVERS.forEach(l => {
     dismissOnboard(); storyEnvChanged();
   });
 });
+
+// ---- Medium-Umschalter (Land/Wasser) — Nutzer-Vorschlag von ganz zu Beginn dieser
+// Roadmap-Sitzung, hier eingeloest, NACHDEM Phase 2 (zweiter Anlauf) eine echte
+// amphibische Nische geschaffen hat: vorher waere ein Land/Wasser-Schalter ein
+// Etikettenschwindel gewesen (Amphibie nur per Drift erreichbar), jetzt nicht mehr.
+// Kein neues Gen, kein physics.json-Eingriff: der water-Regler bleibt EIN Regler,
+// der Schalter engt nur sein Band ein und tauscht Name/Pole. Die anderen fuenf Regler
+// sind in beiden Welten unveraendert dieselben — nur water bekommt eine eigene, enge
+// Feinjustage statt einer Achse, die in der Mitte heimlich von Land- auf Wasser-Physik
+// umkippt (Befund: docs/lebensbaum-luecken.md §7).
+//
+// WICHTIG: das Band-Zwingen gilt NUR fuer die manuelle Umschalter-Bedienung (freie
+// Erkundung). Presets/Umwelt-Einfluesse/Fundort-Wiederherstellung setzen eigene, fein
+// kuratierte water-Werte (z. B. Moderwald 0.42, Trueber See 0.6 — beide in der Luecke
+// zwischen den beiden Baendern) — die duerfen NICHT verzerrt werden. Fuer sie zieht
+// resetMediumUI() den Regler zurueck auf volle Spanne + Original-Beschriftung, statt sie
+// in ein Band zu zwingen.
+const MEDIUM_BANDS = {
+  land:   { lo: 0.02, hi: 0.35, name: "Feuchte",     poleLo: "trocken", poleHi: "feucht" },
+  wasser: { lo: 0.65, hi: 1.00, name: "Wassertiefe", poleLo: "flach",   poleHi: "tief" },
+};
+const WATER_LEVER_DEF = LEVERS.find(l => l.key === "water");
+const mediumsEl = document.getElementById("mediums");
+const waterInputEl = document.getElementById("s-water");
+const waterLeverEl = waterInputEl.closest(".lever");
+const waterNameEl = waterLeverEl.querySelector(".name .lbl");
+const waterEndsEl = waterLeverEl.querySelectorAll(".ends span");
+function setWaterLabel(name, poleLo, poleHi){
+  waterInputEl.setAttribute("aria-label", name);
+  waterNameEl.textContent = name;
+  waterEndsEl[0].textContent = poleLo;
+  waterEndsEl[1].textContent = poleHi;
+}
+/** Manueller Umschalter: water-Regler auf ein enges Medium-Band festlegen, env.water
+    zwingend hinein (Clamp) — für freie Erkundung ohne Preset. */
+function applyMediumUI(medium){
+  const b = MEDIUM_BANDS[medium];
+  env.water = Math.min(b.hi, Math.max(b.lo, env.water));
+  waterInputEl.min = b.lo; waterInputEl.max = b.hi; waterInputEl.value = env.water;
+  document.getElementById("v-water").textContent = env.water.toFixed(2);
+  setWaterLabel(b.name, b.poleLo, b.poleHi);
+  [...mediumsEl.children].forEach(c => c.classList.toggle("active", c.dataset.medium === medium));
+}
+/** Preset/Einfluss/Fundort hat water bereits auf einen eigenen Wert gesetzt: Regler auf
+    volle Spanne + Original-Beschriftung zurück, Umschalter zeigt „keine Auswahl" — der
+    Wert bleibt unverändert, unabhängig davon, ob er in einer der beiden Bänder liegt. */
+function resetMediumUI(){
+  waterInputEl.min = 0; waterInputEl.max = 1; waterInputEl.value = env.water;
+  document.getElementById("v-water").textContent = env.water.toFixed(2);
+  setWaterLabel(WATER_LEVER_DEF.name, WATER_LEVER_DEF.lo, WATER_LEVER_DEF.hi);
+  [...mediumsEl.children].forEach(c => c.classList.remove("active"));
+}
+[["land","Land"],["wasser","Wasser"]].forEach(([key,lbl]) => {
+  const btn = document.createElement("button");
+  btn.className = "medium"; btn.dataset.medium = key; btn.textContent = lbl;
+  btn.addEventListener("click", () => {
+    if(btn.classList.contains("active")) return;   // schon aktiv -> nichts zu tun
+    const b = MEDIUM_BANDS[key];
+    env.water = (b.lo + b.hi) / 2;   // neue Welt: Band-Mitte als Startpunkt, wie Phase-0-Vorbild
+    applyMediumUI(key);
+    lastBiome = "freie Umwelt"; document.getElementById("biomeTag").textContent = lastBiome;
+    document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+    dismissOnboard(); storyEnvChanged();
+  });
+  mediumsEl.appendChild(btn);
+});
+resetMediumUI();
 
 // Verborgene Stressoren (toxicity/oxygen/salinity/… kommen NUR über Biome/Umwelt-
 // Einflüsse, haben also bewusst KEINEN Regler — siehe P1.3-Kommentar bei LEVERS oben,
@@ -3054,7 +3126,7 @@ BIOMES.forEach((b,bi) => {
   btn.addEventListener("click", () => {
     Object.assign(env, b.env); env.toxicity = 0; env.oxygen = 1; env.salinity = 0; env.uv = 0; env.pressure = 0; env.aridity = 0; env.radiation = 0; env.fire = 0; env.frost = 0; env.wind = 0;   // Biome sind saubere, geschützte Milieus
     if(b.stress) env[b.stress.ax] = b.stress.v;   // PHASE 3: vier Orte SIND per Namen ein Stressor (Tiefsee=Druck, Wüste=Dürre, Meer=Salz, Eiszeit=Frost)
-    LEVERS.forEach(l => { document.getElementById("s-"+l.key).value=env[l.key]; document.getElementById("v-"+l.key).textContent=env[l.key].toFixed(2); });
+    syncLeverInputs();   // zieht auch das Medium (Land/Wasser) nach, bevor water gesetzt wird
     renderStressChips();
     lastBiome = b.n; document.getElementById("biomeTag").textContent = b.n;
     document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
@@ -3992,8 +4064,7 @@ function applyInfluence(f){
   const preEnv = { ...env };   // S5: Schnappschuss für „Einfluss zurücknehmen"
   const preBiome = lastBiome, preActive = document.querySelector(".biome.active");
   Object.assign(env, influenceResultEnv(f));
-  LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
-    if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
+  syncLeverInputs();   // zieht auch das Medium (Land/Wasser) nach, bevor water gesetzt wird
   renderStressChips();
   lastBiome = f.plain||f.name; _el("biomeTag").textContent = f.plain||f.name;
   document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
@@ -4018,8 +4089,7 @@ function undoLastInfluence(){
   if(!_pendingUndo) return;
   const { env: preEnv, biome, activeBtn, label } = _pendingUndo;
   Object.assign(env, preEnv);
-  LEVERS.forEach(l => { const s=_el("s-"+l.key), v=_el("v-"+l.key);
-    if(s) s.value = env[l.key]; if(v) v.textContent = env[l.key].toFixed(2); });
+  syncLeverInputs();   // zieht auch das Medium (Land/Wasser) nach, bevor water gesetzt wird
   renderStressChips();
   lastBiome = biome; _el("biomeTag").textContent = biome;
   document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));

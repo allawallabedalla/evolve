@@ -1320,6 +1320,20 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
   phenomena-check (8/8), coevolution-check (7,9×) — sowie `archetype-transition-check`
   (4000 Umwelten): keine der 65 Formen verliert Erreichbarkeit. Details in
   docs/roadmap-lebendige-welt.md Phase 2.
+- [x] **Medium-Umschalter Land/Wasser (UI-Nachtrag, 2026-07-31).** Nutzer-Vorschlag von
+  ganz zu Beginn dieser Sitzung, jetzt eingelöst (Vorbedingung — echte amphibische
+  Nische statt Etikettenschwindel — war durch den Zweiten Anlauf oben erfüllt).
+  Zweiwertiger Umschalter „Lebensraum: Land / Wasser" oberhalb der 6 Regler. Kein neues
+  Gen, kein physics.json-Eingriff: `water` bleibt ein Regler, der Umschalter engt nur
+  sein Band ein (Land 0,02–0,35 „Feuchte", Wasser 0,65–1,00 „Wassertiefe") und tauscht
+  Beschriftung/Pole; die anderen fünf Regler bleiben in beiden Welten identisch. Nur bei
+  manueller Bedienung wirksam — Presets/Einflüsse/Fundort setzen weiterhin eigene,
+  kuratierte `water`-Werte (auch in der bewussten Lücke zwischen den Bändern, z. B.
+  Moderwald 0,42) und werden dabei NICHT verzerrt (`syncLeverInputs()` setzt den Regler
+  für diese Fälle auf volle Spanne zurück). Im Browser verifiziert (Playwright): Toggle
+  engt Band korrekt ein, Presets bleiben unverzerrt, erneuter Toggle-Klick nach einem
+  Preset funktioniert. `app-fitness-check` bestätigt: reine UI-Änderung, Physik-Bundle
+  unverändert. Details in docs/roadmap-lebendige-welt.md Phase 2.
 - [x] **Phase 5 — Symbiose/Parasitismus — umgesetzt (2026-07-30).** Neue Datei
   `world/symbiosis.ts` (Ergänzung neben `world/coevolution.ts`, kein Eingriff dort):
   zwei Populationen über denselben Merkmals-Passungs-Kernel gekoppelt wie beim

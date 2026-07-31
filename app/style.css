@@ -415,6 +415,15 @@
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
   .speed { font-size: var(--fs-sm); color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
   .speed.active { background: var(--bio-dim); color: #fbf3dd; font-weight: var(--w-bold); box-shadow: var(--shadow-sm); }   /* helle Schrift auf dunklem Aubergine -> AA (Audit) */
+
+  /* ---- Medium-Umschalter (Land/Wasser) — Lebendige-Welt-Roadmap Punkt 10 Nachtrag.
+     Selber Pillen-Baustein wie .speeds/.speed, eigener Name: schaltet den Wasser-Regler
+     auf ein enges Medium-Band um (Feuchte an Land / Wassertiefe im Wasser) statt Tempo. */
+  .mediums-row { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px; flex-wrap: wrap; }
+  .mediums-row .mlabel { font-size: var(--fs-xs); color: var(--muted); letter-spacing: var(--tr-caps); text-transform: uppercase; }
+  .mediums { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
+  .medium { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .medium.active { background: var(--bio-dim); color: #fbf3dd; font-weight: var(--w-bold); box-shadow: var(--shadow-sm); }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bio-dim); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 

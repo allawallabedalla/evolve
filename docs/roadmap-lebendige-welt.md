@@ -91,10 +91,28 @@ Kanal profitieren. Amphibie · Lurch dadurch schwach über echte Selektion errei
 (`gap-sweep`: 0/4000 → 2/4000 — „schwach" wie von Anfang an erwartet, die Nische ist per
 Definition schmal). Alle Pflicht-Gates grün: ecology, reality (20/20), distribution-check
 (4/4), phenomena-check (8/8), coevolution-check (7,9×), keine Archetyp-Erreichbarkeit
-verloren (`archetype-transition-check`, 4000 Umwelten). Ein dreiwertiger Medium-Toggle
-(Land/Amphibisch/Wasser) im UI ist damit fundiert möglich, aber ein eigener, noch nicht
-begonnener UX-Schritt — Amphibie ist jetzt eine echte (wenn auch seltene) Nische, kein
-reiner Drift-Fang mehr.
+verloren (`archetype-transition-check`, 4000 Umwelten). Ein Medium-Toggle im UI war damit
+fundiert möglich, aber ein eigener UX-Schritt — Amphibie ist jetzt eine echte (wenn auch
+seltene) Nische, kein reiner Drift-Fang mehr.
+
+**UI-Nachtrag umgesetzt (2026-07-31).** Zweiwertiger Umschalter „Lebensraum: Land /
+Wasser" (`app/index.html`, oberhalb der 6 Regler) — der ursprüngliche Vorschlag aus dem
+allerersten Teil dieser Sitzung, jetzt eingelöst, weil die Vorbedingung (echte
+amphibische Nische statt Etikettenschwindel) erfüllt ist. Kein neues Gen, kein
+physics.json-Eingriff: der `water`-Regler bleibt ein einzelner Regler, der Umschalter
+engt nur sein Band ein (Land 0,02–0,35 „Feuchte", Wasser 0,65–1,00 „Wassertiefe") und
+tauscht Beschriftung/Pole. Die anderen fünf Regler sind in beiden Welten identisch.
+Bewusst NUR bei manueller Umschalter-Bedienung wirksam — Presets/Umwelt-Einflüsse/
+Fundort-Wiederherstellung setzen eigene kuratierte `water`-Werte (z. B. Moderwald 0,42,
+Trüber See 0,6 — beide in der Lücke zwischen den Bändern) und werden davon NICHT verzerrt:
+`syncLeverInputs()` setzt den Regler für diese Fälle auf volle Spanne + Original-
+Beschriftung zurück, der Umschalter zeigt dann „keine Auswahl". Im Browser verifiziert
+(Playwright): Klick auf „Wasser"/„Land" engt Band + Beschriftung korrekt ein und snapt auf
+die Band-Mitte; Preset-Klick auf „Moderwald" (water=0,42, Lücken-Wert) hinterlässt den
+Regler unverzerrt auf voller Spanne; erneuter manueller Klick nach einem Preset
+funktioniert wieder normal. Kein Amphibisch-Zustand — mit nur zwei Bändern und einer
+bewusst unbelegten Lücke dazwischen bleibt die Aussage „Land" bzw. „Wasser" ehrlich, ein
+dritter Zustand „Amphibisch" wäre nur eine benannte Version derselben Lücke.
 
 ## Phase 3 — Habitat als Weltebene
 
