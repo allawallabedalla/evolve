@@ -44,7 +44,14 @@ try {
 
   // 2) Einfluss-Modal öffnen (Kategorien)
   await page.click("#worldBtn");
-  await page.waitForSelector("#infl:not([hidden]) .infl-cat", { timeout: 10000 });
+  await page.waitForSelector("#infl:not([hidden])", { timeout: 10000 });
+  // P1.4 (Komplexitäts-Audit): das Modal startet kuratiert — Schnellzugriff-Chips statt
+  // vollem Katalog, die Kategorien-Liste (#inflCats) ist anfangs eingeklappt
+  // (setInflCatsExpanded(false) in openInfl()). Ein echter Nutzer klickt für den vollen
+  // Katalog erst „Alle Kategorien anzeigen ↗" — das holt dieser Test hier nach, statt
+  // auf sichtbare .infl-cat-Elemente zu warten, die es vor diesem Klick nicht gibt.
+  await page.click("#inflCatsToggle");
+  await page.waitForSelector("#inflCats:not([hidden]) .infl-cat", { timeout: 5000 });
   const cats = await page.locator(".infl-cat").count();
   console.log(`  Einfluss-Modal: Kategorien:       ${cats >= 8 ? "OK" : "FAIL"} (${cats})`);
 

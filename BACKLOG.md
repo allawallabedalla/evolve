@@ -1639,18 +1639,16 @@ noch offenen Ideen:
 - **Verletzlichkeit sichtbar lassen — bestätigt, kein Task.** Companion-Bindungs-
   Forschung (Yu-kai Chou u. a.) bestätigt: gezeigte Schwäche/Kampf („0 % Passung ·
   kämpft") ist Teil der emotionalen Bindung, kein Zustand, den man wegdesignen sollte.
-- [ ] **`npm run app-world-smoke` ist rot — VORBESTEHEND, Ursache offen** — **Modell:
-  Sonnet** (eingegrenzter Fehler, kein Ermessensspielraum). Beim Gate-Lauf zur
-  Jahreszeiten-Änderung aufgefallen: Schritt 2 des Smoke-Tests bricht ab —
-  `page.waitForSelector("#infl:not([hidden]) .infl-cat")` läuft in den Timeout, obwohl
-  der Locator die 10 Kategorie-Buttons FINDET („resolved to 10 elements"); Playwright
-  hält sie nur nicht für sichtbar. Die drei Schritte davor sind grün.
-  **Nicht durch die Arbeit dieser Sitzung verursacht — belegt:** identisch rot bei
-  `38f3424` UND bei `a72391d` (Stand vor allen UI-Änderungen dieser Sitzung, damals so
-  auf main). Erster Verdacht: Null-Größe/Deckkraft während der Öffnen-Animation des
-  Einfluss-Modals, also evtl. ein reines Test-Timing-Problem und kein echter
-  Nutzer-Schaden — das Modal lässt sich von Hand bedienen. Vor einem Fix erst
-  entscheiden, ob der Test oder die UI falsch liegt.
+- [x] **`npm run app-world-smoke` war rot — behoben (2026-07-31, Sonnet).** Ursache
+  gefunden, kein Timing-Problem: `openInfl()` startet mit **eingeklappten Kategorien**
+  (`setInflCatsExpanded(false)`) — die kuratierte Startansicht aus dem
+  Komplexitäts-Audit P1.4 (Schnellzugriff-Chips statt vollem Katalog, `#inflCats`
+  bleibt hidden bis „Alle Kategorien anzeigen ↗" geklickt wird). Der Smoke-Test wartete
+  auf sichtbare `.infl-cat`-Elemente, die vor diesem Klick gar nicht sichtbar sein
+  sollen — die App war korrekt, der Test kannte die spätere UX-Änderung nicht.
+  **Fix:** Test klickt jetzt `#inflCatsToggle`, bevor er auf die Kategorien wartet —
+  genau der Weg, den ein echter Nutzer zum vollen Katalog nimmt. Dreimal grün
+  hintereinander laufen lassen, um einen Zufallstreffer auszuschließen.
 
 ---
 
