@@ -711,11 +711,21 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
   jeweils neu erworbene Modul (braucht neue Erkennungslogik: welches Modul ist
   seit der letzten committeten Form neu — baut auf der bestehenden Formkipp-
   Erkennung für die Chronik auf).
-- [ ] **Phase 4 — Restliche UI** — **Modell: Sonnet** (Palette/Regeln bereits definiert, nur
-  Übertragung): Genom-Balken, Vitalitätsanzeige, Chronik,
-  Genbook, Baum-des-Lebens-SVG, Challenge-Liste auf dieselbe Palette + die
-  Hell/Dunkel-Hierarchieregel übertragen (Werte/Regler/Buttons bleiben die
-  einzigen hellen, hochkontrastigen Elemente).
+- [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
+  Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
+  hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,
+  `var(--shadow*)` = flache 1px-Hairline, kein Blur/Verlauf) — das ist bereits als
+  Nebeneffekt von Phase 1s globaler `:root`-Umstellung passiert, nur der Haken hier
+  fehlte noch. Per Screenshot verifiziert: Genom-/Vitalitätsbalken (Kreatur-Karte),
+  Chronik (Details-Panel), Genbuch/Lebensbaum, Herausforderungen — alle flach,
+  schattenfrei, auf Palette. Einzige gefundene hartkodierte Farben sind bewusste
+  Ausnahmen mit Bestand (Rarität-Farbcode Blau/Lila in `.gb-tile.rar-*` UND im
+  Dendrogramm-Code deckungsgleich, Stress-Chip-Farben je Achse) — keine Leichen,
+  sondern ein bereits etabliertes Semantik-Farbsystem. Das Ähnlichkeits-Dendrogramm
+  („Baum-des-Lebens-SVG") nutzt `var(--bio-dim)` für Linien/Labels, ist aber aktuell
+  über keinen Button erreichbar (`openWorld()`-Bindung an `worldBtn` bewusst
+  auskommentiert seit Umwelt-Einfluss den Button übernommen hat) — aufgefallen bei
+  diesem Check, nicht Teil des Palette-Auftrags, hier nur vermerkt.
 - [ ] **Phase 5 — Audit** — **Modell: Sonnet** (Checkliste abarbeiten): WCAG-Kontrast erneut
   prüfen, `prefers-reduced-motion` erhalten, alle Biome/Extremregler/Mutationsfälle
   durchklicken.
