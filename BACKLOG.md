@@ -719,10 +719,12 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
 - [ ] **Phase 5 — Audit** — **Modell: Sonnet** (Checkliste abarbeiten): WCAG-Kontrast erneut
   prüfen, `prefers-reduced-motion` erhalten, alle Biome/Extremregler/Mutationsfälle
   durchklicken.
-- [ ] **Zwei kleine Politur-Punkte aus Phase 2** — **Modell: Sonnet**: Himmel wirkt bei
-  mittlerem Licht etwas zu dunkel (Helligkeits-Kurve in `drawHabitat()` nachjustieren);
-  die Wellenlinie am Boden (`groundPath()`) könnte mit mehr Stützpunkten runder
-  werden.
+- [x] **Zwei kleine Politur-Punkte aus Phase 2 — erledigt (2026-07-31).** Helligkeitskurve
+  in `drawHabitat()` von linear auf `Math.pow(L,0.6)`-Ease umgestellt (bright(0.5) jetzt
+  ~0.83 statt 0.75, Enden L=0/1 unverändert). `groundPath()` von 10 auf 16 Stützpunkte,
+  Sinus-Phase mitskaliert (Wellenform bleibt gleich, nur runder interpoliert),
+  Kristall-Branch bewusst unverändert kantig gelassen (Formensprache, kein Bug).
+  Playwright-geprüft (Welle + Kristall-Voreinstellung), keine JS-Fehler.
 
 Betrifft nur die Präsentationsschicht — `engine/`, `physics.json` und die
 Fitness-Validierung (`npm run parity`) sind unangetastet.
@@ -1424,15 +1426,21 @@ noch offenen Ideen:
   an die echte Kalenderjahreszeit gekoppelt (deckt sich mit der bestehenden Leitplanke
   „echte Erdzeit-Reihenfolge" unter „Wertschätzung für die Natur"). Kein Balken, kein
   Ziel — reine Ambiance.
-- [ ] **Alter/Stabilitäts-Text statt Zahl** — **Modell: Sonnet**. Ergänzt den
-  bestehenden „Angepasst — die Form steht"-Hinweis um einen Zeitbezug wie „seit N
-  Generationen stabil" — Chronik-Charakter (Dwarf-Fortress-/CK-Muster: Geschichte
-  statt Prozentzahl), kein neues Widget.
-- [ ] **Onboarding-Selbstcheck** — **Modell: Sonnet**. Niche (Breed & Evolve) hat als
-  nächstverwandtes Vergleichsspiel dokumentiert unter mangelnder In-Game-Erklärung
-  seiner Genetik-Mechanik gelitten. Lohnt sich, `#onboard`/Regler-Erklärungen der
-  eigenen App mit frischem Blick gegenzuprüfen statt anzunehmen, dass sie reichen —
-  noch nicht durchgeführt.
+- [x] **Alter/Stabilitäts-Text statt Zahl — erledigt (2026-07-31).** „Angepasst — die
+  Form steht" bekommt einen Zeitbezug („seit N Generationen stabil"). `_why.stableSince`
+  merkt sich die Generation, seit der die Form ununterbrochen steht, wird
+  zurückgesetzt sobald die Umwelt wieder etwas formt. Umgeht bewusst die
+  sig-Kurzschluss-Optimierung der Warum-Zeile nur im Stabilitäts-Zweig (Takt bleibt bei
+  WHY_MS ~900 ms, kein Flacker-Risiko). Playwright-geprüft: Zähler startet erst ab der
+  zweiten stabilen Generation, zählt sauber hoch.
+- [x] **Onboarding-Selbstcheck — erledigt (2026-07-31).** Gegengeprüft: `#onboard`,
+  Regler-Tooltips, Presets/Herausforderungen/Umwelt-Einfluss-Buttons hatten alle schon
+  ein `title`. **Eine echte Lücke gefunden:** die neuen Land/Wasser-Medium-Buttons
+  (diese Session, Punkt „Medium-Umschalter") hatten KEIN Tooltip — man konnte nur durch
+  Ausprobieren herausfinden, dass sie den Wasser-Regler zwischen Feuchte- und
+  Wassertiefe-Wertebereich umschalten. Genau die Art Lücke, an der laut Recherche
+  Niche (Breed & Evolve) krankte. Behoben: Tooltips auf beiden Buttons + dem
+  „Lebensraum"-Label.
 - **Schnappschuss-Moment — verworfen (2026-07-31, Nutzer-Entscheidung).** Inspiriert
   von Naturfotografie-Spielen (Pokémon Snap/Bugsnax/Alba): ein internes Album mit
   Discovery-/Stabilisierungs-Momenten einer Linie. **Begründung:** deckt sich bereits

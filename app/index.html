@@ -97,7 +97,7 @@
       <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
       <p class="console-framing"><b>Presets ↗</b> setzen eine fertige Welt sofort · <b>Regler</b> entwerfen eine neue, <b>Los</b> übernimmt sie · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
       <div class="onboard" id="onboard" hidden>Öffne <b>Presets ↗</b> für eine fertige Welt, oder dreh einen <b>Regler</b> und drück <b>Los</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
-      <div class="mediums-row"><span class="mlabel">Lebensraum</span><div class="mediums" id="mediums"></div></div>
+      <div class="mediums-row"><span class="mlabel" title="Schaltet den Wasser-Regler zwischen zwei Wertebereichen um: Feuchte für Landlebensräume oder Wassertiefe für Wasserlebensräume">Lebensraum</span><div class="mediums" id="mediums"></div></div>
       <div id="levers"></div>
       <div class="draftbar" id="draftbar" hidden>
         <p class="draft-preview" id="draftPreview"></p>
@@ -412,7 +412,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.80.4";
+const APP_VERSION = "v0.80.5";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -3110,9 +3110,13 @@ function resetMediumUI(){
   setWaterLabel(WATER_LEVER_DEF.name, WATER_LEVER_DEF.lo, WATER_LEVER_DEF.hi);
   [...mediumsEl.children].forEach(c => c.classList.remove("active"));
 }
-[["land","Land"],["wasser","Wasser"]].forEach(([key,lbl]) => {
+// Onboarding-Selbstcheck (Punkt 11, Niche-Lehre): jeder andere Regler/Button in der App
+// traegt ein title-Tooltip, diese beiden Buttons hatten keins - fanden sich beim
+// Gegenchecken nur ueber Ausprobieren heraus, was sie tun.
+[["land","Land","Wasser-Regler als Feuchte einstellen (trocken ↔ feucht) — für Landlebensräume"],
+ ["wasser","Wasser","Wasser-Regler als Wassertiefe einstellen (flach ↔ tief) — für Wasserlebensräume"]].forEach(([key,lbl,title]) => {
   const btn = document.createElement("button");
-  btn.className = "medium"; btn.dataset.medium = key; btn.textContent = lbl;
+  btn.className = "medium"; btn.dataset.medium = key; btn.textContent = lbl; btn.title = title;
   btn.addEventListener("click", () => {
     if(btn.classList.contains("active")) return;   // schon aktiv -> nichts zu tun
     const de = draftEnv();
