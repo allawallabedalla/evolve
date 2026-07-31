@@ -128,6 +128,10 @@
         <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
         <span class="vit-num" id="vitNum">—</span>
       </div>
+      <!-- Aussterbe-Warnung (V3). Steht ueber der Warum-Zeile, weil sie in dem Moment
+           das Wichtigste auf dem Bildschirm ist. role=alert: Screenreader melden sie
+           sofort, ohne dass der Fokus springt. -->
+      <div class="peril" id="perilLine" role="alert" hidden></div>
       <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausliest — gemessen an der lebenden Population: um so viel verschiebt die Auslese den Durchschnitt dieses Merkmals je Generation. Steht nichts, ist das Wesen angepasst."></div>
       <div class="genes" id="genes"></div>
       <button class="gene-nums-toggle" id="geneFilterBtn" aria-pressed="false" title="Nur auffällige Gene zeigen oder alle 25 Gene auf einmal">Alle 25 Gene zeigen</button>
@@ -416,7 +420,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.87.1";
+const APP_VERSION = "v0.88.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1610,6 +1614,42 @@ let committedArch, candArch = null, candCount = 0;
 // (neues Leben, Spielstand laden, Herausforderung starten) laufen schon waehrend des
 // Bootens — eine Deklaration weiter unten liefe in die temporale Totzone.
 let _lastFormGenome = null, _accentKeys = null;
+
+// ============================================================================
+// AUSSTERBEN (V3 aus docs/bindung-konzept.md, Nutzer-Entscheidung 2026-07-31).
+// Eine Linie kann enden — damit wird die Ahnenlinie zur Überlebensgeschichte und
+// „Neu beginnen" zu einer Entscheidung statt einem Knopf.
+//
+// ⚠️ NICHT VERHANDELBARE LEITPLANKE aus dem Konzept: **nie offline.** Wer zurückkommt,
+// findet nie ein totes Wesen vor — das wäre genau das Verfall-Schuldgefühl, das der
+// Produkt-Pfeiler ausschliesst. Strukturell abgesichert, nicht nur per Absicht:
+// der Zähler läuft in ECHTEN BEOBACHTETEN SEKUNDEN und wird ausschliesslich in der
+// Bildschleife hochgezählt, nie in simAdvance(). Damit können ihn die Offline-
+// Nachsimulation (OFFLINE_CAP, bis zu 240 Generationen bei der Rückkehr), ein
+// pausiertes Spiel und ein Hintergrund-Tab per Konstruktion nicht bewegen.
+//
+// SCHWELLE — gemessen, nicht geschätzt. Die Anzeige-Passung („Passung hier") taugt
+// dafür NICHT: drei der zwölf kuratierten Presets stehen dauerhaft bei 0 %
+// (Urtümpel 0.000, Moderwald 0.004, Trüber See 0.008), weil vitality() erst ab
+// Fitness 0.10 zu zählen beginnt — an ihr ein Aussterben zu hängen hätte „Urtümpel"
+// jedes Mal tödlich gemacht. Genommen wird deshalb die ROHE Fitness:
+//   · schlechtestes kuratiertes Preset (Urtümpel):        0.081
+//   · PERIL_FIT (Schwelle)                                0.040
+//   · Boden der Fitness-Funktion (phys.floor):            0.020
+// Nur eine Welt, die die Fitness praktisch auf den Boden drückt — dort gibt es keine
+// Auslese mehr, sie ist eine echte Sackgasse — kann also töten. Eine einzelne
+// Katastrophe reicht nicht (nur Gift auf Maximum: 0.204).
+const PERIL_FIT = 0.04;      // darunter beginnt die Uhr zu laufen
+const PERIL_WARN_S = 20;     // beobachtete Sekunden bis zur Warnung
+const PERIL_DEAD_S = 60;     // beobachtete Sekunden bis zum Ende
+const PERIL_RECOVER = 3;     // Erholung läuft 3x so schnell zurück wie der Verfall
+let _peril = 0, _perilDead = false;
+// Nach einem Aussterben ist die Uhr ENTSCHÄRFT, bis die Linie einmal wirklich
+// lebensfähig war (Fitness über der Schwelle). Sonst würde dieselbe unveränderte Welt
+// sofort die nächste Linie holen — zweimal dasselbe zu verlieren lehrt nichts und
+// fühlt sich nur nach Strafe an. Wer die Welt heilt, schärft sie damit von selbst
+// wieder; wer nichts tut, verliert auch nichts mehr.
+let _perilArmed = true;
 function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
 
 // ======================= Der Schwarm (Migrations-Stufe 4) =======================
@@ -1906,6 +1946,8 @@ async function initSwarmCore(){
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
+  _peril = 0; _perilDead = false;   // Aussterbe-Uhr: jede neue Linie startet unbelastet
+  _perilArmed = true;
   return true;
 }
 
@@ -2185,6 +2227,8 @@ function newLineage(){
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
+  _peril = 0; _perilDead = false;   // Aussterbe-Uhr: jede neue Linie startet unbelastet
+  _perilArmed = true;
   creatureName = "";
   // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
   // Milieu (verborgene Stressoren haben keinen Regler) — sonst „strandet" das Neugeborene.
@@ -2924,6 +2968,8 @@ function applyState(s){
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
+  _peril = 0; _perilDead = false;   // Aussterbe-Uhr: jede neue Linie startet unbelastet
+  _perilArmed = true;
 }
 function offlineCatchup(prevTs){
   const elapsed = Math.max(0, Date.now() - (prevTs || Date.now()));
@@ -2937,6 +2983,8 @@ function offlineCatchup(prevTs){
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
+  _peril = 0; _perilDead = false;   // Aussterbe-Uhr: jede neue Linie startet unbelastet
+  _perilArmed = true;
 }
 async function restore(){
   if(session){
@@ -3980,11 +4028,16 @@ function storyReset(){
 
 // ---- Zeit-Steuerung ----
 const playBtn = document.getElementById("playBtn");
-playBtn.addEventListener("click", () => {
-  running = !running;
+/** Knopf, a11y-Label und Lebenspunkt an `running` angleichen — eine Wahrheit, zwei
+ *  Aufrufer (Klick und das Aussterben, das die Zeit selbst anhaelt). */
+function setPlayIcon(){
   playBtn.innerHTML = running ? ic("pause") : ic("play");
   playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");   // B9: dynamisches Label
   document.getElementById("liveDot").style.animationPlayState = running ? "running" : "paused";
+}
+playBtn.addEventListener("click", () => {
+  running = !running;
+  setPlayIcon();
   wake();   // reduced-motion: Schleife nach dem Umschalten sicher wieder anstoßen
 });
 playBtn.setAttribute("aria-label", running ? "Pause" : "Weiter");
@@ -4744,6 +4797,8 @@ async function enterFixedWorld(chId, worldKey){
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
   _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
+  _peril = 0; _perilDead = false;   // Aussterbe-Uhr: jede neue Linie startet unbelastet
+  _perilArmed = true;
   lastBiome = worldKeyLabel(worldKey);
   document.getElementById("biomeTag").textContent = lastBiome;
   document.querySelectorAll(".biome.active").forEach(x => x.classList.remove("active"));
@@ -6092,6 +6147,58 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
 // drawProtist/drawSessile, ~900 Zeilen) sind mit Phase 3 entfallen: alle sechs Reiche
 // zeichnen jetzt als SVG (s. CREATURE_SVG). Die Historie steht im Git.
 
+// ===== Aussterben: Anzeige + Ende (V3) =====
+// Die Not wird DIEGETISCH gezeigt, nicht als Countdown: das Wesen verblasst sichtbar,
+// je naeher das Ende rueckt. Das ist die Uhr — ohne Stoppuhr-Ton, der in diesem Spiel
+// sonst nirgends vorkommt, und passend zum „zeigen statt zaehlen"-Charakter.
+// Dazu zwei Textstufen, die klar sagen, dass und wie man es abwenden kann.
+function renderPeril(){
+  const el = document.getElementById("perilLine");
+  if(!el) return;
+  const t = _peril / PERIL_DEAD_S;
+  // Verblassen erst ab der Warnschwelle — vorher soll nichts flackern.
+  const warnT = PERIL_WARN_S / PERIL_DEAD_S;
+  const fade = (t <= warnT ? 1 : 1 - 0.62*((t - warnT)/(1 - warnT))).toFixed(2);
+  // Nur schreiben, wenn sich der Wert wirklich aendert (auf 2 Stellen gerastert) —
+  // sonst setzte jedes Bild dieselbe Deckkraft neu.
+  if(cSvg.style.opacity !== fade) cSvg.style.opacity = fade;
+  if(_peril < PERIL_WARN_S || _perilDead){
+    if(!el.hidden){ el.hidden = true; el.textContent = ""; }
+    return;
+  }
+  const name = (creatureName || "").trim() || "Dein Wesen";
+  // Zwei Stufen statt Sekundenzahl — die letzte Drittelphase spricht dringlicher.
+  const txt = t > 0.72
+    ? `${name} wird schwächer. Diese Welt trägt kein Leben — ändere sie jetzt.`
+    : `${name} kämpft ums Überleben. Diese Welt trägt kein Leben — ändere sie, sonst endet die Linie.`;
+  if(el.textContent !== txt) el.textContent = txt;
+  el.classList.toggle("crit", t > 0.72);
+  if(el.hidden) el.hidden = false;
+}
+/** Das Ende einer Linie. Haelt die Zeit an, ehrt das Wesen, uebergibt an die Ahnenlinie. */
+async function extinguish(){
+  if(_perilDead) return;
+  _perilDead = true;
+  running = false;                      // der Moment steht still
+  setPlayIcon();
+  const name = (creatureName || "").trim();
+  const form = (committedArch || classify(genome)).n;
+  const gens = generation.toLocaleString("de-DE");
+  // Die Linie zieht in die Ahnenlinie — wie bei „Neues Leben", nur nicht freiwillig.
+  ancestry.push({ name: name || null, form, gen: generation });
+  if(ancestry.length > 12) ancestry = ancestry.slice(-12);
+  const wer = name ? `${name} (${form})` : form;
+  await uiConfirm(`${wer} ist nach ${gens} Generationen ausgestorben — diese Welt trug kein Leben mehr. `
+    + `Die Linie zieht in die Ahnenlinie; entdeckte Formen bleiben im Lebensbaum.`, "Neue Linie beginnen");
+  newLineage();
+  _peril = 0; _perilDead = false;
+  _perilArmed = false;   // erst wieder scharf, wenn die neue Linie einmal lebensfaehig war
+  cSvg.style.opacity = "1";
+  document.getElementById("genReadout").textContent = "Generation 0";
+  updatePanels(); updateBonding(); storyReset(); saveState();
+  running = true; setPlayIcon(); wake();
+}
+
 // ======================= Loop =======================
 let lastTime = null, acc = 0;
 // reduced-motion: die rAF-Schleife läuft nicht dauerhaft. Sie hält an, sobald die Form
@@ -6102,6 +6209,19 @@ function wake(){ if(!rafOn){ rafOn = true; lastTime = null; requestAnimationFram
 function frame(time){
   if(lastTime===null) lastTime=time;
   const dt = Math.min(0.1, (time-lastTime)/1000); lastTime=time;
+  // Aussterbe-Uhr (V3). Steht BEWUSST hier in der Bildschleife und nicht in
+  // simAdvance(): nur so kann die Offline-Nachsimulation sie nicht bewegen — die
+  // Leitplanke „nie offline" ist damit strukturell erzwungen, nicht nur beabsichtigt.
+  // Zusaetzlich: pausiert (running=false) und im Hintergrund-Tab (document.hidden,
+  // ausserdem feuert rAF dort gar nicht) steht sie ebenfalls still.
+  if(running && !document.hidden && !_perilDead){
+    const f = fitness(genome, envLive);
+    if(f > PERIL_FIT) _perilArmed = true;   // einmal lebensfaehig gewesen -> Uhr gilt wieder
+    if(_perilArmed && f <= PERIL_FIT) _peril = Math.min(PERIL_DEAD_S, _peril + dt);
+    else _peril = Math.max(0, _peril - dt*PERIL_RECOVER);
+    if(_peril >= PERIL_DEAD_S) extinguish();
+  }
+  renderPeril();
   // Kontinuierliche Zeit: laufend Generationen weiterschieben (Tempo-abhaengig).
   if(running){
     // Anpassungs-Schub nach einem Umwelt-Einfluss: kurz schnellere Evolution, dann ruhig.

@@ -942,10 +942,48 @@ Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschied
   abgefangenen Wikipedia-Sandbox-Block).
   Damit ist Backlog Punkt 5 (Nutzerbindung) inhaltlich abgeschlossen — V1/V4/V5 umgesetzt,
   V2/V3 bleiben bewusst offene Produktentscheidungen.
-- [ ] **V2/V3** (`docs/bindung-konzept.md`) — **Modell: Opus** (Produktentscheidung, nicht
-  eigenmächtig umsetzen) — Trägheit der Welt (Eingriffe brauchen Zeit), Aussterben nur unter
-  Beobachtung. Beide verändern das Grundgefühl des Spiels stärker als V1/V4/V5 und sind laut
-  `docs/bindung-konzept.md` bewusst als eigene, spätere Entscheidung markiert.
+- [x] **V2 „Trägheit der Welt" — erledigt durch das Entwurfs-System, nicht separat gebaut
+  (Nutzer-Entscheidung 2026-07-31).** V2 wollte laut `docs/bindung-konzept.md` erreichen,
+  dass „man vorausdenken muss statt zu zappeln; jeder Eingriff bekommt Gewicht" — genau
+  das leistet das in derselben Sitzung gebaute **Entwurfs-System** (Regler stellen →
+  stille Vorschau → „Los" übernimmt), das auf dieselbe Nutzer-Beobachtung
+  („fühlt sich zu volatil an") zurückgeht. Zusätzlich hätte V2s vorgeschlagene Umsetzung
+  — „sichtbarer Fortschrittsbalken (‚Umstellung läuft, noch 40 Generationen')" — der am
+  selben Tag getroffenen Entscheidung gegen Fortschrittsbalken widersprochen.
+  **Kein zweiter Verzögerungs-Mechanismus obendrauf**, das wäre doppelte Bremse.
+- [x] **V3 „Aussterben — aber nur unter deinen Augen" — umgesetzt (2026-07-31, Opus).**
+  Nutzer-Entscheidung: bauen. Damit ist Punkt 5 vollständig.
+  **Die Leitplanke ist strukturell erzwungen, nicht nur beabsichtigt:** die Uhr läuft in
+  **beobachteten Sekunden** und wird ausschliesslich in der Bildschleife hochgezählt,
+  nie in `simAdvance()`. Damit können die Offline-Nachsimulation (bis zu 240
+  Generationen bei der Rückkehr), ein pausiertes Spiel und ein Hintergrund-Tab sie per
+  Konstruktion nicht bewegen. **Gemessen:** 5.000 Generationen Offline-Nachholung in
+  einer tödlichen Welt → Uhr bleibt bei 0, kein Tod.
+  **Die Schwelle war der eigentliche Entwurfsfund.** Der naheliegende Weg — „Passung
+  lange sehr niedrig" — wäre falsch gewesen: **drei der zwölf kuratierten Presets stehen
+  dauerhaft bei 0 % Passung** (Urtümpel 0.000, Moderwald 0.004, Trüber See 0.008), weil
+  `vitality()` erst ab Fitness 0.10 zu zählen beginnt. „Urtümpel" hätte jedes Mal
+  getötet. Genommen wird deshalb die **rohe Fitness** mit gemessenem Abstand nach beiden
+  Seiten: schlechtestes Preset 0.081 · Schwelle `PERIL_FIT` 0.040 · Boden der
+  Fitness-Funktion (`phys.floor`) 0.020. Nur eine Welt, die die Fitness praktisch auf den
+  Boden drückt — dort gibt es keine Auslese mehr —, kann töten; eine einzelne Katastrophe
+  reicht nicht (nur Gift auf Maximum: 0.204). Alle 12 Presets über 1.300 Generationen
+  gegengeprüft: keines gerät unter die Schwelle.
+  **Ablauf:** 20 s Vorwarnung, 60 s bis zum Ende. Die Not wird **diegetisch** gezeigt —
+  das Wesen verblasst sichtbar, je näher das Ende rückt; das ist die Uhr, ohne
+  Stoppuhr-Ton, den dieses Spiel sonst nirgends hat. Dazu zwei Textstufen, die klar
+  sagen, dass und wie es abzuwenden ist. Erholung läuft 3× so schnell zurück wie der
+  Verfall — Welt heilen lässt die Warnung sofort verschwinden (verifiziert).
+  **Beim Testen gefunden und entschärft:** nach dem Ende lief die Uhr in derselben
+  unveränderten Welt sofort wieder los. Zweimal dasselbe zu verlieren lehrt nichts, es
+  fühlt sich nur nach Strafe an. Jetzt ist die Uhr nach einem Aussterben **entschärft**,
+  bis die neue Linie einmal wirklich lebensfähig war (`_perilArmed`) — wer die Welt
+  heilt, schärft sie von selbst wieder; wer nichts tut, verliert auch nichts mehr.
+  **Beim Ende:** Zeit hält an, die Linie zieht mit Name/Form/Generationenzahl in die
+  Ahnenlinie, ein ruhiger Dialog verabschiedet sie, **entdeckte Formen bleiben im
+  Lebensbaum** (verifiziert). Danach beginnt die nächste Linie.
+  Gates: `design-audit` (beide Warnstufen einzeln auf AA geprüft), `ui-calm-check`,
+  `app-parity` grün.
 
 ### 6 · Große Brocken — Rest-Achsen (Punkt 2 abgeschlossen, neu bewertet 2026-07-30 — s. u.)
 

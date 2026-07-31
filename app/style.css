@@ -345,6 +345,19 @@
     letter-spacing: var(--tr-display); color: var(--bio-dim); text-align: right;
     font-variant-numeric: tabular-nums; }
   /* Live-„Warum": welche Merkmale die aktuelle Umwelt gerade auslest (Selektionsgradient). */
+  /* Aussterbe-Warnung (V3). Traegt als einziges Element der Karte die Danger-Farbe —
+     sie erscheint nur, wenn die Linie tatsaechlich zu Ende geht, und muss dann alles
+     andere ueberstimmen. Die zweite Stufe (.crit) wird kraeftiger, nicht lauter. */
+  .peril { margin-top: 8px; padding: 8px 11px; border-radius: 10px;
+    font-size: var(--fs-sm); line-height: var(--lh-body);
+    color: var(--danger); background: rgba(176,71,47,.09);
+    border: 1px solid rgba(176,71,47,.35); }
+  .peril[hidden] { display: none; }
+  .peril.crit { color: #fbf3dd; background: var(--danger); border-color: var(--danger);
+    font-weight: var(--w-bold); }
+  /* Das Verblassen der Kreatur IST die Uhr — deshalb weich, aber nicht als „Animation"
+     im Sinne von prefers-reduced-motion (kein Bewegungsreiz, nur Deckkraft). */
+  #creatureSvg { transition: opacity .5s linear; }
   .why { margin-top: 7px; font-size: var(--fs-sm); line-height: var(--lh-body); color: var(--muted); min-height: 1.1em; }
   .why b { color: var(--text); font-weight: var(--w-bold); }
   .why .up { color: var(--bio-dim); font-weight: var(--w-bold); }

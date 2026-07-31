@@ -45,6 +45,12 @@ page.on("pageerror", e => errors.push("Haupt: " + e));
 page.on("console", m => { if (m.type() === "error") errors.push("Haupt: " + m.text()); });
 await page.goto(URL_APP);
 await page.waitForTimeout(1200);
+// Simulation anhalten: der Kontrast-Teil soll IMMER dieselbe Oberflaeche messen.
+// Laeuft sie weiter, kann waehrend der Messung eine zustandsabhaengige Zeile
+// auftauchen (Aussterbe-Warnung, Toast) und das Ergebnis von Lauf zu Lauf springen —
+// genau so wurden hier einmal 2 Verstoesse gemeldet, die nicht reproduzierbar waren.
+await page.evaluate(() => { running = false; if (typeof setPlayIcon === "function") setPlayIcon(); });
+await page.waitForTimeout(200);
 
 const contrastFn = () => {
   const lum = (r,g,b) => { const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
@@ -100,6 +106,21 @@ for (const [id, name] of [["discBtn","Lebensbaum"],["chalBtn","Herausforderungen
 }
 
 // ---------- 2) Alle 12 Presets + Extremregler ----------
+// Zustands-Elemente, die im Normalzustand versteckt sind, gezielt sichtbar machen —
+// sonst wuerden sie nie gemessen (die Aussterbe-Warnung hat zwei Farbstufen).
+for (const [stufe, krit] of [["Aussterbe-Warnung", false], ["Aussterbe-Warnung kritisch", true]]) {
+  await page.evaluate((k) => {
+    const el = document.getElementById("perilLine");
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = "Nebel kaempft ums Ueberleben. Diese Welt traegt kein Leben.";
+    el.classList.toggle("crit", k);
+  }, krit);
+  await page.waitForTimeout(150);
+  badTotal += await auditContrast(stufe);
+}
+await page.evaluate(() => { const el = document.getElementById("perilLine"); if (el) { el.hidden = true; el.classList.remove("crit"); } });
+
 console.log("\n=== 2) Presets + Extremregler ===");
 await page.click("#presetsBtn"); await page.waitForTimeout(400);
 const biomes = await page.locator("#presetsPanel .biome").count();
