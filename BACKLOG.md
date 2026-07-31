@@ -1402,6 +1402,48 @@ wird hier laufend nachgetragen, damit ein neuer Chat sofort weiß, wo er einstei
 
 ---
 
+### 11 · Zeitgefühl & Vergleichsspiel-Recherche (2026-07-31, noch nicht umgesetzt)
+
+Auslöser: Nutzer vermisste beim Betrachten einer kämpfenden Linie einen „zeitlichen
+Bezug" und fragte, ob ein Fortschrittsbalken passen würde. Antwort **nein** — steht
+explizit als Leitplanke in Punkt „🧭 Produkt-Pfeiler" (`kein Vollständigkeits-Balken`,
+`kein Grind/Skinner-Loop`) — recherchiert stattdessen Muster aus Spielen, die bewusst
+ohne Balken auskommen (Outer Wilds Ship Log, Dwarf Fortress/Crusader-Kings-Chronik,
+Don't-Starve-Tagzähler, Animal-Crossing-Echtzeitkopplung) sowie allgemein
+Vergleichsspiele zu Genetik/Bindung ohne Grind (Niche — Breed & Evolve, Creatures/
+Norns, Pokémon-Snap-artige Naturfotografie-Spiele, thatgamecompany-Bindungsdesign).
+Volle Recherche inkl. Quellen im Session-Verlauf, hier nur die daraus abgeleiteten,
+noch offenen Ideen:
+
+- [ ] **Dormante `world/seasonal.ts`-Oszillation in die Live-App einspeisen** —
+  **Modell: Opus** (Produktentscheidung: welche Achse, welche Amplitude/Periode sind
+  Geschmacksfragen, nicht nur Verdrahtung). Bisher laut Phase 6 (Punkt 10) bewusst
+  „Live-App unberührt" — nur als Forschungsnachweis (`tools/seasonal-check.mjs`)
+  validiert. Idee: eine Umweltachse spürbar zyklisch schwingen lassen (analog Don't
+  Starve/Animal Crossing: Zeit als erlebter Rhythmus, nicht als Zahl), optional locker
+  an die echte Kalenderjahreszeit gekoppelt (deckt sich mit der bestehenden Leitplanke
+  „echte Erdzeit-Reihenfolge" unter „Wertschätzung für die Natur"). Kein Balken, kein
+  Ziel — reine Ambiance.
+- [ ] **Alter/Stabilitäts-Text statt Zahl** — **Modell: Sonnet**. Ergänzt den
+  bestehenden „Angepasst — die Form steht"-Hinweis um einen Zeitbezug wie „seit N
+  Generationen stabil" — Chronik-Charakter (Dwarf-Fortress-/CK-Muster: Geschichte
+  statt Prozentzahl), kein neues Widget.
+- [ ] **Onboarding-Selbstcheck** — **Modell: Sonnet**. Niche (Breed & Evolve) hat als
+  nächstverwandtes Vergleichsspiel dokumentiert unter mangelnder In-Game-Erklärung
+  seiner Genetik-Mechanik gelitten. Lohnt sich, `#onboard`/Regler-Erklärungen der
+  eigenen App mit frischem Blick gegenzuprüfen statt anzunehmen, dass sie reichen —
+  noch nicht durchgeführt.
+- [ ] **Schnappschuss-Moment** — **Modell: Opus** (neue Feature-Idee, kein reiner
+  Fix). Inspiriert von Naturfotografie-Spielen (Pokémon Snap/Bugsnax/Alba): einen
+  Discovery- oder Stabilisierungs-Moment einer Linie visuell festhalten (nicht nur
+  Chronik-Text) — würde sich mit dem Schnappschuss-Teilen-Feature und der Chronik
+  überschneiden, braucht eigenen Design-Durchlauf.
+- **Verletzlichkeit sichtbar lassen — bestätigt, kein Task.** Companion-Bindungs-
+  Forschung (Yu-kai Chou u. a.) bestätigt: gezeigte Schwäche/Kampf („0 % Passung ·
+  kämpft") ist Teil der emotionalen Bindung, kein Zustand, den man wegdesignen sollte.
+
+---
+
 ## 🧭 Produkt-Pfeiler (Leitplanken)
 
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
