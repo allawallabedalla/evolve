@@ -119,7 +119,6 @@
       <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
       <div class="species-edge" id="speciesEdge" hidden></div>
       <div class="bauplan" id="bauplan">Ein Ur-Wesen ohne Spezialisierung. Stell eine Umwelt ein — über Generationen bildet sich eine Form heraus.</div>
-      <div class="chron-line" id="chronLine" role="status" aria-live="polite" hidden></div>
       <div class="vitality" title="Wie gut passt das Wesen zur aktuellen Umwelt? (aus der Fitness). Dreh einen Regler — die Vitalität reagiert.">
         <span class="vit-label" id="vitLabel">Passung zur Umwelt</span>
         <span class="vit-track"><span class="vit-fill" id="vitFill"></span></span>
@@ -413,7 +412,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.80.0";
+const APP_VERSION = "v0.80.1";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -2886,7 +2885,7 @@ async function restore(){
   _story.lastEnv = Object.assign({}, env);
   _story.lastForm = committedArch || classify(genome);
   loadChron();
-  if(chronicle.length) renderChron(null);
+  if(chronicle.length) renderChron();
   else storyLine("anfang", { key: "start" });
 }
 function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
@@ -3760,14 +3759,7 @@ function loadChron(){
     }
   }catch(e){}
 }
-function renderChron(newText){
-  const line = document.getElementById("chronLine");
-  if(line && newText){
-    line.hidden = false; line.classList.remove("show"); void line.offsetWidth;
-    line.textContent = newText; line.classList.add("show");
-  } else if(line && !newText && chronicle.length){
-    line.hidden = false; line.classList.add("show"); line.textContent = chronicle[chronicle.length-1].t;
-  }
+function renderChron(){
   const log = document.getElementById("chronLog"), list = document.getElementById("chronList");
   if(!log || !list) return;
   log.hidden = chronicle.length < 2;   // eine einzelne Zeile braucht noch kein Archiv
@@ -3793,7 +3785,7 @@ function storyLine(beat, extra){
   _story.last = now;
   chronicle.push({ t: r.text, g: generation });
   if(chronicle.length > CHRON_MAX) chronicle.shift();
-  renderChron(r.text); saveChron();
+  renderChron(); saveChron();
 }
 // Der Spieler hat die Umwelt verändert (Regler/Biom/Einfluss). Entprellt, damit das
 // Schieben eines Reglers EINE Zeile ergibt — und Mikro-Justagen gar keine.
@@ -3864,9 +3856,7 @@ function storyReset(){
   _story.pressKey = null; _story.pressGens = 0; _story.pressDone = false;
   _story.calmGens = 0; _story.calmDone = false;
   _story.lowGens = 0; _story.lowDone = false; _story.highGens = 0; _story.highDone = false;
-  const line = document.getElementById("chronLine");
-  if(line){ line.hidden = true; line.classList.remove("show"); line.textContent = ""; }
-  renderChron(null);
+  renderChron();
   storyLine("anfang", { key: "start" });
 }
 
