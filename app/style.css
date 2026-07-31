@@ -179,6 +179,12 @@
      Ebenen dieselbe Flaeche decken — ohne dies wuerde `.hab-stage svg` das zweite SVG
      als Block DARUNTER stapeln statt darueber legen. */
   .hab-stage #creatureSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  /* Akzentfarbe fuer das NEU ERWORBENE Modul (Phase 3). Bewusst als Regel und nicht als
+     Attribut: der Zeichner schreibt jedes Bild seine eigene Farbe, eine Klasse gewinnt
+     ohne dass sich beide gegenseitig ueberschreiben. Getrennt nach Flaeche und Kontur —
+     eine gemeinsame Regel wuerde Strichformen (fill="none") faelschlich fluten. */
+  #creatureSvg .cre-accent-fill { fill: var(--accent); }
+  #creatureSvg .cre-accent-stroke { stroke: var(--accent); }
   /* Umwelt-Einfluss-Cinematik: kurzer tongefärbter Blitz + leichtes Beben aufs Habitat */
   .viewport::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; border-radius: 16px; z-index: 4; }
   .viewport.fx-hit, .viewport.fx-shift, .viewport.fx-bio { animation: vpShake .5s ease; }

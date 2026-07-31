@@ -777,16 +777,30 @@ Session, dabei den `.gene .fill`-Bug selbst reproduziert und behoben).
     Messschleife die Canvas-Rasterung staut. Kein Performance-Gewinn behauptet.)
   - Gates: `ui-calm-check`, `app-parity` grün; Resize, `prefers-reduced-motion` und
     Reich-Wechsel (SVG↔Canvas, Reste werden geräumt) einzeln verifiziert.
-  **Offen aus dem ursprünglichen Phase-3-Auftrag:** die **Akzentfarbe für das neu
-  erworbene Modul** (EINE Akzentfarbe markiert das Körperteil, das seit der letzten
-  committeten Form dazugekommen ist). Braucht zwei Dinge, die es noch nicht gibt: eine
-  Erkennungslogik „welches Gen ist seit dem letzten Form-Commit am stärksten gestiegen"
-  (kann auf der bestehenden Formkipp-Erkennung der Chronik aufbauen) und je Reich eine
-  **Gen→Körperteil-Zuordnung** (z. B. `armor`→Panzer/Stacheln, `limb`→Beine,
-  `insul`→Fell, `wing`→Flügel). Jetzt gut machbar, weil alle Zeichner modular sind und
-  jedes Anbauteil ein eigenes Element mit stabilem Schlüssel hat.
-  **Ebenfalls offen (neu, klein):** die ~800 Zeilen unerreichbarer Canvas-Zeichner
-  entfernen — eigene Aufräum-Aktion, s. o.
+  - **Akzentfarbe für das neu erworbene Modul — umgesetzt (2026-07-31).** Damit ist der
+    Phase-3-Auftrag vollständig. Die Palette reservierte `--accent` (Ringelblume) von
+    Anfang an für „neu erworbene Merkmale", eine Mechanik dafür gab es aber nie.
+    **Wie es arbeitet:** am bestehenden Formkipp-Punkt (derselbe, der Chronik und
+    Genbuch auslöst) wird verglichen, welches Gen seit der letzten committeten Form am
+    stärksten gestiegen ist; das zugehörige Körperteil trägt den Akzent, bis die nächste
+    Form steht. `MODULE_MAP` hält je Reich die Gen→Körperteil-Zuordnung
+    (z. B. Tier: `armor`→Panzer/Ringe/Stacheln, `insul`→Fell, `limb`→Beine,
+    `wing`→Flügel, `sense`→Fühler).
+    **Zwei bewusste Entscheidungen:** (1) Nur Gene mit SICHTBAREM Modul kommen infrage —
+    steigt etwa „Osmoregulation", gibt es dafür nichts zu zeigen, dann bleibt es beim
+    normalen Farbschema. Lieber kein Akzent als ein gelogener (so verifiziert).
+    (2) Umgesetzt als **CSS-Klasse**, nicht als Attribut: der Zeichner schreibt pro Bild
+    seine eigene Farbe, ein Attribut-Akzent würde sich mit ihm jedes Bild gegenseitig
+    überschreiben. Die Klasse wechselt nur beim Formkipp. Getrennt nach Fläche und
+    Kontur, sonst würde eine gemeinsame Regel Strichformen (`fill="none"`) fluten.
+    **Live verifiziert:** in einer kalten Umwelt entwickelte sich ein „Fell-Warmblüter",
+    und der Akzent wählte das **Fell** — also genau das Merkmal, nach dem die Form
+    benannt ist. Über 250 Generationen stabil, null Modulwechsel zwischen den Formkippen.
+    **Bewusst KEIN Text-Label dazu:** Warum-Zeile und `#speciesEdge` erklären ohnehin
+    schon, was sich gerade verändert; eine dritte Textstelle wäre Doppelung (und der
+    Nutzer hat in dieser Sitzung bereits eine redundante Textzeile entfernen lassen).
+  **Offen (neu, klein):** die ~800 Zeilen unerreichbarer Canvas-Zeichner entfernen —
+  eigene Aufräum-Aktion, s. o.
 - [x] **Phase 4 — Restliche UI — geprüft, bereits erledigt (2026-07-31).** Vor dem
   Umsetzen gegengecheckt statt blind zu "übertragen": alle fünf genannten Bereiche
   hängen schon vollständig an den Klippenlicht-Tokens (`var(--chamber)`,

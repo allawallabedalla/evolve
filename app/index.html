@@ -417,7 +417,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.85.0";
+const APP_VERSION = "v0.86.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1605,6 +1605,12 @@ let _pressTop = null;
 // kurz ueberstreifter Formen und (b) spontanes Umschalten an classify()-Schwellen.
 const STABLE_GENS = 15;
 let committedArch, candArch = null, candCount = 0;
+// Akzent-Modul (Phase 3, s. updateAccentModule weiter unten): Genom beim letzten
+// Form-Commit + die Schluessel des dadurch markierten Koerperteils. Steht BEWUSST hier
+// beim uebrigen Linien-Zustand und nicht unten beim Zeichner: die Zuruecksetz-Stellen
+// (neues Leben, Spielstand laden, Herausforderung starten) laufen schon waehrend des
+// Bootens — eine Deklaration weiter unten liefe in die temporale Totzone.
+let _lastFormGenome = null, _accentKeys = null;
 function makeRandn(){ return () => { const u=Math.max(rng(),1e-9), v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
 
 // ======================= Der Schwarm (Migrations-Stufe 4) =======================
@@ -1900,6 +1906,7 @@ async function initSwarmCore(){
   // Anzeige auf den Schwarm-Zentroid nachziehen (newLineage() lief vor dem Modul-Ladevorgang).
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
   return true;
 }
 
@@ -2178,6 +2185,7 @@ function newLineage(){
   spawnSwarm(null);   // frisches Leben = gestreute Gründer (setzt `genome` auf den Zentroid)
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
   creatureName = "";
   // Frisches Leben startet nicht in einem unsichtbar giftigen/hypoxischen/salzigen
   // Milieu (verborgene Stressoren haben keinen Regler) — sonst „strandet" das Neugeborene.
@@ -2916,6 +2924,7 @@ function applyState(s){
   spawnSwarm(genome);
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
 }
 function offlineCatchup(prevTs){
   const elapsed = Math.max(0, Date.now() - (prevTs || Date.now()));
@@ -2928,6 +2937,7 @@ function offlineCatchup(prevTs){
   }
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
 }
 async function restore(){
   if(session){
@@ -4734,6 +4744,7 @@ async function enterFixedWorld(chId, worldKey){
   spawnSwarm(null);   // gestreute Gründer aus lineageSeed -> für alle Spieler dieselben
   displayGenome = genome.slice();
   committedArch = classify(genome); candArch = null; candCount = 0;
+  _lastFormGenome = genome.slice(); _accentKeys = null;   // Akzent-Modul neu aufsetzen
   lastBiome = worldKeyLabel(worldKey);
   document.getElementById("biomeTag").textContent = lastBiome;
   document.querySelectorAll(".biome.active").forEach(x => x.classList.remove("active"));
@@ -5214,6 +5225,57 @@ function cAttr(e, o){
   }
   return e;
 }
+// --- Akzentfarbe fuer das NEU ERWORBENE Modul --------------------------------
+// Die Palette reserviert `--accent` (Ringelblume) ausdruecklich fuer „neu erworbene
+// Merkmale" — bis jetzt gab es dafuer aber keine Mechanik. Sie funktioniert so:
+// bei jedem Form-Wechsel (dem bestehenden Formkipp-Punkt, der auch Chronik und
+// Genbuch ausloest) wird verglichen, WELCHES Gen seit der letzten committeten Form am
+// staerksten gestiegen ist. Das zugehoerige Koerperteil traegt die Akzentfarbe, bis die
+// naechste Form steht — die Silhouette sagt damit selbst, was an ihr neu ist.
+//
+// Zwei bewusste Entscheidungen:
+//  · Nur Gene mit einem SICHTBAREN Modul kommen infrage. Steigt „Osmoregulation", gibt
+//    es dafuer nichts zu zeigen — dann faellt die Wahl auf den naechstbesten Kandidaten
+//    oder es bleibt beim normalen Farbschema. Lieber kein Akzent als ein gelogener.
+//  · Umgesetzt als CSS-KLASSE, nicht als Attribut. Wuerde der Akzent die fill-/stroke-
+//    Attribute ueberschreiben, schrieben Zeichner und Akzent sich pro Bild gegenseitig
+//    um; die Klasse wechselt nur beim Formkipp und die Regel in app/style.css gewinnt.
+const MODULE_MAP = {
+  Tier:    { 0:["an-fur"], 2:["an-legs"], 4:["an-shell","an-shring","an-spike"],
+             8:["an-wing","an-w1","an-w2","an-w3"], 18:["an-ant","an-stalk"] },
+  Pflanze: { 0:["pl-fuzz","pl-snow","pl-hair"], 4:["pl-spine"],
+             5:["pl-blob","pl-crown","pl-lf","pl-ros","pl-mb","pl-gl","pl-pin","pl-fl","pl-tier"],
+             7:["pl-trunk","pl-ntr","pl-gst","pl-st"] },
+  Pilz:    { 4:["fun-shelf"], 5:["fun-lobe"], 2:["fun-myc","fun-thr"] },
+  Sessil:  { 5:["cor-tips"], 15:["spo-por"], 4:["spo-body"] },
+  Mikrobe: { 5:["amo-vac"], 6:["arc-fla"], 1:["bac-core"] },
+  Protist: { 5:["eug-chl"], 6:["eug-fla"], 18:["eug-eye","rad-spikes"] },
+};
+/** Beim Formkipp aufrufen: bestimmt das neue Modul und merkt sich das Genom. */
+function updateAccentModule(g, arch){
+  const kind = (arch && (arch.e==="🪸"||arch.e==="🧽")) ? "Sessil" : (arch && arch.k);
+  const map = MODULE_MAP[kind];
+  _accentKeys = null;
+  if(map && _lastFormGenome){
+    // Alle Gene nach Zuwachs sortieren, den ersten mit sichtbarem Modul nehmen.
+    const risen = [];
+    for(let i=0;i<NG;i++){ const d = g[i] - (_lastFormGenome[i] ?? 0.5); if(d >= 0.08 && map[i]) risen.push({ i, d }); }
+    risen.sort((a,b) => b.d - a.d);
+    if(risen.length) _accentKeys = map[risen[0].i];
+  }
+  _lastFormGenome = g.slice();
+}
+/** Nach dem Zeichnen: Akzent-Klasse auf die Elemente des Moduls setzen/entfernen. */
+function applyAccentClasses(){
+  for(const [k, e] of _cPool){
+    const on = !!(_accentKeys && _accentKeys.some(p => k === p || k.startsWith(p)));
+    // Strich-Elemente (fill="none") bekommen den Akzent auf die Kontur, Flaechen auf die
+    // Fuellung — eine gemeinsame Regel wuerde sonst Strichformen faelschlich fluten.
+    const stroked = e.getAttribute("fill") === "none";
+    e.classList.toggle("cre-accent-fill", on && !stroked);
+    e.classList.toggle("cre-accent-stroke", on && stroked);
+  }
+}
 function cBegin(){ _cUsed = new Set(); }
 /** Was dieses Bild nicht benutzt wurde, verschwindet (Formwechsel laesst nichts stehen). */
 function cEnd(){
@@ -5280,6 +5342,7 @@ function drawCreature(g, time, a){
       creatureGlowSvg(g, cx, CH*0.6, time);
       drawProtistSvg(g, cx, CH*0.6, breath, time, rnd, a);
     }
+    applyAccentClasses();
     cEnd();
     return;
   }
@@ -6703,7 +6766,9 @@ function frame(time){
       if(cur.n === candArch){ candCount += steps; }
       else { candArch = cur.n; candCount = steps; }
       if(candCount >= STABLE_GENS){
-        if(committedArch.n !== cur.n) committedArch = cur;
+        // Formkipp: hier (und NUR hier) wird auch entschieden, welches Koerperteil als
+        // „neu erworben" die Akzentfarbe traegt — s. updateAccentModule().
+        if(committedArch.n !== cur.n){ committedArch = cur; updateAccentModule(genome, cur); }
         // Neuartige (erzeugte) Namen sind KEINE Blätter des Lebensbaums — sie bekommen
         // keinen Genbuch-Eintrag, sonst zählte der Fortschritt Formen mit, die es im
         // Baum gar nicht gibt. Die Form selbst wird trotzdem angezeigt und erzählt.
