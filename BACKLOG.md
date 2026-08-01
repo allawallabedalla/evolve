@@ -1720,7 +1720,37 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       `STABLE_GENS` nie erreichen können — Genbuch-Funde hätten komplett einfrieren
       können. Direkt am Katalog bestätigt: drei Arten mit byte-identischem Genom in
       derselben Gruppe.
-- [ ] **3.1–3.2** Abdeckungs-Metrik + Lückenreport → Vorschläge für neue Gen-Achsen (*Opus*).
+- [x] **3.1** Abdeckungs-Metrik (2026-08-01) — `npm run coverage-check` (neu, registriert:
+      läuft nur auf eingecheckten Dateien). Sweep aus drei Schichten mit vorhandener
+      Technik: 5^6-Regler-Gitter (wie `docs/rarity.json`) + 66 Einfluss-Faktoren × 15 Biome
+      (sonst wären die 15 bedingten Gene per Konstruktion unerreichbar) + 192 Schwarm-Läufe
+      auf `world/population.ts` (Cluster-Zentroide, wie `readSwarm()`) = **16.754 Endpunkte**.
+      **Drei Lesarten statt einer**, damit die Zwillings-Decke aus 1.4 nicht als Engine-Lücke
+      gelesen wird: **96,2 %** der 20.178 Arten liegen in einer erreichten Bauplan-Gruppe,
+      **28,9 % an einem erreichten Genom-Punkt (die Abdeckungszahl)**, 0,55 % werden strikt
+      benannt (= 15,9 % der 692 unterscheidbaren Punkte — mehr ist mit 96,6 % Zwillingen
+      arithmetisch unmöglich). 59/65 Baupläne erreicht; kein Endpunkt jenseits
+      `novelThreshold`. **Kernbefund: es ist keine Wertebereichs-, sondern eine
+      Kombinations-Lücke** — nur 327 Arten verlangen einen nie erreichten Genwert — und sie
+      liegt zu **71,7 % bei der PLATZIERUNG, nicht bei der Engine**: so viel des Verlusts
+      steht auf Genen mit Konfidenz 1 (Geschwister-Median aus Stufe c), nur 18,1 % auf einer
+      Kladen-Regel. Der Median erbt von jedem Geschwister dessen Spezialisierung und baut
+      eine Durchschnittspflanze, die es nicht gibt. Nebenbefund: `docs/rarity.json` ist in
+      11 von 43 Formen überholt.
+- [x] **3.2** Lückenreport → Achsen-Vorschläge (2026-08-01) — `docs/coverage-report.md`:
+      **sieben Vorschläge, keiner umgesetzt** (Struktur-Wachstum nur auf Bestätigung,
+      `engine/fitness.ts`/`physics.json` unberührt). Drei ohne neues Gen — **V0**
+      Imputation der bedingten Gene auf Mehrheitsregel statt Median (der größte und
+      billigste Hebel, s. 71,7 % oben), **V1** Standort-Grundlast statt Einzel-Ereignis
+      (heute setzen 33 von 66 Faktoren gar keinen, 26 genau einen Stressor — mehrere milde
+      Dauer-Toleranzen sind strukturell unerreichbar), **V2** Filterapparat kostet
+      Stromlinienform (im `fisch`-Bauplan gewinnt ein Punkt mit `filter` 0.86 gegen 1.637
+      reale Fische mit 0.03). Vier neue Achsen — **AXIS-22** Poikilohydrie (`revive`,
+      Laubmoose 0 %), **AXIS-23** Kriechsohle (`creep`, Ringelwürmer 0 %, `wurm` ist eine
+      tote Form), **AXIS-24** Ruhephase/Ektothermie (`dormancy`, Reptilien 4 %),
+      **AXIS-25** krautiger Wuchs (`resprout`, Blütenkraut-Bauplan unerreichbar).
+      Ausdrücklich **nicht** gestützt von der Messung: Fortpflanzung, Sozialität,
+      Wirt-Parasit; die Protisten (0 %) brauchen mehr Baupläne, keine Gen-Achse.
 - [x] **4.1** Gründer-Los im Nullraum (2026-08-01) — `world/founder.ts`, einmal je
       Gründung gezogen, Radius je Gen **gemessen** statt geraten: der
       Neutralitäts-Wächter kürzt 23 von 25 Genen ein, bis ±Radius unter 0.5 % Fitness

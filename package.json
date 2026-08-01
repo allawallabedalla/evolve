@@ -38,6 +38,7 @@
     "key-check": "node tools/key-check.mjs",
     "build-catalog": "NODE_USE_ENV_PROXY=1 node tools/build-catalog.mjs",
     "catalog-check": "node tools/catalog-check.mjs",
+    "coverage-check": "npm run build && node tools/coverage-check.mjs",
     "wikidata-harvest": "NODE_USE_ENV_PROXY=1 node tools/wikidata-harvest.mjs",
     "story-check": "node tools/story-check.mjs",
     "influence-check": "node tools/influence-check.mjs",

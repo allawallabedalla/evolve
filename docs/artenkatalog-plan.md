@@ -673,12 +673,85 @@ sicher auf den Bauplan-Namen zurück (kein Bruch).
 
 ### Phase 3 — Abdeckung messen
 
-**3.1 · `npm run coverage-check`** — *Opus* · Welcher Anteil der realen Arten liegt in
-Reichweite der Engine? Lückenreport nach Reich, Klade und Gen-Achse. Das ist die Zahl,
-die die Vision überhaupt erst messbar macht.
-**3.2 · Lückenreport in Achsen-Vorschläge übersetzen** — *Opus* · Fortpflanzung,
-Sozialität, Lebenszyklus, Wirt-Parasit. Nur Vorschlag, Bestätigung von Hand — wie bei
-jedem Struktur-Wachstumsschritt in diesem Repo.
+**3.1 · `npm run coverage-check` — ✅ erledigt 2026-08-01**
+*Modell: Opus* · *Netz: nein*
+
+`tools/coverage-check.mjs` beantwortet die Frage, die die Vision messbar macht: gibt es
+eine Umwelt, in der die Engine ein Genom hervorbringt, dessen `nearestReal()` **diese**
+Art ausweist? Der Sweep hat drei Schichten, alle mit vorhandener Technik: **A** das
+5^6-Regler-Gitter mit deterministischer Konvergenz (dieselbe Technik wie `docs/rarity.json`,
+15.625 Umwelten), **B** eine Stressor-Schicht (66 aktive Einfluss-Faktoren × 15 kalibrierte
+Biome = 847 Umwelten, Stressor-Rücksetzung wie `applyInfluence()`) — ohne sie wäre jede Art
+mit einem der 15 bedingten Gene per Konstruktion „unerreichbar" —, und **C** 192
+Schwarm-Läufe auf `world/population.ts` mit der Live-`SWARM`-Konfiguration, bei denen wie in
+`readSwarm()` die **Cluster-Zentroide** benannt werden. Zusammen 16.754 Endpunkte.
+
+**Drei ineinander liegende Zahlen statt einer** — weil die Zwillings-Decke aus 1.4 (692
+unterscheidbare Punkte) sonst als Engine-Lücke gelesen würde:
+
+| Lesart | Arten | Anteil |
+|---|---:|---:|
+| in erreichten Bauplan-Gruppen | 19.411 | 96,2 % |
+| **an erreichten Genom-Punkten (die Abdeckungszahl)** | **5.825** | **28,9 %** |
+| tatsächlich benannt (an der Zwillings-Decke gedeckelt) | 110 | 0,55 % (= 15,9 % der 692 Punkte) |
+
+Dazu: **59/65 Bauplan-Gruppen erreicht**, kein einziger Endpunkt jenseits von
+`novelThreshold` (die Schwelle ist weiter richtig kalibriert), und die Schichten tragen
+messbar: ohne B wären 520, ohne C weitere 569 Arten scheinbar unerreichbar — eine Messung
+nur auf dem Regler-Gitter hätte sich um ein Fünftel geirrt.
+
+**Der Befund, mit dem nicht zu rechnen war:** die Lücke ist **keine Wertebereichs-Lücke**.
+Nur 327 der 20.178 Arten verlangen einen Genwert, den die Engine in 16.754 Umwelten *nie*
+erreicht (Panzerung > 0.78, Grabtrieb > 0.76). Es ist eine **Kombinations-Lücke** — und
+zu **71,7 %** eine Lücke der *Platzierung*, nicht der Engine: gewichtet man die Gene, in
+denen eine unerreichte Art gegen den Gewinner verliert, mit ihrer Katalog-Konfidenz, stammen
+71,7 % des Verlusts aus **Stufe (c)** (Geschwister-Median, Konfidenz 1) und nur 18,1 % aus
+einer begründeten Kladen-Regel. Der Median über die Geschwister der Bedecktsamer erbt von
+den Kakteen die Austrocknungs-Toleranz, von den Süßgräsern die Feuerresistenz, von den
+Nadelhölzern den Frostschutz — und erzeugt eine **Durchschnittspflanze, die es nicht gibt**.
+Für eine An/Aus-Spezialisierung ist der Median der falsche Schätzer; `unusedBurden()` nennt
+so ein Wesen zu Recht eine Chimäre.
+
+*Gate:* `npm run coverage-check` — **in `package.json` registriert** (anders als
+`impute-check`/`build-traits`), weil es ausschließlich auf eingecheckten Dateien läuft;
+`tools/.harvest-state.json` ist der einzige optionale Zusatz (Kladen-Aufschlüsselung) und
+sein Fehlen kostet nur diesen einen Abschnitt. Laufzeit gemessen ~6 min, `--quick` ~1 min.
+Diagnose, kein Pass/Fail (Präzedenz `ablation-check`/`spectrum-check`): es gibt keine
+begründbare Schwelle für „genug Abdeckung". Rohzahlen in `docs/coverage.json`.
+
+*Nebenbefund, notiert statt behoben:* `docs/rarity.json` ist in **11 von 43 Formen**
+überholt (Schicht A ist mit derselben Technik gemessen und stimmt in 32/43 überein) —
+`fisch`, `reptil`, `fellgrosstier`, `grossjaeger`, `hutpilz`, `schimmel`, `farn` sind
+inzwischen erreichbar, obwohl dort 0 % steht. Die Datei steuert die Genbuch-Rarität und
+sollte neu erzeugt werden; eigener kleiner Schritt.
+
+**3.2 · Lückenreport in Achsen-Vorschläge übersetzt — ✅ erledigt 2026-08-01**
+*Modell: Opus* · *Netz: nein*
+
+`docs/coverage-report.md` — **sieben Vorschläge, keiner umgesetzt** (Struktur-Wachstum wird
+in diesem Repo nur vorgeschlagen, s. README „Autonomie"; `engine/fitness.ts` und
+`physics.json` sind nicht angefasst). Jeder Vorschlag nennt WAS fehlt, WARUM (welche reale
+Klade mit welcher gemessenen Abdeckung sonst unerreichbar bleibt), WIE die Physik-Formel
+aussähe, das Risiko und die Erfolgsmessung — nach dem Muster von AXIS-1…AXIS-21.
+
+| # | Vorschlag | neues Gen? | Ziel-Klade (heutige Abdeckung) |
+|---|---|---|---|
+| V0 | Imputation der 15 bedingten Gene: Mehrheitsregel statt Median | nein | Bedecktsamer 12 %, Pilze 56 % — **71,7 % des Verlusts** |
+| V1 | Standort-Grundlast (milde Dauer-Stressoren aus den 6 Reglern abgeleitet) | nein | Süßgräser, Nacktsamer, Flechten |
+| V2 | Filterapparat kostet Stromlinienform (`aquaticFilterDrag`) | nein | Strahlenflosser 7 %, Weichtiere 36 % |
+| AXIS-22 | Poikilohydrie (`revive`) | ja | **Laubmoose 0 %** |
+| AXIS-23 | Kriechsohle (`creep`) | ja | Weichtiere 36 %, **Ringelwürmer 0 %** |
+| AXIS-24 | Ruhephase/Ektothermie (`dormancy` + `seasonality`) | ja | Reptilien 4 %, Amphibien-Bauplan 0 % |
+| AXIS-25 | Krautiger Wuchs (`resprout`) | ja | Bedecktsamer 12 %, Blütenkraut-Bauplan 0 % |
+
+**Empfohlene Reihenfolge: V0 zuerst und allein messen** — er kostet die Engine nichts und
+verschiebt vermutlich die Grundlage aller anderen Zahlen. Zwei Funde, die dabei
+ausdrücklich *gegen* eine neue Achse sprechen: die **Protisten** (0 % — einziges Reich bei
+null) brauchen keine Gen-Achse, sondern mehr als zwei Baupläne für fünf Wurzel-Kladen; und
+drei der im alten Plan genannten Kandidaten — **Fortpflanzung, Sozialität, Wirt-Parasit** —
+werden von der Messung **nicht** gestützt (die Pilze sind mit 56–58 % die bestabgedeckten
+Vielzeller; die Rostpilze verlieren an einem imputierten `osmo`-Wert, nicht an einer
+fehlenden Wirts-Mechanik). Nur *Lebenszyklus* bestätigt sich (AXIS-24/25).
 
 ### Phase 4 — Kontingenz (der ursprüngliche Faden, jetzt mit Wirkung)
 
