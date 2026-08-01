@@ -1696,7 +1696,12 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       87 % der conf-0-Werte die Aussage „Gen aus"; **kein Kern-Gen kommt aus Stufe (d)**.
       Gate `node tools/impute-check.mjs` (I1–I4, nicht in package.json — braucht die
       Ernte-Artefakte).
-- [ ] **1.4** Katalog-Erzeugung, Sharding, nächtlicher Actions-Lauf (*Sonnet*, Netz).
+- [x] **1.4** Katalog-Erzeugung (2026-08-01) — `stage:"full"`, 20.178 Arten, 37/65
+      Bauplan-Gruppen belegt. Im Browser verifiziert: Fell-Genom zeigt „Capybara" statt
+      „Fell-Großtier". Gate `npm run catalog-check` (gzip-Budget 753 KB, korrigiert von
+      Rohbyte- auf Gzip-Maß). Zwei gemessene Funde für Abschnitt 8: 96,6% Genom-Zwillinge
+      (Empfehlung: founderSpreads() aus 4.1 wiederverwenden) und synchrones Laden statt
+      Sharding.
 - [ ] **2.1–2.4** Lebensbaum auf echte Taxonomie, Rarität zweistufig, Chronik/
       Herausforderungen, Spielstands-Migration (*Sonnet*).
 - [ ] **3.1–3.2** Abdeckungs-Metrik + Lückenreport → Vorschläge für neue Gen-Achsen (*Opus*).

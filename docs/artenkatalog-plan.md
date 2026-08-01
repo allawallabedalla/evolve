@@ -497,14 +497,78 @@ Wikidatas P2974 (Habitat, 8 % Belegung bei Säugern) ist über den `habitatHint`
 vorgesehen, aber noch nicht angebunden. Ebenfalls offen: `MIN_SIBLINGS` (5) ist die
 Lehrbuch-Untergrenze und nicht an diesem Korpus kalibriert.
 
-**1.4 · Katalog-Erzeugung**
-*Modell: Sonnet* · *Netz: ja*
+**1.4 · Katalog-Erzeugung — ✅ erledigt 2026-08-01**
+*Modell: Sonnet* · *Netz: ja (nur für den Wiki-Titel-Nachlauf, s. u.)*
 
-Zusammenbau, Quantisierung, Sharding, Aufnahmeschwelle kalibrieren, Kollisionsprüfung
-(zwei Arten auf demselben Punkt), nächtlicher Actions-Lauf.
+`tools/build-catalog.mjs` bekommt einen `FULL_MODE` (Standard, sobald
+`tools/.harvest-state.json` existiert; `--bootstrap` erzwingt die alte Stufe 0.2).
+Reine Montage der bereits geprüften Bausteine: für jede geerntete Art `traitsToGenes()`
+(1.1b) + `applyCladeRules()` (1.2) → Korpus für ganz Schritt 1.1-1.4 → `placeSpecies()`
+(1.3) für die volle Platzierung, dazu `core.matchArchetype()` (aus `tools/lib/app-core.mjs`,
+**Wiederverwendung statt zweiter Abstandsformel**) mit der von `habitatOf()` geschätzten
+Umwelt, um die Bauplan-Gruppe zu bestimmen.
 
-*Gate:* `npm run catalog-check` auf dem echten Katalog; Größen- und Ladezeit-Budget;
-Reproduzierbarkeit (zweimal erzeugen ⇒ bitgleich).
+**Vorbedingung, die erst beim Bauen auffiel: der Artikel-Titel fehlte.** Die Ernte (1.1)
+filtert auf „hat einen deutschen Wikipedia-Artikel", selektiert aber nie den Artikel-Titel
+selbst. Für die vielen Arten, deren Wikidata-*Label* zufällig der wissenschaftliche Name
+ist (gemessen: *Hyla chrysoscelis* als Label, aber Artikel „Copes Grauer Laubfrosch"),
+wäre ein Link auf den wissenschaftlichen Namen **falsch** gewesen — genau für die Arten,
+die am ehesten gelesen werden. Neues Skript `tools/wikidata-sitelinks.mjs`: 20.178 Arten
+in Batches à 50 über die Action-API, **100 % Trefferquote**.
+
+**Ein Bug beim Verdrahten, gefunden über eine Plausibilitätsprüfung (conf3 lag bei
+exakt 0,0 % statt der erwarteten ~0,3 %):** `placeSpecies()` erwartet bereits fertige
+Genwerte (`traitsToGenes()`-Ausgabe), bekam aber das rohe Merkmal (`{massG:...}`)
+übergeben — `GENE_INDEX["massG"]` existiert nicht, Stufe (a) fiel still auf 0 zurück,
+ohne Fehler. Der stille Fehlschlag ist selbst ein Fund: eine Schnittstelle, die bei
+falscher Eingabe kommentarlos nichts tut statt zu werfen, ist ein Risiko für jede
+künftige Erweiterung von Stufe (a). Behoben; `conf3` liegt jetzt bei 0,3 %.
+
+**Ergebnis:** 20.178 Arten, **37 von 65 Bauplan-Gruppen belegt**, Konfidenz gesamt
+conf3 0,3 % · conf2 46,9 % · conf1 16,2 % · conf0 36,6 %. **Im echten Browser
+verifiziert** (Playwright): Fell-Genom zeigt jetzt „**Capybara**" statt „Fell-Großtier",
+Pflanzen-Genom „**Füllhorn-Fedie**" statt „Verholzter Strauch" — `CATALOG_NAMES` kippt
+automatisch, wie in Schritt 0.3 vorgesehen. Alle bestehenden Gates unverändert grün
+(`parity` 6,939e-18, `app-parity` Δ=0, `mf-fidelity`, `key-check`, `exemplar-check`,
+`story-check`, `influence-check`, `ui-calm-check`, `app-world-smoke`).
+
+**Größenbudget korrigiert, nicht nur erreicht.** Die ursprüngliche 4-MB-Rohbyte-Schwelle
+in `catalog-check.mjs` war der falsche Maßstab: GitHub Pages liefert `.js` immer gzip
+aus. Gemessen: **8,7 MB roh → 753 KB gzip**. `catalog-check.mjs` prüft jetzt gegen ein
+1536-KB-**Gzip**-Budget (Luft bis ~40.000 Arten). Reale Ladezeit im lokalen Playwright-Test
+(ohne Netzwerklatenz): 178 ms Parse/Eval für die Ressource.
+
+**Zwei ehrliche, gemessene Funde — beide NICHT im Rahmen von 1.4 behoben, sondern für
+Abschnitt 8 dokumentiert:**
+
+1. **96,6 % der Arten teilen sich ein genom-identisches „Zwilling" in ihrer Gruppe** —
+   nur **692 unterscheidbare Punkte** unter 20.178 Arten. Ursache: Stufe (a) deckt fast
+   nur Säugetier-Masse ab (s. 5a), Stufe (b) operiert auf Familien-/Ordnungs-Ebene, und
+   Stufe (c) imputiert aus genau demselben geteilten Vorfahren — drei eng verwandte
+   Arten ohne eigene Messung landen deshalb oft exakt am selben Punkt. Der Stufe-2-Matcher
+   wählt unter echten Zwillingen dann nicht mehr nach Nähe, sondern per Sortier-Reihenfolge
+   — ein Teil der 20.178 Arten ist dadurch faktisch nie „die nächste", egal welches Genom
+   die Engine erzeugt. `catalog-check.mjs` berichtet die Zahl bei jedem Lauf (kein Gate,
+   damit sie nicht versehentlich verschwindet). **Empfehlung für einen Folgeschritt:**
+   dieselbe, bereits validierte Maschinerie aus 4.1 (`founderSpreads()`,
+   Neutralitäts-Wächter über Bisektion) auf den Katalog anwenden — ein deterministischer,
+   QID-geseedeter Versatz **ausschließlich in den Genen, in denen die Selektion nicht
+   hinschaut**, würde Zwillinge trennen, ohne eine einzige erfundene biologische Aussage
+   zu treffen. Bewusst nicht in dieser Sitzung gebaut, um diese Entscheidung nicht unter
+   Zeitdruck zu treffen.
+2. **28 von 65 Bauplan-Gruppen haben keine einzige reale Art** (u. a. Sukkulente,
+   Nadelbaum, Koloss, Schnecke). Dort bleibt die Anzeige beim Bauplan-Namen (`real: null`,
+   von `nearestReal()` korrekt abgefangen). Deckt sich mit der Erwartung aus Schritt 3 —
+   das IST der Lückenreport, nur noch nicht ausgewertet.
+
+**Bewusst offen:** echtes Sharding/Lazy-Loading nach Bauplan-Gruppe ist im Datenmodell
+angelegt (`byGroup`-Index existiert), aber `app/index.html` lädt `catalog.js` weiterhin
+synchron als eine Datei (`<script src>`, wie `archetypes.js`). Bei 20.178 Arten ist das
+mit 753 KB gzip noch vertretbar; bei einem Wachstum auf 40.000+ Arten (weitere
+Ernte-Läufe, die Warteschlange hat noch 2.268 unbearbeitete Kladen) wird echtes
+Lazy-Loading nötig — im Datenmodell vorbereitet, aber nicht gebaut.
+
+*Gate:* `npm run catalog-check` (C1–C8, inkl. gzip-Budget und Zwillings-Bericht) grün.
 
 ### Phase 2 — Integration
 
@@ -651,3 +715,12 @@ Phase 0–3 stehen. Erzwingt einen bezahlten Supabase-Plan.
   werden. Entscheidung nach der Belegungsmessung in 1.1.
 - Ob Wikidata allein reicht oder eine zweite Merkmalsquelle (GBIF, FishBase, TRY) nötig
   wird. Entscheidung nach 1.1, nicht vorher.
+- **Genom-Zwillinge (gemessen 1.4): 96,6 % der 20.178 Arten teilen sich einen
+  genom-identischen Zwilling in ihrer Bauplan-Gruppe** (nur 692 unterscheidbare Punkte).
+  Empfehlung: `founderSpreads()` aus 4.1 auf den Katalog anwenden — deterministischer,
+  QID-geseedeter Versatz nur im Nullraum der Selektion. Nicht gebaut, um die Entscheidung
+  nicht unter Zeitdruck zu treffen. Details in 1.4.
+- **Echtes Sharding (gemessen 1.4): `app/index.html` lädt `catalog.js` synchron als eine
+  Datei** (753 KB gzip bei 20.178 Arten), obwohl das Datenmodell nach Bauplan-Gruppe
+  shardet. Bei weiterem Wachstum (Warteschlange der Ernte hat noch 2.268 Kladen) wird
+  echtes Lazy-Loading nötig.

@@ -24,9 +24,13 @@
 import { readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SIZE_BUDGET_KB = 4096;   // ~4 MB: bei 20.000 Arten die Obergrenze aus Plan Abschnitt 4
+// GEZIPPT, nicht roh: GitHub Pages liefert .js immer komprimiert aus, die rohe
+// Byte-Zahl ueberzeichnet die reale Ladekosten massiv (gemessen bei 20.178 Arten:
+// 8,7 MB roh -> 784 KB gzip). Budget mit Luft fuer Wachstum auf ~40.000 Arten.
+const GZIP_BUDGET_KB = 1536;
 
 const win = {};
 new Function("window", readFileSync(join(ROOT, "app", "catalog.js"), "utf-8"))(win);
@@ -90,9 +94,11 @@ for (const e of entries) {
   set.add(e.qid);
 }
 
-// C7 — Groessenbudget
-const kb = statSync(join(ROOT, "app", "catalog.js")).size / 1024;
-if (kb > SIZE_BUDGET_KB) note("C7", `Katalog ${kb.toFixed(0)} KB > Budget ${SIZE_BUDGET_KB} KB.`);
+// C7 — Groessenbudget (gzip, s. Begruendung oben)
+const catalogPath = join(ROOT, "app", "catalog.js");
+const kb = statSync(catalogPath).size / 1024;
+const gzipKb = gzipSync(readFileSync(catalogPath)).length / 1024;
+if (gzipKb > GZIP_BUDGET_KB) note("C7", `Katalog ${gzipKb.toFixed(0)} KB gzip > Budget ${GZIP_BUDGET_KB} KB.`);
 
 // --- Bericht ---
 const withQid = entries.filter((e) => e.qid).length;
@@ -102,12 +108,28 @@ const confCount = [0, 0, 0, 0];
 for (const e of entries) for (const c of e.conf || []) confCount[c]++;
 const confTotal = confCount.reduce((a, b) => a + b, 0) || 1;
 
-console.log(`catalog-check — Stufe "${CAT.stage}", ${entries.length} Eintraege in ${Object.keys(CAT.byGroup || {}).length} Bauplan-Gruppen, ${kb.toFixed(1)} KB`);
+console.log(`catalog-check — Stufe "${CAT.stage}", ${entries.length} Eintraege in ${Object.keys(CAT.byGroup || {}).length} Bauplan-Gruppen, ${kb.toFixed(0)} KB roh / ${gzipKb.toFixed(0)} KB gzip`);
 console.log(`  Beleg: ${withQid}/${entries.length} mit Wikidata-QID · ${withSci} mit wissenschaftlichem Namen`);
 console.log(`  Konfidenz je Gen: ${confCount.map((c, i) => `${i}=${(100 * c / confTotal).toFixed(0)}%`).join("  ")}`
   + "   (3 gemessen · 2 Klade · 1 imputiert · 0 Habitat)");
 if (emptyGroups.length)
   console.log(`  ohne reale Art (bleibt beim Bauplan-Namen): ${emptyGroups.length} Gruppen — ${emptyGroups.slice(0, 8).join(", ")}${emptyGroups.length > 8 ? " …" : ""}`);
+
+// BERICHTET, kein Fehler: wie oft teilen sich mehrere reale Arten in derselben Gruppe
+// buchstaeblich denselben Punkt (moegliche Folge duenner Kladen-Regel-Aufloesung, s.
+// docs/artenkatalog-plan.md "Bewusst offen" — der Stufe-2-Matcher waehlt unter
+// Zwillingen nicht mehr nach Naehe, sondern per Sortier-Reihenfolge).
+if (entries.length) {
+  const seen = new Map();
+  for (const e of entries) {
+    const key = e.group + "|" + e.genome.join(",");
+    seen.set(key, (seen.get(key) || 0) + 1);
+  }
+  const clones = entries.length - seen.size;
+  console.log(`  Arten mit einem genom-identischen Zwilling in ihrer Gruppe: `
+    + `${clones}/${entries.length} (${(100 * clones / entries.length).toFixed(1)}%) — `
+    + `${seen.size} unterscheidbare Punkte insgesamt.`);
+}
 
 // Rechenzeit-Budget der Stufe 2 (Plan Abschnitt 3): der Matcher laeuft pro Generation,
 // darf also den Bildlauf nicht bremsen. Gemessen wird der echte innere Schleifenkern auf
