@@ -2285,7 +2285,9 @@ function readSwarm(){
   swarmSplit = null;
   if(swarmForms.length > 1 && swarmForms[1].fraction >= SWARM.splitShow){
     const other = classify(swarmForms[1].centroid, env);
-    swarmSplit = { n: other.n, pct: Math.round(swarmForms[1].fraction * 100) };
+    // key mitfuehren: renderSpeciesEdge() muss die Aufspaltung ueber den BAUPLAN
+    // erkennen, nicht ueber den (seit Schritt 1.4 oft realen) Anzeigenamen.
+    swarmSplit = { n: other.n, key: other.key, pct: Math.round(swarmForms[1].fraction * 100) };
   }
   updateCoevoState();   // Wettrüsten-Hinweis im Zensus-Takt, nicht je Bild
   _perf.census++; _perf.censusMs += performance.now() - t0;
@@ -3594,7 +3596,9 @@ function renderSpeciesEdge(a){
   //     gleichzeitig lebensfähige Bauformen. Das ist die auffälligste Neuigkeit, die der
   //     Punkt-Motor prinzipiell nicht liefern konnte (der Mittelwert einer gespaltenen
   //     Population läge im leeren Tal) — deshalb steht sie vor allen anderen Modi.
-  const split = (swarmSplit && a && swarmSplit.n !== a.n) ? swarmSplit : null;
+  // Ueber .key vergleichen: zwei Cluster desselben Bauplans mit zufaellig
+  // unterschiedlichem naechsten Realart-Treffer sind KEINE Aufspaltung.
+  const split = (swarmSplit && a && swarmSplit.key !== a.key) ? swarmSplit : null;
   let mode = "";
   if(split) mode = "split";
   else if(a && a.novel) mode = "novel";
@@ -4017,8 +4021,11 @@ function updateBonding(){
   row.hidden = false;
   const shown = ancestry.slice(-4);
   const lead = ancestry.length > shown.length ? `<span class="sep">…›</span>` : `<span class="sep">Ahnen:</span>`;
+  // formIcon() ueber a.form (Bauplan) — a.formName (reale Art) fehlt bei aelteren,
+  // schon gespeicherten Ahnenlinien-Eintraegen und faellt dann auf den Bauplan-Namen
+  // zurueck (kein Datenverlust bei alten Staenden).
   row.innerHTML = lead + shown.map(a =>
-    `<span class="anc">${formIcon(a.form)}${a.name || a.form.split(" · ")[0]}</span>`
+    `<span class="anc">${formIcon(a.form)}${a.name || a.formName || a.form.split(" · ")[0]}</span>`
   ).join(`<span class="sep">›</span>`);
 }
 
@@ -4106,7 +4113,11 @@ function storyEnvChanged(){
 function storyTick(steps){
   if(!steps || !window.EvolveStory) return;
   const a = committedArch;
-  if(a && _story.lastForm && a.n !== _story.lastForm.n){
+  // Ueber .key erkennen (Bauplan), nicht .n: die Chronik erzaehlt bewusst ueber den
+  // Bauplan, nicht die Art (s. Kommentar oben an storyTick) — mit Bugfix in der
+  // STABLE_GENS-Gate oben ist committedArch.n zwar praktisch schon key-synchron, aber
+  // die Absicht gehoert explizit hierher, nicht nur implizit von dort geerbt.
+  if(a && _story.lastForm && a.key !== _story.lastForm.key){
     storyLine("wandel", { from: _story.lastForm.n, vorher: _story.lastForm.n, to: a.n,
       fromK: _story.lastForm.k, toK: a.k, key: _story.lastForm.n + ">" + a.n });
   }
@@ -4213,7 +4224,8 @@ _dlg.el.addEventListener("keydown", e => {
 document.getElementById("newLifeBtn").addEventListener("click", async () => {
   if(!await uiConfirm("Neues Leben als Nachkomme starten? Das jetzige Wesen zieht in die Ahnenlinie.", "Neues Leben")) return;
   // A4: aktuelles Wesen als Ahne aufzeichnen (Linie ueberlebt "Neues Leben").
-  ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
+  // form = Bauplan-Name (fuer formIcon() in der Ahnenzeile), formName = reale Art.
+  ancestry.push({ name: creatureName || null, form: committedArch.form, formName: committedArch.n, gen: generation });
   if(ancestry.length > 12) ancestry = ancestry.slice(-12);
   newLineage();
   document.getElementById("reveal").hidden = true;
@@ -4684,8 +4696,12 @@ function challengeTick(){
   // ganz ohne Zutun. CHAL_MIN_GENS macht daraus wieder ein echtes "geschafft".
   const CHAL_MIN_GENS = 5;
   const cur = classify(genome);
+  // ch.ziel.form ist ein fester BAUPLAN-Name aus challenges.js (z.B. "Fell-Warmblüter").
+  // Seit Schritt 1.4 ist cur.n oft ein realer Artname ("Capybara") — der Vergleich muss
+  // ueber den stabilen Schluessel laufen, sonst waeren formbasierte Herausforderungen
+  // im vollen Katalog praktisch unloesbar.
   const matched = (generation - activeChallenge.startGen >= CHAL_MIN_GENS) &&
-    (ch.ziel.form ? cur.n===ch.ziel.form : cur.k===ch.ziel.reich);
+    (ch.ziel.form ? cur.key===formKey(ch.ziel.form) : cur.k===ch.ziel.reich);
   if(matched){
     completedChallenges.add(ch.id); saveCompletedChallenges();
     showChallengeToast(ch, "geschafft");
@@ -4853,7 +4869,11 @@ function recordWorldResult(worldKey, ch, gens, arch){
   const k = worldKey + "|" + ch.id;
   const prev = wowMine[k];
   const best = !prev || gens < prev.gens;
-  if(best){ wowMine[k] = { gens, form: arch.n, ts: Date.now() }; saveWowMine(); }
+  // form = stabiler BAUPLAN-Name (arch.form), NICHT arch.n: das ist seit Schritt 1.4 oft
+  // eine reale Art und wuerde die Vielfalts-Zaehlung/den Icon-Lookup in renderWowRes()
+  // zersplittern (formIcon() faellt auf reale Namen still auf "dot" zurueck).
+  // formName haelt den realen Anzeigenamen zusaetzlich fuer die persoenliche "als X"-Zeile.
+  if(best){ wowMine[k] = { gens, form: arch.form, formName: arch.n, ts: Date.now() }; saveWowMine(); }
   setTimeout(() => showInfoToast(
     best ? `Geschafft in ${gens.toLocaleString("de-DE")} Generationen — als ${arch.n}.`
          : `Geschafft in ${gens.toLocaleString("de-DE")} Generationen (deine Bestzeit: ${prev.gens.toLocaleString("de-DE")}).`
@@ -4873,9 +4893,12 @@ async function pushWorldResult(worldKey, ch, gens, arch){
       .eq("user_id", session.user.id).eq("world_key", worldKey).eq("challenge_id", ch.id).maybeSingle();
     if(own.error) throw own.error;
     if(own.data && own.data.generations <= gens) return;   // alte Bestzeit bleibt stehen
+    // form = arch.form (fester Bauplan-Name): die Tabellen-Spalte ist ausdruecklich auf
+    // "festes Vokabular" ausgelegt (s. supabase/schema.sql), arch.n waere seit Schritt
+    // 1.4 oft eine reale Art und wuerde diese Zusage brechen.
     const { error } = await sb.from("challenge_results").upsert({
       user_id: session.user.id, world_key: worldKey, challenge_id: ch.id,
-      generations: gens, form: arch.n, kingdom: kingdomOf(arch.n) || "—",
+      generations: gens, form: arch.form, kingdom: kingdomOf(arch.form) || "—",
     }, { onConflict: "user_id,world_key,challenge_id" });
     if(error) throw error;
   } catch(e){
@@ -4906,7 +4929,7 @@ async function enterFixedWorld(chId, worldKey){
     `„${ch.titel}" in der ${worldKeyLabel(worldKey)} beginnen? Alle starten hier mit derselben Umwelt und demselben Zufall — nur so ist vergleichbar, in wie vielen Generationen es jemand schafft. Dein jetziges Wesen zieht dafür in die Ahnenlinie.`,
     "Welt betreten");
   if(!ok) return false;
-  ancestry.push({ name: creatureName || null, form: committedArch.n, gen: generation });
+  ancestry.push({ name: creatureName || null, form: committedArch.form, formName: committedArch.n, gen: generation });
   if(ancestry.length > 12) ancestry = ancestry.slice(-12);
   const sw = startWorldFor(ch, worldKey);
   // wie newLineage(), nur mit FESTEM Seed und FESTER Umwelt statt Math.random()
@@ -4966,7 +4989,7 @@ function renderWowCard(){
   if(mine){
     const d = document.createElement("div");
     d.className = "wow-mine";
-    d.textContent = `dein Ergebnis: ${mine.gens.toLocaleString("de-DE")} Generationen · ${mine.form}`;
+    d.textContent = `dein Ergebnis: ${mine.gens.toLocaleString("de-DE")} Generationen · ${mine.formName || mine.form}`;
     _el("wowEnv").after(d);
   }
   _el("wowEnter").textContent = mine ? "Noch einmal versuchen" : "Diese Welt betreten";
@@ -5006,8 +5029,10 @@ async function openWowRes(worldKey, chId){
 }
 function renderWowRes(worldKey, ch, rows, failed){
   const mine = wowMine[worldKey + "|" + ch.id];
+  // formName ist der reale Anzeigename (seit Schritt 1.4); aeltere lokale Ergebnisse ohne
+  // formName fallen auf form (den Bauplan-Namen) zurueck — kein Datenverlust bei alten Staenden.
   const mineHtml = mine
-    ? `<div class="wowr-head">Du hast diese Welt in <b>${mine.gens.toLocaleString("de-DE")}</b> Generationen geschafft — als <b>${mine.form}</b>.</div>`
+    ? `<div class="wowr-head">Du hast diese Welt in <b>${mine.gens.toLocaleString("de-DE")}</b> Generationen geschafft — als <b>${mine.formName || mine.form}</b>.</div>`
     : `<div class="wowr-head">Du hast diese Welt noch nicht geschafft. Es gibt keine Frist und nichts zu verpassen — sie bleibt offen.</div>`;
   if(failed || !rows){
     _el("wowResBody").innerHTML = mineHtml +
@@ -6307,12 +6332,13 @@ async function extinguish(){
   running = false;                      // der Moment steht still
   setPlayIcon();
   const name = (creatureName || "").trim();
-  const form = (committedArch || classify(genome)).n;
+  const a = committedArch || classify(genome);
+  const form = a.form, formName = a.n;   // form = Bauplan (Icon), formName = reale Art (Text)
   const gens = generation.toLocaleString("de-DE");
   // Die Linie zieht in die Ahnenlinie — wie bei „Neues Leben", nur nicht freiwillig.
-  ancestry.push({ name: name || null, form, gen: generation });
+  ancestry.push({ name: name || null, form, formName, gen: generation });
   if(ancestry.length > 12) ancestry = ancestry.slice(-12);
-  const wer = name ? `${name} (${form})` : form;
+  const wer = name ? `${name} (${formName})` : formName;
   await uiConfirm(`${wer} ist nach ${gens} Generationen ausgestorben — diese Welt trug kein Leben mehr. `
     + `Die Linie zieht in die Ahnenlinie; entdeckte Formen bleiben im Lebensbaum.`, "Neue Linie beginnen");
   newLineage();
@@ -6359,12 +6385,19 @@ function frame(time){
       // Stabile Form: nur wenn dieselbe Klasse STABLE_GENS Generationen haelt ->
       // dann committen (Anzeige/Zeichnung wechselt) UND erst dann Genbuch-Unlock.
       const cur = classify(genome);
-      if(cur.n === candArch){ candCount += steps; }
-      else { candArch = cur.n; candCount = steps; }
+      // Stabilitaets-Gate ueber den BAUPLAN (.key), nicht den Anzeigenamen (.n): seit
+      // Schritt 1.4 kann .n bei jedem Aufruf zwischen zwei nah beieinanderliegenden
+      // REALEN Arten kippen (nearestReal()-Beinah-Gleichstand), auch wenn der Bauplan
+      // stabil bleibt. Ein Vergleich auf .n wuerde candCount dann staendig zuruecksetzen
+      // und STABLE_GENS nie erreichen — Genbuch-Funde koennten komplett einfrieren.
+      // Vor Schritt 1.4 war .n 1:1 mit dem Bauplan identisch, .key ist die Fortsetzung
+      // desselben Verhaltens, kein Verhaltenswechsel.
+      if(cur.key === candArch){ candCount += steps; }
+      else { candArch = cur.key; candCount = steps; }
       if(candCount >= STABLE_GENS){
         // Formkipp: hier (und NUR hier) wird auch entschieden, welches Koerperteil als
         // „neu erworben" die Akzentfarbe traegt — s. updateAccentModule().
-        if(committedArch.n !== cur.n){ committedArch = cur; updateAccentModule(genome, cur); }
+        if(committedArch.key !== cur.key){ committedArch = cur; updateAccentModule(genome, cur); }
         // Neuartige (erzeugte) Namen sind KEINE Blätter des Lebensbaums — sie bekommen
         // keinen Genbuch-Eintrag, sonst zählte der Fortschritt Formen mit, die es im
         // Baum gar nicht gibt. Die Form selbst wird trotzdem angezeigt und erzählt.
