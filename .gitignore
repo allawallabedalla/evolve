@@ -24,3 +24,9 @@ tools/.catalog-cache.json
 tools/.harvest-state.json
 tools/.traits-cache/
 tools/.traits-linked.json
+
+# Eltern-Cache von tools/wikidata-lineage.mjs (Schritt 1.3) — dieselbe Begruendung:
+# reproduzierbares Abfrage-Ergebnis (14.495 Arten in ~4 min), kein Quelltext. Er ist
+# zugleich die Quelle der Wahrheit fuer die Ketten, weil die laufende Ernte
+# tools/.harvest-state.json aus ihrem eigenen Speicherabbild ueberschreibt.
+tools/.lineage-cache.json

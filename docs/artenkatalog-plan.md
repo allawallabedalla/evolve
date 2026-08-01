@@ -409,13 +409,93 @@ Kosten-Tuning-Parameter und **nicht** die Massenskala, das ist eine eigene Kalib
 (Eisbär muss isoliert und groß herauskommen, Löwenzahn photosynthetisch und niedrig);
 Regelwerk-Abdeckung je Reich; keine Regel ohne Begründungskommentar.
 
-**1.3 · Imputation + Habitat-Rückwärtslauf**
+**1.3 · Imputation + Habitat-Rückwärtslauf — ✅ erledigt 2026-08-01**
 *Modell: Opus* · *Netz: ja*
 
-Stufen (c) und (d). Harte Bedingung: (d) überschreibt nie (a)–(c).
+Stufen (c) und (d) in `tools/lib/impute.mjs`, dazu die fehlende Vorbedingung.
 
-*Gate:* Konfidenz-Verteilung je Gen und Reich wird berichtet; Anteil `conf=0` je Gen unter
-Schwelle; Ablations-Prüfung (ohne Imputation muss die Abdeckung messbar schlechter sein).
+**Vorbedingung zuerst: die Elterntaxon-Ketten fehlten.** Die Ernte (1.1) speichert je Art
+nur die Wurzel-Klade, nicht die P171-Kette — Stufe (b) braucht sie aber. `tools/wikidata-lineage.mjs`
+lädt sie nach, **ebenenweise statt Kette für Kette**: die ganze Front in *einer* SPARQL-Abfrage
+(`VALUES`-Block, 250 QIDs), neue Front = alle noch unbekannten Eltern. Das lohnt sich, weil die
+Ketten nach oben zusammenlaufen. **Gemessen: 14.495 Arten in 4:02 min mit 132 Abfragen** (Ebene 0
+14.245 Knoten → 5.558 neue Vorfahren → 2.502 → …, 39 Ebenen, 24.890 Knoten im Cache). Der naive
+Weg (wie in `build-catalog.mjs`, dort für 65 Einträge vertretbar) hätte über 300.000 Anfragen
+gebraucht. Nachläufe für inzwischen dazugekommene Arten kosten Sekunden, weil der
+Eltern-Cache die oberen Ebenen schon kennt (Endstand: 16.941 Arten mit Kette, 28.302 Knoten).
+P171 ist nicht funktional, gespeichert wird deshalb die **Vorfahren*menge*** in
+Breitensuch-Reihenfolge — genau die Form, die `applyCladeRules()` (Mengenzugehörigkeit) und die
+Imputation („näher zuerst") brauchen.
+
+*Nebenläufigkeit, gemessen und behoben:* die parallel laufende Ernte schreibt
+`tools/.harvest-state.json` aus ihrem eigenen Speicherabbild und **hat den ersten Merge
+prompt wieder ausradiert**. Quelle der Wahrheit ist deshalb `tools/.lineage-cache.json`
+(`tools/lib/lineage.mjs`); der Merge liest den Ernte-Zustand unmittelbar vorher frisch ein,
+ergänzt nur `lineage`/`rank` und schreibt über temp+`rename()`. Standardmäßig wartet das
+Skript zusätzlich auf das Ende einer laufenden Ernte.
+
+**Stufe (c)** nimmt den Median der nächsten Kettenebene mit ≥ 5 belegten Geschwistern
+(Konfidenz 1). Der Korpus entsteht aus den (a)+(b)-Genomen *aller* geernteten Arten —
+11.977 Vorfahren-Knoten. **Stufe (d)** schätzt das Habitat aus der Kette (`HABITAT_RULES`,
+14 Regeln, jede mit Begründung, **keine neue QID** — alle stehen schon geprüft in
+`clade-rules.mjs`) und lässt `engine/fitness.ts` (über `dist/`, rein lesend) dort
+deterministisch konvergieren; **feste Gene bleiben während der Konvergenz fest**, damit
+die harte Regel nicht nachträglich repariert werden muss. Das Habitat-Vokabular sind die
+**zwölf kalibrierten Biome der App** plus die Land/Wasser-Bandmitten aus `MEDIUM_BANDS` —
+zur Laufzeit aus `app/index.html` gelesen, keine zweite Kopie, keine erfundene Umwelt.
+
+Dazu die eine Stufe-(a)-Abbildung, die geeicht werden konnte: **Masse → `size`**,
+stückweise linear in log10(Masse) an den gemessenen Prototyp-Ankern (Bakterie 1e-12 g →
+0.05 … Blauwal 1.5e8 g → 0.85). Die Diät-Anteile aus EltonTraits bleiben ausdrücklich
+ungenutzt: jede Abbildung darauf bräuchte einen Faktor, den nichts eicht — und sie trüge
+Konfidenz 3 und würde damit die begründeten Kladen-Werte verdrängen.
+
+*Gemessene Konfidenz-Verteilung* (`tools/impute-check.mjs`, 200 Arten × 25 Gene = 5.000,
+Ernte-Stand 16.941 Arten mit Kette):
+
+| Konfidenz | Herkunft | Gene | Anteil |
+|---:|---|---:|---:|
+| 3 | direkt gemessen (PanTHERIA-Masse) | 17 | 0,3 % |
+| 2 | aus der Klade (Stufe b) | 2.334 | 46,7 % |
+| 1 | hierarchisch imputiert (Stufe c) | 820 | 16,4 % |
+| 0 | Habitat-Rückwärtslauf (Stufe d) | 1.829 | 36,6 % |
+
+**Wie die 36,6 % zu lesen sind** — und das ist der eigentliche Befund: Stufe (d) fasst
+**kein einziges der zehn Kern-Gene** an (Bauplan, Energie, Verteidigung). Sie arbeitet
+ausschließlich im Block der 15 bedingten Stressor-Gene, zu denen es weder Klade noch
+Merkmalsquelle gibt. **86,6 % ihrer Werte tragen die Aussage „Gen aus" (≤ 0.05)**: in einer
+Umwelt ohne den passenden Stressor wirft die Engine die Resistenz ab, statt sie beim Ruhewert
+0.12 als Phantom-Unterhalt stehen zu lassen. Nur 246 Gene der Stichprobe tragen einen echten,
+vom Habitat getragenen Wert. Stufe (d) ist damit die Notlösung, als die sie geplant war —
+sie trägt den Katalog nicht.
+
+*Zwei Funde, die die Erwartung korrigiert haben:*
+1. **Stufe (c) trägt mehr als gedacht (16,4 %, nicht ~0).** Die Annahme war, dass (b) pro
+   Klade identische Werte vergibt und der Geschwister-Median deshalb redundant oder leer
+   ist. Tatsächlich hängen unter einem Vorfahren Untergruppen mit *unterschiedlich tiefen*
+   Regeln — ein Vielborster ohne eigene Aussage zu `burrow` erbt den Median seiner
+   Geschwister, die eine haben. Ablation: 820 Gene mit Korpus, 0 ohne.
+2. **Stufe (c) erreicht die Kern-Gene praktisch nicht** (0,45 %, ausschließlich `armor`;
+   Stufe (d) fasst dort **kein einziges** Gen an), weil (b) dort lückenlos ist — und aus demselben Grund auch nicht `size`. Die Imputation
+   arbeitet faktisch nur im Stressor-Block. Der Lehrbuch-Fall „Congener erbt die Masse aus
+   dem Gattungs-Median" tritt nicht ein, solange (b) `size` für jede Klade setzt.
+
+*Gate:* `node tools/impute-check.mjs` (I1 harte Regel bitgleich an 20 Arten mit
+Kladen-Treffern, 235 Gene, 0 Abweichungen · I2 kein Gen ohne Wert · I3 Konfidenz-Verteilung
+je Gen plus Kern-Gen-Schwelle 2 % · I4 Determinismus, auch am Konvergenz-Cache vorbei ·
+I5 jede Habitat-Regel begründet und ohne neue QID) — grün, 1,5 ms je Art. **Nicht in
+`package.json` registriert:** das Skript braucht die Ernte-Artefakte und (für Stufe a) die
+optionale Python-Abhängigkeit aus 1.1b; als Pflicht-Gate leuchtete es auf einem frischen
+Klon rot, ohne dass etwas kaputt wäre — dieselbe Begründung wie bei `build-traits.mjs`.
+`npm run parity` unverändert grün (max |TS − Python| = 6,9e-18); `engine/fitness.ts` und
+`physics.json` sind nicht angefasst.
+
+*Bewusst offen:* die Habitat-Zuordnung ist grob — 20 von 200 Arten der Stichprobe fallen
+auf die neutrale Startwelt zurück (Schnecken, höhere Krebse und andere Gruppen, die Land,
+Süß- und Salzwasser zu gleichmäßig aufteilen, als dass eine Klade-Regel ehrlich wäre).
+Wikidatas P2974 (Habitat, 8 % Belegung bei Säugern) ist über den `habitatHint`-Parameter
+vorgesehen, aber noch nicht angebunden. Ebenfalls offen: `MIN_SIBLINGS` (5) ist die
+Lehrbuch-Untergrenze und nicht an diesem Korpus kalibriert.
 
 **1.4 · Katalog-Erzeugung**
 *Modell: Sonnet* · *Netz: ja*

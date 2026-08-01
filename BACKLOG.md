@@ -1689,7 +1689,13 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       datengesteuert (`stage: "full"`), nicht per Code-Änderung.
 - [ ] **1.1** Wikidata-Ernte + Belegungsmessung je Eigenschaft (*Sonnet*, Netz).
 - [ ] **1.2** Merkmals- und Kladen-Regelwerk (*Opus*, Netz) — abwägungsintensivster Schritt.
-- [ ] **1.3** Imputation + Habitat-Rückwärtslauf (*Opus*, Netz).
+- [x] **1.3** Imputation + Habitat-Rückwärtslauf (2026-08-01) — `tools/lib/impute.mjs`;
+      vorab `tools/wikidata-lineage.mjs` (Elterntaxon-Ketten ebenenweise nachgeladen:
+      **14.495 Arten in 4:02 min, 132 Abfragen**). Konfidenz über 200 Arten × 25 Gene:
+      **0,3 % conf 3 · 46,7 % conf 2 · 16,4 % conf 1 · 36,6 % conf 0** — davon tragen
+      87 % der conf-0-Werte die Aussage „Gen aus"; **kein Kern-Gen kommt aus Stufe (d)**.
+      Gate `node tools/impute-check.mjs` (I1–I4, nicht in package.json — braucht die
+      Ernte-Artefakte).
 - [ ] **1.4** Katalog-Erzeugung, Sharding, nächtlicher Actions-Lauf (*Sonnet*, Netz).
 - [ ] **2.1–2.4** Lebensbaum auf echte Taxonomie, Rarität zweistufig, Chronik/
       Herausforderungen, Spielstands-Migration (*Sonnet*).
