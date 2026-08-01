@@ -13,8 +13,9 @@
 // gemeinsame { mechanisms -> Metrik }-Format gebracht, keine neue Kern-Logik.
 // P1, P4, P6 und die P8-ERHOLUNG sind net-neu.
 
-import { Population, mulberry32 } from "./population.js";
+import { Population, mulberry32, DEFAULT_CANALIZATION } from "./population.js";
 import type { PopulationConfig, CompetitionConfig } from "./population.js";
+import { founderSpreads, FOUNDER_LOTTERY_DEFAULTS } from "./founder.js";
 import { World, meanDistance } from "./world.js";
 import { Ecosystem, temporalSd } from "./coevolution.js";
 import { modes1D } from "./cluster.js";
@@ -431,3 +432,164 @@ export function extinctionRecovery(phys: Physics, mechanisms: Mechanisms, seed =
 // sonst entstuende doppelte, potenziell widerspruechliche Logik (s. Backlog
 // Punkt 9 Schritt 2).
 // ---------------------------------------------------------------------------
+
+// ===========================================================================
+// PHASE 4 (docs/artenkatalog-plan.md) — Kontingenz mit Wirkung.
+// Szenario-Logik fuer `npm run founder-check`; Zielbaender und Ausgabe liegen
+// wie ueberall in tools/ (hier: tools/founder-check.mjs).
+// ===========================================================================
+//
+// WARUM DAS NICHT IN contingency() (P6) EINGEBAUT IST — der wichtigste Befund
+// dieses Schritts, deshalb hier und nicht in einer Randnotiz:
+//
+// P6 misst die Streuung der Endzustaende NACH 300 GENERATIONEN. Gemessen (48
+// Seeds statt der ueblichen 8, damit der Schaetzer nicht selbst das Ergebnis
+// ist): das Gruender-Los ist zu diesem Zeitpunkt SPURLOS verschwunden.
+//   Startvarianz mit Los          0.696   (ohne Los: 0.0001)
+//   nach  20 Generationen         0.549   (ohne Los: 0.049)
+//   nach  70 Generationen         0.041   (ohne Los: 0.022)
+//   nach 300 Generationen         0.018-0.020 fuer JEDE gepruefte Losstaerke,
+//                                 ununterscheidbar von 0.0197 ohne Los.
+// Die Ursache ist nachgewiesen, nicht vermutet: laesst man dieselbe Population
+// OHNE Selektion laufen (gleichgewichtete Reproduktion), bleibt die Varianz bei
+// 0.212 statt auf 0.019 zu fallen. Es ist also die Selektion, die das Los
+// aufzehrt — und zwar deshalb, weil ein Budget von 0.5 % Fitness bei N=300
+// einem Selektionskoeffizienten mit N*s ~ 1.5 entspricht. Das ist im
+// populationsgenetischen Sinn NICHT neutral: ueber 300 Generationen gewinnt die
+// Selektion sicher. Der Nullraum dieser Landschaft ist ein Zustand auf Zeit
+// (~70 Generationen), kein dauerhafter Freiheitsgrad — jedes der 25 Gene traegt
+// eine Unterhaltslast und hat damit genau EINEN Attraktor.
+//
+// Haette man Phase 4 trotzdem in contingency() eingeschaltet, waere die von
+// phenomena-check gedruckte P6-Zahl je nach Parametrierung zwischen 0.014 und
+// 0.022 gesprungen — reines Schaetzerrauschen bei acht Seeds, das wie ein
+// Ergebnis ausgesehen haette. P6 bleibt deshalb BIT-IDENTISCH (0.01955), und
+// die Wirkung von Phase 4 wird dort gemessen, wo sie real ist: an ihrem
+// Zeitverlauf.
+
+/** Kontingenz-Varianz einer Seed-Schar zu mehreren Zeitpunkten. */
+export interface FounderCurveResult {
+  gens: number[];
+  /** Varianz der Mittel-Genome ueber die Seeds, je Zeitpunkt. */
+  variance: number[];
+}
+
+function centroidVariance(finals: number[][]): number {
+  const NG = finals[0].length;
+  const c = new Array<number>(NG).fill(0);
+  for (const f of finals) for (let g = 0; g < NG; g++) c[g] += f[g] / finals.length;
+  let v = 0;
+  for (const f of finals) {
+    let d = 0;
+    for (let g = 0; g < NG; g++) d += (f[g] - c[g]) ** 2;
+    v += d / finals.length;
+  }
+  return v;
+}
+
+/**
+ * Zeitverlauf der Kontingenz: gleiche Anfangsbedingung (alle Gene 0.5), gleiche
+ * Umwelt, nur andere Zufallssaat — genau der P6-Aufbau, aber MEHRFACH abgelesen
+ * statt nur am Ende, und wahlweise mit Gruender-Los (Schritt 4.1) und
+ * Sperrklinke (Schritt 4.2).
+ */
+export function founderCurve(
+  phys: Physics,
+  opts: {
+    lottery?: boolean;
+    canalization?: boolean;
+    seeds?: number[];
+    gens?: number[];
+    env?: Environment;
+  } = {},
+): FounderCurveResult {
+  const NG = phys.traits.length;
+  const env = opts.env ?? MID_ENV;
+  const seeds = opts.seeds ?? Array.from({ length: 24 }, (_, i) => i + 1);
+  const gens = opts.gens ?? [0, 20, 70, 300];
+  const cfg: Partial<PopulationConfig> = { numGenes: NG };
+  if (opts.lottery) {
+    cfg.founderLottery = { spread: founderSpreads(new Array<number>(NG).fill(0.5), env, phys) };
+  }
+  if (opts.canalization) cfg.canalization = DEFAULT_CANALIZATION;
+  const pops = seeds.map((s) => new Population(cfg, s, 0.5));
+  const variance: number[] = [];
+  let t = 0;
+  for (const g of gens) {
+    while (t < g) {
+      for (const p of pops) p.step(env, phys);
+      t++;
+    }
+    variance.push(centroidVariance(pops.map((p) => p.mean())));
+  }
+  return { gens, variance };
+}
+
+// ---------------------------------------------------------------------------
+// Dollo-Probe fuer die Sperrklinke (Schritt 4.2).
+// ---------------------------------------------------------------------------
+//
+// Aufbau: eine Population lebt STRESS_GENS Generationen in einer giftigen Welt
+// (MID_ENV + toxicity=1). Die Entgiftung (Gen `detox`, Index 10) wird dort
+// selektiert und saettigt bei ~0.93. Dann verschwindet das Gift schlagartig, und
+// gemessen wird, WIE LANGE die Linie braucht, um das erworbene Merkmal wieder
+// abzulegen (bis der Mittelwert unter `threshold` faellt) und WO sie danach zur
+// Ruhe kommt.
+//
+// Das ist die saubere Probe fuer eine Sperrklinke, weil sie beide Haelften der
+// Behauptung trennt:
+//   - Rueckkehr-DAUER: mit Klinke laenger  -> die Verriegelung wirkt.
+//   - Ruhe-LAGE danach: unveraendert       -> sie ueberstimmt die Selektion nicht.
+// Ein Mechanismus, der nur das Erste zeigt, koennte auch ein verstecktes
+// Fitness-Argument sein; erst das Zweite belegt, dass es reine Drift-Mechanik ist.
+
+export interface DolloResult {
+  /** Mittelwert des Gens am Ende der Stress-Phase (erworbener Zustand). */
+  peak: number;
+  /** Generationen bis der Mittelwert unter `threshold` faellt (-1 = nie). */
+  returnGens: number;
+  /** Mittelwert nach der vollen Entspannungsphase (die Ruhelage). */
+  settled: number;
+  /** Verriegelungsgrad des Gens am Ende der Stress-Phase (0..1). */
+  lock: number;
+}
+
+/** Entgiftung — das Gen, das die giftige Welt selektiert. */
+export const DETOX_GENE = 10;
+
+export function dolloReturn(
+  phys: Physics,
+  opts: {
+    canalization?: boolean;
+    seeds?: number[];
+    gene?: number;
+    stressGens?: number;
+    relaxGens?: number;
+    threshold?: number;
+  } = {},
+): DolloResult {
+  const NG = phys.traits.length;
+  const gene = opts.gene ?? DETOX_GENE;
+  const seeds = opts.seeds ?? [1, 2, 3, 4, 5, 6, 7, 8];
+  const stressGens = opts.stressGens ?? 250;
+  const relaxGens = opts.relaxGens ?? 400;
+  const threshold = opts.threshold ?? 0.5;
+  const stressEnv: Environment = { ...MID_ENV, toxicity: 1 };
+  const cfg: Partial<PopulationConfig> = { numGenes: NG };
+  if (opts.canalization) cfg.canalization = DEFAULT_CANALIZATION;
+  const acc = { peak: 0, returnGens: 0, settled: 0, lock: 0 };
+  for (const seed of seeds) {
+    const pop = new Population(cfg, seed, 0.5);
+    for (let i = 0; i < stressGens; i++) pop.step(stressEnv, phys);
+    acc.peak += pop.mean()[gene] / seeds.length;
+    acc.lock += pop.canalLock()[gene] / seeds.length;
+    let back = -1;
+    for (let i = 0; i < relaxGens; i++) {
+      pop.step(MID_ENV, phys);
+      if (back < 0 && pop.mean()[gene] < threshold) back = i + 1;
+    }
+    acc.returnGens += (back < 0 ? relaxGens : back) / seeds.length;
+    acc.settled += pop.mean()[gene] / seeds.length;
+  }
+  return acc;
+}

@@ -447,12 +447,101 @@ jedem Struktur-Wachstumsschritt in diesem Repo.
 
 ### Phase 4 — Kontingenz (der ursprüngliche Faden, jetzt mit Wirkung)
 
-**4.1 · Gründer-Los im Nullraum der Selektion** — *Opus* · Zufall nur dort, wo
-`selectionWeights()` flach ist, mit Neutralitäts-Wächter (`|Δf|/f < 0.5 %`).
-*Gate:* `parity` unverändert, `spectrum-check` nicht schlechter.
-**4.2 · Sperrklinke (Kanalisierung)** — *Opus* · historisch modulierte Mutations-Schrittweite,
-damit Kontingenz sich verriegelt statt zurückzudriften.
-*Gate:* `phenomena-check` P6 hoch, P4 im Band.
+**4.1 · Gründer-Los im Nullraum der Selektion — ✅ erledigt 2026-08-01**
+*Modell: Opus* · *Netz: nein*
+
+`world/founder.ts` (neu) misst mit `founderSpreads(base, env, phys)`, wie weit jedes Gen
+beim Gründen einer Linie ausgelost werden darf. Grundlage ist das vorhandene
+`selectionWeights()` aus `world/cluster.ts` — **keine zweite Kopie der
+Fitness-Ableitungslogik**; `world/population.ts` bekommt den fertigen Vektor als
+`founderLottery.spread` hereingereicht und bleibt reine Dynamik. Gezogen wird **einmal im
+Konstruktor** (und in `seedFrom()` wiederverwendet), gleichverteilt in `[-spread, +spread]`,
+danach als fester Versatz der ganzen Gründer-Kohorte vererbt.
+
+**Der Neutralitäts-Wächter ist die Konstruktion, nicht ein nachgelagerter Test.** Ein rein
+gewichtsbasierter Radius reicht nachweislich nicht: `selectionWeights` normiert auf das
+stärkste Gen, also bekommt in einer Umwelt mit *einem* dominanten Gen auch ein folgenreiches
+Gen ein kleines Gewicht — gemessen hätte der Vorschlag in `COLD_ENV` den Stoffwechsel um
+±0.14 verschoben und **4.4 % Fitness** gekostet. Der Radius wird deshalb per Bisektion
+eingeschrumpft, bis die *gemessene* relative Fitness-Änderung an beiden Rändern unter 0.5 %
+liegt. Gemessen greift der Wächter bei **23 von 25 Genen** ein (Beispiel `metabolism`:
+Vorschlag 0.159 → zertifiziert 0.047).
+
+Ergebnis in `MID_ENV`: 17 Gene mit Radius ≥ 0.1, größter Radius 0.48 — genau die 15
+bedingten Stressor-Gene plus `limbLength` und `nfix`. Gene, auf die die Selektion schaut
+(`insulation` 0.00, `camo` 0.03, `photosynthesis` 0.04) bekommen praktisch kein Los.
+
+**4.2 · Sperrklinke (Kanalisierung) — ✅ erledigt 2026-08-01**
+*Modell: Opus* · *Netz: nein*
+
+`PopulationConfig.canalization` in `world/population.ts`: ein gleitendes Mittel der
+Auslenkung je Gen und Linie (`memory 0.05`), eine Schwelle (`onset 0.8` — erst unter 0.10
+bzw. über 0.90) und ein Boden (`floor 0.15`). Ein lange gesättigtes Gen bekommt eine
+kleinere Mutations-Schrittweite und ist damit schwerer zurückzudriften (Waddington 1942 /
+Dollo).
+
+*Zwei Bauformen gemessen und eine verworfen:* die naheliegende **gerichtete** Klinke
+(Rückweg zur Mitte stärker bremsen als den Hinweg) hat **kein Arbeitsfenster** — unter
+einer Bremse von ~0.5 tut sie nichts, darüber kippt sie schlagartig und überstimmt die
+Selektion vollständig (P6 steigt auf 0.185 → 1.29 → **2.13**, und 2.13 liegt *über* der
+Referenz „gar keine Selektion" NG/12 = 2.083). Sie ist keine Klinke, sondern eine erfundene
+Kraft nach außen. Geblieben ist die symmetrische Form, die Schritte nur kleiner macht und
+strukturell keinen Erwartungswert verschieben kann.
+
+**Neues Gate: `npm run founder-check`** (F1 Neutralität in 3 Umwelten, F2 Nullraum bleibt
+nutzbar, F3 Kontingenz-Zeitverlauf, D3 Dollo-Probe, N0 Vorgabe-Neutralität).
+
+#### Gemessene Vorher/Nachher-Zahlen
+
+| Kennzahl | vorher | nachher | Bemerkung |
+|---|---:|---:|---|
+| `parity` (Engine ↔ Orakel) | 6.9e-18 | **6.9e-18** | unverändert, `fitness.ts` nicht angefasst |
+| `spectrum-check` Browser-Spektrum | 55 Läufe / 66 Formen / 1.16 Cluster | **byte-identisch** | JSD gegen Orakel-Schwarm bleibt damit 0.0218 |
+| P6 Kontingenz-Varianz (300 Gen.) | 0.01955 | **0.01955** | bit-identisch, s. u. |
+| P4 Konvergenz-Distanz | 0.169 | **0.169** | bit-identisch, im Band ≤ 0.3 |
+| Kontingenz bei Generation 20 (24 Seeds) | 0.0504 | **0.5487** | **10.9×** durch das Gründer-Los |
+| Kontingenz bei Generation 70 | 0.0215 | 0.0411 | 1.9× |
+| Kontingenz bei Generation 300 | 0.0208 | 0.0186 | kein Unterschied mehr |
+| Dollo-Rückkehrzeit (`detox`, 8 Seeds) | 27.0 Gen. | **35.8 Gen.** | +32 % durch die Sperrklinke |
+| Ruhelage nach der Rückkehr | 0.149 | 0.156 | unverändert — die Selektion behält das letzte Wort |
+
+#### Der wichtigste Befund: dieser Nullraum ist ein Zustand auf Zeit
+
+Das Gründer-Los ist nach 300 Generationen **spurlos verschwunden** — und zwar nicht, weil
+es zu schwach wäre, sondern weil die Selektion es aufzehrt. Gegenprobe: lässt man dieselbe
+Population *ohne* Selektion laufen, bleibt die Varianz bei 0.212 statt auf 0.019 zu fallen.
+Der Grund ist rechenbar: ein Budget von 0.5 % Fitness entspricht bei N = 300 einem
+Selektionskoeffizienten mit *N·s ≈ 1.5* — im populationsgenetischen Sinn **nicht neutral**.
+Jedes der 25 Gene trägt eine Unterhaltslast (`unusedBurden()` misst sie) und hat damit genau
+*einen* Attraktor; einen dauerhaft flachen Freiheitsgrad gibt es in dieser Landschaft nicht.
+
+**Konsequenz für P6.** Phase 4 wurde deshalb **nicht** in `contingency()` eingeschaltet.
+Hätte man es getan, wäre die von `phenomena-check` gedruckte Zahl je nach Parametrierung
+zwischen 0.014 und 0.022 gesprungen — reines Schätzerrauschen bei acht Seeds, das wie ein
+Ergebnis ausgesehen hätte (mit 48 Seeds nachgemessen: *jede* geprüfte Losstärke landet bei
+0.018–0.020, ununterscheidbar von 0.0197 ohne Los). P6 bleibt bit-identisch; die Wirkung
+von Phase 4 wird dort gemessen, wo sie real ist — an ihrem Zeitverlauf, in `founder-check`.
+
+**Und warum das trotzdem genau der richtige Zeitpunkt für 4.1/4.2 war:** die Lebensdauer
+des Loses (~70 Generationen) ist die Zeitskala, auf der eine Linie im Spiel ihren *ersten*
+Namen bekommt. Genau dort entscheidet es künftig, welche reale Art innerhalb der
+Bauplan-Gruppe getroffen wird (Abschnitt 3).
+
+**Bewusst NICHT eingeschaltet: der Live-Schwarm der App** (`SWARM` in `app/index.html`).
+Zwei Gründe, beide messbar: (a) `spectrum-check` spiegelt die App-Konfiguration Zeichen für
+Zeichen gegen den Python-Orakel-Schwarm — ein Los in der App verlangt dieselbe Mechanik in
+`oracle/swarm_reference.py`, also einen kompletten Orakel-Neulauf, und das ist ein eigener
+Schritt, kein Nebeneffekt. (b) Solange `CATALOG_NAMES` false ist (Bootstrap-Stufe, s. 0.3),
+hätte das Los **keine sichtbare Wirkung**: die Benennung endet bei der Bauplan-Gruppe, und
+die entscheidet sich an den Genen, auf die die Selektion *schaut*. Beides fällt zusammen mit
+Schritt 1.4: sobald der Katalog `stage: "full"` liefert, wird das Einschalten in der App
+sinnvoll *und* muss der Orakel-Spiegel nachgezogen werden.
+
+*Beide Mechanismen sind opt-in und per Vorgabe aus* — Prüfung N0 in `founder-check` zeigt,
+dass die Population ohne Konfiguration bit-identisch zum Stand vor Phase 4 rechnet. Deshalb
+sind `parity`, `ecology`, `branching-check`, `world-check`, `coevolution-check`,
+`phenomena-check`, `ablation-check`, `spectrum-check`, `app-parity`, `mf-fidelity` und
+`app-world-smoke` unverändert grün.
 
 ### Phase 5 — Gemeinschaft (optional, später)
 

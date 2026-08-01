@@ -42,6 +42,17 @@ function competitionAxes(c) {
         return [c.axis];
     return [];
 }
+/**
+ * Begruendete Vorgaben — kalibriert und geprueft in `npm run founder-check`.
+ * `floor: 0.15` ist der Arbeitspunkt aus der Dollo-Messung dort: er verlaengert
+ * die Rueckkehrzeit eines gesaettigten Gens messbar (gemessen 27.0 -> 35.8
+ * Generationen, +32 %), laesst der
+ * Mutation aber ein Sechstel ihres Schritts, sodass die Selektion die Ruhelage
+ * unveraendert erreicht.
+ */
+export const DEFAULT_CANALIZATION = {
+    memory: 0.05, onset: 0.8, floor: 0.15, power: 1,
+};
 /** Defaults spiegeln das Orakel (ORACLE_POP/MUT_SD/SEL_POWER/RECOMB_PROB). */
 export const DEFAULT_POP_CONFIG = {
     size: 300,
@@ -51,22 +62,54 @@ export const DEFAULT_POP_CONFIG = {
     recombProb: 0.5,
     startSpread: 0.03,
     founderSpread: "gaussian",
+    founderLottery: null,
+    canalization: null,
     competition: null,
 };
 export class Population {
     cfg;
     genomes;
+    /**
+     * Das gezogene Gruender-Los (Schritt 4.1) — EINMAL im Konstruktor bestimmt und
+     * danach unveraenderlich. Ohne `founderLottery` ein Nullvektor. Oeffentlich
+     * lesbar, weil genau das die interessante Groesse ist: "was hat diese Linie
+     * beim Gruenden zufaellig mitbekommen?" (`npm run founder-check` liest es).
+     */
+    founderOffset;
+    /** Gedaechtnis der Sperrklinke je Gen (Schritt 4.2); leer, wenn nicht konfiguriert. */
+    canalHist = [];
     rng;
     randn;
     constructor(cfg, seed, start = 0.5) {
         this.cfg = { ...DEFAULT_POP_CONFIG, ...cfg };
         this.rng = mulberry32(seed);
         this.randn = makeRandn(this.rng);
-        const { size, numGenes, startSpread, founderSpread } = this.cfg;
+        const { size, numGenes, startSpread, founderSpread, founderLottery, canalization } = this.cfg;
+        // Das Los ZUERST ziehen (Schritt 4.1): es gehoert zum Gruendungs-Ereignis,
+        // nicht zu den Individuen. Ohne Konfiguration wird hier keine Zufallszahl
+        // verbraucht — der Strom bleibt bit-identisch zum Verhalten vor Phase 4.
+        this.founderOffset = new Array(numGenes).fill(0);
+        if (founderLottery) {
+            for (let g = 0; g < numGenes; g++) {
+                const s = founderLottery.spread[g] ?? 0;
+                if (s > 0)
+                    this.founderOffset[g] = (this.rng() * 2 - 1) * s;
+            }
+        }
+        if (canalization)
+            this.canalHist = new Array(numGenes).fill(0);
+        const off = this.founderOffset;
         this.genomes =
             founderSpread === "uniform"
-                ? Array.from({ length: size }, () => Array.from({ length: numGenes }, () => this.rng()))
-                : Array.from({ length: size }, () => Array.from({ length: numGenes }, () => clamp01(start + this.randn() * startSpread)));
+                ? // Gleichverteilte Gruender sind der GEGENBEGRIFF zum Gruendereffekt: jedes
+                    // Gen jedes Individuums ist unabhaengig gezogen, die Kohorte hat also gar
+                    // keinen gemeinsamen Zufalls-Ausgangspunkt, den ein Los verschieben
+                    // koennte (der Mittelwert liegt per Konstruktion bei 0.5 +- 1/sqrt(12N)).
+                    // Das Los wird hier deshalb bewusst NICHT angewandt, sondern erst dort,
+                    // wo es eine Gruender-Kohorte mit gemeinsamem Ausgangswert gibt:
+                    // gausssche Gruendung und `seedFrom()`.
+                    Array.from({ length: size }, () => Array.from({ length: numGenes }, () => this.rng()))
+                : Array.from({ length: size }, () => Array.from({ length: numGenes }, (_, g) => clamp01(start + off[g] + this.randn() * startSpread)));
     }
     get size() {
         return this.genomes.length;
@@ -75,11 +118,18 @@ export class Population {
      * Population aus EINEM konkreten Genom neu befüllen (mit kleiner Streuung) —
      * z. B. um einen Ort mit der Linie des Spielers zu besiedeln („dein Wesen als
      * Ort in der Welt"). Fehlende/überzählige Gene werden auf numGenes normiert.
+     *
+     * Das Gründer-Los (Schritt 4.1) wird hier MIT angewandt — eine Besiedlung IST
+     * ein Gründungs-Ereignis. Gezogen wird es aber nicht neu: es ist das im
+     * Konstruktor gezogene Los DIESER Linie, sonst wäre es kein Gründer-Effekt,
+     * sondern ein Zufall pro Aufruf. Ohne `founderLottery` ist der Versatz exakt 0
+     * und der Pfad bit-identisch zu vorher.
      */
     seedFrom(genome, spread = this.cfg.startSpread) {
         const { size, numGenes } = this.cfg;
+        const off = this.founderOffset;
         const base = Array.from({ length: numGenes }, (_, k) => clamp01(genome[k] ?? 0.5));
-        this.genomes = Array.from({ length: size }, () => base.map((v) => clamp01(v + this.randn() * spread)));
+        this.genomes = Array.from({ length: size }, () => base.map((v, g) => clamp01(v + off[g] + this.randn() * spread)));
     }
     /**
      * Reproduktions-Gewichte je Individuum (Fitness^selPower, optional /Konkurrenz).
@@ -165,17 +215,51 @@ export class Population {
         }
         const next = new Array(N);
         const { numGenes, recombProb, mutationSd } = this.cfg;
+        // Sperrklinke (Schritt 4.2): gen- UND linien-spezifische Schrittweite.
+        // `null` -> `sd` bleibt null und der Rumpf unten rechnet exakt wie vor
+        // Phase 4 (skalares mutationSd, gleiche Zufallszahlen in gleicher Reihenfolge).
+        const sd = this.cfg.canalization ? this.canalStep() : null;
         for (let k = 0; k < N; k++) {
             const pa = total > 0 ? this.pick(cum, total) : this.genomes[(this.rng() * N) | 0];
             const pb = total > 0 ? this.pick(cum, total) : this.genomes[(this.rng() * N) | 0];
             const child = new Array(numGenes);
             for (let g = 0; g < numGenes; g++) {
                 const base = this.rng() < recombProb ? pb[g] : pa[g];
-                child[g] = clamp01(base + this.randn() * mutationSd);
+                child[g] = clamp01(base + this.randn() * (sd ? sd[g] : mutationSd));
             }
             next[k] = child;
         }
         this.genomes = next;
+    }
+    /**
+     * Sperrklinke fortschreiben und die effektive Schrittweite je Gen liefern
+     * (Schritt 4.2, Formel und Begruendung s. `CanalizationConfig`). Laeuft einmal
+     * je Generation, Kosten O(N*G) — gegen den O(N^2)-Konkurrenz-Kernel, der in
+     * derselben Generation laeuft, nicht messbar.
+     */
+    canalStep() {
+        const c = this.cfg.canalization;
+        const { numGenes, mutationSd } = this.cfg;
+        const m = this.mean();
+        const sd = new Array(numGenes);
+        for (let g = 0; g < numGenes; g++) {
+            const raw = Math.min(1, 2 * Math.abs(m[g] - 0.5));
+            const ext = clamp01((raw - c.onset) / (1 - c.onset));
+            const h = (1 - c.memory) * (this.canalHist[g] ?? 0) + c.memory * ext;
+            this.canalHist[g] = h;
+            sd[g] = mutationSd * (1 - (1 - c.floor) * Math.pow(h, c.power));
+        }
+        return sd;
+    }
+    /**
+     * Verriegelungsgrad je Gen (0 = frei beweglich wie vor Phase 4, 1 = maximal
+     * kanalisiert). Nur zum Messen/Erklaeren — `npm run founder-check` liest das.
+     */
+    canalLock() {
+        const c = this.cfg.canalization;
+        if (!c)
+            return new Array(this.cfg.numGenes).fill(0);
+        return this.canalHist.map((h) => Math.pow(h, c.power));
     }
     /** Mittleres Genom (nur sinnvoll bei unimodaler Population). */
     mean() {

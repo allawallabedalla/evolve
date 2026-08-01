@@ -1694,8 +1694,25 @@ entscheidet genau das, worauf die Selektion nicht schaut.
 - [ ] **2.1–2.4** Lebensbaum auf echte Taxonomie, Rarität zweistufig, Chronik/
       Herausforderungen, Spielstands-Migration (*Sonnet*).
 - [ ] **3.1–3.2** Abdeckungs-Metrik + Lückenreport → Vorschläge für neue Gen-Achsen (*Opus*).
-- [ ] **4.1–4.2** Gründer-Los im Nullraum + Sperrklinke/Kanalisierung (*Opus*) — der
-      ursprüngliche Zufalls-Faden, jetzt mit Wirkung.
+- [x] **4.1** Gründer-Los im Nullraum (2026-08-01) — `world/founder.ts`, einmal je
+      Gründung gezogen, Radius je Gen **gemessen** statt geraten: der
+      Neutralitäts-Wächter kürzt 23 von 25 Genen ein, bis ±Radius unter 0.5 % Fitness
+      kostet (rein gewichtsbasiert hätte er in COLD 4.4 % gekostet). Wirkung:
+      Kontingenz bei Generation 20 **0.0504 → 0.5487 (10.9×)**.
+- [x] **4.2** Sperrklinke/Kanalisierung (2026-08-01) — historisch modulierte
+      Mutations-Schrittweite (`memory 0.05 / onset 0.8 / floor 0.15`). Dollo-Rückkehr
+      eines gesättigten Gens **27.0 → 35.8 Generationen (+32 %)** bei **unveränderter
+      Ruhelage** (0.149 → 0.156) — verlangsamt, überstimmt die Selektion nicht. Die
+      gerichtete Bauform wurde gebaut und **verworfen**: kein Arbeitsfenster, sie kippt
+      von wirkungslos direkt auf P6 = 2.13 > „gar keine Selektion" (2.083).
+      *Gate:* `npm run founder-check` (F1/F2/F3/D3/N0).
+      **Befund:** dieser Nullraum ist ein Zustand auf Zeit (~70 Generationen), kein
+      dauerhafter Freiheitsgrad — 0.5 % Fitness sind bei N=300 ein *N·s ≈ 1.5* und damit
+      nicht neutral. Deshalb bleibt P6 bewusst bit-identisch (0.01955) statt mit
+      Schätzerrauschen „gehoben" zu werden; Details in `docs/artenkatalog-plan.md`
+      Phase 4. Beide Mechanismen sind opt-in und in der Live-App noch **aus** — das
+      Einschalten gehört zu 1.4 (dann kippt auch die Benennung auf Stufe 2, erst dort
+      wird das Los sichtbar) und verlangt den Orakel-Spiegel nachzuziehen.
 - [ ] **5** Gemeinschafts-Schicht über Supabase (optional, erzwingt bezahlten Plan).
 
 **Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.

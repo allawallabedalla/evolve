@@ -24,6 +24,7 @@
     "lifehistory-check": "npm run build && node tools/lifehistory-check.mjs",
     "phenomena-check": "npm run build && node tools/phenomena-check.mjs",
     "ablation-check": "npm run build && node tools/ablation-check.mjs",
+    "founder-check": "npm run build && node tools/founder-check.mjs",
     "distribution-check": "npm run build && node tools/distribution-check.mjs",
     "census-check": "npm run build && node tools/census-check.mjs",
     "spectrum-check": "npm run build && node tools/spectrum-check.mjs",
