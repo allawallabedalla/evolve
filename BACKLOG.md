@@ -1650,6 +1650,60 @@ noch offenen Ideen:
   genau der Weg, den ein echter Nutzer zum vollen Katalog nimmt. Dreimal grün
   hintereinander laufen lassen, um einen Zufallstreffer auszuschließen.
 
+### 12 · Realer Artenkatalog — der Katalog wird rückwärts aus Wikidata befüllt (2026-08-01)
+
+**Modell:** je Schritt einzeln vermerkt — grob: **Sonnet** für Ernte/Format/Migration,
+**Opus** für Matcher, Regelwerk, Abdeckung und Kontingenz.
+**Voller Plan: `docs/artenkatalog-plan.md`** (maßgeblich; hier nur der Zeiger).
+
+*(Nutzer, 2026-08-01)* Vision: „irgendwann sollen alle Lebewesen abgebildet und erreichbar
+sein." Erste Idee war ein Zufallsfaktor kurz vor der Artauswahl. Die Analyse ergab: der
+Zufall ist bereits da (Schwarm, N=200, Drift — `phenomena.ts` misst Kontingenz), er wird
+nur vom `argmin` in `matchArchetype()` wieder weggerundet, und die eigentliche Grenze ist
+die auf 70 handkuratierte Prototypen gedeckelte Benennung.
+
+**Die Umkehrung (Nutzer):** den Katalog nicht vorwärts erzeugen, sondern **rückwärts aus
+realen Lebewesen befüllen, die einen Wikipedia-Eintrag haben** — Beleg direkt in den
+Daten. Damit ist der Zwei-Klassen-Katalog (90 % Einträge ohne Quelle/Icon/Text)
+strukturell ausgeschlossen, und es fällt eine **Abdeckungs-Metrik** ab: welcher Anteil der
+realen Formenvielfalt ist von der Engine überhaupt erreichbar, und wo sind die Lücken.
+
+**Entschieden:** ~5.000–20.000 Arten · Platzierung im 25-D-Genraum **hybrid** (Merkmale +
+Kladen-Regeln + hierarchische Imputation + Habitat-Rückwärtslauf) · der Katalog **ersetzt
+die Benennung** · Wikidata (CC0) als Rückgrat, dewiki-Sitelink als Pflichtfilter.
+
+**Tragende Architektur-Entscheidung — zweistufige Benennung.** Stufe 1 bleibt der heutige
+Matcher und liefert die **Bauplan-Gruppe** als stabilen Schlüssel (`key` existiert in
+`app/archetypes.js` bereits); Stufe 2 sucht die nächste reale Art *innerhalb* der Gruppe
+und liefert den Anzeigenamen. Damit brechen `TREE`/`RARITY`/`FICON`/`challenges.js`/
+`story.js` **nicht**, der Matcher bleibt bezahlbar (~1 % der naiven Suchkosten), und der
+Zufallsfaktor bekommt zum ersten Mal eine sichtbare Wirkung — innerhalb einer Gruppe
+entscheidet genau das, worauf die Selektion nicht schaut.
+
+**Reihenfolge (nach Abhängigkeit UND Netzbedarf — Phase 0 braucht kein Netz):**
+- [ ] **0.1** Schlüssel-Ebene entkoppeln (*Sonnet*) — blockiert alles Weitere.
+- [ ] **0.2** Katalog-Format + Bootstrap aus den 65 `exemplar.js`-Zuordnungen (*Sonnet*).
+- [ ] **0.3** Zweistufiger Matcher (*Opus*) — Ende-zu-Ende lauffähig ohne Wikidata.
+- [ ] **1.1** Wikidata-Ernte + Belegungsmessung je Eigenschaft (*Sonnet*, Netz).
+- [ ] **1.2** Merkmals- und Kladen-Regelwerk (*Opus*, Netz) — abwägungsintensivster Schritt.
+- [ ] **1.3** Imputation + Habitat-Rückwärtslauf (*Opus*, Netz).
+- [ ] **1.4** Katalog-Erzeugung, Sharding, nächtlicher Actions-Lauf (*Sonnet*, Netz).
+- [ ] **2.1–2.4** Lebensbaum auf echte Taxonomie, Rarität zweistufig, Chronik/
+      Herausforderungen, Spielstands-Migration (*Sonnet*).
+- [ ] **3.1–3.2** Abdeckungs-Metrik + Lückenreport → Vorschläge für neue Gen-Achsen (*Opus*).
+- [ ] **4.1–4.2** Gründer-Los im Nullraum + Sperrklinke/Kanalisierung (*Opus*) — der
+      ursprüngliche Zufalls-Faden, jetzt mit Wirkung.
+- [ ] **5** Gemeinschafts-Schicht über Supabase (optional, erzwingt bezahlten Plan).
+
+**Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.
+
+**Umgebungs-Befund (2026-08-01):** Wikidata/Wikipedia sind aus der Claude-Code-Umgebung
+**nicht erreichbar** (Netzwerk-Policy lässt nur GitHub/npm/PyPI durch, `curl` → 000;
+GitHub → 200). Dasselbe Problem ist in `docs/tree-of-life.json` schon vermerkt. Phase 1
+braucht daher entweder die Freischaltung von `wikidata.org`, `query.wikidata.org` und
+`*.wikipedia.org` in den Umgebungs-Einstellungen (vom Nutzer zugesagt) oder den Umweg über
+GitHub Actions. Phase 0 ist davon unabhängig.
+
 ---
 
 ## 🧭 Produkt-Pfeiler (Leitplanken)
