@@ -1590,6 +1590,26 @@ function updateEnvLive(){
 }
 let genome = new Array(NG).fill(0.5);
 let displayGenome = new Array(NG).fill(0.5);   // geglaettete Anzeige (gleitender Mittelwert)
+// ZENSUS-GLAETTUNG (Nutzer-Rückmeldung 2026-08): „die Entwicklung zappelt, statt
+// kontinuierlich zu wirken". Gemessen (Eiszeit-Preset, 400 Zensus-Takte, 5 Merkmale):
+// >50 % der Zensus-zu-Zensus-Schritte kehren die Richtung um, bei kaum vorhandenem
+// Netto-Trend — echte Wright-Fisher-Drift bei endlicher Population, kein Anzeige-Fehler.
+// EIN Fix AN DER DYNAMIK selbst (schwache Mutations-Rückstellkraft in
+// world/population.ts, analog zu PARAMS.mutationAnchor im Mittelfeld-Pfad) wurde
+// gebaut und wieder verworfen: über 5 Seeds gemessen daempft jede Staerke, die echte,
+// starke Selektionsantwort noch weitgehend intakt laesst (0.005–0.02 Pull, <16 %
+// Einbusse), das Zappeln kaum (<5 % Amplituden-Ruecknahme); jede Staerke, die das
+// Zappeln spuerbar daempft (0.2–0.3 Pull), zerstoert echte Anpassung fast vollstaendig
+// (Zielwert unter starkem Druck bleibt bei ~0.5 statt ~0.9 zu erreichen). Der Schwarm
+// selbst bleibt deshalb UNVERAENDERT — `pop` ist bitgleich zum vorherigen Verhalten,
+// world/population.ts und oracle/reference_model.py unberuehrt. Geglaettet wird NUR,
+// wie `genome` (und damit alles, was der Spieler sieht) aus dem rohen Zensus-Zentroid
+// hervorgeht: ein Teilschritt je Zensus-Takt statt eines Sprungs auf den vollen
+// Rohwert, s. readSwarm(). Ein echter Umwelt-Schub (adaptBoost) und der Offline-
+// Rückkehr-Moment (offlineCatchup) werden bewusst NICHT geglaettet — dort ist der
+// volle, ungefilterte Sprung der didaktisch richtige Moment (dieselbe Leitplanke wie
+// WHY_JUMP bei der Warum-Zeile).
+const GENOME_DISPLAY_SMOOTH = 0.18;
 let generation = 0, running = true, gensPerSec = 8, lastBiome = "freie Umwelt";
 let adaptBoost = 0;   // Umwelt-Einfluss -> kurzer Anpassungs-Schub (beschleunigt die Evolution, klingt ab)
 let rng, randn, lineageSeed = 0;
@@ -2168,7 +2188,17 @@ function readSwarm(){
     if(forms[near].fraction >= SWARM.stickyFraction * forms[0].fraction) pick = near;
   }
   swarmForms = [forms[pick], ...forms.filter((_, i) => i !== pick)];
-  genome = swarmForms[0].centroid.slice();
+  // Anzeige-Glaettung (s. GENOME_DISPLAY_SMOOTH oben): im Ruhezustand nur ein Teilschritt
+  // Richtung des rohen Zentroids, damit viele kleine, ueberwiegend richtungslose
+  // Zensus-zu-Zensus-Spruenge zu einer sichtbar STETIGEN Linie werden. Waehrend eines
+  // echten Umwelt-Schubs (adaptBoost, s. triggerHabitatFx) sofort den vollen Rohwert
+  // zeigen — das ist der Moment, den auch die Warum-Zeile nicht verzoegert.
+  const rawCentroid = swarmForms[0].centroid;
+  if(adaptBoost > 0.05){
+    genome = rawCentroid.slice();
+  } else {
+    for(let i=0;i<NG;i++) genome[i] += (rawCentroid[i]-genome[i]) * GENOME_DISPLAY_SMOOTH;
+  }
   // Aufspaltung: gibt es daneben eine zweite, wirklich ANDERE Bauform mit Gewicht?
   swarmSplit = null;
   if(swarmForms.length > 1 && swarmForms[1].fraction >= SWARM.splitShow){
@@ -2978,6 +3008,7 @@ function offlineCatchup(prevTs){
     const beforeA = classify(genome), beforeG = genome.slice();
     simAdvance(offGens);
     readSwarm();   // Endstand sofort ablesen (nicht erst beim nächsten Zensus-Takt)
+    genome = swarmForms[0].centroid.slice();   // Rückkehr-Moment: ungeglaettet, s. GENOME_DISPLAY_SMOOTH
     showReveal(elapsed, offGens, beforeA, classify(genome), beforeG, genome);
   }
   displayGenome = genome.slice();
