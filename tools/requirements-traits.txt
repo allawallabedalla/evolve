@@ -1,0 +1,3 @@
+# Nur fuer tools/build-traits-fetch.py (Schritt 1.1b) — NICHT Teil des normalen
+# npm-Gate-Zyklus, der Rest der Python-Werkzeuge (oracle/) bleibt stdlib-rein.
+pyreadr

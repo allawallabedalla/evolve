@@ -335,26 +335,67 @@ Node-seitige Kern-Extraktor (von `influence-check` gefunden).
 
 ### Phase 1 — Datenpipeline (Netz nötig)
 
-**1.1 · Wikidata-Ernte (Rückgrat)**
+**1.1 · Wikidata-Ernte (Rückgrat) — ⚙️ läuft (2026-08-01)**
 *Modell: Sonnet* · *Netz: ja*
 
-Top-down über direkte `P171`-Kanten Ebene für Ebene (NICHT über `P171*`-Pfade, s. 5a),
-gefiltert auf `dewiki`-Sitelink. Geerntet werden Taxonomie, Rang, Namen und die
-**Fremdschlüssel** (P846 GBIF, P815 ITIS, P685 NCBI) — das ist der Anschluss für 1.1b.
-Paginiert, gecacht, als GitHub Action mit Artefakt.
+`tools/wikidata-harvest.mjs`: adaptiver Top-down-Ernter. **Zwei Strategien**, je Klade
+gewählt: schneller Pfad (`P171*` + `LIMIT/OFFSET`, funktioniert direkt für mittelgroße
+Kladen) oder — schlägt die erste Seite fehl — **Zerlegung** in direkte Kinder (`P171`
+einzelner Hop, immer schnell) und rekursive Verarbeitung jedes Teils. Nie gemischt (sonst
+Doppelzählung). Resumierbar über `tools/.harvest-state.json`.
 
-*Gate:* `npm run wikidata-harvest -- --report` gibt die Belegungstabelle aus (Format
-s. 5a); Abfrage respektiert die Nutzungsbedingungen (User-Agent, Rate-Limit).
+25 verifizierte Wurzel-Kladen (Tier/Pflanze/Pilz/Mikrobe/Protist-Gruppen — Liste in der
+Datei) — **verifiziert per `wbsearchentities`**, nicht aus dem Gedächtnis geraten: der
+erste Versuch mit geratenen QIDs traf u. a. „Ilona Koutny" und „Taylor Dayne" statt
+Kladen, s. Commit-Historie.
 
-**1.1b · Merkmalsquellen anbinden** *(neu — folgt aus dem Messbefund 5a)*
-*Modell: Sonnet* · *Netz: ja*
+**Zwei Funde beim Bauen:**
+1. **Client-Timeout nötig:** der Server braucht bis zu 40-55s, um eine zu große Klade
+   mit 502/504 abzulehnen. Ein 20s-Client-Timeout löst dieselbe (sichere) Zerlegung
+   deutlich schneller aus.
+2. **`?tLabel` ist der deutsche Anzeigename, nicht der wissenschaftliche Name** — bei
+   bekannten Arten z. B. „Eisbär" statt „Ursus maritimus". Für Schritt 1.1b (Verknüpfung
+   über Gattung+Art) und das Katalog-Feld `sci` unbrauchbar. Fix: `P225` explizit
+   mitgezogen (`?sci`), Ernte dafür einmal neu gestartet (kostete den bis dahin
+   gesammelten Stand, ~1.750 Arten — bewusst in Kauf genommen, da sonst die
+   Merkmals-Verknüpfung in 1.1b auf falscher Grundlage gelaufen wäre).
 
-AVONET / PanTHERIA / EltonTraits / AmphiBIO / FishBase über die Fremdschlüssel
-verknüpfen. **Erste Aufgabe: Lizenz und Verknüpfungsquote je Quelle messen** — eine
-Quelle, die sich nur zu 40 % verknüpfen lässt, ist keine Grundlage.
+*Gate:* `npm run wikidata-harvest -- --report` gibt den Ernte-Stand aus (Artenzahl,
+Warteschlange, fertige/zerlegte/fehlgeschlagene Kladen).
 
-*Gate:* Verknüpfungsquote je Quelle und Klade wird berichtet; keine Quelle ohne geklärte
-Lizenz im Katalog.
+**1.1b · Merkmalsquellen anbinden — ⚙️ Prototyp steht (2026-08-01)**
+*Modell: Sonnet* · *Netz: ja (github.com/raw.githubusercontent.com — bereits Trusted-Default)*
+
+**Messbefund vorab (5a):** die ursprünglich genannten Quellen (AVONET, PanTHERIA,
+EltonTraits, AmphiBIO, FishBase) liegen bei Figshare/Dryad/FishBase — diese Hosts sind
+aus der Umgebung **nicht erreichbar** (nur `wikidata.org`/`*.wikipedia.org` wurden
+freigeschaltet). Gefunden: der GitHub-Spiegel **`RS-eco/traitdata`** (R-Paket, 32
+gebündelte Fachdatensätze) liegt auf `raw.githubusercontent.com` — das ist bereits Teil
+der Standard-Trusted-Liste, keine weitere Freischaltung nötig.
+
+**Format-Hürde:** die Dateien sind `.rda` (R-Serialisierung). Kein R-Interpreter in der
+Umgebung. Mit `pyreadr` (Python) laufen **PanTHERIA** (5510 Arten, u. a. Körpermasse) und
+**EltonTraits Säuger+Vögel** (5494 + 10009 Arten, Ernährungs-/Aktivitätsprofil) sauber
+durch. **AmphiBIO, fishmorph, lizard_traits scheitern** — ihre Freitext-Zitationsspalten
+enthalten Windows-1252-Bytes, an denen sowohl `pyreadr` als auch die Alternative `rdata`
+scheitern (letztere wirft nach etlichen Dekodier-Warnungen einen `AssertionError`). Offener
+Rest für eine Umgebung mit echtem R oder eine gezielte Byte-Vorfilterung.
+
+**Verknüpfungsquote** (`tools/build-traits.mjs`, gegen die bis dahin geernteten Arten,
+klade-gefiltert — eine Quelle nur an der Klade zu messen, zu der sie etwas sagt):
+vorläufig mit dem Label statt des wissenschaftlichen Namens gemessen (11-15 % Säuger, 0 %
+Vögel — s. o., Bug), **wird nach der 1.1-Korrektur (P225) neu gemessen**, sobald die
+Ernte genug Vögel gesammelt hat.
+
+**Lizenz — ehrlich offen:** das R-Paket ist GPL-3 (irrelevant, wir nutzen keinen
+Paket-Code). Die zugrunde liegenden Datenpapiere (Ecology/Ecological Archives) haben
+eigene, in dieser Umgebung nicht direkt nachprüfbare Lizenzbedingungen (Figshare/Dryad
+blockiert) — vor einem produktiven Einsatz einzeln zu bestätigen. `tools/build-traits.mjs`
+trägt diesen Hinweis explizit im Kopfkommentar; das Skript ist als **Prototyp** markiert.
+
+*Gate:* `node tools/build-traits.mjs` berichtet Verknüpfungsquote je Quelle und Klade
+(kein npm-Script — hängt an einer optionalen Python-Abhängigkeit, `pip install -r
+tools/requirements-traits.txt`, bewusst nicht Teil des normalen Gate-Zyklus).
 
 **1.2 · Merkmals- und Kladen-Regelwerk**
 *Modell: Opus* (die abwägungsintensivste Arbeit des Plans) · *Netz: ja*

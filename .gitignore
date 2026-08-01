@@ -18,3 +18,9 @@ _*.mjs
 
 # Aufloesungs-Cache von tools/build-catalog.mjs (Artefakt, kein Quelltext)
 tools/.catalog-cache.json
+
+# Ernte-Zustand (Schritt 1.1) + Merkmalsquellen-Cache/Verknuepfung (Schritt 1.1b) —
+# resumierbare Zwischenstaende bzw. heruntergeladene Fremddaten, kein Quelltext.
+tools/.harvest-state.json
+tools/.traits-cache/
+tools/.traits-linked.json
