@@ -572,13 +572,104 @@ Lazy-Loading nötig — im Datenmodell vorbereitet, aber nicht gebaut.
 
 ### Phase 2 — Integration
 
-**2.1 · Lebensbaum auf echte Taxonomie** — *Sonnet* · Elterntaxon-Ketten ersetzen
-`docs/tree-of-life.json`; Genbuch zeigt die reale Hierarchie.
-**2.2 · Rarität zweistufig** — *Sonnet* · Rang je Bauplan-Gruppe bleibt; neu ein Rang je
-Art aus dem Abdeckungs-Sweep.
-**2.3 · Chronik und Herausforderungen nachziehen** — *Sonnet* · Tags hängen an der
-Bauplan-Gruppe, Texte dürfen den realen Artnamen einsetzen.
-**2.4 · Spielstands-Migration abschließen** — *Sonnet* · lokal und Supabase.
+**2.1 · Lebensbaum auf echte Taxonomie — ✅ erledigt 2026-08-01, mit einem wichtigen
+Nebenfund für 1.4**
+*Modell: Sonnet*
+
+`tools/build-tree-reference.mjs` ergänzt `docs/tree-of-life.json` (bisher komplett
+handkuratiert, „gefetcht via WebSearch, OTOL/GBIF-API im Sandbox-Netz geblockt") je
+Knoten um: `qid` (verifizierte Wikidata-ID — 25 Wurzel-Kladen aus 1.1, 10 zusätzliche
+per `wbsearchentities` verifiziert), `harvestedSpecies` (gemessen in unserer eigenen
+dewiki-gefilterten Ernte, klar getrennt von der Literatur-Schätzung `describedSpecies`,
+die stehen bleibt) und `observedForms` (Gegenprobe: welche Bauplan-Gruppen entstehen
+*tatsächlich* aus Arten unter diesem QID im vollen Katalog). Idempotent (zweimal
+ausführen ⇒ bitgleiche Datei).
+
+**Zwei QID-Korrekturen aus 1.2 übernommen:** „Farne" zeigte auf Q80005 (kein Taxon-Item,
+s. 1.2-Fund) — korrigiert auf Q373615 (Polypodiopsida). „Gymnospermae" trägt jetzt beide
+QIDs (Q133712 + Q132825, wie in `clade-rules.mjs`), weil Koniferen in Wikidata nicht
+unter Ersterem hängen.
+
+> ⚠️ **Die `observedForms`-Gegenprobe hat einen ernsten, bis dahin unentdeckten Fehler
+> in Schritt 1.4 aufgedeckt: 34 % der 20.178 Arten landeten in einem Bauplan aus dem
+> FALSCHEN REICH** (Amoebozoa/Archaeen/Foraminifera 100 % falsch, Krebstiere 94 %,
+> Ascomycota 86 %, Bedecktsamer 47 %). Ein Salamander (*Ambystoma dumerilii*) erschien
+> als „Plankton" (Protist).
+>
+> **Ursache, von Hand nachgerechnet** (ein Zehnfußkrebs, *Calcinus laevimanus*): die 70
+> Archetyp-Prototypen sind auf die **eigene Spiel-Dynamik** geeicht — verrauschte,
+> vom Mutationsanker beeinflusste Mittelwerte aus evolvierten Schwärmen (s.
+> Kopfkommentar `app/archetypes.js`: „Mittelwert über ERREICHBARE Genome"). Die
+> Kladen-Regeln (1.2) liefern dagegen **reinere**, taxonomisch begründete Werte — der
+> Krebs bekommt `photosynthesis=0.08` (biologisch korrekt: null), während der
+> Krebstier-Prototyp bei `0.23` liegt (Spiel-Rauschen). In einer Umwelt, in der
+> `photosynthesis` fast das gesamte Distanzmaß dominiert (Gewicht 1,0 im Neutral-Biom),
+> gewinnt dann zufällig ein wesensfremder Prototyp (hier: „Zunderschwamm", ein
+> Baumpilz) mit zufällig näher liegendem, ebenso verrauschtem Wert — bestätigt direkt
+> im Katalog: der Krebs landete tatsächlich bei „zunderschwamm", `alt` zeigte korrekt
+> „Krebstier · Arthropode" als Zweitplatzierten.
+>
+> **Behoben in `tools/build-catalog.mjs` (Reich-Wächter):** die Wurzel-Klade der Ernte
+> (`root`) legt das Reich eindeutig und taxonomisch fest — zuverlässiger als die
+> distanzbasierte 65-Prototypen-Suche. `nearestInKingdom()` repliziert
+> `matchArchetype()`s Distanzformel (Spezifitäts-Bonus, `requires`-Strafe) exakt, aber
+> nur über Prototypen **desselben Reichs**. Reine Zusatz-Absicherung für den
+> **Offline**-Katalogbau; `matchArchetype()` selbst (für die live evolvierende Kreatur)
+> bleibt unverändert, weil deren Genome aus echter In-Game-Selektion stammen und dieses
+> Problem strukturell nicht haben können. **Ergebnis: Reich-Fehlklassifikation 34 % → 0,00 %**,
+> Katalog neu erzeugt (40 statt 37 belegte Bauplan-Gruppen — vorher „gestohlene" Gruppen
+> werden jetzt wieder erreicht). Alle Gates erneut grün (`catalog-check`, `app-parity`,
+> `app-world-smoke`, `key-check`, `exemplar-check`, `story-check`, `influence-check`,
+> `ui-calm-check`).
+>
+> **Lehre:** die `observedForms`-Gegenprobe war kein Selbstzweck, sondern hat einen
+> Fehler gefunden, den kein bisheriger Gate-Test (`catalog-check` prüft Format, nicht
+> biologische Plausibilität) hätte fangen können. Ein Konsistenz-Check über eine
+> UNABHÄNGIGE Wahrheitsquelle (hier: die Taxonomie selbst) ist etwas anderes als ein
+> Format-Gate — beide bleiben nötig.
+
+*Gate:* `node tools/build-tree-reference.mjs` (idempotent, geprüft) + die vollständige
+Gate-Suite nach dem Reich-Wächter-Fix (alle grün, s. o.).
+
+**2.2 · Rarität zweistufig — bewusst zurückgestellt, nicht umgesetzt**
+*Modell: Sonnet*
+
+Ursprünglich geplant: ein Raritäts-Rang je REALER Art, zusätzlich zum bestehenden Rang
+je Bauplan-Gruppe. **Zurückgestellt, weil die Datengrundlage das noch nicht hergibt:**
+96,6 % der Arten teilen sich ein genom-identisches „Zwilling" in ihrer Gruppe (s. 1.4,
+„Bewusst offen"). Ein Raritäts-Rang je Art würde für hunderte identisch platzierte
+Arten denselben Wert ausweisen und eine Präzision behaupten, die die Platzierung nicht
+hat — genau die Sorte erfundene Genauigkeit, die dieses Projekt an anderer Stelle
+konsequent vermeidet. Sinnvoll erst nach der empfohlenen Gründer-Los-Anwendung auf den
+Katalog (s. 1.4). Der bestehende Rang je Bauplan-Gruppe (`RARITY`, `docs/rarity.json`)
+bleibt unverändert gültig und unberührt.
+
+**2.3 · Chronik und Herausforderungen — ✅ faktisch erledigt über den Regressions-Fix**
+*Modell: Sonnet*
+
+Die eigentliche Arbeit war nicht „Texte nachziehen", sondern **verhindern, dass Chronik
+und Herausforderungen durch die neuen realen Namen brechen** — das hat der
+Sicherheits-Audit direkt nach 1.4 aufgedeckt und der Regressions-Fix-Commit erledigt
+(6 Stellen: `challengeTick()`, `storyTick()`, `renderSpeciesEdge()`, das
+`STABLE_GENS`-Gate, `wowMine`/`challenge_results`, die Ahnenlinie — alle liefen noch auf
+`.n`-Vergleichen statt `.key`/`.form`). `app/story.js`/`app/challenges.js` selbst
+brauchten keine Änderung: sie enthalten keine namensbasierten Lookups, nur
+Bauplan-Tags — genau das macht sie robust gegen die Katalog-Umstellung.
+**Bewusst nicht gebaut:** Story-Text, der den realen Artnamen explizit einwebt („du hast
+einen Capybara gefunden" statt „ein neues Reich"). Der Sim-Kern und die Chronik erzählen
+laut eigener Leitplanke bewusst über den *Bauplan* (Auslese), nicht über die *Art* — der
+reale Name ist im UI (Wesen-Karte, Ahnenlinie) sichtbar, ohne dass die Chronik ihn
+nennen muss.
+
+**2.4 · Spielstands-Migration — ✅ bereits durch Schritt 0.1 abgedeckt**
+*Modell: Sonnet*
+
+`discovered`/`discoveryLog` speichern seit 0.1 den Bauplan-**Schlüssel**, nicht den
+Anzeigenamen (`formKey()`-Migration beim Laden alter Stände). Da sich mit 1.4 nur der
+Anzeigename ändert, nicht der Schlüssel, bleiben alte Spielstände unverändert
+kompatibel — nichts zu tun. Die Ahnenlinie (`ancestry`) bekam mit dem Regressions-Fix
+(2.3) ein neues optionales `formName`-Feld; alte Einträge ohne dieses Feld fallen
+sicher auf den Bauplan-Namen zurück (kein Bruch).
 
 ### Phase 3 — Abdeckung messen
 

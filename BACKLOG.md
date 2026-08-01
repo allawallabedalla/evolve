@@ -1696,14 +1696,30 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       87 % der conf-0-Werte die Aussage „Gen aus"; **kein Kern-Gen kommt aus Stufe (d)**.
       Gate `node tools/impute-check.mjs` (I1–I4, nicht in package.json — braucht die
       Ernte-Artefakte).
-- [x] **1.4** Katalog-Erzeugung (2026-08-01) — `stage:"full"`, 20.178 Arten, 37/65
-      Bauplan-Gruppen belegt. Im Browser verifiziert: Fell-Genom zeigt „Capybara" statt
-      „Fell-Großtier". Gate `npm run catalog-check` (gzip-Budget 753 KB, korrigiert von
+- [x] **1.4** Katalog-Erzeugung (2026-08-01) — `stage:"full"`, 20.178 Arten, 40/65
+      Bauplan-Gruppen belegt (nach Reich-Wächter-Fix aus 2.1, s. u. — vorher 37 mit
+      34% Reich-Fehlklassifikation). Im Browser verifiziert: Fell-Genom zeigt „Capybara"
+      statt „Fell-Großtier". Gate `npm run catalog-check` (gzip-Budget, korrigiert von
       Rohbyte- auf Gzip-Maß). Zwei gemessene Funde für Abschnitt 8: 96,6% Genom-Zwillinge
       (Empfehlung: founderSpreads() aus 4.1 wiederverwenden) und synchrones Laden statt
       Sharding.
-- [ ] **2.1–2.4** Lebensbaum auf echte Taxonomie, Rarität zweistufig, Chronik/
-      Herausforderungen, Spielstands-Migration (*Sonnet*).
+- [x] **2.1** Lebensbaum-Referenz (2026-08-01) — `docs/tree-of-life.json` mit echten
+      QIDs/Artenzahlen/Gegenprobe. **Deckte einen ernsten 1.4-Fehler auf: 34% der Arten
+      im falschen REICH** (Reich-Wächter behoben Reich-Fehlklassifikation auf 0,00%,
+      Katalog neu erzeugt).
+- [ ] **2.2** Rarität zweistufig — bewusst zurückgestellt (96,6% Genom-Zwillinge machen
+      einen Rang je Art aktuell irreführend, s. 1.4/2.2 im Plan).
+- [x] **2.3** Chronik/Herausforderungen — faktisch durch den Regressions-Fix erledigt
+      (6 Stellen liefen auf `.n` statt `.key`/`.form`, s. u.).
+- [x] **2.4** Spielstands-Migration — bereits durch Schritt 0.1 abgedeckt.
+- [x] **Regressions-Fix nach 1.4** (2026-08-01) — Sicherheits-Audit fand 5 echte Bugs,
+      ein 6. beim Nachprüfen: `STABLE_GENS`-Gate, `challengeTick()`, `renderSpeciesEdge()`,
+      `storyTick()`, `wowMine`/`challenge_results`, Ahnenlinie. Alle liefen auf dem jetzt
+      oft realen Anzeigenamen `.n` statt dem stabilen `.key`/`.form`. Schwerster Fund: das
+      Stabilitäts-Gate hätte bei Beinah-Gleichstand zwischen zwei realen Arten
+      `STABLE_GENS` nie erreichen können — Genbuch-Funde hätten komplett einfrieren
+      können. Direkt am Katalog bestätigt: drei Arten mit byte-identischem Genom in
+      derselben Gruppe.
 - [ ] **3.1–3.2** Abdeckungs-Metrik + Lückenreport → Vorschläge für neue Gen-Achsen (*Opus*).
 - [x] **4.1** Gründer-Los im Nullraum (2026-08-01) — `world/founder.ts`, einmal je
       Gründung gezogen, Radius je Gen **gemessen** statt geraten: der

@@ -1,12 +1,12 @@
 {
-  "_comment": "Hauptäste des Lebensbaums als Gerüst für Genbuch/Unlock-Gamification. Gefetcht via WebSearch (OTOL/GBIF-API im Sandbox-Netz geblockt). Jeder Knoten mappt reale Klade -> unsere 5 Reiche / 65 Formen (Stand 2026-07-30, Phase 1 'Lebendige Welt'). WICHTIG: Unsere Engine modelliert Nischen-Besetzung, NICHT Artenzahl (kein Speziations-Mechanismus) - die 'describedSpecies' sind reale Kontext-Info, KEINE Freischalt-Ziele. reachable: 'attractor' = stabiler Fitness-Gipfel (entsteht von selbst), 'drift' = nur über stochastische Drift transient (seltener Fang). formRarity je Knoten gespiegelt aus docs/rarity.json (2026-07-29, Backlog Punkt 8) - Name->Tier je ourForms-Eintrag, rein informativ, keine Spielfunktion liest diese Datei.",
+  "_comment": "Hauptäste des Lebensbaums als Gerüst für Genbuch/Unlock-Gamification. Gefetcht via WebSearch (OTOL/GBIF-API im Sandbox-Netz geblockt). Jeder Knoten mappt reale Klade -> unsere 5 Reiche / 65 Formen (Stand 2026-07-30, Phase 1 'Lebendige Welt'). WICHTIG: Unsere Engine modelliert Nischen-Besetzung, NICHT Artenzahl (kein Speziations-Mechanismus) - die 'describedSpecies' sind reale Kontext-Info, KEINE Freischalt-Ziele. reachable: 'attractor' = stabiler Fitness-Gipfel (entsteht von selbst), 'drift' = nur über stochastische Drift transient (seltener Fang). formRarity je Knoten gespiegelt aus docs/rarity.json (2026-07-29, Backlog Punkt 8) - Name->Tier je ourForms-Eintrag, rein informativ, keine Spielfunktion liest diese Datei. NEU (Schritt 2.1): `qid` (verifizierte Wikidata-ID), `harvestedSpecies` (gemessen in unserer Ernte) und `observedForms` (welche Bauplan-Gruppen echte Arten unter diesem QID im vollen Katalog tatsaechlich treffen) ergaenzt einige Knoten — `describedSpecies`/`estimatedSpecies` (Literatur) bleiben unveraendert stehen, sie beschreiben eine andere Frage (die reale Welt, nicht unsere dewiki-Stichprobe).",
   "sources": [
     "Hawksworth & Lücking 2017, Fungal Diversity Revisited (2.2-3.8 Mio Pilze)",
     "Mora et al. 2011, How Many Species Are There on Earth",
     "PNAS/Stork - Arthropoden-/Käfer-Schätzungen",
     "Reptile Database 2023, IUCN, Amphibian Species of the World, IOC Birds"
   ],
-  "generatedAt": "2026-07",
+  "generatedAt": "2026-08 (harvestedSpecies/observedForms ergänzt, s. tools/build-tree-reference.mjs)",
   "nodes": [
     {
       "id": "life",
@@ -29,7 +29,16 @@
         "Bakterie": "haeufig"
       },
       "reachable": "attractor",
-      "note": "Real überwältigend nach Zell-/Individuenzahl (Ubiquität)."
+      "note": "Real überwältigend nach Zell-/Individuenzahl (Ubiquität).",
+      "qid": "Q10876",
+      "harvestedSpecies": 521,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "archaee": 324,
+        "schwefelbakterie": 173,
+        "bakterie": 20,
+        "deinococcus": 4
+      }
     },
     {
       "id": "archaea",
@@ -46,7 +55,13 @@
         "Archaee · Extremophil": "haeufig"
       },
       "reachable": "attractor",
-      "note": "Extremophile (Hitze/Kälte/Salz)."
+      "note": "Extremophile (Hitze/Kälte/Salz).",
+      "qid": "Q10872",
+      "harvestedSpecies": 34,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "archaee": 34
+      }
     },
     {
       "id": "eukaryota",
@@ -67,7 +82,13 @@
       "formRarity": {
         "Protist · Amöbe": "gelegentlich"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q473809",
+      "harvestedSpecies": 85,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "plankton": 85
+      }
     },
     {
       "id": "discoba",
@@ -83,7 +104,13 @@
         "Euglenoid · Mixotroph": "haeufig"
       },
       "reachable": "attractor",
-      "note": "Mischotroph: schwimmt UND Photosynthese."
+      "note": "Mischotroph: schwimmt UND Photosynthese.",
+      "qid": "Q499086",
+      "harvestedSpecies": 25,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "plankton": 25
+      }
     },
     {
       "id": "rhizaria",
@@ -98,7 +125,13 @@
       "formRarity": {
         "Plankton": "gelegentlich"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q855740",
+      "harvestedSpecies": 5,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "plankton": 5
+      }
     },
     {
       "id": "plantae",
@@ -139,7 +172,13 @@
       "formRarity": {
         "Moos": "legendaer"
       },
-      "reachable": "drift"
+      "reachable": "drift",
+      "qid": "Q25347",
+      "harvestedSpecies": 386,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "gruenalge": 386
+      }
     },
     {
       "id": "polypodiopsida",
@@ -154,7 +193,11 @@
       "formRarity": {
         "Farn": "legendaer"
       },
-      "reachable": "drift"
+      "reachable": "drift",
+      "qid": "Q373615",
+      "harvestedSpecies": 0,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {}
     },
     {
       "id": "gymnospermae",
@@ -171,7 +214,18 @@
         "Nadelbaum": "selten",
         "Krummholz · Windzwerg": "gelegentlich"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": [
+        "Q133712",
+        "Q132825"
+      ],
+      "harvestedSpecies": 289,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "laubbaum": 265,
+        "strauch": 23,
+        "kraut": 1
+      }
     },
     {
       "id": "angiospermae",
@@ -199,7 +253,18 @@
         "Erle · Knöllchen-Pflanze": "sehr-selten"
       },
       "reachable": "attractor",
-      "note": "Artenreichste Pflanzengruppe; unsere Landpflanzen-Baupläne."
+      "note": "Artenreichste Pflanzengruppe; unsere Landpflanzen-Baupläne.",
+      "qid": "Q25314",
+      "harvestedSpecies": 7069,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "strauch": 5269,
+        "moos": 935,
+        "sukkulente": 500,
+        "bluetenkraut": 340,
+        "farn": 16,
+        "gruenalge": 9
+      }
     },
     {
       "id": "fungi",
@@ -229,7 +294,16 @@
         "Flechte · Symbiose": "selten"
       },
       "reachable": "mixed",
-      "note": "Flechte = Symbiose Pilz+Alge. Hefe/Schimmel drift-selten."
+      "note": "Flechte = Symbiose Pilz+Alge. Hefe/Schimmel drift-selten.",
+      "qid": "Q174726",
+      "harvestedSpecies": 385,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "schimmel": 271,
+        "flechte": 102,
+        "hefe": 12,
+        "plankton": 2
+      }
     },
     {
       "id": "basidiomycota",
@@ -253,7 +327,15 @@
         "Hallimasch · Leuchtpilz": "selten"
       },
       "reachable": "mixed",
-      "note": "Hutpilz/Baumpilz = klassische Fruchtkörper."
+      "note": "Hutpilz/Baumpilz = klassische Fruchtkörper.",
+      "qid": "Q174698",
+      "harvestedSpecies": 1787,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "hutpilz": 927,
+        "schimmel": 787,
+        "porling": 73
+      }
     },
     {
       "id": "animalia",
@@ -278,7 +360,14 @@
       "formRarity": {
         "Wurm": "legendaer"
       },
-      "reachable": "drift"
+      "reachable": "drift",
+      "qid": "Q25522",
+      "harvestedSpecies": 137,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "fisch": 115,
+        "amphibie": 22
+      }
     },
     {
       "id": "arthropoda",
@@ -307,7 +396,14 @@
         "Feuerkäfer · Pyrophil": "gelegentlich",
         "Frostspanner · Winterfalter": "gelegentlich"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q1390",
+      "harvestedSpecies": 1315,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "flink": 771,
+        "insekt": 544
+      }
     },
     {
       "id": "crustacea",
@@ -328,7 +424,15 @@
         "Tiefsee-Amphipode · Druckfest": "gelegentlich",
         "Krill · Filtrierendes Kleinstwesen": "gelegentlich"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q25364",
+      "harvestedSpecies": 821,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "krebstier": 769,
+        "krill": 45,
+        "flink": 7
+      }
     },
     {
       "id": "chordata",
@@ -351,7 +455,17 @@
       "formRarity": {
         "Fisch · Aalform": "legendaer"
       },
-      "reachable": "drift"
+      "reachable": "drift",
+      "qid": "Q127282",
+      "harvestedSpecies": 1268,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "fisch": 1164,
+        "schnecke": 61,
+        "leuchtwesen": 24,
+        "amphibie": 10,
+        "krill": 9
+      }
     },
     {
       "id": "amphibia",
@@ -367,7 +481,14 @@
         "Amphibie · Lurch": "legendaer"
       },
       "reachable": "drift",
-      "note": "Bindeglied Wasser/Land: weiche Haut, ans Wasser gebunden."
+      "note": "Bindeglied Wasser/Land: weiche Haut, ans Wasser gebunden.",
+      "qid": "Q10908",
+      "harvestedSpecies": 500,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "flink": 382,
+        "amphibie": 118
+      }
     },
     {
       "id": "reptilia",
@@ -386,7 +507,18 @@
         "Gepanzertes Beutetier": "gelegentlich",
         "Chamäleon · Tarnjäger": "legendaer"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q10811",
+      "harvestedSpecies": 625,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "fisch": 285,
+        "reptil": 156,
+        "beutetier": 113,
+        "flink": 44,
+        "insekt": 18,
+        "amphibie": 9
+      }
     },
     {
       "id": "aves",
@@ -403,7 +535,17 @@
         "Flatterer · Vogel": "gelegentlich",
         "Laufvogel · Strauß": "selten"
       },
-      "reachable": "attractor"
+      "reachable": "attractor",
+      "qid": "Q5113",
+      "harvestedSpecies": 500,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "vogel": 390,
+        "generalist": 51,
+        "fisch": 36,
+        "fellwarm": 19,
+        "grossjaeger": 4
+      }
     },
     {
       "id": "mammalia",
@@ -435,7 +577,22 @@
         "Robbe · Meeressäuger": "gelegentlich"
       },
       "reachable": "attractor",
-      "note": "Unsere Vierbeiner-Baupläne (FORM-Tabelle im Renderer)."
+      "note": "Unsere Vierbeiner-Baupläne (FORM-Tabelle im Renderer).",
+      "qid": "Q7377",
+      "harvestedSpecies": 2443,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "fellwarm": 1617,
+        "fledermaus": 318,
+        "kletterer": 227,
+        "fellgrosstier": 213,
+        "fisch": 37,
+        "beutetier": 9,
+        "grossjaeger": 8,
+        "reptil": 6,
+        "amphibie": 5,
+        "generalist": 3
+      }
     },
     {
       "id": "mollusca",
@@ -453,7 +610,15 @@
         "Muschel · Sessiler Filtrierer": "sehr-selten"
       },
       "reachable": "attractor",
-      "note": "Schnecke = Weichtier mit Kalkhaus (Panzer, langsam, ohne Gliedmaßen)."
+      "note": "Schnecke = Weichtier mit Kalkhaus (Panzer, langsam, ohne Gliedmaßen).",
+      "qid": "Q25326",
+      "harvestedSpecies": 1132,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "krill": 718,
+        "schnecke": 351,
+        "kopffuesser": 63
+      }
     },
     {
       "id": "cephalopoda",
@@ -469,7 +634,13 @@
         "Kopffüßer · Tintenfisch": "legendaer"
       },
       "reachable": "drift",
-      "note": "Weichkörper (kein Skelett) + viele Fangarme; agiler Räuber."
+      "note": "Weichkörper (kein Skelett) + viele Fangarme; agiler Räuber.",
+      "qid": "Q128257",
+      "harvestedSpecies": 63,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "kopffuesser": 63
+      }
     },
     {
       "id": "cnidaria",
@@ -485,7 +656,15 @@
         "Koralle · Riffbildner": "selten"
       },
       "reachable": "attractor",
-      "note": "SESSILES Tier: hartes Riffskelett + Symbiose-Algen (Photo) — tierisches Pendant zur Flechte."
+      "note": "SESSILES Tier: hartes Riffskelett + Symbiose-Algen (Photo) — tierisches Pendant zur Flechte.",
+      "qid": "Q25441",
+      "harvestedSpecies": 130,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "amphibie": 55,
+        "schwamm": 38,
+        "koralle": 37
+      }
     },
     {
       "id": "porifera",
@@ -501,7 +680,11 @@
         "Schwamm": "legendaer"
       },
       "reachable": "drift",
-      "note": "SESSILES Tier: weicher Filtrierer, älteste Tiergruppe — tierisches Pendant zum Pilz."
+      "note": "SESSILES Tier: weicher Filtrierer, älteste Tiergruppe — tierisches Pendant zum Pilz.",
+      "qid": "Q18960",
+      "harvestedSpecies": 0,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {}
     },
     {
       "id": "sulfobacteria",
@@ -517,7 +700,13 @@
         "Schwefelbakterie · Chemotroph": "gelegentlich"
       },
       "reachable": "attractor",
-      "note": "Chemosynthese statt Photosynthese — Energie aus Schwefelverbindungen (Tiefsee-Hydrothermalquellen, Gezeitensedimente)."
+      "note": "Chemosynthese statt Photosynthese — Energie aus Schwefelverbindungen (Tiefsee-Hydrothermalquellen, Gezeitensedimente).",
+      "qid": "Q134239",
+      "harvestedSpecies": 2,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "schwefelbakterie": 2
+      }
     },
     {
       "id": "deinococcus_thermus",
@@ -533,7 +722,11 @@
         "Deinococcus · Strahlenfest": "gelegentlich"
       },
       "reachable": "attractor",
-      "note": "Deinococcus radiodurans übersteht extreme Strahlendosen durch mehrfache Genom-Kopien + DNA-Reparatur."
+      "note": "Deinococcus radiodurans übersteht extreme Strahlendosen durch mehrfache Genom-Kopien + DNA-Reparatur.",
+      "qid": "Q134886",
+      "harvestedSpecies": 0,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {}
     },
     {
       "id": "euryarchaeota",
@@ -549,7 +742,11 @@
         "Methanogenes Archaeon · Anaerobier": "selten"
       },
       "reachable": "attractor",
-      "note": "Methanogene Archaeen — anaerober Stoffwechsel wie vor der Großen Sauerstoffkatastrophe."
+      "note": "Methanogene Archaeen — anaerober Stoffwechsel wie vor der Großen Sauerstoffkatastrophe.",
+      "qid": "Q204219",
+      "harvestedSpecies": 0,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {}
     },
     {
       "id": "cupressaceae",
@@ -565,7 +762,13 @@
         "Mammutbaum · Riesenpflanze": "selten"
       },
       "reachable": "attractor",
-      "note": "Mammutbäume (Sequoioideae) — die größten und massereichsten lebenden Organismen der Erde."
+      "note": "Mammutbäume (Sequoioideae) — die größten und massereichsten lebenden Organismen der Erde.",
+      "qid": "Q146037",
+      "harvestedSpecies": 154,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "laubbaum": 154
+      }
     },
     {
       "id": "tardigrada",
@@ -581,7 +784,11 @@
         "Bärtierchen · Anhydrobiont": "gelegentlich"
       },
       "reachable": "attractor",
-      "note": "Eigener Tierstamm — Kryptobiose/Anhydrobiose übersteht fast vollständige Austrocknung, Vakuum, Strahlung."
+      "note": "Eigener Tierstamm — Kryptobiose/Anhydrobiose übersteht fast vollständige Austrocknung, Vakuum, Strahlung.",
+      "qid": "Q5194",
+      "harvestedSpecies": 0,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {}
     },
     {
       "id": "echinodermata",
@@ -597,7 +804,17 @@
         "Seestern · Stachelhäuter": "selten"
       },
       "reachable": "attractor",
-      "note": "Radiäre (meist fünfstrahlige) Symmetrie — ein eigener Bauplan, nah verwandt mit den Chordatieren."
+      "note": "Radiäre (meist fünfstrahlige) Symmetrie — ein eigener Bauplan, nah verwandt mit den Chordatieren.",
+      "qid": "Q44631",
+      "harvestedSpecies": 90,
+      "harvestedSpeciesNote": "gemessen in unserer dewiki-gefilterten Ernte (tools/wikidata-harvest.mjs, Stand 2026-08-01) — kein Ersatz fuer describedSpecies (Literatur-Schaetzung der REALEN Welt), sondern eine zweite, exakt reproduzierbare Zahl.",
+      "observedForms": {
+        "seestern": 43,
+        "krill": 22,
+        "schwamm": 16,
+        "amphibie": 8,
+        "chamaeleon": 1
+      }
     }
   ],
   "coverageGaps": [

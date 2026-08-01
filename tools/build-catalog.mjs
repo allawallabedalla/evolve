@@ -44,11 +44,6 @@ const FULL_MODE = existsSync(HARVEST_PATH) && !process.argv.includes("--bootstra
 const archWin = {};
 new Function("window", readFileSync(join(ROOT, "app", "archetypes.js"), "utf-8"))(archWin);
 const ARCH = archWin.ARCHETYPES;
-// Name -> Schluessel (identisch zu FORM_KEY_BY_NAME in app/index.html, Schritt 0.1) —
-// gebraucht, um im FULL-Modus den "novum"-Sonderfall von matchArchetype() aufzuloesen
-// (dort ist `key` absichtlich "novum", aber `alt` der Name des naechsten Verwandten).
-const NAME_TO_KEY = Object.fromEntries(ARCH.forms.map((f) => [f.n, f.key]));
-const ARCH_KEY_BY_NAME = new Set(ARCH.forms.map((f) => f.key));
 
 const html = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
 const grab = (re, what) => {
@@ -167,6 +162,67 @@ function loadTraitLookup() {
   return m;
 }
 
+// ---------------------------------------------------------------------------
+// REICH-WÄCHTER (gefunden beim Bauen von Schritt 2.1, nicht in 1.4 selbst).
+//
+// BEFUND: core.matchArchetype() weist 34% der 20.178 Arten einem BAUPLAN AUS DEM
+// FALSCHEN REICH zu (Amoebozoa/Archaeen/Foraminifera 100%, Krebstiere 94%,
+// Ascomycota 86% falsch — gemessen ueber tools/build-tree-reference.mjs' Gegenprobe).
+// Beispiel: ein Salamander (Ambystoma dumerilii, Amphibium) landet bei "Plankton"
+// (Protist). URSACHE, per Hand nachgerechnet (ein Zehnfusskrebs, Calcinus laevimanus):
+// die 70 Archetyp-Prototypen sind auf die EIGENE SPIEL-DYNAMIK geeicht (verrauschte,
+// vom Mutationsanker beeinflusste Werte aus evolvierten Schwaermen — s. Kopfkommentar
+// app/archetypes.js "gemessen ... Mittelwert ueber ERREICHBARE Genome"), waehrend die
+// Kladen-Regeln (1.2) REINERE, taxonomisch begruendete Werte liefern (der Krebs bekommt
+// photosynthesis=0.08, waehrend der Krebstier-Prototyp bei 0.23 liegt — Rest-Rauschen
+// aus der Spiel-Dynamik). In einer Umwelt, in der `photosynthesis` fast das gesamte
+// Distanzmass dominiert (Gewicht 1.0 im Neutral-Biom), gewinnt dann zufaellig ein
+// voellig wesensfremder Prototyp mit naeher liegendem (ebenso verrauschtem) Wert.
+//
+// GEGENMASSNAHME: die Wurzel-Klade der Ernte (`root`) legt das Reich eindeutig fest
+// (Saeugetiere/Voegel/.../Stachelhaeuter -> Tier, Bedecktsamer/... -> Pflanze, usw.) —
+// diese Information ist taxonomisch, nicht distanzbasiert, und daher zuverlaessiger als
+// die 65-Prototypen-Suche. Der Reich-Waechter schraenkt die Bauplan-Suche auf Prototypen
+// DESSELBEN Reichs ein, bevor ueberhaupt eine Distanz gerechnet wird — dieselbe
+// Distanzformel wie core.matchArchetype() (Spezifitaets-Bonus, requires-Strafe), nur mit
+// eingeschraenkter Kandidatenmenge. Reine ZUSATZ-Absicherung fuer den OFFLINE-Katalogbau;
+// core.matchArchetype() selbst (fuer die LIVE evolvierende Kreatur) bleibt unveraendert,
+// weil deren Genome aus echter In-Game-Selektion stammen und dieses Problem nicht haben.
+const ROOT_KINGDOM = {
+  Saeugetiere: "Tier", Voegel: "Tier", Reptilien: "Tier", Amphibien: "Tier",
+  Strahlenflosser: "Tier", Insekten: "Tier", Spinnentiere: "Tier", Krebstiere: "Tier",
+  Weichtiere: "Tier", Ringelwuermer: "Tier", Nesseltiere: "Tier", Stachelhaeuter: "Tier",
+  Bedecktsamer: "Pflanze", Nacktsamer: "Pflanze", Farne: "Pflanze", Laubmoose: "Pflanze",
+  Basidiomycota: "Pilz", Ascomycota: "Pilz",
+  Bakterien: "Mikrobe", Archaeen: "Mikrobe",
+  Amoebozoa: "Protist", Ciliophora: "Protist", Euglenozoa: "Protist",
+  Foraminifera: "Protist", Diatomeen: "Protist",
+};
+
+const ARCH_NAMED_MAX = Math.max(1, ...ARCH.forms.map((f) => Object.keys(f.proto).length));
+function envFits(e, req) {
+  for (const ax in req) {
+    const v = e[ax] == null ? 0 : e[ax];
+    if (v < req[ax][0] || v > req[ax][1]) return false;
+  }
+  return true;
+}
+/** Wie core.matchArchetype()s innere Distanzformel, aber nur ueber Prototypen EINES
+ *  Reichs — der Reich-Waechter. `null` Reich (unbekannte Wurzel) sucht ueber alle. */
+function nearestInKingdom(t, env, w, kingdom) {
+  const pool = kingdom ? ARCH.forms.filter((f) => f.k === kingdom) : ARCH.forms;
+  let best = null, dBest = Infinity;
+  for (const f of pool) {
+    const idx = Object.keys(f.proto).map((k) => ARCH.genes.indexOf(k)).filter((i) => i >= 0);
+    let s = 0, z = 0;
+    for (const i of idx) { const d = (t[i] - f.proto[ARCH.genes[i]]) * w[i]; s += d * d; z += w[i] * w[i]; }
+    let dist = Math.sqrt(s / Math.max(z, 1e-9)) * (1 - ARCH.specificityBonus * idx.length / ARCH_NAMED_MAX);
+    if (f.requires && !envFits(env, f.requires)) dist *= ARCH.requiresPenalty;
+    if (dist < dBest) { dBest = dist; best = f; }
+  }
+  return { key: best.key, name: best.n, dist: dBest };
+}
+
 /** Nur Stufe (a)+(b), OHNE Habitat-Rueckwaertslauf — das ist der Korpus fuer Stufe (c)
  *  (s. tools/lib/impute.mjs buildCorpus-Doku: "die (a)+(b)-Genome ALLER geernteten
  *  Arten"). Stufe (d) darf hier NICHT einfliessen, sonst imputiert Stufe (c) aus
@@ -220,13 +276,14 @@ async function buildFullEntries() {
     const placed = placeSpecies(traitsToGenes(p.traitValues), p.cladeResult, null, { lineage: p.v.lineage, corpus });
     const habEnv = habitatOf(p.v.lineage, null).env;
     const t = placed.genome; // 0..1, vollstaendig belegt
-    const match = core.matchArchetype(t, habEnv);
-    // Regulaerer Fall: `key` ist schon ein echter Bauplan-Schluessel. Sonderfall
-    // "novum" (Abstand > novelThreshold, s. app/index.html matchArchetype()): dort
-    // ist `alt` der ANZEIGENAME des naechsten Verwandten (nicht dessen Schluessel) —
-    // fuer die Katalog-ZUORDNUNG (nicht die spaetere Live-Benennung) reicht der
-    // naechste Verwandte trotzdem als Gruppe, ueber NAME_TO_KEY aufgeloest.
-    const group = ARCH_KEY_BY_NAME.has(match.key) ? match.key : (NAME_TO_KEY[match.alt] || match.key);
+    // Reich-Waechter (s. Kommentar oben): die Bauplan-Suche laeuft nur ueber Prototypen
+    // DESSELBEN Reichs wie die Wurzel-Klade der Art — sonst kann eine (verrauschte)
+    // Genom-Distanz eine Art in ein biologisch falsches Reich stecken (gemessen: 34%
+    // ohne diesen Waechter, s. o.).
+    const kingdom = ROOT_KINGDOM[p.v.root] || null;
+    const w = core.selectionWeights(t, habEnv);
+    const match = nearestInKingdom(t, habEnv, w, kingdom);
+    const group = match.key;
 
     for (const c of placed.conf) confHist[c]++;
     const coreConf2plus = placed.conf.slice(0, 10).filter((c) => c >= 2).length;
