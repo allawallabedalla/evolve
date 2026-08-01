@@ -33,6 +33,7 @@ const STATE = join(ROOT, "tools", ".harvest-state.json");
 const UA = "evolve-artenkatalog/0.1 (https://github.com/allawallabedalla/evolve)";
 const ENDPOINT = "https://query.wikidata.org/sparql";
 const REPORT_ONLY = process.argv.includes("--report");
+const RETRY_FAILED = process.argv.includes("--retry-failed");
 const minutesArg = process.argv.find((a) => a.startsWith("--minutes="));
 const DEADLINE = minutesArg ? Date.now() + Number(minutesArg.split("=")[1]) * 60000 : Infinity;
 const PAGE = 500;
@@ -135,6 +136,16 @@ function report() {
   console.log(`Ernte-Stand: ${n} Arten · ${state.queue.length} in der Warteschlange · `
     + `${state.done.length} Kladen fertig · ${state.decomposed.length} zerlegt · ${state.failed.length} endgueltig fehlgeschlagen`);
   if (state.failed.length) console.log("  fehlgeschlagen: " + state.failed.map((f) => f.label).join(", "));
+}
+
+if (RETRY_FAILED && state.failed.length) {
+  // Netzwerk-Flackern statt strukturellem Problem ist der haeufigste Grund fuer einen
+  // endgueltigen Fehlschlag (Client-Timeout auf BEIDEN Versuchen kurz hintereinander).
+  // Genau EIN erneuter Versuch je Knoten -- kein Endlos-Retry, sonst verstopft ein
+  // wirklich zu grosser Knoten die Warteschlange dauerhaft.
+  console.log(`${state.failed.length} zuvor fehlgeschlagene Knoten werden erneut versucht.`);
+  for (const f of state.failed) state.queue.push({ qid: f.qid, label: f.label, rootLabel: f.rootLabel, offset: 0 });
+  state.failed = [];
 }
 
 if (REPORT_ONLY) { report(); process.exit(0); }
