@@ -36,14 +36,21 @@ export function loadAppCore(toolName = "app-core") {
   const nounSrc   = grab(/function bodyPlanNoun\(t, e\)\{[\s\S]*?\n\}/, "bodyPlanNoun()");
   const genSrc    = grab(/function generateFormName\(t, e, w, near\)\{[\s\S]*?\n\}/, "generateFormName()");
   const matchSrc  = grab(/function matchArchetype\(t, e\)\{[\s\S]*?\n\}/, "matchArchetype()");
+  // Stufe 2 des Matchers (Schritt 0.3): naechste reale Art innerhalb der Bauplan-Gruppe.
+  const realSrc   = grab(/function nearestReal\(t, groupKey, w\)\{[\s\S]*?\n\}/, "nearestReal()");
   const classSrc  = grab(/function classify\(t, envIn\)\{[\s\S]*?\n\}/, "classify()");
   const geneLabels = eval(grab(/const GENE_LABELS = \[[\s\S]*?\];/, "GENE_LABELS")
     .replace(/^const GENE_LABELS = /, "").replace(/;$/, ""));
   const archWin = {};
   new Function("window", readFileSync(join(ROOT, "app", "archetypes.js"), "utf-8"))(archWin);
+  // Der Artenkatalog (Schritt 0.2) — dieselbe Technik. Fehlt die Datei, laeuft der Kern
+  // ohne Stufe 2 weiter (nearestReal liefert dann null), statt hier auszusteigen.
+  const catWin = {};
+  try { new Function("window", readFileSync(join(ROOT, "app", "catalog.js"), "utf-8"))(catWin); }
+  catch (e) { catWin.CATALOG = null; }
 
   const box = {};
-  new Function("box", "ARCH", `
+  new Function("box", "ARCH", "CAT", `
     const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
     const sigmoid = x => 1 / (1 + Math.exp(-x));
     ${physSrc}
@@ -62,11 +69,14 @@ export function loadAppCore(toolName = "app-core") {
     ${envFitSrc}
     ${nounSrc}
     ${genSrc}
+    const CATALOG_NAMES = !!CAT && CAT.stage === "full";
+    ${realSrc}
     ${matchSrc}
     ${classSrc}
     box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify;
     box.matchArchetype = matchArchetype; box.selectionWeights = selectionWeights; box.NG = NG;
-  `)(box, archWin.ARCHETYPES);
+    box.nearestReal = nearestReal;
+  `)(box, archWin.ARCHETYPES, catWin.CATALOG || null);
 
   // Deterministische Konvergenz aus dem Ur-Genom (kein Rauschen) — das Maß dafür,
   // ob ein Einfluss die Selektion wirklich verschiebt.

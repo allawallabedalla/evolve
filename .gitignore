@@ -15,3 +15,6 @@ _*.mjs
 
 # Persönliche lokale Claude-Code-Einstellungen (nicht versionieren)
 .claude/settings.local.json
+
+# Aufloesungs-Cache von tools/build-catalog.mjs (Artefakt, kein Quelltext)
+tools/.catalog-cache.json

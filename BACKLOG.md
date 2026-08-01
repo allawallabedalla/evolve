@@ -1681,9 +1681,12 @@ Zufallsfaktor bekommt zum ersten Mal eine sichtbare Wirkung — innerhalb einer 
 entscheidet genau das, worauf die Selektion nicht schaut.
 
 **Reihenfolge (nach Abhängigkeit UND Netzbedarf — Phase 0 braucht kein Netz):**
-- [ ] **0.1** Schlüssel-Ebene entkoppeln (*Sonnet*) — blockiert alles Weitere.
-- [ ] **0.2** Katalog-Format + Bootstrap aus den 65 `exemplar.js`-Zuordnungen (*Sonnet*).
-- [ ] **0.3** Zweistufiger Matcher (*Opus*) — Ende-zu-Ende lauffähig ohne Wikidata.
+- [x] **0.1** Schlüssel-Ebene entkoppelt (2026-08-01) — `formKey()`/`formName()`, Gate `npm run key-check`.
+- [x] **0.2** Katalog-Format + Bootstrap (2026-08-01) — `app/catalog.js`, 65 Einträge,
+      **64 mit Wikidata-QID** (live aufgelöst), Gate `npm run catalog-check`.
+- [x] **0.3** Zweistufiger Matcher (2026-08-01) — `nearestReal()`; gemessen 0,12 µs je
+      Eintrag → 16.686 Einträge je Gruppe passen ins 2-ms-Budget. Benennung kippt
+      datengesteuert (`stage: "full"`), nicht per Code-Änderung.
 - [ ] **1.1** Wikidata-Ernte + Belegungsmessung je Eigenschaft (*Sonnet*, Netz).
 - [ ] **1.2** Merkmals- und Kladen-Regelwerk (*Opus*, Netz) — abwägungsintensivster Schritt.
 - [ ] **1.3** Imputation + Habitat-Rückwärtslauf (*Opus*, Netz).

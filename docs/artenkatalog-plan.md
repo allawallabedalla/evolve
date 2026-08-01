@@ -268,27 +268,70 @@ kein Name doppelt im Baum) — 65 Formen, 65 Äste, grün. Dazu unverändert gr�
 `app-parity`, `mf-fidelity`, `app-world-smoke` (Browser), `exemplar-check`,
 `story-check`, `influence-check`, `ui-calm-check`.
 
-**0.2 · Katalog-Format + Bootstrap-Katalog**
-*Modell: Sonnet* · *Netz: nein*
+**0.2 · Katalog-Format + Bootstrap-Katalog — ✅ erledigt 2026-08-01**
+*Modell: Opus (zusammen mit 0.3 gebaut)* · *Netz: ja (besser als geplant)*
 
-Das Format aus Abschnitt 4 festschreiben, Lade-/Shard-Logik bauen, und als ersten
-Datensatz die **65 vorhandenen Zuordnungen aus `app/exemplar.js`** einlesen (Name →
-Wikipedia-Artikel ist dort bereits handkuratiert). Damit ist die gesamte Kette
-Ende-zu-Ende lauffähig und prüfbar, bevor eine Zeile Wikidata-Code existiert.
+`tools/build-catalog.mjs` erzeugt `app/catalog.js` im Format aus Abschnitt 4. Datenquelle
+sind die 65 kuratierten „≈ in echt"-Zuordnungen aus `app/exemplar.js` — **aber QID,
+wissenschaftlicher Name, Rang und Elterntaxon-Kette werden live gegen Wikidata
+aufgelöst**, da der Netzzugang schon stand. Der Bootstrap hat damit bereits die
+Datenqualität des späteren Katalogs; nur die Genom-Positionen sind noch Bauplan-Prototypen
+(deshalb trägt jedes Gen Konfidenz 2, keines Konfidenz 3).
 
-*Gate:* `npm run catalog-check` — Format, Schlüssel-Integrität, Shard-Vollständigkeit,
-Ladezeit-Budget.
+Ergebnis: 65 Einträge, **64 mit Wikidata-QID**, 44 mit wissenschaftlichem Namen, 30,5 KB.
 
-**0.3 · Zweistufiger Matcher**
-*Modell: Opus* (Abwägung: Abstandsmaß, Schwellen, Umgang mit leeren Gruppen) · *Netz: nein*
+*Drei Funde beim Bauen:*
+1. Nodes eingebautes `fetch()` liest `HTTPS_PROXY` nicht — 403 „Host not in allowlist",
+   obwohl der Host erlaubt ist. Das npm-Script setzt deshalb `NODE_USE_ENV_PROXY=1`.
+2. Ohne Drosselung läuft der Lauf zuverlässig in ein 429 (die Elterntaxon-Ketten machen
+   bis zu 30 Anfragen je Art). Jetzt 120 ms Mindestabstand plus exponentielles Zurückziehen.
+3. `wbgetentities&sites=dewiki` folgt **keinen Weiterleitungen** — 12 von 65 kuratierten
+   Titeln blieben so ohne QID. Auflösung läuft jetzt über die Wikipedia-API mit
+   `redirects=1`; das hebt die Quote von 53 auf 64. **Für Schritt 1.1 relevant:** dort ist
+   die Richtung umgekehrt (Wikidata → dewiki-Sitelink), das Problem entfällt.
 
-Stufe 2 in `matchArchetype()` einziehen: nach der Bauplan-Gruppe die nächste reale Art
-innerhalb der Gruppe suchen, gewichtet mit denselben Selektionsgewichten. Anzeige:
-Trivialname + wissenschaftlicher Name + Wikipedia-Link + Abstandsangabe. Jenseits von
-`novelThreshold` keine reale Art behaupten.
+*Ehrlicher Stand:* die kuratierten Vorbilder sind grob — nur 3 Einträge haben Artrang, der
+Rest ist Klasse/Ordnung/Familie oder gar kein Taxon („Kräuter", „Strauch", „Plankton",
+„Würmer"). Genau das behebt die Ernte in 1.x.
 
-*Gate:* `npm run app-world-smoke` grün, Rechenzeit pro `classify()` unter Budget,
-`ui-calm-check` grün (die neue Zeile darf die Ruhe nicht brechen).
+*Gate:* `npm run catalog-check` (C1–C8: Kopf + Gen-Liste, Eintrags-Form, Bauplan-Schlüssel,
+byGroup-Index, Sortier-Invariante fürs Sharding, keine Art doppelt, Größenbudget,
+Rechenzeit-Budget) — grün.
+
+**0.3 · Zweistufiger Matcher — ✅ erledigt 2026-08-01**
+*Modell: Opus* · *Netz: nein*
+
+`nearestReal(t, groupKey, w)` in `app/index.html`: nach der Bauplan-Gruppe die nächste
+reale Art *innerhalb* der Gruppe, mit denselben Selektionsgewichten wie Stufe 1. Ergebnis
+hängt als `real: {e, dist}` am `classify()`-Rückgabewert; der Bauplan-Name bleibt als
+`form` immer erreichbar (Chronik, Genbuch und Erklärtexte sprechen über den Bauplan, nicht
+über die Art). Der „≈ in echt"-Verweis in der Wesen-Karte kommt jetzt aus dem Katalog über
+den **gemessenen Genom-Abstand** statt aus der statischen Name→Name-Tabelle, die zu jedem
+Bauplan immer dasselbe Vorbild zeigte.
+
+**Wann kippt die Benennung?** Die Bedingung steht in den Daten, nicht im Code:
+`CATALOG_NAMES = CAT.stage === "full"`. In der Bootstrap-Stufe hat jede Gruppe genau
+*einen* Eintrag — Stufe 2 hätte keine echte Wahl, und der grobe Vorbild-Name („Säugetier")
+wäre ein Rückschritt gegenüber dem Bauplan-Namen („Fell-Warmblüter"). Sobald Schritt 1.4
+`stage: "full"` liefert, kippt die Benennung ohne Code-Änderung auf die reale Art.
+
+**Bewusst offen gelassen:** die Konfidenz je Gen geht noch *nicht* in den Abstand ein. Ein
+aus dem Familien-Median imputierter Wert sollte weniger zählen als ein gemessener — aber im
+Bootstrap tragen alle Einträge Konfidenz 2, eine Gewichtungskurve wäre hier nicht prüfbar.
+Kalibrierung in 1.4 an echter Konfidenz-Streuung, statt jetzt eine Zahl zu erfinden.
+
+*Gemessen:* 0,12 µs je Katalog-Eintrag → **16.686 Einträge je Bauplan-Gruppe passen ins
+2-ms-Budget** (unterhalb eines 60-Hz-Bildschritts). Die Zweistufigkeit trägt den Zielumfang
+damit mit großem Abstand.
+
+*Im Browser verifiziert* (Playwright, echte Seite): Fell-Genom → Bauplan „Fell-Großtier",
+reale Art „Bär (Ursidae)", Abstand 0,136. Pflanzen-Genom → „Strauch", 0,151. Aal-Genom →
+„Aal (Anguillidae)", 0,164.
+
+*Gate:* `app-world-smoke` (Browser), `app-parity`, `mf-fidelity`, `key-check`,
+`catalog-check`, `exemplar-check`, `story-check`, `influence-check`, `ui-calm-check` — alle
+grün. `tools/lib/app-core.mjs` musste um Stufe 2 erweitert werden, sonst brach der
+Node-seitige Kern-Extraktor (von `influence-check` gefunden).
 
 ### Phase 1 — Datenpipeline (Netz nötig)
 

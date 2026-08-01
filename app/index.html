@@ -412,6 +412,7 @@
 
 <script src="./vendor/supabase.js"></script>
 <script src="./archetypes.js"></script>
+<script src="./catalog.js"></script>
 <script src="./influences.js"></script>
 <script src="./gene-explain.js"></script>
 <script src="./challenges.js"></script>
@@ -1275,6 +1276,51 @@ function formName(k){ return FORM_NAME_BY_KEY[k] || k; }
  *  (key "novum"), erben aber in matchArchetype() das Icon ihres nächsten Verwandten
  *  unter ihrem NAMEN — deshalb hier die Fallunterscheidung an genau einer Stelle. */
 function archIcon(a, cls){ return formIcon(a.novel ? a.n : a.key, cls); }
+
+// ---------------------------------------------------------------------------
+// STUFE 2 — die naechste REALE Art (BACKLOG Punkt 12, Schritt 0.3)
+//
+// Stufe 1 (matchArchetype) liefert die Bauplan-Gruppe und damit den stabilen Schluessel.
+// Stufe 2 sucht darin das naechste belegte Lebewesen aus app/catalog.js. Zwei Stufen
+// statt einer Suche ueber den ganzen Katalog: bei 20.000 Arten waeren das 500.000
+// Rechenschritte pro classify()-Aufruf — und der laeuft pro Generation. Innerhalb einer
+// Gruppe sind es gut 1 % davon (s. docs/artenkatalog-plan.md Abschnitt 3).
+//
+// Dasselbe Abstandsmass wie Stufe 1: selektions-gewichteter, normierter Abstand. Was in
+// DIESER Umwelt ueber Leben und Tod entscheidet, entscheidet auch darueber, welcher realen
+// Art das Wesen am naechsten kommt — ein Gen, das hier nichts bewirkt, soll die Zuordnung
+// nicht bestimmen.
+//
+// NOCH NICHT gewichtet wird die Konfidenz je Gen (catalog.js `conf`): ein aus dem
+// Familien-Median imputierter Wert sollte weniger zaehlen als ein gemessener. In der
+// Bootstrap-Stufe tragen ALLE Eintraege dieselbe Konfidenz 2, eine Gewichtungskurve waere
+// hier also nicht pruefbar — sie wird in Schritt 1.4 an echter Konfidenz-Streuung
+// kalibriert statt jetzt geraten.
+const CAT = window.CATALOG || null;
+function nearestReal(t, groupKey, w){
+  if(!CAT) return null;
+  const idx = CAT.byGroup[groupKey];
+  if(!idx || !idx.length) return null;
+  let best = null, dBest = Infinity;
+  for(const i of idx){
+    const e = CAT.entries[i];
+    let sum = 0, z = 0;
+    for(let g = 0; g < NG; g++){
+      const d = (t[g] - e.genome[g]/255) * w[g];
+      sum += d*d; z += w[g]*w[g];
+    }
+    const dist = Math.sqrt(sum/Math.max(z, 1e-9));
+    if(dist < dBest){ dBest = dist; best = e; }
+  }
+  return best ? { e: best, dist: dBest } : null;
+}
+// Wann traegt der Katalog den ANZEIGENAMEN? Die Antwort steht in den Daten, nicht im Code:
+// solange `stage` "bootstrap" ist, hat jede Gruppe genau einen Eintrag (aus den 65
+// kuratierten „≈ in echt"-Zuordnungen) — Stufe 2 haette dann keine echte Wahl, und der
+// grobe Vorbild-Name („Saeugetier") waere ein Rueckschritt gegenueber dem Bauplan-Namen
+// („Fell-Warmblueter"). Ab Schritt 1.4 liefert der Erzeuger `stage: "full"`, und die
+// Benennung kippt ohne Code-Aenderung auf die reale Art (Plan Abschnitt 2, Rolle).
+const CATALOG_NAMES = !!CAT && CAT.stage === "full";
 // Prototyp-Objekte -> Vektor + Liste der GENANNTEN Gene (einmalig, beim ersten Aufruf).
 // `idx` ist der Kern der Bauform: ein Prototyp ist eine TEIL-Spezifikation. Nur die Gene,
 // über die sein Kaskaden-Zweig eine Aussage traf, gehen in den Abstand ein — der
@@ -1423,10 +1469,15 @@ function matchArchetype(t, e){
     // Namen greift, erbt der Name das Icon des nächsten Verwandten.
     if(FICON[n]===undefined) FICON[n] = FICON[best.f.n] || "dot";
     return { k:best.f.k, n, e:best.f.e, key:"novum", conf:0, margin:0, settled, alt:best.f.n,
-             novel:true, dist:dBest };
+             novel:true, dist:dBest, real:null };
   }
-  return { k:best.f.k, n:best.f.n, e:best.f.e, key:best.f.key, conf, margin, settled,
-           alt: second ? second.f.n : null, novel:false, dist:dBest };
+  const real = nearestReal(t, best.f.key, w);
+  return { k:best.f.k, n: (CATALOG_NAMES && real) ? (real.e.de || real.e.sci) : best.f.n,
+           e:best.f.e, key:best.f.key, conf, margin, settled,
+           alt: second ? second.f.n : null, novel:false, dist:dBest, real,
+           // Bauplan-Name bleibt IMMER erreichbar — Chronik, Genbuch und Erklaertexte
+           // sprechen ueber den Bauplan, nicht ueber die Art.
+           form: best.f.n };
 }
 // Signatur unverändert für alle Aufrufer: classify(genome) -> {k, n, e}. Neu obendrauf:
 // key/conf/alt/novel/dist. Die Umwelt ist optional — ohne Angabe gilt die aktuelle Welt
@@ -6796,9 +6847,22 @@ try {
   function updateSpeciesWiki() {
     const a = el("speciesWiki"); const pet = petState();
     if (!a || !pet) return;
-    // Exakt zum angezeigten Namen (classify) — fällt auf die emergente Form zurück.
-    const ex = (pet.form && archetypeWiki(pet.form)) || realExample(describe(pet.genome));
-    if (a.dataset.k !== ex.wiki) { a.href = ex.wiki; a.textContent = "≈ " + ex.name + " ↗"; a.hidden = false; a.dataset.k = ex.wiki; }
+    // Schritt 0.3: der Verweis kommt jetzt aus dem KATALOG — Stufe 2 hat die naechste
+    // reale Art bereits ueber den gewichteten Genom-Abstand bestimmt. Vorher war das eine
+    // statische Name→Name-Tabelle (app/exemplar.js), die zu jedem Bauplan IMMER dasselbe
+    // Vorbild zeigte, egal wie sich das Wesen innerhalb seines Bauplans entwickelt hatte.
+    // Der Rueckfall auf exemplar.js bleibt fuer erzeugte Formen (kein Katalog-Eintrag).
+    const arch = (typeof committedArch !== "undefined" && committedArch) || classify(genome);
+    let href = null, label = null;
+    if (arch && arch.real) {
+      const e = arch.real.e;
+      href = "https://de.wikipedia.org/wiki/" + encodeURIComponent(e.wiki.replace(/ /g, "_"));
+      label = e.de || e.sci;
+    } else {
+      const ex = (pet.form && archetypeWiki(pet.form)) || realExample(describe(pet.genome));
+      href = ex.wiki; label = ex.name;
+    }
+    if (a.dataset.k !== href) { a.href = href; a.textContent = "≈ " + label + " ↗"; a.hidden = false; a.dataset.k = href; }
   }
   updateSpeciesWiki();
   setInterval(updateSpeciesWiki, 700);
