@@ -730,7 +730,7 @@ const FICON = {
   "Methanogenes Archaeon · Anaerobier":"voidmicrobe","Erle · Knöllchen-Pflanze":"alder",
   "Mammutbaum · Riesenpflanze":"sequoia","Chamäleon · Tarnjäger":"eyeambush",
 };
-function formIcon(name, cls){ return ic(FICON[name]||"dot", cls); }
+function formIcon(x, cls){ return ic(FICON[FORM_NAME_BY_KEY[x] || x] || "dot", cls); }
 
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1244,6 +1244,37 @@ function stepGeneration(m, env, randn){
 // App hat ihre eigene Inline-Kopie von fitness()/PHYS/PARAMS (s. docs/komplexitaets-audit.md);
 // ein ES-Modul-Import aus engine/ liefe im Browser nicht ohne Bundling.
 const ARCH = window.ARCHETYPES;
+
+// ---------------------------------------------------------------------------
+// SCHLÜSSEL-EBENE (BACKLOG Punkt 12, Schritt 0.1 — docs/artenkatalog-plan.md)
+//
+// Bis hierher schlüsselten Genbuch (TREE), Rarität (RARITY), Icons (FICON), die
+// Reich-Zuordnung (FORM_KINGDOM), die Fund-Chronik (discoveryLog) und der Spielstand
+// (`discovered`) auf dem ANZEIGENAMEN einer Form. Das trägt genau so lange, wie der
+// Anzeigename aus einer festen Liste von 70 Prototypen stammt.
+//
+// Sobald der reale Artenkatalog die Benennung übernimmt (Schritt 0.3/1.x), heißt ein
+// Wesen nach einer echten Art („Polarfuchs") — und keiner dieser Namen träfe mehr.
+// Deshalb wird der bereits vorhandene, stabile `key` aus app/archetypes.js
+// („fellwarm") zur Schlüssel-Ebene; der Anzeigename wird zur reinen Ausgabe.
+//
+// Bewusst KEIN Umschreiben der Tabellen: sie bleiben namensindiziert (Daten
+// unverändert, minimaler Diff), und die Akzessoren übersetzen Schlüssel → Name.
+// Dass diese Übersetzung für JEDE Form aufgeht, prüft `npm run key-check` —
+// der Prüfstand findet damit auch Tippfehler, die vorher still zu „dot"/„haeufig"
+// zurückgefallen wären.
+const FORM_KEY_BY_NAME = {}, FORM_NAME_BY_KEY = {};
+for(const f of ARCH.forms){ FORM_KEY_BY_NAME[f.n] = f.key; FORM_NAME_BY_KEY[f.key] = f.n; }
+/** Nimmt Anzeigename ODER Schlüssel, liefert immer den Schlüssel (idempotent).
+ *  Unbekanntes — erzeugte Namen jenseits von novelThreshold — geht unverändert
+ *  durch; die Namens-Rückfälle in den Akzessoren fangen diesen Fall ab. */
+function formKey(x){ return FORM_KEY_BY_NAME[x] || x; }
+/** Umkehrung: Schlüssel -> Anzeigename. Unbekanntes geht unverändert durch. */
+function formName(k){ return FORM_NAME_BY_KEY[k] || k; }
+/** Icon für ein classify()-Ergebnis. Erzeugte Formen haben keinen echten Schlüssel
+ *  (key "novum"), erben aber in matchArchetype() das Icon ihres nächsten Verwandten
+ *  unter ihrem NAMEN — deshalb hier die Fallunterscheidung an genau einer Stelle. */
+function archIcon(a, cls){ return formIcon(a.novel ? a.n : a.key, cls); }
 // Prototyp-Objekte -> Vektor + Liste der GENANNTEN Gene (einmalig, beim ersten Aufruf).
 // `idx` ist der Kern der Bauform: ein Prototyp ist eine TEIL-Spezifikation. Nur die Gene,
 // über die sein Kaskaden-Zweig eine Aussage traf, gehen in den Abstand ein — der
@@ -2374,12 +2405,19 @@ const TREE = [
   ]},
 ];
 const TREE_TOTAL = TREE.reduce((s,g)=>s+g.forms.length,0);
+// Schlüssel-Ebene (s. formKey oben): der Lebensbaum trägt seine Formen als Namen —
+// abgeleitet wird der stabile Schlüssel einmalig hier, statt 65 Einträge von Hand um
+// ein Feld zu ergänzen. `npm run key-check` prüft, dass jeder Ast einen echten
+// Schlüssel bekommt (ein Tippfehler im Namen fiele sonst still auf sich selbst zurück).
+for(const grp of TREE) for(const f of grp.forms) f.key = formKey(f.n);
 
 // Reich-Meilensteine (sanfte Ziele, KEIN Sammelzähler): das erste Wesen aus einem der
 // 5 großen Reiche des Lebens wird als Staunens-Moment gefeiert — Wertschätzung für die
 // Vielfalt, nicht „sammle alle". Quelle der Reich-Zuordnung = derselbe Baum wie das Genbuch.
 const FORM_KINGDOM = {}, FORM_STORY = {};
-for(const grp of TREE) for(const f of grp.forms){ FORM_KINGDOM[f.n] = grp.k; FORM_STORY[f.n] = { era: f.era, evo: f.evo }; }
+// Schluessel-indiziert (Schritt 0.1): beide Tabellen werden ohnehin hier abgeleitet,
+// also gleich unter dem stabilen Schluessel statt unter dem Anzeigenamen.
+for(const grp of TREE) for(const f of grp.forms){ FORM_KINGDOM[f.key] = grp.k; FORM_STORY[f.key] = { era: f.era, evo: f.evo }; }
 const KINGDOM_ORDER = ["Mikrobe","Protist","Pflanze","Pilz","Tier"];
 const KINGDOM_WONDER = {
   "Mikrobe": "Das älteste, unsichtbare Leben — seit ~3,5 Milliarden Jahren.",
@@ -2388,7 +2426,7 @@ const KINGDOM_WONDER = {
   "Pilz":    "Leben, das zersetzt und verbindet — das Netz unter dem Boden.",
   "Tier":    "Leben, das sich bewegt, jagt und wahrnimmt.",
 };
-const kingdomOf = (name) => FORM_KINGDOM[name] || null;
+const kingdomOf = (x) => FORM_KINGDOM[formKey(x)] || null;
 // Welche Reiche sind schon „erwacht" (mind. eine entdeckte Form)? Aus dem discovered-Set
 // abgeleitet — so bekommen Bestandsspieler NICHT rückwirkend eine Flut von Meilensteinen.
 function awakenedKingdoms(set){
@@ -2435,7 +2473,7 @@ const RARITY_META = {
   "gelegentlich":{label:"Gelegentlich",  col:"#3d7d64", rank:1},
   "haeufig":     {label:"Häufig",        col:"#6b5836", rank:0},
 };
-function rarityOf(name){ return RARITY[name] || "haeufig"; }
+function rarityOf(x){ return RARITY[FORM_NAME_BY_KEY[x] || x] || "haeufig"; }
 
 // Sanfte Biom-Empfehlungen (BACKLOG.md Punkt 8): pro Preset der Formname, auf den ein
 // neutrales Genom (0.5 in allen NG Genen) im Mittelfeld-Regime (deterministisch, OHNE
@@ -2470,7 +2508,7 @@ function biomeHintForms(){
 // (noch nicht entdeckt + Raritaets-Tier >= "selten"). Blockiert/sperrt nichts.
 function biomeHintFor(i){
   const form = biomeHintForms()[i];
-  if(discovered.has(form)) return null;
+  if(discovered.has(formKey(form))) return null;
   const rk = rarityOf(form), rm = RARITY_META[rk];
   return rm.rank>=2 ? {form, rk, rm} : null;
 }
@@ -2498,14 +2536,14 @@ function renderGenbook(){
   ord.innerHTML = "Die Reiche sind nur <b>gruppiert</b>, nicht gereiht — kein Reich ist „höher“ entwickelt als ein anderes.";
   body.appendChild(ord);
   for(const grp of TREE){
-    const have = grp.forms.filter(f=>discovered.has(f.n)).length;
+    const have = grp.forms.filter(f=>discovered.has(f.key)).length;
     const h = document.createElement("div"); h.className="gb-kingdom";
     h.innerHTML = `<span>${grp.k}</span><span class="cnt">${have}/${grp.forms.length}</span>`;
     body.appendChild(h);
     const grid = document.createElement("div"); grid.className="gb-grid";
     for(const f of grp.forms){
-      const ok = discovered.has(f.n);
-      const rk = rarityOf(f.n), rm = RARITY_META[rk];
+      const ok = discovered.has(f.key);
+      const rk = rarityOf(f.key), rm = RARITY_META[rk];
       const t = document.createElement("div");
       t.className = "gb-tile rar-"+rk + (ok?" found":" miss") + (ok&&rm.rank>=2?" rare":"");
       const title = ok ? f.n : "???";
@@ -2513,7 +2551,7 @@ function renderGenbook(){
       t.dataset.title = title; t.dataset.clade = f.cl; t.dataset.era = f.era||""; t.dataset.evo = evo;
       t.dataset.rarity = rm.label; t.dataset.rcol = rm.col;
       t.title = `${title} · ${rm.label} · ${f.era||""} · ${evo}`;   // Fallback (Touch/a11y)
-      t.innerHTML = `<div class="em">${ok?formIcon(f.n):ic("dot")}</div>`+
+      t.innerHTML = `<div class="em">${ok?formIcon(f.key):ic("dot")}</div>`+
                     `<div class="nm">${ok?f.n:"???"}</div>`+
                     `<div class="cl">${f.cl}</div>`+
                     `<span class="gb-rar" style="color:${rm.col}"><i class="gb-dot" style="background:${rm.col}"></i>${rm.label}</span>`;
@@ -2708,8 +2746,11 @@ function formInsight(name){
 const DISC_KEY = "evolve_discovery_v1";
 let discoveryLog = {};
 try { discoveryLog = JSON.parse(localStorage.getItem(DISC_KEY) || "{}") || {}; } catch(e) { discoveryLog = {}; }
+// Migration (Schritt 0.1): Eintraege alter Staende stehen unter dem Anzeigenamen.
+{ const m = {}; for(const k in discoveryLog) m[formKey(k)] = discoveryLog[k]; discoveryLog = m; }
 function saveDiscoveryLog(){ try{ localStorage.setItem(DISC_KEY, JSON.stringify(discoveryLog)); }catch(e){} }
-function recordDiscovery(name){
+function recordDiscovery(nameOrKey){
+  const name = formKey(nameOrKey);
   if(discoveryLog[name]) return;
   const w = {};
   for(const ax in AX_POLE){ const v = env[ax]; w[ax] = +((v==null ? (ax==="oxygen"?1:0) : v).toFixed(3)); }
@@ -2717,8 +2758,8 @@ function recordDiscovery(name){
   saveDiscoveryLog();
 }
 /** Die aufgezeichnete Fund-Umwelt wiederherstellen (alle 16 Achsen, inkl. Stressoren). */
-function restoreDiscoveryEnv(name){
-  const rec = discoveryLog[name]; if(!rec || !rec.env) return;
+function restoreDiscoveryEnv(nameOrKey){
+  const rec = discoveryLog[formKey(nameOrKey)]; if(!rec || !rec.env) return;
   for(const ax in AX_POLE) if(rec.env[ax] != null) env[ax] = rec.env[ax];
   syncLeverInputs();
   renderStressChips();
@@ -2776,7 +2817,7 @@ function renderInsight(name){
     if(parts.length) h += `<p class="ins-req">Plausibel nur bei: ${parts.join(" · ")} <span class="ins-req-n">(weiches Fenster, kein Verbot)</span></p>`;
   }
   // (3) Fundort
-  const rec = discoveryLog[name];
+  const rec = discoveryLog[formKey(name)];
   h += `<div class="ins-h">Dein Fundort</div>`;
   if(rec){
     const chips = [];
@@ -2924,7 +2965,7 @@ function showToast(a){
   const t = document.getElementById("toast");
   const rk = rarityOf(a.n), rm = RARITY_META[rk], rare = rm.rank>=2;
   const lead = rk==="legendaer" ? "Extrem seltene Form" : rare ? ("Seltene Form · "+rm.label) : "Neue Form";
-  t.innerHTML = formIcon(a.n) + " " + lead + ": " + a.n +
+  t.innerHTML = archIcon(a) + " " + lead + ": " + a.n +
     (rare ? ` <span class="toast-rar" style="color:${rm.col}"><i class="gb-dot" style="background:${rm.col}"></i></span>` : "") +
     // V4 (Erkenntnisse): eine ruhige Ortsangabe, kein Freischalt-Jingle — der Fund selbst
     // bleibt der Moment, diese Zeile sagt nur, wo das Wissen dazu nachzulesen ist.
@@ -2943,7 +2984,7 @@ function showKingdomMilestone(kd, a, awakenedCount){
   const all = awakenedCount >= 5;
   const prog = all ? "Alle 5 Reiche des Lebens erwacht — der ganze Baum lebt in deinem Genbuch."
                    : `${awakenedCount} der 5 großen Reiche des Lebens erwacht.`;
-  t.innerHTML = `<div class="toast-ms-h">${formIcon(a.n)} Ein neues Reich: <b>${kd}</b></div>`+
+  t.innerHTML = `<div class="toast-ms-h">${archIcon(a)} Ein neues Reich: <b>${kd}</b></div>`+
     `<div class="toast-ms-sub">${a.n} — ${KINGDOM_WONDER[kd]||""}</div>`+
     `<div class="toast-ms-prog">${prog}</div>`;
   t.classList.remove("legendary"); t.classList.remove("hasnote"); t.classList.add("milestone");
@@ -2982,7 +3023,9 @@ function applyState(s){
     syncLeverInputs();
     if(typeof renderStressChips === "function") renderStressChips(); }
   generation = s.generation || 0;
-  discovered = new Set(s.discovered || []);
+  // Migration (Schritt 0.1): alte Staende enthalten ANZEIGENAMEN, neue Schluessel.
+  // formKey() ist idempotent -> beides laeuft durch denselben Aufruf.
+  discovered = new Set((s.discovered || []).map(formKey));
   creatureName = s.name || "";
   ancestry = Array.isArray(s.ancestry) ? s.ancestry : ancestry;   // Ahnenlinie: lokal (Cloud-Zeile hat keine Spalte)
   lineageSeed = s.lineageSeed || s.lineage_seed || ((Math.random()*4294967296)>>>0);
@@ -3045,9 +3088,9 @@ function showReveal(elapsed, gens, beforeA, afterA, beforeG, afterG){
   const changed = beforeA.n !== afterA.n;
   // A6: prominente Vorher -> Nachher-Silhouetten-Zeile.
   const formsRow = `<div class="reveal-forms">`+
-    `<span class="rf"><span class="rf-ic">${formIcon(beforeA.n)}</span><span class="rf-nm">${beforeA.n}</span></span>`+
+    `<span class="rf"><span class="rf-ic">${archIcon(beforeA)}</span><span class="rf-nm">${beforeA.n}</span></span>`+
     `<span class="rf-arrow">→</span>`+
-    `<span class="rf ${changed?'rf-new':''}"><span class="rf-ic">${formIcon(afterA.n)}</span><span class="rf-nm">${afterA.n}</span></span>`+
+    `<span class="rf ${changed?'rf-new':''}"><span class="rf-ic">${archIcon(afterA)}</span><span class="rf-nm">${afterA.n}</span></span>`+
     `</div>`;
   const parts = [];
   parts.push(`Es sind <b>${timeStr(elapsed)}</b> vergangen — <b>${gens}</b> Generationen weiter.`);
@@ -3544,7 +3587,7 @@ function updatePanels(g, a){
   g = g || genome;
   a = a || (typeof committedArch !== "undefined" && committedArch) || classify(g);
   document.getElementById("kingdom").textContent = a.k;
-  document.getElementById("emoji").innerHTML = formIcon(a.n);
+  document.getElementById("emoji").innerHTML = archIcon(a);
   document.getElementById("species").textContent = a.n;
   document.getElementById("bauplan").textContent = describe(g, a);
   renderSpeciesEdge(a);
@@ -5016,7 +5059,7 @@ async function shareSnapshot(){
   const SERIF = 'Georgia, "Times New Roman", serif';
   const a = (typeof committedArch!=="undefined" && committedArch) || classify(genome);
   const name = (creatureName||"").trim(), form = a.n;
-  const story = FORM_STORY[form] || {};
+  const story = FORM_STORY[a.novel ? "" : a.key] || {};
   let ty = y0 + 48; const pad = 34;
   c.textAlign = "left";
   if(name){
@@ -6274,18 +6317,18 @@ function frame(time){
         // Neuartige (erzeugte) Namen sind KEINE Blätter des Lebensbaums — sie bekommen
         // keinen Genbuch-Eintrag, sonst zählte der Fortschritt Formen mit, die es im
         // Baum gar nicht gibt. Die Form selbst wird trotzdem angezeigt und erzählt.
-        if(!cur.novel && !discovered.has(cur.n)){
+        if(!cur.novel && !discovered.has(cur.key)){
           // Erstes Wesen eines Reiches? -> Reich-Meilenstein statt normalem Fund-Toast.
-          const kd = kingdomOf(cur.n);
+          const kd = kingdomOf(cur.key);
           const newKingdom = kd && !awakenedKingdoms(discovered).has(kd);
-          discovered.add(cur.n);
-          recordDiscovery(cur.n);   // Erkenntnis (3): die Welt des Fundes festhalten
+          discovered.add(cur.key);
+          recordDiscovery(cur.key);   // Erkenntnis (3): die Welt des Fundes festhalten
           saveState();
           if(newKingdom) showKingdomMilestone(kd, cur, awakenedKingdoms(discovered).size);
           else showToast(cur);
           // Chronik: der Fund bekommt seine Erzähl-Zeile (Reich schlägt Einzelfund).
           if(newKingdom) storyLine("reich", { kingdom: kd, kingdomCount: awakenedKingdoms(discovered).size, key: "k" + kd });
-          else storyLine("fund", { rarity: rarityOf(cur.n), key: "f" + cur.n });
+          else storyLine("fund", { rarity: rarityOf(cur.key), key: "f" + cur.key });
         }
       }
       document.getElementById("genReadout").textContent = "Generation " + generation.toLocaleString("de-DE");

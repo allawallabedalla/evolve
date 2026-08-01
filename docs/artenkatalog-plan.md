@@ -149,11 +149,13 @@ ausgelieferten Katalog kommt (Schwelle wird in Schritt 1.4 kalibriert, nicht ger
 Der wissenschaftliche Kern. Vier Stufen, in dieser Reihenfolge, jede füllt nur, was die
 vorige offen gelassen hat:
 
-**(a) Direkte Merkmale.** Wikidata-Eigenschaften auf Gene abbilden — Masse (P2067) und
-Länge/Höhe (P2043/P2048) auf `size`, Habitat (P2974) auf `aquatic`-nahe Gene und `light`,
-und so weiter. *Offen und in Schritt 1.1 zu verifizieren:* welche Eigenschaften wie dicht
-belegt sind. Erfahrungsgemäß hat nur ein kleiner Teil der Taxa eine Masse — deshalb ist
-(c) keine Kür, sondern tragende Struktur.
+**(a) Direkte Merkmale.** Wikidata-Eigenschaften auf Gene abbilden — Masse (P2067) auf
+`size`, Habitat (P2974) auf `aquatic`-nahe Gene und `light`, und so weiter.
+
+> ⚠️ **Gemessen 2026-08-01 (s. Abschnitt 5a): Wikidata trägt diese Stufe NICHT.** Die
+> Merkmalsbelegung liegt im einstelligen Prozentbereich. Stufe (a) bleibt im Plan, ist
+> aber ein Zusatz, keine Grundlage — die Last liegt bei (b) und (c), und für die
+> Vertebraten kommt eine zweite Quelle dazu (s. 5a).
 
 **(b) Kladen-Regeln.** Aus der Elterntaxon-Kette: Säugetier ⇒ Isolation hoch, Endothermie;
 Gefäßpflanze ⇒ Photosynthese hoch, Mobilität 0, Stützgewebe nach Wuchsform; Pilz ⇒
@@ -179,6 +181,62 @@ haben, nie überschreiben. Das ist im Prüfstand als harte Bedingung zu veranker
 
 ---
 
+## 5a · Messung der Datenlage (2026-08-01, Vorgriff auf Schritt 1.1)
+
+Stichprobe von je 400 Arten mit deutschem Wikipedia-Artikel, Merkmale über die
+Action-API geholt (`wbgetentities`, volle Claim-Liste — misst also *alle* Eigenschaften,
+nicht nur die vorab geratenen). Belegung in Prozent:
+
+| Eigenschaft | Säuger | Vögel | Amphibien | Bakterien |
+|---|---:|---:|---:|---:|
+| **P171 Elterntaxon** | 100 | 100 | 100 | 100 |
+| **P225 Taxonname / P105 Rang** | 100 | 100 | 100 | 100 |
+| **P846 GBIF-ID** | 100 | 99 | 100 | 94 |
+| **P815 ITIS-ID** | 97 | 94 | 98 | 88 |
+| **P685 NCBI-ID** | 84 | 89 | 86 | 94 |
+| **P1843 Trivialname (de)** | 94 | 98 | 78 | 12 |
+| **P141 IUCN-Status** | 95 | 94 | 94 | 0 |
+| P2067 Masse | **6** | **36** | 0 | 0 |
+| P2050 Spannweite | 9 | 5 | 0 | 0 |
+| P2974 Habitat | 8 | 2 | 0 | 0 |
+| P1034 Nahrung | 1 | 1 | 0 | 1 |
+| P2043 Länge / P2048 Höhe | 0 | 0 | 0 | 0 |
+
+**Befund — Wikidata ist ein Namens- und Verweis-Register, keine Merkmalsdatenbank.**
+Taxonomie, Namen und Fremdschlüssel sind praktisch lückenlos; messbare Merkmale sind
+fast nicht vorhanden. Die offene Frage aus Abschnitt 8 („reicht Wikidata allein?") ist
+damit **beantwortet: nein.**
+
+**Konsequenz für die Architektur — Rollenteilung statt einer Quelle:**
+
+- **Wikidata = Rückgrat.** dewiki-Filter, Elterntaxon-Kette (Lebensbaum), Namen,
+  IUCN — und vor allem die **Fremdschlüssel**, die zu 94–100 % da sind. Genau die sind
+  die Tür zu den Merkmalen.
+- **Merkmale = zweite Quelle, über die Fremdschlüssel angebunden.** Zu prüfen in 1.1b,
+  in dieser Reihenfolge: **AVONET** (Vögel, ~11.000 Arten, Masse + Flügel + Tarsus —
+  außergewöhnlich vollständig), **PanTHERIA** und **EltonTraits** (Säuger: Masse,
+  Ernährungsweise), **AmphiBIO** (Amphibien), **FishBase** (Fische, offene API).
+  Alles publizierte, offen herunterladbare Datensätze — für einen CI-Lauf besser
+  geeignet als eine API mit Ratenbegrenzung.
+- **Wirbellose, Pflanzen, Pilze, Mikroben** bleiben ohne Merkmalsquelle. Dort tragen
+  Kladen-Regeln (b) und Habitat-Rückwärtslauf (d) allein — mit entsprechend
+  niedriger Konfidenz, die im Katalog ausgewiesen wird. Das ist kein Mangel der
+  Umsetzung, sondern der Stand der offenen Daten, und muss so berichtet werden.
+
+**Zweiter Messbefund — die Ernte muss anders geschnitten werden.** Abfragen mit der
+Pfad-Eigenschaft `wdt:P171*` laufen bei großen Kladen in den 60-Sekunden-Timeout des
+Endpunkts (Fische, Insekten, Weichtiere, Bedecktsamer, Pilze fielen alle aus; Säuger,
+Vögel, Amphibien, Bakterien liefen durch). Aggregate über *alle* Taxa scheitern
+grundsätzlich (502 nach ~35 s), begrenzte Abfragen sind dagegen schnell (200 Arten in
+0,7 s). Schritt 1.1 erntet deshalb **top-down über direkte `P171`-Kanten Ebene für
+Ebene** statt über Pfad-Ausdrücke — das ist billig, parallelisierbar und läuft nie in
+den Timeout.
+
+*Rohdaten und Skript: nicht eingecheckt (Messung, kein Artefakt). Reproduzierbar über
+die in 1.1 zu bauende Ernte mit `--report`.*
+
+---
+
 ## 6 · Phasenplan
 
 Reihenfolge nach Abhängigkeit **und** nach Netzbedarf: Phase 0 ist vollständig ohne
@@ -187,18 +245,28 @@ braucht Wikidata.
 
 ### Phase 0 — Fundament (kein Netz nötig)
 
-**0.1 · Schlüssel-Ebene entkoppeln**
+**0.1 · Schlüssel-Ebene entkoppeln — ✅ erledigt 2026-08-01**
 *Modell: Sonnet* (mechanisch, eng spezifiziert) · *Netz: nein* · *blockiert alles Weitere*
 
-Alle Konsumenten von Form-Namen auf den bereits vorhandenen `key` umstellen: `TREE`,
-`RARITY`, `FICON`, `app/challenges.js`, `app/story.js`, `app/exemplar.js`, `discovered`
-in Supabase. Anzeigename wird zur Variablen, Schlüssel wird konstant.
+`formKey()`/`formName()` als Übersetzungsschicht über dem bereits vorhandenen `key` aus
+`app/archetypes.js`; `formIcon()`, `rarityOf()` und `kingdomOf()` nehmen jetzt Schlüssel
+**oder** Namen (idempotent). `FORM_KINGDOM`/`FORM_STORY` werden ohnehin aus `TREE`
+abgeleitet und stehen seither direkt unter dem Schlüssel; `TREE` bekommt seinen
+Schlüssel in einer Zeile abgeleitet statt in 65 Einträgen von Hand. `discovered` und
+`discoveryLog` speichern Schlüssel, alte Spielstände werden beim Laden durch `formKey()`
+migriert. Neu: `archIcon(a)` als einzige Stelle, die den Sonderfall erzeugter Formen
+(kein echter Schlüssel) behandelt.
 
-*Gate:* alle vorhandenen Prüfstände unverändert grün, plus ein neuer
-`npm run key-consistency-check` (jeder Schlüssel in jedem Subsystem existiert in
-`app/archetypes.js`, keine verwaisten Namens-Referenzen mehr).
-*Nebenaufgabe:* Migration bestehender Spielstände (`discovered` enthält heute Namen,
-künftig Schlüssel) — Zuordnungstabelle einmalig, alte Namen bleiben lesbar.
+*Kleiner als geplant:* der Zugriff lief schon fast vollständig über zwei Akzessoren
+(`formIcon`, `rarityOf`) — keine Migration durch die halbe App, sondern drei Akzessoren,
+zwei abgeleitete Tabellen und die Spielstands-Migration. Die Tabellen selbst bleiben
+namensindiziert (Daten unverändert, minimaler Diff).
+
+*Gate:* `npm run key-check` (neu, 5 Prüfungen K1–K5: Schlüssel eindeutig, keine
+verwaisten Tabellen-Einträge, jeder Lebensbaum-Ast löst auf, jede Form hat ein Icon,
+kein Name doppelt im Baum) — 65 Formen, 65 Äste, grün. Dazu unverändert grün:
+`app-parity`, `mf-fidelity`, `app-world-smoke` (Browser), `exemplar-check`,
+`story-check`, `influence-check`, `ui-calm-check`.
 
 **0.2 · Katalog-Format + Bootstrap-Katalog**
 *Modell: Sonnet* · *Netz: nein*
@@ -224,18 +292,26 @@ Trivialname + wissenschaftlicher Name + Wikipedia-Link + Abstandsangabe. Jenseit
 
 ### Phase 1 — Datenpipeline (Netz nötig)
 
-**1.1 · Wikidata-Ernte**
+**1.1 · Wikidata-Ernte (Rückgrat)**
 *Modell: Sonnet* · *Netz: ja*
 
-SPARQL-Abfrage über Taxa (P31/Q16521) mit `dewiki`-Sitelink, Elterntaxon-Kette (P171),
-Rang (P105), Namen (P225/P1843) und allen Merkmals-Eigenschaften. Paginiert, gecacht,
-als GitHub Action mit Artefakt. **Erste Aufgabe: den tatsächlichen Belegungsgrad je
-Eigenschaft messen und berichten** — davon hängt die Kalibrierung der Stufen (a)–(d) ab.
-Die im Plan genannten Property-IDs sind aus dem Gedächtnis und müssen gegen den Endpunkt
-verifiziert werden.
+Top-down über direkte `P171`-Kanten Ebene für Ebene (NICHT über `P171*`-Pfade, s. 5a),
+gefiltert auf `dewiki`-Sitelink. Geerntet werden Taxonomie, Rang, Namen und die
+**Fremdschlüssel** (P846 GBIF, P815 ITIS, P685 NCBI) — das ist der Anschluss für 1.1b.
+Paginiert, gecacht, als GitHub Action mit Artefakt.
 
-*Gate:* `npm run wikidata-harvest -- --report` gibt Belegungstabelle aus; Abfrage
-respektiert die Nutzungsbedingungen (User-Agent, Rate-Limit).
+*Gate:* `npm run wikidata-harvest -- --report` gibt die Belegungstabelle aus (Format
+s. 5a); Abfrage respektiert die Nutzungsbedingungen (User-Agent, Rate-Limit).
+
+**1.1b · Merkmalsquellen anbinden** *(neu — folgt aus dem Messbefund 5a)*
+*Modell: Sonnet* · *Netz: ja*
+
+AVONET / PanTHERIA / EltonTraits / AmphiBIO / FishBase über die Fremdschlüssel
+verknüpfen. **Erste Aufgabe: Lizenz und Verknüpfungsquote je Quelle messen** — eine
+Quelle, die sich nur zu 40 % verknüpfen lässt, ist keine Grundlage.
+
+*Gate:* Verknüpfungsquote je Quelle und Klade wird berichtet; keine Quelle ohne geklärte
+Lizenz im Katalog.
 
 **1.2 · Merkmals- und Kladen-Regelwerk**
 *Modell: Opus* (die abwägungsintensivste Arbeit des Plans) · *Netz: ja*

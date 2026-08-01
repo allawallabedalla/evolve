@@ -34,6 +34,7 @@
     "app-fitness-check": "npm run build && node tools/bundle-app-fitness.mjs --check",
     "app-world-smoke": "npm run bundle-app && node tools/app-parity.mjs && node tools/mf-fidelity.mjs && node tools/app-world-smoke.mjs",
     "exemplar-check": "node tools/exemplar-check.mjs",
+    "key-check": "node tools/key-check.mjs",
     "story-check": "node tools/story-check.mjs",
     "influence-check": "node tools/influence-check.mjs",
     "ui-calm-check": "node tools/ui-calm-check.mjs",
