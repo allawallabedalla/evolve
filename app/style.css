@@ -171,20 +171,21 @@
   /* Wortmarke: EINE Schrift, eine Achse, ein Zeilenabstand. Vorher stiessen hier
      ultrafette System-Grotesk (29,4px) und kursive Georgia (25,6px) fast gleich
      gross aufeinander — zwei unvereinbare Toene ohne Ueber-/Unterordnung, und das
-     font-weight:900 sah auf jedem Betriebssystem anders aus (Audit 3.9). Jetzt
-     trennt das GEWICHT die beiden Teile, nicht die Schriftfamilie. */
+     font-weight:900 sah auf jedem Betriebssystem anders aus (Audit 3.9). Seit dem
+     Wegfall des "· Bio-Kammer"-Zusatzes (Nutzer-Feedback 2026-08-03) traegt der
+     ganze Titel direkt das fette Gewicht — kein <b> mehr fuer einen zweiten Teil noetig. */
   .brand {
     font-family: var(--display); font-size: var(--fs-display);
     font-stretch: var(--wd-display);
     line-height: var(--lh-display); letter-spacing: var(--tr-display);
-    color: var(--muted); margin: 0; font-weight: var(--w-regular);
-  }
-  .brand b {
-    font-weight: var(--w-black); color: var(--bio-dim); margin-right: 1px;
+    color: var(--bio-dim); margin: 0; font-weight: var(--w-black);
   }
   .tagline { color: var(--muted); font-size: var(--fs-md); line-height: var(--lh-body); max-width: 46ch; }
 
-  .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 20px; align-items: start;
+  /* Nutzer-Feedback (2026-08-03): die drei Kaesten (Buehne+Buttons, Wesen-Karte, Regler)
+     wirkten als dicht gestapelte Kacheln. Groesserer Row-Gap gibt der Stapelung im linken
+     Spalten-Zug (view -> card) mehr Luft; der Spalten-Abstand zur Konsole bleibt knapper. */
+  .stage { display: grid; grid-template-columns: 1.25fr .95fr; gap: 28px 20px; align-items: start;
     grid-template-areas: "view console" "card console"; }
   .viewport-panel { grid-area: view; }
   .creature-card { grid-area: card; }
@@ -1016,7 +1017,11 @@
      Name-Edit, „So funktioniert's", Chronik-Log, Engine-Info, Zahlen-Toggle,
      Login/Cloud-Sync und „Neu beginnen" stehen nicht mehr permanent auf der Hauptseite,
      sondern liegen gemeinsam hinter einem Klick (Prio 3: bewusst vergraben). */
-  .details-btn { margin-left: auto; white-space: nowrap; }
+  /* Icon statt Text (Nutzer-Feedback 2026-08-03): kein Unterstrich unter dem
+     Zahnrad, dafuer ein dezenter Kreis-Hover wie bei anderen Icon-Buttons der App. */
+  .details-btn { margin-left: auto; text-decoration: none; padding: 6px; border-radius: 50%; }
+  .details-btn .ic { width: 1.3em; height: 1.3em; }
+  .details-btn:hover { background: rgba(0,0,0,.06); filter: none; }
   .dpanel { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center;
     background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .dpanel[hidden] { display: none; }
