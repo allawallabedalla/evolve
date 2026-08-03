@@ -40,6 +40,7 @@ const FIRERES = 21;
 const FROSTRES = 22;
 const WINDRES = 23;
 const NFIX = 24;
+const RESPROUT = 25;
 
 export function fitness(traits: TraitVector, env: Environment, phys: Physics): number {
   const insulation = traits[INSULATION];
@@ -67,6 +68,7 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const frostres = traits[FROSTRES] ?? 0;
   const windres = traits[WINDRES] ?? 0;
   const nfix = traits[NFIX] ?? 0;
+  const resprout = traits[RESPROUT] ?? 0;
 
   // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
   // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
@@ -105,7 +107,27 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
   //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
   const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
-  const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight;
+  //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
+  //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
+  //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
+  //       erhalten. Skaliert mit (1-size): ein GROSSER Koerper kann seine Hoehe nicht
+  //       per Wiederaustrieb ersetzen (das bleibt structure vorbehalten), nur ein
+  //       niedriger/krautiger Bauplan profitiert. Der Ertragsabschlag dafuer steckt
+  //       NICHT hier, sondern im Energie-Steuersatz weiter unten (resproutCost).
+  //       BEIDE skalieren mit `disturbance` (Feuer/Frost, s. Punkt 14 unten - hier
+  //       vorgezogen, weil lightAccess sie schon braucht): ohne wiederkehrende Stoerung
+  //       gibt es nichts wiederherzustellen - eine Pflanze in einer stoerungsfreien Umwelt
+  //       zahlt dann weder den Wiederaufbau, noch bekommt sie den Lichtzugangs-Vorteil.
+  //       Erste Fassung OHNE diese Kopplung (immer aktiv) gab JEDER Pflanze mit resprout>0
+  //       einen von der Stoerung unabhaengigen Groessen-Anreiz (klein = billiger Lichtzugang)
+  //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
+  //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
+  //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
+  const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
+  const lightAccess = clamp01(
+    phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
+      phys.resproutReach * resprout * disturbance * (1 - size)
+  );
   //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
   //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
   const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
@@ -362,11 +384,19 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     mobility * mobility * mq.mobility +
     armor * armor * mq.armor;
 
+  //    Wiederaustrieb-Steuer (AXIS-25): der jaehrliche Wiederaufbau aus der Basis kostet
+  //    einen Anteil der GESAMTENERGIE, nicht nur einen festen Unterhalt (m.resprout gibt
+  //    es bewusst nicht) - das ist der Ertragsabschlag, den ein Kraut gegenueber einem
+  //    Baum zahlt, der sein Gewebe von Jahr zu Jahr weiterverwendet. Wie der lightAccess-
+  //    Bonus oben skaliert das mit `disturbance` - ohne wiederkehrende Stoerung gibt es
+  //    nichts, was jaehrlich neu aufgebaut werden muesste.
+  const totalEnergyAfterResprout = totalEnergy * (1 - phys.resproutCost * resprout * disturbance);
+
   // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
   // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
   // (keine "tote Zone"), OHNE dem Wesen Gratis-Energie zu geben - der Anreiz, sich
   // auf einen echten Energiepfad festzulegen, bleibt erhalten.
-  const rawNutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+  const rawNutrition = sigmoid((totalEnergyAfterResprout - maintenance) * phys.energyScale);
   const nutrition = phys.nutritionFloor + (1 - phys.nutritionFloor) * rawNutrition;
 
   // 3) Praedation: Verteidigung aus Panzer + Stuetzgewebe + Groesse, plus
@@ -479,6 +509,29 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const wind = env.wind ?? 0;
   const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
 
+  // 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): Feuer/Frost koennen oberirdisches
+  //     Gewebe zerstoeren, OHNE die Pflanze zu toeten, wenn sie aus der Basis wieder
+  //     austreibt (resprout) ODER ohnehin feuerresistent ist (fireres, dessen Beschreibung
+  //     oben ausdruecklich Lignotuber nennt - beide Gene koennen sich ueberschneiden, das ist
+  //     biologisch korrekt: Korkrinde UND Wiederaustrieb sind zwei unabhaengige, kombinierbare
+  //     Strategien derselben Pflanze).
+  //     BEWUSST OHNE predation/Fraas (anders als der urspruengliche Vorschlag, docs/coverage-
+  //     report.md AXIS-25): predation ist in dieser Physik bereits durch den endogenen
+  //     Raeuber-Beute-Mechanismus belegt (world/coevolution.ts modelliert damit die eigentliche
+  //     JAGD-Chase-Staerke, kein reiner Pflanzen-Fraßdruck). Eine erste Fassung mit
+  //     predation*resproutGrazingShare gab Beute-Genomen eine vom echten Verteidigungs-Handel
+  //     (defenseScore/structure/armor/size) losgeloeste, billige Flucht aus dem Raeuberdruck
+  //     und riss die kalibrierte Groessen-Ruestungswettlauf-Dynamik aus dem Zielband (gemessen:
+  //     distribution-check B4 Raeuber/Beute-Biomasse 0.24 -> 2.37, weit ausserhalb 0.03-0.3).
+  //     Fire/Frost sind reine Umwelt-Einfluesse ohne diese Doppelbelegung - sie sind ausserdem
+  //     der textbuchmaessige Kernfall von Wiederaustrieb (Graeser nach Steppenbrand,
+  //     Staudenrueckzug in den Wurzelstock ueber Winter). `disturbance` selbst wurde bereits
+  //     oben bei lightAccess berechnet (aus env.fire/env.frost, vor der Deklaration der
+  //     lokalen fire/frost-Konstanten) - hier nur wiederverwendet.
+  const regrowthSurvival = clamp01(
+    1 - disturbance * (1 - Math.max(fireres, resprout)) * phys.resproutSeverity
+  );
+
   const fit =
     Math.pow(thermal, phys.wThermal) *
     Math.pow(predSurvival, phys.wPred) *
@@ -492,7 +545,8 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
     Math.pow(radSurvival, phys.wRad) *
     Math.pow(fireSurvival, phys.wFire) *
     Math.pow(frostSurvival, phys.wFrost) *
-    Math.pow(windSurvival, phys.wWind);
+    Math.pow(windSurvival, phys.wWind) *
+    Math.pow(regrowthSurvival, phys.wResprout);
 
   return Math.max(fit, phys.floor);
 }

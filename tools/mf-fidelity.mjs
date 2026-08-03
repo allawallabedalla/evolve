@@ -74,7 +74,7 @@ const BASE = { temperature: 0.5, predation: 0.3, foodAbundance: 0.5, foodHeight:
   toxicity: 0, oxygen: 1, salinity: 0, uv: 0, pressure: 0, aridity: 0, radiation: 0, fire: 0, frost: 0, wind: 0 };
 const env = (kw) => ({ ...BASE, ...kw });
 const idx = (n) => TRAITS.indexOf(n);
-const COND = ["detox","oxyEff","osmo","burrow","pigment","filter","camo","baro","sense","desicc","radres","fireres","frostres","windres","nfix"];
+const COND = ["detox","oxyEff","osmo","burrow","pigment","filter","camo","baro","sense","desicc","radres","fireres","frostres","windres","nfix","resprout"];
 const condIdx = COND.map(idx);
 const condMean = (m) => condIdx.reduce((s, i) => s + m[i], 0) / condIdx.length;
 
@@ -103,6 +103,14 @@ const STRESS = [
   ["Feuer",       { fire: 0.85 }, "fireres"],
   ["Frost",       { frost: 0.85 }, "frostres"],
   ["Wind",        { wind: 0.85 }, "windres"],
+  // Kein eigener Part-B-Eintrag fuer 'resprout' (AXIS-25): regrowthSurvival nimmt
+  // max(fireres,resprout) - unter reinem Feuer/Frost-Stress deckt das guenstigere fireres/
+  // frostres (die zusaetzlich auf die eigene fireSurvival/frostSurvival einzahlen) denselben
+  // Kanal, resprout bleibt aus einem neutralen Start unterselektiert. Das ist keine Fidelity-
+  // Luecke, sondern dieselbe Lage wie bei nfix/burrow/camo/sense/filter oben, die aus
+  // demselben Grund ebenfalls keinen Part-B-Eintrag haben - resprouts reale Nische
+  // (Bluetenkraut/Kraut/Farn) ist in app/archetypes.js separat gemessen (Hill-Climb ab
+  // Pflanzen-Prototyp), s. physics.json-Kommentar Version 9.
 ];
 
 console.log(`Mittelfeld-Fidelity — echte 25-Gen-App-Bahn (aus app/index.html), NG=${NG}\n`);

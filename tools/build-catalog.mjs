@@ -29,8 +29,30 @@ import { fileURLToPath } from "node:url";
 import { loadAppCore } from "./lib/app-core.mjs";
 import { applyCladeRules, GENES, GENE_INDEX } from "./lib/clade-rules.mjs";
 import { traitsToGenes, buildCorpus, placeSpecies, habitatOf } from "./lib/impute.mjs";
+import { founderSpreads } from "../dist/world/founder.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const PHYS = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
+const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+
+// Deterministisches Gruender-Los je Art (Abschnitt 8 "Bewusst offen": Genom-Zwillinge).
+// Aus der QID geseedet statt Math.random() — derselbe Katalog-Build muss reproduzierbar
+// bleiben. mulberry32 ist bewusst simpel: es geht nur um eine stabile, gut gestreute
+// Zahlenfolge, keine kryptografische Guete.
+function hashQid(qid) {
+  let h = 2166136261;
+  for (let i = 0; i < qid.length; i++) { h ^= qid.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(seed) {
+  let a = seed;
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 const OFFLINE = process.argv.includes("--offline");
 const UA = "evolve-artenkatalog/0.1 (https://github.com/allawallabedalla/evolve)";
 const CACHE = join(ROOT, "tools", ".catalog-cache.json");
@@ -284,6 +306,20 @@ async function buildFullEntries() {
     const w = core.selectionWeights(t, habEnv);
     const match = nearestInKingdom(t, habEnv, w, kingdom);
     const group = match.key;
+
+    // Gruender-Los im Nullraum (world/founder.ts, Phase 4.1) — NACH der Gruppen-
+    // Zuordnung, sonst würde der Los-Wert selbst mitentscheiden, welcher Bauplan-
+    // Gruppe eine Art zugeordnet wird, und wäre kein Nullraum-Los mehr. Nur Gene, auf
+    // die die Selektion in dieser Umwelt nicht schaut, dürfen sich verschieben (per
+    // Konstruktion ≤0,5% Fitness-Kosten, s. founder-check) — Arten mit echten
+    // Messwerten bleiben praktisch unangetastet, weil deren Gene selten im Nullraum
+    // liegen. Behebt die Genom-Zwillinge (96,6% teilten sich vor diesem Fix einen
+    // Zwilling in ihrer Gruppe, s. docs/artenkatalog-plan.md Abschnitt 8).
+    const spread = founderSpreads(t, habEnv, PHYS);
+    const rng = mulberry32(hashQid(p.qid));
+    for (let g = 0; g < t.length; g++) {
+      if (spread[g] > 0) t[g] = clamp01(t[g] + (rng() * 2 - 1) * spread[g]);
+    }
 
     for (const c of placed.conf) confHist[c]++;
     const coreConf2plus = placed.conf.slice(0, 10).filter((c) => c >= 2).length;

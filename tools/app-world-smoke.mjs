@@ -63,7 +63,14 @@ try {
   console.log(`  Sub-Modal: Faktoren + Erklärung:  ${factors >= 3 && descs === factors ? "OK" : "FAIL"} (${factors})`);
 
   // 4) echten Faktor wählen -> OK aktiv
-  const factorName = (await page.locator("#inflFactors .infl-factor:not(.soon) .fn").first().textContent()).trim();
+  // .fn enthält NICHT nur den Namen: bei naheliegenden Faktoren haengt proxBadge() ein
+  // "<span class='prox'>naheliegend</span>" ohne Trennzeichen direkt dahinter (s.
+  // app/index.html factorHtml()). textContent() laese Name+Abzeichen zusammen, obwohl
+  // applyInfluence() den Namen (f.plain||f.name) allein in #biomeTag schreibt — deshalb
+  // hier nur den direkten Text-Knoten lesen, nicht den Badge-Span mit.
+  const factorName = (await page.locator("#inflFactors .infl-factor:not(.soon) .fn").first()
+    .evaluate((el) => Array.from(el.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join(""))
+  ).trim();
   await page.locator("#inflFactors .infl-factor:not(.soon)").first().click();
   const okEnabled = await page.locator("#inflOk").isEnabled();
   console.log(`  Faktor wählbar, OK aktiv:         ${okEnabled ? "OK" : "FAIL"}`);

@@ -31,6 +31,7 @@ export const TRAITS = [
   "frostres",
   "windres",
   "nfix",
+  "resprout",
 ] as const;
 export type TraitName = (typeof TRAITS)[number];
 
@@ -137,6 +138,10 @@ export interface Physics {
   tractionYield: number;
   tractionHeatFloor: number;
   tractionScarcityCeiling: number;
+  resproutReach: number;
+  resproutCost: number;
+  resproutSeverity: number;
+  wResprout: number;
   maintenance: {
     base: number;
     size: number;

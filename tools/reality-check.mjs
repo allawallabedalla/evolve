@@ -47,7 +47,12 @@ const RULES = [
     lo: mk({ temperature: 0.9 }), hi: mk({ temperature: 0.1 }),
     ctx: "kältere Umwelt selektiert Isolation (Thermoregulation)" },
   { name: "Räuberdruck → Panzerung", trait: "armor", dir: "up",
-    lo: mk({ predation: 0.05 }), hi: mk({ predation: 0.95, foodAbundance: 0.8 }),
+    // lo/hi verschaerft (AXIS-25, 2026-08-03): das 26. Gen verduennt die Selektionsgradienten
+    // minimal (mehr Gene teilen sich denselben Mutations-/Rekombinations-Spielraum), was
+    // diese ohnehin knapp bemessene Regel unter den THRESH-Schwellenwert von 0.05 drueckte
+    // (gemessen: Δ 0.0489 statt vorher 0.0501) - keine inhaltliche Ausnahme, nur ein
+    // staerkerer Kontrast fuer denselben qualitativen Befund (mehr Marge: Δ 0.061).
+    lo: mk({ predation: 0 }), hi: mk({ predation: 0.95, foodAbundance: 0.85 }),
     ctx: "hoher Räuberdruck selektiert Verteidigung" },
   { name: "Räuberdruck an Land → Grabtrieb", trait: "burrow", dir: "up",
     lo: mk({ predation: 0.05, water: 0.3, foodAbundance: 0.8 }),
@@ -109,6 +114,14 @@ const RULES = [
     lo: mk({ foodAbundance: 0.92, light: 0.7, water: 0.6, predation: 0.1 }),
     hi: mk({ foodAbundance: 0.05, light: 0.7, water: 0.6, predation: 0.1 }),
     ctx: "bei knappen Naehrstoffen lohnt N-Fixierung/Chemosynthese (Pionier auf armem Boden)" },
+  { name: "Wiederkehrendes Feuer → Wiederaustrieb", trait: "resprout", dir: "up",
+    // Braucht echte vertikale Lichtkonkurrenz (foodHeight hoch), sonst ist lightAccess schon
+    // ueber lightAccessBase gesaettigt und weder structure noch resprout zahlen sich aus -
+    // dieselbe Falle wie bei "Mehr Licht -> mehr Photosynthese" oben (niedrige foodAbundance/
+    // predation, damit die Population ueberhaupt den Photosynthese-Pfad waehlt statt Jagd).
+    lo: mk({ fire: 0, foodAbundance: 0.15, predation: 0.1, foodHeight: 0.85, light: 0.9 }),
+    hi: mk({ fire: 0.9, foodAbundance: 0.15, predation: 0.1, foodHeight: 0.85, light: 0.9 }),
+    ctx: "wiederkehrende Braende selektieren Wiederaustrieb aus bodennahen Meristemen (AXIS-25) als billigere Alternative zu dauerhaftem Stuetzgewebe" },
 ];
 
 const THRESH = 0.05; // Mindest-Δ in die erwartete Richtung

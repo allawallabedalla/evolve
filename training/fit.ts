@@ -204,8 +204,16 @@ function main() {
   // ---- Genetischer Algorithmus ----
   // Budget skaliert mit der Parameterzahl (DIM Dim bei NUM_GENES Genen, seit der
   // 25-Gene-Erweiterung 28 statt vorher 12 - POP entsprechend angehoben).
-  const POP = 160;
-  const GENS = 160;
+  // 2026-08-03 (AXIS-25, resprout): 26. Gen -> DIM 28->29, POP/GENS 160->176 (derselbe
+  // Hebel, kleiner Schritt) - ein erster Trainingslauf bei DIM 29 landete bei einer
+  // responseRate-Kombination, die ecology-check C4 (Tier <= 55%) knapp verletzte
+  // (56.1%), reines GA-Suchrauschen ohne Physik-Bezug (physics.json-Kommentar Version 9,
+  // NACHTRAG). Mehr Suchbudget statt eines Physik-Eingriffs, der auch den world/
+  // population.ts-Pfad (reality-/distribution-/symbiosis-/coevolution-/phenomena-check)
+  // getroffen und dort mehr kaputt gemacht haette als es hier reparierte (gemessen und
+  // zurueckgenommen).
+  const POP = 176;
+  const GENS = 176;
   const ELITE = 3;
   const TOURN = 3;
 

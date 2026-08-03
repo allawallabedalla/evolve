@@ -1,27 +1,80 @@
 {
- "0": { "erklaerung": "Hält die Körperwärme im Kalten, wird aber in der Hitze zur Last, weil die Wärme nicht mehr entweichen kann." },
- "1": { "erklaerung": "Ein großer Körper übersteht Kälte und Angriffe besser, kostet aber deutlich mehr Nahrung und Energie." },
- "2": { "erklaerung": "Längere Gliedmaßen erreichen weiter entferntes oder höheres Futter, sind aber teurer zu bauen und zu tragen." },
- "3": { "erklaerung": "Ein hoher Stoffwechsel lässt schneller wachsen und reagieren, verlangt dafür aber ständig viel Nahrung." },
- "4": { "erklaerung": "Fester Panzer wehrt Bisse und Angriffe ab, wiegt jedoch schwer und bringt ohne Jäger nur Ballast." },
- "5": { "erklaerung": "Gewinnt Energie aus Licht und spart so Nahrung, taugt aber nur dort, wo genug Helligkeit ankommt." },
- "6": { "erklaerung": "Höhere Beweglichkeit erschließt mehr Futter und Fluchtwege, verbraucht dafür aber laufend Energie." },
- "7": { "erklaerung": "Stützgewebe trägt Höhe und aufrechte Form, ist aber totes Gewicht, wo niedriger Wuchs genügt." },
- "8": { "erklaerung": "Große Flügelfläche trägt durch die Luft und ermöglicht Gleiten, bleibt ohne Flug jedoch teure Fracht." },
- "9": { "erklaerung": "Eigenes Licht lockt Beute oder Partner in der Finsternis an, verrät aber zugleich die eigene Lage." },
- "10": { "erklaerung": "Baut Giftstoffe im Körper ab und hilft dort, wo die Umgebung vergiftet ist, sonst nur teurer Aufwand." },
- "11": { "erklaerung": "Kommt mit wenig Sauerstoff aus und rettet in sauerstoffarmer Umgebung, bringt bei viel Luft kaum Vorteil." },
- "12": { "erklaerung": "Hält den Salzhaushalt im Gleichgewicht und sichert das Überleben in salzigem oder wechselndem Wasser." },
- "13": { "erklaerung": "Erlaubt den Rückzug unter die Erde und schützt vor Jägern, bringt aber nichts, wo nichts jagt." },
- "14": { "erklaerung": "Dunkles Pigment fängt gefährliche Strahlung ab und hilft im grellen Licht, ist im Schatten überflüssig." },
- "15": { "erklaerung": "Siebt Nahrung aus dem Wasser und ist ergiebiger als Jagen, aber nur in nährstoffreichem Wasser sinnvoll." },
- "16": { "erklaerung": "Macht schwer sichtbar und schützt so vor Jägern, bringt aber keinen Vorteil, wo niemand jagt." },
- "17": { "erklaerung": "Hält dem Druck der Tiefe stand und öffnet das tiefe Wasser, wird in flachen Zonen jedoch überflüssig." },
- "18": { "erklaerung": "Schärfere Sinne bemerken Gefahr und Beute früher, verlangen aber teures Nerven- und Sinnesgewebe." },
- "19": { "erklaerung": "Hält Wasser im Körper zurück und rettet in Trockenheit, bringt aber wenig, wo Feuchte reichlich ist." },
- "20": { "erklaerung": "Repariert Schäden durch Strahlung und hilft in verstrahlter Umgebung, ist sonst nur teurer Aufwand." },
- "21": { "erklaerung": "Schützt Rinde und Knospen vor Feuer und rettet nach Bränden, kostet aber ohne Feuergefahr nur Energie." },
- "22": { "erklaerung": "Verhindert das Gefrieren des Gewebes und sichert das Überleben im Frost, ist in Wärme jedoch nutzlos." },
- "23": { "erklaerung": "Niedriger, zäher Wuchs übersteht starken Wind ohne Bruch, kostet aber Höhe und Wachstumstempo." },
- "24": { "erklaerung": "Bindet Stickstoff aus der Luft und macht unabhängig vom Boden, ist auf gutem Grund aber unnötig teuer." }
+  "0": {
+    "erklaerung": "Hält die Körperwärme im Kalten, wird aber in der Hitze zur Last, weil die Wärme nicht mehr entweichen kann."
+  },
+  "1": {
+    "erklaerung": "Ein großer Körper übersteht Kälte und Angriffe besser, kostet aber deutlich mehr Nahrung und Energie."
+  },
+  "2": {
+    "erklaerung": "Längere Gliedmaßen erreichen weiter entferntes oder höheres Futter, sind aber teurer zu bauen und zu tragen."
+  },
+  "3": {
+    "erklaerung": "Ein hoher Stoffwechsel lässt schneller wachsen und reagieren, verlangt dafür aber ständig viel Nahrung."
+  },
+  "4": {
+    "erklaerung": "Fester Panzer wehrt Bisse und Angriffe ab, wiegt jedoch schwer und bringt ohne Jäger nur Ballast."
+  },
+  "5": {
+    "erklaerung": "Gewinnt Energie aus Licht und spart so Nahrung, taugt aber nur dort, wo genug Helligkeit ankommt."
+  },
+  "6": {
+    "erklaerung": "Höhere Beweglichkeit erschließt mehr Futter und Fluchtwege, verbraucht dafür aber laufend Energie."
+  },
+  "7": {
+    "erklaerung": "Stützgewebe trägt Höhe und aufrechte Form, ist aber totes Gewicht, wo niedriger Wuchs genügt."
+  },
+  "8": {
+    "erklaerung": "Große Flügelfläche trägt durch die Luft und ermöglicht Gleiten, bleibt ohne Flug jedoch teure Fracht."
+  },
+  "9": {
+    "erklaerung": "Eigenes Licht lockt Beute oder Partner in der Finsternis an, verrät aber zugleich die eigene Lage."
+  },
+  "10": {
+    "erklaerung": "Baut Giftstoffe im Körper ab und hilft dort, wo die Umgebung vergiftet ist, sonst nur teurer Aufwand."
+  },
+  "11": {
+    "erklaerung": "Kommt mit wenig Sauerstoff aus und rettet in sauerstoffarmer Umgebung, bringt bei viel Luft kaum Vorteil."
+  },
+  "12": {
+    "erklaerung": "Hält den Salzhaushalt im Gleichgewicht und sichert das Überleben in salzigem oder wechselndem Wasser."
+  },
+  "13": {
+    "erklaerung": "Erlaubt den Rückzug unter die Erde und schützt vor Jägern, bringt aber nichts, wo nichts jagt."
+  },
+  "14": {
+    "erklaerung": "Dunkles Pigment fängt gefährliche Strahlung ab und hilft im grellen Licht, ist im Schatten überflüssig."
+  },
+  "15": {
+    "erklaerung": "Siebt Nahrung aus dem Wasser und ist ergiebiger als Jagen, aber nur in nährstoffreichem Wasser sinnvoll."
+  },
+  "16": {
+    "erklaerung": "Macht schwer sichtbar und schützt so vor Jägern, bringt aber keinen Vorteil, wo niemand jagt."
+  },
+  "17": {
+    "erklaerung": "Hält dem Druck der Tiefe stand und öffnet das tiefe Wasser, wird in flachen Zonen jedoch überflüssig."
+  },
+  "18": {
+    "erklaerung": "Schärfere Sinne bemerken Gefahr und Beute früher, verlangen aber teures Nerven- und Sinnesgewebe."
+  },
+  "19": {
+    "erklaerung": "Hält Wasser im Körper zurück und rettet in Trockenheit, bringt aber wenig, wo Feuchte reichlich ist."
+  },
+  "20": {
+    "erklaerung": "Repariert Schäden durch Strahlung und hilft in verstrahlter Umgebung, ist sonst nur teurer Aufwand."
+  },
+  "21": {
+    "erklaerung": "Schützt Rinde und Knospen vor Feuer und rettet nach Bränden, kostet aber ohne Feuergefahr nur Energie."
+  },
+  "22": {
+    "erklaerung": "Verhindert das Gefrieren des Gewebes und sichert das Überleben im Frost, ist in Wärme jedoch nutzlos."
+  },
+  "23": {
+    "erklaerung": "Niedriger, zäher Wuchs übersteht starken Wind ohne Bruch, kostet aber Höhe und Wachstumstempo."
+  },
+  "24": {
+    "erklaerung": "Bindet Stickstoff aus der Luft und macht unabhängig vom Boden, ist auf gutem Grund aber unnötig teuer."
+  },
+  "25": {
+    "erklaerung": "Lässt nach Bränden oder Frost aus bodennahen Speicherorganen neu austreiben, kostet dabei aber jedes Mal Energie für den Wiederaufbau."
+  }
 }

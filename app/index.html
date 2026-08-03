@@ -535,7 +535,11 @@ const PHYS = {
   nfixBase: 0.2,
   tractionYield: 2,
   tractionHeatFloor: 0.7,
-  tractionScarcityCeiling: 0.5
+  tractionScarcityCeiling: 0.5,
+  resproutReach: 0.15,
+  resproutCost: 0.15,
+  resproutSeverity: 0.6,
+  wResprout: 1
 };
 // PARAMS — die gefitteten Mittelfeld-Parameter.
 //
@@ -587,14 +591,29 @@ const PARAMS = {
   // Kanal). Amphibie · Lurch dadurch schwach ueber Selektion erreichbar (Sweep: 0/4000
   // -> 2/4000), s. engine/fitness.ts fuer die volle Herleitung. Alle Pflicht-Gates
   // gruen, neu trainiert (Physik-Aenderung).
-  responseRate:[0.29048565060164755, 0.3144304626012807, 0.1059716573817345, 0.7634147804819107, 0.3233797932444492, 0.7711172005210656, 0.7813864319884113, 0.3402516698690486, 0.2028444016263386, 0.8, 0.1714292043959725, 0.2114376274199332, 0.3055814331046625, 0.21101706712289484, 0.1797677129263417, 0.30402386122575975, 0.3114617815099476, 0.1641581206450702, 0.1655883115444087, 0.18259572609083236, 0.1798762990589038, 0.21431340962907142, 0.23341454653478372, 0.19372701689981095, 0.15645492046456375],
+  // 2026-08-03 (AXIS-25, resprout): 26. Gen dazugekommen, komplett neu trainiert
+  // (npm run oracle + npm run train) - mehrfach, weil die Formel/das Trainings-Budget
+  // mehrfach korrigiert wurden: (1) predation aus disturbance entfernt, (2) lightAccess/
+  // Energie-Steuer an disturbance gekoppelt (beide in engine/fitness.ts, s. physics.json-
+  // Kommentar Version 9 fuer den vollen Befund), (3) training/fit.ts POP/GENS 160->176
+  // (ecology-check C4-Nachjustierung: ein erster Trainingslauf bei DIM 29 landete bei
+  // einer responseRate-Kombination, die Tier auf 56.1% trieb - reines GA-Suchrauschen,
+  // resprout selbst ist im ecology-check-Gitter beweisbar wirkungslos, da dort nie
+  // fire/frost gesetzt wird; ein Versuch, das stattdessen ueber defenseFromMobility zu
+  // kompensieren, wurde zurueckgenommen, weil er im Pop-Kern mehr Regeln riss als er in
+  // ecology-check reparierte). Test-Validitaet 61.8% (vorher ~72% bei 25 Genen) - im
+  // erwarteten Rahmen der mit jeder Gen-Erweiterung wachsenden Suchraum-Dimension
+  // (s. Kommentar zu Punkt 9 oben, "28 statt vorher 12 Dimensionen"), weiterhin unter
+  // dem 80-90%-Zielband (unveraendert seit Punkt 9, s. BACKLOG.md) - bewertet nur den
+  // Mittelfeld-Pfad, nicht die Live-App/den Populations-Schwarm.
+  responseRate:[0.11571566316622231, 0.4084352845524596, 0.15623600288373915, 0.6874081664497733, 0.23826336707787218, 0.8, 0.8, 0.45195459667518345, 0.24836365775838656, 0.5126401360224246, 0.2581201635198671, 0.22319886786002416, 0.3037488075659823, 0.2451089038930219, 0.26515324239556, 0.2942430733389363, 0.2760315882836335, 0.23176949851318143, 0.3283578273973091, 0.23551067414306864, 0.3480189595848025, 0.3243181720325491, 0.21494491491518375, 0.25122315527749195, 0.242180093376475, 0.5612130563209103],
   // Mutations-Ruecktrieb-Anker je Gen: die 10 Kern-Gene (Bau/Energie/Verteidigung) ankern
-  // neutral bei 0.5; die 15 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
-  // Index 10..24) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
+  // neutral bei 0.5; die 16 bedingten Kosten-Gene (Stressor-Resistenzen + Nischen-Mechaniken,
+  // Index 10..25) ankern niedrig (0.12) — sie sind „standardmaessig aus" und werden ohne den
   // passenden Stressor abgeworfen, statt bei 0.5 Phantom-Unterhalt zu kosten. Ohne das blieb die
   // Vitalitaet in reichen Biomen faelschlich niedrig (Mittelfeld-Falle, siehe tools/mf-fidelity.mjs).
-  mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
-  mutationRate:0.0037629005772963084, selectionStrength:0.7620469119523765, varianceWeight:1
+  mutationAnchor:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12],
+  mutationRate:0.003104433724656701, selectionStrength:0.6951649827914269, varianceWeight:1
 };
 const clamp01 = x => x<0?0:x>1?1:x;
 const sigmoid = x => 1/(1+Math.exp(-x));
@@ -770,6 +789,7 @@ function fitness(t, e){
   const FROSTRES = 22;
   const WINDRES = 23;
   const NFIX = 24;
+  const RESPROUT = 25;
   function _engineFitness(traits, env, phys) {
       const insulation = traits[INSULATION];
       const size = traits[SIZE];
@@ -796,6 +816,7 @@ function fitness(t, e){
       const frostres = traits[FROSTRES] ?? 0;
       const windres = traits[WINDRES] ?? 0;
       const nfix = traits[NFIX] ?? 0;
+      const resprout = traits[RESPROUT] ?? 0;
       // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
       // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
       // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -829,7 +850,25 @@ function fitness(t, e){
       //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
       //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
       const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
-      const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight;
+      //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
+      //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
+      //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
+      //       erhalten. Skaliert mit (1-size): ein GROSSER Koerper kann seine Hoehe nicht
+      //       per Wiederaustrieb ersetzen (das bleibt structure vorbehalten), nur ein
+      //       niedriger/krautiger Bauplan profitiert. Der Ertragsabschlag dafuer steckt
+      //       NICHT hier, sondern im Energie-Steuersatz weiter unten (resproutCost).
+      //       BEIDE skalieren mit `disturbance` (Feuer/Frost, s. Punkt 14 unten - hier
+      //       vorgezogen, weil lightAccess sie schon braucht): ohne wiederkehrende Stoerung
+      //       gibt es nichts wiederherzustellen - eine Pflanze in einer stoerungsfreien Umwelt
+      //       zahlt dann weder den Wiederaufbau, noch bekommt sie den Lichtzugangs-Vorteil.
+      //       Erste Fassung OHNE diese Kopplung (immer aktiv) gab JEDER Pflanze mit resprout>0
+      //       einen von der Stoerung unabhaengigen Groessen-Anreiz (klein = billiger Lichtzugang)
+      //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
+      //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
+      //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
+      const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
+      const lightAccess = clamp01(phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
+          phys.resproutReach * resprout * disturbance * (1 - size));
       //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
       //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
       const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
@@ -1061,11 +1100,18 @@ function fitness(t, e){
           metabolism * metabolism * mq.metabolism * kleiber +
           mobility * mobility * mq.mobility +
           armor * armor * mq.armor;
+      //    Wiederaustrieb-Steuer (AXIS-25): der jaehrliche Wiederaufbau aus der Basis kostet
+      //    einen Anteil der GESAMTENERGIE, nicht nur einen festen Unterhalt (m.resprout gibt
+      //    es bewusst nicht) - das ist der Ertragsabschlag, den ein Kraut gegenueber einem
+      //    Baum zahlt, der sein Gewebe von Jahr zu Jahr weiterverwendet. Wie der lightAccess-
+      //    Bonus oben skaliert das mit `disturbance` - ohne wiederkehrende Stoerung gibt es
+      //    nichts, was jaehrlich neu aufgebaut werden muesste.
+      const totalEnergyAfterResprout = totalEnergy * (1 - phys.resproutCost * resprout * disturbance);
       // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
       // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
       // (keine "tote Zone"), OHNE dem Wesen Gratis-Energie zu geben - der Anreiz, sich
       // auf einen echten Energiepfad festzulegen, bleibt erhalten.
-      const rawNutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+      const rawNutrition = sigmoid((totalEnergyAfterResprout - maintenance) * phys.energyScale);
       const nutrition = phys.nutritionFloor + (1 - phys.nutritionFloor) * rawNutrition;
       // 3) Praedation: Verteidigung aus Panzer + Stuetzgewebe + Groesse, plus
       //    Flucht durch Mobilitaet.
@@ -1164,6 +1210,26 @@ function fitness(t, e){
       //     Standorten (Grat/Kueste/Steppe) der windharte Krueppel. wind kommt ueber Umwelt-Einfluesse.
       const wind = env.wind ?? 0;
       const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
+      // 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): Feuer/Frost koennen oberirdisches
+      //     Gewebe zerstoeren, OHNE die Pflanze zu toeten, wenn sie aus der Basis wieder
+      //     austreibt (resprout) ODER ohnehin feuerresistent ist (fireres, dessen Beschreibung
+      //     oben ausdruecklich Lignotuber nennt - beide Gene koennen sich ueberschneiden, das ist
+      //     biologisch korrekt: Korkrinde UND Wiederaustrieb sind zwei unabhaengige, kombinierbare
+      //     Strategien derselben Pflanze).
+      //     BEWUSST OHNE predation/Fraas (anders als der urspruengliche Vorschlag, docs/coverage-
+      //     report.md AXIS-25): predation ist in dieser Physik bereits durch den endogenen
+      //     Raeuber-Beute-Mechanismus belegt (world/coevolution.ts modelliert damit die eigentliche
+      //     JAGD-Chase-Staerke, kein reiner Pflanzen-Fraßdruck). Eine erste Fassung mit
+      //     predation*resproutGrazingShare gab Beute-Genomen eine vom echten Verteidigungs-Handel
+      //     (defenseScore/structure/armor/size) losgeloeste, billige Flucht aus dem Raeuberdruck
+      //     und riss die kalibrierte Groessen-Ruestungswettlauf-Dynamik aus dem Zielband (gemessen:
+      //     distribution-check B4 Raeuber/Beute-Biomasse 0.24 -> 2.37, weit ausserhalb 0.03-0.3).
+      //     Fire/Frost sind reine Umwelt-Einfluesse ohne diese Doppelbelegung - sie sind ausserdem
+      //     der textbuchmaessige Kernfall von Wiederaustrieb (Graeser nach Steppenbrand,
+      //     Staudenrueckzug in den Wurzelstock ueber Winter). `disturbance` selbst wurde bereits
+      //     oben bei lightAccess berechnet (aus env.fire/env.frost, vor der Deklaration der
+      //     lokalen fire/frost-Konstanten) - hier nur wiederverwendet.
+      const regrowthSurvival = clamp01(1 - disturbance * (1 - Math.max(fireres, resprout)) * phys.resproutSeverity);
       const fit = Math.pow(thermal, phys.wThermal) *
           Math.pow(predSurvival, phys.wPred) *
           Math.pow(nutrition, phys.wNutrition) *
@@ -1176,7 +1242,8 @@ function fitness(t, e){
           Math.pow(radSurvival, phys.wRad) *
           Math.pow(fireSurvival, phys.wFire) *
           Math.pow(frostSurvival, phys.wFrost) *
-          Math.pow(windSurvival, phys.wWind);
+          Math.pow(windSurvival, phys.wWind) *
+          Math.pow(regrowthSurvival, phys.wResprout);
       return Math.max(fit, phys.floor);
   }
   return _engineFitness(t, e, PHYS);
@@ -1692,7 +1759,7 @@ const BIOMES = [
   {n:"Offenes Meer", ico:"fish", env:{temperature:.5,predation:.5,foodAbundance:.65,foodHeight:.3,light:.5,water:.98}, stress:{ax:"salinity", v:.65}},
   {n:"Lichtlose Tiefsee", ico:"jelly", env:{temperature:.3,predation:.5,foodAbundance:.55,foodHeight:.1,light:.03,water:.95}, stress:{ax:"pressure", v:.7}},
 ];
-const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz","Windhärte","Stickstoff-Fix."];
+const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Panzerung","Photosynthese","Mobilität","Stützgewebe","Flügelfläche","Biolumineszenz","Entgiftung","Sauerstoff-Effizienz","Osmoregulation","Grabtrieb","Schutzpigment","Filterapparat","Tarnung","Druck-Toleranz","Sinne","Austrocknungs-Tol.","Strahlungsresistenz","Feuerresistenz","Frostschutz","Windhärte","Stickstoff-Fix.","Wiederaustrieb"];
 // Anzahl Gene = Länge der Physik-Merkmalsliste. Alle Schleifen/Arrays leiten sich
 // daraus ab, damit neue Achsen (AXIS) nur EINEN Eintrag brauchen. Alte Spielstände
 // (kürzerer Vektor) werden beim Laden mit 0.5 aufgefüllt (padGenome).
