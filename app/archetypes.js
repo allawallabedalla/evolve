@@ -47,11 +47,21 @@
 //     liegt die Umwelt ausserhalb, wird der Abstand mit `requiresPenalty` multipliziert.
 //     Ein Landtier in der Tiefsee wird unwahrscheinlich, aber nicht unmoeglich.
 //
-// (4) Die 15 bedingten Gene (Index 10..24: Stressor-Resistenzen, Nischen-Mechaniken)
-//     tauchen in keinem Prototyp auf — die alte Kaskade hat sie nie angesehen, und ohne
-//     ihren Stressor driften sie frei (gemessen: ~64 % des rohen 25-D-Abstands ist dieses
-//     Driftrauschen). Sie wirken trotzdem: ueber die Selektionsgewichte (in einer giftigen
-//     Welt wird „Entgiftung" identitaetsstiftend) und ueber die unerklaerte Merkmalslast.
+// (4) Die 15 bedingten Gene aus der alten Kaskaden-Aera (Index 10..24: Stressor-
+//     Resistenzen, Nischen-Mechaniken) tauchen in keinem Prototyp auf — die alte Kaskade
+//     hat sie nie angesehen, und ohne ihren Stressor driften sie frei (gemessen: ~64 %
+//     des rohen 25-D-Abstands ist dieses Driftrauschen). Sie wirken trotzdem: ueber die
+//     Selektionsgewichte (in einer giftigen Welt wird „Entgiftung" identitaetsstiftend)
+//     und ueber die unerklaerte Merkmalslast.
+//
+//     AUSNAHME `resprout` (Index 25, AXIS-25, 2026-08-03): dieses Gen kam NACH der alten
+//     Kaskade dazu, es gibt also keinen Kaskaden-Zweig, aus dessen Geometrie sich ein Wert
+//     ableiten liesse (Methode (1)/(2) oben setzt genau das voraus). Bei bluetenkraut/farn/
+//     kraut steht deshalb ein direkt GEMESSENER Wert: Hill-Climb nur auf resprout, Uebrige
+//     Gene fest auf dem jeweiligen Prototyp, gemittelt ueber mehrere Stoerungsgrade (Feuer
+//     0.2..1.0) — dieselbe Idee wie Methode (2) („Mittelwert ueber erreichbare Genome"),
+//     nur ohne den Geometrie-Anteil (1), den es fuer ein kaskaden-loses Gen nicht geben
+//     kann. Begruendung/Messwerte: docs/coverage-report.md AXIS-25.
 //
 // Reich (`k`), Name (`n`) und Emoji (`e`) sind BIT-IDENTISCH zur alten Kaskade — die
 // Namen sind Schluessel fuer Lebensbaum (TREE), Raritaet (RARITY), Icons (FICON),
@@ -72,7 +82,7 @@ window.ARCHETYPES = {
   // app/index.html. Der Matcher liest die Reihenfolge aus DIESER Liste.
   genes: ["insulation","size","limbLength","metabolism","armor","photosynthesis","mobility","structure",
           "wing","biolum","detox","oxyEff","osmo","burrow","pigment","filter","camo","baro","sense",
-          "desicc","radres","fireres","frostres","windres","nfix"],
+          "desicc","radres","fireres","frostres","windres","nfix","resprout"],
 
   // Weiche Strafe auf den Abstand, wenn die Umwelt ausserhalb von `requires` liegt.
   requiresPenalty: 1.30,
@@ -177,19 +187,29 @@ window.ARCHETYPES = {
       // gingen an Nadelbaum). size:.63 = Mittelwert über 8 Mio. gleichverteilte
       // Kraut-Genome im Blütenkraut-Zweig (dieselbe Geometrie-Methode wie
       // archetype-derive.mjs Schritt 1, hier nur unterhalb ihrer eigenen Schwelle).
+      // resprout .57 = Hill-Climb-Mittel ueber Feuer .2-1.0 bei sonst fixem Proto (AXIS-25,
+      // s. Kommentar zu `genes` oben) - macht das Fenster zwischen Moos/Gruenalge (.09)
+      // und Strauch/Laubbaum (.83/.89) erstmals real erreichbar statt nur geometrisch.
       proto:{ insulation:.30, size:.63, armor:.25, photosynthesis:.87, mobility:.20,
-              structure:.24 }, requires:{ water:[0.05,0.70] } },
+              structure:.24, resprout:.57 }, requires:{ water:[0.05,0.70] } },
 
     { key:"farn", k:"Pflanze", n:"Farn", e:"🌿",
       // if(struct<0.42 && size>0.35), photo<=0.75
       // requires water: Farne moegen es feucht/schattig, aber nicht untergetaucht — s.
       // Laubbaum-Kommentar (PHASE-0, 2026-07-30).
+      // resprout .59 (AXIS-25, gemessen wie bei bluetenkraut): reale Farne (z. B.
+      // Adlerfarn) treiben nach Feuer/Frost aus tief sitzenden Rhizomen wieder aus,
+      // ohne oberirdisches Gewebe ueber die Saison zu erhalten.
       proto:{ insulation:.30, size:.70, armor:.25, photosynthesis:.60, mobility:.20,
-              structure:.22 }, requires:{ water:[0.15,0.75] } },
+              structure:.22, resprout:.59 }, requires:{ water:[0.15,0.75] } },
 
     { key:"kraut", k:"Pflanze", n:"Kraut · niedrige Pflanze", e:"☘️",
       // Auffang-Zweig der Pflanzen. requires water: s. Laubbaum-Kommentar.
-      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47 },
+      // resprout .74 (AXIS-25, gemessen wie bei bluetenkraut): der Auffang-Zweig fuer
+      // krautige Pflanzen ohne eigenen Prototyp - hoher Wert, weil ausdauernde Stauden/
+      // Ruderalarten die Mehrheit dieser Restklasse stellen.
+      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47,
+              resprout:.74 },
       requires:{ water:[0.05,0.70] } },
 
     // ===== Reich TIERE — heterotroph + mobil ====================================

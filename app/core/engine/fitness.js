@@ -38,6 +38,7 @@ const FIRERES = 21;
 const FROSTRES = 22;
 const WINDRES = 23;
 const NFIX = 24;
+const RESPROUT = 25;
 export function fitness(traits, env, phys) {
     const insulation = traits[INSULATION];
     const size = traits[SIZE];
@@ -64,6 +65,7 @@ export function fitness(traits, env, phys) {
     const frostres = traits[FROSTRES] ?? 0;
     const windres = traits[WINDRES] ?? 0;
     const nfix = traits[NFIX] ?? 0;
+    const resprout = traits[RESPROUT] ?? 0;
     // "An Land" (0..1): 1 ausserhalb des tiefen Wassers, 0 im offenen Wasserkoerper.
     // Landjagd UND Flug sind terrestrisch/aerisch - sie funktionieren nicht unter
     // Wasser. Im Wasser uebernimmt die aquatische Jagd (Schwimmen). Ohne diese Gate
@@ -97,7 +99,15 @@ export function fitness(traits, env, phys) {
     //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
     //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
     const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
-    const lightAccess = phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight;
+    //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
+    //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
+    //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
+    //       erhalten. Skaliert mit (1-size): ein GROSSER Koerper kann seine Hoehe nicht
+    //       per Wiederaustrieb ersetzen (das bleibt structure vorbehalten), nur ein
+    //       niedriger/krautiger Bauplan profitiert. Der Ertragsabschlag dafuer steckt
+    //       NICHT hier, sondern im Energie-Steuersatz weiter unten (resproutCost).
+    const lightAccess = clamp01(phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
+        phys.resproutReach * resprout * (1 - size));
     //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
     //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
     const photoSize = phys.photoSizeFloor + (1 - phys.photoSizeFloor) * size;
@@ -329,11 +339,16 @@ export function fitness(traits, env, phys) {
         metabolism * metabolism * mq.metabolism * kleiber +
         mobility * mobility * mq.mobility +
         armor * armor * mq.armor;
+    //    Wiederaustrieb-Steuer (AXIS-25): der jaehrliche Wiederaufbau aus der Basis kostet
+    //    einen Anteil der GESAMTENERGIE, nicht nur einen festen Unterhalt (m.resprout gibt
+    //    es bewusst nicht) - das ist der Ertragsabschlag, den ein Kraut gegenueber einem
+    //    Baum zahlt, der sein Gewebe von Jahr zu Jahr weiterverwendet.
+    const totalEnergyAfterResprout = totalEnergy * (1 - phys.resproutCost * resprout);
     // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
     // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
     // (keine "tote Zone"), OHNE dem Wesen Gratis-Energie zu geben - der Anreiz, sich
     // auf einen echten Energiepfad festzulegen, bleibt erhalten.
-    const rawNutrition = sigmoid((totalEnergy - maintenance) * phys.energyScale);
+    const rawNutrition = sigmoid((totalEnergyAfterResprout - maintenance) * phys.energyScale);
     const nutrition = phys.nutritionFloor + (1 - phys.nutritionFloor) * rawNutrition;
     // 3) Praedation: Verteidigung aus Panzer + Stuetzgewebe + Groesse, plus
     //    Flucht durch Mobilitaet.
@@ -432,6 +447,18 @@ export function fitness(traits, env, phys) {
     //     Standorten (Grat/Kueste/Steppe) der windharte Krueppel. wind kommt ueber Umwelt-Einfluesse.
     const wind = env.wind ?? 0;
     const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
+    // 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): Feuer/Frost/Fraas koennen
+    //     oberirdisches Gewebe zerstoeren, OHNE die Pflanze zu toeten, wenn sie aus der
+    //     Basis wieder austreibt (resprout) ODER ohnehin feuerresistent ist (fireres,
+    //     dessen Beschreibung oben ausdruecklich Lignotuber nennt - beide Gene koennen sich
+    //     ueberschneiden, das ist biologisch korrekt: Korkrinde UND Wiederaustrieb sind zwei
+    //     unabhaengige, kombinierbare Strategien derselben Pflanze). resproutGrazingShare
+    //     daempft den Fraas-Anteil bewusst: predation zaehlt bereits ueber defenseScore/
+    //     predSurvival oben in die Fitness ein (structure ist dort schon Verteidigung) -
+    //     ohne den Faktor waere Fraas-Stoerung hier ein zweites Mal voll bestraft (gemessen
+    //     in einer isolierten Vorab-Abschaetzung, s. physics.json-Kommentar Version 9).
+    const disturbance = clamp01(Math.max(fire, frost, env.predation * phys.resproutGrazingShare));
+    const regrowthSurvival = clamp01(1 - disturbance * (1 - Math.max(fireres, resprout)) * phys.resproutSeverity);
     const fit = Math.pow(thermal, phys.wThermal) *
         Math.pow(predSurvival, phys.wPred) *
         Math.pow(nutrition, phys.wNutrition) *
@@ -444,6 +471,7 @@ export function fitness(traits, env, phys) {
         Math.pow(radSurvival, phys.wRad) *
         Math.pow(fireSurvival, phys.wFire) *
         Math.pow(frostSurvival, phys.wFrost) *
-        Math.pow(windSurvival, phys.wWind);
+        Math.pow(windSurvival, phys.wWind) *
+        Math.pow(regrowthSurvival, phys.wResprout);
     return Math.max(fit, phys.floor);
 }

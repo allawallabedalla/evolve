@@ -47,8 +47,9 @@ TRAITS = [
     "frostres",
     "windres",
     "nfix",
+    "resprout",
 ]
-INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES, WINDRES, NFIX = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+INSULATION, SIZE, LIMB, METABOLISM, ARMOR, PHOTO, MOBILITY, STRUCTURE, WING, BIOLUM, DETOX, OXYEFF, OSMO, BURROW, PIGMENT, FILTER, CAMO, BARO, SENSE, DESICC, RADRES, FIRERES, FROSTRES, WINDRES, NFIX, RESPROUT = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
 
 
 def _clamp01(x: float) -> float:
@@ -86,6 +87,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     frostres = traits[FROSTRES] if len(traits) > FROSTRES else 0.0
     windres = traits[WINDRES] if len(traits) > WINDRES else 0.0
     nfix = traits[NFIX] if len(traits) > NFIX else 0.0
+    resprout = traits[RESPROUT] if len(traits) > RESPROUT else 0.0
 
     # "An Land" (0..1): 1 ausserhalb tiefen Wassers, 0 im offenen Wasserkoerper.
     # Landjagd UND Flug sind terrestrisch/aerisch - unter Wasser jagt man schwimmend.
@@ -113,7 +115,12 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
 
     # 2) Energie - zwei sich ausschliessende Strategien
     structure_light = phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]
-    light_access = phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
+    # Wiederaustrieb (AXIS-25, resprout): zweiter, billigerer Weg ins Licht - s.
+    # engine/fitness.ts fuer den vollen Kommentar. Skaliert mit (1-size).
+    light_access = _clamp01(
+        phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
+        + phys["resproutReach"] * resprout * (1.0 - size)
+    )
     photo_size = phys["photoSizeFloor"] + (1.0 - phys["photoSizeFloor"]) * size
     # Temperatur-Abhaengigkeit (Biologie-Audit): Photosynthese hat ein Optimum;
     # in Kaelte/Hitze sinkt die Enzym-Leistung (milde Glocke).
@@ -302,7 +309,10 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + mobility * mobility * mq["mobility"]
         + armor * armor * mq["armor"]
     )
-    raw_nutrition = _sigmoid((total_energy - maintenance) * phys["energyScale"])
+    # Wiederaustrieb-Steuer (AXIS-25): jaehrlicher Wiederaufbau kostet einen Anteil der
+    # Gesamtenergie statt eines festen Unterhalts (kein m["resprout"]).
+    total_energy_after_resprout = total_energy * (1.0 - phys["resproutCost"] * resprout)
+    raw_nutrition = _sigmoid((total_energy_after_resprout - maintenance) * phys["energyScale"])
     nutrition = phys["nutritionFloor"] + (1.0 - phys["nutritionFloor"]) * raw_nutrition
 
     # 3) Praedation
@@ -363,6 +373,14 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     wind = env.get("wind", 0.0)
     wind_survival = _clamp01(1.0 - wind * (1.0 - windres) * phys["windLethality"])
 
+    # 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): s. engine/fitness.ts fuer den
+    #     vollen Kommentar. resproutGrazingShare daempft den Fraas-Anteil, weil predation
+    #     schon oben (pred_survival/defense) einzahlt - sonst waere Fraas doppelt bestraft.
+    disturbance = _clamp01(max(fire, frost, env["predation"] * phys["resproutGrazingShare"]))
+    regrowth_survival = _clamp01(
+        1.0 - disturbance * (1.0 - max(fireres, resprout)) * phys["resproutSeverity"]
+    )
+
     fit = (
         (thermal ** phys["wThermal"])
         * (pred_survival ** phys["wPred"])
@@ -377,6 +395,7 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         * (fire_survival ** phys["wFire"])
         * (frost_survival ** phys["wFrost"])
         * (wind_survival ** phys["wWind"])
+        * (regrowth_survival ** phys["wResprout"])
     )
     return max(fit, phys["floor"])
 

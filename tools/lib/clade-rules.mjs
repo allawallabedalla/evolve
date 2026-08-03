@@ -150,7 +150,7 @@ export const GENES = [
   "insulation", "size", "limbLength", "metabolism", "armor", "photosynthesis",
   "mobility", "structure", "wing", "biolum", "detox", "oxyEff", "osmo", "burrow",
   "pigment", "filter", "camo", "baro", "sense", "desicc", "radres", "fireres",
-  "frostres", "windres", "nfix",
+  "frostres", "windres", "nfix", "resprout",
 ];
 
 export const GENE_INDEX = Object.fromEntries(GENES.map((g, i) => [g, i]));
@@ -857,13 +857,13 @@ export const CLADE_RULES = [
   {
     qid: "Q43238", sci: "Poaceae", de: "Suessgraeser", level: 7,
     genes: { structure: 0.22, size: 0.26, photosynthesis: 0.88, windres: 0.68, armor: 0.32,
-             fireres: 0.55 },
-    reason: "Biegsame Halme statt starrer Staemme sind die Windantwort der Graeser, Silikat-Einlagerungen ihr Frassschutz, und die bodennahen Meristeme lassen sie nach Feuer aus der Basis wieder austreiben — in dieser Physik sind das drei verschiedene Gene fuer eine einzige Wuchsform.",
+             fireres: 0.55, resprout: 0.6 },
+    reason: "Biegsame Halme statt starrer Staemme sind die Windantwort der Graeser, Silikat-Einlagerungen ihr Frassschutz, und die bodennahen Meristeme lassen sie nach Feuer ODER Verbiss aus der Basis wieder austreiben — in dieser Physik sind das VIER verschiedene Gene fuer eine einzige Wuchsform (fireres puffert das brennende Blattwerk selbst, resprout das Wiederaustreiben aus der ueberlebenden Basis danach; beide sind bei Graesern kombiniert, nicht austauschbar).",
   },
   {
     qid: "Q25400", sci: "Asteraceae", de: "Korbbluetler", level: 7,
-    genes: { structure: 0.20, size: 0.24, photosynthesis: 0.86, windres: 0.30 },
-    reason: "Die artenreichste Pflanzenfamilie ist ganz ueberwiegend krautig — anders als bei den meisten Familien laesst sich die Wuchsform hier aus der Klade ableiten, und das ist wichtig, weil ein Loewenzahn sonst das Stuetzgewebe der Bedecktsamer-Regel (0.45) erben wuerde und in die Naehe eines Strauchs geriete.",
+    genes: { structure: 0.20, size: 0.24, photosynthesis: 0.86, windres: 0.30, resprout: 0.55 },
+    reason: "Die artenreichste Pflanzenfamilie ist ganz ueberwiegend krautig — anders als bei den meisten Familien laesst sich die Wuchsform hier aus der Klade ableiten, und das ist wichtig, weil ein Loewenzahn sonst das Stuetzgewebe der Bedecktsamer-Regel (0.45) erben wuerde und in die Naehe eines Strauchs geriete. Die meisten Arten sind ausdauernde Stauden mit einer ueberdauernden Wurzel/Rosette, die nach Mahd, Verbiss oder Frost aus der Basis neu austreibt (AXIS-25) statt wie ein Gehoelz Gewebe ueber Jahre zu erhalten.",
   },
   {
     qid: "Q44448", sci: "Fabaceae", de: "Huelsenfruechtler", level: 7,
