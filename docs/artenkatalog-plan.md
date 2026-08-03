@@ -556,6 +556,18 @@ Abschnitt 8 dokumentiert:**
    hinschaut**, würde Zwillinge trennen, ohne eine einzige erfundene biologische Aussage
    zu treffen. Bewusst nicht in dieser Sitzung gebaut, um diese Entscheidung nicht unter
    Zeitdruck zu treffen.
+
+   **✅ Behoben (2026-08-03):** genau diese Empfehlung umgesetzt. `tools/build-catalog.mjs`
+   ruft `founderSpreads()` (`dist/world/founder.js`, unverändert aus 4.1) nach der
+   Bauplan-Gruppen-Zuordnung auf — sonst würde der Los-Wert selbst mitentscheiden, welcher
+   Gruppe eine Art zugeordnet wird, und wäre kein Nullraum-Los mehr. Los-Wert je Art
+   deterministisch aus der QID geseedet (mulberry32, kein `Math.random()`), damit der
+   Katalog-Build reproduzierbar bleibt. **Ergebnis: 0/20.178 Arten mit Zwilling (vorher
+   96,6 %), 20.178 statt 692 unterscheidbare Punkte.** Größe minimal gewachsen (1356 → 1407
+   KB gzip, weiter klar unter dem 1536-KB-Budget). Alle Gates unverändert grün (`founder-check`
+   — die Neutralitätszusage betrifft die Population, nicht den Katalog, und blieb unberührt —,
+   `catalog-check`, `key-check`, `exemplar-check`, `story-check`, `influence-check`,
+   `ui-calm-check`, `parity`, `app-parity`, `mf-fidelity`).
 2. **28 von 65 Bauplan-Gruppen haben keine einzige reale Art** (u. a. Sukkulente,
    Nadelbaum, Koloss, Schnecke). Dort bleibt die Anzeige beim Bauplan-Namen (`real: null`,
    von `nearestReal()` korrekt abgefangen). Deckt sich mit der Erwartung aus Schritt 3 —
@@ -879,11 +891,10 @@ Phase 0–3 stehen. Erzwingt einen bezahlten Supabase-Plan.
   werden. Entscheidung nach der Belegungsmessung in 1.1.
 - Ob Wikidata allein reicht oder eine zweite Merkmalsquelle (GBIF, FishBase, TRY) nötig
   wird. Entscheidung nach 1.1, nicht vorher.
-- **Genom-Zwillinge (gemessen 1.4): 96,6 % der 20.178 Arten teilen sich einen
-  genom-identischen Zwilling in ihrer Bauplan-Gruppe** (nur 692 unterscheidbare Punkte).
-  Empfehlung: `founderSpreads()` aus 4.1 auf den Katalog anwenden — deterministischer,
-  QID-geseedeter Versatz nur im Nullraum der Selektion. Nicht gebaut, um die Entscheidung
-  nicht unter Zeitdruck zu treffen. Details in 1.4.
+- ~~Genom-Zwillinge (gemessen 1.4): 96,6 % der 20.178 Arten teilten sich einen
+  genom-identischen Zwilling in ihrer Bauplan-Gruppe~~ — **✅ behoben 2026-08-03** über
+  `founderSpreads()` aus 4.1, deterministischer QID-geseedeter Versatz nur im Nullraum der
+  Selektion. Details in 1.4.
 - **Echtes Sharding (gemessen 1.4): `app/index.html` lädt `catalog.js` synchron als eine
   Datei** (753 KB gzip bei 20.178 Arten), obwohl das Datenmodell nach Bauplan-Gruppe
   shardet. Bei weiterem Wachstum (Warteschlange der Ernte hat noch 2.268 Kladen) wird
