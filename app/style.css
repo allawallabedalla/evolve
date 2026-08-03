@@ -510,9 +510,12 @@
   /* Nutzer-Feedback (2026-08-03): "unspezifizierter Toggle" — liegt water bewusst
      zwischen den beiden Bändern (Sumpf, trüber See, s. resetMediumUI()), sahen beide
      Buttons unbeteiligt genau wie im gewöhnlichen "nicht ausgewählt"-Zustand aus, nicht
-     wie ein ABSICHTLICHER Zwischenzustand. Gedämpfte Opazität macht daraus einen
-     dritten, sichtbar eigenen Zustand (Tooltip auf #mediums erklärt zusätzlich das Warum). */
+     wie ein ABSICHTLICHER Zwischenzustand. Gedämpfte Opazität allein reichte nicht (der
+     Ruhezustand war schon vorher color:var(--muted), etwas mehr Transparenz blieb kaum
+     sichtbar) — deshalb zusätzlich ein IMMER SICHTBARES Text-Label (.medium-hint), kein
+     reiner Hover-Tooltip. */
   .mediums.mixed .medium { opacity: .55; }
+  .medium-hint { font-size: var(--fs-xs); color: var(--muted); font-style: italic; }
 
   /* ---- Entwurfs-Leiste (Regler entwerfen, Los übernimmt) — Nutzer-Idee, 2026-07-31.
      Erscheint erst, sobald ein Regler/Umschalter angefasst wurde; verschwindet nach

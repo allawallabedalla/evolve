@@ -100,7 +100,7 @@
       <p class="console-sub">Ändere das Milieu deines Wesens — wo und wie es lebt.</p>
       <p class="console-framing"><b>Presets ↗</b> setzen eine fertige Welt sofort · <b>Regler</b> entwerfen eine neue, <b>Los</b> übernimmt sie · <b>Umwelt-Einfluss ↗</b> löst ein einzelnes Ereignis aus.</p>
       <div class="onboard" id="onboard" hidden>Öffne <b>Presets ↗</b> für eine fertige Welt, oder dreh einen <b>Regler</b> und drück <b>Los</b> — beobachte, wie sich die Form über <b>Generationen</b> verschiebt.</div>
-      <div class="mediums-row"><span class="mlabel" title="Schaltet den Wasser-Regler zwischen zwei Wertebereichen um: Feuchte für Landlebensräume oder Wassertiefe für Wasserlebensräume">Lebensraum</span><div class="mediums" id="mediums"></div></div>
+      <div class="mediums-row"><span class="mlabel" title="Schaltet den Wasser-Regler zwischen zwei Wertebereichen um: Feuchte für Landlebensräume oder Wassertiefe für Wasserlebensräume">Lebensraum</span><div class="mediums" id="mediums"></div><span class="medium-hint" id="mediumHint" hidden>dazwischen</span></div>
       <div id="levers"></div>
       <div class="draftbar" id="draftbar" hidden>
         <p class="draft-preview" id="draftPreview"></p>
@@ -3411,6 +3411,7 @@ const MEDIUM_BANDS = {
 };
 const WATER_LEVER_DEF = LEVERS.find(l => l.key === "water");
 const mediumsEl = document.getElementById("mediums");
+const mediumHintEl = document.getElementById("mediumHint");
 const waterInputEl = document.getElementById("s-water");
 const waterLeverEl = waterInputEl.closest(".lever");
 const waterNameEl = waterLeverEl.querySelector(".name .lbl");
@@ -3434,6 +3435,7 @@ function applyMediumUI(medium, target){
   setWaterLabel(b.name, b.poleLo, b.poleHi);
   [...mediumsEl.children].forEach(c => c.classList.toggle("active", c.dataset.medium === medium));
   mediumsEl.classList.remove("mixed"); mediumsEl.title = "";
+  mediumHintEl.hidden = true;
 }
 /** Preset/Einfluss/Fundort hat water bereits auf einen eigenen Wert gesetzt: Regler auf
     volle Spanne + Original-Beschriftung zurück, Umschalter zeigt „keine Auswahl" — der
@@ -3441,8 +3443,10 @@ function applyMediumUI(medium, target){
     Loescht auch eine evtl. committetes Medium-Band (eine fremd gesetzte Welt ersetzt es).
     Nutzer-Feedback (2026-08-03): "unspezifizierter Toggle" — zwei nicht hervorgehobene
     Buttons sahen wie ein Rendering-Fehler aus, nicht wie ein bewusster Zwischenzustand.
-    `.mixed` daempft jetzt beide sichtbar UND ein Tooltip erklaert, warum (Sumpf, trueber
-    See — die Umwelt liegt bewusst zwischen den beiden Baendern, s. Kommentar oben). */
+    Erster Versuch (nur gedaempfte Opazitaet) reichte nicht: der Ruhezustand war schon
+    vorher `color: var(--muted)`, ein bisschen mehr Transparenz darauf blieb praktisch
+    unsichtbar. Jetzt zusaetzlich ein IMMER SICHTBARES Text-Label ("dazwischen") statt
+    nur Opazitaet + Hover-Tooltip — eindeutig ohne Maus-Hover erkennbar. */
 function resetMediumUI(){
   committedMedium = null;
   waterInputEl.min = 0; waterInputEl.max = 1; waterInputEl.value = env.water;
@@ -3450,6 +3454,8 @@ function resetMediumUI(){
   setWaterLabel(WATER_LEVER_DEF.name, WATER_LEVER_DEF.lo, WATER_LEVER_DEF.hi);
   mediumsEl.classList.add("mixed");
   mediumsEl.title = "Weder eindeutig Land noch Wasser — diese Umwelt liegt bewusst dazwischen (z. B. Sumpf, trüber See).";
+  mediumHintEl.hidden = false;
+  mediumHintEl.title = mediumsEl.title;
   [...mediumsEl.children].forEach(c => c.classList.remove("active"));
 }
 // Onboarding-Selbstcheck (Punkt 11, Niche-Lehre): jeder andere Regler/Button in der App
