@@ -5,6 +5,18 @@
      die Simulationsschleife selbst ist seit Migrations-Stufe 4 ein echter
      Populations-Schwarm aus app/core/ (world/population.js + cluster.js).
      ============================================================ */
+  /* ---- Design v4, "Feldpost" (2026-08-03) ----
+     Loest v3 "Klippenlicht" (reine Flaechenfarbe, 1px-Kontur, kein Schatten) ab.
+     Bildidee: Riso-Feldfuehrer/Sticker-Album statt Naturkunde-Vektorplatte — dicke
+     Tinten-Kontur + versetzter Schlagschatten statt Hairline, Koralle/Petrol/Ocker
+     statt Aubergine/Lila. Entschieden anhand dreier recherchierter Richtungen
+     (Awwwards 2025, Apple Design Awards 2026, Neubrutalismus/„Tactile Maximalism"
+     2026) — s. docs/design-konzepte-feldpost.md fuer Herkunft und Alternativen.
+     Tokens BEHALTEN ihre alten NAMEN (viele hundert Aufrufstellen) — nur die Werte
+     wechseln, damit die Kaskade den Stil ohne Markup-Aenderung durchreicht. Neue
+     Kontrastwerte gemessen (dieselbe Formel wie tools/design-audit.mjs), s.
+     Kommentare je Rolle unten; End-Ergebnis verifiziert mit `npm run design-audit`
+     (0 AA-Verstoesse, wie vor der Umstellung). */
   /* ---- Schriften: selbst gehostet, kein CDN (die App bleibt offline-fähig) ----
      Zwei Dateien, drei Stimmen. Archivo ist eine variable Grotesk mit wght- UND
      wdth-Achse — die Display-Stimme entsteht aus der Breite, nicht aus einer
@@ -29,36 +41,42 @@
 
   :root {
     color-scheme: light;
-    /* Flacher Vektor / Siebdruck (Design v3, "Klippenlicht"). Reine Flächenfarben,
-       keine Verläufe/Schatten. Rollen statt Neomorph-Tiefe: --abyss/--chamber bleiben
-       als Namen erhalten (viele Regeln referenzieren sie), tragen aber jetzt flache
-       Töne aus der Palette. */
-    --abyss: #eee6d6;        /* Karten-Untergrund (helle, warme Papierfläche) */
-    --bg-top: #e4dac2;       /* Seiten-Hintergrund (etwas gedeckter als die Karten) */
-    --chamber: #f7f1e2;      /* Karten/Flächen — flach, kein Schatten trägt sie */
-    --chamber-2: #efe6d0;
-    --line: #d9cbab;         /* Hairline-Kontur statt Schlagschatten */
-    --line-soft: #e3d7ba;
-    --text: #2c2130;         /* Aubergine-Ink — Fließtext */
-    --muted: #645463;        /* gedämpftes Aubergine-Grau. AA-Audit: 5.1:1 auf --bg-top,
-                                5.3:1 auf --abyss, 6.2:1 auf --chamber — kleiner Text okay. */
-    --bio: #9c7fa0;          /* dusty Lilac — Silhouette hell / Flächen */
-    --bio-dim: #4a3650;      /* Aubergine dunkel — Text-Rolle, AA auch bei kleinem Text
-                                (Audit): 9.6:1 auf --chamber, 8.7:1 auf --bg-top. */
-    --ember: #cf8f4e;        /* warmer Ockerton — Temperatur-Achse warm */
-    --danger: #b0472f;
-    --gold: #b98a2e;         /* Rarität — FLÄCHEN-Rolle: Ränder, Punkte, Glows */
-    --gold-ink: #8a6416;     /* Rarität — TEXT-Rolle. Dieselbe Trennung wie --bio/--bio-dim:
-                                #b98a2e erreicht als Schrift auf --chamber nur 2.8:1 und fiel
-                                im Redesign-Audit (Phase 5) durch; dieser Ton liegt bei 4.7:1. */
-    --accent: #e2a72e;       /* Ringelblume — EINZIGER Akzent: neu erworbene Merkmale */
-    --cream: #f7f1de;        /* helles UI-Chrome: Werte/Regler/Buttons */
-    --ink: #241f28;          /* Text auf hellem UI-Chrome */
-    --warn: #93591f;         /* "Gen wird zurückgedrängt" / Warnung — unterscheidbar von --danger */
-    /* Flach: keine Unschärfe, keine Doppel-Schatten — nur eine 1px-Kontur. */
-    --shadow: 0 0 0 1px var(--line);
-    --shadow-sm: 0 0 0 1px var(--line-soft);
-    --shadow-inset: inset 0 0 0 1px var(--line-soft);
+    /* Feldpost-Palette: Riso-Feldfuehrer statt Aubergine-Kammer. --abyss/--chamber/
+       --bio* BEHALTEN ihre alten Namen (Hunderte Aufrufstellen) — nur die Werte
+       wechseln. Kontrast gemessen (identische Formel wie tools/design-audit.mjs),
+       Werte je Rolle unten; Gesamtergebnis: `npm run design-audit` 0 Verstoesse. */
+    --abyss: #f1e7cd;        /* Karten-Untergrund — Kraftpapier statt Lilapapier */
+    --bg-top: #e8d9b8;       /* Seiten-Hintergrund, etwas gedeckter als die Karten */
+    --chamber: #fbf4e2;      /* Karten/Flächen — helles Aufkleber-Papier */
+    --chamber-2: #f0e4c6;
+    --line: #c9b98f;         /* Hairline-Kontur INNERHALB einer Karte (Trenner, nicht mehr der Karten-Rand — der kommt jetzt aus --shadow) */
+    --line-soft: #ded0ac;
+    --text: #211e19;         /* warme Tinte — Fließtext. 15,1:1 auf --chamber */
+    --muted: #5a4e32;        /* gedämpftes Tinte-Braun. Gemessen: 5,9:1 auf --bg-top,
+                                7,5:1 auf --abyss, 7,4:1 auf --chamber — AA auch klein. */
+    --bio: #1e8c7e;          /* Petrol — Flächen-Rolle (Silhouette, Kladen-Tag-Füllung) */
+    --bio-dim: #0b4540;      /* Petrol dunkel — Text-Rolle. Gemessen: 9,9:1 auf --chamber,
+                                7,8:1 auf --bg-top; auch als helle Schrift AUF sich selbst
+                                (aktive Pillen, #fbf3dd drauf): 9,8:1. */
+    --ember: #d9502f;        /* Koralle — Temperatur-Achse warm, reine Flächen-Rolle (keine
+                                Aufrufstelle nutzt sie als Schriftfarbe — muss AA nicht tragen) */
+    --danger: #8c2a1c;        /* dunkler Ziegel, deutlich von --ember unterschieden.
+                                Gemessen: 7,8:1 auf --chamber, 7,7:1 als Flaeche unter #fbf3dd */
+    --gold: #c98a2e;         /* Rarität — FLÄCHEN-Rolle: Ränder, Punkte, Glows */
+    --gold-ink: #6e4e0c;     /* Rarität — TEXT-Rolle, dieselbe Trennung wie --bio/--bio-dim.
+                                Gemessen: 6,9:1 auf --chamber, 5,5:1 auf --bg-top, 6,0:1 auf --chamber-2. */
+    --accent: #d99a2b;       /* Ocker — EINZIGER Akzent: neu erworbene Merkmale, reine
+                                Flächen-Rolle (keine Aufrufstelle nutzt sie als Schrift) */
+    --cream: #fbf4e2;        /* helles UI-Chrome: Werte/Regler/Buttons */
+    --ink: #211e19;          /* Text auf hellem UI-Chrome */
+    --warn: #7a5013;         /* "Gen wird zurückgedrängt" / Warnung. Gemessen: 5,0:1 auf --bg-top */
+    /* Dicke Tinten-Kontur + versetzter Schlagschatten statt Hairline (Feldpost-
+       Kernmerkmal). Jede Regel, die schon `box-shadow: var(--shadow*)` benutzte,
+       bekommt den neuen Stil ohne eigene Änderung — border blieb überall `none`,
+       der Ring KOMMT aus dem Schatten-Token, das war schon vor v4 die Konvention. */
+    --shadow: 0 0 0 3px var(--ink), 5px 5px 0 var(--ink);
+    --shadow-sm: 0 0 0 2px var(--ink), 3px 3px 0 var(--ink);
+    --shadow-inset: inset 0 0 0 2px var(--ink), inset 0 2px 4px rgba(33, 30, 25, .3);
     /* ========================================================================
        TYPOGRAFIE-SYSTEM — Befund und Begründung: docs/typografie-audit.md
        Vorher: 33 Einzelgrößen, 11 Zeilenabstände, 14 Laufweiten, Monospace als
@@ -164,10 +182,12 @@
   /* Mobil: Bild → Regler (Konsole) → Detail-Karte, damit die Steuerung nah am Bild bleibt */
   @media (max-width: 820px) { .stage { grid-template-columns: 1fr; grid-template-areas: "view" "console" "card"; } }
 
+  /* Feldpost: 14px statt 20px — knapper gerundet, damit die dicke Tinten-Kontur
+     (--shadow) wie ein Aufkleber-Rand liest statt wie ein weiches Neomorph-Polster. */
   .panel {
     background: var(--chamber);
     border: none;
-    border-radius: 20px;
+    border-radius: 14px;
     box-shadow: var(--shadow);
   }
 
@@ -214,7 +234,7 @@
   .gen-readout {
     position: absolute; top: 12px; left: 14px; z-index: 3;
     font-family: var(--mono); font-size: var(--fs-sm); letter-spacing: .05em;
-    color: var(--ink); background: var(--cream); border: 1px solid var(--line-soft);
+    color: var(--ink); background: var(--cream); border: none; box-shadow: var(--shadow-sm);
     padding: 3px 9px; border-radius: 999px;
   }
   /* Jahr/Jahreszeit: zweite Stimme im selben Chip — der zyklische Zeitbezug steht
@@ -223,7 +243,7 @@
   .biome-tag {
     position: absolute; top: 12px; right: 14px; z-index: 3;
     font-size: var(--fs-sm); color: var(--ink); background: var(--cream);
-    border: 1px solid var(--line-soft); padding: 3px 9px; border-radius: 999px;
+    border: none; box-shadow: var(--shadow-sm); padding: 3px 9px; border-radius: 999px;
   }
   /* Verborgene Stressoren (AXIS-6..8): sonst unsichtbar & „klebrig" — als Chips zeigen. */
   .stress-chips { position: absolute; top: 40px; right: 14px; z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
@@ -246,11 +266,21 @@
 
   /* ---- Identitaets-Karte ---- */
   .card { padding: 16px 20px 20px; }
-  .kingdom { text-transform: uppercase; letter-spacing: var(--tr-caps); font-size: var(--fs-xs); color: var(--bio-dim); }
+  /* Feldpost: das Reich als kleine Briefmarke statt stiller Versal-Zeile — derselbe
+     Baustein wie die Rarität im Lebensbaum (Farbe als Flaeche, nicht nur als Text). */
+  .kingdom { display: inline-block; text-transform: uppercase; letter-spacing: var(--tr-caps);
+    font-size: var(--fs-meta); font-weight: var(--w-bold); color: var(--chamber);
+    /* --bio-dim statt --bio als Flaeche: --bio (#1e8c7e) traegt helle Schrift nur zu
+       3,75:1 (design-audit fing das) — --bio-dim (#0b4540) schafft 9,8:1. */
+    background: var(--bio-dim); padding: 3px 10px 4px; border-radius: 999px; margin-bottom: 2px; }
   /* Der Artname ist die Titelkarte des Wesens, kein lateinisches Binomen in einem
      Fachaufsatz — darum Display statt Georgia-Kursiv (Audit 3.2). */
+  /* Feldpost: --w-black statt --w-bold fuer die Plakat-Wucht — geprueft gegen die
+     laengsten echten Katalog-Namen (49 Zeichen, z. B. "Roseinatronobacter
+     bogoriensis subsp. bogoriensis"): text-wrap:balance faengt sie unveraendert in
+     2-3 Zeilen ab, kein Overflow (s. docs/design-konzepte-feldpost.md). */
   .species { font-family: var(--display); font-size: var(--fs-display); font-stretch: var(--wd-display);
-    font-weight: var(--w-bold); line-height: var(--lh-display); letter-spacing: var(--tr-display);
+    font-weight: var(--w-black); line-height: var(--lh-display); letter-spacing: var(--tr-display);
     text-wrap: balance; margin: 2px 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   /* Liegt IM .species-Element und erbte darum dessen Display-Behandlung (700, expandiert,
      negative Laufweite) — ein leiser Beleg-Link darf das nicht. Explizit zurücksetzen. */
@@ -339,7 +369,10 @@
   .vit-label { grid-area: lab; font-size: var(--fs-meta); text-transform: uppercase;
     letter-spacing: var(--tr-caps); font-weight: var(--w-bold); color: var(--bio-dim); }
   .vit-track { grid-area: bar; height: 9px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 999px; overflow: hidden; }
-  .vit-fill { display: block; height: 100%; width: 50%; border-radius: 999px; background: var(--bio-dim); transition: width .25s ease, background .4s ease; }
+  /* Feldpost: Ocker statt Petrol — die Passung ist die Erfolgs-Kennzahl der Karte,
+     verdient die Akzentfarbe (--accent, sonst reserviert fuer neu erworbene
+     Merkmale); Zahl/Label bleiben Petrol-Text, nur der Balken wechselt die Rolle. */
+  .vit-fill { display: block; height: 100%; width: 50%; border-radius: 999px; background: var(--accent); transition: width .25s ease, background .4s ease; }
   .vit-num { grid-area: num; font-family: var(--display); font-stretch: var(--wd-display);
     font-size: var(--fs-num-hero); font-weight: var(--w-black); line-height: var(--lh-data);
     letter-spacing: var(--tr-display); color: var(--bio-dim); text-align: right;
