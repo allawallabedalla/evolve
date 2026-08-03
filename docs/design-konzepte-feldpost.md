@@ -89,18 +89,78 @@ auf `--bio-dim` (9,8:1). Genau der Fall, für den der Check existiert.
   Herausforderungen/Umwelt-Einfluss-Modals — Palette und Kontur tragen konsistent
   durch, keine Bildschirm-eigene Ausnahme gefunden.
 
-## Was bewusst NICHT angefasst wurde
+## Nachtrag: die beiden offenen Stellen geschlossen
 
-- **Die generative Kreatur-Zeichnung** (`drawAnimalSvg`/`drawPlantSvg`/… in
-  `app/index.html`) bleibt unverändert — sie nutzt schon reine Flächenfarben ohne
-  Verlauf/Blur, was zur Feldpost-Idee passt, aber ihre eigenen `mix()`-Berechnungen
-  (Habitat-/Fell-/Blattfarben) sind ein eigenes System, keine CSS-Tokens. Das ist
-  ein separates Vorhaben.
-- **Die Rarität-Farben** (`RARITY_META` in `app/index.html`, plus
-  `.gb-tile.rar-*` in `style.css`) sind ein **eigenständiges, hart codiertes**
-  Farbschema (Lila/Blau/Grün/Braun) — nicht über die neuen Tokens erreichbar, beim
-  Lebensbaum-Screenshot sichtbar geblieben. Trägt noch die alte Farbwelt. Eigener
-  Umbau nötig, wenn das auch auf Feldpost soll.
+Auf Nutzer-Wunsch („alles konsistent auf Feldpost") zwei weitere Runden:
+
+### Rarität
+
+`RARITY_META` (`app/index.html`) und die dazu parallel gepflegte `RTONE`-Tabelle
+(Welt-Chronik, andere Schlüsselform „sehr selten" statt „sehr-selten" — historisch
+getrennt, jetzt farblich synchron) trugen ein eigenständiges Lila/Blau/Grün/Braun-
+Schema, unabhängig von den CSS-Tokens. Umgestellt auf dieselbe Feldpost-Ramp,
+STEIGENDE Sättigung mit steigender Seltenheit:
+
+| Stufe | vorher | jetzt | Kontrast gemessen |
+|---|---|---|---|
+| Häufig | `#6b5836` | `#5a4e32` (= `--muted`) | 5,9–7,5:1 |
+| Gelegentlich | `#3d7d64` | `#0b4540` (= `--bio-dim`) | 7,8–9,9:1 |
+| Selten | `#2f86ad` (Blau) | `#6e4e0c` (= `--gold-ink`) | 5,5–6,9:1 |
+| Sehr selten | `#7d55c4` (Lila) | `#9a331c` (dunkle Koralle, neu) | 5,3–6,7:1 |
+| Extrem selten | `#b07d1f` | `#5c1f42` (Pflaume, neu) | 8,7–11,1:1 |
+
+Zwei neue Einzelfarben (dunkle Koralle, Pflaume) — bewusst NICHT als CSS-Token
+eingeführt: `RARITY_META` war schon vor v4 eine eigene, von den Tokens getrennte
+JS-Tabelle (Architektur-Entscheidung von vor dieser Umstellung, nicht angetastet).
+Die drei „seltenen" Ränge im Lebensbaum (`.gb-tile.rar-*`, `style.css`) folgen
+derselben Ramp, Ring 1px→2px, aber bewusst **ohne** eigenen Schlagschatten — im
+dichten Kachel-Raster (bis zu 6 Kacheln je Reich) würde die volle Karten-Wucht
+jeder Zeile zu Rauschen statt Auszeichnung.
+
+### Generative Kreatur-Zeichnung
+
+`drawAnimalSvg`/`drawPlantSvg`/`drawFungusSvg`/`drawMicrobeSvg`/`drawProtistSvg`
+(~2500 Zeilen, alle fünf Reiche) bleiben inhaltlich unverändert — ihre
+`mix()`-Berechnungen (Fell-, Blatt-, Panzerfarben aus Genom + Umwelt) sind
+naturalistisch gemeint und sollen es bleiben: ein Fuchs soll braun bleiben, kein
+Koralle-Ton. Was fehlte, war die Bildsprache, nicht die Farbe — eine dünne
+Tinten-Kontur um jede gefüllte Fläche, dieselbe Sticker-Sprache wie das Chrome.
+
+Statt ~150 Aufrufstellen einzeln zu ändern, EINE CSS-Regel:
+
+```css
+#creatureSvg :is(ellipse, path, polygon, circle, rect):not([fill="none"]) {
+  stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round;
+}
+```
+
+`:not([fill="none"])` lässt reine Linien-Pfade (Beine, Fühler, Spiralen — schon
+mit eigener Stroke-Farbe gezeichnet) unberührt; CSS gewinnt sonst gegen
+SVG-Präsentationsattribute und hätte deren Farbe überschrieben. Geprüft an 7
+Bauplänen quer durch alle Reiche (Vierbeiner/Panzertier, Insekt, Vogel, Fisch,
+Baum, Pilz-Kluster, Mikrobe/Radiolarie) per Playwright-Screenshot — trägt überall,
+kein Reich fällt heraus.
+
+Kompletter Prüfstand nach diesem Nachtrag erneut grün: `design-audit` (0
+Verstöße, alle 12 Presets + 50 Gen-Mutationsfälle weiter fehlerfrei gezeichnet —
+die neue Kontur-Regel ändert keine `getBBox()`-Maße), `ui-calm-check`,
+`type-audit -- --strict`, `app-parity` (weiter `0.000e+0`), `key-check` (65
+Formen/65 Äste/5 Reiche, alle Schlüssel lösen auf), `exemplar-check` (65
+Archetypen, alle mit Wikipedia-Vorbild + Icon).
+
+### Zusätzlich gefunden: zwei Kontur-Stufen
+
+Beim Durchgehen fiel auf, dass ~18 VERSCHACHTELTE Elemente (Einfluss-Faktoren,
+Welt-Orte, Genbuch-Kacheln, Herausforderungs-Zeilen, Login-Karte …) `border: 1px
+solid var(--line[-soft])` direkt setzen, nicht über `--shadow*`. Sie erben die neue
+Tinte-Farbe automatisch, aber nicht das dickere Gewicht. Bewusst NICHT auf die
+volle Karten-Kontur gehoben (das würde in dichten Listen/Rastern zu Rauschen
+werden), aber von 1px auf 2px verstärkt — zwei Stufen mit Absicht:
+Karten/Buttons volle Tinten-Kontur + Schlagschatten, verschachtelter Inhalt nur
+dickere Tinte-Linie. Kommentar dazu im Datei-Kopf von `style.css`.
+
+## Was weiterhin bewusst nicht angefasst wurde
+
 - **Schriften**: kein Futura verfügbar (nur Archivo variabel + JetBrains Mono
   selbst gehostet, kein CDN). Die „Plakat"-Wirkung kommt aus Archivos `wght`/`wdth`-
   Achsen (`--w-black`, `--wd-display`), nicht aus einer neuen Schriftfamilie —
