@@ -35,6 +35,7 @@
     "app-fitness-check": "npm run build && node tools/bundle-app-fitness.mjs --check",
     "app-world-smoke": "npm run bundle-app && node tools/app-parity.mjs && node tools/mf-fidelity.mjs && node tools/app-world-smoke.mjs",
     "exemplar-check": "node tools/exemplar-check.mjs",
+    "plausi-check": "node tools/plausi-check.mjs",
     "key-check": "node tools/key-check.mjs",
     "build-catalog": "NODE_USE_ENV_PROXY=1 node tools/build-catalog.mjs",
     "catalog-check": "node tools/catalog-check.mjs",
