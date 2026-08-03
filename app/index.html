@@ -1699,7 +1699,13 @@ const GENE_LABELS = ["Wärmedämmung","Größe","Gliedmaßen","Stoffwechsel","Pa
 const NG = GENE_LABELS.length;
 const padGenome = a => { const g=a.slice(0,NG); while(g.length<NG) g.push(0.5); return g; };
 
-let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.6,toxicity:0,oxygen:1,salinity:0,uv:0,pressure:0,aridity:0,radiation:0,fire:0,frost:0,wind:0};
+// water:.72 statt .6 — liegt bewusst INNERHALB des Wasser-Bands (MEDIUM_BANDS, s. u.),
+// damit der Land/Wasser-Umschalter beim Erststart eine Auswahl zeigt statt "keine
+// Auswahl" (Nutzer-Frage: "irgendwo muessen wir uns doch befinden" — Leben begann real
+// im Wasser, passt zur "Ursprungszelle"). .6 lag in der bewusst neutralen Luecke
+// zwischen den Baendern (0.35-0.65, s. MEDIUM_BANDS-Kommentar) — richtig fuer spaeter
+// vom Spieler gewaehlte Zwischenwerte, aber am Erststart nur verwirrend.
+let env = {temperature:.5,predation:.3,foodAbundance:.5,foodHeight:.2,light:.5,water:.72,toxicity:0,oxygen:1,salinity:0,uv:0,pressure:0,aridity:0,radiation:0,fire:0,frost:0,wind:0};
 // Entwurfs-Umwelt (Nutzer-Idee, 2026-07-31): Regler/Medium-Umschalter schreiben NICHT
 // mehr direkt in `env` (das treibt die laufende Simulation), sondern in `envDraft` — das
 // lebende Wesen laeuft unter der ALTEN Welt unbeeinflusst weiter, waehrend eine stille
@@ -2607,15 +2613,18 @@ const RARITY = {
   "Muschel · Sessiler Filtrierer":"sehr-selten","Erle · Knöllchen-Pflanze":"sehr-selten",
   "Chamäleon · Tarnjäger":"legendaer",
 };
-// Reihenfolge selten->haeufig; Label + Farbe (subtiler Ramp, Gold = legendaer).
+// Reihenfolge selten->haeufig; Label + Farbe (Feldpost-Ramp: Tinte -> Petrol ->
+// Ocker -> Koralle -> Pflaume, steigende Saettigung = steigende Seltenheit).
 // Rarität = ökologische Häufigkeit (in wie vielen Umwelten dieser Bauplan
-// gewinnt), kein Sammel-Rang. Farben AA-lesbar auf Ocker (Audit K2/K3).
+// gewinnt), kein Sammel-Rang. Farben AA-lesbar gerechnet gegen --chamber/--bg-top/
+// --chamber-2/--abyss (identische Formel wie tools/design-audit.mjs), s.
+// docs/design-konzepte-feldpost.md.
 const RARITY_META = {
-  "legendaer":   {label:"Extrem selten", col:"#b07d1f", rank:4},
-  "sehr-selten": {label:"Sehr selten",   col:"#7d55c4", rank:3},
-  "selten":      {label:"Selten",        col:"#2f86ad", rank:2},
-  "gelegentlich":{label:"Gelegentlich",  col:"#3d7d64", rank:1},
-  "haeufig":     {label:"Häufig",        col:"#6b5836", rank:0},
+  "legendaer":   {label:"Extrem selten", col:"#5c1f42", rank:4},  // Pflaume — 8,7-11,1:1
+  "sehr-selten": {label:"Sehr selten",   col:"#9a331c", rank:3},  // dunkle Koralle — 5,3-6,7:1
+  "selten":      {label:"Selten",        col:"#6e4e0c", rank:2},  // = --gold-ink — 5,5-6,9:1
+  "gelegentlich":{label:"Gelegentlich",  col:"#0b4540", rank:1},  // = --bio-dim — 7,8-9,9:1
+  "haeufig":     {label:"Häufig",        col:"#5a4e32", rank:0},  // = --muted — 5,9-7,5:1
 };
 function rarityOf(x){ return RARITY[FORM_NAME_BY_KEY[x] || x] || "haeufig"; }
 
@@ -3460,7 +3469,14 @@ function resetMediumUI(){
   });
   mediumsEl.appendChild(btn);
 });
-resetMediumUI();
+// Erststart: faellt der Start-Wert von water in eines der beiden Baender, zeigt der
+// Umschalter das gleich an — sonst bliebe das Ur-Wesen auf dem allerersten Bild ohne
+// jede Orts-Angabe. Spaetere Presets/Umwelt-Einfluesse setzen ihre eigenen Werte
+// weiterhin bewusst OHNE Band-Zuordnung (s. resetMediumUI oben, unveraendert) — das
+// hier gilt nur fuer den einmaligen Erststart, vor jeder Spieler-Handlung.
+const startMedium = Object.keys(MEDIUM_BANDS).find(k => env.water >= MEDIUM_BANDS[k].lo && env.water <= MEDIUM_BANDS[k].hi);
+if(startMedium){ committedMedium = startMedium; applyMediumUI(startMedium, env); }
+else resetMediumUI();
 
 // ---- Entwurf: Vorschau + Los/Verwerfen (Nutzer-Idee, 2026-07-31) ----------------------
 // Regler/Medium-Umschalter schreiben oben bereits in envDraft statt env. Hier die
@@ -6623,7 +6639,9 @@ try {
   const { realExample, archetypeWiki } = await import("./exemplar.js");
   window.__archetypeWiki = archetypeWiki;   // Brücke fürs Genbuch (Klick-Beschreibung)
 
-  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"#2f86ad", "sehr selten":"#7d55c4", "extrem selten":"var(--gold-ink)" };
+  // Dieselbe Feldpost-Ramp wie RARITY_META (nur mit Leerzeichen-Schluesseln, hier
+  // historisch gewachsen getrennt) — Werte synchron gehalten, s. RARITY_META oben.
+  const RTONE = { "häufig":"var(--muted)", "gelegentlich":"var(--bio-dim)", "selten":"var(--gold-ink)", "sehr selten":"#9a331c", "extrem selten":"#5c1f42" };
   const ic = window.__ic || (() => "");
 
   const el = (id) => document.getElementById(id);

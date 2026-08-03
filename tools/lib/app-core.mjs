@@ -39,6 +39,9 @@ export function loadAppCore(toolName = "app-core") {
   // Stufe 2 des Matchers (Schritt 0.3): naechste reale Art innerhalb der Bauplan-Gruppe.
   const realSrc   = grab(/function nearestReal\(t, groupKey, w\)\{[\s\S]*?\n\}/, "nearestReal()");
   const classSrc  = grab(/function classify\(t, envIn\)\{[\s\S]*?\n\}/, "classify()");
+  // Bauplan-SATZ (die Zeile unter dem Artnamen). Wird von tools/plausi-check.mjs
+  // gegen den Katalog und gegen die Zeichnung geprueft — deshalb hier mit heraus.
+  const descSrc   = grab(/function describe\(t, a\)\{[\s\S]*?\n\}/, "describe()");
   const geneLabels = eval(grab(/const GENE_LABELS = \[[\s\S]*?\];/, "GENE_LABELS")
     .replace(/^const GENE_LABELS = /, "").replace(/;$/, ""));
   const archWin = {};
@@ -79,10 +82,13 @@ export function loadAppCore(toolName = "app-core") {
     ${realSrc}
     ${matchSrc}
     ${classSrc}
+    ${descSrc}
     box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify;
     box.matchArchetype = matchArchetype; box.selectionWeights = selectionWeights; box.NG = NG;
-    box.nearestReal = nearestReal;
+    box.nearestReal = nearestReal; box.describe = describe;
   `)(box, archWin.ARCHETYPES, catWin.CATALOG || null);
+  box.ARCH = archWin.ARCHETYPES;
+  box.CATALOG = catWin.CATALOG || null;
 
   // Deterministische Konvergenz aus dem Ur-Genom (kein Rauschen) — das Maß dafür,
   // ob ein Einfluss die Selektion wirklich verschiebt.
