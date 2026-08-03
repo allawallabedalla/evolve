@@ -1,8 +1,13 @@
 # Backlog
 
-**Stand:** 2026-07-30 · Live-App `app/index.html`, deployt via GitHub Pages von `main`. Läuft
+**Stand:** 2026-08-01 · Live-App `app/index.html`, deployt via GitHub Pages von `main`. Läuft
 seit Migrations-Stufe 4 (Punkt 2) auf einem echten Populations-Schwarm (`world/population.ts`,
 N=200), nicht mehr auf dem alten Mittelfeld-Gradientenaufstieg.
+**Seit Punkt 12 (2026-08-01) trägt die App einen realen Artenkatalog** (`app/catalog.js`,
+`stage:"full"`, 20.178 Wikidata-Arten): die 65 Baupläne unten bleiben die Schlüssel-Ebene
+(Genbuch/Rarität/Icons/Chronik hängen daran), aber der ANGEZEIGTE Name ist jetzt oft eine
+reale Art („Capybara" statt „Fell-Großtier") — Details, offene Punkte und Messwerte in
+`docs/artenkatalog-plan.md`.
 **Verteilungs-Treue (Schicht C seit Migrations-Stufe 6):** Jensen-Shannon-Divergenz
 Browser-Schwarm (N=200) ↔ Orakel-Schwarm (N=2000) = **0.0218** (Ziel < 0.15, `npm run
 spectrum-check`) — die alte "Test-Validität ~72%" (Mittelfeld-Distillation, `validityTest`)
@@ -1687,8 +1692,22 @@ entscheidet genau das, worauf die Selektion nicht schaut.
 - [x] **0.3** Zweistufiger Matcher (2026-08-01) — `nearestReal()`; gemessen 0,12 µs je
       Eintrag → 16.686 Einträge je Gruppe passen ins 2-ms-Budget. Benennung kippt
       datengesteuert (`stage: "full"`), nicht per Code-Änderung.
-- [ ] **1.1** Wikidata-Ernte + Belegungsmessung je Eigenschaft (*Sonnet*, Netz).
-- [ ] **1.2** Merkmals- und Kladen-Regelwerk (*Opus*, Netz) — abwägungsintensivster Schritt.
+- [x] **1.1** Wikidata-Ernte (2026-08-01) — `tools/wikidata-harvest.mjs`, adaptiver
+      Top-down-Ernter (schneller Pfad + Zerlegung bei Timeout). **20.178 Arten** über
+      25 verifizierte Wurzel-Kladen, 100 % mit vollständiger Elterntaxon-Kette
+      (`tools/wikidata-lineage.mjs`) und echtem dewiki-Artikeltitel
+      (`tools/wikidata-sitelinks.mjs`). Restliche Warteschlange (2.268 Kladen) bewusst
+      offen gelassen — im Zielband, weitere Läufe sind resumierbar.
+- [x] **1.1b** Merkmalsquellen-Prototyp (2026-08-01) — PanTHERIA + EltonTraits
+      (Säuger+Vögel) über den GitHub-Spiegel `RS-eco/traitdata`, 55–81 % Verknüpfungsquote.
+      AmphiBIO/fishmorph/lizard_traits nicht angebunden (Nicht-UTF-8-Zitationsspalten,
+      kein R-Interpreter in der Umgebung). Lizenz der Originaldaten nicht abschließend
+      geklärt (Prototyp-Status, s. Kopfkommentar `tools/build-traits.mjs`).
+- [x] **1.2** Kladen-Regelwerk (2026-08-01) — `tools/lib/clade-rules.mjs`, 163 Regeln über
+      194 verifizierte QIDs, Konfidenz 2, kein Netz/LLM zur Laufzeit. 28/28 Stichproben,
+      Spezifitäts-Ordnung gegen 135 echte Ketten geprüft. Vier QID-Funde dabei (Insecta
+      hängt unter Crustacea, drei parallele Bedecktsamer-Items, falsche Konifer-QID,
+      „Farne" war gar kein Taxon-Item).
 - [x] **1.3** Imputation + Habitat-Rückwärtslauf (2026-08-01) — `tools/lib/impute.mjs`;
       vorab `tools/wikidata-lineage.mjs` (Elterntaxon-Ketten ebenenweise nachgeladen:
       **14.495 Arten in 4:02 min, 132 Abfragen**). Konfidenz über 200 Arten × 25 Gene:
@@ -1767,19 +1786,20 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       dauerhafter Freiheitsgrad — 0.5 % Fitness sind bei N=300 ein *N·s ≈ 1.5* und damit
       nicht neutral. Deshalb bleibt P6 bewusst bit-identisch (0.01955) statt mit
       Schätzerrauschen „gehoben" zu werden; Details in `docs/artenkatalog-plan.md`
-      Phase 4. Beide Mechanismen sind opt-in und in der Live-App noch **aus** — das
-      Einschalten gehört zu 1.4 (dann kippt auch die Benennung auf Stufe 2, erst dort
-      wird das Los sichtbar) und verlangt den Orakel-Spiegel nachzuziehen.
+      Phase 4. **Beide Mechanismen sind opt-in und in der Live-App weiterhin aus** —
+      1.4 hat sie NICHT eingeschaltet (das war nie Teil von 1.4s Umfang, s. dort).
+      Das Einschalten ist ein eigener, noch nicht terminierter Folgeschritt und verlangt
+      den Orakel-Spiegel nachzuziehen.
 - [ ] **5** Gemeinschafts-Schicht über Supabase (optional, erzwingt bezahlten Plan).
 
 **Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.
 
-**Umgebungs-Befund (2026-08-01):** Wikidata/Wikipedia sind aus der Claude-Code-Umgebung
-**nicht erreichbar** (Netzwerk-Policy lässt nur GitHub/npm/PyPI durch, `curl` → 000;
-GitHub → 200). Dasselbe Problem ist in `docs/tree-of-life.json` schon vermerkt. Phase 1
-braucht daher entweder die Freischaltung von `wikidata.org`, `query.wikidata.org` und
-`*.wikipedia.org` in den Umgebungs-Einstellungen (vom Nutzer zugesagt) oder den Umweg über
-GitHub Actions. Phase 0 ist davon unabhängig.
+**Umgebungs-Befund (2026-08-01, erledigt):** Wikidata/Wikipedia waren aus der
+Claude-Code-Umgebung zunächst **nicht erreichbar** (Netzwerk-Policy ließ nur
+GitHub/npm/PyPI durch). Der Nutzer hat `wikidata.org`, `query.wikidata.org` und
+`*.wikipedia.org` freigeschaltet — Phase 1 lief danach vollständig gegen das echte
+Netz (s. 1.1–1.4 oben). `raw.githubusercontent.com` (für 1.1b) war schon vorher als
+Trusted-Default nutzbar, keine weitere Freischaltung nötig.
 
 ---
 
@@ -2269,3 +2289,5 @@ Nutzerbindungs-Konzept in `docs/bindung-konzept.md`. Kurzfassung:
 - Plan Meilenstein A: `docs/plan-A-lebender-begleiter.md`.
 - Projekt-Übergabe/Kontext: `resume.md`.
 - Reale Vorlagen: `docs/biodiversity-reference.md`, `docs/tree-of-life-reference.md` + `.json`.
+- Realer Artenkatalog (Punkt 12): `docs/artenkatalog-plan.md` (maßgeblicher Plan),
+  `docs/coverage-report.md` (Abdeckungs-Messung + Achsen-Vorschläge).
