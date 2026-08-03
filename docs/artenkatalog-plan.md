@@ -885,8 +885,11 @@ Phase 0–3 stehen. Erzwingt einen bezahlten Supabase-Plan.
 
 ## 8 · Bewusst offen
 
-- Ob der `novelThreshold` von 0.15 nach dem Umbau noch stimmt — er wurde gegen 70
-  Prototypen kalibriert, nicht gegen 20.000 Arten. Neu zu messen in 0.3.
+- ~~Ob der `novelThreshold` von 0.15 nach dem Umbau noch stimmt~~ — **✅ gemessen
+  2026-08-03** (`coverage-check`, Nachlauf mit dem Zwillings-fixierten Katalog): 0 von
+  16.754 Endpunkten liegen jenseits der Schwelle. **Weiterhin korrekt kalibriert**, jetzt
+  gegen den vollen Katalog statt gegen 70 Prototypen bestätigt. Details in
+  `docs/coverage-report.md` (Nachtrag).
 - Ob Bauplan-Gruppen mit sehr wenigen realen Arten sinnvoll bleiben oder zusammengelegt
   werden. Entscheidung nach der Belegungsmessung in 1.1.
 - Ob Wikidata allein reicht oder eine zweite Merkmalsquelle (GBIF, FishBase, TRY) nötig

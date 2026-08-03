@@ -6,6 +6,18 @@ gehört zu `BACKLOG.md` Punkt 12.
 **Alle Zahlen dieses Dokuments stammen aus diesem einen Lauf** und sind reproduzierbar;
 keine Schätzung, keine gerundete Erinnerung.
 
+> **Nachtrag (2026-08-03):** der Genom-Zwillings-Fix (`founderSpreads()` auf den Katalog
+> angewendet, s. Plan Abschnitt 8/1.4) hat die 692-Punkte-Decke aufgehoben, auf die sich
+> dieser Bericht in Abschnitt 1 und 5 stützt. **Erneuter Lauf mit dem reparierten Katalog:**
+> tatsächlich benannte Arten steigen von 110 (0,55 %, gedeckelt bei 3,4 %) auf **317
+> (1,57 %, keine Deckelung mehr — 20.178 unterscheidbare Punkte)**. `novelThreshold` bleibt
+> bei 0 Endpunkten jenseits der Schwelle — **weiterhin korrekt kalibriert**, jetzt gegen den
+> vollen Katalog statt gegen 70 Prototypen bestätigt (schließt den offenen Punkt aus Plan
+> Abschnitt 8). Alle übrigen Zahlen dieses Berichts (Engine-Lücken, Gen-Verlust-Rangfolge,
+> Chimären-Falle, V0–V2/AXIS-22–25) sind im Nachlauf **bitgleich bzw. binnen Rauschen**
+> reproduziert — die Zwillinge waren nie der Engpass, **V0 bleibt der größte Hebel**.
+> Volle neue Zahlen: `docs/coverage.json` (Lauf vom 2026-08-03).
+
 > **Der Teil 3.2 ist ein VORSCHLAG, keine Umsetzung.** Neue Gene und neue Mechaniken
 > werden in diesem Repo grundsätzlich nur vorgeschlagen und von Hand bestätigt
 > (README „Autonomie"); kontinuierliche Parameter werden gefittet, Struktur wächst nur
