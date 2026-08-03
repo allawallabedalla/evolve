@@ -14,9 +14,27 @@ keine Schätzung, keine gerundete Erinnerung.
 > bei 0 Endpunkten jenseits der Schwelle — **weiterhin korrekt kalibriert**, jetzt gegen den
 > vollen Katalog statt gegen 70 Prototypen bestätigt (schließt den offenen Punkt aus Plan
 > Abschnitt 8). Alle übrigen Zahlen dieses Berichts (Engine-Lücken, Gen-Verlust-Rangfolge,
-> Chimären-Falle, V0–V2/AXIS-22–25) sind im Nachlauf **bitgleich bzw. binnen Rauschen**
-> reproduziert — die Zwillinge waren nie der Engpass, **V0 bleibt der größte Hebel**.
-> Volle neue Zahlen: `docs/coverage.json` (Lauf vom 2026-08-03).
+> Chimären-Falle) sind im Nachlauf **bitgleich bzw. binnen Rauschen** reproduziert — die
+> Zwillinge waren nie der Engpass.
+>
+> **Zweiter Nachtrag (2026-08-03): V0 UMGESETZT und gemessen — die Vorhersage hat sich
+> NICHT bestätigt.** `tools/lib/impute.mjs` wendet jetzt die in Abschnitt 6 (V0)
+> vorgeschlagene Mehrheitsregel an (Median nur noch bei belegter Mehrheit > 0.3, sonst
+> „Gen aus“ über Stufe (d)). Ergebnis nach vollem Sweep: **319 statt 317 benannte Arten
+> (1,58 % statt 1,57 %) — kein messbarer Effekt.** Auch die Distanz-Verteilung (Abschnitt
+> 3.3b) und die Gen-Verlust-Rangfolge (Abschnitt 4) bleiben binnen Rauschen gleich. **Die
+> in Abschnitt 4 erzählte Kausalkette — Median erzeugt Chimären, Chimären erklären die
+> Lücke — war zur Hälfte richtig:** die Imputation ist jetzt ehrlicher (keine erfundene
+> „Durchschnittsart“ mehr), aber die tatsächliche Nicht-Erreichbarkeit hängt gemessen
+> überwiegend an anderen Stellen — vermutlich an denselben Kern-Genen (Struktur, Mobilität,
+> Photosynthese, Stoffwechsel), die die vier dokumentierten Engine-Lücken
+> (`bluetenkraut`/`amphibie`/`plankton`/`kopffuesser`) schon vorher trugen, nicht an den 15
+> bedingten Stressor-Genen. **V0 bleibt trotzdem im Code** — die Mehrheitsregel ist die
+> biologisch korrektere Schätzung unabhängig vom Abdeckungseffekt, nur die Erwartung
+> „größter Hebel“ ist widerlegt. **V1/V2/AXIS-22–25 sind davon nicht entlastet:** ihre
+> Begründung (Kombinations-Lücke bei gleichzeitigen Dauer-Toleranzen bzw. fehlende
+> Kern-Gen-Nischen) steht unabhängig von der V0-Diagnose.
+> Volle neue Zahlen: `docs/coverage.json` (Lauf vom 2026-08-03, nach V0).
 
 > **Der Teil 3.2 ist ein VORSCHLAG, keine Umsetzung.** Neue Gene und neue Mechaniken
 > werden in diesem Repo grundsätzlich nur vorgeschlagen und von Hand bestätigt

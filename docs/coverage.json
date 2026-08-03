@@ -14,9 +14,9 @@
  },
  "coverage": {
   "speciesInReachedGroups": 19411,
-  "speciesAtReachedPoints": 317,
-  "namedSpecies": 317,
-  "reachedPoints": 317,
+  "speciesAtReachedPoints": 319,
+  "namedSpecies": 319,
+  "reachedPoints": 319,
   "reachedGroups": 59
  },
  "quadrants": {
@@ -136,22 +136,22 @@
    "g": "fisch",
    "species": 1637,
    "nCls": 1637,
-   "hit": 13,
-   "inReach": 13
+   "hit": 12,
+   "inReach": 12
   },
   {
    "g": "fellwarm",
    "species": 1636,
    "nCls": 1636,
-   "hit": 28,
-   "inReach": 28
+   "hit": 26,
+   "inReach": 26
   },
   {
    "g": "flink",
    "species": 1297,
    "nCls": 1297,
-   "hit": 34,
-   "inReach": 34
+   "hit": 35,
+   "inReach": 35
   },
   {
    "g": "schimmel",
@@ -178,15 +178,15 @@
    "g": "hutpilz",
    "species": 927,
    "nCls": 927,
-   "hit": 4,
-   "inReach": 4
+   "hit": 3,
+   "inReach": 3
   },
   {
    "g": "krebstier",
    "species": 848,
    "nCls": 848,
-   "hit": 4,
-   "inReach": 4
+   "hit": 3,
+   "inReach": 3
   },
   {
    "g": "krill",
@@ -234,8 +234,8 @@
    "g": "fledermaus",
    "species": 318,
    "nCls": 318,
-   "hit": 9,
-   "inReach": 9
+   "hit": 8,
+   "inReach": 8
   },
   {
    "g": "laubbaum",
@@ -248,15 +248,15 @@
    "g": "kletterer",
    "species": 227,
    "nCls": 227,
-   "hit": 12,
-   "inReach": 12
+   "hit": 9,
+   "inReach": 9
   },
   {
    "g": "fellgrosstier",
    "species": 213,
    "nCls": 213,
-   "hit": 9,
-   "inReach": 9
+   "hit": 10,
+   "inReach": 10
   },
   {
    "g": "schwefelbakterie",
@@ -283,15 +283,15 @@
    "g": "flechte",
    "species": 102,
    "nCls": 102,
-   "hit": 4,
-   "inReach": 4
+   "hit": 6,
+   "inReach": 6
   },
   {
    "g": "porling",
    "species": 73,
    "nCls": 73,
-   "hit": 4,
-   "inReach": 4
+   "hit": 5,
+   "inReach": 5
   },
   {
    "g": "generalist",
@@ -311,15 +311,15 @@
    "g": "seestern",
    "species": 43,
    "nCls": 43,
-   "hit": 10,
-   "inReach": 10
+   "hit": 11,
+   "inReach": 11
   },
   {
    "g": "koralle",
    "species": 37,
    "nCls": 37,
-   "hit": 4,
-   "inReach": 4
+   "hit": 10,
+   "inReach": 10
   },
   {
    "g": "leuchtwesen",
@@ -346,8 +346,8 @@
    "g": "hefe",
    "species": 12,
    "nCls": 12,
-   "hit": 4,
-   "inReach": 4
+   "hit": 3,
+   "inReach": 3
   },
   {
    "g": "grossjaeger",
@@ -403,7 +403,7 @@
    "lo": 0.063,
    "hi": 0.991,
    "max": 0.994,
-   "speciesOutside": 6043,
+   "speciesOutside": 6039,
    "speciesBeyondMax": 0
   },
   {
@@ -421,8 +421,8 @@
    "lo": 0.003,
    "hi": 0.699,
    "max": 0.783,
-   "speciesOutside": 1711,
-   "speciesBeyondMax": 162
+   "speciesOutside": 1712,
+   "speciesBeyondMax": 163
   },
   {
    "gene": "photosynthesis",
@@ -457,7 +457,7 @@
    "lo": 0.018,
    "hi": 0.616,
    "max": 0.987,
-   "speciesOutside": 1883,
+   "speciesOutside": 1885,
    "speciesBeyondMax": 0
   },
   {
@@ -484,7 +484,7 @@
    "lo": 0.011,
    "hi": 0.225,
    "max": 0.99,
-   "speciesOutside": 4444,
+   "speciesOutside": 4442,
    "speciesBeyondMax": 0
   },
   {
@@ -493,7 +493,7 @@
    "lo": 0.008,
    "hi": 0.204,
    "max": 0.992,
-   "speciesOutside": 8114,
+   "speciesOutside": 8120,
    "speciesBeyondMax": 0
   },
   {
@@ -502,8 +502,8 @@
    "lo": 0.008,
    "hi": 0.729,
    "max": 0.764,
-   "speciesOutside": 591,
-   "speciesBeyondMax": 574
+   "speciesOutside": 590,
+   "speciesBeyondMax": 573
   },
   {
    "gene": "pigment",
@@ -511,7 +511,7 @@
    "lo": 0.012,
    "hi": 0.204,
    "max": 0.987,
-   "speciesOutside": 11136,
+   "speciesOutside": 11134,
    "speciesBeyondMax": 0
   },
   {
@@ -529,7 +529,7 @@
    "lo": 0.006,
    "hi": 0.965,
    "max": 0.976,
-   "speciesOutside": 0,
+   "speciesOutside": 3,
    "speciesBeyondMax": 0
   },
   {
@@ -538,7 +538,7 @@
    "lo": 0.013,
    "hi": 0.21,
    "max": 0.988,
-   "speciesOutside": 1342,
+   "speciesOutside": 1330,
    "speciesBeyondMax": 0
   },
   {
@@ -547,8 +547,8 @@
    "lo": 0.009,
    "hi": 0.932,
    "max": 0.948,
-   "speciesOutside": 44,
-   "speciesBeyondMax": 28
+   "speciesOutside": 40,
+   "speciesBeyondMax": 26
   },
   {
    "gene": "desicc",
@@ -556,7 +556,7 @@
    "lo": 0.012,
    "hi": 0.373,
    "max": 0.984,
-   "speciesOutside": 11451,
+   "speciesOutside": 11450,
    "speciesBeyondMax": 0
   },
   {
@@ -565,7 +565,7 @@
    "lo": 0.012,
    "hi": 0.204,
    "max": 0.987,
-   "speciesOutside": 2658,
+   "speciesOutside": 2659,
    "speciesBeyondMax": 0
   },
   {
@@ -574,7 +574,7 @@
    "lo": 0.011,
    "hi": 0.204,
    "max": 0.986,
-   "speciesOutside": 7684,
+   "speciesOutside": 7673,
    "speciesBeyondMax": 0
   },
   {
@@ -583,8 +583,8 @@
    "lo": 0.01,
    "hi": 0.204,
    "max": 0.962,
-   "speciesOutside": 9464,
-   "speciesBeyondMax": 7
+   "speciesOutside": 9461,
+   "speciesBeyondMax": 6
   },
   {
    "gene": "windres",
@@ -592,7 +592,7 @@
    "lo": 0.011,
    "hi": 0.204,
    "max": 0.988,
-   "speciesOutside": 9824,
+   "speciesOutside": 9820,
    "speciesBeyondMax": 0
   },
   {
@@ -608,7 +608,7 @@
  "lossByGene": [
   {
    "gene": "desicc",
-   "loss": 0.053
+   "loss": 0.0526
   },
   {
    "gene": "limbLength",
@@ -616,49 +616,49 @@
   },
   {
    "gene": "pigment",
-   "loss": 0.04
+   "loss": 0.0394
   },
   {
    "gene": "fireres",
-   "loss": 0.0375
+   "loss": 0.037
   },
   {
    "gene": "frostres",
-   "loss": 0.036
+   "loss": 0.0358
   },
   {
    "gene": "osmo",
-   "loss": 0.0247
-  },
-  {
-   "gene": "filter",
-   "loss": 0.0218
+   "loss": 0.0245
   },
   {
    "gene": "insulation",
-   "loss": 0.0198
+   "loss": 0.0219
+  },
+  {
+   "gene": "filter",
+   "loss": 0.0189
   },
   {
    "gene": "oxyEff",
-   "loss": 0.0178
+   "loss": 0.0179
   },
   {
    "gene": "burrow",
-   "loss": 0.0175
+   "loss": 0.0172
   },
   {
    "gene": "detox",
-   "loss": 0.0165
+   "loss": 0.0166
   },
   {
    "gene": "structure",
-   "loss": 0.0151
+   "loss": 0.0154
   }
  ],
  "lossByConfidence": [
-  0.1311,
-  0.5004,
-  0.3633,
+  0.1373,
+  0.4916,
+  0.3658,
   0.0052
  ],
  "distanceHistogram": {
@@ -673,9 +673,9 @@
   "species": [
    0,
    0,
-   7305,
-   10591,
-   1198,
+   7047,
+   10885,
+   1160,
    767
   ]
  },
@@ -683,7 +683,7 @@
   "Tier": {
    "total": 9570,
    "group": 9280,
-   "point": 232
+   "point": 233
   },
   "Mikrobe": {
    "total": 555,
@@ -698,7 +698,7 @@
   "Pilz": {
    "total": 2172,
    "group": 2172,
-   "point": 19
+   "point": 20
   },
   "Protist": {
    "total": 137,
@@ -715,27 +715,27 @@
   "Ringelwuermer": {
    "total": 137,
    "group": 115,
-   "point": 0
+   "point": 2
   },
   "Nesseltiere": {
    "total": 130,
    "group": 75,
-   "point": 5
+   "point": 11
   },
   "Stachelhaeuter": {
    "total": 90,
    "group": 82,
-   "point": 11
+   "point": 12
   },
   "Strahlenflosser": {
    "total": 1268,
    "group": 1258,
-   "point": 11
+   "point": 9
   },
   "Saeugetiere": {
    "total": 2443,
    "group": 2438,
-   "point": 68
+   "point": 62
   },
   "Reptilien": {
    "total": 625,
@@ -765,12 +765,12 @@
   "Ascomycota": {
    "total": 385,
    "group": 385,
-   "point": 11
+   "point": 12
   },
   "Krebstiere": {
    "total": 821,
    "group": 821,
-   "point": 9
+   "point": 8
   },
   "Spinnentiere": {
    "total": 609,
@@ -795,7 +795,7 @@
   "Weichtiere": {
    "total": 1132,
    "group": 1069,
-   "point": 21
+   "point": 22
   },
   "Nacktsamer": {
    "total": 289,
