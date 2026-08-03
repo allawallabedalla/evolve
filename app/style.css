@@ -454,6 +454,12 @@
   .mediums { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
   .medium { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
   .medium.active { background: var(--bio-dim); color: #fbf3dd; font-weight: var(--w-bold); box-shadow: var(--shadow-sm); }
+  /* Nutzer-Feedback (2026-08-03): "unspezifizierter Toggle" — liegt water bewusst
+     zwischen den beiden Bändern (Sumpf, trüber See, s. resetMediumUI()), sahen beide
+     Buttons unbeteiligt genau wie im gewöhnlichen "nicht ausgewählt"-Zustand aus, nicht
+     wie ein ABSICHTLICHER Zwischenzustand. Gedämpfte Opazität macht daraus einen
+     dritten, sichtbar eigenen Zustand (Tooltip auf #mediums erklärt zusätzlich das Warum). */
+  .mediums.mixed .medium { opacity: .55; }
 
   /* ---- Entwurfs-Leiste (Regler entwerfen, Los übernimmt) — Nutzer-Idee, 2026-07-31.
      Erscheint erst, sobald ein Regler/Umschalter angefasst wurde; verschwindet nach

@@ -3424,16 +3424,23 @@ function applyMediumUI(medium, target){
   document.getElementById("v-water").textContent = e.water.toFixed(2);
   setWaterLabel(b.name, b.poleLo, b.poleHi);
   [...mediumsEl.children].forEach(c => c.classList.toggle("active", c.dataset.medium === medium));
+  mediumsEl.classList.remove("mixed"); mediumsEl.title = "";
 }
 /** Preset/Einfluss/Fundort hat water bereits auf einen eigenen Wert gesetzt: Regler auf
     volle Spanne + Original-Beschriftung zurück, Umschalter zeigt „keine Auswahl" — der
     Wert bleibt unverändert, unabhängig davon, ob er in einer der beiden Bänder liegt.
-    Loescht auch eine evtl. committetes Medium-Band (eine fremd gesetzte Welt ersetzt es). */
+    Loescht auch eine evtl. committetes Medium-Band (eine fremd gesetzte Welt ersetzt es).
+    Nutzer-Feedback (2026-08-03): "unspezifizierter Toggle" — zwei nicht hervorgehobene
+    Buttons sahen wie ein Rendering-Fehler aus, nicht wie ein bewusster Zwischenzustand.
+    `.mixed` daempft jetzt beide sichtbar UND ein Tooltip erklaert, warum (Sumpf, trueber
+    See — die Umwelt liegt bewusst zwischen den beiden Baendern, s. Kommentar oben). */
 function resetMediumUI(){
   committedMedium = null;
   waterInputEl.min = 0; waterInputEl.max = 1; waterInputEl.value = env.water;
   document.getElementById("v-water").textContent = env.water.toFixed(2);
   setWaterLabel(WATER_LEVER_DEF.name, WATER_LEVER_DEF.lo, WATER_LEVER_DEF.hi);
+  mediumsEl.classList.add("mixed");
+  mediumsEl.title = "Weder eindeutig Land noch Wasser — diese Umwelt liegt bewusst dazwischen (z. B. Sumpf, trüber See).";
   [...mediumsEl.children].forEach(c => c.classList.remove("active"));
 }
 // Onboarding-Selbstcheck (Punkt 11, Niche-Lehre): jeder andere Regler/Button in der App
