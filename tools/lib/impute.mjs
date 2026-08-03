@@ -213,6 +213,23 @@ export function traitsToGenes(traits) {
  *  tools/impute-check.mjs die Empfindlichkeit messen kann statt sie zu glauben. */
 export const MIN_SIBLINGS = 5;
 
+// V0 (docs/coverage-report.md, Abschnitt 6): fuer die 15 BEDINGTEN Stressor-Gene
+// (Index 10-24: detox..nfix) ist der Geschwister-MEDIAN der falsche Schaetzer. Ein
+// kontinuierliches Merkmal (Groesse, Masse) darf gemittelt werden -- eine An/Aus-
+// Spezialisierung nicht: der Median aus Kakteen-Austrocknungstoleranz, Nadelholz-
+// Frostschutz und Huelsenfruchtler-Stickstofffixierung erzeugt eine "Durchschnitts-
+// pflanze", die gleichzeitig alle drei mittelstark traegt -- und die es real nicht
+// gibt (jede Art hat EINE Spezialisierung). Gemessen: 71,7 % des gesamten Abdeckungs-
+// verlusts im Katalog stand auf genau dieser Fehlimputation (coverage-report.md
+// Abschnitt 4). Deshalb hier eine Mehrheitsregel statt eines Mittelwerts: nur wenn
+// mehr als die Haelfte der belegten Geschwister eine SPUERBARE Auspraegung zeigt,
+// gilt die Klade als Traeger und der Median wird uebernommen. Sonst gilt "Gen aus"
+// (Stufe (c) liefert dafuer nichts -- das Gen faellt an Stufe (d) durch, die den
+// echten, habitatabhaengigen Wert berechnet statt einen erfundenen Mittelwert zu
+// behaupten).
+export const STRESSOR_GENE_START = 10;
+export const STRESSOR_GENE_MAJORITY_THRESHOLD = 0.3;
+
 /** Wie tief in die Kette der Korpus hineinreicht. Die ersten zwoelf Vorfahren decken
  *  Gattung bis Klasse ab; alles darueber ist als „Geschwisterschaft“ bedeutungslos
  *  (der Median aller Tiere sagt nichts ueber eine Art) und kostet nur Speicher. */
@@ -264,6 +281,15 @@ export function imputeGene(corpus, lineage, gene, minSiblings = MIN_SIBLINGS) {
     const slot = corpus.get(lin[d]);
     const vals = slot && slot[gi];
     if (!vals || vals.length < minSiblings) continue;
+    // V0: bei den bedingten Stressor-Genen erst pruefen, ob die Geschwisterschaft die
+    // Spezialisierung MEHRHEITLICH traegt -- sonst ist "Gen aus" die ehrlichere Aussage
+    // als ein Median, den keine einzelne Art dieser Ebene wirklich hat. Kein Weitersuchen
+    // in einer groeberen Ebene: eine spezifischere Ebene ohne Mehrheit ist ein Ergebnis,
+    // keine fehlende Datenlage.
+    if (gi >= STRESSOR_GENE_START) {
+      const above = vals.filter((v) => v > STRESSOR_GENE_MAJORITY_THRESHOLD).length;
+      if (above * 2 <= vals.length) return null;
+    }
     return { value: median(vals), qid: lin[d], depth: d, n: vals.length };
   }
   return null;
