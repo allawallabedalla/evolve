@@ -185,6 +185,8 @@
           <summary id="chronLogSum">Chronik dieses Lebens</summary>
           <ol id="chronList"></ol>
         </details>
+        <div class="dpanel-row"><button class="gene-nums-toggle" id="fantasyModeBtn" aria-pressed="false" title="Wesen entwickeln erfundene statt echte Arten">Fantasiemodus: Aus</button></div>
+        <p class="dpanel-note">Ausgeschaltet entwickeln sich deine Wesen zu <b>echten, bei Wikipedia dokumentierten Arten</b>. Eingeschaltet entstehen stattdessen frei erfundene Namen im selben Klang — dein Wesen bleibt dann keiner realen Art mehr ähnlich benannt.</p>
       </div>
       <div class="dpanel-sec">
         <h3>Anzeige</h3>
@@ -1423,6 +1425,81 @@ function generateFormName(t, e, w, near){
   return second ? `${first.ax.adj}${end} ${second.ax.stem}${noun.w.toLowerCase()}`
                 : `${first.ax.adj}${end} ${noun.w}`;
 }
+
+// ---------------------------------------------------------------------------
+// FANTASIEMODUS (Backlog-Idee, verfeinert): Umschalter zwischen "Wesen entwickeln sich
+// zu ECHTEN Arten" (Standard, s. nearestReal() unten) und "Wesen entwickeln frei
+// erfundene Formen". Der erfundene Name kommt NICHT aus generateFormName() oben
+// (Adjektiv+Stamm+Grundwort — bleibt als Rückfall bestehen, falls der Katalog fehlt),
+// sondern aus einem Buchstaben-4-Gramm-Modell, trainiert auf den echten deutschen
+// Trivialnamen desselben Katalogs (catalog.js `de`-Feld). Verglichen gegen drei
+// Alternativen (Tracery-Grammatik, wortbasierte Markov-Kette, Präfix/Suffix-Splicing
+// samt Trigramm+Neuheits-Filter in einem Fitness-Feedback-Loop) — die einfache 4-Gramm-
+// Kette auf dem ROHEN Korpus (Leer-/Bindestriche als echte Übergänge mittrainiert, daher
+// gelegentlich mehrteilige Namen wie "Kleine Karder") klang im Vergleich am besten.
+let FANTASY_MODE = (typeof localStorage !== "undefined" && localStorage.getItem("evolveFantasyMode") === "1");
+
+let _fantasyModel = null;
+function fantasyModel(){
+  if(_fantasyModel) return _fantasyModel;
+  // Klammer-Zusaetze ("... (Gattung)") und Ziffern raus, Leer-/Bindestrich bleiben als
+  // echte Buchstaben im Trainingsalphabet erhalten (die machen den mehrteiligen Klang aus).
+  const clean = (n) => n.replace(/\s*\([^)]*\)\s*/g, " ").replace(/[0-9]/g, "").trim();
+  const uniq = [...new Set((CAT ? CAT.entries.map(e => clean(e.de || "")) : []).filter(Boolean))];
+  const ORDER = 4;
+  const model = new Map();
+  for(const w of uniq){
+    const s = "^".repeat(ORDER) + w.toLowerCase().replace(/[^a-zäöüß \-]/g, "") + "$";
+    for(let i = 0; i < s.length - ORDER; i++){
+      const ctx = s.slice(i, i+ORDER), next = s[i+ORDER];
+      if(!model.has(ctx)) model.set(ctx, new Map());
+      const m = model.get(ctx);
+      m.set(next, (m.get(next)||0) + 1);
+    }
+  }
+  _fantasyModel = { model, ORDER, realNameSet: new Set(uniq.map(n => n.toLowerCase())) };
+  return _fantasyModel;
+}
+// Bewusst KEIN Zwang auf ein Grundwort-Ende — genau das (Vergleichsvariante mit
+// Praefix/Splice-Formzwang) klang im direkten Hoervergleich schlechter. Einzige Schranke:
+// echt NEU (keine woertliche Kopie eines Katalog-Namens) und ein NATUERLICHES Ende (kein
+// Abbruch mitten im Wort, s. "$"-Symbol unten) — sonst entstehen Fragmente wie
+// "Kenia rubritische arch".
+function fantasyGenOnce(rng, fm, maxLen){
+  let ctx = "^".repeat(fm.ORDER), out = "";
+  for(let i = 0; i < maxLen; i++){
+    const m = fm.model.get(ctx);
+    if(!m) return null;
+    const entries = [...m.entries()];
+    const total = entries.reduce((a,[,c]) => a+c, 0);
+    let r = rng()*total, c = null;
+    for(const [ch,cnt] of entries){ r -= cnt; if(r <= 0){ c = ch; break; } }
+    if(!c) return null;
+    if(c === "$") return out;
+    out += c;
+    ctx = (ctx+c).slice(-fm.ORDER);
+  }
+  return null;   // Obergrenze ohne natuerliches Ende erreicht -> verwerfen, nicht abschneiden
+}
+function fantasyCapitalize(word){
+  return word.split(/([ -])/).map((part,i) => (i%2===0 ? part.charAt(0).toUpperCase()+part.slice(1) : part)).join("");
+}
+// Deterministisch aus dem Genom (wie generateFormName() oben): dasselbe Genom liefert
+// IMMER denselben Fantasienamen, kein Zufall ausserhalb des Genoms selbst.
+function generateFantasyName(t, e, w, near){
+  const fm = fantasyModel();
+  if(!fm.model.size) return generateFormName(t, e, w, near);   // Katalog fehlt -> alter Rückfall
+  const seed = fnv1a32("fantasy|" + t.map(x => Math.round(x*255)).join(","));
+  for(let attempt = 0; attempt < 60; attempt++){
+    const rng = mulberry32((seed + attempt*2654435761) >>> 0);
+    const raw = fantasyGenOnce(rng, fm, 24);
+    if(!raw || raw.length < 6 || raw.length > 24) continue;
+    const word = fantasyCapitalize(raw);
+    if(!fm.realNameSet.has(word.toLowerCase())) return word;
+  }
+  return generateFormName(t, e, w, near);   // sehr seltener Fall: nach 60 Versuchen nichts Passendes
+}
+
 // Der eigentliche Matcher: gewichteter, normierter Abstand zu jedem Prototyp — gemittelt
 // NUR über die Gene, zu denen der jeweilige Prototyp etwas sagt (s. archLib()).
 const _archDist = [];
@@ -1463,13 +1540,26 @@ function matchArchetype(t, e){
   const settled = clamp01(1 - burden/ARCH.burdenFull);   // 1 = keine überflüssige Ausrüstung
   const conf = margin * settled;
   if(dBest > ARCH.novelThreshold){
-    const n = generateFormName(t, e, w, best);
+    const n = FANTASY_MODE ? generateFantasyName(t, e, w, best) : generateFormName(t, e, w, best);
     // Reich, Emoji und damit Silhouette/Bauplan-Text folgen dem nächsten Verwandten — nur
     // der NAME ist neu. Damit die vorhandene Icon-Tabelle (Name -> Icon) auch für erzeugte
     // Namen greift, erbt der Name das Icon des nächsten Verwandten.
     if(FICON[n]===undefined) FICON[n] = FICON[best.f.n] || "dot";
     return { k:best.f.k, n, e:best.f.e, key:"novum", conf:0, margin:0, settled, alt:best.f.n,
-             novel:true, dist:dBest, real:null };
+             novel:true, dist:dBest, real:null,
+             // Bauplan-Name bleibt IMMER erreichbar (s. Kommentar unten) — fehlte hier bisher.
+             form: best.f.n };
+  }
+  // Fantasiemodus: ueberspringt nearestReal() komplett, GENUS/Bauplan-Zuordnung (`key`,
+  // `k`, `e`, `form`) bleibt unveraendert — nur der ANZEIGENAME ist erfunden statt real.
+  // Dadurch bleiben alle Stellen, die nach `.key`/`.form` vergleichen (Genbuch, Chronik,
+  // Herausforderungen, Stabilitaets-Gate), unberuehrt vom Umschalter.
+  if(FANTASY_MODE){
+    const n = generateFantasyName(t, e, w, best);
+    if(FICON[n]===undefined) FICON[n] = FICON[best.f.n] || "dot";
+    return { k:best.f.k, n, e:best.f.e, key:best.f.key, conf, margin, settled,
+             alt: second ? second.f.n : null, novel:false, dist:dBest, real:null,
+             form: best.f.n };
   }
   const real = nearestReal(t, best.f.key, w);
   return { k:best.f.k, n: (CATALOG_NAMES && real) ? (real.e.de || real.e.sci) : best.f.n,
@@ -3535,6 +3625,22 @@ GENE_LABELS.forEach((lbl,i) => {
   apply(on);
   btn.addEventListener("click", ()=>{ const v=!genesEl.classList.contains("show-all-genes"); apply(v);
     localStorage.setItem("evolveGeneShowAll", v?"1":"0"); });
+})();
+// Fantasiemodus-Umschalter (dasselbe localStorage-Muster wie oben). Da der Umschalter
+// nur den ANZEIGENAMEN betrifft (s. matchArchetype()), reicht ein Neu-Klassifizieren des
+// aktuellen Genoms — derselbe Reset, den newLineage()/loadState() u.a. schon nutzen; der
+// laufende Zeichen-Takt (drawCreature/updatePanels) liest committedArch ohnehin jeden
+// Frame neu und zeigt den neuen Namen dadurch sofort, ohne eigenen Repaint-Aufruf.
+(function(){
+  const btn=document.getElementById("fantasyModeBtn");
+  const apply = v => { btn.setAttribute("aria-pressed", v?"true":"false");
+    btn.textContent = v ? "Fantasiemodus: An" : "Fantasiemodus: Aus"; };
+  apply(FANTASY_MODE);
+  btn.addEventListener("click", ()=>{
+    FANTASY_MODE = !FANTASY_MODE; apply(FANTASY_MODE);
+    localStorage.setItem("evolveFantasyMode", FANTASY_MODE?"1":"0");
+    committedArch = classify(genome); candArch = null; candCount = 0;
+  });
 })();
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
 // Gen-Index: 0 insul,1 size,2 limb,3 metab,4 armor,5 photo,6 mob,7 struct,8 wing,...,13 Grabtrieb
