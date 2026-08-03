@@ -187,29 +187,34 @@ window.ARCHETYPES = {
       // gingen an Nadelbaum). size:.63 = Mittelwert über 8 Mio. gleichverteilte
       // Kraut-Genome im Blütenkraut-Zweig (dieselbe Geometrie-Methode wie
       // archetype-derive.mjs Schritt 1, hier nur unterhalb ihrer eigenen Schwelle).
-      // resprout .57 = Hill-Climb-Mittel ueber Feuer .2-1.0 bei sonst fixem Proto (AXIS-25,
+      // resprout .59 = Hill-Climb-Mittel ueber Feuer .2-1.0 bei sonst fixem Proto (AXIS-25,
       // s. Kommentar zu `genes` oben) - macht das Fenster zwischen Moos/Gruenalge (.09)
       // und Strauch/Laubbaum (.83/.89) erstmals real erreichbar statt nur geometrisch.
       proto:{ insulation:.30, size:.63, armor:.25, photosynthesis:.87, mobility:.20,
-              structure:.24, resprout:.57 }, requires:{ water:[0.05,0.70] } },
+              structure:.24, resprout:.59 }, requires:{ water:[0.05,0.70] } },
 
     { key:"farn", k:"Pflanze", n:"Farn", e:"🌿",
       // if(struct<0.42 && size>0.35), photo<=0.75
       // requires water: Farne moegen es feucht/schattig, aber nicht untergetaucht — s.
       // Laubbaum-Kommentar (PHASE-0, 2026-07-30).
-      // resprout .59 (AXIS-25, gemessen wie bei bluetenkraut): reale Farne (z. B.
+      // resprout .62 (AXIS-25, gemessen wie bei bluetenkraut): reale Farne (z. B.
       // Adlerfarn) treiben nach Feuer/Frost aus tief sitzenden Rhizomen wieder aus,
       // ohne oberirdisches Gewebe ueber die Saison zu erhalten.
       proto:{ insulation:.30, size:.70, armor:.25, photosynthesis:.60, mobility:.20,
-              structure:.22, resprout:.59 }, requires:{ water:[0.15,0.75] } },
+              structure:.22, resprout:.62 }, requires:{ water:[0.15,0.75] } },
 
     { key:"kraut", k:"Pflanze", n:"Kraut · niedrige Pflanze", e:"☘️",
       // Auffang-Zweig der Pflanzen. requires water: s. Laubbaum-Kommentar.
-      // resprout .74 (AXIS-25, gemessen wie bei bluetenkraut): der Auffang-Zweig fuer
-      // krautige Pflanzen ohne eigenen Prototyp - hoher Wert, weil ausdauernde Stauden/
-      // Ruderalarten die Mehrheit dieser Restklasse stellen.
-      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47,
-              resprout:.74 },
+      // KEIN resprout-Eintrag (AXIS-25, Korrektur 2026-08-03): anders als bluetenkraut/farn
+      // ist kraut kein neu erschlossenes Stoerungs-Nische, sondern der generische Auffang-
+      // Zweig, der schon vorher (ohne resprout) in praktisch jeder Umwelt erreichbar war.
+      // Ein erster Versuch, ihm einen gemessenen resprout-Wert (.77) mitzugeben, gab ihm
+      // einen Abstands-Sollwert auf einem Gen, das in JEDER ungestoerten Umwelt (fire=frost=0,
+      // der Normalfall) nahe seinem Anker (0.12) bleibt - das riss kraut (937 Arten) aus der
+      // Erreichbarkeit (gemessen: coverage-check engineGapGroups, Vorher/Nachher-Vergleich
+      // gegen den Commit vor AXIS-25). Nur Archetypen, deren Identitaet WIRKLICH an
+      // Stoerung haengt (bluetenkraut/farn), bekommen einen resprout-Wert.
+      proto:{ insulation:.30, armor:.25, photosynthesis:.71, mobility:.20, structure:.47 },
       requires:{ water:[0.05,0.70] } },
 
     // ===== Reich TIERE — heterotroph + mobil ====================================

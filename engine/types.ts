@@ -141,7 +141,6 @@ export interface Physics {
   resproutReach: number;
   resproutCost: number;
   resproutSeverity: number;
-  resproutGrazingShare: number;
   wResprout: number;
   maintenance: {
     base: number;

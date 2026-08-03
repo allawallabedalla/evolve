@@ -116,10 +116,12 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     # 2) Energie - zwei sich ausschliessende Strategien
     structure_light = phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]
     # Wiederaustrieb (AXIS-25, resprout): zweiter, billigerer Weg ins Licht - s.
-    # engine/fitness.ts fuer den vollen Kommentar. Skaliert mit (1-size).
+    # engine/fitness.ts fuer den vollen Kommentar. Skaliert mit (1-size) UND mit
+    # disturbance (Feuer/Frost) - ohne Stoerung gibt es nichts wiederherzustellen.
+    disturbance = _clamp01(max(env.get("fire", 0.0), env.get("frost", 0.0)))
     light_access = _clamp01(
         phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
-        + phys["resproutReach"] * resprout * (1.0 - size)
+        + phys["resproutReach"] * resprout * disturbance * (1.0 - size)
     )
     photo_size = phys["photoSizeFloor"] + (1.0 - phys["photoSizeFloor"]) * size
     # Temperatur-Abhaengigkeit (Biologie-Audit): Photosynthese hat ein Optimum;
@@ -310,8 +312,9 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + armor * armor * mq["armor"]
     )
     # Wiederaustrieb-Steuer (AXIS-25): jaehrlicher Wiederaufbau kostet einen Anteil der
-    # Gesamtenergie statt eines festen Unterhalts (kein m["resprout"]).
-    total_energy_after_resprout = total_energy * (1.0 - phys["resproutCost"] * resprout)
+    # Gesamtenergie statt eines festen Unterhalts (kein m["resprout"]) - skaliert wie
+    # der lightAccess-Bonus oben mit disturbance.
+    total_energy_after_resprout = total_energy * (1.0 - phys["resproutCost"] * resprout * disturbance)
     raw_nutrition = _sigmoid((total_energy_after_resprout - maintenance) * phys["energyScale"])
     nutrition = phys["nutritionFloor"] + (1.0 - phys["nutritionFloor"]) * raw_nutrition
 
@@ -374,9 +377,11 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     wind_survival = _clamp01(1.0 - wind * (1.0 - windres) * phys["windLethality"])
 
     # 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): s. engine/fitness.ts fuer den
-    #     vollen Kommentar. resproutGrazingShare daempft den Fraas-Anteil, weil predation
-    #     schon oben (pred_survival/defense) einzahlt - sonst waere Fraas doppelt bestraft.
-    disturbance = _clamp01(max(fire, frost, env["predation"] * phys["resproutGrazingShare"]))
+    #     vollen Kommentar. BEWUSST OHNE predation (anders als der urspruengliche Vorschlag) -
+    #     predation ist bereits durch den endogenen Raeuber-Beute-Mechanismus belegt
+    #     (world/coevolution.ts) und gab dort eine vom echten Verteidigungs-Handel geloeste
+    #     Flucht (gemessen: distribution-check B4 ausserhalb Zielband). `disturbance` wurde
+    #     bereits oben bei light_access berechnet, hier nur wiederverwendet.
     regrowth_survival = _clamp01(
         1.0 - disturbance * (1.0 - max(fireres, resprout)) * phys["resproutSeverity"]
     )

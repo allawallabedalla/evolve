@@ -114,9 +114,19 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   //       per Wiederaustrieb ersetzen (das bleibt structure vorbehalten), nur ein
   //       niedriger/krautiger Bauplan profitiert. Der Ertragsabschlag dafuer steckt
   //       NICHT hier, sondern im Energie-Steuersatz weiter unten (resproutCost).
+  //       BEIDE skalieren mit `disturbance` (Feuer/Frost, s. Punkt 14 unten - hier
+  //       vorgezogen, weil lightAccess sie schon braucht): ohne wiederkehrende Stoerung
+  //       gibt es nichts wiederherzustellen - eine Pflanze in einer stoerungsfreien Umwelt
+  //       zahlt dann weder den Wiederaufbau, noch bekommt sie den Lichtzugangs-Vorteil.
+  //       Erste Fassung OHNE diese Kopplung (immer aktiv) gab JEDER Pflanze mit resprout>0
+  //       einen von der Stoerung unabhaengigen Groessen-Anreiz (klein = billiger Lichtzugang)
+  //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
+  //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
+  //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
+  const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
   const lightAccess = clamp01(
     phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
-      phys.resproutReach * resprout * (1 - size)
+      phys.resproutReach * resprout * disturbance * (1 - size)
   );
   //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
   //       Photosynthese ein (macht baumartige Groesse ueberhaupt lohnend).
@@ -377,8 +387,10 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   //    Wiederaustrieb-Steuer (AXIS-25): der jaehrliche Wiederaufbau aus der Basis kostet
   //    einen Anteil der GESAMTENERGIE, nicht nur einen festen Unterhalt (m.resprout gibt
   //    es bewusst nicht) - das ist der Ertragsabschlag, den ein Kraut gegenueber einem
-  //    Baum zahlt, der sein Gewebe von Jahr zu Jahr weiterverwendet.
-  const totalEnergyAfterResprout = totalEnergy * (1 - phys.resproutCost * resprout);
+  //    Baum zahlt, der sein Gewebe von Jahr zu Jahr weiterverwendet. Wie der lightAccess-
+  //    Bonus oben skaliert das mit `disturbance` - ohne wiederkehrende Stoerung gibt es
+  //    nichts, was jaehrlich neu aufgebaut werden muesste.
+  const totalEnergyAfterResprout = totalEnergy * (1 - phys.resproutCost * resprout * disturbance);
 
   // Nutrition-Floor: die Nahrungs-Komponente faellt in der Fitness nie ganz auf 0.
   // So bleiben Temperatur/Praedations-Gradienten auch ohne Energiequelle lebendig
@@ -497,17 +509,25 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const wind = env.wind ?? 0;
   const windSurvival = clamp01(1 - wind * (1 - windres) * phys.windLethality);
 
-  // 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): Feuer/Frost/Fraas koennen
-  //     oberirdisches Gewebe zerstoeren, OHNE die Pflanze zu toeten, wenn sie aus der
-  //     Basis wieder austreibt (resprout) ODER ohnehin feuerresistent ist (fireres,
-  //     dessen Beschreibung oben ausdruecklich Lignotuber nennt - beide Gene koennen sich
-  //     ueberschneiden, das ist biologisch korrekt: Korkrinde UND Wiederaustrieb sind zwei
-  //     unabhaengige, kombinierbare Strategien derselben Pflanze). resproutGrazingShare
-  //     daempft den Fraas-Anteil bewusst: predation zaehlt bereits ueber defenseScore/
-  //     predSurvival oben in die Fitness ein (structure ist dort schon Verteidigung) -
-  //     ohne den Faktor waere Fraas-Stoerung hier ein zweites Mal voll bestraft (gemessen
-  //     in einer isolierten Vorab-Abschaetzung, s. physics.json-Kommentar Version 9).
-  const disturbance = clamp01(Math.max(fire, frost, env.predation * phys.resproutGrazingShare));
+  // 14) Stoerungs-Ueberleben / Wiederaustrieb (AXIS-25): Feuer/Frost koennen oberirdisches
+  //     Gewebe zerstoeren, OHNE die Pflanze zu toeten, wenn sie aus der Basis wieder
+  //     austreibt (resprout) ODER ohnehin feuerresistent ist (fireres, dessen Beschreibung
+  //     oben ausdruecklich Lignotuber nennt - beide Gene koennen sich ueberschneiden, das ist
+  //     biologisch korrekt: Korkrinde UND Wiederaustrieb sind zwei unabhaengige, kombinierbare
+  //     Strategien derselben Pflanze).
+  //     BEWUSST OHNE predation/Fraas (anders als der urspruengliche Vorschlag, docs/coverage-
+  //     report.md AXIS-25): predation ist in dieser Physik bereits durch den endogenen
+  //     Raeuber-Beute-Mechanismus belegt (world/coevolution.ts modelliert damit die eigentliche
+  //     JAGD-Chase-Staerke, kein reiner Pflanzen-Fraßdruck). Eine erste Fassung mit
+  //     predation*resproutGrazingShare gab Beute-Genomen eine vom echten Verteidigungs-Handel
+  //     (defenseScore/structure/armor/size) losgeloeste, billige Flucht aus dem Raeuberdruck
+  //     und riss die kalibrierte Groessen-Ruestungswettlauf-Dynamik aus dem Zielband (gemessen:
+  //     distribution-check B4 Raeuber/Beute-Biomasse 0.24 -> 2.37, weit ausserhalb 0.03-0.3).
+  //     Fire/Frost sind reine Umwelt-Einfluesse ohne diese Doppelbelegung - sie sind ausserdem
+  //     der textbuchmaessige Kernfall von Wiederaustrieb (Graeser nach Steppenbrand,
+  //     Staudenrueckzug in den Wurzelstock ueber Winter). `disturbance` selbst wurde bereits
+  //     oben bei lightAccess berechnet (aus env.fire/env.frost, vor der Deklaration der
+  //     lokalen fire/frost-Konstanten) - hier nur wiederverwendet.
   const regrowthSurvival = clamp01(
     1 - disturbance * (1 - Math.max(fireres, resprout)) * phys.resproutSeverity
   );

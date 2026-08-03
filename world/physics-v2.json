@@ -1,5 +1,5 @@
 {
-  "_comment": "v2-Landschaft (Umbau-Prototyp) — Kopie von physics.json mit EINER Änderung: maintenance.size 0.22->0.14, damit sich über die Umwelten ein echtes Größen-Spektrum (klein/mittel/groß) einstellt statt fast nur winzig. NUR für den world/-Prototyp; die Live-App + Orakel + parity/ecology nutzen weiter physics.json (unberührt). Bei Integration (Stufe A) wird das über einen sauberen Engine-Pass mit Re-Validierung in physics.json überführt. AXIS-25-Nachtrag (2026-08-03): engine/fitness.ts liest jetzt zusaetzlich resproutReach/resproutCost/resproutSeverity/resproutGrazingShare/wResprout - hier nachgezogen, damit das 26. Gen nicht auf undefined liegt. Vorgefundene Luecke (nicht durch diese Aenderung verursacht, nur dabei bemerkt): diese Datei fuehrt bereits VOR diesem Nachtrag nicht die amphibiousYield/amphibiousWaterCenter/... -Schluessel aus physics.json Version 7 - jeder Aufruf von fitness() mit dieser Datei liefert deshalb bereits heute NaN (energyAmphibious = undefined*... ), unabhaengig von AXIS-25. Das ist die in der Kopf-Notiz erwaehnte, noch ausstehende Stufe-A-Integration, nicht Teil dieser Aenderung - hier bewusst nicht mitrepariert, um den Eingriff auf AXIS-25 zu begrenzen.",
+  "_comment": "v2-Landschaft (Umbau-Prototyp) — Kopie von physics.json mit EINER Änderung: maintenance.size 0.22->0.14, damit sich über die Umwelten ein echtes Größen-Spektrum (klein/mittel/groß) einstellt statt fast nur winzig. NUR für den world/-Prototyp; die Live-App + Orakel + parity/ecology nutzen weiter physics.json (unberührt). Bei Integration (Stufe A) wird das über einen sauberen Engine-Pass mit Re-Validierung in physics.json überführt. AXIS-25-Nachtrag (2026-08-03): engine/fitness.ts liest jetzt zusaetzlich resproutReach/resproutCost/resproutSeverity/wResprout - hier nachgezogen, damit das 26. Gen nicht auf undefined liegt (finale Formel s. physics.json Version 9: lightAccess-Bonus und Energie-Steuer sind an disturbance=max(fire,frost) gekoppelt, kein resproutGrazingShare/predation-Anteil). Vorgefundene Luecke (nicht durch diese Aenderung verursacht, nur dabei bemerkt): diese Datei fuehrt bereits VOR diesem Nachtrag nicht die amphibiousYield/amphibiousWaterCenter/... -Schluessel aus physics.json Version 7 - jeder Aufruf von fitness() mit dieser Datei liefert deshalb bereits heute NaN (energyAmphibious = undefined*... ), unabhaengig von AXIS-25. Das ist die in der Kopf-Notiz erwaehnte, noch ausstehende Stufe-A-Integration, nicht Teil dieser Aenderung - hier bewusst nicht mitrepariert, um den Eingriff auf AXIS-25 zu begrenzen.",
   "traits": [
     "insulation",
     "size",
@@ -163,6 +163,5 @@
   "resproutReach": 0.15,
   "resproutCost": 0.15,
   "resproutSeverity": 0.6,
-  "resproutGrazingShare": 0.35,
   "wResprout": 1.0
 }

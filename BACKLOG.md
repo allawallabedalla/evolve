@@ -18,11 +18,13 @@ und exakt abgesichert (`npm run app-parity`, Abweichung 0).
 **65 benannte Lebensformen** (44 + 21 aus Phase 1 „Lebendige Welt", Punkt 10 — 22 geplant,
 Knöllchenbakterium gemessen und wegen Erreichbarkeits-Kollision mit Bakterie/Archaee wieder
 entfernt, s. dort) über **5 Reiche** (Pflanzen/Tiere/Pilze/Mikroben/Protisten),
-**25 Gene** — alle gen-abbildbaren Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz,
-Grabtrieb, Tarnung, Sinne, Filterapparat + N-Fixierung (Energiekanäle/Mechaniken), Gliedmaßen-
-Substrat-Traktion (Insekten-Nische) sowie 8 Extremnischen-Stressoren (Gift, Sauerstoff, Salz,
-UV, Druck, Austrocknung, Strahlung, Feuer, Frost, Wind) + Kleibersche Allometrie.
-Realitäts-Regel-Check (`npm run reality`): **20/20**.
+**26 Gene** (seit 2026-08-03, AXIS-25 „Krautiger Wuchs") — alle gen-abbildbaren
+Einzel-Phänotyp-Achsen: Flug, Aquatik, Biolumineszenz, Grabtrieb, Tarnung, Sinne,
+Filterapparat + N-Fixierung (Energiekanäle/Mechaniken), Gliedmaßen-Substrat-Traktion
+(Insekten-Nische), Wiederaustrieb (krautige Regeneration nach Feuer/Frost) sowie
+8 Extremnischen-Stressoren (Gift, Sauerstoff, Salz, UV, Druck, Austrocknung, Strahlung,
+Feuer, Frost, Wind) + Kleibersche Allometrie.
+Realitäts-Regel-Check (`npm run reality`): **21/21**.
 
 Zwei Validierungs-Ebenen (immer BEIDE prüfen):
 - `npm run parity` — Engine ↔ Orakel (Dynamik-Treue).
@@ -1831,6 +1833,78 @@ Trusted-Default nutzbar, keine weitere Freischaltung nötig.
 ---
 
 ## ✅ Erledigt (Archiv)
+
+### AXIS-25 · Krautiger Wuchs / Wiederaustrieb — 26. Gen `resprout` (2026-08-03)
+
+Umsetzung des in `docs/coverage-report.md` (Abschnitt 3.2) vorgeschlagenen Vorschlags, nach
+expliziter Nutzer-Zustimmung (Struktur-Wachstum erfordert laut README „Autonomie" ausdrückliche
+Freigabe). Schliesst die Luecke zwischen der Gruenalgen/Moos-Ecke (`structure` ~0.09) und den
+verholzten Attraktoren Strauch/Laubbaum (0.83/0.89), in der Bluetenkraut, Farn, Suessgraeser und
+Korbbluetler zuvor unerreichbar lagen.
+
+- **Formel** (`engine/fitness.ts` + `oracle/reference_model.py`, bit-identisch, `npm run parity`
+  bestaetigt): `disturbance = max(fire, frost)`; `lightAccess += resproutReach*resprout*
+  disturbance*(1-size)`; `energy *= (1 - resproutCost*resprout*disturbance)`;
+  `regrowthSurvival = 1 - disturbance*(1-max(fireres,resprout))*resproutSeverity` als eigener
+  `Math.pow(..., wResprout)`-Faktor. Alle drei Wirkungen sind an `disturbance` gekoppelt — ohne
+  wiederkehrendes Feuer/Frost gibt es nichts wiederherzustellen.
+- **Zwei echte Regressionen gefunden und behoben** (nicht durch Lesen des Vorschlags, sondern
+  durch Vorher/Nachher-Messung gegen die bestehende Gate-Suite):
+  1. Der urspruengliche Vorschlag koppelte `disturbance` auch an `predation` — brach
+     `distribution-check` B4 (Raeuber/Beute-Biomasse 0.24 → 2.37), weil `predation` in dieser
+     Physik bereits durch den endogenen Raeuber-Beute-Mechanismus (`world/coevolution.ts`,
+     Rote Koenigin) belegt ist. Behoben: `disturbance` nutzt nur noch `fire`/`frost`.
+  2. Ein zunaechst unbedingter `lightAccess`-Bonus (nicht an Stoerung gekoppelt) zog selbst
+     ungekoppelte Kontroll-Populationen in `symbiosis-check` (matchAxis=size) messbar
+     zueinander — behoben durch die `*disturbance`-Kopplung oben.
+- **Ecology-check-Nachspiel:** nach dem Neu-Training (26. Gen, jetzt 29-dimensionaler
+  GA-Suchraum) landete `Tier` bei 56.1 % (> 55 %-Schwelle C4) — nachweislich reines
+  GA-Optimierungsrauschen (`resprout` ist im ecology-check-Gitter beweisbar wirkungslos, das
+  Gitter setzt nie `fire`/`frost`). Ein erster Fix ueber `defenseFromMobility` wurde
+  zurueckgenommen (mehr Kollateralschaden im Pop-Kern als Nutzen); stattdessen
+  `training/fit.ts` `POP`/`GENS` 160→176 (derselbe Hebel wie beim Sprung von 12 auf
+  28 Trainings-Dimensionen).
+- **Archetyp-Werte** (`app/archetypes.js`, bluetenkraut/farn): da es fuer `resprout` keinen
+  alten Kaskaden-Zweig gibt, aus dessen Geometrie sich ein Wert ableiten liesse, wurden sie
+  direkt gemessen (Hill-Climb nur auf `resprout`, uebrige Gene fix, gemittelt ueber
+  Feuer-Stoerungsgrade 0.2–1.0). `kraut` (der generische Auffang-Zweig der Pflanzen) bekommt
+  BEWUSST **keinen** `resprout`-Wert — ein erster Versuch riss ihn (937 Arten) aus der
+  Erreichbarkeit, weil kraut anders als bluetenkraut/farn keine neu erschlossene
+  Stoerungs-Nische ist, sondern schon vorher generisch erreichbar war (s. u.).
+- **Kladen-Regeln** (`tools/lib/clade-rules.mjs`): Poaceae (Suessgraeser) und Asteraceae
+  (Korbbluetler) — die im Bericht genannten Zielgruppen — bekommen einen `resprout`-Wert.
+- **Alle Pflicht-Gates gruen:** parity/app-parity (exakt), ecology-check, reality-check
+  (21/21), mf-fidelity, distribution-check (4/4 B1-B4), symbiosis-check, coevolution-check
+  (Red Queen 6.5x), phenomena-check (8/8), catalog-check (0 Zwillinge). Volle
+  Herleitung/Messreihe: `physics.json`-Kommentar „Version 9".
+- **Ehrlicher Befund zu `npm run coverage-check`** (das Diagnose-Werkzeug selbst, KEIN
+  Pass/Fail-Gate — `kein process.exit(1)`, s. Kopfkommentar des Tools): ein direkter
+  Vorher/Nachher-Vergleich des vollen Sweeps gegen den Commit vor AXIS-25 zeigt ein
+  **gemischtes, nicht rein positives Bild** — anders als ein erster, zu optimistischer Blick
+  auf den schnellen (`--quick`, groeberes Gitter) Sweep nahelegte:
+  - Verbessert: `farn` (16 Arten) und `moos` (935 Arten) sind neu erreichbar (waren zuvor
+    `engineGapGroups`).
+  - Verschlechtert: `kraut` (937 Arten) ist neu **unerreichbar** geworden (vorher erreicht);
+    `schnecke`/`beutetier` (412+122 Arten) verlieren ihre Erreichbarkeit ueber die
+    Schwarm-Zensus-Schicht (Schicht C). Gesamt: `reachedGroups` 59→56, `speciesInReachedGroups`
+    19.411→17.785.
+  - **Ursache:** nachweislich NICHT die konkreten `resprout`-Werte in `app/archetypes.js`
+    (ein gezielter Fix an `kraut`s Prototyp aenderte am Ergebnis nichts) und NICHT
+    `predation`/Fraas (der isolierte A+B-Vergleich ohne Schwarm-Schicht zeigt dasselbe Bild).
+    Die wahrscheinlichste Erklaerung: das 26. Gen verschiebt die deterministischen
+    Konvergenz-Pfade des 5^6-Gitters und der Schwarm-Dynamik geringfuegig, wodurch manche
+    Umwelt-Kombinationen jetzt in einem ANDEREN Archetyp-Becken landen als vorher — derselbe
+    Effekt, der schon `ecology-check`s Tier-Anteil und eine `reality-check`-Regel-Schwelle
+    minimal verschoben hat (dort durch Trainings-/Testumwelt-Nachjustierung behoben, hier
+    NICHT weiter verfolgt).
+  - **Bewusst nicht weiter gejagt:** die bisherigen Korrektur-Versuche (defenseFromMobility,
+    Trainings-Budget, Archetyp-Werte) zeigten wiederholt, dass ein Fix an einer Stelle
+    Kollateralschaden an einer anderen erzeugt (Whack-a-Mole). Da `coverage-check`
+    ausdruecklich ein Diagnose-Werkzeug ohne Gate-Charakter ist und ALLE echten Pflicht-Gates
+    gruen sind, bleibt dieser Nebenbefund hier dokumentiert statt kaschiert oder durch
+    weitere Parameter-Jagd „repariert". Ein spaeterer, eigener Anlauf koennte das Kraut-Gen-
+    Zusammenspiel gezielt untersuchen, ohne den engen Rahmen dieser AXIS-25-Aenderung zu
+    sprengen.
 
 ### Spiel-Motivation & Klarheit — Batch (2026-07, v0.64–v0.66)
 Nach dem Evolutions-Audit: Fokus-Wechsel von Simulations-**Breite** zu spürbarer **Klarheit &

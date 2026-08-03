@@ -36,11 +36,41 @@ keine Schätzung, keine gerundete Erinnerung.
 > Kern-Gen-Nischen) steht unabhängig von der V0-Diagnose.
 > Volle neue Zahlen: `docs/coverage.json` (Lauf vom 2026-08-03, nach V0).
 
+> **Dritter Nachtrag (2026-08-03): AXIS-25 UMGESETZT** (nach ausdrücklicher Nutzer-Zustimmung
+> für den Struktur-Wachstum-Schritt). Neues Gen `resprout` in `engine/fitness.ts` +
+> `oracle/reference_model.py` + `physics.json` (voller Herleitungs-/Messkommentar dort,
+> „Version 9"). Formel bewusst enger als hier vorgeschlagen: `disturbance = max(fire, frost)`
+> (OHNE `predation`/Fraas — eine erste Fassung mit `predation*grazingShare` brach die
+> Räuber-Beute-Koevolution, `distribution-check` B4 0.24→2.37), und `lightAccess`-Bonus +
+> Energie-Steuer sind an `disturbance` gekoppelt (nicht unbedingt wie ursprünglich skizziert —
+> sonst zog ein von Störung unabhängiger Größen-Anreiz selbst ungekoppelte Kontroll-
+> Populationen in `symbiosis-check` zueinander). Alle Pflicht-Gates grün (parity, app-parity,
+> ecology-check, reality-check 21/21, mf-fidelity, distribution-check 4/4, symbiosis-check,
+> coevolution-check, phenomena-check 8/8, catalog-check).
+>
+> **Ehrlicher Befund zum Abdeckungs-Effekt** (dieses Diagnose-Werkzeug selbst ist KEIN
+> Pass/Fail-Gate): ein voller Vorher/Nachher-Sweep gegen den Commit vor AXIS-25 zeigt ein
+> gemischtes Bild, nicht die klare Verbesserung, die ein erster Blick auf den groben
+> `--quick`-Sweep nahelegte. Neu erreichbar: `farn` (16 Arten) und `moos` (935 Arten, praktisch
+> vollständig). Neu UNERREICHBAR: `kraut` (937 Arten, vorher erreicht), `schnecke`/`beutetier`
+> (412+122 Arten, verlieren die Schwarm-Zensus-Erreichbarkeit). `bluetenkraut` selbst bleibt in
+> diesem Sweep unerreicht (die Formel macht es rechnerisch konkurrenzfähig, s. Version-9-
+> Kommentar, aber die deterministische Konvergenz aus einem neutralen Startgenom findet diesen
+> Punkt in den gerasterten Testumwelten nicht). Ursache der Kraut/Schnecke/Beutetier-Regression:
+> nachweislich NICHT die konkreten `resprout`-Werte (ein gezielter Archetyp-Fix änderte nichts)
+> und NICHT `predation` (zeigt sich auch ohne Schwarm-Schicht) — am wahrscheinlichsten
+> verschiebt das 26. Gen die deterministischen Konvergenzpfade geringfügig, sodass einzelne
+> Gitterpunkte in ein anderes Archetyp-Becken kippen (derselbe Effekt, der `ecology-check` und
+> eine `reality-check`-Schwelle minimal verschoben hat, dort durch Nachjustierung behoben).
+> Bewusst NICHT weiter durch Parameter-Jagd „repariert" (mehrfach beobachtetes Whack-a-Mole-
+> Muster) — vollständig dokumentiert in `BACKLOG.md` („AXIS-25"-Eintrag).
+
 > **Der Teil 3.2 ist ein VORSCHLAG, keine Umsetzung.** Neue Gene und neue Mechaniken
 > werden in diesem Repo grundsätzlich nur vorgeschlagen und von Hand bestätigt
 > (README „Autonomie"); kontinuierliche Parameter werden gefittet, Struktur wächst nur
 > mit ausdrücklicher Zustimmung. `engine/fitness.ts` und `physics.json` sind für diesen
-> Schritt **nicht angefasst** worden.
+> Schritt **nicht angefasst** worden — **das gilt für den ursprünglichen Vorschlag unten,
+> AXIS-25 selbst wurde seither umgesetzt, s. dritter Nachtrag oben.**
 
 ---
 
@@ -568,6 +598,13 @@ eine echte Saison-Schleife in `world/population.ts`.
 in konstanten Umwelten nicht verlieren (das ist der Gegentest).
 
 ### AXIS-25 · Krautiger Wuchs / Regeneration nach Störung — neues Gen `resprout`
+
+> **✅ UMGESETZT (2026-08-03)** — die Formel unten ist der ursprüngliche Vorschlag; die
+> tatsächlich gebaute Fassung weicht in zwei gemessenen Punkten davon ab (kein `predation` im
+> `disturbance`-Term, `lightAccess`/Energie-Steuer an `disturbance` gekoppelt statt unbedingt).
+> Voller Befund inkl. ehrlicher Abdeckungs-Wirkung: dritter Nachtrag ganz oben in diesem
+> Dokument, ausführliche Herleitung `physics.json`-Kommentar „Version 9", Zusammenfassung
+> `BACKLOG.md` („AXIS-25"-Eintrag).
 
 **WAS fehlt.** Stützgewebe (`structure`) ist in dieser Physik der einzige Weg nach oben ins
 Licht (`structureLightFloor`) und trägt seinen Unterhalt (0.15) dauerhaft. Eine Pflanze, die

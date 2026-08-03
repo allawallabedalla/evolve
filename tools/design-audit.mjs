@@ -8,7 +8,7 @@
 //      gesucht, bis eine deckende Flaeche kommt — nicht geraten).
 //   2) alle 12 Presets + jeder der 6 Regler auf 0 und 1: wird ueberhaupt etwas
 //      gezeichnet?
-//   3) alle 25 Gene einzeln auf 0 und 1 (50 Mutationsfaelle) durch classify()
+//   3) alle NG Gene einzeln auf 0 und 1 (2*NG Mutationsfaelle) durch classify()
 //      und den Zeichner.
 //   4) prefers-reduced-motion: eigener Kontext, Animationen aus, keine Fehler.
 //
@@ -152,7 +152,7 @@ const extremes = await page.evaluate(async () => {
 console.log("  Extremregler ohne Zeichnung:", extremes.length ? extremes : "keine");
 
 // ---------- 3) Mutationsfälle: jedes Gen einzeln auf 0 und 1 ----------
-console.log("\n=== 3) Mutationsfälle (25 Gene x 2 Extreme) ===");
+console.log("\n=== 3) Mutationsfälle (alle Gene x 2 Extreme) ===");
 const genes = await page.evaluate(() => {
   const bad = [];
   for (let i = 0; i < NG; i++) for (const v of [0, 1]) {
@@ -166,7 +166,7 @@ const genes = await page.evaluate(() => {
   }
   return bad;
 });
-console.log("  auffällig:", genes.length ? genes : "keine — alle 50 Fälle gezeichnet");
+console.log("  auffällig:", genes.length ? genes : "keine — alle Faelle gezeichnet");
 
 // ---------- 4) prefers-reduced-motion ----------
 console.log("\n=== 4) prefers-reduced-motion ===");
