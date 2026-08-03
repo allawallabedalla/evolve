@@ -1791,6 +1791,21 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       Das Einschalten ist ein eigener, noch nicht terminierter Folgeschritt und verlangt
       den Orakel-Spiegel nachzuziehen.
 - [ ] **5** Gemeinschafts-Schicht über Supabase (optional, erzwingt bezahlten Plan).
+- [x] **6** Fantasiemodus-Umschalter (2026-08-03) — Details-Panel, `#fantasyModeBtn`,
+      `localStorage("evolveFantasyMode")`. Aus (Standard): unverändertes Verhalten,
+      Wesen entwickeln sich zu echten, Wikipedia-dokumentierten Arten (`nearestReal()`).
+      An: `nearestReal()` wird übersprungen, der Anzeigename kommt stattdessen aus
+      `generateFantasyName()` — einem Buchstaben-4-Gramm-Modell, trainiert auf den
+      echten deutschen Trivialnamen desselben Katalogs (`catalog.js` `de`-Feld).
+      Gegen drei Alternativen verglichen (Tracery-Grammatik, wortbasierte Markov-Kette,
+      Präfix/Suffix-Splicing mit Trigramm+Neuheits-Filter in einem Fitness-Feedback-Loop);
+      die einfache 4-Gramm-Kette auf dem rohen Korpus (Leer-/Bindestrich als echte
+      Übergänge mittrainiert) klang im direkten Hörvergleich am besten. Bauplan-Zuordnung
+      (`key`/`form`/Icon) bleibt vom Umschalter unberührt — nur der Anzeigename wechselt;
+      dadurch bleiben Genbuch, Chronik, Herausforderungen und das Stabilitäts-Gate
+      unverändert korrekt. Name ist deterministisch aus dem Genom (`fnv1a32`-Seed), kein
+      Zufall außerhalb des Genoms. `tools/lib/app-core.mjs` fest auf `FANTASY_MODE=false`
+      gesetzt (Node-Tooling will immer die echte Klassifizierung).
 
 **Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.
 

@@ -69,6 +69,12 @@ export function loadAppCore(toolName = "app-core") {
     ${envFitSrc}
     ${nounSrc}
     ${genSrc}
+    // Fantasiemodus (BACKLOG Punkt 12, Erweiterung): matchArchetype() liest FANTASY_MODE
+    // und ruft im Fantasiefall generateFantasyName() auf. Node-Tooling will immer die
+    // ECHTE Klassifizierung (Katalog-Erzeugung, Abdeckungs-Metrik, ...) — hier fest aus;
+    // die Ternary/if-Zweige, die generateFantasyName() beruehren wuerden, laufen dann nie,
+    // die Funktion selbst muss also nicht mitextrahiert werden.
+    const FANTASY_MODE = false;
     const CATALOG_NAMES = !!CAT && CAT.stage === "full";
     ${realSrc}
     ${matchSrc}
