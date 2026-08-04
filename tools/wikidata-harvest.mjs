@@ -47,7 +47,11 @@ const ROOTS = [
   ["Q1358", "Spinnentiere"], ["Q25364", "Krebstiere"], ["Q25326", "Weichtiere"],
   ["Q25522", "Ringelwuermer"], ["Q25441", "Nesseltiere"], ["Q44631", "Stachelhaeuter"],
   // Pflanze
-  ["Q25314", "Bedecktsamer"], ["Q133712", "Nacktsamer"], ["Q80005", "Farne"],
+  ["Q25314", "Bedecktsamer"], ["Q133712", "Nacktsamer"],
+  // Q373615 (Polypodiopsida) statt Q80005 (Bugfix 2026-08-03): Q80005 ist kein
+  // Taxon-Item (kein P225, kein P171) und lieferte deshalb immer 0 Arten -
+  // s. docs/artenkatalog-plan.md Zeilen 600-601 / tools/lib/clade-rules.mjs.
+  ["Q373615", "Farne"],
   ["Q25347", "Laubmoose"],
   // Pilz
   ["Q174698", "Basidiomycota"], ["Q174726", "Ascomycota"],
