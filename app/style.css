@@ -587,15 +587,16 @@
   @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
 
   /* iPhone-Usability-Audit (2026-08-04, docs/iphone-usability-audit.md Befund 4): keines der
-     Vollbild-Modale (hier + `.dlg`, `.infl`, `.world`, `.login`, `.dpanel` weiter unten im
-     Stylesheet) respektierte `env(safe-area-inset-*)`. Jedes zentriert seine Karte per
+     Vollbild-Modale (hier + `.dlg`, `.infl`, `.world`, `.login`, `.dpanel`, `.reveal` weiter
+     unten im Stylesheet) respektierte `env(safe-area-inset-*)`. Jedes zentriert seine Karte per
      `place-items:center` gegen den VOLLEN Viewport — auf iPhones mit Dynamic Island/Notch oder
      im Querformat mit abgerundeten Seitenrändern konnte die zentrierte Karte damit zu nah an
      eine geschützte Zone rücken. Das Padding schrumpft die Box, GEGEN die zentriert wird, statt
-     einzelne Karten anzufassen — trifft alle sechs Modale einheitlich, ein Fix statt sechs.
+     einzelne Karten anzufassen — trifft alle Modale einheitlich, ein Fix statt vieler.
      `max(14px, …)`: Geräte ohne Safe-Area-Zonen (env() fällt dann auf 0) behalten trotzdem den
-     bisherigen Mindestabstand zum Bildschirmrand. */
-  .genbook, .dlg, .infl, .world, .login, .dpanel {
+     bisherigen Mindestabstand zum Bildschirmrand. (`.reveal` kam erst nachträglich dazu, s.
+     Kommentar bei seiner eigenen Regel weiter unten — war vorher kein eigenes Vollbild-Modal.) */
+  .genbook, .dlg, .infl, .world, .login, .dpanel, .reveal {
     padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
              max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
   }
@@ -1057,14 +1058,39 @@
   .login-msg { margin-top: 12px; font-size: var(--fs-base); color: var(--bio-dim); min-height: 1.2em; }
 
   /* ---- Willkommen-zurück-Reveal ---- */
+  /* Regressions-Fix (2026-08-04, Nutzer-Screenshot von einem echten iPhone): `.reveal` lag bisher
+     `position:absolute; inset:0` INNERHALB von `.viewport` — passte, solange `.viewport` (das
+     Habitat-Bild) groß genug war. Seit dem Mobil-Crop dieses Audits (`#habitatSvg` auf 190px
+     begrenzt, s. `.hab-stage svg` weiter oben) ist diese Box auf schmalen Geräten deutlich
+     kleiner, und der Reveal-Text (Vorher/Nachher-Formen + bis zu 4 Zeilen + Button) wurde von
+     `.viewport`s `overflow:hidden` MITTEN IM SATZ abgeschnitten — der Schließen-Button war gar
+     nicht mehr erreichbar, auch nicht durch Scrollen (kein Scroll-Mechanismus vorhanden). Ein
+     `overflow-y:auto` auf der Karte allein behob das nur technisch (scrollbar, aber ohne jeden
+     Hinweis sah es weiter aus wie mitten im Satz abgebrochen — keine echte Verbesserung).
+     Stattdessen jetzt dasselbe Muster wie jedes andere Modal der App (`.dpanel`, `.genbook`, …):
+     eigenes `position:fixed`-Overlay über der GANZEN Seite, unabhängig von der Höhe des
+     Habitat-Bilds — bekommt dadurch automatisch auch die safe-area-Behandlung von dort
+     (`.genbook, .dlg, …, .reveal` weiter oben im Stylesheet). */
   .reveal {
-    position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-    background: rgba(247,241,226,.94); border-radius: 16px 16px 0 0;
+    position: fixed; inset: 0; z-index: 27; display: grid; place-items: center;
+    background: rgba(36,31,40,.5);
     animation: fadein .4s ease;
   }
   .reveal[hidden] { display: none; }   /* sonst schlaegt display:grid das hidden-Attribut */
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  .reveal-card { max-width: 82%; text-align: center; padding: 8px 14px; }
+  .reveal-card {
+    width: min(88%, 420px); max-height: 84vh; overflow-y: auto; text-align: center;
+    background:
+      linear-gradient(var(--chamber) 30%, transparent) center top,
+      linear-gradient(transparent, var(--chamber) 70%) center bottom,
+      radial-gradient(farthest-side at 50% 0, rgba(33,30,25,.18), transparent) center top,
+      radial-gradient(farthest-side at 50% 100%, rgba(33,30,25,.18), transparent) center bottom
+      var(--chamber);
+    background-repeat: no-repeat;
+    background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+    background-attachment: local, local, scroll, scroll;
+    border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow);
+  }
   .reveal-eyebrow { text-transform: uppercase; letter-spacing: var(--tr-caps); font-size: var(--fs-xs); color: var(--bio-dim); margin-bottom: 10px; }
   .reveal-body { font-size: var(--fs-md); line-height: var(--lh-body); color: var(--text); }
   .reveal-body b { color: var(--bio-dim); font-weight: var(--w-bold); }
