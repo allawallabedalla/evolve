@@ -28,6 +28,7 @@
   <header class="top">
     <h1 class="brand">Evolve</h1>
     <button class="link details-btn" id="detailsBtn" aria-haspopup="dialog" aria-controls="detailsPanel" aria-label="Details" title="Weitere Einstellungen: Name, Chronik, Engine-Info, Zahlen, Konto, Neu beginnen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 00.12-.61l-1.92-3.32a.5.5 0 00-.59-.22l-2.39.96a7.3 7.3 0 00-1.62-.94L14.4 2.81a.49.49 0 00-.48-.41h-3.84a.49.49 0 00-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.59.22L2.74 8.87a.5.5 0 00.12.61l2.03 1.58c-.05.3-.09.62-.09.94s.02.64.07.94l-2.03 1.58a.5.5 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.5.5 0 00-.12-.61zM12 15.6a3.6 3.6 0 110-7.2 3.6 3.6 0 010 7.2z"/></svg></button>
+    <button class="link feedback-btn" id="feedbackBtn" aria-haspopup="dialog" aria-controls="feedbackPanel" aria-label="Feedback geben" title="Idee, Lob oder Fehler melden — öffnet ein GitHub-Issue in diesem Repo"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></button>
   </header>
 
   <div class="stage">
@@ -221,6 +222,31 @@
       <div class="dpanel-sec">
         <h3>Verwalten</h3>
         <div class="dpanel-row"><button class="ctrl newlife" id="newLifeBtn">Neu beginnen</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback-Panel: schickt nichts automatisch los (kein Server, kein Token im
+       Client-Code, das waere fuer alle Besucher der GitHub-Pages-Seite auslesbar) —
+       oeffnet stattdessen ein vorausgefuelltes GitHub-Issue in einem neuen Tab. Folgt
+       demselben Oeffnen/Schliessen/Fokus-Rueckgabe-Muster wie das Details-Panel oben. -->
+  <div class="dpanel" id="feedbackPanel" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" hidden>
+    <div class="dpanel-card">
+      <div class="dpanel-head">
+        <h2 id="feedbackTitle">Feedback</h2>
+        <button id="feedbackClose" class="link">schließen</button>
+      </div>
+      <div class="dpanel-sec">
+        <p class="dpanel-note">Idee, Fehler oder Meinung? Öffnet ein vorausgefülltes GitHub-Issue in einem neuen Tab (Label „feedback") — dafür brauchst du einen GitHub-Account. Wir sammeln es dort und übernehmen es von da in den Backlog.</p>
+        <div class="feedback-field">
+          <label for="feedbackText">Dein Feedback</label>
+          <textarea id="feedbackText" class="dlg-input feedback-input" rows="5" placeholder="Was ist dir aufgefallen? Was fehlt, was nervt, was gefällt dir?"></textarea>
+        </div>
+        <p class="dpanel-note" id="feedbackHint" hidden>Bitte kurz beschreiben, bevor du das Issue öffnest.</p>
+      </div>
+      <div class="dpanel-row feedback-actions">
+        <button class="link" id="feedbackCancel">Abbrechen</button>
+        <button class="ctrl" id="feedbackSubmit">Auf GitHub öffnen ↗</button>
       </div>
     </div>
   </div>
@@ -2791,20 +2817,49 @@ document.getElementById("genbook").addEventListener("click", (e) => { if(e.targe
 // Hover-Info: wann & wie sich die Art entwickelt hat
 const gbTip = document.createElement("div"); gbTip.id="gbTip"; document.body.appendChild(gbTip);
 const gbBodyEl = document.getElementById("gbBody");
+// Vorschaubild bei Hover (Nutzer-Wunsch): dieselbe wikiSummary() wie das Klick-
+// Detail unten, nur ueber eine kurze Verzoegerung ausgeloest - sonst wuerde jedes
+// Vorbeifahren mit der Maus ueber eine ganze Kachelreihe unnoetige Anfragen abfeuern.
+// Erst-Hover einer Kachel kostet die normale Netzwerklatenz (Bild faedet ein, sobald
+// da), jeder weitere Hover auf dieselbe Kachel ist sofort aus dem _wikiCache.
+let _gbHoverTileEl = null, _gbHoverTimer = null;
+const _gbThumbResolved = {};   // Bauplan-Titel -> Bild-URL | null (null = versucht, keins gefunden)
 gbBodyEl.addEventListener("mousemove", (e) => {
   const tile = e.target.closest(".gb-tile");
-  if(!tile){ gbTip.classList.remove("show"); return; }
-  gbTip.innerHTML = `<b>${tile.dataset.title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
+  if(!tile){ gbTip.classList.remove("show"); _gbHoverTileEl=null; clearTimeout(_gbHoverTimer); return; }
+  const title = tile.dataset.title;
+  const thumbUrl = _gbThumbResolved[title];
+  gbTip.innerHTML = `<b>${title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
     `<div class="tip-rar" style="color:${tile.dataset.rcol}"><i class="gb-dot" style="background:${tile.dataset.rcol}"></i>${tile.dataset.rarity}</div>`+
-    `<div class="tip-era">${tile.dataset.era}</div><div>${tile.dataset.evo}</div>`;
+    `<div class="tip-era">${tile.dataset.era}</div>`+
+    `<div class="tip-thumb-slot">${thumbUrl ? `<img class="tip-thumb loaded" src="${thumbUrl}" alt="">` : ""}</div>`+
+    `<div>${tile.dataset.evo}</div>`;
   gbTip.classList.add("show");
   const pad=14, r=gbTip.getBoundingClientRect();
   let x=e.clientX+pad, y=e.clientY+pad;
   if(x+r.width>innerWidth) x=e.clientX-r.width-pad;
   if(y+r.height>innerHeight) y=e.clientY-r.height-pad;
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
+  if(tile !== _gbHoverTileEl){
+    _gbHoverTileEl = tile;
+    clearTimeout(_gbHoverTimer);
+    if(tile.classList.contains("found") && _gbThumbResolved[title]===undefined){
+      _gbHoverTimer = setTimeout(async () => {
+        const aw = window.__archetypeWiki ? window.__archetypeWiki(title) : null;
+        const wtitle = aw ? decodeURIComponent(aw.wiki.split("/wiki/")[1]).replace(/_/g," ") : null;
+        const url = wtitle ? await wikiThumb(wtitle) : null;
+        _gbThumbResolved[title] = url || null;
+        if(_gbHoverTileEl !== tile || !gbTip.classList.contains("show")) return;   // Maus ist schon weiter
+        const slot = gbTip.querySelector(".tip-thumb-slot");
+        if(slot && url){
+          slot.innerHTML = `<img class="tip-thumb" src="${url}" alt="">`;
+          requestAnimationFrame(() => slot.querySelector("img")?.classList.add("loaded"));
+        }
+      }, 300);
+    }
+  }
 });
-gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+gbBodyEl.addEventListener("mouseleave", () => { gbTip.classList.remove("show"); _gbHoverTileEl=null; clearTimeout(_gbHoverTimer); });
 
 // Klick auf eine entdeckte Form -> Detail-Panel mit Beschreibung (Wikipedia-Auszug).
 const gbDetail = document.createElement("div"); gbDetail.id="gbDetail"; gbDetail.hidden=true;
@@ -2822,17 +2877,22 @@ function closeGbDetail(){
   _gbdOpener = null;
 }
 gbDetail.addEventListener("click", e=>{ if(e.target.id==="gbDetail" || e.target.closest(".gbd-x")) closeGbDetail(); });
+// Ein Cache fuer BEIDE Verbraucher (Klick-Detail: Text: Hover-Vorschau: Bild) -
+// derselbe REST-Endpunkt liefert extract UND thumbnail in einer Antwort, ein
+// zweiter Request fuer dasselbe Wesen waere reine Verschwendung.
 const _wikiCache = {};
-async function wikiExtract(title){
+async function wikiSummary(title){
   if(_wikiCache[title]!==undefined) return _wikiCache[title];
   try{
     const r = await fetch("https://de.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title), {headers:{accept:"application/json"}});
     if(!r.ok) throw 0;
     const j = await r.json();
-    const ex = (j.type==="disambiguation") ? null : (j.extract||null);
-    return _wikiCache[title]=ex;
+    const val = (j.type==="disambiguation") ? null : { extract: j.extract||null, thumb: j.thumbnail?.source||null };
+    return _wikiCache[title]=val;
   }catch(e){ return _wikiCache[title]=null; }
 }
+async function wikiExtract(title){ return (await wikiSummary(title))?.extract ?? null; }
+async function wikiThumb(title){ return (await wikiSummary(title))?.thumb ?? null; }
 // ============================================================================
 // ERKENNTNISSE — „Wissen als Meta-Fortschritt" (BACKLOG Punkt 5, V4 aus
 // docs/bindung-konzept.md). Was bleibt, wenn ein Wesen geht: nicht Macht,
@@ -3126,6 +3186,51 @@ function closeDetails(){
 }
 document.getElementById("detailsBtn").addEventListener("click", openDetails);
 document.getElementById("detailsClose").addEventListener("click", closeDetails);
+// Feedback-Panel: kein Server, kein Client-seitiger GitHub-Token (waere fuer jeden
+// Besucher der Pages-Seite auslesbar) — das Formular oeffnet stattdessen ein
+// vorausgefuelltes "New Issue" auf GitHub in einem neuen Tab. Folgt demselben
+// Oeffnen/Schliessen/Fokus-Rueckgabe-Muster wie das Details-Panel oben.
+const FEEDBACK_REPO = "allawallabedalla/evolve";
+let _feedbackOpener = null;
+function openFeedback(){
+  _feedbackOpener = document.activeElement;
+  document.getElementById("feedbackHint").hidden = true;
+  document.getElementById("feedbackPanel").hidden = false;
+  document.getElementById("feedbackText").focus();
+}
+function closeFeedback(){
+  document.getElementById("feedbackPanel").hidden = true;
+  document.getElementById("feedbackText").value = "";
+  document.getElementById("feedbackHint").hidden = true;
+  if(_feedbackOpener && _feedbackOpener.focus) _feedbackOpener.focus();
+  _feedbackOpener = null;
+}
+function submitFeedback(){
+  const text = document.getElementById("feedbackText").value.trim();
+  if(!text){ document.getElementById("feedbackHint").hidden = false; document.getElementById("feedbackText").focus(); return; }
+  const firstLine = text.split("\n")[0].slice(0, 80);
+  const title = "Feedback: " + firstLine;
+  const biome = (document.getElementById("biomeTag")||{}).textContent || "?";
+  const species = (typeof committedArch !== "undefined" && committedArch && committedArch.n) || "?";
+  const body = text +
+    "\n\n---\n" +
+    "*Automatisch angehängter Kontext:*\n" +
+    "- App-Version: " + APP_VERSION + "\n" +
+    "- Generation: " + generation + "\n" +
+    "- Aktuelle Art: " + species + "\n" +
+    "- Biom: " + biome + "\n" +
+    "- Zeitpunkt: " + new Date().toISOString();
+  const url = "https://github.com/" + FEEDBACK_REPO + "/issues/new" +
+    "?title=" + encodeURIComponent(title) +
+    "&body=" + encodeURIComponent(body) +
+    "&labels=" + encodeURIComponent("feedback");
+  window.open(url, "_blank", "noopener");
+  closeFeedback();
+}
+document.getElementById("feedbackBtn").addEventListener("click", openFeedback);
+document.getElementById("feedbackClose").addEventListener("click", closeFeedback);
+document.getElementById("feedbackCancel").addEventListener("click", closeFeedback);
+document.getElementById("feedbackSubmit").addEventListener("click", submitFeedback);
 // P1.3 (Komplexitaets-Audit): Presets-Panel — buendelt die vorher permanent im
 // Hauptbildschirm stehenden Biom-Buttons hinter einem Klick, folgt demselben
 // Oeffnen/Schliessen/Fokus-Rueckgabe-Muster wie das Details-Panel oben.
@@ -3150,6 +3255,7 @@ document.addEventListener("keydown", (e) => {
   const gb=document.getElementById("genbook"), lg=document.getElementById("login"), rv=document.getElementById("reveal");
   const iSub=document.getElementById("inflSub"), iMain=document.getElementById("infl");
   const ch=document.getElementById("chal"), dp=document.getElementById("detailsPanel"), pp=document.getElementById("presetsPanel");
+  const fb=document.getElementById("feedbackPanel");
   // Das Form-Detail liegt ÜBER dem Genbuch — Escape geht erst diese Ebene zurueck
   // (frueher schlossen sich beide auf einmal, weil es dafuer einen eigenen Listener gab).
   if(!gbDetail.hidden){ closeGbDetail(); }
@@ -3163,6 +3269,7 @@ document.addEventListener("keydown", (e) => {
   // Ergebnis-Vergleich liegt ÜBER dem Herausforderungs-Modal — erst diese Ebene zurück.
   else if(document.getElementById("wowRes") && !document.getElementById("wowRes").hidden){ closeWowRes(); }
   else if(ch && !ch.hidden){ closeChal(); }
+  else if(fb && !fb.hidden){ closeFeedback(); }
   else if(dp && !dp.hidden){ closeDetails(); }
   else if(pp && !pp.hidden){ closePresets(); }
 });

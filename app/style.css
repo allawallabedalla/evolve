@@ -1005,6 +1005,9 @@
   #gbTip .tip-rar { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-meta); letter-spacing: .04em;
     text-transform: uppercase; margin: 3px 0 1px; }
   #gbTip .tip-era { color: var(--bio-dim); font-size: var(--fs-xs); margin: 3px 0 2px; }
+  #gbTip .tip-thumb { display: block; width: 100%; max-height: 110px; object-fit: cover; border-radius: 7px;
+    margin: 6px 0 2px; opacity: 0; transition: opacity .2s; }
+  #gbTip .tip-thumb.loaded { opacity: 1; }
   .toast.legendary { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
   /* Erkenntnis-Hinweis im Fund-Toast: bewusst leise (kleiner, gedaempft, keine Farbe) —
@@ -1103,6 +1106,13 @@
   .details-btn { margin-left: auto; text-decoration: none; padding: 6px; border-radius: 50%; }
   .details-btn .ic { width: 1.3em; height: 1.3em; }
   .details-btn:hover { background: rgba(0,0,0,.06); filter: none; }
+  .feedback-btn { text-decoration: none; padding: 6px; border-radius: 50%; }
+  .feedback-btn .ic { width: 1.3em; height: 1.3em; }
+  .feedback-btn:hover { background: rgba(0,0,0,.06); filter: none; }
+  .feedback-field { display: flex; flex-direction: column; align-items: stretch; margin-top: 10px; }
+  .feedback-field label { font-size: var(--fs-xs); color: var(--muted); margin-bottom: 4px; }
+  .feedback-input { min-height: 110px; resize: vertical; }
+  .feedback-actions { justify-content: flex-end; margin-top: 16px; }
   .dpanel { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center;
     background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .dpanel[hidden] { display: none; }
