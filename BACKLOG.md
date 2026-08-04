@@ -1839,18 +1839,44 @@ Beschreibungen). Stattdessen: prozedural bleiben, aber die drei Ebenen nachrüst
 fehlen — Anatomie/Schattierung, eine genomgesteuerte Musterschicht, Mikrotextur. KI-
 Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
 
-- [ ] **Phase 0 — Fundament.** Vorher/Nachher-Erfolgsmaßstab festlegen (Screenshot-Vergleich,
-      ggf. kleiner Blindtest). Prototyping in `spike/`, nicht direkt in `app/index.html` — Produktivcode
-      bleibt unberührt, bis ein Ansatz sich bewährt hat.
+- [x] **Phase 0 — Fundament — erledigt (2026-08-04).** Erfolgsmaßstab: Vorher/Nachher-
+      Screenshot-Vergleich per Playwright-Harness (`genome`/`displayGenome`/`committedArch` direkt
+      setzen statt UI-Klicks — der laufende `requestAnimationFrame`-Loop zeichnet dann von selbst
+      mit den erzwungenen Werten; ein einmaliger `drawCreature()`-Aufruf reicht NICHT, der Loop
+      überschreibt ihn sofort wieder). Direkt in `app/index.html` gearbeitet statt in `spike/`
+      (Iteration lief per lokalem Server + Screenshot-Diff, nicht per Deploy — dieselbe
+      Absicherung wie geplant, nur ohne separate Kopie).
+      **Wichtiger Fund, der Phase 1 korrigiert:** `app/index.html` trägt eine explizite,
+      bewusste Stil-Regel (Kommentar vor den SVG-Zeichnern): „nur Flächenfarben, keine
+      Verläufe, kein Blur, kein Filter — Tiefe durch Schichtung + `flatStep()`-Helligkeitsstufen".
+      Gradients/weicher Schlagschatten (wie ursprünglich hier notiert) würden also die
+      bereits getroffene „Feldpost"-Siebdruck-Entscheidung (s. `docs/design-konzepte-feldpost.md`)
+      unterlaufen. Phase 1 unten ist entsprechend umformuliert: Tiefe/Detail durch mehr
+      **geschichtete flache Formen**, nicht durch Verläufe.
       **Modell:** Sonnet — eng umrissenes Setup, keine offene Design-Entscheidung.
 
-- [ ] **Phase 1 — Anatomie & Schattierung (prozedural, ernst genommen).** Pro Archetyp
-      (~15–20, in `drawAnimalSvg`/`drawPlantSvg`/…, `app/index.html`): einzelne Zehen/Krallen als
-      Sub-Pfade, bessere Proportionen, Mehrpunkt-Gradients statt `mix()`-Flatfill, weicher
-      Schlagschatten (SVG-Filter), Ambient Occlusion an Gelenken/Unterseite durch überlagerte
-      Halbtransparenzen. Reine Code-/Art-Direction-Arbeit, kein ML-Modell nötig.
-      Checkpoint: `design-audit`, `ui-calm-check`, `app-parity`, `exemplar-check` bleiben grün,
-      dazu neues Screenshot-Diff-Set (Playwright) je Archetyp.
+- [x] **Phase 1 — Anatomie & Schichtung (prozedural, Feldpost-Regel bewusst eingehalten) —
+      erster Schnitt erledigt (2026-08-04), Vierbeiner-Bauplan.** Umgesetzt für den geteilten
+      Vierbeiner-Zeichner (`drawAnimalSvg`, betrifft alle 9 Kinds, die ihn nutzen: 🦊🐒🐺🐭🐻🦥🦎🦏🐢):
+      **Zehen/Pfoten** — jedes Bein endet jetzt in einer Pfotenfläche + 3 einzeln sichtbaren
+      Zehen-Strichen (vorher: Bein-Strich endete ohne Fuß). **Zweistufige Schwanz-Verjüngung**
+      (🐺/🦎) — dieselbe Kurve per De-Casteljau bei t=0,5 exakt geteilt (keine Knick-Naht),
+      Basis-Hälfte dicker Strich, Spitze dünner — „gestaffelt" statt Verlauf, passend zu
+      `flatStep()`. **Bauch/Rücken-Schichtung** — hellere Bauch- und dunklere Rücken-Fläche
+      als zwei zusätzliche `flatStep()`-Ellipsen über dem Körper (vorher: ein einzelner
+      Flächenton für den ganzen Körper). **Iris-Ring** am Auge (`flatStep(dark,1)` zwischen
+      Pupille und Umgebung) statt nur Pupille + Glanzpunkt.
+      Reine Code-/Art-Direction-Arbeit, kein ML-Modell nötig.
+      **Checkpoint:** `design-audit` (0 Kontrastverstöße, alle 12 Presets + Extremregler +
+      alle Gen-Mutationsfälle fehlerfrei gezeichnet), `ui-calm-check`, `app-parity` (Abweichung
+      weiter 0, reine Zeichenlogik unberührt von der Fitness), `exemplar-check` — alle grün.
+      Zusätzlich per Screenshot-Harness stichprobenartig gegen 🦎🐺🐢🐻🦏 geprüft (keine Fehler,
+      keine NaN-Geometrie).
+      **Noch offen (nicht Teil dieses Schnitts):** die übrigen ~10 Archetypen mit eigenen
+      Zeichnern (🐌🐙🐸🪱🐟🐜🦀🦋🐦🦇 + alle Pflanzen/Pilze/Mikroben/Protisten) tragen dieselbe
+      Schichtungs-Idee noch nicht — gleiches Muster (Pfoten/Anhänge, gestaffelte Verjüngung,
+      Bauch/Rücken- bzw. Ober-/Unterseiten-Schichtung), aber jeweils eigene Geometrie pro
+      Zeichner, deshalb als Fortsetzung und nicht in einem Rutsch mitgemacht.
       **Modell:** Opus — geschmacksintensiv (Proportionen/Licht „richtig" aussehen lassen), großer
       Ermessensspielraum, kein enges Ticket.
 
