@@ -6525,7 +6525,7 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       // naeher unter den Rumpf — Nutzer-Fund: "Fuesse sind unter dem Koerper statt seitlich"
       // (das war ein Saeugetier-Stand: Bein senkrecht runter statt gespreizt).
       const dir = t<0.5 ? -1 : 1;
-      elx = lx + dir*R*0.5; ely = cy+R*bh*0.5 + legLen*0.25;
+      elx = lx + dir*R*0.7; ely = cy+R*bh*0.5 + legLen*0.25;
       fx = lx + dir*R*0.18 + swing*0.3; fy = cy+R*bh*0.5 + legLen*0.9;
     } else {
       elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
@@ -6588,17 +6588,34 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
         transform:`translate(${(hx+R*e[0]).toFixed(1)},${(hy+R*e[1]).toFixed(1)}) rotate(${(e[4]*180/Math.PI).toFixed(1)})` }); }
     else cAttr(pe, { opacity: 0 });
   }
-  // Gecko-Kopf flacher/keilfoermiger statt rund (Nutzer-Fund: "Kopf ist einfach nur rund
-  // und nicht wie bei einem Gecko") — niedrigere Kopfhoehe, dafuer laengere Schnauze unten.
-  E("an-head", hx, hy, R*(reptile?0.46:0.5), R*(reptile?0.3:0.45), flatCol(body));
-  // Schnauze
-  const snout = kind==="🐺"?1.0 : kind==="🦊"?0.62 : kind==="🦏"?0.8 : kind==="🐻"?0.55 : kind==="🐒"?0.0 : kind==="🐦"?0.0 : kind==="🐭"?0.5 : reptile?0.85 : 0.45;
+  // Gecko-Kopf: EIN durchgehender Keil statt Kopf-Kreis + separatem Schnauzen-Kreis —
+  // Nutzer-Fund "Kopf ist einfach nur rund" bestand nach der ersten Verflachung fort, weil
+  // zwei sich ueberlappende Ellipsen (mit je eigener Tinten-Kontur) wie eine Erdnuss statt
+  // ein Keil lesen. Teardrop-Pfad: rund am Hinterkopf, spitz zulaufend zur Nase.
+  const headWedgeEl = cEl("an-headwedge","path");
+  const snout = kind==="🐺"?1.0 : kind==="🦊"?0.62 : kind==="🦏"?0.8 : kind==="🐻"?0.55 : kind==="🐒"?0.0 : kind==="🐦"?0.0 : kind==="🐭"?0.5 : 0.45;
   const snoutEl = cEl("an-snout","ellipse"), noseEl = cEl("an-nose","path");
-  if(snout>0.2){
-    cAttr(snoutEl, { cx:0, cy:0, rx:(R*0.2*snout+R*0.12).toFixed(1), ry:(R*0.22).toFixed(1), fill: flatCol(body), opacity: 1,
-      transform:`translate(${(hx-R*0.42*snout).toFixed(1)},${(hy+R*0.1).toFixed(1)})` });
-    cAttr(noseEl, { d: dot(hx-R*(0.4*snout+0.18), hy+R*0.1, R*0.06), fill: flatCol(dark), opacity: 1 });
-  } else { cAttr(snoutEl, { opacity: 0 }); cAttr(noseEl, { opacity: 0 }); }
+  let noseTipX = hx-R*(0.4*snout+0.18), noseTipY = hy+R*0.1;
+  if(reptile){
+    const bk=hx+R*0.30, tip=hx-R*0.95, midX=(bk+tip)/2, halfH=R*0.30;
+    const d = `M${bk.toFixed(1)},${(hy-halfH).toFixed(1)}`
+      + `Q${midX.toFixed(1)},${(hy-halfH*0.25).toFixed(1)} ${tip.toFixed(1)},${hy.toFixed(1)}`
+      + `Q${midX.toFixed(1)},${(hy+halfH*0.35).toFixed(1)} ${bk.toFixed(1)},${(hy+halfH).toFixed(1)}`
+      + `A${halfH.toFixed(1)},${halfH.toFixed(1)} 0 0 1 ${bk.toFixed(1)},${(hy-halfH).toFixed(1)}Z`;
+    cAttr(headWedgeEl, { d, fill: flatCol(body), opacity: 1 });
+    cAttr(cEl("an-head","ellipse"), { opacity: 0 });
+    cAttr(snoutEl, { opacity: 0 });
+    noseTipX = tip+R*0.03; noseTipY = hy;
+    cAttr(noseEl, { d: dot(noseTipX, noseTipY, R*0.045), fill: flatCol(dark), opacity: 1 });
+  } else {
+    cAttr(headWedgeEl, { opacity: 0 });
+    E("an-head", hx, hy, R*0.5, R*0.45, flatCol(body));
+    if(snout>0.2){
+      cAttr(snoutEl, { cx:0, cy:0, rx:(R*0.2*snout+R*0.12).toFixed(1), ry:(R*0.22).toFixed(1), fill: flatCol(body), opacity: 1,
+        transform:`translate(${(hx-R*0.42*snout).toFixed(1)},${(hy+R*0.1).toFixed(1)})` });
+      cAttr(noseEl, { d: dot(noseTipX, noseTipY, R*0.06), fill: flatCol(dark), opacity: 1 });
+    } else { cAttr(snoutEl, { opacity: 0 }); cAttr(noseEl, { opacity: 0 }); }
+  }
   const beakEl = cEl("an-beak","polygon");
   if(kind==="🐦") cAttr(beakEl, { points:`${(hx-R*0.48).toFixed(1)},${(hy+R*0.02).toFixed(1)} ${(hx-R*0.18).toFixed(1)},${(hy-R*0.08).toFixed(1)} ${(hx-R*0.18).toFixed(1)},${(hy+R*0.14).toFixed(1)}`,
     fill: flatCol(mix([232,182,80],[240,140,60],metab)), opacity: 1 });
@@ -6609,11 +6626,17 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       fill: flatCol(mix(body,[238,238,225],0.55)), opacity: 1 });
   } else cAttr(hornEl, { opacity: 0 });
   const blink = (Math.sin(time*0.0009)>0.985)?0.1:1;
+  // Auge kleiner + weiter hinten auf dem Keil (Nutzer-Fund: "Auge zu gross/rund" wirkte
+  // niedlich-cartoonhaft statt wach-reptilienhaft) — nur fuer den Gecko-Kopf, andere Kinds
+  // unveraendert. rx bleibt vom Lidschlag unberuehrt (nur ry schrumpft), wie bei der Pupille.
+  const ex = reptile ? hx-R*0.03 : hx-R*0.15, ey = reptile ? hy-R*0.08 : hy-R*0.05;
+  const irisRx = reptile ? R*0.105 : R*0.155, irisRy = reptile ? R*0.125 : R*0.185;
+  const eyeRx  = reptile ? R*0.075 : R*0.11,  eyeRy  = reptile ? R*0.09  : R*0.13;
   // Iris-Ring vor der Pupille — ein zusaetzlicher flatStep()-Layer, kein Verlauf, gibt
   // dem Auge mehr Tiefe als die bisherige Zwei-Ton-Kombination (nur Pupille + Glanzpunkt).
-  E("an-iris", hx-R*0.15, hy-R*0.05, R*0.155*blink, R*0.185*blink, flatStep(dark,1));
-  E("an-eye", hx-R*0.15, hy-R*0.05, R*0.11, R*0.13*blink, EYE);
-  P("an-glint", dot(hx-R*0.18, hy-R*0.09, R*0.04), { fill: GLINT, "fill-opacity": .9 });
+  E("an-iris", ex, ey, irisRx, irisRy*blink, flatStep(dark,1));
+  E("an-eye", ex, ey, eyeRx, eyeRy*blink, EYE);
+  P("an-glint", dot(ex-eyeRx*0.27, ey-eyeRy*0.7, R*(reptile?0.028:0.04)), { fill: GLINT, "fill-opacity": .9 });
 }
 
 // Die alten Canvas-Zeichner (drawPlant/drawAnimal/drawFungus/drawMicrobe/
