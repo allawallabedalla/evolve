@@ -1818,6 +1818,96 @@ GitHub/npm/PyPI durch). Der Nutzer hat `wikidata.org`, `query.wikidata.org` und
 Netz (s. 1.1–1.4 oben). `raw.githubusercontent.com` (für 1.1b) war schon vorher als
 Trusted-Default nutzbar, keine weitere Freischaltung nötig.
 
+### 13 · Kreatur-Rendering — Weg zu bespoke-naher visueller Qualität (2026-08-04, Nutzerauftrag „nicht zu konservativ")
+
+**Modell:** je Phase einzeln vermerkt — grob **Opus** für die geschmacks-/architekturintensiven
+Phasen 1–3+5 (neue visuelle Subsysteme, keine engen Spezifikationen), **Sonnet** für Phase 0
+(Setup) und Phase 4 (mechanische Politur auf bereits gesetzter Richtung).
+
+**Auslöser:** Nutzer zeigte ein KI-generiertes Sticker-Bild (Gecko, painterly Schattierung,
+Einzelzehen, Ink-Kontur) und fragte nach Machbarkeit dieser Qualität für die Live-App. Recherche
+(öffentliche Repos + Forschung, s. Chat-Verlauf dieser Session) ergab vier Lösungsrichtungen:
+feste Teile-Bibliothek + Textur-Layer (No Man's Sky/Spore-Vorbild), Genom-als-Bildfunktion
+(CPPN/Picbreeder/Petalz), Neural-Cellular-Automata-Mikrotextur, KI-Bildgenerierung mit
+Konsistenz-Constraints (CharacterFactory/ControlNet+IPAdapter).
+
+**Entscheidung gegen die Teile-Bibliothek als Hauptweg:** No Man's Sky/Spore sind der
+industrielle Standard, aber eine feste Template-Bibliothek kappt genau die Eigenschaft, die
+Evolve laut README auszeichnet — Vielfalt aus einem **kontinuierlichen** 25-Gen-Genom statt aus
+einem endlichen Asset-Pool (schon ein grober 4-Stufen-Grid-Scan ergibt ~2400 Bauplan-
+Beschreibungen). Stattdessen: prozedural bleiben, aber die drei Ebenen nachrüsten, die aktuell
+fehlen — Anatomie/Schattierung, eine genomgesteuerte Musterschicht, Mikrotextur. KI-
+Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
+
+- [ ] **Phase 0 — Fundament.** Vorher/Nachher-Erfolgsmaßstab festlegen (Screenshot-Vergleich,
+      ggf. kleiner Blindtest). Prototyping in `spike/`, nicht direkt in `app/index.html` — Produktivcode
+      bleibt unberührt, bis ein Ansatz sich bewährt hat.
+      **Modell:** Sonnet — eng umrissenes Setup, keine offene Design-Entscheidung.
+
+- [ ] **Phase 1 — Anatomie & Schattierung (prozedural, ernst genommen).** Pro Archetyp
+      (~15–20, in `drawAnimalSvg`/`drawPlantSvg`/…, `app/index.html`): einzelne Zehen/Krallen als
+      Sub-Pfade, bessere Proportionen, Mehrpunkt-Gradients statt `mix()`-Flatfill, weicher
+      Schlagschatten (SVG-Filter), Ambient Occlusion an Gelenken/Unterseite durch überlagerte
+      Halbtransparenzen. Reine Code-/Art-Direction-Arbeit, kein ML-Modell nötig.
+      Checkpoint: `design-audit`, `ui-calm-check`, `app-parity`, `exemplar-check` bleiben grün,
+      dazu neues Screenshot-Diff-Set (Playwright) je Archetyp.
+      **Modell:** Opus — geschmacksintensiv (Proportionen/Licht „richtig" aussehen lassen), großer
+      Ermessensspielraum, kein enges Ticket.
+
+- [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
+      `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
+      körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
+      Genom-Distanz → automatisch kleine visuelle Distanz, ohne Zusatzlogik.
+      **Wichtige Abgrenzung zum bestehenden `fnv1a32`-Seeding** (Fantasiename-Generator, Punkt
+      6): dort ist Diskontinuität gewollt (Namen dürfen springen), hier NICHT — die Netzgewichte
+      müssen eine **stetige** Funktion der Genwerte sein (z. B. Gene direkt/glatt kombiniert als
+      Gewichte), ein Hash würde die Kontinuitäts-Eigenschaft sofort zerstören.
+      Neuer Check: Mutations-Kontinuität messen (kleine Genom-Distanz → kleine Pixel-Distanz
+      zwischen zwei gerenderten Mustern), analog zum bestehenden Parity-/Divergenz-Denken
+      (`spectrum-check`).
+      **Modell (Technik):** kein vortrainiertes Netz — ein winziges, selbst gebautes CPPN in
+      TypeScript, feste Topologie (kein NEAT-Strukturwachstum nötig, da der Bauplan schon aus
+      `development.ts` kommt), 2–3 versteckte Schichten, gemischte Aktivierungen (`sin`,
+      `gaussian`, `tanh`), Gewichte glatt aus den 26 Genen abgeleitet. Vorbild: Picbreeder/
+      Petalz-CPPN-Encoding, aber ohne deren interaktive Evolution — hier ersetzt das vorhandene
+      Genom die Notwendigkeit, das Netz selbst zu evolvieren.
+      **Modell (Umsetzung):** Opus — neues Subsystem, Architekturentscheidung, kein enges Ticket.
+
+- [ ] **Phase 3 — NCA-Mikrotextur.** Für Materialgefühl (Schuppen-Rauheit, Fell-Flaum,
+      Chitin-Glanz) je Bedeckungsart aus `development.ts`. Läuft als kleine Canvas-Textur
+      (z. B. 64×64), auf die Körperform gemappt.
+      **Modell (Technik):** Neural Cellular Automata nach Mordvintsev et al. („Self-Organising
+      Textures"/DyNCA-Formulierung) — offline in Python trainiert (ein Modell je Bedeckungsart:
+      Schuppe/Fell/Chitin/Rinde/…), Gewichte extrem kompakt (Forschung zeigt 68–588 Byte pro
+      Textur), als JSON exportiert. **Strukturparallele zum bestehenden Projekt:** genau das
+      Python-trainiert-JS/TS-läuft-Muster, das `training/` bereits für die Engine-Kalibrierung
+      nutzt (`fitted-params.json`) — hier `training/` für Texturen statt Fitness. Laufzeit-
+      Interpreter in reinem JS/Canvas (kein TensorFlow.js nötig bei dieser Modellgröße — passt zur
+      Zero-Heavy-Dependency-Linie der App).
+      Checkpoint: Frame-Zeit-Budget messen, Echtzeitziel darf nicht kippen.
+      **Modell (Umsetzung):** Opus — neue ML-Trainingspipeline + Integrationsarchitektur.
+
+- [ ] **Phase 4 — Licht-Kohärenz.** Einheitliche Lichtquelle/Randlicht über alle Archetypen,
+      Habitat-Ambientfarbe reflektiert auf die Kreatur (Ansatz existiert konzeptionell schon in
+      `mockup/visual.html`, „Bio-Kammer"). Mechanische Politur, sobald Phase 1 die Richtung
+      gesetzt hat.
+      **Modell:** Sonnet — Umsetzung einer bereits getroffenen Design-Entscheidung.
+
+- [ ] **Phase 5 — KI-Trophäen-Porträt (optional, entkoppelt, eigenes Kostenbudget).** Nur für
+      Meilenstein-/Teilen-Momente: einmalig generiertes, gecachtes Einzelbild — bewusst NICHT
+      Teil der Live-Simulation, daher keine Echtzeit-/Konsistenz-über-Generationen-Anforderung.
+      Das prozedural gerenderte SVG dient als Struktur-Kontrolle (Canny-Kantenbild) für Formtreue
+      zum tatsächlichen Genom.
+      **Modell (Technik):** FLUX.1 [dev] oder SDXL als Basismodell + ControlNet-Canny (Struktur
+      aus dem SVG-Silhouette-Rendering) + optional IP-Adapter für einen über eine Abstammungslinie
+      konsistenten „Artstil"/Palette. Hosted Inference (z. B. fal.ai/Replicate-artige API) statt
+      Selbst-Hosting empfohlen — passt zur seltenen, gecachten Nutzung, kein GPU-Infra-Aufwand.
+      **Achtung:** einziger Punkt in dieser Roadmap mit laufenden externen Kosten pro Bild —
+      braucht vor Umsetzung explizite Nutzer-Freigabe (Budget/Anbieter), nicht impliziert durch
+      „lege los".
+      **Modell (Umsetzung):** Opus — Produkt-/Architekturentscheidung (Anbieterwahl,
+      Prompt-/Konsistenz-Design, Kostenmodell).
+
 ---
 
 ## 🧭 Produkt-Pfeiler (Leitplanken)
