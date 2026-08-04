@@ -35,6 +35,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PHYS = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
+// SPARQLs SERVICE wikibase:label liefert bei einem Taxon OHNE Label in den
+// angefragten Sprachen die QID selbst als Literal zurueck (dokumentiertes
+// Wikidata/SPARQL-Verhalten) - das ist kein Trivialname, sondern "kein Label".
+const isQidShaped = (s) => /^Q\d+$/.test(String(s || ""));
+
 // Deterministisches Gruender-Los je Art (Abschnitt 8 "Bewusst offen": Genom-Zwillinge).
 // Aus der QID geseedet statt Math.random() — derselbe Katalog-Build muss reproduzierbar
 // bleiben. mulberry32 ist bewusst simpel: es geht nur um eine stabile, gut gestreute
@@ -333,8 +338,14 @@ async function buildFullEntries() {
       // Trivialnamen existiert (gemessen: "Hyla chrysoscelis" als Label, aber
       // Artikel "Copes Grauer Laubfrosch") — `wiki` (tools/wikidata-sitelinks.mjs)
       // ist der verlaesslichere Beleg dafuer.
+      // Bugfix (2026-08-03, gefunden durch Spielt: "Q15978631" als Anzeigename):
+      // hat ein Taxon KEIN Label in "de,en", liefert SPARQLs SERVICE wikibase:label
+      // die QID selbst als Literal zurueck (dokumentiertes Verhalten, kein Fehler
+      // der Ernte) - `label` ist dann technisch "vorhanden" und != sci, faellt aber
+      // NICHT unter "echter Trivialname". isQidShaped() filtert genau das heraus,
+      // bevor sci als letzter Notnagel greift.
       de: (p.v.wiki && p.v.wiki !== p.v.sci) ? p.v.wiki
-        : (p.v.label && p.v.label !== p.v.sci ? p.v.label : null),
+        : (p.v.label && p.v.label !== p.v.sci && !isQidShaped(p.v.label) ? p.v.label : null),
       sci: p.v.sci,
       wiki: p.v.wiki || p.v.sci, // echter dewiki-Artikeltitel (tools/wikidata-sitelinks.mjs); sci nur als Notnagel
       group,
