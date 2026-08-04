@@ -6551,7 +6551,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     const t = legs===1?0.5:i/(legs-1);
     const lx = cx + (t-0.5)*R*bw*1.35;
     const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
-    const bx = lx, by = cy+R*bh*0.5;
+    // Bein-Ansatz beim Echsen-Bauplan bewusst WEIT in den Rumpf hinein (nicht nur an der
+    // Bauchkante) — Nutzer-Fund: "der Beinansatz auf der Sichtseite stimmt nicht". Die
+    // Rumpf-Ellipse wird NACH den Beinen gezeichnet und deckt den oberen Teil des breiten
+    // Bein-Bands ab; setzt das Band exakt auf die Kante, bleibt keine Ueberlappung, und man
+    // sieht eine Naht statt eines aus dem Koerper wachsenden Beins.
+    const bx = lx, by = reptile ? cy+R*bh*0.05 : cy+R*bh*0.5;
     let fx, fy, elx, ely;
     if(reptile){
       // Spreiz-Gang statt Saeulenbein: Ellbogen weit raus (entlang der Rumpflaengsachse,
