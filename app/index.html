@@ -5877,6 +5877,29 @@ function arcPath(cx, cy, rx, ry, rot, a0, a1, close){
   }
   return close ? d+"Z" : d;
 }
+/**
+ * Verjuengtes, GEFUELLTES Band entlang einer quadratischen Bezierkurve — Basis breit,
+ * Spitze schmal. Fuer koerpernahe Anhaenge, die kein duenner Strich sein sollen (z. B.
+ * Echsen-Schwanz: „bei einer Echse ist er ja Teil des Koerpers", Nutzer-Fund). Tastet die
+ * Kurve ab, versetzt an jedem Punkt senkrecht zur Tangente um die halbe (interpolierte)
+ * Breite — anders als ein Strich mit fester/gestufter Breite folgt die Kontur so wirklich
+ * der Kruemmung.
+ */
+function bezierRibbon(x0,y0,x1,y1,x2,y2,w0,w1){
+  const n=10, top=[], bot=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n, mt=1-t;
+    const x=mt*mt*x0+2*mt*t*x1+t*t*x2, y=mt*mt*y0+2*mt*t*y1+t*t*y2;
+    const dx=2*mt*(x1-x0)+2*t*(x2-x1), dy=2*mt*(y1-y0)+2*t*(y2-y1);
+    const len=Math.hypot(dx,dy)||1, nx=-dy/len, ny=dx/len;
+    const w=(w0+(w1-w0)*t)/2;
+    top.push([x+nx*w, y+ny*w]); bot.push([x-nx*w, y-ny*w]);
+  }
+  let d = `M${top[0][0].toFixed(1)},${top[0][1].toFixed(1)}`;
+  for(let i=1;i<=n;i++) d += `L${top[i][0].toFixed(1)},${top[i][1].toFixed(1)}`;
+  for(let i=n;i>=0;i--) d += `L${bot[i][0].toFixed(1)},${bot[i][1].toFixed(1)}`;
+  return d+"Z";
+}
 
 // ===== Reich PROTISTEN (SVG) =====
 function drawProtistSvg(g, cx, cy, breath, time, rnd, a){
@@ -6489,16 +6512,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       transform:`translate(${tx.toFixed(1)},${ty.toFixed(1)}) rotate(${((0.5+wag)*180/Math.PI).toFixed(1)})` });
   } else if(kind==="🐒"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}C${(tx+R*0.8).toFixed(1)},${(ty-R*0.3).toFixed(1)} ${(tx+R*1.15).toFixed(1)},${(ty+R*0.8+wag*18).toFixed(1)} ${(tx+R*0.5).toFixed(1)},${(ty+R*1.1).toFixed(1)}`,
       stroke: flatCol(dark), "stroke-width": (4+size*3).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: 1 });
-  } else if(kind==="🐺"||kind==="🦎"){
+  } else if(reptile){
+    // Nutzer-Fund: "der Schwanz ist zu unscheinbar, bei einer Echse ist er ja Teil des
+    // Koerpers" — ein duenner Strich (wie beim Wolf) ist strukturell falsch. Stattdessen
+    // ein GEFUELLTES Band (bezierRibbon), an der Basis fast koerperhoch, zur Spitze
+    // schmal, in derselben Koerperfarbe wie der Rumpf (nicht der dunklere "dark"-Ton) —
+    // liest dadurch als Fortsatz des Koerpers, nicht als angesetzter Strich.
+    const p1x=tx+R*1.1, p1y=ty+R*0.1+wag*14, p2x=tx+R*1.7, p2y=ty+R*0.5;
+    cAttr(tailEl, { d: bezierRibbon(tx,ty,p1x,p1y,p2x,p2y, R*bh*0.95, R*0.07),
+      fill: flatCol(body), opacity: 1 });
+  } else if(kind==="🐺"){
     // Zweistufige Verjuengung statt Verlauf: dieselbe Quadratkurve per De-Casteljau bei
     // t=0.5 exakt geteilt (keine Knick-Naht), Basis-Haelfte breiter Strich, Spitze duenner
     // — „gestaffelt" statt "glatt", passend zur flatStep()-Sprache statt echtem Gradient.
-    // Gecko-Schwanz deutlich laenger (reale Echsen: Schwanz ~= oder > Rumpflaenge).
-    const len = reptile ? 1.7 : 1.0;
-    const p1x=tx+R*0.7*len, p1y=ty+R*0.1+wag*14, p2x=tx+R*1.0*len, p2y=ty+R*0.5;
+    const p1x=tx+R*0.7, p1y=ty+R*0.1+wag*14, p2x=tx+R*1.0, p2y=ty+R*0.5;
     // De-Casteljau-Mitte bei t=0.5: B(0.5) = 0.25*P0 + 0.5*P1 + 0.25*P2.
     const mx=0.25*tx+0.5*p1x+0.25*p2x, my=0.25*ty+0.5*p1y+0.25*p2y;
-    const w0=(6+size*5)*(reptile?0.85:1), w1=w0*0.5;
+    const w0=(6+size*5), w1=w0*0.5;
     cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}Q${((tx+p1x)/2).toFixed(1)},${((ty+p1y)/2).toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`,
       stroke: flatCol(dark), "stroke-width": w0.toFixed(1), "stroke-linecap":"round", fill:"none", opacity: 1 });
     cAttr(tailTipEl, { d:`M${mx.toFixed(1)},${my.toFixed(1)}Q${((p1x+p2x)/2).toFixed(1)},${((p1y+p2y)/2).toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}`,
@@ -6508,7 +6538,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   } else if(kind==="🦏"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}L${(tx+R*0.35).toFixed(1)},${(ty+R*0.4).toFixed(1)}`,
       stroke: flatCol(dark), "stroke-width": 5, "stroke-linecap":"round", fill:"none", opacity: 1 });
   }
-  const legs = kind==="🐦" ? 2 : 2 + Math.round((0.3 + 0.7*limb)*5);
+  // Echsen haben immer genau 4 Beine — die generische Formel (2-7, aus limb abgeleitet)
+  // gab bei mittlerem limb oft 5 und damit ein Bein zuviel/mittig, was zusammen mit dem
+  // Spreiz-Gang schnell "falsch" (Nutzer: "Ameisenbaer-Spitzmaus-Hybrid") aussah.
+  const legs = kind==="🐦" ? 2 : reptile ? 4 : 2 + Math.round((0.3 + 0.7*limb)*5);
   const legLen = (12 + limb*40)*FORM.legL;
   // Pro Bein zusaetzlich Pfote + 2-3 einzeln sichtbare Zehen am Fusspunkt — die
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
@@ -6525,8 +6558,8 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       // naeher unter den Rumpf — Nutzer-Fund: "Fuesse sind unter dem Koerper statt seitlich"
       // (das war ein Saeugetier-Stand: Bein senkrecht runter statt gespreizt).
       const dir = t<0.5 ? -1 : 1;
-      elx = lx + dir*R*0.7; ely = cy+R*bh*0.5 + legLen*0.25;
-      fx = lx + dir*R*0.18 + swing*0.3; fy = cy+R*bh*0.5 + legLen*0.9;
+      elx = lx + dir*R*1.0; ely = cy+R*bh*0.5 + legLen*0.25;
+      fx = lx + dir*R*0.45 + swing*0.3; fy = cy+R*bh*0.5 + legLen*0.9;
     } else {
       elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
       fx = lx+swing; fy = cy+R*bh*0.5+legLen;
@@ -6597,16 +6630,19 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   const snoutEl = cEl("an-snout","ellipse"), noseEl = cEl("an-nose","path");
   let noseTipX = hx-R*(0.4*snout+0.18), noseTipY = hy+R*0.1;
   if(reptile){
-    const bk=hx+R*0.30, tip=hx-R*0.95, midX=(bk+tip)/2, halfH=R*0.30;
+    // Spitze ABGERUNDET (kleiner Bogen, nicht ein einzelner Punkt) — Nutzer-Fund: "die
+    // Nase sieht aus wie von einer Spitzmaus". Ein Gecko-Maul ist vorn stumpf, nicht spitz.
+    const bk=hx+R*0.30, tipC=hx-R*0.82, midX=(bk+tipC)/2, halfH=R*0.30, tipR=R*0.1;
     const d = `M${bk.toFixed(1)},${(hy-halfH).toFixed(1)}`
-      + `Q${midX.toFixed(1)},${(hy-halfH*0.25).toFixed(1)} ${tip.toFixed(1)},${hy.toFixed(1)}`
-      + `Q${midX.toFixed(1)},${(hy+halfH*0.35).toFixed(1)} ${bk.toFixed(1)},${(hy+halfH).toFixed(1)}`
+      + `Q${midX.toFixed(1)},${(hy-halfH*0.3).toFixed(1)} ${tipC.toFixed(1)},${(hy-tipR).toFixed(1)}`
+      + `A${tipR.toFixed(1)},${tipR.toFixed(1)} 0 0 0 ${tipC.toFixed(1)},${(hy+tipR).toFixed(1)}`
+      + `Q${midX.toFixed(1)},${(hy+halfH*0.4).toFixed(1)} ${bk.toFixed(1)},${(hy+halfH).toFixed(1)}`
       + `A${halfH.toFixed(1)},${halfH.toFixed(1)} 0 0 1 ${bk.toFixed(1)},${(hy-halfH).toFixed(1)}Z`;
     cAttr(headWedgeEl, { d, fill: flatCol(body), opacity: 1 });
     cAttr(cEl("an-head","ellipse"), { opacity: 0 });
     cAttr(snoutEl, { opacity: 0 });
-    noseTipX = tip+R*0.03; noseTipY = hy;
-    cAttr(noseEl, { d: dot(noseTipX, noseTipY, R*0.045), fill: flatCol(dark), opacity: 1 });
+    noseTipX = tipC-tipR*0.6; noseTipY = hy;
+    cAttr(noseEl, { d: dot(noseTipX, noseTipY, R*0.04), fill: flatCol(dark), opacity: 1 });
   } else {
     cAttr(headWedgeEl, { opacity: 0 });
     E("an-head", hx, hy, R*0.5, R*0.45, flatCol(body));
