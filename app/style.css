@@ -1033,6 +1033,13 @@
   .details-btn { margin-left: auto; text-decoration: none; padding: 6px; border-radius: 50%; }
   .details-btn .ic { width: 1.3em; height: 1.3em; }
   .details-btn:hover { background: rgba(0,0,0,.06); filter: none; }
+  .feedback-btn { text-decoration: none; padding: 6px; border-radius: 50%; }
+  .feedback-btn .ic { width: 1.3em; height: 1.3em; }
+  .feedback-btn:hover { background: rgba(0,0,0,.06); filter: none; }
+  .feedback-field { display: flex; flex-direction: column; align-items: stretch; margin-top: 10px; }
+  .feedback-field label { font-size: var(--fs-xs); color: var(--muted); margin-bottom: 4px; }
+  .feedback-input { min-height: 110px; resize: vertical; }
+  .feedback-actions { justify-content: flex-end; margin-top: 16px; }
   .dpanel { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center;
     background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .dpanel[hidden] { display: none; }
