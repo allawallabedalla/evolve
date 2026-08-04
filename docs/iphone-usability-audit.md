@@ -3,6 +3,14 @@
 **Auftrag (Nutzer, 2026-08-04):** „Mach mal eine Usability-Analyse am iPhone." Getestet wurde
 die deployte Live-App (`app/index.html` + `app/style.css`), nicht der archivierte `mockup/`.
 
+> **Update (2026-08-04, selber Tag):** alle 5 Befunde unten wurden auf diesem Branch angefasst —
+> Details je Befund als „**Status:**"-Zeile direkt unter der jeweiligen Überschrift. Kurzfassung:
+> Befunde 2–5 sind behoben und per Playwright + `npm run design-audit`/`ui-calm-check`
+> re-verifiziert (0 Kontrastverstöße, keine JS-Fehler). Befund 1 ist **entschärft, nicht
+> vollständig gelöst** — eine echte Lösung (Reihenfolge der Blöcke ändern) hätte das Karten-Markup
+> quer über Mobil/Desktop umgebaut und wäre ein eigener, riskanterer Schritt gewesen; s. Status-
+> Zeile dort für die Zahlen und die offene Restarbeit.
+
 Ziel dieses Dokuments ist eine **Bestandsaufnahme**, keine beschlossene Umsetzung — analog zu
 `komplexitaets-audit.md` und `typografie-audit.md`. Ein Teil der iPhone-Grundlagen ist bereits
 sauber gelöst (s. „Was schon funktioniert" unten); dieser Bericht sammelt den Rest.
@@ -45,6 +53,20 @@ CSS/DOM-Inspektion einschätzen, nicht in echtem Safari beobachten.
 
 ### 1. Die Kernbedienung steht beim ersten Bildschirm nicht im Bild (hoch)
 
+**Status: entschärft, nicht vollständig gelöst (2026-08-04).** Habitat-Bild auf Mobil per
+`#habitatSvg { height: 190px }` gecroppt (statt der vollen ~278px, `preserveAspectRatio="…
+slice"` erlaubt das verzerrungsfrei), 2×2-Raster kompakter (kleineres Icon, knapperes Polster),
+`.stage`-Zeilenabstand auf Mobil 28px→16px. Gemessen (iPhone 14 Pro, 393×660): die Konsolen-
+Überschrift „UMWELT FORMEN" + vollständiger Untertitel + Framing-Absatz sind jetzt komplett
+sichtbar, ohne zu scrollen (vorher war nur ein abgeschnittenes Wort der Überschrift zu sehen).
+Der Lebensraum-Umschalter und der erste Regler selbst liegen mit den gewählten, noch
+maßvollen Werten weiterhin unterhalb von 660px — sie vollständig above-the-fold zu bekommen,
+hätte entweder das Bild deutlich aggressiver croppen oder die Blockreihenfolge selbst ändern
+müssen (Konsole vor das 2×2-Raster statt danach). Letzteres braucht eine eigene
+Markup-Umstrukturierung (Schnell-Einstiege aus der Bild-Karte lösen, damit sie als eigenes
+Grid-Item auf Mobil hinter die Konsole rutschen können) — das war als Teil dieses Durchgangs zu
+riskant für eine unbeaufsichtigte Umsetzung und bleibt offen.
+
 `app/index.html:97–116` — die Konsole „Umwelt formen" mit den 6 Reglern ist laut eigenem
 HTML-Kommentar (`app/index.html:97`) *„auf Mobil direkt unter dem Bild, vor der Detail-Karte"*
 platziert, und die 6 Regler sind laut Stylesheet-Kommentar (`app/style.css:80–82`) *„die
@@ -59,6 +81,13 @@ Das ist kein Overflow-Bug, sondern eine Ranking-Frage: Bild + 4 Kacheln wiegen a
 schmaleren iPhone-Viewport schwerer, als die eigene Absicht des Layouts vorsieht.
 
 ### 2. Chip-Überlappung oben im Habitat-Fenster auf schmalen iPhones (hoch)
+
+**Status: behoben (2026-08-04).** Beide Chips teilen sich jetzt eine Flex-Zeile
+(`.viewport-top-row`, `justify-content: space-between`); der Biom-Tag behält seine volle Breite
+(`flex-shrink: 0`), der Generation-Chip weicht zuerst zurück und schneidet seinen Text nur noch
+per Ellipse ab. Re-gemessen bei 320/375/393px mit voll ausgeschriebener Jahreszeit
+(„Generation N · Jahr 1 · Frühling"): durchgehend **8px Abstand statt Überlappung**
+(vorher −109px bei 375px). Screenshot bestätigt sauberen Abschluss mit „…".
 
 `app/style.css:257–270` positioniert zwei Chips absolut übereinander im selben Eck-Paar:
 `.gen-readout` (`top:12px; left:14px`, Inhalt „Generation N · Jahr Y · <Jahreszeit>") und
@@ -87,6 +116,19 @@ weiterhin unterstützten iPhone-Breiten.
 
 ### 3. Touch-Ziele unter 44×44px, die die vorhandene Coarse-Pointer-Regel nicht erfasst (mittel)
 
+**Status: behoben (2026-08-04)**, mit einer bewussten Ausnahme. `.medium`, `.gene-nums-toggle`,
+`.cshare` der `(pointer: coarse)`-Liste hinzugefügt; `.link` dort von `min-height:40px` auf
+`44px` gehoben. `#detailsBtn` brauchte einen eigenen, spezifischeren Selektor
+(`.details-btn.link`) — die unconditional `.details-btn`-Regel weiter unten im Stylesheet
+(`padding: 6px`, gleiche Spezifität wie `.link`) gewann bisher gegen die Coarse-Pointer-Regel
+rein durch Reihenfolge im Stylesheet, nicht durch Design-Absicht; das war die eigentliche
+Fundstelle des 33×40px-Befunds. `.species-wiki` bewusst **kein** 44px-Kasten (bliebe als reiner
+Fließtext-Link neben dem Artnamen fehl am Platz) — stattdessen Innenpolster + kompensierender
+Negativ-Rand, Trefferfläche 112×14 → 120×34px, ohne dass sich Optik oder Zeilenhöhe ändern. Alle
+Werte per `getBoundingClientRect()` nachgemessen (iPhone 14 Pro): nur noch die Regler-Tracks
+selbst (native `<input type=range>`-Box, visueller Griff bleibt bei 26×26px) und der bewusst
+belassene `.species-wiki`-Link liegen noch unter 44px.
+
 `app/style.css:489–497` vergrößert unter `@media (pointer: coarse)` bereits gezielt
 `.biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip, .infl-search-result,
 .infl-search` auf `min-height: 44px` (Kommentar „B10: größere Touch-Ziele auf Touch-Geräten") —
@@ -109,6 +151,12 @@ den Reglern, werden also potenziell oft angetippt.
 
 ### 4. Kein `env(safe-area-inset-*)` in `app/style.css` (niedrig–mittel)
 
+**Status: behoben (2026-08-04).** Ein gemeinsamer Selektor für alle sechs Vollbild-Modale
+(`.genbook, .dlg, .infl, .world, .login, .dpanel`) trägt jetzt
+`padding: max(14px, env(safe-area-inset-*))` auf allen vier Seiten — schrumpft die Box, GEGEN
+die `place-items:center` zentriert, statt jede Karte einzeln anzufassen. `max(14px, …)` hält auf
+Geräten ohne Safe-Area-Zonen (env() fällt dann auf 0 zurück) den bisherigen Mindestabstand.
+
 Das Stylesheet referenziert an keiner Stelle `env(safe-area-inset-*)` (per Volltextsuche
 geprüft). Alle Vollbild-Modale (`.dpanel`, `.genbook`, `.infl`, `.world`, `.login`, `.dlg` — je
 `position: fixed; inset: 0`) legen ihre Karte per `place-items: center` in die Mitte des vollen
@@ -122,6 +170,14 @@ Lücke als ein akutes Symptom; nicht geprüft werden konnte das echte Rendering,
 Chromium-Emulation zur Verfügung stand (s. Einschränkung oben).
 
 ### 5. Presets-Liste: Scroll funktioniert, aber ohne Hinweis (niedrig)
+
+**Status: behoben (2026-08-04).** Reiner CSS-Scroll-Schatten (Lea Verous Klassiker: zwei
+`background-attachment:local`-Verlaufsebenen decken den Schatten an den echten Kartenenden ab,
+zwei `scroll`-Ebenen zeigen ihn, solange noch Inhalt fehlt) auf `.dpanel-card` **und** `.gb-card`
+(Lebensbaum/Herausforderungen/Weltkarten-Ergebnisse teilen sich dieselbe Klasse und damit
+denselben Befund). Kein JS, kein Scroll-Listener — verschwindet von selbst an Anfang und Ende,
+per Test bestätigt (`scrollTop` bewegt sich programmatisch + letzte Zeile wird beim Scrollen
+vollständig sichtbar).
 
 `.dpanel-card` (`style.css:1039`, `max-height: 84vh; overflow-y: auto`) — programmatisch
 bestätigt: die Karte scrollt intern korrekt (`scrollHeight` 598px vs. `clientHeight` 550px bei
@@ -153,7 +209,7 @@ gelöst und wurden im Test bestätigt:
 
 ---
 
-## Empfohlene Fixes (nach Priorität der Befunde oben)
+## Empfohlene Fixes (nach Priorität der Befunde oben) — Stand vor der Umsetzung, s. Status-Zeilen oben
 
 1. Chip-Kollision (Befund 2): `.gen-readout` eine `max-width` setzen, die auf 375px-Breite
    sicher unter der `.biome-tag`-Startposition bleibt (rechnerisch bei `right:14px` + Tag-Breite

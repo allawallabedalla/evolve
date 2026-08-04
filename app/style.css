@@ -190,7 +190,7 @@
   .creature-card { grid-area: card; }
   .console { grid-area: console; }
   /* Mobil: Bild → Regler (Konsole) → Detail-Karte, damit die Steuerung nah am Bild bleibt */
-  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; grid-template-areas: "view" "console" "card"; } }
+  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; grid-template-areas: "view" "console" "card"; gap: 16px; } }
 
   /* Feldpost: 14px statt 20px — knapper gerundet, damit die dicke Tinten-Kontur
      (--shadow) wie ein Aufkleber-Rand liest statt wie ein weiches Neomorph-Polster. */
@@ -207,6 +207,14 @@
      transparent darueber und zeichnet nur noch die Kreatur (Phase 3 loest es ab). */
   .hab-stage { position: relative; }
   .hab-stage svg { display: block; width: 100%; height: auto; border-radius: 16px; }
+  /* iPhone-Usability-Audit (2026-08-04, Befund 1, Fortsetzung): auf schmalen Viewports nimmt
+     das volle 720:560-Seitenverhältnis zu viel Erstbildschirm-Höhe. `preserveAspectRatio="…
+     slice"` ist auf beiden Ebenen (Szene + Kreatur, s. Kommentar oben) schon genau für diesen
+     Fall gebaut — eine feste, niedrigere Höhe croppt beide Ebenen identisch, statt sie zu
+     verzerren oder zu verschieben. `#habitatSvg` statt `.hab-stage svg`: die ID schlägt die
+     Grund-Regel unabhängig von der Reihenfolge im Stylesheet; `#creatureSvg` bleibt unberührt
+     (bezieht seine Höhe ohnehin von `.hab-stage`, s. Regel unten). */
+  @media (max-width: 820px) { #habitatSvg { height: 190px; } }
   /* Kreatur-SVG (Phase 3): liegt wie das Canvas absolut ueber der Buehne, damit beide
      Ebenen dieselbe Flaeche decken — ohne dies wuerde `.hab-stage svg` das zweite SVG
      als Block DARUNTER stapeln statt darueber legen. */
@@ -251,11 +259,36 @@
   .entry-row .disc .entry-ic { width: 1.6rem; height: 1.6rem; }
   .entry-row .disc .entry-label { font-size: var(--fs-sm); font-weight: var(--w-bold); color: var(--bio-dim); }
   .entry-row .disc .entry-sub { font-size: var(--fs-meta); color: var(--muted); }
+  /* iPhone-Usability-Audit (2026-08-04, docs/iphone-usability-audit.md Befund 1): Habitat-Bild
+     + dieses 2×2-Raster füllten bei sichtbarer Safari-Leiste (reale Nutzhöhe ~660px, nicht die
+     vollen ~850px) den kompletten ersten Bildschirm — von den 6 Reglern, laut Code-Kommentar
+     oben „die einzige immer sichtbare Kernbedienung", war nichts zu sehen. Kein Restrukturieren
+     der Reihenfolge (das Bild bleibt bewusst zuerst), sondern beide Blöcke kompakter: kleineres
+     Icon, knapperes Innenpolster, engere Abstände — dieselben drei Informationen (Icon/Label/
+     „entdeckt"-Zähler), nur enger gesetzt. */
+  @media (max-width: 820px) {
+    .entry-row { gap: 6px; padding: 10px 16px 9px; }
+    .entry-row .disc { gap: 3px; padding: 10px 8px 9px; }
+    .entry-row .disc .entry-ic { width: 1.35rem; height: 1.35rem; }
+  }
   /* Ueberlagerungen des Habitats: seit die Buehne selbst positioniert ist (.hab-stage)
      und im DOM NACH den Chips steht, brauchen diese eine eigene Stapel-Ebene — sonst
      verschwinden sie darunter. Bleiben unter dem Blitz-Overlay (.viewport::after, z-index 4). */
+  /* iPhone-Usability-Audit (2026-08-04, docs/iphone-usability-audit.md Befund 2): beide Chips
+     waren früher unabhängig voneinander `position:absolute` in dieselben zwei Ecken gesetzt,
+     jeder nur so breit wie sein eigener Inhalt — sobald die Jahreszeit im linken Chip erschien,
+     wuchs er auf schmalen iPhones (375px) so breit, dass er den rechten Biom-Tag um >100px
+     unterlief (beide Chips teilten sich denselben Platz, ohne voneinander zu wissen). Jetzt
+     teilen sie sich eine Flex-Zeile mit `justify-content:space-between`: der Biom-Tag behält
+     immer seine volle Breite (`flex-shrink:0`), der Generation-Chip weicht zuerst zurück und
+     schneidet seinen Text erst als letztes Mittel per Ellipse ab — kollidieren können sie so
+     nicht mehr. */
+  .viewport-top-row {
+    position: absolute; top: 12px; left: 14px; right: 14px; z-index: 3;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
   .gen-readout {
-    position: absolute; top: 12px; left: 14px; z-index: 3;
+    min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
     font-family: var(--mono); font-size: var(--fs-sm); letter-spacing: .05em;
     color: var(--ink); background: var(--cream); border: none; box-shadow: var(--shadow-sm);
     padding: 3px 9px; border-radius: 999px;
@@ -264,7 +297,7 @@
      bewusst leiser als die lineare Generationszahl (kein zweites Widget, kein Balken). */
   .gen-readout .season { color: var(--muted); }
   .biome-tag {
-    position: absolute; top: 12px; right: 14px; z-index: 3;
+    flex: 0 0 auto;
     font-size: var(--fs-sm); color: var(--ink); background: var(--cream);
     border: none; box-shadow: var(--shadow-sm); padding: 3px 9px; border-radius: 999px;
   }
@@ -487,13 +520,24 @@
   .ctrl.newlife { margin-left: auto; }
   /* B10: groessere Touch-Ziele auf Touch-Geraeten */
   @media (pointer: coarse) {
-    .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip, .infl-search-result, .infl-search { min-height: 44px; }
+    .biome, .ctrl, .speed, .disc, .infl-cat, .infl-factor, .infl-quick-chip, .infl-search-result, .infl-search,
+    .medium, .gene-nums-toggle, .cshare { min-height: 44px; }
     .infl-quick-chip { padding: 8px 14px; }
     .speed { padding: 10px 14px; }
     /* Größerer Schieberegler-Griff auf Touch (Audit): feine Umwelt-Justierung am Handy. */
     input[type=range]::-webkit-slider-thumb { width: 26px; height: 26px; }
     input[type=range]::-moz-range-thumb { width: 26px; height: 26px; }
-    .link { padding: 8px 4px; min-height: 40px; }
+    .link { padding: 8px 4px; min-height: 44px; }
+    /* iPhone-Usability-Audit (2026-08-04, docs/iphone-usability-audit.md Befund 3): `.details-btn`
+       (das Zahnrad im Header) ist spezifischer als `.link` und überschrieb dessen Padding mit
+       einem knappen `padding:6px` — Ergebnis war 33×40px trotz der `.link`-Regel oben. Zwei
+       Klassen im Selektor schlagen die einzelne `.details-btn`-Regel unabhängig von der
+       Reihenfolge im Stylesheet. */
+    .details-btn.link { padding: 10px; min-width: 44px; }
+    /* `.species-wiki` bleibt bewusst ein reiner Fließtext-Link (kein 44px-Kasten neben dem
+       Artnamen) — die Trefferfläche wächst per Innenpolster + kompensierendem Negativ-Rand,
+       ohne dass sich Zeilenhöhe oder Optik ändern. */
+    .species-wiki { display: inline-block; padding: 10px 4px; margin: -10px -4px; }
   }
   .speeds { display: inline-flex; gap: 4px; background: var(--chamber); box-shadow: var(--shadow-inset); border-radius: 12px; padding: 4px; }
   .speed { font-size: var(--fs-sm); color: var(--muted); background: transparent; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
@@ -542,6 +586,19 @@
   .disc.pulse { animation: discpulse .6s ease; }
   @keyframes discpulse { 0%{transform:scale(1)} 30%{transform:scale(1.18)} 100%{transform:scale(1)} }
 
+  /* iPhone-Usability-Audit (2026-08-04, docs/iphone-usability-audit.md Befund 4): keines der
+     Vollbild-Modale (hier + `.dlg`, `.infl`, `.world`, `.login`, `.dpanel` weiter unten im
+     Stylesheet) respektierte `env(safe-area-inset-*)`. Jedes zentriert seine Karte per
+     `place-items:center` gegen den VOLLEN Viewport — auf iPhones mit Dynamic Island/Notch oder
+     im Querformat mit abgerundeten Seitenrändern konnte die zentrierte Karte damit zu nah an
+     eine geschützte Zone rücken. Das Padding schrumpft die Box, GEGEN die zentriert wird, statt
+     einzelne Karten anzufassen — trifft alle sechs Modale einheitlich, ein Fix statt sechs.
+     `max(14px, …)`: Geräte ohne Safe-Area-Zonen (env() fällt dann auf 0) behalten trotzdem den
+     bisherigen Mindestabstand zum Bildschirmrand. */
+  .genbook, .dlg, .infl, .world, .login, .dpanel {
+    padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+             max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
   /* ---- Genbuch (begehbarer Lebensbaum) ---- */
   .genbook { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .genbook[hidden] { display: none; }
@@ -751,7 +808,20 @@
   .wl-slider input[type=range] { flex: 1; accent-color: var(--bio); height: 3px; }
   .wl-slider .wl-sl-val { flex: 0 0 24px; text-align: right; font-family: var(--mono); color: var(--text); }
   .wl-loading { color: var(--bio-dim); font-size: var(--fs-base); padding: 30px 0; text-align: center; }
-  .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto; background: var(--chamber); border: none; border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
+  /* Scroll-Schatten wie bei `.dpanel-card` (iPhone-Usability-Audit 2026-08-04, Befund 5) —
+     `.gb-card` trägt Lebensbaum/Herausforderungen/Weltkarten-Ergebnisse, alle mit demselben
+     max-height+overflow-y-Muster und darum demselben Abschnitt-Problem. */
+  .gb-card { width: min(94%, 780px); max-height: 88vh; overflow-y: auto;
+    background:
+      linear-gradient(var(--chamber) 30%, transparent) center top,
+      linear-gradient(transparent, var(--chamber) 70%) center bottom,
+      radial-gradient(farthest-side at 50% 0, rgba(33,30,25,.18), transparent) center top,
+      radial-gradient(farthest-side at 50% 100%, rgba(33,30,25,.18), transparent) center bottom
+      var(--chamber);
+    background-repeat: no-repeat;
+    background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+    background-attachment: local, local, scroll, scroll;
+    border: none; border-radius: 20px; padding: 20px 22px; box-shadow: var(--shadow); }
   .gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .gb-title { margin: 0; font-size: var(--fs-lg); font-weight: var(--w-bold); color: var(--text); }
   .gb-sub { color: var(--muted); font-size: var(--fs-base); margin: 6px 0 4px; line-height: var(--lh-body); }
@@ -1036,8 +1106,22 @@
   .dpanel { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center;
     background: rgba(36,31,40,.5); animation: fadein .3s ease; }
   .dpanel[hidden] { display: none; }
+  /* iPhone-Usability-Audit (2026-08-04, Befund 5): das Scrollen selbst funktionierte schon
+     (max-height + overflow-y:auto), aber ohne Hinweis wirkte eine abgeschnittene letzte Zeile
+     wie ein Layout-Fehler statt „hier geht's weiter". Reiner CSS-Scroll-Schatten (Lea Verous
+     Klassiker): zwei `local`-Verlaufsebenen decken den Schatten dort ab, wo tatsächlich Kartenrand
+     ist (Anfang/Ende des Inhalts), zwei `scroll`-Ebenen zeigen ihn dort, wo noch Inhalt fehlt —
+     kein JS, kein Scroll-Listener, verschwindet von selbst an beiden Enden. */
   .dpanel-card { width: min(92%, 460px); max-height: 84vh; overflow-y: auto;
-    background: var(--chamber);
+    background:
+      linear-gradient(var(--chamber) 30%, transparent) center top,
+      linear-gradient(transparent, var(--chamber) 70%) center bottom,
+      radial-gradient(farthest-side at 50% 0, rgba(33,30,25,.18), transparent) center top,
+      radial-gradient(farthest-side at 50% 100%, rgba(33,30,25,.18), transparent) center bottom
+      var(--chamber);
+    background-repeat: no-repeat;
+    background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+    background-attachment: local, local, scroll, scroll;
     border: 2px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
   .dpanel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .dpanel-head h2 { font-family: var(--display); font-stretch: var(--wd-display); font-weight: var(--w-bold);
