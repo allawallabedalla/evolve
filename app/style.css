@@ -935,6 +935,9 @@
   #gbTip .tip-rar { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-meta); letter-spacing: .04em;
     text-transform: uppercase; margin: 3px 0 1px; }
   #gbTip .tip-era { color: var(--bio-dim); font-size: var(--fs-xs); margin: 3px 0 2px; }
+  #gbTip .tip-thumb { display: block; width: 100%; max-height: 110px; object-fit: cover; border-radius: 7px;
+    margin: 6px 0 2px; opacity: 0; transition: opacity .2s; }
+  #gbTip .tip-thumb.loaded { opacity: 1; }
   .toast.legendary { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
   .toast-rar { display: inline-flex; vertical-align: middle; }
   /* Erkenntnis-Hinweis im Fund-Toast: bewusst leise (kleiner, gedaempft, keine Farbe) —
