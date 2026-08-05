@@ -6463,6 +6463,59 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     P("an-glint", dot(exW-R*0.02, eyW-R*0.025, R*0.025), { fill: GLINT, "fill-opacity": .9 });
     return;
   }
+  if(kind==="🦐"||kind==="🧂"||kind==="⚓"){   // Garnelenartige Krebstiere (Phase 1b)
+    // Ein Zeichner fuer drei Archetypen (Krill / Salinenkrebs / Tiefsee-Amphipode) — alle
+    // drei fielen auf den Vierbeiner-Fallback ("pelziger Ball mit vier Beinchen") zurueck.
+    // Referenzfoto (Meganyctiphanes norvegica): gebogener Segmentkoerper, grosses dunkles
+    // Auge, lange Antennen nach hinten, Reihe feiner Schwimmbeine, Schwanzfaecher.
+    const slim = kind==="🧂";              // Salinenkrebs schlanker
+    const hunch = kind==="⚓" ? 0.5 : 0;    // Amphipode staerker gekruemmt
+    const L = R*(slim?1.6:1.45);
+    const p0x=cx-L, p0y=cy+R*0.1, p1x=cx, p1y=cy-R*(0.35+hunch*0.5), p2x=cx+L, p2y=cy-R*0.05;
+    const w0 = R*(slim?0.46:0.62), w1 = R*0.12;
+    const evalQ=(a0,a1,a2,t)=>{ const mt=1-t; return a0*mt*mt+2*mt*t*a1+t*t*a2; };
+    const tanQ=(a0,a1,a2,t)=>2*(1-t)*(a1-a0)+2*t*(a2-a1);
+    // Rumpf als EIN geschlossener Pfad (Regel 1) — verjuengtes Band entlang der Koerperkurve.
+    P("an-body", bezierRibbon(p0x,p0y, p1x,p1y, p2x,p2y, w0, w1), { fill: flatCol(body) });
+    // Segmentgrenzen: kurze Striche SENKRECHT zur Koerperkurve (Tangente ableiten, normal
+    // dazu) — nur so folgen sie der Kruemmung statt schraeg zu stehen.
+    let segs="", legs="";
+    for(let i=1;i<=7;i++){
+      const t=i/8, px=evalQ(p0x,p1x,p2x,t), py=evalQ(p0y,p1y,p2y,t);
+      const dx=tanQ(p0x,p1x,p2x,t), dy=tanQ(p0y,p1y,p2y,t), len=Math.hypot(dx,dy)||1;
+      const nx=-dy/len, ny=dx/len, hw=(w0+(w1-w0)*t)/2;
+      segs += `M${(px+nx*hw*0.85).toFixed(1)},${(py+ny*hw*0.85).toFixed(1)}L${(px-nx*hw*0.85).toFixed(1)},${(py-ny*hw*0.85).toFixed(1)}`;
+      if(i<=5){  // Schwimmbeine (Pleopoden) unter der vorderen Koerperhaelfte
+        // Richtung bewusst aus der Normalen abgeleitet und nach UNTEN orientiert (ny>0),
+        // sonst kippte ein Bein je nach Kruemmung auf die falsche Seite (eigener Fund).
+        const sw=Math.sin(time*0.009+i)*R*0.07;
+        const sgn = ny>=0 ? 1 : -1;
+        const ax=px+nx*hw*0.6*sgn, ay=py+ny*hw*0.6*sgn;
+        legs += `M${ax.toFixed(1)},${ay.toFixed(1)}L${(ax+sw).toFixed(1)},${(ay+R*0.42).toFixed(1)}`;
+      }
+    }
+    P("an-segs", segs, { stroke: flatCol(dark), "stroke-opacity": .4, "stroke-width": 1, fill:"none" });
+    P("an-legs", legs, { stroke: flatCol(dark), "stroke-opacity": .55, "stroke-width": 1.2, "stroke-linecap":"round", fill:"none" });
+    // Schwanzfaecher (Telson + Uropoden) am duennen Ende.
+    cAttr(cEl("an-fan","polygon"), { points:
+      `${p2x.toFixed(1)},${p2y.toFixed(1)} ${(p2x+R*0.42).toFixed(1)},${(p2y-R*0.26).toFixed(1)} `
+      +`${(p2x+R*0.3).toFixed(1)},${p2y.toFixed(1)} ${(p2x+R*0.42).toFixed(1)},${(p2y+R*0.26).toFixed(1)}`,
+      fill: flatStep(body,-1) });
+    // Gerundeter Carapax am Kopfende: das bezierRibbon-Band endet mit einer GERADEN Kante
+    // (abgehackter Kopf, eigener Fund). Der Carapax ist bei Krebstieren ohnehin ein eigener
+    // Koerperabschnitt — die Naht ist hier also anatomisch richtig, kein Regel-1-Verstoss.
+    E("an-carapace", p0x+R*0.16, p0y-R*0.05, R*0.34, w0*0.5, flatCol(body), -0.25);
+    // Antennen: lang und nach VORNE geschwungen (Referenzfoto) — zeigten vorher nach
+    // hinten-oben aus dem Bild heraus.
+    let ant="";
+    for(const sd of [-1,1]) ant += `M${(p0x+R*0.1).toFixed(1)},${(p0y-R*0.02).toFixed(1)}Q${(p0x-R*0.5).toFixed(1)},${(p0y+sd*R*0.3).toFixed(1)} ${(p0x-R*1.15).toFixed(1)},${(p0y+sd*R*0.55+R*0.12).toFixed(1)}`;
+    P("an-ant", ant, { stroke: flatCol(dark), "stroke-opacity": .5, "stroke-width": 1.1, "stroke-linecap":"round", fill:"none" });
+    // Grosses dunkles Stielauge am Kopf (Regel 5: Pupille + versetzter Glanzpunkt).
+    const ex2=p0x+R*0.2, ey2=p0y-R*0.12;
+    P("an-eye", dot(ex2, ey2, R*0.14), { fill: EYE });
+    P("an-glint", dot(ex2-R*0.05, ey2-R*0.05, R*0.05), { fill: GLINT, "fill-opacity": .9 });
+    return;
+  }
   if(kind==="🐌"){   // Schnecke: Schleimfuss + Spiralhaus + Fuehler
     const L=R*2.2, foot=flatCol(mix(body,[150,175,155],0.4));
     P("an-foot", `M${(cx-L*0.5).toFixed(1)},${(cy+R*0.5).toFixed(1)}Q${(cx-L*0.55).toFixed(1)},${(cy+R*0.1).toFixed(1)} ${(cx-L*0.3).toFixed(1)},${(cy+R*0.1).toFixed(1)}`
