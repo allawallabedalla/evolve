@@ -2003,6 +2003,15 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         echtem Ermessensspielraum (z. B. Kamera-Perspektive grundsätzlich ändern, Anzahl
         Gliedmaßen bei einer Art mit variabler Zähl-Konvention wie Krake-Armzahl) weiterhin
         zur Entscheidung vorlegen, nicht selbst festlegen.
+      - **⚠️ Harte Regel, per Nutzer-Nachfrage („checkst du die gegen die Thumbnails?")
+        aufgedeckt (2026-08-05):** Schritt 2 der Checkliste (Referenzfoto ziehen) ist NICHT
+        optional, auch wenn ein Fund über Code-Muster (Grep) oder allgemeines Bio-Wissen
+        plausibel erscheint. Eine Grep-Runde („GLINT ohne EYE") wurde ohne Foto-Gegencheck
+        durchgezogen — nachträglich mit echtem Foto geprüft, ergab sich beim selben
+        Archetyp (Ameise) noch ein zweiter, groesserer Fund (Mandibeln fehlten komplett),
+        der beim reinen Code-/Wissens-Audit übersehen wurde. Code-Muster und Fachwissen
+        taugen zum AUFSPÜREN von Kandidaten, ersetzen aber nicht den Foto-Abgleich vor dem
+        Commit.
       - **Restliche Kandidaten mit offener Unsicherheits-Einschätzung** (Stand 2026-08-05):
         🦋 (Flügel ohne Aderung — geringe Priorität), restliche Vierbeiner-Kinds 🦊🐒🐺🐭🐻🦥🦏
         (gerade Beine sind für Säugetiere korrekt, kein erwarteter Fund), 🐜/🦀/🐌 (bereits
