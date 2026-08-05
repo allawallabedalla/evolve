@@ -2035,10 +2035,14 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       darstellbar — kein Parameter-Tuning, sondern eigene Zeichner nötig.
       **Nutzer-Auftrag: "leg damit direkt los!"** — Priorisierung nach groesstem
       Baupan-Unterschied zum Vierbeiner-Fallback zuerst:
-      - [ ] ⭐ Seestern (radiär, 5 Arme) — als erstes, größter Kontrast.
-      - [ ] 🦪 Muschel (zweiklappige Schale)
-      - [ ] 🪼 Leuchtwesen/Qualle (Schirm + Tentakel, kann `bezierRibbon`/Saugnapf-Technik
-            vom Kraken wiederverwenden)
+      - [x] ⭐ Seestern (radiär, 5 Arme) — erledigt (2026-08-05). Eigener Zweig: 5
+            `bezierRibbon`-Arme radial, granuläre Haut-Textur (Bezier-Abtast-Punkte),
+            echte Lichtsinnesflecken an jeder Armspitze.
+      - [x] 🦪 Muschel (zweiklappige Schale) — erledigt (2026-08-05). Fan-Form,
+            Scharnier + konzentrische Wachstumsringe (Panzerring-Technik wiederverwendet).
+      - [x] 🪼 Leuchtwesen/Qualle (Schirm + Tentakel) — erledigt (2026-08-05).
+            `halfEllipse` für den Schirm, radiale Markierung, sechs dünne wallende
+            Tentakel (bewusst dünn/ohne Saugnäpfe, anders als der Kraken-Arm).
       - [ ] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
       - [ ] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — kleinere/generischere Baupläne, ggf. genügt eine
             angepasste Parametrisierung der Vierbeiner-Funktion statt eines eigenen Zeichners
