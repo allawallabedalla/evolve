@@ -6559,13 +6559,17 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     const bx = lx, by = reptile ? cy+R*bh*0.05 : cy+R*bh*0.5;
     let fx, fy, elx, ely;
     if(reptile){
-      // Spreiz-Gang statt Saeulenbein: Ellbogen weit raus (entlang der Rumpflaengsachse,
-      // vorne nach vorn/aussen, hinten nach hinten/aussen), Fuss kommt erst danach wieder
-      // naeher unter den Rumpf — Nutzer-Fund: "Fuesse sind unter dem Koerper statt seitlich"
-      // (das war ein Saeugetier-Stand: Bein senkrecht runter statt gespreizt).
-      const dir = t<0.5 ? -1 : 1;
-      elx = lx + dir*R*1.0; ely = cy+R*bh*0.5 + legLen*0.25;
-      fx = lx + dir*R*0.45 + swing*0.3; fy = cy+R*bh*0.5 + legLen*0.9;
+      // KORREKTUR (Nutzer: "sieht aus als wuerde man frontal draufschauen"): der vorige
+      // Versuch bog Vorder-/Hinterbeine GEGENLAEUFIG entlang der Kopf-Schwanz-Achse
+      // auseinander (Ellbogen vorne nach vorn, hinten nach hinten) — das ergibt ein
+      // symmetrisches "V" pro Beinpaar, und genau DAS liest man nur in der Frontalansicht
+      // so (zwei Beine, die auseinanderklappen). Seitliches Ausstellen (links/rechts) laesst
+      // sich in reiner Seitenansicht ueberhaupt nicht durch Verschiebung auf der
+      // Kopf-Schwanz-Achse zeigen — nahes und fernes Bein liegen dort uebereinander.
+      // Stattdessen: niedriger, geknickter Krabbel-Stand, ALLE Beine mit gleicher
+      // Knick-Richtung (Gangbild-Versatz statt Spreizung), kurz und tief (Gecko-Kauerstand).
+      elx = lx - R*0.22 + swing*0.4; ely = cy+R*bh*0.5 + legLen*0.4;
+      fx = lx + R*0.05 + swing*0.7; fy = cy+R*bh*0.5 + legLen*0.95;
     } else {
       elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
       fx = lx+swing; fy = cy+R*bh*0.5+legLen;
