@@ -6071,12 +6071,19 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
     myc(); return;
   }
   if(kind==="🪵"||kind==="🟤"){   // Baumpilz: gestapelte Konsolen am Totholz
-    cAttr(cEl("fun-wood","rect"), { x:(bx-6).toFixed(1), y:(by-90).toFixed(1), width:12, height:92,
+    const trunkR = 6;
+    cAttr(cEl("fun-wood","rect"), { x:(bx-trunkR).toFixed(1), y:(by-90).toFixed(1), width:trunkR*2, height:92,
       fill: flatCol([70,50,38]), "fill-opacity": .9 });
     const shelves = 3+Math.round(size*4);
     for(let i=0;i<shelves;i++){
-      const y=by-14-i*(16+size*10), w=(20+size*30)*(1-i*0.08), side=i%2?1:-1;
-      const d = halfEllipse(bx+side*4, y, w, 7+size*5, "bottom");
+      const y=by-14-i*(16+size*10), w=(20+size*30)*(1-i*0.08), rh=7+size*5, side=i%2?1:-1;
+      // Konsolen wachsen SEITLICH aus dem Stamm — flache Kante AM Stamm, Bogen nach
+      // aussen. Die vorige halfEllipse() war horizontal orientiert (Kappen-Rezept: flache
+      // Kante oben/unten) und sass fast zentriert auf dem Stamm — sah wie kleine Huegel
+      // AUF dem Holz aus statt wie seitlich abstehende Konsolen (Foto-Abgleich: echte
+      // Baumpilze stehen wie Bretter/Regale seitlich vom Stamm ab).
+      const xEdge = bx+side*trunkR;
+      const d = `M${xEdge.toFixed(1)},${(y-rh).toFixed(1)}A${w.toFixed(1)},${rh.toFixed(1)} 0 0 ${side>0?1:0} ${xEdge.toFixed(1)},${(y+rh).toFixed(1)}Z`;
       cAttr(cEl("fun-shelf"+i,"path"), { d,
         fill: flatCol(mix(capTone,[120,90,70],0.5).map(c=>c*(0.8+i*0.05))),
         stroke: flatCol([30,24,18]), "stroke-opacity": .4, "stroke-width": 1 });
@@ -6306,13 +6313,22 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
     const stemCol=mix([90,70,50],[120,95,62],photo);
     for(let s=0;s<stems;s++){
       const off=(s-(stems-1)/2)*14, h=(45+size*70+struct*30)*breath*(0.7+rnd()*0.5);
+      const p0x=bx+off*0.4, p0y=by, p1x=bx+off, p1y=by-h*0.5;
       const tx=bx+off+Math.sin(sway+s)*8, ty=by-h;
       cAttr(cEl("pl-st"+s,"path"), {
-        d:`M${(bx+off*0.4).toFixed(1)},${by.toFixed(1)}Q${(bx+off).toFixed(1)},${(by-h*0.5).toFixed(1)} ${tx.toFixed(1)},${ty.toFixed(1)}`,
+        d:`M${p0x.toFixed(1)},${p0y.toFixed(1)}Q${p1x.toFixed(1)},${p1y.toFixed(1)} ${tx.toFixed(1)},${ty.toFixed(1)}`,
         stroke: flatCol(stemCol), "stroke-width": (4+struct*6).toFixed(1), "stroke-linecap": "round", fill: "none" });
-      for(let l=0;l<4;l++){ const la=(l/4)*Math.PI*2;
-        cAttr(cEl("pl-lf"+s+"-"+l,"ellipse"), { cx:0, cy:0, rx:(12+photo*8).toFixed(1), ry:(6+photo*4).toFixed(1), fill: flatCol(leafVar()),
-          transform:`translate(${(tx+Math.cos(la)*10).toFixed(1)},${(ty+Math.sin(la)*10).toFixed(1)}) rotate(${(la*180/Math.PI).toFixed(1)})` }); }
+      // Blattbuescheln nur an der Stammspitze liessen den Strauch wie "kahle Stiele mit
+      // Puscheln obendrauf" aussehen statt buschig (Foto-Abgleich: echtes Laub deckt das
+      // ganze Volumen, nicht nur die Triebspitzen). Zusaetzliche, kleinere Buescheln entlang
+      // des Stamms (quadratische Bezier-Punkte bei t=0.55/0.8) fuellen die Silhouette.
+      const bez = t => ({ x:(1-t)*(1-t)*p0x+2*(1-t)*t*p1x+t*t*tx, y:(1-t)*(1-t)*p0y+2*(1-t)*t*p1y+t*t*ty });
+      [[0.55,0.7],[0.8,0.85],[1.0,1.0]].forEach(([t,scale],ti)=>{
+        const pt = bez(t);
+        for(let l=0;l<4;l++){ const la=(l/4)*Math.PI*2;
+          cAttr(cEl("pl-lf"+s+"-"+ti+"-"+l,"ellipse"), { cx:0, cy:0, rx:((12+photo*8)*scale).toFixed(1), ry:((6+photo*4)*scale).toFixed(1), fill: flatCol(leafVar()),
+            transform:`translate(${(pt.x+Math.cos(la)*10*scale).toFixed(1)},${(pt.y+Math.sin(la)*10*scale).toFixed(1)}) rotate(${(la*180/Math.PI).toFixed(1)})` }); }
+      });
     }
     roots(); return;
   }

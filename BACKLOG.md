@@ -2128,6 +2128,41 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         JEDE neu gebaute Form mindestens ein Referenzfoto tatsächlich geladen worden
         sein, nicht nur für die zuerst bearbeitete.
 
+      **Nachtrag 7 — Fotoaudit der 11 ursprünglichen Pflanzen/Pilz-Archetypen (2026-08-05,
+      Nutzer-Auftrag „mach halt weiter der reihe nach"):** die 2026-08-04-Runde hatte für
+      Baum/Kaktus/Strauch/Kraut/Nadelbaum/Blütenkraut/Farn/Moos-Alge/Hutpilz/Baumpilz/
+      Schimmel nur einen Codeaudit gemacht (kein Foto), s. Nachtrag 4. Jetzt nachgeholt:
+      - **Großer Nebenfund, kein Anatomie-Fehler:** beim ersten Testrender von 🌵/🌳 fiel
+        auf, dass hohe/aufrechte Pflanzen am unteren Rand abgeschnitten wirkten (Wurzeln
+        unsichtbar) — kein Test-Artefakt, sondern ein echter, seit dem iPhone-Usability-
+        Merge live auf `main` stehender Bug: `resize()` berechnete die Bühnenhöhe `CH`
+        aus einer festen 720:560-Ratio, aber `@media (max-width:820px){#habitatSvg
+        {height:190px}}` überschreibt das auf jedem Gerät ≤820px mit einer festen
+        Pixelhöhe — betrifft praktisch jedes Mobilgerät. Alles nahe am Bühnenboden (vor
+        allem Pflanzen mit `by=CH*0.9`) rutschte unten aus dem sichtbaren Bereich. Fix:
+        `CH` liest jetzt die tatsächlich gerenderte Höhe direkt aus
+        `getBoundingClientRect()` statt sie zu erraten.
+      - **🪴 Strauch:** Blattbüschel sassen nur an den Stammspitzen — sah wie "kahle
+        Stiele mit Puscheln obendrauf" statt buschig aus. Zusätzliche, kleinere Büschel
+        entlang jedes Stamms (Bezier-Zwischenpunkte) ergänzt, füllen jetzt die Silhouette.
+      - **🪵 Baumpilz/🟤 Zunderschwamm:** die Konsolen nutzten `halfEllipse()` mit
+        horizontaler Ausrichtung (Kappen-Rezept: flache Kante oben/unten) und sassen fast
+        zentriert AUF dem Stamm — sahen wie kleine Hügel aus statt wie seitlich
+        abstehende Konsolen-Bretter. Pfad jetzt mit vertikaler flacher Kante AM
+        Stamm, Bogen nach aussen.
+      - **Bestätigt ohne Fund (Codeaudit hatte hier bereits recht):** 🌳 Laubbaum, 🌵
+        Kaktus, ☘️ Kraut, 🌲 Nadelbaum, 🌸 Blütenkraut, 🟢/🌱 Moos-Alge, 🍄 Hutpilz, 🧵
+        Schimmel — jeweils gegen ein frisch geladenes Referenzfoto verglichen, keine
+        anatomische Abweichung, die eine Änderung rechtfertigt. 🌿 Farn zeigte beim
+        ersten Testrender die generische Stängel-Fallback-Form statt der dedizierten
+        Wedel-Zeichnung — eigener Testfehler (Gen `structure` nicht unter den
+        `<0.42`-Schwellenwert gesetzt), kein Code-Bug; mit korrektem Gen liest sich die
+        Wedel-Form klar als Farn. 🍥 Flechte liest als flacher Bodenbelag erkennbar,
+        aber weniger kompakt/rosettenförmig als das Referenzfoto — als geringfügige,
+        nicht eindeutig genug belegte Abweichung ohne Fix belassen.
+      - Alle Fixes committed mit `app-parity`/`design-audit`/`exemplar-check`/`key-check`
+        grün.
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
