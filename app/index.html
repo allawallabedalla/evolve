@@ -6825,10 +6825,17 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     "🐭":{bw:1.0,bh:0.95,legL:0.62}, "🐒":{bw:0.9,bh:1.12,legL:1.6},
     "🐻":{bw:1.32,bh:1.04,legL:0.92}, "🦥":{bw:1.14,bh:0.92,legL:1.0},
     "🦎":{bw:1.58,bh:0.56,legL:0.8}, "🐦":{bw:0.82,bh:1.02,legL:1.4},
+    // Chamaeleon: seitlich abgeflacht, also hoch statt lang (anders als der flache Gecko).
+    "👁️":{bw:1.05,bh:1.0,legL:0.95},
     "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
   })[kind] || {bw:1.08,bh:0.98,legL:1.0};
   const bw=FORM.bw, bh=FORM.bh;
-  const reptile = kind==="🦎"; // Gecko-Spezifika: Keil-Kopf, Schwanz als Koerperfortsatz
+  // Chamaeleon erbt den kompletten Echsen-Koerper (Keil-Kopf, Spreiz-Gang, dicke Beine) —
+  // Phase 1b: es fiel vorher auf den "pelziger Ball"-Fallback zurueck, obwohl der bereits
+  // gebaute Echsen-Bauplan fast perfekt passt. Nur Schwanz (eingerollt), Turmauge und
+  // Helmkamm sind chamaeleon-spezifisch (s. u.).
+  const cham = kind==="👁️";
+  const reptile = kind==="🦎" || cham;  // Keil-Kopf + Echsen-Proportionen
   const sprawl = reptile || kind==="🐢"; // Spreiz-Gang-Beine: alle sprawlenden Reptilien
   // Schwanz-Basis am tatsaechlichen Koerperrand (skaliert mit bw) statt an einer festen
   // Konstante — bei breiten Koerpern (Gecko bw=1.58) ragte der Schwanz vorher kaum aus dem
@@ -6841,6 +6848,14 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       transform:`translate(${tx.toFixed(1)},${ty.toFixed(1)}) rotate(${((0.5+wag)*180/Math.PI).toFixed(1)})` });
   } else if(kind==="🐒"){ cAttr(tailEl, { d:`M${tx.toFixed(1)},${ty.toFixed(1)}C${(tx+R*0.8).toFixed(1)},${(ty-R*0.3).toFixed(1)} ${(tx+R*1.15).toFixed(1)},${(ty+R*0.8+wag*18).toFixed(1)} ${(tx+R*0.5).toFixed(1)},${(ty+R*1.1).toFixed(1)}`,
       stroke: flatCol(dark), "stroke-width": (4+size*3).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: 1 });
+  } else if(cham){
+    // Chamaeleon-Greifschwanz: rollt sich ein. Zwei Ribbon-Segmente (auslaufend nach
+    // hinten, dann eng nach oben-vorne eingerollt) statt des geraden Gecko-Schwanzes.
+    const c1x=tx+R*0.95, c1y=ty-R*0.1, c2x=tx+R*1.05, c2y=ty-R*0.75;
+    cAttr(tailEl, { d: bezierRibbon(tx,ty, c1x,c1y+R*0.3, c2x,c2y, R*bh*0.9, R*0.16),
+      fill: flatCol(body), opacity: 1 });
+    cAttr(tailTipEl, { d: bezierRibbon(c2x,c2y, tx+R*0.5,ty-R*1.1, tx+R*0.42,ty-R*0.55,
+      R*0.16, R*0.05), fill: flatCol(body), opacity: 1 });
   } else if(reptile){
     // Nutzer-Fund: "der Schwanz ist zu unscheinbar, bei einer Echse ist er ja Teil des
     // Koerpers" — ein duenner Strich (wie beim Wolf) ist strukturell falsch. Stattdessen
@@ -6940,7 +6955,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   P("an-paws", paws, { fill: flatStep(dark,-1) });
   P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
   const furEl = cEl("an-fur","path");
-  if(insul>0.4){ let f="";
+  // Reptilien haben KEIN Fell — der Borsten-Kranz lief bisher rein ueber das insul-Gen und
+  // traf damit auch Gecko/Schildkroete/Chamaeleon (eigener Fund beim Chamaeleon-Render).
+  // insul steht bei Reptilien fuer Hornschuppen/Waermehaushalt, nicht fuer Haare.
+  if(insul>0.4 && !sprawl){ let f="";
     const n=Math.round(30+insul*50);
     for(let i=0;i<n;i++){ const ang=i/n*Math.PI*2, r1=0.92, r2=(1.05+insul*0.18+rnd()*0.06);
       f += `M${(cx+Math.cos(ang)*r1*R*bw).toFixed(1)},${(cy+Math.sin(ang)*r1*R*bh).toFixed(1)}L${(cx+Math.cos(ang)*r2*R*bw).toFixed(1)},${(cy+Math.sin(ang)*r2*R*bh).toFixed(1)}`; }
@@ -7008,7 +7026,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   if(reptile){
     // Spitze ABGERUNDET (kleiner Bogen, nicht ein einzelner Punkt) — Nutzer-Fund: "die
     // Nase sieht aus wie von einer Spitzmaus". Ein Gecko-Maul ist vorn stumpf, nicht spitz.
-    const bk=hx+R*0.30, tipC=hx-R*0.82, midX=(bk+tipC)/2, halfH=R*0.30, tipR=R*0.1;
+    // Chamaeleon-Schnauze deutlich kuerzer + Kopf hoeher als beim langgestreckten Gecko
+    // (der Gecko-Keil wirkte am Chamaeleon wie ein Ameisenbaer-Ruessel, eigener Fund).
+    const bk=hx+R*0.30, tipC=hx-R*(cham?0.46:0.82), midX=(bk+tipC)/2,
+          halfH=R*(cham?0.4:0.30), tipR=R*0.1;
     const d = `M${bk.toFixed(1)},${(hy-halfH).toFixed(1)}`
       + `Q${midX.toFixed(1)},${(hy-halfH*0.3).toFixed(1)} ${tipC.toFixed(1)},${(hy-tipR).toFixed(1)}`
       + `A${tipR.toFixed(1)},${tipR.toFixed(1)} 0 0 0 ${tipC.toFixed(1)},${(hy+tipR).toFixed(1)}`
@@ -7058,6 +7079,20 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   E("an-iris", ex, ey, irisRx, irisRy*blink, flatStep(dark,1));
   E("an-eye", ex, ey, eyeRx, eyeRy*blink, EYE);
   P("an-glint", dot(ex-eyeRx*0.27, ey-eyeRy*0.7, R*(reptile?0.028:0.04)), { fill: GLINT, "fill-opacity": .9 });
+  // --- Chamaeleon-Sonderteile (Phase 1b) -------------------------------------------
+  // Turmauge (kegelfoermiger Lidkonus, der die Pupille fast umschliesst) und Helmkamm
+  // (Casque) sind DIE beiden Merkmale, an denen ein Chamaeleon erkannt wird.
+  const casqueEl = cEl("an-casque","polygon"), turretEl = cEl("an-turret","ellipse");
+  if(cham){
+    cAttr(casqueEl, { points:`${(hx+R*0.3).toFixed(1)},${(hy-R*0.24).toFixed(1)} `
+      +`${(hx+R*0.46).toFixed(1)},${(hy-R*0.72).toFixed(1)} ${(hx-R*0.16).toFixed(1)},${(hy-R*0.3).toFixed(1)}`,
+      fill: flatCol(body), opacity: 1 });
+    cAttr(turretEl, { cx:0, cy:0, rx:(R*0.3).toFixed(1), ry:(R*0.28).toFixed(1),
+      fill: flatCol(body), opacity: 1, transform:`translate(${ex.toFixed(1)},${ey.toFixed(1)})` });
+    // Pupille NACH dem Lidkonus neu setzen, damit sie obenauf liegt (sonst verdeckt).
+    E("an-eye2", ex-R*0.07, ey, R*0.08, R*0.08, EYE);
+  } else { cAttr(casqueEl, { opacity: 0 }); cAttr(turretEl, { opacity: 0 });
+    cAttr(cEl("an-eye2","ellipse"), { opacity: 0 }); }
 }
 
 // Die alten Canvas-Zeichner (drawPlant/drawAnimal/drawFungus/drawMicrobe/
