@@ -2011,11 +2011,13 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         Archetyp (Ameise) noch ein zweiter, groesserer Fund (Mandibeln fehlten komplett),
         der beim reinen Code-/Wissens-Audit übersehen wurde. Code-Muster und Fachwissen
         taugen zum AUFSPÜREN von Kandidaten, ersetzen aber nicht den Foto-Abgleich vor dem
-        Commit.
+        Commit. **Nachtrag geschlossen:** alle fünf betroffenen Kinds (🦇🐜🦀🐌🦋)
+        nachträglich gegen echte Fotos geprüft — 🐜 Mandibeln ergänzt, 🦀 gezackte
+        Panzer-Vorderkante ergänzt, 🦋 perlschnurartige Fühler ergänzt, 🐌 nach Check
+        unverändert gelassen (kein klarer Fund).
       - **Restliche Kandidaten mit offener Unsicherheits-Einschätzung** (Stand 2026-08-05):
-        🦋 (Flügel ohne Aderung — geringe Priorität), restliche Vierbeiner-Kinds 🦊🐒🐺🐭🐻🦥🦏
-        (gerade Beine sind für Säugetiere korrekt, kein erwarteter Fund), 🐜/🦀/🐌 (bereits
-        geprüft, keine offensichtliche Lücke gefunden).
+        restliche Vierbeiner-Kinds 🦊🐒🐺🐭🐻🦥🦏 (gerade Beine sind für Säugetiere korrekt,
+        kein erwarteter Fund), Pflanzen/Pilze (eigenes Prüfraster noch offen, s. Nachtrag 4).
 
       **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame
       Vierbeiner-Funktion (2026-08-05, Nutzer-Auftrag „immer weiter, auditiere dich
