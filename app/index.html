@@ -6326,7 +6326,13 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(const o of [-1,1]){ ant += `M${(hx+R*0.08).toFixed(1)},${(hy-R*0.2).toFixed(1)}L${(hx+R*0.28+o*R*0.05).toFixed(1)},${(hy-R*0.65).toFixed(1)}`;
       tip += dot(hx+R*0.28+o*R*0.05, hy-R*0.68, R*0.06); }
     P("an-ant", ant, { stroke: foot, "stroke-width": (R*0.09).toFixed(1), "stroke-linecap":"round", fill:"none" });
-    P("an-atip", tip, { fill: GLINT, "fill-opacity": .9 });
+    // Fuehlerspitzen waren nur Glanzpunkte statt echter Augen (gleicher Fund wie bei
+    // Ameise/Krabbe/Fledermaus) — bei Landschnecken sitzen die Augen tatsaechlich an den
+    // oberen Fuehlerspitzen, also dunkle Pupille dort statt reinem Glanzpunkt.
+    P("an-atip", tip, { fill: EYE });
+    let atgl = "";
+    for(const o of [-1,1]) atgl += dot(hx+R*0.28+o*R*0.05-R*0.015, hy-R*0.7, R*0.02);
+    P("an-atipgl", atgl, { fill: GLINT, "fill-opacity": .9 });
     const shx=cx-L*0.1, shy=cy-R*0.2, sr=R*0.98;
     cAttr(cEl("an-shell","circle"), { cx:shx.toFixed(1), cy:shy.toFixed(1), r:sr.toFixed(1), fill: flatCol(mix(body,[185,145,95],armor)) });
     let sp="";
@@ -6512,10 +6518,15 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
         transform: tr + ` rotate(${(0.32*180/Math.PI).toFixed(1)},${(R*0.85).toFixed(1)},${(-R*0.44).toFixed(1)})` });
     }
     E("an-body", cx, cy, R*0.16, R*0.62, dc);
-    let ant="", gl="";
+    // Kopf hatte ueberhaupt kein Auge, nur die Fuehler-Kolben als Glanzpunkte — echte
+    // Facettenaugen am Kopfansatz ergaenzt (gleiches Audit-Muster wie bei den anderen
+    // Gliederfuessern).
+    let ant="", gl="", eyeD="";
     for(const sd of [-1,1]){ ant += `M${(cx+sd*R*0.06).toFixed(1)},${(cy-R*0.5).toFixed(1)}Q${(cx+sd*R*0.3).toFixed(1)},${(cy-R*0.95).toFixed(1)} ${(cx+sd*R*0.46).toFixed(1)},${(cy-R*0.82).toFixed(1)}`;
-      gl += dot(cx+sd*R*0.46, cy-R*0.84, R*0.05); }
+      gl += dot(cx+sd*R*0.46, cy-R*0.84, R*0.05);
+      eyeD += dot(cx+sd*R*0.07, cy-R*0.56, R*0.05); }
     P("an-ant", ant, { stroke: dc, "stroke-width": 1.5, "stroke-linecap":"round", fill:"none" });
+    P("an-eye", eyeD, { fill: EYE });
     P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
     return;
   }
