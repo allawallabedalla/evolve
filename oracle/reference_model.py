@@ -357,8 +357,13 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     baro_survival = _clamp01(1.0 - pressure * (1.0 - baro) * phys["baroLethality"])
 
     # 9) Austrocknung (AXIS-14): extreme Trockenheit ohne Austrocknungs-Toleranz toedlich.
+    #    LANDGANG (2026-08-05): Grundtrockenheit aus dem Land-Regime, s. engine/fitness.ts
+    #    fuer die ausfuehrliche Begruendung. Unterhalb aquaticWaterFloor waechst der
+    #    Austrocknungsdruck mit sinkender Feuchte; ein Duerre-Ereignis addiert sich darauf.
     aridity = env.get("aridity", 0.0)
-    desicc_survival = _clamp01(1.0 - aridity * (1.0 - desicc) * phys["desiccLethality"])
+    land_dry = _clamp01((phys["aquaticWaterFloor"] - env["water"]) / phys["aquaticWaterFloor"])
+    eff_aridity = _clamp01(aridity + phys["landDesiccation"] * land_dry)
+    desicc_survival = _clamp01(1.0 - eff_aridity * (1.0 - desicc) * phys["desiccLethality"])
 
     # 10) Ionisierende Strahlung (AXIS-15): radioaktive Milieus ohne Strahlungsresistenz toedlich.
     radiation = env.get("radiation", 0.0)

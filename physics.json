@@ -151,6 +151,7 @@
   "wBaro": 1.0,
   "senseForage": 0.3,
   "desiccLethality": 0.85,
+  "landDesiccation": 0.0,
   "wDesicc": 1.0,
   "radLethality": 0.85,
   "wRad": 1.0,

@@ -431,8 +431,21 @@ export function fitness(traits, env, phys) {
     //    (kompatible Solute/Trehalose, Resurrektions-Physiologie). 'desicc' puffert,
     //    kostet Unterhalt -> nur in ariden Nischen der Xerophyt/Anhydrobiont (Baerentierchen,
     //    Auferstehungspflanze). aridity kommt ueber Umwelt-Einfluesse (Duerre/Aridifizierung).
+    //    LANDGANG (2026-08-05): 'aridity' allein ist ein EREIGNIS-Stressor (Duerre), der nur
+    //    ueber Umwelt-Einfluesse gesetzt wird. Dadurch hatte ein Land-HABITAT bisher gar keinen
+    //    Austrocknungsdruck: gemessen war Landtauglichkeit in einer Landwelt (water .2) sogar
+    //    ein Nachteil von -1,2 % (desicc kostet Unterhalt und bringt ohne aridity nichts).
+    //    Genau das ist aber die definierende Herausforderung des Landgangs — real trocknet
+    //    Land aus, und das ist der Grund, warum Landbesiedlung Cuticula/Sporen/Amnion
+    //    brauchte. Deshalb: unterhalb des aquatischen Bodens entsteht eine GRUNDTROCKENHEIT,
+    //    die mit sinkender Feuchte waechst; ein Duerre-Ereignis kommt additiv obendrauf.
+    //    Bei water >= aquaticWaterFloor ist landDry exakt 0 -> im Wasser unveraendert, und
+    //    die Rote-Koenigin-Testumwelt (water=0.5) liegt exakt auf der Grenze, bleibt also
+    //    bitgleich (bewusst so gewaehlt, s. Version-7-Befund im physics.json-Changelog).
     const aridity = env.aridity ?? 0;
-    const desiccSurvival = clamp01(1 - aridity * (1 - desicc) * phys.desiccLethality);
+    const landDry = clamp01((phys.aquaticWaterFloor - env.water) / phys.aquaticWaterFloor);
+    const effAridity = clamp01(aridity + phys.landDesiccation * landDry);
+    const desiccSurvival = clamp01(1 - effAridity * (1 - desicc) * phys.desiccLethality);
     // 10) Ionisierende Strahlung (AXIS-15): radioaktive Boeden (Selen/Arsen/Radon, Uran-
     //     Erz) und kosmische Strahlung erzeugen DNA-Doppelstrangbrueche, toedlich WENN
     //     keine Strahlungsresistenz (redundante Genome, DNA-Reparatur wie bei Deinococcus,

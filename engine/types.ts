@@ -124,6 +124,9 @@ export interface Physics {
   wBaro: number;
   senseForage: number;
   desiccLethality: number;
+  /** Wie stark ein trockenes LAND-Habitat fuer sich genommen Austrocknungsdruck erzeugt
+   *  (zusaetzlich zum Duerre-Ereignis `aridity`). 0 = Land trocknet nicht aus. */
+  landDesiccation: number;
   wDesicc: number;
   radLethality: number;
   wRad: number;
