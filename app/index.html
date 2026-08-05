@@ -6534,11 +6534,20 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     // Kopf hatte ueberhaupt kein Auge, nur die Fuehler-Kolben als Glanzpunkte — echte
     // Facettenaugen am Kopfansatz ergaenzt (gleiches Audit-Muster wie bei den anderen
     // Gliederfuessern).
-    let ant="", gl="", eyeD="";
-    for(const sd of [-1,1]){ ant += `M${(cx+sd*R*0.06).toFixed(1)},${(cy-R*0.5).toFixed(1)}Q${(cx+sd*R*0.3).toFixed(1)},${(cy-R*0.95).toFixed(1)} ${(cx+sd*R*0.46).toFixed(1)},${(cy-R*0.82).toFixed(1)}`;
+    // Nachcheck gegen Referenzfoto (Kleiner Fuchs): echte Schmetterlingsfuehler sind
+    // "perlschnurartig" gegliedert, nicht glatt — kleine Perlen entlang derselben Kurve
+    // (dieselbe Bezier-Abtast-Technik wie bei den Kraken-Saugnaepfen).
+    let ant="", gl="", eyeD="", beads="";
+    const evalQb=(p0,p1,p2,t)=>{ const mt=1-t; return p0*mt*mt+2*mt*t*p1+t*t*p2; };
+    for(const sd of [-1,1]){
+      const p0x=cx+sd*R*0.06, p0y=cy-R*0.5, p1x=cx+sd*R*0.3, p1y=cy-R*0.95, p2x=cx+sd*R*0.46, p2y=cy-R*0.82;
+      ant += `M${p0x.toFixed(1)},${p0y.toFixed(1)}Q${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}`;
+      for(let s=1;s<=4;s++){ const tt=s/5;
+        beads += dot(evalQb(p0x,p1x,p2x,tt), evalQb(p0y,p1y,p2y,tt), R*0.018); }
       gl += dot(cx+sd*R*0.46, cy-R*0.84, R*0.05);
       eyeD += dot(cx+sd*R*0.07, cy-R*0.56, R*0.05); }
-    P("an-ant", ant, { stroke: dc, "stroke-width": 1.5, "stroke-linecap":"round", fill:"none" });
+    P("an-ant", ant, { stroke: dc, "stroke-width": 1.2, "stroke-linecap":"round", fill:"none" });
+    P("an-beads", beads, { fill: dc });
     P("an-eye", eyeD, { fill: EYE });
     P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
     return;
