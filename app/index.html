@@ -6510,6 +6510,13 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   if(kind==="🦇"){   // Fledermaus: dunkler Rumpf + gefingerte Hautfluegel + Ohren
     const flap=0.35+0.4*Math.sin(time*0.008);
     const wc=flatCol(mix(body,[70,60,85],0.6)), bc=flatCol(mix(body,[55,48,66],0.6));
+    // Selbstabgleich gegen Referenzfoto (Gegenlicht-Aufnahme): der Kommentar behauptete
+    // "gefingerte Hautfluegel", aber die Flaeche war nur eine glatte Kontur ohne jede
+    // Fingerstruktur — genau das Merkmal, das eine Fledermaus von einem generischen Umhang
+    // unterscheidet. Vier Finger-Streben vom Handgelenk zu den Ausbuchtungen der Kontur
+    // (dieselben Eckpunkte, die die Kontur schon definieren — keine neue Geometrie noetig).
+    const wristX=0, wristY=R*0.05;
+    const wingPts = [[sd=>sd*R*1.5,-R*0.42],[sd=>sd*R*1.28,R*0.32],[sd=>sd*R*0.9,R*0.42],[sd=>sd*R*0.5,R*0.46]];
     for(const sd of [-1,1]){
       P("an-wing"+sd, `M0,${(-R*0.1).toFixed(1)}L${(sd*R*1.5).toFixed(1)},${(-R*0.42).toFixed(1)}`
         +`Q${(sd*R*1.2).toFixed(1)},${(R*0.02).toFixed(1)} ${(sd*R*1.28).toFixed(1)},${(R*0.32).toFixed(1)}`
@@ -6517,6 +6524,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
         +`Q${(sd*R*0.62).toFixed(1)},${(R*0.14).toFixed(1)} ${(sd*R*0.5).toFixed(1)},${(R*0.46).toFixed(1)}`
         +`L0,${(R*0.22).toFixed(1)}Z`,
         { fill: wc, transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${(sd*flap*180/Math.PI).toFixed(1)})` });
+      let fingers="";
+      for(const [fx,fy] of wingPts) fingers += `M${wristX},${wristY}L${fx(sd).toFixed(1)},${fy.toFixed(1)}`;
+      P("an-fingers"+sd, fingers, { stroke: flatCol(dark), "stroke-opacity": .45, "stroke-width": 1.3, fill:"none",
+        transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${(sd*flap*180/Math.PI).toFixed(1)})` });
     }
     E("an-body", cx, cy, R*0.32, R*0.5, bc);
     cAttr(cEl("an-head","circle"), { cx:cx.toFixed(1), cy:(cy-R*0.5).toFixed(1), r:(R*0.28).toFixed(1), fill: bc });
