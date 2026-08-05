@@ -2184,6 +2184,45 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
 
 ---
 
+### 13 · iPhone-Usability-Audit (2026-08-04) — 4 von 5 behoben, 1 entschärft (PR #25, 2026-08-04)
+
+**Modell:** Sonnet reicht — klar lokalisierte CSS-/Layout-Fixes, kein Design-Ermessen nötig.
+
+Geprüft mit `playwright-core` + Chromium-Mobil-Emulation (iPhone 14 Pro 393×660 mit sichtbarer
+Safari-Leiste, iPhone SE 3. Gen./13 Mini 375px, altes SE 320px nur als Gegenprobe) gegen die
+Live-App. Voller Bericht mit Status je Befund: `docs/iphone-usability-audit.md`.
+
+- ✅ **Chip-Überlappung (hoch, behoben):** `.gen-readout`/`.biome-tag` teilen sich jetzt eine
+  Flex-Zeile (`.viewport-top-row`, `justify-content: space-between`) statt unabhängig
+  `position:absolute` in dieselben Ecken gesetzt zu sein — der Generation-Chip weicht zurück und
+  schneidet per Ellipse ab (war: −109px Überlappung bei 375px, jetzt 8px Abstand).
+- ⚠️ **Kernregler unter dem Fold (hoch, entschärft, nicht vollständig gelöst):** Habitat-Bild auf
+  Mobil gecroppt (`preserveAspectRatio="slice"`), 2×2-Schnelleinstiege kompakter, Stage-Abstand
+  verkleinert — die Konsolen-Überschrift + Untertitel sind jetzt vollständig sichtbar ohne zu
+  scrollen (vorher nur ein abgeschnittenes Wort). Die Regler selbst vollständig above-the-fold
+  zu bekommen bräuchte eine Markup-Umstrukturierung (Schnell-Einstiege aus der Bild-Karte lösen)
+  — blieb als eigener, riskanterer Schritt bewusst offen.
+- ✅ **5 Touch-Ziele unter 44×44px (mittel, behoben — eine bewusste Ausnahme):** `.medium`,
+  `.gene-nums-toggle`, `.cshare` in die bestehende `(pointer: coarse)`-Regel aufgenommen, `.link`
+  auf 44px angehoben, `.details-btn` brauchte einen spezifischeren Selektor (`.details-btn.link`
+  — eine unconditional Regel weiter unten gewann bisher rein durch Stylesheet-Reihenfolge gegen
+  die Coarse-Pointer-Regel). `#speciesWiki` bewusst als Textlink belassen, nur die Trefferfläche
+  per Innenpolster + Negativ-Rand vergrößert (112×14 → 120×34px).
+- ✅ **Kein `env(safe-area-inset-*)` (niedrig–mittel, behoben):** ein gemeinsamer Selektor für
+  alle sechs Vollbild-Modale (`.genbook, .dlg, .infl, .world, .login, .dpanel`) trägt jetzt
+  `padding: max(14px, env(safe-area-inset-*))` — ein Fix statt sechs Einzeländerungen.
+- ✅ **Presets-Liste ohne Scroll-Hinweis (niedrig, behoben):** reiner CSS-Scroll-Schatten
+  (`background-attachment: local/scroll`-Ebenen, kein JS) auf `.dpanel-card` **und** `.gb-card`
+  (Lebensbaum/Herausforderungen/Weltkarten-Ergebnisse teilen sich dieselbe Klasse).
+
+**Bereits sauber (zur Einordnung, keine Aufgabe):** kein Auto-Zoom-Risiko (alle Inputs 16px),
+Viewport-Meta erlaubt Pinch-Zoom, `(pointer: coarse)` greift nachweislich (Regler-Griff korrekt
+26px), kein horizontaler Dokument-Overflow bei keiner getesteten Breite.
+
+Re-verifiziert nach den Fixes mit `npm run design-audit` (0 AA-Verstöße) und
+`npm run ui-calm-check` (beide grün), Playwright-Screenshots auf Mobil (375/393px) + Desktop
+(1280px, unverändert) — Details/Zahlen je Befund in `docs/iphone-usability-audit.md`.
+
 ## 🧭 Produkt-Pfeiler (Leitplanken)
 
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
@@ -2744,3 +2783,5 @@ Nutzerbindungs-Konzept in `docs/bindung-konzept.md`. Kurzfassung:
 - Reale Vorlagen: `docs/biodiversity-reference.md`, `docs/tree-of-life-reference.md` + `.json`.
 - Realer Artenkatalog (Punkt 12): `docs/artenkatalog-plan.md` (maßgeblicher Plan),
   `docs/coverage-report.md` (Abdeckungs-Messung + Achsen-Vorschläge).
+- iPhone-Usability-Audit (Punkt 13): `docs/iphone-usability-audit.md` (PR #25, 2026-08-04
+  nach `main` gemergt).

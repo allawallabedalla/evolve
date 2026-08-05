@@ -35,8 +35,10 @@
     <!-- Habitat + Identitaet -->
     <div class="panel viewport-panel">
       <div class="viewport">
-        <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span><span class="season" id="seasonReadout" title="Die Temperatur schwingt über ein „Jahr“ von 600 Generationen — kein Ziel, nur der Rhythmus der Welt. Während einer Herausforderung steht sie still."></span></div>
-        <div class="biome-tag" id="biomeTag">freie Umwelt</div>
+        <div class="viewport-top-row">
+          <div class="gen-readout"><span class="live-dot" id="liveDot"></span> <span id="genReadout">Generation 0</span><span class="season" id="seasonReadout" title="Die Temperatur schwingt über ein „Jahr“ von 600 Generationen — kein Ziel, nur der Rhythmus der Welt. Während einer Herausforderung steht sie still."></span></div>
+          <div class="biome-tag" id="biomeTag">freie Umwelt</div>
+        </div>
         <div class="stress-chips" id="stressChips" hidden></div>
         <!-- Phase 2 (flacher Vektor-Stil): die Buehne ist echtes SVG-DOM — flache Flaechen
              statt Canvas-Verlaeufe. Das Canvas liegt transparent darueber und traegt nur
@@ -2815,20 +2817,49 @@ document.getElementById("genbook").addEventListener("click", (e) => { if(e.targe
 // Hover-Info: wann & wie sich die Art entwickelt hat
 const gbTip = document.createElement("div"); gbTip.id="gbTip"; document.body.appendChild(gbTip);
 const gbBodyEl = document.getElementById("gbBody");
+// Vorschaubild bei Hover (Nutzer-Wunsch): dieselbe wikiSummary() wie das Klick-
+// Detail unten, nur ueber eine kurze Verzoegerung ausgeloest - sonst wuerde jedes
+// Vorbeifahren mit der Maus ueber eine ganze Kachelreihe unnoetige Anfragen abfeuern.
+// Erst-Hover einer Kachel kostet die normale Netzwerklatenz (Bild faedet ein, sobald
+// da), jeder weitere Hover auf dieselbe Kachel ist sofort aus dem _wikiCache.
+let _gbHoverTileEl = null, _gbHoverTimer = null;
+const _gbThumbResolved = {};   // Bauplan-Titel -> Bild-URL | null (null = versucht, keins gefunden)
 gbBodyEl.addEventListener("mousemove", (e) => {
   const tile = e.target.closest(".gb-tile");
-  if(!tile){ gbTip.classList.remove("show"); return; }
-  gbTip.innerHTML = `<b>${tile.dataset.title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
+  if(!tile){ gbTip.classList.remove("show"); _gbHoverTileEl=null; clearTimeout(_gbHoverTimer); return; }
+  const title = tile.dataset.title;
+  const thumbUrl = _gbThumbResolved[title];
+  gbTip.innerHTML = `<b>${title}</b> · <span class="tip-clade">${tile.dataset.clade}</span>`+
     `<div class="tip-rar" style="color:${tile.dataset.rcol}"><i class="gb-dot" style="background:${tile.dataset.rcol}"></i>${tile.dataset.rarity}</div>`+
-    `<div class="tip-era">${tile.dataset.era}</div><div>${tile.dataset.evo}</div>`;
+    `<div class="tip-era">${tile.dataset.era}</div>`+
+    `<div class="tip-thumb-slot">${thumbUrl ? `<img class="tip-thumb loaded" src="${thumbUrl}" alt="">` : ""}</div>`+
+    `<div>${tile.dataset.evo}</div>`;
   gbTip.classList.add("show");
   const pad=14, r=gbTip.getBoundingClientRect();
   let x=e.clientX+pad, y=e.clientY+pad;
   if(x+r.width>innerWidth) x=e.clientX-r.width-pad;
   if(y+r.height>innerHeight) y=e.clientY-r.height-pad;
   gbTip.style.left=Math.max(6,x)+"px"; gbTip.style.top=Math.max(6,y)+"px";
+  if(tile !== _gbHoverTileEl){
+    _gbHoverTileEl = tile;
+    clearTimeout(_gbHoverTimer);
+    if(tile.classList.contains("found") && _gbThumbResolved[title]===undefined){
+      _gbHoverTimer = setTimeout(async () => {
+        const aw = window.__archetypeWiki ? window.__archetypeWiki(title) : null;
+        const wtitle = aw ? decodeURIComponent(aw.wiki.split("/wiki/")[1]).replace(/_/g," ") : null;
+        const url = wtitle ? await wikiThumb(wtitle) : null;
+        _gbThumbResolved[title] = url || null;
+        if(_gbHoverTileEl !== tile || !gbTip.classList.contains("show")) return;   // Maus ist schon weiter
+        const slot = gbTip.querySelector(".tip-thumb-slot");
+        if(slot && url){
+          slot.innerHTML = `<img class="tip-thumb" src="${url}" alt="">`;
+          requestAnimationFrame(() => slot.querySelector("img")?.classList.add("loaded"));
+        }
+      }, 300);
+    }
+  }
 });
-gbBodyEl.addEventListener("mouseleave", () => gbTip.classList.remove("show"));
+gbBodyEl.addEventListener("mouseleave", () => { gbTip.classList.remove("show"); _gbHoverTileEl=null; clearTimeout(_gbHoverTimer); });
 
 // Klick auf eine entdeckte Form -> Detail-Panel mit Beschreibung (Wikipedia-Auszug).
 const gbDetail = document.createElement("div"); gbDetail.id="gbDetail"; gbDetail.hidden=true;
@@ -2846,17 +2877,22 @@ function closeGbDetail(){
   _gbdOpener = null;
 }
 gbDetail.addEventListener("click", e=>{ if(e.target.id==="gbDetail" || e.target.closest(".gbd-x")) closeGbDetail(); });
+// Ein Cache fuer BEIDE Verbraucher (Klick-Detail: Text: Hover-Vorschau: Bild) -
+// derselbe REST-Endpunkt liefert extract UND thumbnail in einer Antwort, ein
+// zweiter Request fuer dasselbe Wesen waere reine Verschwendung.
 const _wikiCache = {};
-async function wikiExtract(title){
+async function wikiSummary(title){
   if(_wikiCache[title]!==undefined) return _wikiCache[title];
   try{
     const r = await fetch("https://de.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title), {headers:{accept:"application/json"}});
     if(!r.ok) throw 0;
     const j = await r.json();
-    const ex = (j.type==="disambiguation") ? null : (j.extract||null);
-    return _wikiCache[title]=ex;
+    const val = (j.type==="disambiguation") ? null : { extract: j.extract||null, thumb: j.thumbnail?.source||null };
+    return _wikiCache[title]=val;
   }catch(e){ return _wikiCache[title]=null; }
 }
+async function wikiExtract(title){ return (await wikiSummary(title))?.extract ?? null; }
+async function wikiThumb(title){ return (await wikiSummary(title))?.thumb ?? null; }
 // ============================================================================
 // ERKENNTNISSE — „Wissen als Meta-Fortschritt" (BACKLOG Punkt 5, V4 aus
 // docs/bindung-konzept.md). Was bleibt, wenn ein Wesen geht: nicht Macht,

@@ -29,8 +29,20 @@ import { gzipSync } from "node:zlib";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // GEZIPPT, nicht roh: GitHub Pages liefert .js immer komprimiert aus, die rohe
 // Byte-Zahl ueberzeichnet die reale Ladekosten massiv (gemessen bei 20.178 Arten:
-// 8,7 MB roh -> 784 KB gzip). Budget mit Luft fuer Wachstum auf ~40.000 Arten.
-const GZIP_BUDGET_KB = 1536;
+// 8,7 MB roh -> 784 KB gzip).
+// Nachtrag (2026-08-04, Harvester-Fortsetzung 20.178 -> 30.286 Arten): die urspruengliche
+// Annahme "Budget mit Luft fuer Wachstum auf ~40.000 Arten" bei UNVERAENDERTEM Budget war
+// falsch kalibriert. Rohe Bytes/Art blieben nahezu konstant (431 -> 436 B/Art), aber die
+// GZIP-Bytes/Art fast verdoppelten sich (38,8 -> 68,6 B/Art) - der Harvester hat seither
+// ueberwiegend tief verzweigte, kleinteilige Kladen erschlossen (Insekten-/Pilz-Gattungen
+// mit oft nur 1-2 Arten je Klade), deren Abstammungsketten sich viel weniger wiederholen
+// als bei den zuerst geernteten grossen, artenreichen Kladen (Saeugetiere/Voegel) - weniger
+// Redundanz heisst schlechtere Kompression, unabhaengig von der Artenzahl selbst. Budget neu
+// gesetzt mit moderater Luft ueber dem gemessenen Stand (2.079 KB), NICHT mit dem alten
+// Wachstumsziel - weiteres Wachstum braucht eine bewusste neue Kalibrierung, kein
+// automatisches Mitwachsen der Annahme. Echte Loesung fuer weiteres Wachstum waere Sharding/
+// Lazy-Loading (docs/artenkatalog-plan.md Abschnitt 8, "bewusst offen"), nicht nur diese Zahl.
+const GZIP_BUDGET_KB = 2400;
 
 const win = {};
 new Function("window", readFileSync(join(ROOT, "app", "catalog.js"), "utf-8"))(win);
