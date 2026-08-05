@@ -5525,11 +5525,17 @@ const SVGNS = "http://www.w3.org/2000/svg";
 function el0(id){ return document.getElementById(id); }
 let CW=720, CH=560, DPR=1;
 function resize(){
-  // Die Groesse gibt das SVG vor (width:100%, height:auto ueber die viewBox-Ratio).
-  // DPR wird weiter mitgefuehrt: der Schnappschuss rastert damit in Geraeteaufloesung.
+  // Die Groesse gibt das SVG vor (width:100%, height:auto ueber die viewBox-Ratio) —
+  // ABER seit dem Mobil-Crop-Audit gilt das nicht mehr ueberall: `@media (max-width:820px)
+  // { #habitatSvg{height:190px} }` (s. style.css) ueberschreibt height:auto auf schmalen
+  // Geraeten mit einer festen Pixelhoehe, die von der 720:560-viewBox-Ratio abweicht. Die
+  // alte Berechnung CH=CW*(560/720) ignorierte das und nahm ueberall die Ratio an — auf
+  // jedem Geraet <=820px lag CH damit zu hoch (275 statt echter 190), und alles nahe am
+  // Buehnenboden (v.a. Pflanzen mit by=CH*0.9) rutschte unten aus dem sichtbaren Bereich.
+  // Jetzt die TATSAECHLICH gerenderte Hoehe nehmen statt sie aus der Ratio zu erraten.
   const rect = hSvg.getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio||1);
-  CW = rect.width || 720; CH = CW * (560/720);
+  CW = rect.width || 720; CH = rect.height || (CW * (560/720));
 }
 window.addEventListener("resize", resize);
 
