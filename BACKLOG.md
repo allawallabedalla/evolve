@@ -1880,6 +1880,49 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       **Modell:** Opus — geschmacksintensiv (Proportionen/Licht „richtig" aussehen lassen), großer
       Ermessensspielraum, kein enges Ticket.
 
+      **Nachtrag — Gecko-Feinschliff (2026-08-05), Methodik für die restlichen Archetypen
+      festgehalten:** Nutzer hat 🦎 über ~10 Feedback-Runden gegen ein eigenes Referenzbild
+      (Linienzeichnung) durchkorrigiert (`kind==="🦎"`-Zweige in der geteilten
+      Vierbeiner-Funktion, andere 8 Kinds unverändert). Ergebnis + Prinzipien, die auf die
+      restlichen Archetypen übertragen werden sollen:
+      - **`bezierRibbon(x0,y0,x1,y1,x2,y2,w0,w1)`** (neu, neben `arcPath`): tastet eine
+        quadratische Bezierkurve ab, versetzt senkrecht zur Tangente um eine interpolierte
+        Halbbreite — ergibt ein GEFÜLLTES, verjüngtes Band statt eines Strichs fester Breite.
+        Genutzt für Schwanz UND Beine (Echsen-Beine sind dick, kein dünner Strich).
+      - **Kopf als EINE durchgehende Silhouette**, nicht zwei überlappende Ellipsen (Kopf +
+        Schnauze) — Letzteres liest als „Erdnuss", weil jede Form ihre eigene Tinten-Kontur
+        bekommt. Teardrop-Pfad: rund am Hinterkopf, per kleinem Bogen (nicht spitzem Punkt!)
+        zur Nase verjüngt — ein echter Punkt sieht „wie eine Spitzmaus" aus.
+      - **Anhänge (Schwanz, Gliedmaßen), die anatomisch „Teil des Körpers" sind, brauchen
+        dieselbe Körperfarbe** (`flatCol(body)`, nicht den dunkleren `dark`-Ton) — sonst liest
+        das Stück als angesetztes Fremdteil statt als Fortsatz.
+      - **Echte Tiefenstaffelung statt Z-Order-Zufall:** ein Vierbeiner hat in Seitenansicht
+        3 Ebenen — fernes Bein → Körper → nahes Bein. Das ferne Bein wird VOR der
+        Rumpf-Ellipse gezeichnet (landet dahinter, gedämpfte Farbe, kein Zehen-Detail, nur
+        Andeutung), das nahe Bein ERST NACH Rumpf + Bauch/Rücken-Schichtung (liegt sichtbar
+        VOR dem Körper, eigener Umriss überlappt die Körperkante direkt — kein Wulst- oder
+        Versteck-Trick nötig). Nicht: alle Anhänge einheitlich vor oder hinter dem Körper.
+      - **Seitliches Ausstellen (Sprawl) lässt sich in reiner Profilansicht NICHT über
+        Vorne/Hinten-Versatz (Kopf-Schwanz-Achse) darstellen** — das liest zwangsläufig als
+        Frontalansicht (zwei Beine, die symmetrisch auseinanderklappen). Tiefe/Sprawl kommt
+        stattdessen aus der Dicke (bezierRibbon) und der 3-Ebenen-Staffelung, nicht aus
+        horizontaler Spreizung.
+      - **Bein-Ansatzpunkte clustern** (Schulter-/Hüftbereich, deutliche Lücke dazwischen),
+        nicht gleichmäßig über die Rumpflänge verteilt — sonst „Vielbeiner"-Eindruck.
+      - **Test-Harness-Fallstricke:** `running=false` VOR jeder Genom-Erzwingung setzen (der
+        laufende `requestAnimationFrame`-Loop überschreibt sonst den erzwungenen Zustand
+        innerhalb von Millisekunden mit der frei laufenden Simulation — führte zu einem
+        kompletten Fehl-Screenshot, siehe Session-Verlauf). `time=0` fest übergeben (sonst
+        zufällige Blink-/Wag-Animationsphase im Screenshot, z. B. Pupille mitten im
+        Lidschlag). Genom-Gene, die Schwellenwert-Effekte auslösen (z. B. Biolumineszenz-Glow
+        ab 0,4), explizit auf 0 setzen, nicht auf dem 0,5-Default belassen.
+      - **Selbstabgleich-Workflow (Nutzer-Wunsch, gilt fortan Standard):** vor jeder
+        Rückfrage an den Nutzer erst selbst gegen ein Referenzbild (Wikidata-Foto oder
+        Nutzer-Skizze) abgleichen, konkrete Abweichungen benennen, DANN präsentieren — nicht
+        nur „sieht gut aus?" fragen.
+      **Nutzer-Auftrag (2026-08-05):** „jetzt ist es super, merke dir die Logik, lass es
+      erstmal so" — 🦎 gilt als Referenz-Vorlage, weiter mit dem nächsten Archetyp.
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
