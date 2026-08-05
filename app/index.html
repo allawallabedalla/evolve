@@ -6299,7 +6299,24 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
   roots();
 }
 
-// ===== Reich TIERE (SVG) — der groesste Zeichner, 10 Sonderbauplaene + Vierbeiner =====
+// ===== Reich TIERE (SVG) — der groesste Zeichner, viele Sonderbauplaene + Vierbeiner =====
+// ┌─ ZEICHNER-REGELN (write-time-Checkliste, aus BACKLOG Punkt 13 destilliert) ─────────┐
+// │ Diese Regeln GELTEN BEIM SCHREIBEN eines neuen kind-Zweigs, nicht erst im Review —   │
+// │ jede stand schon als Backlog-Lehre da und wurde trotzdem einmal verletzt:            │
+// │  1. EIN Koerperteil = EIN geschlossener Pfad. Zwei sich beruehrende gefuellte Formen │
+// │     bekommen je eine Tinten-Kontur und lesen als Naht ("Erdnuss"-Fehler: Gecko-Kopf, │
+// │     Wal-Rumpf). Durchgehende Silhouette statt aneinandergesetzter Segmente.          │
+// │  2. Anatomisch zugehoerige Anhaenge in flatCol(body), NICHT im dunklen dark-Ton      │
+// │     (sonst "angeklebt" statt "gewachsen").                                            │
+// │  3. Mehrere Gliedmassen-Paare: getrennte X/Y-Zonen, sonst Silhouetten-Gewirr. Das    │
+// │     untergeordnete/ferne Paar per flatStep(dark,0.5) zuruecknehmen (Tiefenhierarchie).│
+// │  4. Verjuengte/dicke Anhaenge via bezierRibbon() statt Strich fester Breite.         │
+// │  5. Auge = dunkle EYE-Pupille + kleiner versetzter GLINT. GLINT allein ist kein Auge.│
+// │  6. Gesicht pruefen: Mund/Nase/Nuestern gehoeren dazu (fehlten oft komplett).        │
+// │  7. Keine Verlaeufe/Blur/Filter (Projekt-Stilregel) — Tiefe nur ueber flatStep().    │
+// │  Nach dem Schreiben: npm run creature-shot -- <emoji> <pfad> UND gegen Referenzfoto   │
+// │  abgleichen (Wikipedia REST /page/summary → thumbnail); Foto-Check ist Pflicht.      │
+// └─────────────────────────────────────────────────────────────────────────────────────┘
 function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   const [insul,size,limb,metab,armor,photo,mob,struct,wing=0]=g;
   const kind = a.e;
