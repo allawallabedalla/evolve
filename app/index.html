@@ -6545,7 +6545,7 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   const legLen = (12 + limb*40)*FORM.legL;
   // Pro Bein zusaetzlich Pfote + 2-3 einzeln sichtbare Zehen am Fusspunkt — die
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
-  let lp="", legFill="", paws="", toes="";
+  let lp="", legFill="", paws="", toes="", shoulders="";
   const nToes = kind==="🐦" ? 0 : 3;
   // Nutzer-Referenzbild (Gecko-Linienzeichnung) genau angeschaut: die Beine sitzen
   // GEKLUMPERT — ein Paar nah am Schulterbereich (kurz hinterm Kopf), ein Paar nah an der
@@ -6560,20 +6560,22 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let bx = lx, by = cy+R*bh*0.5;
     let fx, fy, elx, ely;
     if(reptile){
-      // Bein-Ansatz auf der TATSAECHLICHEN Ellipsen-Kontur bei diesem x (nicht auf einer
-      // festen Hoehe) — sonst passt die Naht an den schmaleren Rumpf-Enden nicht mehr
-      // (Nutzer-Fund: "der Beinansatz auf der Sichtseite stimmt nicht"). 15% des Wegs von
-      // der Mitte zur echten Kante = sicher innerhalb, die Rumpf-Ellipse (danach gezeichnet)
-      // deckt den Rest des Bein-Ansatzes ab.
-      const edge = R*bh*Math.sqrt(Math.max(0.1, 1-((lx-cx)/(R*bw))**2));
-      by = cy + edge*0.15;
-      // Vorderbein-Paar (t<0.5) knickt Richtung Kopf, Hinterbein-Paar Richtung Schwanz —
-      // wie im Referenzbild (Fuss liegt vor/hinter dem Ansatzpunkt, nicht seitlich davon,
-      // das ginge in reiner Seitenansicht nicht). Deutlich moderater als der vorige
-      // Versuch (R*1.0 sah "frontal gespreizt" aus) — hier nur ein sanfter Knick.
-      const dir = t<0.5 ? -1 : 1;
-      elx = lx + dir*R*0.28 + swing*0.3; ely = by + legLen*0.45;
-      fx = lx + dir*R*0.42 + swing*0.6; fy = by + legLen*0.95;
+      // KORREKTUR (Nutzer: "das Schultergelenk muss am unteren Teil der Seitenansicht der
+      // Koerpersilhouette sein, nicht einfach an der Unterseite drangesteckt"): das Problem
+      // war nicht die HOEHE des Ansatzpunkts, sondern dass das Bein ein von der
+      // Rumpf-Ellipse komplett GETRENNTES Objekt war, das nur zufaellig per Z-Reihenfolge
+      // verdeckt wurde — kein Teil der Silhouette selbst. Fix: ein kleiner Schulter/Huefte-
+      // Wulst (Kreis in Koerperfarbe) sitzt AUF der echten Ellipsen-Kontur, wird von der
+      // Rumpf-Ellipse zur Haelfte ueberdeckt (wie die Bauch/Ruecken-Schichtung) und ragt nur
+      // mit seiner unteren Haelfte heraus — DAS liest als "Teil der Koerperkontur", nicht
+      // als angeklebtes Fremdteil. Das Bein setzt an der Unterkante DIESES Wulstes an.
+      const dx = lx-cx;
+      const edgeY = cy + R*bh*Math.sqrt(Math.max(0.08, 1-(dx/(R*bw))**2));
+      const bumpR = R*0.24;
+      shoulders += dot(lx, edgeY, bumpR);
+      by = edgeY + bumpR*0.75;
+      elx = lx + R*0.1 + swing*0.3; ely = by + legLen*0.45;
+      fx = lx + swing*0.5; fy = by + legLen*0.95;
     } else {
       elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
       fx = lx+swing; fy = cy+R*bh*0.5+legLen;
@@ -6594,6 +6596,7 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*toeSpread).toFixed(1)},${(fy+toeLen-Math.abs(tt)*R*0.03).toFixed(1)}`; }
   }
   P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: reptile?0:1 });
+  P("an-shoulders", shoulders, { fill: flatCol(body), opacity: reptile?1:0 });
   P("an-legfill", legFill, { fill: flatStep(dark,1), opacity: reptile?1:0 });
   P("an-paws", paws, { fill: flatStep(dark,-1) });
   P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": reptile?2.2:1.6, "stroke-linecap":"round", fill:"none" });
