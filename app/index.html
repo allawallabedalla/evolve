@@ -5953,8 +5953,17 @@ function cppnField(g){
  * `amount` (aus dem Pigment-Gen) steuert, WIE STARK das Muster auftraegt; bei
  * ~0 verschwindet es ganz, damit ungemusterte Tiere nicht kuenstlich gefleckt werden.
  */
-function patternPatches(prefix, field, inside, bb, base, amount, fine){
-  const dEl = cEl(prefix+"-pd","path"), lEl = cEl(prefix+"-pl","path");
+function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTransform){
+  // Fluegel (u.a.) haben ihre eigene bewegte Transform (Flatter-Flap): statt eines
+  // Welt-Raum-inside()-Tests, der die Animation jedes Mal nachrechnen muesste, wird
+  // dann in LOKALEN Koordinaten gerastert und die ganze Gruppe traegt dieselbe
+  // Transform wie die Fluegel-Ellipse selbst — die Flecken "kleben" so am Fluegel.
+  let parent = cBodyLayer;
+  if(groupTransform !== undefined){
+    parent = cEl(prefix+"-pgrp","g");
+    cAttr(parent, { transform: groupTransform });
+  }
+  const dEl = cEl(prefix+"-pd","path",parent), lEl = cEl(prefix+"-pl","path",parent);
   // Oberflaechenzeichnung: keine eigene Tinten-Kontur (s. .cre-mark in app/style.css).
   // classList statt cAttr, damit applyAccentClasses() weiter frei toggeln kann.
   dEl.classList.add("cre-mark"); lEl.classList.add("cre-mark");
@@ -7064,6 +7073,11 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     cAttr(cEl("an-dorsal","polygon"), { points:`${cx.toFixed(1)},${(cy-H*0.95).toFixed(1)} ${(cx+R*0.5).toFixed(1)},${(cy-H*0.5).toFixed(1)} ${(cx-R*0.3).toFixed(1)},${(cy-H*0.5).toFixed(1)}`,
       fill: flatCol(mix(body,dark,0.4)) });
     E("an-body", cx, cy, L, H, flatCol(body));
+    // Phase 2: Musterung auf der Flanke (Forellentupfen, Zebrafisch-Streifen, …).
+    patternPatches("an", cppnField(g),
+      (x,y) => { const dx=(x-cx)/L, dy=(y-cy)/H; return dx*dx+dy*dy <= 0.92; },
+      { x0: cx-L, y0: cy-H, x1: cx+L, y1: cy+H },
+      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
     cAttr(cEl("an-pect","ellipse"), { cx:0, cy:(R*0.2).toFixed(1), rx:(R*0.35).toFixed(1), ry:(R*0.16).toFixed(1), fill: flatCol(mix(body,dark,0.4)),
       transform:`translate(${(cx-L*0.2).toFixed(1)},${(cy+H*0.35).toFixed(1)}) rotate(${((0.5+Math.sin(time*0.005)*0.2)*180/Math.PI).toFixed(1)})` });
     // Selbstabgleich gegen Referenzfoto (Regenbogenforelle): Bauchflossen (Becken- +
@@ -7154,10 +7168,21 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     const moth = kind==="🌙";
     const flap=0.5+0.5*Math.abs(Math.sin(time*(moth?0.009:0.006)));
     const wc=flatCol(mix(body,moth?[150,140,120]:[150,120,195],moth?0.4:0.5)), dc=flatCol(dark);
+    // Phase 2: Musterung auf dem Vorderfluegel (Augenflecken/Baender — das eigentliche
+    // Erkennungsmerkmal bei Schmetterlingen). EIN Feld fuer beide Seiten (dieselben
+    // lokalen u/v), damit das Muster von Natur aus links/rechts symmetrisch ist statt
+    // zufaellig verschieden — reale Falterfluegel sind spiegelsymmetrisch gemustert.
+    const wingField = cppnField(g);
+    const w1cx=R*0.72, w1cy=-R*0.42, w1rx=R*0.72, w1ry=R*0.56;
     for(const sd of [-1,1]){
       const tr = `translate(${cx.toFixed(1)},${cy.toFixed(1)}) scale(${(sd*flap).toFixed(3)},1)`;
-      cAttr(cEl("an-w1"+sd,"ellipse"), { cx:(R*0.72).toFixed(1), cy:(-R*0.42).toFixed(1), rx:(R*0.72).toFixed(1), ry:(R*0.56).toFixed(1), fill: wc,
-        transform: tr + ` rotate(${(0.32*180/Math.PI).toFixed(1)},${(R*0.72).toFixed(1)},${(-R*0.42).toFixed(1)})` });
+      const wingTr = tr + ` rotate(${(0.32*180/Math.PI).toFixed(1)},${w1cx.toFixed(1)},${w1cy.toFixed(1)})`;
+      cAttr(cEl("an-w1"+sd,"ellipse"), { cx:w1cx.toFixed(1), cy:w1cy.toFixed(1), rx:w1rx.toFixed(1), ry:w1ry.toFixed(1), fill: wc,
+        transform: wingTr });
+      patternPatches("an-w"+sd, wingField,
+        (x,y) => { const dx=(x-w1cx)/w1rx, dy=(y-w1cy)/w1ry; return dx*dx+dy*dy <= 0.9; },
+        { x0: w1cx-w1rx, y0: w1cy-w1ry, x1: w1cx+w1rx, y1: w1cy+w1ry },
+        body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5, wingTr);
       cAttr(cEl("an-w2"+sd,"ellipse"), { cx:(R*0.6).toFixed(1), cy:(R*0.52).toFixed(1), rx:(R*0.5).toFixed(1), ry:(R*0.42).toFixed(1), fill: wc,
         transform: tr + ` rotate(${(-0.22*180/Math.PI).toFixed(1)},${(R*0.6).toFixed(1)},${(R*0.52).toFixed(1)})` });
       cAttr(cEl("an-w3"+sd,"ellipse"), { cx:(R*0.85).toFixed(1), cy:(-R*0.44).toFixed(1), rx:(R*0.2).toFixed(1), ry:(R*0.16).toFixed(1), fill: dc,

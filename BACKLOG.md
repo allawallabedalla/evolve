@@ -2206,12 +2206,31 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         Reihen + fester Rüttel (hängt **nur** an `(ix,iy)`, nicht am Genom — sonst
         wanderten die Punkte bei jeder Mutation und die Stetigkeit wäre dahin), und die
         Rasterdichte wächst mit der Feinheit mit.
-      **Offen für eine Folgerunde:** die Musterschicht liegt bisher nur auf dem
-      Vierbeiner-Rumpf. Flügel (🦋/🌙), Fisch-Flanke, Panzer und die Pflanzen/Pilz-
-      Zeichner haben ihre eigenen Körperformen und bräuchten je einen `inside()`-Test.
-      Außerdem legt sich das Muster derzeit gleichmäßig über den ganzen Rumpf und
-      überdeckt damit die Bauch-/Rücken-Staffelung leicht — echte Tiere sind am Bauch
-      meist ungemustert.
+      **Nachtrag — Fisch-Flanke + Falter-Flügel (2026-08-05, Nutzer-Auftrag „mach da
+      weiter, wo wir aufgehört haben"):**
+      - **🐟 Fisch:** eigener `inside()`-Test auf der Rumpf-Ellipse (`E("an-body",…)`),
+        analog zum Vierbeiner. Sichtgeprüft: pigment=0 sauber, .5 gesprenkelt, .9+camo
+        hoch fein gemustert (Forellentupfen-artig).
+      - **🦋/🌙 Falter:** technisch anders gelöst als Rumpf/Fisch, weil Flügel eine
+        eigene BEWEGTE Transform tragen (Flatter-Flap, `scale(sd*flap,1)`). Statt eines
+        Welt-Raum-`inside()`-Tests, der die Animation jeden Frame nachrechnen müsste,
+        rastert `patternPatches()` jetzt wahlweise in LOKALEN Flügel-Koordinaten und
+        hängt die Flecken-Gruppe an dieselbe Transform wie die Flügel-Ellipse (neuer
+        optionaler `groupTransform`-Parameter) — die Flecken "kleben" am Flügel. EIN
+        Feld für beide Seiten (dieselben lokalen u/v), damit das Muster von Natur aus
+        spiegelsymmetrisch ist statt zufällig verschieden (reale Falterflügel sind es
+        auch). Nur der Vorderflügel gemustert (Hinterflügel + Flügelspitzen-Fleck bleiben
+        eigene Elemente) — das ist die Fläche, die bei echten Faltern die Zeichnung
+        trägt. **Eigener Fund beim Sichtabgleich:** erster Test bei size=0.3 zeigte
+        scheinbar gar kein Muster — Fehlschluss vermieden, bevor er zum „Fund" wurde:
+        Nachrender mit größerem `size` zeigte das Muster klar sichtbar, es war schlicht
+        zu klein für die Kontaktbogen-Vorschau, kein Code-Fehler.
+      - `pattern-continuity-check` bleibt unverändert grün (prüft das Feld selbst, nicht
+        die Kind-spezifische Platzierung).
+      **Weiterhin offen:** Panzer (Schildkröte/Krabbe) und die Pflanzen/Pilz-Zeichner
+      haben eigene Körperformen ohne Musterschicht. Das Muster legt sich zudem
+      gleichmäßig über den ganzen Rumpf und überdeckt damit die Bauch-/Rücken-Staffelung
+      leicht — echte Tiere sind am Bauch meist ungemustert.
 
   <details><summary>Ursprünglicher Vorschlag (2026-08-04)</summary>
 
