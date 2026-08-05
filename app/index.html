@@ -6354,6 +6354,9 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let ey="", gl="";
     for(const o of [-1,1]){ ey += dot(cx+o*hr*0.4, cy-R*0.25, R*0.17); gl += dot(cx+o*hr*0.4-R*0.04, cy-R*0.31, R*0.06); }
     P("an-eye", ey, { fill: EYE }); P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    // Papageienartiger Hornschnabel dort, wo die Tentakel zusammenlaufen — fehlte
+    // komplett, wie zuvor Mund/Maul bei Frosch/Fisch/Vierbeiner.
+    P("an-beak", dot(cx, cy+hr*0.42, R*0.09), { fill: flatCol(dark) });
     return;
   }
   if(kind==="🐸"){   // Amphibie: gedrungen, gespreizte Beine, Augen oben
