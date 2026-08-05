@@ -6500,7 +6500,8 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
   })[kind] || {bw:1.08,bh:0.98,legL:1.0};
   const bw=FORM.bw, bh=FORM.bh;
-  const reptile = kind==="🦎";
+  const reptile = kind==="🦎"; // Gecko-Spezifika: Keil-Kopf, Schwanz als Koerperfortsatz
+  const sprawl = reptile || kind==="🐢"; // Spreiz-Gang-Beine: alle sprawlenden Reptilien
   // Schwanz-Basis am tatsaechlichen Koerperrand (skaliert mit bw) statt an einer festen
   // Konstante — bei breiten Koerpern (Gecko bw=1.58) ragte der Schwanz vorher kaum aus dem
   // Rumpf heraus (Nutzer-Fund: "Schwanz viel zu klein").
@@ -6541,7 +6542,7 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // Echsen haben immer genau 4 Beine — die generische Formel (2-7, aus limb abgeleitet)
   // gab bei mittlerem limb oft 5 und damit ein Bein zuviel/mittig, was zusammen mit dem
   // Spreiz-Gang schnell "falsch" (Nutzer: "Ameisenbaer-Spitzmaus-Hybrid") aussah.
-  const legs = kind==="🐦" ? 2 : reptile ? 4 : 2 + Math.round((0.3 + 0.7*limb)*5);
+  const legs = kind==="🐦" ? 2 : sprawl ? 4 : 2 + Math.round((0.3 + 0.7*limb)*5);
   const legLen = (12 + limb*40)*FORM.legL;
   // Pro Bein zusaetzlich Pfote + 2-3 einzeln sichtbare Zehen am Fusspunkt — die
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
@@ -6555,14 +6556,14 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // keine Beine). Die vorige Gleichverteilung (t=0,0.33,0.67,1) sah dagegen wie ein
   // Vielbeiner aus. Feste 4 t-Werte statt Formel. Je Paar: erster Wert = FERNES Bein
   // (hinter dem Koerper gezeichnet), zweiter Wert = NAHES Bein (vor dem Koerper).
-  const reptileT = [0.14, 0.30, 0.70, 0.86];
+  const sprawlT = [0.14, 0.30, 0.70, 0.86];
   for(let i=0;i<legs;i++){
-    const t = reptile ? reptileT[i] : (legs===1?0.5:i/(legs-1));
+    const t = sprawl ? sprawlT[i] : (legs===1?0.5:i/(legs-1));
     const lx = cx + (t-0.5)*R*bw*1.35;
     const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
     let bx = lx, by = cy+R*bh*0.5;
     let fx, fy, elx, ely;
-    if(reptile){
+    if(sprawl){
       // KORREKTUR (Nutzer: "dein Denkfehler ist, dass dein Koerper vor dem Bein liegt —
       // das missachtet die 3-Dimensionalitaet. Vorderes Bein, Koerper, hinteres Bein sind
       // 3 Ebenen"): bisher war JEDES Bein hinter der Rumpf-Ellipse (nur ein Wulst zeigte
@@ -6598,10 +6599,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(let j=0;j<nToes;j++){ const tt=(j/(nToes-1||1)-0.5)*2;
       toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*R*0.1).toFixed(1)},${(fy+R*0.15-Math.abs(tt)*R*0.02).toFixed(1)}`; }
   }
-  P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: reptile?0:1 });
+  P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: sprawl?0:1 });
   // Fernes Bein: VOR dem Koerper gezeichnet (dieser Aufruf), landet also dahinter.
-  P("an-legfill-far", legFillFar, { fill: flatStep(dark,0.5), opacity: reptile?1:0 });
-  P("an-paws-far", pawsFar, { fill: flatStep(dark,-1), opacity: reptile?1:0 });
+  P("an-legfill-far", legFillFar, { fill: flatStep(dark,0.5), opacity: sprawl?1:0 });
+  P("an-paws-far", pawsFar, { fill: flatStep(dark,-1), opacity: sprawl?1:0 });
   P("an-paws", paws, { fill: flatStep(dark,-1) });
   P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
   const furEl = cEl("an-fur","path");
@@ -6620,9 +6621,9 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // Nahes Bein: ERST JETZT gezeichnet, NACH der Rumpf-Ellipse — liegt damit sichtbar VOR
   // dem Koerper (dritte Tiefenebene, s. Nutzer-Erklaerung oben bei der Berechnung). Der
   // eigene Umriss ueberlappt die Koerperkante direkt, kein Wulst-Hilfstrick noetig.
-  P("an-legfill-near", legFillNear, { fill: flatStep(dark,1), opacity: reptile?1:0 });
-  P("an-paws-near", pawsNear, { fill: flatStep(dark,-1), opacity: reptile?1:0 });
-  P("an-toes-near", toesNear, { stroke: flatStep(dark,-1), "stroke-width": 2.2, "stroke-linecap":"round", fill:"none", opacity: reptile?1:0 });
+  P("an-legfill-near", legFillNear, { fill: flatStep(dark,1), opacity: sprawl?1:0 });
+  P("an-paws-near", pawsNear, { fill: flatStep(dark,-1), opacity: sprawl?1:0 });
+  P("an-toes-near", toesNear, { stroke: flatStep(dark,-1), "stroke-width": 2.2, "stroke-linecap":"round", fill:"none", opacity: sprawl?1:0 });
   // HINWEIS: der Canvas-Zweig hat hier noch Vogel-Fluegel/Schwanzfedern und einen
   // "🐦"-Eintrag in FORM — das ist im Original TOTER CODE, weil der Vogel weiter oben
   // per return abgehandelt wird und diese Stelle nie erreicht. Bewusst nicht mitportiert
