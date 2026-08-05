@@ -1947,6 +1947,16 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
            innen, Hinterbein beginnt erst außerhalb davon), und das weniger dominante Paar
            (meist das vom Körper größtenteils verdeckte) über `flatStep(dark, 0.5)` statt
            `1` optisch zurücknehmen — Dominanz-Hierarchie wie beim Gecko-„fernen Bein".
+      - **🦇** Selbst-Audit-Fund (kein Nutzer-Hinweis nötig): Code-Kommentar behauptete
+        „gefingerte Hautflügel", die Fläche war aber eine glatte Kontur ohne jede innere
+        Struktur. Gegen Referenzfoto (Gegenlicht, Fingerknochen als Rippen sichtbar)
+        bestätigt und behoben: vier dünne Streben vom Handgelenk zu den ohnehin schon
+        vorhandenen Kontur-Eckpunkten (keine neue Geometrie nötig), dazu Daumenkralle an
+        der Vorderkante und Füße mit Krallen (fehlten komplett) ergänzt. Nutzer-Korrektur:
+        den Beleuchtungs-Effekt des Referenzfotos selbst (Gegenlicht) nicht mitübernehmen —
+        nur die anatomischen Strukturen, die er sichtbar machte, sind relevant. **Lehre:**
+        ein Referenzfoto kann durch Beleuchtung/Perspektive Details zeigen, die man sonst
+        übersieht, ohne dass die Aufnahmebedingung selbst Teil des Zielbilds wird.
 
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
