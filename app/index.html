@@ -6528,8 +6528,20 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       for(const [fx,fy] of wingPts) fingers += `M${wristX},${wristY}L${fx(sd).toFixed(1)},${fy.toFixed(1)}`;
       P("an-fingers"+sd, fingers, { stroke: flatCol(dark), "stroke-opacity": .45, "stroke-width": 1.3, fill:"none",
         transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${(sd*flap*180/Math.PI).toFixed(1)})` });
+      // Daumenkralle: kleiner Haken an der Fluegel-Vorderkante nahe dem Handgelenk — im
+      // Referenzfoto gut sichtbar, fehlte bisher komplett (Nutzer-Fund).
+      P("an-thumb"+sd, `M${(sd*R*0.06).toFixed(1)},${(-R*0.12).toFixed(1)}Q${(sd*R*0.28).toFixed(1)},${(-R*0.3).toFixed(1)} ${(sd*R*0.15).toFixed(1)},${(-R*0.35).toFixed(1)}`,
+        { stroke: flatCol(dark), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none",
+          transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${(sd*flap*180/Math.PI).toFixed(1)})` });
     }
     E("an-body", cx, cy, R*0.32, R*0.5, bc);
+    // Fuesse mit Krallen am Rumpf haengend — fehlten bisher komplett (Nutzer-Fund).
+    let feet="";
+    for(const sd of [-1,1]){ const fx=cx+sd*R*0.14, fy0=cy+R*0.42, fy1=cy+R*0.62;
+      feet += `M${fx.toFixed(1)},${fy0.toFixed(1)}L${fx.toFixed(1)},${fy1.toFixed(1)}`;
+      for(const tt of [-1,0,1]) feet += `M${fx.toFixed(1)},${fy1.toFixed(1)}L${(fx+tt*R*0.06).toFixed(1)},${(fy1+R*0.09).toFixed(1)}`;
+    }
+    P("an-feet", feet, { stroke: flatCol(dark), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
     cAttr(cEl("an-head","circle"), { cx:cx.toFixed(1), cy:(cy-R*0.5).toFixed(1), r:(R*0.28).toFixed(1), fill: bc });
     let ears="", gl="";
     for(const sd of [-1,1]){ ears += `M${(cx+sd*R*0.1).toFixed(1)},${(cy-R*0.68).toFixed(1)}L${(cx+sd*R*0.3).toFixed(1)},${(cy-R*1.06).toFixed(1)}L${(cx+sd*R*0.02).toFixed(1)},${(cy-R*0.78).toFixed(1)}Z`;
