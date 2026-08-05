@@ -6499,6 +6499,13 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       pincer += `M${(cxx-R*0.22).toFixed(1)},${(cyy-R*0.28).toFixed(1)}L${(cxx+R*0.22).toFixed(1)},${(cyy-R*0.1).toFixed(1)}`; }
     P("an-arms", arms, { stroke: flatCol(dark), "stroke-width": 4, "stroke-linecap":"round", fill:"none" });
     P("an-pincer", pincer, { stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
+    // Nachcheck gegen Referenzfoto (Carcinus maenas, Draufsicht): die gezackte
+    // Panzer-Vorderkante ("Zaehnchen-Krone") fehlte komplett — bisher nur eine glatte
+    // Ellipse. Sehr markantes, gut sichtbares Krabben-Merkmal.
+    let teeth = "";
+    for(let i=0;i<7;i++){ const t=i/6-0.5, tx=cx+t*W*0.85, ty=cy-H*(0.9-Math.abs(t)*0.15);
+      teeth += `M${(tx-4).toFixed(1)},${ty.toFixed(1)}L${(tx+4).toFixed(1)},${ty.toFixed(1)}L${tx.toFixed(1)},${(ty-6).toFixed(1)}Z`; }
+    P("an-teeth", teeth, { fill: shell });
     let stalk="", ey="";
     for(const sd of [-1,1]){ stalk += `M${(cx+sd*R*0.2).toFixed(1)},${(cy-H*0.7).toFixed(1)}L${(cx+sd*R*0.25).toFixed(1)},${(cy-H*1.05).toFixed(1)}`;
       ey += dot(cx+sd*R*0.25, cy-H*1.12, R*0.1); }
