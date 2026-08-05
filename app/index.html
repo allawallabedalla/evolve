@@ -6547,29 +6547,33 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
   let lp="", legFill="", paws="", toes="";
   const nToes = kind==="🐦" ? 0 : 3;
+  // Nutzer-Referenzbild (Gecko-Linienzeichnung) genau angeschaut: die Beine sitzen
+  // GEKLUMPERT — ein Paar nah am Schulterbereich (kurz hinterm Kopf), ein Paar nah an der
+  // Hueftbereich (kurz vorm Schwanzansatz), mit deutlicher Luecke dazwischen (Rippenbereich,
+  // keine Beine). Die vorige Gleichverteilung (t=0,0.33,0.67,1) sah dagegen wie ein
+  // Vielbeiner aus. Feste 4 t-Werte statt Formel.
+  const reptileT = [0.14, 0.30, 0.70, 0.86];
   for(let i=0;i<legs;i++){
-    const t = legs===1?0.5:i/(legs-1);
+    const t = reptile ? reptileT[i] : (legs===1?0.5:i/(legs-1));
     const lx = cx + (t-0.5)*R*bw*1.35;
     const swing = Math.sin(time*0.006 + i*1.3)*(6+mob*10);
-    // Bein-Ansatz beim Echsen-Bauplan bewusst WEIT in den Rumpf hinein (nicht nur an der
-    // Bauchkante) — Nutzer-Fund: "der Beinansatz auf der Sichtseite stimmt nicht". Die
-    // Rumpf-Ellipse wird NACH den Beinen gezeichnet und deckt den oberen Teil des breiten
-    // Bein-Bands ab; setzt das Band exakt auf die Kante, bleibt keine Ueberlappung, und man
-    // sieht eine Naht statt eines aus dem Koerper wachsenden Beins.
-    const bx = lx, by = reptile ? cy+R*bh*0.05 : cy+R*bh*0.5;
+    let bx = lx, by = cy+R*bh*0.5;
     let fx, fy, elx, ely;
     if(reptile){
-      // KORREKTUR (Nutzer: "sieht aus als wuerde man frontal draufschauen"): der vorige
-      // Versuch bog Vorder-/Hinterbeine GEGENLAEUFIG entlang der Kopf-Schwanz-Achse
-      // auseinander (Ellbogen vorne nach vorn, hinten nach hinten) — das ergibt ein
-      // symmetrisches "V" pro Beinpaar, und genau DAS liest man nur in der Frontalansicht
-      // so (zwei Beine, die auseinanderklappen). Seitliches Ausstellen (links/rechts) laesst
-      // sich in reiner Seitenansicht ueberhaupt nicht durch Verschiebung auf der
-      // Kopf-Schwanz-Achse zeigen — nahes und fernes Bein liegen dort uebereinander.
-      // Stattdessen: niedriger, geknickter Krabbel-Stand, ALLE Beine mit gleicher
-      // Knick-Richtung (Gangbild-Versatz statt Spreizung), kurz und tief (Gecko-Kauerstand).
-      elx = lx - R*0.22 + swing*0.4; ely = cy+R*bh*0.5 + legLen*0.4;
-      fx = lx + R*0.05 + swing*0.7; fy = cy+R*bh*0.5 + legLen*0.95;
+      // Bein-Ansatz auf der TATSAECHLICHEN Ellipsen-Kontur bei diesem x (nicht auf einer
+      // festen Hoehe) — sonst passt die Naht an den schmaleren Rumpf-Enden nicht mehr
+      // (Nutzer-Fund: "der Beinansatz auf der Sichtseite stimmt nicht"). 15% des Wegs von
+      // der Mitte zur echten Kante = sicher innerhalb, die Rumpf-Ellipse (danach gezeichnet)
+      // deckt den Rest des Bein-Ansatzes ab.
+      const edge = R*bh*Math.sqrt(Math.max(0.1, 1-((lx-cx)/(R*bw))**2));
+      by = cy + edge*0.15;
+      // Vorderbein-Paar (t<0.5) knickt Richtung Kopf, Hinterbein-Paar Richtung Schwanz —
+      // wie im Referenzbild (Fuss liegt vor/hinter dem Ansatzpunkt, nicht seitlich davon,
+      // das ginge in reiner Seitenansicht nicht). Deutlich moderater als der vorige
+      // Versuch (R*1.0 sah "frontal gespreizt" aus) — hier nur ein sanfter Knick.
+      const dir = t<0.5 ? -1 : 1;
+      elx = lx + dir*R*0.28 + swing*0.3; ely = by + legLen*0.45;
+      fx = lx + dir*R*0.42 + swing*0.6; fy = by + legLen*0.95;
     } else {
       elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
       fx = lx+swing; fy = cy+R*bh*0.5+legLen;
@@ -6583,13 +6587,16 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       lp += `M${bx.toFixed(1)},${by.toFixed(1)}Q${elx.toFixed(1)},${ely.toFixed(1)} ${fx.toFixed(1)},${fy.toFixed(1)}`;
     }
     paws += dot(fx, fy, R*0.085+size*0.03);
-    for(let j=0;j<nToes;j++){ const tt=(j/(nToes-1||1)-0.5)*2;
-      toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*R*0.1).toFixed(1)},${(fy+R*0.15-Math.abs(tt)*R*0.02).toFixed(1)}`; }
+    // Zehen-Faecher fuer Echsen groesser/deutlicher (Selbstabgleich gegen Referenzbild:
+    // vorher kaum als Finger lesbar, nur ein kleiner Klecks).
+    const nT = reptile ? 4 : nToes, toeLen = reptile ? R*0.2 : R*0.1, toeSpread = reptile ? R*0.16 : R*0.1;
+    for(let j=0;j<nT;j++){ const tt=(j/(nT-1||1)-0.5)*2;
+      toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*toeSpread).toFixed(1)},${(fy+toeLen-Math.abs(tt)*R*0.03).toFixed(1)}`; }
   }
   P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: reptile?0:1 });
   P("an-legfill", legFill, { fill: flatStep(dark,1), opacity: reptile?1:0 });
   P("an-paws", paws, { fill: flatStep(dark,-1) });
-  P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
+  P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": reptile?2.2:1.6, "stroke-linecap":"round", fill:"none" });
   const furEl = cEl("an-fur","path");
   if(insul>0.4){ let f="";
     const n=Math.round(30+insul*50);
