@@ -1957,6 +1957,56 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         nur die anatomischen Strukturen, die er sichtbar machte, sind relevant. **Lehre:**
         ein Referenzfoto kann durch Beleuchtung/Perspektive Details zeigen, die man sonst
         übersieht, ohne dass die Aufnahmebedingung selbst Teil des Zielbilds wird.
+      - **🐙** Selbst-Audit-Fund: Tentakel waren glatte Striche ohne die charakteristische
+        Saugnapf-Reihe. Behoben durch Punkte entlang derselben Kurve (Bezier-Auswertung
+        wiederverwendet, keine neue Geometrie). 8 statt 6 Fangarme bewusst NICHT
+        angefasst (Struktur-/Spacing-Aenderung, nicht nur Textur — Nutzer-Rueckfrage
+        gestellt, offen gelassen).
+
+      **Nachtrag 3 — Werkzeug + Checkliste fuer selbststaendige Fortsetzung (2026-08-05,
+      Nutzer-Auftrag „Fokus auf den eigenständigen Korrekturmechanismus, damit du
+      selbstständig weiterarbeiten kannst"):**
+      - **`tools/creature-shot.mjs`** (neu, `npm run creature-shot -- <emoji> <pfad>
+        [--genes '{"insulation":0.2,...}']`) ersetzt die bisherigen Wegwerf-Skripte
+        (`tools/_tmp_*.mjs`, nie eingecheckt). Kapselt alle drei Test-Harness-Fallstricke
+        aus Nachtrag 1 fest (running=false zuerst, time=0, biolum=0-Default) und liest die
+        Gen-Namen LIVE aus `app/catalog.js` (kein hartkodiertes Index-Mapping, das bei einer
+        Gen-Reihenfolge-Änderung stillschweigend falsch würde). Gen-Werte per Name statt
+        Index — lesbarer und weniger fehleranfällig als 26-elementige Arrays von Hand.
+      - **Checkliste je Archetyp** (Reihenfolge, keine Schritte auslassen):
+        1. Zeichner-Code lesen (`if(kind==="…")`-Block in `drawAnimalSvg`) — welche
+           Anhänge/Details fehlen komplett? Gezielt auf Gesicht (Mund/Nase/Nüstern) UND auf
+           das EINE archetyp-prägende Merkmal prüfen (Saugnäpfe, Fingerknochen, gefaltete
+           Beine, Sprawl-Gang — je nach Tiergruppe unterschiedlich, aber immer genau EINES
+           gibt der Silhouette ihre Wiedererkennbarkeit).
+        2. Referenzfoto ziehen: `https://<lang>.wikipedia.org/api/rest_v1/page/summary/<Art>`
+           → `thumbnail.source`/`originalimage.source`. Wenn der direkte Thumbnail-Link
+           400 zurückgibt (Sonderzeichen im Dateinamen): über Commons
+           `action=query&titles=File:<Dateiname>&prop=imageinfo&iiprop=url&iiurlwidth=<N>&format=json`
+           → `thumburl` gehen (robuster als Hash-Pfad von Hand zu bauen).
+        3. `npm run creature-shot -- <emoji> <pfad> --genes '{...}'`, Ergebnis gegen das
+           Referenzfoto lesen, KONKRETE Abweichungen benennen (nicht „sieht komisch aus").
+        4. Fix umsetzen — Standardrepertoire, das sich beim Gecko bewährt hat:
+           `bezierRibbon()` für dicke/verjüngte Anhänge statt dünner Striche fester Breite;
+           anatomisch zugehörige Anhänge in `flatCol(body)`, nicht im dunkleren `dark`-Ton;
+           bei mehreren Gliedmaßen-Paaren am selben Körper GETRENNTE X/Y-Wertebereiche
+           (sonst Silhouetten-Gewirr) und das untergeordnete Paar über `flatStep(dark,0.5)`
+           optisch zurücknehmen; bei sich verdeckenden Körperteilen ECHTE Tiefenstaffelung
+           (vor/nach der Rumpf-Ellipse zeichnen), kein Wulst-Behelf; nirgends Verläufe/Blur/
+           Filter (Projektregel).
+        5. Neu rendern, `app-parity` + `design-audit` + `exemplar-check` — alle drei müssen
+           grün bleiben, sonst Fix zurücknehmen statt Prüfstand anpassen.
+        6. Committen mit konkreter Vorher/Nachher-Begründung (Referenzfoto-Fund → Fix).
+      - **Wann selbstständig entscheiden vs. Rückfrage stellen:** objektiv gegen ein
+        Referenzfoto verifizierbare Lücken (fehlendes Anatomie-Teil, das jedes Foto der Art
+        zeigt) selbstständig beheben und committen. Kompositions-/Geschmacksfragen mit
+        echtem Ermessensspielraum (z. B. Kamera-Perspektive grundsätzlich ändern, Anzahl
+        Gliedmaßen bei einer Art mit variabler Zähl-Konvention wie Krake-Armzahl) weiterhin
+        zur Entscheidung vorlegen, nicht selbst festlegen.
+      - **Restliche Kandidaten mit offener Unsicherheits-Einschätzung** (Stand 2026-08-05):
+        🦋 (Flügel ohne Aderung — geringe Priorität), restliche Vierbeiner-Kinds 🦊🐒🐺🐭🐻🦥🦏
+        (gerade Beine sind für Säugetiere korrekt, kein erwarteter Fund), 🐜/🦀/🐌 (bereits
+        geprüft, keine offensichtliche Lücke gefunden).
 
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion

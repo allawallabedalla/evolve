@@ -56,7 +56,8 @@
     "build-influences": "node tools/build-influences.mjs",
     "world-demo": "npm run build && node dist/cli/world-demo.js",
     "serve": "python3 -m http.server 8000",
-    "design-audit": "node tools/design-audit.mjs"
+    "design-audit": "node tools/design-audit.mjs",
+    "creature-shot": "node tools/creature-shot.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
