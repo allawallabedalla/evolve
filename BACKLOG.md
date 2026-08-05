@@ -2019,6 +2019,32 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         restliche Vierbeiner-Kinds 🦊🐒🐺🐭🐻🦥🦏 (gerade Beine sind für Säugetiere korrekt,
         kein erwarteter Fund), Pflanzen/Pilze (eigenes Prüfraster noch offen, s. Nachtrag 4).
 
+      **Nachtrag 5 — Phase 1b: 14 Tier-Archetypen ohne jede eigene Zeichenlogik entdeckt
+      (2026-08-05).** Beim Nachcheck der Säugetier-Beinzahl (Wolf gegen Referenzfoto) fiel
+      auf: die "Vierbeiner-Grundbauplan"-Funktion ist ein Auffangbecken für weit mehr
+      Archetypen als die 9 mit eigener FORM/EARS/Schwanz-Behandlung. **35 Tier-Archetypen
+      insgesamt** (`grep -oP 'k:"Tier", n:"[^"]*", e:"\K[^"]*' app/archetypes.js`), davon
+      **14 ohne jede Kind-spezifische Anpassung**, alle mit `proto`-Genom + `requires`-Fenster
+      also echt erreichbar (Teil "Lebendige Welt", Punkt 10), nicht tot:
+      ⭐ Seestern, 🐋 Bartenwal, 🦪 Muschel, 🦐 Krill, 🦭 Robbe, 🪼 Leuchtwesen/Tiefsee-Qualle,
+      👁️ Chamäleon, 🦤 Laufvogel/Strauß, 🥟 Bärtierchen, 🪲 Feuerkäfer, 🌙 Frostspanner,
+      🕳️ Wühler, 🧂 Salinenkrebs, ⚓ Tiefsee-Amphipode — werden alle als pelziger runder
+      Vierbeiner mit Standard-Schnauze gerendert (Beleg: 🐋-Testrender sieht aus wie ein
+      haariger Ball, keine Flossen/Fluke). Radial-symmetrische (⭐), schirmförmige (🪼) und
+      zweiklappige (🦪) Baupläne sind mit der Vierbeiner-Geometrie strukturell nicht
+      darstellbar — kein Parameter-Tuning, sondern eigene Zeichner nötig.
+      **Nutzer-Auftrag: "leg damit direkt los!"** — Priorisierung nach groesstem
+      Baupan-Unterschied zum Vierbeiner-Fallback zuerst:
+      - [ ] ⭐ Seestern (radiär, 5 Arme) — als erstes, größter Kontrast.
+      - [ ] 🦪 Muschel (zweiklappige Schale)
+      - [ ] 🪼 Leuchtwesen/Qualle (Schirm + Tentakel, kann `bezierRibbon`/Saugnapf-Technik
+            vom Kraken wiederverwenden)
+      - [ ] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
+      - [ ] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — kleinere/generischere Baupläne, ggf. genügt eine
+            angepasste Parametrisierung der Vierbeiner-Funktion statt eines eigenen Zeichners
+            (Fall-für-Fall-Entscheidung beim Umsetzen).
+      **Modell:** Opus — neue Bauplan-Geometrien, großer Ermessensspielraum bei Form/Proportion.
+
       **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame
       Vierbeiner-Funktion (2026-08-05, Nutzer-Auftrag „immer weiter, auditiere dich
       selbst, gib mir immer mal einen Zwischenstand"):**
