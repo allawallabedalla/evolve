@@ -6359,15 +6359,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(const o of [-1,1]){
       const hipX=cx+o*W*0.4, hipY=cy+H*0.18;
       const kneeX=cx+o*W*1.02, kneeY=cy+H*0.32;
-      const ankleX=cx+o*W*0.8, ankleY=cy+H*0.92;
-      const footX=cx+o*W*1.18, footY=cy+H*0.98;
+      // Schaerferer Knick: der Unterschenkel faltet sich sichtbar ZURUECK Richtung Mitte
+      // statt seitlich weiterzulaufen (Nutzer: Referenzfoto zeigt eine kompaktere Hocke).
+      const ankleX=cx+o*W*0.5, ankleY=cy+H*0.95;
       hindFill += bezierRibbon(hipX,hipY, cx+o*W*0.85,hipY+H*0.12, kneeX,kneeY, R*0.32, R*0.22);
-      hindFill += bezierRibbon(kneeX,kneeY, cx+o*W*1.08,cy+H*0.65, ankleX,ankleY, R*0.19, R*0.09);
+      hindFill += bezierRibbon(kneeX,kneeY, cx+o*W*0.92,cy+H*0.68, ankleX,ankleY, R*0.19, R*0.09);
       pawsF += dot(ankleX, ankleY, R*0.06);
+      // Laengere, spinnenartigere Zehen (Nutzer-Fund: vorher zu kurz).
       for(let j=0;j<4;j++){ const tt=j/3;
-        toesF += `M${ankleX.toFixed(1)},${ankleY.toFixed(1)}L${(ankleX+o*R*(0.08+tt*0.1)).toFixed(1)},${(ankleY+R*0.2-tt*R*0.04).toFixed(1)}`; }
-      // Vorderbein: kurz, staemmig, stuetzt den Rumpf ab — auch verjuengtes Band statt Strich.
-      frontFill += bezierRibbon(cx+o*W*0.3,cy+H*0.5, cx+o*W*0.42,cy+H*0.78, cx+o*W*0.52,cy+H*1.0, R*0.16, R*0.07);
+        toesF += `M${ankleX.toFixed(1)},${ankleY.toFixed(1)}L${(ankleX+o*R*(0.1+tt*0.16)).toFixed(1)},${(ankleY+R*0.28-tt*R*0.05).toFixed(1)}`; }
+      // Vorderbein: Nutzer-Fund ("sollten auch wieder ganz nach vorne") — deutlich weiter
+      // seitlich/nach vorn ausgestellt statt eng am Rumpf, mit sichtbarem Ellbogen-Knick,
+      // wie im Referenzfoto (breiter Stand, Fuss weit aussen/vorn, Zehen gespreizt).
+      const felbowX=cx+o*W*0.75, felbowY=cy+H*0.5, fpawX=cx+o*W*1.0, fpawY=cy+H*1.0;
+      frontFill += bezierRibbon(cx+o*W*0.28,cy+H*0.4, felbowX,felbowY, fpawX,fpawY, R*0.17, R*0.09);
+      pawsF += dot(fpawX, fpawY, R*0.055);
+      for(let j=0;j<4;j++){ const tt=j/3;
+        toesF += `M${fpawX.toFixed(1)},${fpawY.toFixed(1)}L${(fpawX+o*R*(0.06+tt*0.11)).toFixed(1)},${(fpawY+R*0.18-tt*R*0.03).toFixed(1)}`; }
     }
     P("an-hindlegs", hindFill, { fill: flatStep(dark,1) });
     P("an-frontlegs", frontFill, { fill: flatStep(dark,1) });
