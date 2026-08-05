@@ -6358,6 +6358,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       { stroke: flatCol(dark), "stroke-opacity": .55, "stroke-width": 1.5, fill:"none" });
     return;
   }
+  if(kind==="🪼"){   // Leuchtwesen/Tiefsee-Qualle: Schirm + wallende Tentakel (Phase 1b)
+    const bellR=R*0.9, bellH=R*0.65, bellCol=flatCol(mix(body,[210,225,235],0.4));
+    P("an-bell", halfEllipse(cx, cy-R*0.1, bellR, bellH, "top"), { fill: bellCol, "fill-opacity": .88 });
+    // Radiale Markierung auf dem Schirm — typisch fuer viele Quallenarten.
+    let radial = "";
+    for(let i=0;i<5;i++){ const t=(i/4-0.5);
+      radial += `M${(cx+t*bellR*0.75).toFixed(1)},${(cy-R*0.1).toFixed(1)}L${(cx+t*bellR*0.28).toFixed(1)},${(cy-R*0.1-bellH*0.72).toFixed(1)}`; }
+    P("an-radial", radial, { stroke: flatCol(dark), "stroke-opacity": .3, "stroke-width": 1, fill:"none" });
+    // Tentakel: duenne wallende Straehnen (nicht dick/gesaugnapft wie beim Kraken — echte
+    // Quallententakel sind fein und schlicht).
+    let tent = "";
+    const nT=6;
+    for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5), sx=cx+t*bellR*1.5, sw=Math.sin(time*0.003+i)*R*0.2;
+      tent += `M${sx.toFixed(1)},${(cy+R*0.2).toFixed(1)}Q${(sx+sw).toFixed(1)},${(cy+R*0.8).toFixed(1)} ${(sx+t*R*0.3+sw*1.5).toFixed(1)},${(cy+R*1.5).toFixed(1)}`; }
+    P("an-tent", tent, { stroke: bellCol, "stroke-opacity": .7, "stroke-width": 1.5, "stroke-linecap":"round", fill:"none" });
+    return;
+  }
   if(kind==="🐌"){   // Schnecke: Schleimfuss + Spiralhaus + Fuehler
     const L=R*2.2, foot=flatCol(mix(body,[150,175,155],0.4));
     P("an-foot", `M${(cx-L*0.5).toFixed(1)},${(cy+R*0.5).toFixed(1)}Q${(cx-L*0.55).toFixed(1)},${(cy+R*0.1).toFixed(1)} ${(cx-L*0.3).toFixed(1)},${(cy+R*0.1).toFixed(1)}`
