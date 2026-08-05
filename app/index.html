@@ -5837,6 +5837,170 @@ function flatStep(c, step){
   return flatCol([c[0]*k, c[1]*k, c[2]*k]);
 }
 
+// ============================================================================
+// CPPN-MUSTERSCHICHT (BACKLOG Punkt 13, Phase 2)
+// ----------------------------------------------------------------------------
+// Pigmentzeichnung (Streifen/Flecken/Zonen) als STETIGE Funktion des Genoms:
+// kleine Genom-Distanz -> kleine Bild-Distanz, ohne dass irgendwo eine Tabelle
+// "welches Gen macht welches Muster" gepflegt werden muesste.
+//
+// DREI ENTSCHEIDUNGEN, DIE VOM BACKLOG-VORSCHLAG ABWEICHEN — bewusst, mit Grund:
+//
+// 1. Inline-JS statt TypeScript. Der Backlog schlug ein "winziges CPPN in
+//    TypeScript" vor. Das passt fuer Engine-Code: der wird aus src/ gebaut und
+//    per app-parity gegen das Orakel geprueft. Der ZEICHNER hat aber gar kein
+//    TS-Gegenstueck — drawAnimalSvg & Co. existieren nur hier inline, es gibt
+//    nichts, wogegen Parity zu pruefen waere. Ein TS-Modul haette eine zweite
+//    Build-Kette fuer genau eine Funktion aufgemacht, ohne Pruefgewinn.
+//
+// 2. Gewichte aus einer KONSTANTEN Projektionsmatrix, nicht aus einem Hash.
+//    Das ist der Kern der Stetigkeitsforderung: `fnv1a32` (Fantasienamen) darf
+//    springen, hier waere ein Hash toedlich — ein Bit Genom-Aenderung wuerde das
+//    ganze Muster wuerfeln. Stattdessen w = tanh(A · (g - 0.5)) mit FESTEM A.
+//    Damit ist w als Komposition aus linearer Abbildung und tanh nachweislich
+//    Lipschitz-stetig in g; A selbst haengt an einem konstanten Seed und ist
+//    ueber alle Lebewesen/Sitzungen identisch.
+//
+// 3. Ausgabe in Stufen QUANTISIERT, nicht als weiches Feld. Ein CPPN liefert
+//    von Haus aus ein glattes Skalarfeld — direkt gezeichnet waere das ein
+//    Verlauf und damit gegen die Projektregel (nur Flaechenfarben, kein
+//    Filter/Blur/Gradient). Das Feld wird deshalb auf wenige Helligkeitsstufen
+//    geschnitten und als flache Flecken gezeichnet — dieselbe Siebdruck-Logik,
+//    die creatureGlowSvg() schon fuer die Biolumineszenz nutzt.
+//
+//    Die Quantisierung zerstoert die Stetigkeit NICHT: verschiebt sich das Feld
+//    um eps, wandert eine Schwelle nur um einen schmalen Saum (Flaeche ~ eps/|Gradient|),
+//    die Pixelaenderung bleibt also proportional zu eps. Genau das misst
+//    tools/pattern-continuity-check.mjs nach — nicht behauptet, gemessen.
+// ============================================================================
+// Gen-Index nach NAME. Die Zeichner destrukturieren positionsweise (`const [insul,size,…]`),
+// was nur fuer die ersten Gene handhabbar ist; fuer die hinteren waeren harte Indizes noetig —
+// genau die Drift-Falle, die die Werkzeuge in tools/ schon meiden (Reihenfolge live lesen).
+const GI = (() => {
+  const names = (window.ARCHETYPES && ARCHETYPES.genes) || [];
+  const m = {}; names.forEach((k,i) => m[k] = i); return m;
+})();
+const CPPN_IN = 4, CPPN_H1 = 6, CPPN_H2 = 6;
+// Gewichts-Layout, linear: W1 | B1 | W2 | B2 | W3 | B3
+const _CPPN_W1 = 0,                 _CPPN_B1 = _CPPN_W1 + CPPN_IN*CPPN_H1;
+const _CPPN_W2 = _CPPN_B1 + CPPN_H1, _CPPN_B2 = _CPPN_W2 + CPPN_H1*CPPN_H2;
+const _CPPN_W3 = _CPPN_B2 + CPPN_H2, _CPPN_B3 = _CPPN_W3 + CPPN_H2;
+const CPPN_NW  = _CPPN_B3 + 1;
+// Feste Projektion Genom -> Gewichte. Konstanter Seed: dieselbe Matrix in jeder
+// Sitzung, sonst saehe dasselbe Genom nach einem Reload anders aus.
+const _CPPN_A = (() => {
+  const r = mulberry32(0x9E3779B9);
+  const A = new Float64Array(CPPN_NW * NG);
+  for(let i=0;i<A.length;i++) A[i] = r()*2-1;
+  return A;
+})();
+// Alle Gene wirken aufs Muster (es ist die visuelle Signatur des GANZEN Genoms),
+// aber die Gene, die real fuer Zeichnung zustaendig sind, wiegen schwerer — sonst
+// verschoebe ein driftendes Osmoregulations-Gen das Fellmuster genauso stark wie
+// das Pigment-Gen.
+const _CPPN_GAIN = (() => {
+  const names = (window.ARCHETYPES && ARCHETYPES.genes) || [];
+  const gain = new Float64Array(NG).fill(1);
+  const bump = { pigment: 2.6, camo: 2.2, biolum: 1.4, insulation: 1.3, armor: 1.2 };
+  for(const [n, v] of Object.entries(bump)){ const i = names.indexOf(n); if(i >= 0) gain[i] = v; }
+  return gain;
+})();
+// Gemischte Aktivierungen — daher kommt die Mustervielfalt: sin macht Streifen,
+// die Glocke macht Flecken, tanh weiche Zonen, die gefaltete Betragsfunktion
+// symmetrische Kanten (Picbreeder-Rezept).
+const _CPPN_ACT = [
+  x => Math.sin(x*3.1),
+  x => Math.exp(-x*x*2.2)*2-1,
+  x => Math.tanh(x*1.6),
+  x => 1-2*Math.abs(Math.tanh(x)),
+];
+const _CPPN_ACT1 = [0,1,2,0,1,3], _CPPN_ACT2 = [1,0,2,3,0,1];
+/**
+ * Musterfeld fuer ein Genom bauen. Rueckgabe: (u,v) -> Skalar in etwa [-1,1],
+ * u/v sind KOERPERLOKALE Koordinaten in [-1,1] (nicht Bildschirmpixel — dadurch
+ * sitzt dasselbe Muster auf grossen und kleinen Tieren gleich).
+ */
+function cppnField(g){
+  const w = new Float64Array(CPPN_NW);
+  for(let k=0;k<CPPN_NW;k++){
+    let s = 0; const base = k*NG;
+    for(let j=0;j<NG;j++) s += _CPPN_A[base+j] * ((g[j] ?? 0.5) - 0.5) * _CPPN_GAIN[j];
+    w[k] = Math.tanh(s*0.55);
+  }
+  const h1 = new Float64Array(CPPN_H1), h2 = new Float64Array(CPPN_H2);
+  return (u, v) => {
+    const inp = [u, v, Math.sqrt(u*u + v*v), 1];
+    for(let i=0;i<CPPN_H1;i++){
+      let s = w[_CPPN_B1+i];
+      for(let j=0;j<CPPN_IN;j++) s += w[_CPPN_W1 + i*CPPN_IN + j] * inp[j];
+      h1[i] = _CPPN_ACT[_CPPN_ACT1[i]](s*2.2);
+    }
+    for(let i=0;i<CPPN_H2;i++){
+      let s = w[_CPPN_B2+i];
+      for(let j=0;j<CPPN_H1;j++) s += w[_CPPN_W2 + i*CPPN_H1 + j] * h1[j];
+      h2[i] = _CPPN_ACT[_CPPN_ACT2[i]](s*1.8);
+    }
+    let s = w[_CPPN_B3];
+    for(let j=0;j<CPPN_H2;j++) s += w[_CPPN_W3+j] * h2[j];
+    return Math.tanh(s*1.5);
+  };
+}
+/**
+ * Musterfeld als FLACHE Flecken zeichnen. `inside(x,y)` haelt die Flecken in der
+ * Silhouette (jeder Zeichner kennt seine eigene Koerperform — billiger und
+ * robuster als ein clipPath ueber <use>, das jedem Koerperteil eine id abverlangte).
+ *
+ * `amount` (aus dem Pigment-Gen) steuert, WIE STARK das Muster auftraegt; bei
+ * ~0 verschwindet es ganz, damit ungemusterte Tiere nicht kuenstlich gefleckt werden.
+ */
+function patternPatches(prefix, field, inside, bb, base, amount, fine){
+  const dEl = cEl(prefix+"-pd","path"), lEl = cEl(prefix+"-pl","path");
+  // Oberflaechenzeichnung: keine eigene Tinten-Kontur (s. .cre-mark in app/style.css).
+  // classList statt cAttr, damit applyAccentClasses() weiter frei toggeln kann.
+  dEl.classList.add("cre-mark"); lEl.classList.add("cre-mark");
+  if(!(amount > 0.06)){ cAttr(dEl, { opacity: 0 }); cAttr(lEl, { opacity: 0 }); return; }
+  // Eigener dot(): die Zeichner definieren ihn jeweils lokal, global gibt es ihn nicht.
+  const dot = (x,y,r) => `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+  // Rasterdichte MIT der Feinheit hochziehen: bei festem Raster aliasen hohe
+  // Musterfrequenzen dagegen, camo=0.1 und camo=0.95 sahen darum praktisch gleich aus
+  // (eigener Bildbefund). Frequenz und Abtastung muessen zusammen wachsen.
+  const freq = 1.1 + fine*1.9;
+  const cols = Math.round(13 + fine*13), rows = Math.round(9 + fine*9);
+  const w = bb.x1-bb.x0, h = bb.y1-bb.y0;
+  // Zwei Schwellen -> drei flache Toene (Grundfarbe + dunkler + heller Fleck).
+  const hi = 0.72 - amount*0.34, lo = -0.72 + amount*0.34;
+  // Versatz + fester Ruettel gegen die GITTER-OPTIK: auf dem reinen Rechteckraster lasen
+  // die Flecken als gedrucktes Punktraster statt als Fell (Bildbefund am Baeren). Beides
+  // haengt NUR an (ix,iy), nicht am Genom — sonst wanderten die Punkte bei jeder Mutation
+  // und die gemessene Stetigkeit waere dahin.
+  const jit = (i,j,s) => { const t = Math.sin(i*127.1 + j*311.7 + s*74.7)*43758.5453; return (t-Math.floor(t))-0.5; };
+  let dark = "", light = "";
+  for(let iy=0; iy<rows; iy++) for(let ix=0; ix<cols; ix++){
+    const stagger = (iy & 1) ? 0.5 : 0;   // versetzte Reihen statt Schachbrett
+    const fx = (ix + 0.5 + stagger + jit(ix,iy,1)*0.7)/cols;
+    const fy = (iy + 0.5 + jit(ix,iy,2)*0.7)/rows;
+    if(fx < 0 || fx > 1) continue;
+    const x = bb.x0 + fx*w, y = bb.y0 + fy*h;
+    if(!inside(x,y)) continue;
+    const f = field((fx*2-1)*freq, (fy*2-1)*freq);
+    if(f < hi && f > lo) continue;
+    // Radius waechst AB NULL, sobald die Schwelle ueberschritten wird — nicht in festen
+    // Stufen. Erster Wurf sprang bei Schwellenkontakt sofort auf 55 % Radius (~30 % Flaeche);
+    // pattern-continuity-check hat genau daran eine Lipschitz-Schranke von 88 gemessen: bei
+    // flachen Feldern liegt eine grosse Flaeche gleichzeitig auf der Schwelle und kippte auf
+    // einen Schlag — ein Mutationsschritt konnte "ungemustert" zu "voll gefleckt" machen.
+    // sqrt(), damit die FLAECHE linear mit dem Feldwert waechst (die Flaeche sieht das Auge).
+    // Das ist keine Verletzung der Flachfarben-Regel: die Regel verbietet Verlaeufe/Filter,
+    // nicht unterschiedlich grosse Flecken — dieselbe Technik nutzen Rosetten/Hautkoernung.
+    const over = f > hi ? (f-hi)/(1-hi) : (lo-f)/(1+lo);
+    const rr = Math.sqrt(Math.max(0, over)) * (w/cols) * 0.62;
+    const seg = dot(x, y, rr);
+    if(f > hi) light += seg; else dark += seg;
+  }
+  cAttr(dEl, { d: dark || "M0,0", fill: flatStep(base,-1.5), "fill-opacity": (0.3+amount*0.45).toFixed(2), opacity: 1 });
+  cAttr(lEl, { d: light || "M0,0", fill: flatStep(base, 1.5), "fill-opacity": (0.26+amount*0.4).toFixed(2), opacity: 1 });
+}
+
 function drawCreature(g, time, a){
   a = a || classify(g);
   // Form-Details aus lineageSeed (stabil pro Leben) statt aus dem driftenden Genom
@@ -7270,6 +7434,15 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // flache Ellipsen mit flatStep() statt eines Gradient-Fills.
   E("an-belly", cx, cy+R*bh*0.38, R*bw*0.6, R*bh*0.3, flatStep(body,1));
   E("an-back", cx, cy-R*bh*0.55, R*bw*0.8, R*bh*0.24, flatStep(body,-1));
+  // Phase 2: Pigmentzeichnung ueber den Rumpf, in der Rumpf-Ellipse gehalten.
+  // camo steuert die Feinheit (feiner gesprenkelt = bessere Tarnung), pigment die Staerke.
+  {
+    const rx = R*bw, ry = R*bh;
+    patternPatches("an", cppnField(g),
+      (x,y) => { const dx=(x-cx)/rx, dy=(y-cy)/ry; return dx*dx+dy*dy <= 0.94; },
+      { x0: cx-rx, y0: cy-ry, x1: cx+rx, y1: cy+ry },
+      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+  }
   // Nahes Bein: ERST JETZT gezeichnet, NACH der Rumpf-Ellipse — liegt damit sichtbar VOR
   // dem Koerper (dritte Tiefenebene, s. Nutzer-Erklaerung oben bei der Berechnung). Der
   // eigene Umriss ueberlappt die Koerperkante direkt, kein Wulst-Hilfstrick noetig.

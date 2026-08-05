@@ -2163,6 +2163,58 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       - Alle Fixes committed mit `app-parity`/`design-audit`/`exemplar-check`/`key-check`
         grün.
 
+- [x] **Phase 2 — CPPN-Musterschicht — Grundlage steht (2026-08-05).** Umgesetzt als
+      `cppnField()` + `patternPatches()` in `app/index.html`, verdrahtet im gemeinsamen
+      Vierbeiner-Zeichner (greift damit für alle Kinds dieses Bauplans auf einmal).
+      Nachweis: `npm run pattern-continuity-check`.
+      **Drei bewusste Abweichungen vom ursprünglichen Vorschlag unten**, jeweils im Code
+      begründet:
+      1. **Inline-JS statt TypeScript.** Der TS-Vorschlag passt für Engine-Code (wird aus
+         `src/` gebaut, per `app-parity` gegen das Orakel geprüft). Der Zeichner hat gar
+         kein TS-Gegenstück — `drawAnimalSvg` & Co. existieren nur inline, es gäbe nichts
+         zu prüfen. Ein TS-Modul hätte eine zweite Build-Kette für eine Funktion eröffnet.
+      2. **Gewichte aus konstanter Projektionsmatrix**, `w = tanh(A · (g − 0.5))` mit
+         festem `A`. Damit ist die Stetigkeit *strukturell* garantiert (Komposition aus
+         linearer Abbildung und `tanh` ⇒ Lipschitz), nicht bloß empirisch.
+      3. **Ausgabe in Stufen quantisiert.** Ein CPPN liefert ein glattes Feld — direkt
+         gezeichnet wäre das ein Verlauf und verstieße gegen die Flachfarben-Regel. Das
+         Feld wird auf Schwellen geschnitten und als flache Flecken gezeichnet (dieselbe
+         Siebdruck-Logik wie `creatureGlowSvg()`).
+      **Vier Befunde aus der eigenen Prüfung, alle behoben:**
+      - **Quantisierung sprang.** Erster Wurf gab Flecken ab Schwellenkontakt sofort 55 %
+        Radius (≈30 % Fläche) — `pattern-continuity-check` maß dafür eine Lipschitz-
+        Schranke von 88: bei flachen Feldern lag eine große Fläche gleichzeitig auf der
+        Schwelle und kippte geschlossen, ein Mutationsschritt konnte „ungemustert" zu
+        „voll gefleckt" machen. Radius wächst jetzt ab null, `sqrt()` damit die *Fläche*
+        linear mitgeht (88 → 52, Ausreißer-Faktor 4 → 3).
+      - **Prüfkriterium war selbst falsch.** Die zuerst gesetzte Schranke „< 6" prüfte
+        eine Größe, deren natürliche Skala ich vorher nicht kannte — schon der Mittelwert
+        liegt bei ~11, die Schranke war von Anfang an unerfüllbar. Ersetzt durch das, wovor
+        sie schützen soll: Verhältnis schlimmster/mittlerer Fall (Katastrophen-Ausreißer),
+        Absolutwert bleibt informativ daneben. **Kein Aufweichen einer Schwelle bis es
+        passt** — der Radius-Fix hat die zugrunde liegenden Zahlen echt verbessert, das
+        neue Kriterium misst eine reale Eigenschaft.
+      - **Tinten-Kontur um jeden Fleck** (globale Regel in `style.css`) — las als
+        Kettenhemd statt Fell. Ausnahme `.cre-mark`. Dabei zweiter Fehler: die
+        Gegenregel `#creatureSvg .cre-mark` **verlor** (1,1,0 gegen 1,1,1), weil `:not()`
+        und `:is()` je die Spezifität ihres stärksten Arguments erben — das
+        Attribut-`:not()` zählt voll mit. Statt Spezifitäts-Wettrüsten die Marken in der
+        Basisregel per `:not(.cre-mark)` ausgeschlossen.
+      - **Gitter-Optik + wirkungsloses camo-Gen.** Auf dem festen Rechteckraster las das
+        Muster als gedrucktes Punktraster (Bildbefund am Bären), und `camo` änderte kaum
+        etwas, weil hohe Frequenzen gegen das feste Raster aliasten. Jetzt versetzte
+        Reihen + fester Rüttel (hängt **nur** an `(ix,iy)`, nicht am Genom — sonst
+        wanderten die Punkte bei jeder Mutation und die Stetigkeit wäre dahin), und die
+        Rasterdichte wächst mit der Feinheit mit.
+      **Offen für eine Folgerunde:** die Musterschicht liegt bisher nur auf dem
+      Vierbeiner-Rumpf. Flügel (🦋/🌙), Fisch-Flanke, Panzer und die Pflanzen/Pilz-
+      Zeichner haben ihre eigenen Körperformen und bräuchten je einen `inside()`-Test.
+      Außerdem legt sich das Muster derzeit gleichmäßig über den ganzen Rumpf und
+      überdeckt damit die Bauch-/Rücken-Staffelung leicht — echte Tiere sind am Bauch
+      meist ungemustert.
+
+  <details><summary>Ursprünglicher Vorschlag (2026-08-04)</summary>
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
@@ -2181,6 +2233,8 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       Petalz-CPPN-Encoding, aber ohne deren interaktive Evolution — hier ersetzt das vorhandene
       Genom die Notwendigkeit, das Netz selbst zu evolvieren.
       **Modell (Umsetzung):** Opus — neues Subsystem, Architekturentscheidung, kein enges Ticket.
+
+  </details>
 
 - [ ] **Phase 3 — NCA-Mikrotextur.** Für Materialgefühl (Schuppen-Rauheit, Fell-Flaum,
       Chitin-Glanz) je Bedeckungsart aus `development.ts`. Läuft als kleine Canvas-Textur

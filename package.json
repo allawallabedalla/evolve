@@ -58,7 +58,8 @@
     "serve": "python3 -m http.server 8000",
     "design-audit": "node tools/design-audit.mjs",
     "creature-shot": "node tools/creature-shot.mjs",
-    "creature-contact-sheet": "node tools/creature-contact-sheet.mjs"
+    "creature-contact-sheet": "node tools/creature-contact-sheet.mjs",
+    "pattern-continuity-check": "node tools/pattern-continuity-check.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

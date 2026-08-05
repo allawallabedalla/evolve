@@ -232,7 +232,14 @@
      Linien-Pfade (Beine, Fühler, Spiralen — schon mit eigener Stroke-Farbe gezeichnet)
      unberührt, sonst würde die CSS-Regel deren Farbe überschreiben (CSS gewinnt
      gegen SVG-Präsentationsattribute). */
-  #creatureSvg :is(ellipse, path, polygon, circle, rect):not([fill="none"]) {
+  /* `.cre-mark` ist OBERFLAECHENZEICHNUNG (CPPN-Musterschicht, Phase 2): Pigmentflecken
+     liegen AUF dem Koerper und sind kein eigenes Silhouetten-Teil — mit Tinten-Kontur um
+     jeden einzelnen Fleck las das Fell wie ein Kettenhemd statt wie Musterung.
+     Bewusst hier als `:not()` ausgeschlossen statt per Gegenregel ueberschrieben: eine
+     eigene Regel `#creatureSvg .cre-mark` verliert (1,1,0 gegen 1,1,1) — `:not()` und
+     `:is()` erben je die Spezifitaet ihres staerksten Arguments, das Attribut-`:not()`
+     unten zaehlt also voll mit. Ausschluss an der Quelle spart den Spezifitaets-Streit. */
+  #creatureSvg :is(ellipse, path, polygon, circle, rect):not([fill="none"]):not(.cre-mark) {
     stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round;
   }
   /* Umwelt-Einfluss-Cinematik: kurzer tongefärbter Blitz + leichtes Beben aufs Habitat */
