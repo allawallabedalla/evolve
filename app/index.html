@@ -136,14 +136,14 @@
       <div class="peril" id="perilLine" role="alert" hidden></div>
       <div class="why" id="whyLine" title="Welche Merkmale die AKTUELLE Umwelt gerade ausliest — gemessen an der lebenden Population: um so viel verschiebt die Auslese den Durchschnitt dieses Merkmals je Generation. Steht nichts, ist das Wesen angepasst."></div>
       <div class="genes" id="genes"></div>
-      <button class="gene-nums-toggle" id="geneFilterBtn" aria-pressed="false" title="Nur auffällige Gene zeigen oder alle 25 Gene auf einmal">Alle 25 Gene zeigen</button>
+      <button class="gene-nums-toggle" id="geneFilterBtn" aria-pressed="false" title="Nur auffällige Gene zeigen oder alle 26 Gene auf einmal">Alle 26 Gene zeigen</button>
       <div class="ancestry" id="ancestryRow" hidden></div>
       <button class="link cshare" id="shareBtn" title="Ein Bild deines Wesens erstellen und teilen">Schnappschuss teilen ↗</button>
     </div>
   </div>
 
   <p class="footnote">
-    Prozedural aus 25 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
+    Prozedural aus 26 Genen &amp; Umwelt-Einflüssen lebendig gezeichnet.
     <span class="ver" id="appVer" title="App-Version"></span>
   </p>
 
@@ -450,7 +450,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.89.0";
+const APP_VERSION = "v0.90.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1443,7 +1443,7 @@ function archLib(){
 }
 // Selektions-Relevanz je Gen: |∂Fitness/∂Gen| AM GENOM SELBST, auf 0..1 normiert, mit
 // Exponent geschärft und mit einem Boden versehen (nie ganz ignorieren). Ohne diesen
-// Schritt ertränken die 15 bedingten Kosten-Gene (Stressor-Resistenzen, die ohne ihren
+// Schritt ertränken die 16 bedingten Kosten-Gene (Stressor-Resistenzen, die ohne ihren
 // Stressor frei driften) den Abstand in Rauschen — gemessen ~64 % des rohen 25-D-Abstands.
 // Geschärft wird, weil schon die bloße Unterhaltslast jedem Gen eine kleine, gleich große
 // Ableitung gibt; ohne Exponent lägen die folgenlosen Gene noch bei ~40 % Gewicht.
@@ -3818,13 +3818,13 @@ GENE_LABELS.forEach((lbl,i) => {
 })();
 // P0.1 (Komplexitaets-Audit): progressive Disclosure der Gen-ZEILEN selbst (nicht nur
 // der Zahlen). Standard: nur auffaellig vom Mutations-Anker abweichende ODER gerade
-// aktiv selektierte Gene stehen da — der Rest liegt hinter "Alle 25 Gene zeigen"
+// aktiv selektierte Gene stehen da — der Rest liegt hinter "Alle 26 Gene zeigen"
 // (folgt demselben localStorage-Muster wie "Zahlen zeigen" oben).
 (function(){
   const btn=document.getElementById("geneFilterBtn");
   const on = localStorage.getItem("evolveGeneShowAll")==="1";
   const apply = v => { genesEl.classList.toggle("show-all-genes", v); btn.setAttribute("aria-pressed", v?"true":"false");
-    btn.textContent = v ? "Nur relevante Gene zeigen" : "Alle 25 Gene zeigen"; };
+    btn.textContent = v ? "Nur relevante Gene zeigen" : "Alle 26 Gene zeigen"; };
   apply(on);
   btn.addEventListener("click", ()=>{ const v=!genesEl.classList.contains("show-all-genes"); apply(v);
     localStorage.setItem("evolveGeneShowAll", v?"1":"0"); });
@@ -3856,7 +3856,7 @@ function mutedGenes(a){
 }
 // P0.1: welche Gene zaehlen als "relevant" (Zeile bleibt/steht sichtbar)?
 //   (a) deutlich vom neutralen Mutations-Anker abgewichen (die 10 Kern-Gene ankern bei
-//       0.5, die 15 Kosten-Gene bei 0.12 — siehe PARAMS.mutationAnchor) — das Merkmal
+//       0.5, die 16 Kosten-Gene bei 0.12 — siehe PARAMS.mutationAnchor) — das Merkmal
 //       hat sich also wirklich ausgepraegt, nicht nur Rauschen um den Ruhewert;
 //   (b) gerade Teil des Selektions-Theaters (_why.shown/_why.on aus updateWhy) — dann
 //       ist es GENAU DAS, was die aktuelle Umwelt gerade formt.
@@ -4209,7 +4209,7 @@ function updateWhy(g, force){
     // ZWEI Größen, die vorher vermengt waren:
     //   sel  = was die UMWELT tut (Selektion) — nur das ist „diese Umwelt formt gerade"
     //   pull = was das Gen von selbst tut (Mutation/Klemmung bzw. im Rückfall der
-    //          Rücktrieb zum Ruhewert). 15 der 25 Gene ankern niedrig, fielen also
+    //          Rücktrieb zum Ruhewert). 16 der 26 Gene ankern niedrig, fielen also
     //          dauernd mit winzigen, fast gleich großen Beträgen — daraus entstand das
     //          Ranking-Geflacker in der Zeile.
     let sel, net;
