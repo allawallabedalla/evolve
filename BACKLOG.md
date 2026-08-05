@@ -1923,6 +1923,31 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       **Nutzer-Auftrag (2026-08-05):** „jetzt ist es super, merke dir die Logik, lass es
       erstmal so" — 🦎 gilt als Referenz-Vorlage, weiter mit dem nächsten Archetyp.
 
+      **Nachtrag 2 — 🐢 Schildkröte + 🐸 Frosch (2026-08-05):** Nutzer-Auftrag ab hier:
+      **selbstständiger Audit** — vor jeder Rückfrage erst selbst einschätzen, WO im
+      Bauplan-Bestand die größte Unsicherheit liegt, dort mit Referenzbild-Abgleich
+      ansetzen, Vorschlag machen, dann erst fragen (nicht auf Zuruf warten).
+      - **🐢** übernahm die `sprawl`-Bein-Logik vom Gecko (`reptile` = 🦎-only für Keil-Kopf/
+        Schwanz-Fortsetzung; `sprawl` = 🦎+🐢 für die Bein-Mechanik — als getrenntes Flag
+        eingeführt, damit sich Kopf/Schwanz-Spezifika nicht ungewollt auf weitere Kinds
+        ausbreiten). Eigene Funde: generische Panzer-Stacheln (`armor>0.6`) passen nicht zu
+        einer Schildkröte (glatter Panzer laut Referenzfoto) → für 🐢 unterdrückt, andere
+        gepanzerte Kinds unangetastet. Fehlender Schwanz ergänzt (`bezierRibbon`-Stummel,
+        körperfarben).
+      - **🐸** bekam kräftige gefaltete Hinterbeine + ausgestellte Vorderbeine (beide über
+        `bezierRibbon`, gleiches Prinzip wie Gecko-Beine) statt dünner Striche, dazu Mund
+        (Lächel-Bogen via `arcPath`) und Nasenlöcher, die schlicht komplett fehlten.
+        **Zwei zusätzliche Lehren, allgemein anwendbar:**
+        1. **Gesichtsdetails proaktiv prüfen** (Mund/Nase/Nüstern) statt erst auf Zuruf —
+           fehlten beim Frosch komplett und fielen erst im Nutzer-Feedback auf.
+        2. **Bei mehreren Gliedmaßen-Paaren am selben Körper (Vorder-/Hinterbein) müssen die
+           X/Y-Zonen der `bezierRibbon`-Pfade sich NICHT überlappen** — sonst kreuzen sich
+           die Silhouetten zu einem „Gewirr" (Nutzer: „die Beine sehen komisch aus"). Je
+           Paar einen klar getrennten Wertebereich reservieren (z. B. Vorderbein bleibt
+           innen, Hinterbein beginnt erst außerhalb davon), und das weniger dominante Paar
+           (meist das vom Körper größtenteils verdeckte) über `flatStep(dark, 0.5)` statt
+           `1` optisch zurücknehmen — Dominanz-Hierarchie wie beim Gecko-„fernen Bein".
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
