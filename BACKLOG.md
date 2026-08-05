@@ -2008,6 +2008,34 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         (gerade Beine sind für Säugetiere korrekt, kein erwarteter Fund), 🐜/🦀/🐌 (bereits
         geprüft, keine offensichtliche Lücke gefunden).
 
+      **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame
+      Vierbeiner-Funktion (2026-08-05, Nutzer-Auftrag „immer weiter, auditiere dich
+      selbst, gib mir immer mal einen Zwischenstand"):**
+      - **🐟** Referenzfoto (Regenbogenforelle): Becken-/Afterflosse (Bauchseite) fehlten
+        komplett, nur Rücken-/Brustflosse — dazu das Maul (gleicher Fund wie Frosch).
+      - **Gemeinsame Vierbeiner-Funktion** (betrifft 9 Kinds auf einen Schlag: 🦊🐒🐺🐭🐻
+        🦥🦎🦏🐢): hatte eine Nase, aber KEINEN Mund. Größter Einzelfund dieser Runde —
+        ein Fix, neun Archetypen.
+      - **🐙** Hornschnabel an der Tentakel-Basis ergänzt (Augen vorhanden, aber kein Mund).
+      - **Systematisches Muster gefunden, nicht nur Einzelfälle:** `grep -n "fill: GLINT"`
+        über die ganze Datei zeigte, dass mehrere Kinds nur einen Glanzpunkt (helle
+        Fläche) statt eines ECHTEN dunklen Auges hatten — 🦇 (dabei auch Nase/Mund
+        ergänzt), 🐜, 🦀 (Stielaugen), 🐌 (Fühlerspitzen — bei Landschnecken biologisch
+        korrekt die Augenposition), 🦋 (hatte am Kopf überhaupt kein Auge). Jeweils dunkle
+        Pupille ergänzt, Glanzpunkt bleibt als kleiner versetzter Höhepunkt daneben.
+        **Lehre für künftige Audits:** sobald ein Lückentyp (hier: Auge ohne Pupille) an
+        EINER Stelle gefunden wird, lohnt sich ein Grep über die ganze Datei nach dem
+        gleichen Muster (`fill: GLINT` ohne begleitendes `fill: EYE`) — deckt verwandte
+        Fälle in einem Rutsch auf, statt jeden Archetyp einzeln neu zu entdecken.
+      - **Pflanzen/Pilze:** Codeaudit (Baum, Kaktus, Strauch, Kraut, Nadelbaum, Blütenkraut,
+        Moos/Alge, Hutpilz, Baumpilz, Schimmel, Flechte) ergab KEINE klar fehlende
+        Kernstruktur — anders als bei Tieren gibt es keine Gesichts-/Gliedmaßen-Landmarken,
+        an denen sich „das eine fehlende Merkmal" pauschal festmachen lässt. Bräuchte ein
+        eigenes Prüfraster (eher Wuchsform/Verzweigungslogik als Einzelteile) — noch nicht
+        entwickelt, offen für eine künftige Runde.
+      - Alle Einzel-Commits: `design-audit`/`app-parity` (+ `exemplar-check` wo einschlägig)
+        grün, jeweils per `creature-shot.mjs` gegengeprüft.
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
