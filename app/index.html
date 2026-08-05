@@ -6564,11 +6564,17 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     }
     P("an-feet", feet, { stroke: flatCol(dark), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
     cAttr(cEl("an-head","circle"), { cx:cx.toFixed(1), cy:(cy-R*0.5).toFixed(1), r:(R*0.28).toFixed(1), fill: bc });
-    let ears="", gl="";
+    let ears="", gl="", ey="";
     for(const sd of [-1,1]){ ears += `M${(cx+sd*R*0.1).toFixed(1)},${(cy-R*0.68).toFixed(1)}L${(cx+sd*R*0.3).toFixed(1)},${(cy-R*1.06).toFixed(1)}L${(cx+sd*R*0.02).toFixed(1)},${(cy-R*0.78).toFixed(1)}Z`;
-      gl += dot(cx+sd*R*0.11, cy-R*0.52, R*0.06); }
+      ey += dot(cx+sd*R*0.11, cy-R*0.52, R*0.045); gl += dot(cx+sd*R*0.11-R*0.015, cy-R*0.54, R*0.02); }
     P("an-ears", ears, { fill: bc });
+    P("an-eye", ey, { fill: EYE });
     P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    // Mund/Nase fehlten komplett — gleicher Fund wie bei den anderen Kinds. Kleine Nase +
+    // Mundlinie am Schnauzen-Ende (Fledermausgesichter sind kurz/gestaucht).
+    P("an-nose", dot(cx, cy-R*0.36, R*0.035), { fill: flatCol(dark) });
+    P("an-mouth", `M${(cx-R*0.06).toFixed(1)},${(cy-R*0.3).toFixed(1)}Q${cx.toFixed(1)},${(cy-R*0.24).toFixed(1)} ${(cx+R*0.06).toFixed(1)},${(cy-R*0.3).toFixed(1)}`,
+      { stroke: flatCol(dark), "stroke-width": 1.2, fill:"none" });
     return;
   }
 
