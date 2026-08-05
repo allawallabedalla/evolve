@@ -6388,6 +6388,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     P("an-bulge", bulge, { fill: amb });
     for(const o of [-1,1]) E("an-eye"+o, cx+o*W*0.42, cy-H*0.72, R*0.15, R*0.15*blink, EYE);
     P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
+    // Nutzer-Fund: "kein Mund und Nase?" — beides fehlte komplett. Breiter Mund als flacher
+    // Bogen (typische Frosch-"Lächeln"-Linie), zwei kleine Nasenloecher darueber.
+    P("an-mouth", arcPath(cx, cy-H*0.05, W*0.5, H*0.32, 0, Math.PI*0.1, Math.PI*0.9, false),
+      { stroke: flatCol(dark), "stroke-width": 2, fill:"none" });
+    P("an-nostrils", dot(cx-W*0.08, cy-H*0.42, R*0.035)+dot(cx+W*0.08, cy-H*0.42, R*0.035),
+      { fill: flatCol(dark) });
     return;
   }
   if(kind==="🪱"){   // Wurm: gegliederter Schlauch
