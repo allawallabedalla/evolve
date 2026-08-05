@@ -6341,6 +6341,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     P("an-eyespots", eyeSpots, { fill: flatCol(dark) });
     return;
   }
+  if(kind==="🦪"){   // Muschel: zweiklappige Schale mit Wachstumsringen (Phase 1b)
+    const hx2=cx-R*0.85, hy2=cy, shellCol=flatCol(mix(body,[210,200,180],0.35));
+    // Fan-foermige Schale: Scharnier links, gerundete Kante rechts (obere + untere Klappe).
+    const d = `M${hx2.toFixed(1)},${hy2.toFixed(1)}`
+      + `Q${(cx+R*0.1).toFixed(1)},${(cy-R*0.95).toFixed(1)} ${(cx+R*0.85).toFixed(1)},${(cy-R*0.1).toFixed(1)}`
+      + `Q${(cx+R*0.1).toFixed(1)},${(cy+R*0.95).toFixed(1)} ${hx2.toFixed(1)},${hy2.toFixed(1)}Z`;
+    P("an-shell", d, { fill: shellCol });
+    // Wachstumsringe: konzentrische Boegen vom Scharnier aus (gleiche Technik wie beim
+    // Panzer-Ring der Schildkroete).
+    let rings = "";
+    for(let i=1;i<5;i++) rings += arcPath(hx2, hy2, R*0.95*i/4.3, R*0.85*i/4.3, 0, -0.62, 0.62, false);
+    P("an-rings", rings, { stroke: flatCol(dark), "stroke-opacity": .4, "stroke-width": 1.2, fill:"none" });
+    // Schmaler Spalt zeigt das weiche Innere zwischen den Klappen.
+    P("an-gap", `M${hx2.toFixed(1)},${(hy2-R*0.05).toFixed(1)}Q${(cx+R*0.3).toFixed(1)},${(cy-R*0.04).toFixed(1)} ${(cx+R*0.75).toFixed(1)},${cy.toFixed(1)}`,
+      { stroke: flatCol(dark), "stroke-opacity": .55, "stroke-width": 1.5, fill:"none" });
+    return;
+  }
   if(kind==="🐌"){   // Schnecke: Schleimfuss + Spiralhaus + Fuehler
     const L=R*2.2, foot=flatCol(mix(body,[150,175,155],0.4));
     P("an-foot", `M${(cx-L*0.5).toFixed(1)},${(cy+R*0.5).toFixed(1)}Q${(cx-L*0.55).toFixed(1)},${(cy+R*0.1).toFixed(1)} ${(cx-L*0.3).toFixed(1)},${(cy+R*0.1).toFixed(1)}`
