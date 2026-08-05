@@ -2044,9 +2044,16 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
             `halfEllipse` für den Schirm, radiale Markierung, sechs dünne wallende
             Tentakel (bewusst dünn/ohne Saugnäpfe, anders als der Kraken-Arm).
       - [ ] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
-      - [ ] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — kleinere/generischere Baupläne, ggf. genügt eine
-            angepasste Parametrisierung der Vierbeiner-Funktion statt eines eigenen Zeichners
-            (Fall-für-Fall-Entscheidung beim Umsetzen).
+      - [x] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — **alle erledigt (2026-08-05)**. Fall-für-Fall wie
+            geplant entschieden: eigener Zeichner nur, wo der Bauplan strukturell abweicht
+            (🦐🧂⚓ EIN gemeinsamer Krebstier-Zeichner; 🪲 Elytren+Mittelnaht; 🥟 8 Stummel-
+            beine; 🦤 langer Hals + Standbeine), sonst Erben eines vorhandenen Bauplans
+            (🌙 vom Schmetterling, 👁️ vom Gecko/`reptile`, 🕳️ vom Vierbeiner mit
+            Grabschaufeln + Miniaugen).
+            **Systemischer Fund dabei:** der Fell-Borstenkranz lief rein über `insul` und
+            traf damit auch Gecko/Schildkröte/Chamäleon — Reptilien mit Fell. Für alle
+            `sprawl`-Kinds unterdrückt; ein Fix, drei Archetypen.
+            **Phase 1b damit abgeschlossen: 14/14.**
       **Modell:** Opus — neue Bauplan-Geometrien, großer Ermessensspielraum bei Form/Proportion.
 
       **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame
