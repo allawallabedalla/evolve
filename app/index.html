@@ -6467,7 +6467,10 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     if(armor>0.5) cAttr(shellEl, { d: arcPath(cx+s*0.95, cy, s*0.85, s*0.85, 0, -1.2, 1.2, false),
       stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1, fill:"none", opacity: 1 });
     else cAttr(shellEl, { opacity: 0 });
-    P("an-eye", dot(cx-s*1.05, cy-s*0.2, s*0.12), { fill: GLINT, "fill-opacity": .9 });
+    // Nur ein Glanzpunkt statt echtem dunklem Facettenauge (gleicher Fund wie bei der
+    // Fledermaus) — dunkle Pupille ergaenzt, Glanzpunkt bleibt als kleiner Hoehepunkt.
+    P("an-eye", dot(cx-s*1.05, cy-s*0.2, s*0.12), { fill: EYE });
+    P("an-glint", dot(cx-s*1.09, cy-s*0.24, s*0.045), { fill: GLINT, "fill-opacity": .9 });
     return;
   }
   if(kind==="🦀"){   // Krebstier: breiter Panzer + Scheren
@@ -6488,7 +6491,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(const sd of [-1,1]){ stalk += `M${(cx+sd*R*0.2).toFixed(1)},${(cy-H*0.7).toFixed(1)}L${(cx+sd*R*0.25).toFixed(1)},${(cy-H*1.05).toFixed(1)}`;
       ey += dot(cx+sd*R*0.25, cy-H*1.12, R*0.1); }
     P("an-stalk", stalk, { stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
-    P("an-eye", ey, { fill: GLINT, "fill-opacity": .9 });
+    // Nur ein Glanzpunkt statt echtem dunklem Auge (gleicher Fund wie bei Ameise/
+    // Fledermaus) — dunkle Pupille an den Stielaugen ergaenzt.
+    let cgl = "";
+    for(const sd of [-1,1]) cgl += dot(cx+sd*R*0.25-R*0.03, cy-H*1.15, R*0.037);
+    P("an-eye", ey, { fill: EYE });
+    P("an-glint", cgl, { fill: GLINT, "fill-opacity": .9 });
     return;
   }
   if(kind==="🦋"){   // Fluginsekt: schlanker Koerper + 4 flatternde Fluegel
