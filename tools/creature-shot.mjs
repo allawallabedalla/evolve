@@ -45,6 +45,11 @@ const pwDir = "/opt/pw-browsers";
 const chromeDir = readdirSync(pwDir).find(d => /^chromium-\d+$/.test(d));
 if (!chromeDir) { console.error("Kein Chromium unter /opt/pw-browsers gefunden."); process.exit(1); }
 const EXEC = join(pwDir, chromeDir, "chrome-linux", "chrome");
+// Reich (k) je Emoji aus archetypes.js lesen — drawCreature dispatcht darauf. Vorher war
+// k hart auf "Tier" gesetzt, wodurch Pflanzen/Pilze vom falschen Zeichner gerendert wurden.
+const _archSrc = readFileSync(join(ROOT, "app", "archetypes.js"), "utf-8");
+const kindOf = Object.fromEntries([..._archSrc.matchAll(/k:"([^"]+)",\s*n:"[^"]*",\s*e:"([^"]+)"/g)].map(m => [m[2], m[1]]));
+
 const { chromium } = await import("playwright-core");
 
 const server = spawn("python3", ["-m", "http.server", String(PORT), "--directory", join(ROOT, "app")], { stdio: "ignore" });
@@ -59,7 +64,7 @@ await page.waitForTimeout(1000);
 await page.evaluate(() => { running = false; });
 await page.waitForTimeout(200);
 
-const info = await page.evaluate(({ emoji, overrides, geneNames }) => {
+const info = await page.evaluate(({ emoji, overrides, geneNames, kindOf }) => {
   const g = new Array(NG).fill(0.5);
   g[geneNames.indexOf("biolum")] = 0; // Fallstrick 3: Default 0.5 ueberschreitet den Glow-Schwellenwert.
   for (const [name, val] of Object.entries(overrides)) {
@@ -69,11 +74,11 @@ const info = await page.evaluate(({ emoji, overrides, geneNames }) => {
   }
   genome = g; displayGenome = g.slice();
   const real = classify(g);
-  committedArch = Object.assign({}, real, { e: emoji, k: "Tier" });
+  committedArch = Object.assign({}, real, { e: emoji, k: (kindOf[emoji] || "Tier") });
   candArch = null; candCount = 0;
   drawCreature(displayGenome, 0, committedArch); // Fallstrick 2: time=0 fest.
   return { e: committedArch.e, realKey: real.key, realE: real.e };
-}, { emoji, overrides, geneNames });
+}, { emoji, overrides, geneNames, kindOf });
 
 await page.waitForTimeout(300);
 await (await page.$("#creatureSvg")).screenshot({ path: outPath });

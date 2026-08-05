@@ -5978,6 +5978,8 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
   const kind = a.e;
   const pr = mulberry32((lineageSeed^0x27d4eb2f)>>>0);
   const capTone = [[210,180,150],[200,120,90],[180,170,120],[150,110,150],[190,90,90]][Math.floor(pr()*5)];
+  const P = (k,d,o) => cAttr(cEl(k,"path"), Object.assign({ d }, o));
+  const dot = (x,y,r) => `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
   // Myzel-Faeden am Boden (gemeinsam) — 10 Kurven in EINEM Pfad statt 10 Canvas-Zuegen
   const myc = () => {
     let d = "";
@@ -5986,7 +5988,9 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
     cAttr(cEl("fun-myc","path"), { d, stroke: flatCol([210,200,180]), "stroke-opacity": .28, "stroke-width": 1, fill: "none" });
   };
 
-  if(kind==="🍄"){   // Hutpilz: Stiel + Kappe + Lamellen
+  // Habitus-Erben: der Hallimasch (💡) ist ein buescheliger Hutpilz — gleicher Bauplan,
+  // sein Leuchten liefert bereits der generische Biolumineszenz-Halo.
+  if(kind==="🍄"||kind==="💡"){   // Hutpilz: Stiel + Kappe + Lamellen
     const caps = 1+Math.round(size*2);
     for(let c=0;c<caps;c++){
       const off=(c-(caps-1)/2)*22*(0.6+rnd()*0.5);
@@ -6029,6 +6033,41 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
     }
     cAttr(cEl("fun-thr","path"), { d: threads, stroke: flatCol([200,205,190]), "stroke-opacity": .5, "stroke-width": 1, fill: "none" });
     cAttr(cEl("fun-head","path"), { d: heads, fill: flatCol(headCol) });
+    return;
+  }
+  if(kind==="🫧"){   // Hefe: einzellig, Sprossung — gar kein Fruchtkoerper
+    // Raster-Achse 1: eine Hefe hat KEINEN Habitus im Sinne von Stiel/Hut. Sie ist eine
+    // Kolonie sprossender Einzelzellen. Alles Aufrechte waere falsch (vorher: Moos-Klecks).
+    let cells="", buds="", scars="";
+    for(let i=0;i<14;i++){
+      const cxp=bx+(rnd()-0.5)*95, cyp=by-4-rnd()*26, rr=6+rnd()*7;
+      cells += dot(cxp, cyp, rr);
+      // Sprossung: kleinere Tochterzelle am Rand — das definierende Hefe-Merkmal.
+      if(rnd()>0.35){ const ang=rnd()*Math.PI*2;
+        buds += dot(cxp+Math.cos(ang)*rr*1.05, cyp+Math.sin(ang)*rr*1.05, rr*0.5); }
+      scars += dot(cxp-rr*0.35, cyp-rr*0.3, 1.3);   // Knospungsnarbe
+    }
+    P("fun-cell", cells, { fill: flatCol(mix(capTone,[225,210,175],0.55)) });
+    P("fun-bud", buds, { fill: flatCol(mix(capTone,[235,222,190],0.6)) });
+    P("fun-scar", scars, { fill: flatCol([120,100,80]), "fill-opacity": .5 });
+    return;
+  }
+  if(kind==="🍂"){   // Myzel: reines Fadengeflecht im Substrat, kein Fruchtkoerper
+    // Raster-Achse 5 (Substrat-Anbindung) ist hier die GANZE Gestalt: ein Myzel IST das
+    // Netz. Verzweigt rekursiv (Achse 2), wird nach aussen feiner (Achse 4).
+    let net="", tips="";
+    const grow=(x,y,ang,len,depth)=>{
+      const ex=x+Math.cos(ang)*len, ey=y+Math.sin(ang)*len*0.55;
+      net += `M${x.toFixed(1)},${y.toFixed(1)}Q${(x+Math.cos(ang)*len*0.5).toFixed(1)},${(y+Math.sin(ang)*len*0.4-3).toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`;
+      if(depth<=0){ tips += dot(ex, ey, 1.6); return; }
+      for(const d of [-1,1]) grow(ex, ey, ang+d*(0.35+rnd()*0.3), len*(0.62+rnd()*0.12), depth-1);
+    };
+    // Radial nach BEIDEN Seiten auffaechern — ein Myzel waechst rundum ins Substrat,
+    // nicht einseitig (erster Wurf schickte alle Straenge nach links, eigener Fund).
+    for(let i=0;i<7;i++){ const a0 = Math.PI + (i/6-0.5)*Math.PI*1.6 + (rnd()-0.5)*0.25;
+      grow(bx+(i-3)*7, by, a0, 26+size*22, 2); }
+    P("fun-net", net, { stroke: flatCol([215,205,185]), "stroke-opacity": .55, "stroke-width": 1.1, fill:"none" });
+    P("fun-tips", tips, { fill: flatCol([230,222,200]), "fill-opacity": .6 });
     return;
   }
   if(kind==="🍥"){   // Flechte: krustige Lappen, halb Alge
@@ -6104,6 +6143,25 @@ function drawSessileSvg(g, bx, by, breath, time, rnd, a){
 }
 
 // ===== Reich PFLANZEN (SVG) =====
+// ┌─ PRUEFRASTER PFLANZEN & PILZE (write-time, Gegenstueck zur Tier-Checkliste oben) ────┐
+// │ Das Tier-Raster (Gesicht, Gliedmassen, Tiefenstaffelung) traegt hier NICHT — Pflanzen │
+// │ haben keine Landmarken dieser Art. Erkennbarkeit haengt an sechs anderen Achsen:      │
+// │  1. WUCHSFORM (Habitus): Baum / Strauch / Rosette / Polster / Matte / Einzelhalm /    │
+// │     Kletterer. Die primaere Erkennungsachse — das Pendant zum "Bauplan" beim Tier.    │
+// │     Zwei Archetypen mit gleichem Habitus MUESSEN sich sonst woran unterscheiden.      │
+// │  2. VERZWEIGUNGSORDNUNG: echte Gehoelze verzweigen mehrstufig (Stamm→Ast→Zweig).      │
+// │     Nur Stamm + Blattklecks liest als Lolli, nicht als Baum.                          │
+// │  3. BLATTSTELLUNG folgt einer REGEL (wechsel-/gegenstaendig, quirlig, Rosette) —      │
+// │     willkuerliche Winkel lesen sofort falsch. Pendant zur Beinzahl/-stellung.         │
+// │  4. GROESSENGRADIENT: Zweige duenner nach aussen, Blaetter kleiner nach oben.         │
+// │  5. SUBSTRAT-ANBINDUNG: wie trifft es den Boden/Wirt? (Wurzelanlauf, Myzelfaecher,    │
+// │     Krustenrand, Konsolen-Griff am Totholz). Pendant zum "Schultergelenk gehoert zur  │
+// │     Silhouette" — nie frei schwebend absetzen.                                        │
+// │  6. FRUKTIFIKATION am richtigen Ort (endstaendig vs. blattachselstaendig; Lamellen    │
+// │     unter dem Hut; Sporentraeger auf den Faeden).                                      │
+// │  Es gelten zusaetzlich die Stil-Regeln der Tier-Checkliste (keine Verlaeufe/Filter;   │
+// │  EIN Koerperteil = EIN Pfad; Foto-Abgleich ist Pflicht).                              │
+// └──────────────────────────────────────────────────────────────────────────────────────┘
 function drawPlantSvg(g, bx, by, breath, time, rnd, a){
   const [insul,size,limb,metab,armor,photo,mob,struct]=g;
   const kind = a.e;
@@ -6114,6 +6172,7 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
   const leafCol = [leafBase[0]+hue*22, leafBase[1]+hue*46, leafBase[2]+hue*18];
   const leafVar = () => leafCol.map(c=>c*(0.82+rnd()*0.32));
   const dot = (x,y,r) => `M${(x-r).toFixed(1)},${y.toFixed(1)}a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(r*2).toFixed(1)},0a${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(-r*2).toFixed(1)},0`;
+  const P = (k,d,o) => cAttr(cEl(k,"path"), Object.assign({ d }, o));
   // Wurzeln (gemeinsam) — 4 Kurven in EINEM Pfad
   const roots = () => {
     let d = "";
@@ -6122,7 +6181,10 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
     cAttr(cEl("pl-root","path"), { d, stroke: flatCol([120,90,60]), "stroke-opacity": .5, "stroke-width": 2, fill: "none" });
   };
 
-  if(kind==="🌳"){   // Baum: Stamm + runde Krone aus Blattblobs
+  // Habitus-Erben (Prueferaster Achse 1): Archetypen mit demselben Wuchsform-Typ nutzen
+  // denselben Zweig, statt auf den Farn-Fallback zu fallen. Erle = Laubbaum, Mammutbaum
+  // und Krummholz = Nadelgehoelze (nur Groesse/Wuchsrichtung unterscheiden sich).
+  if(kind==="🌳"||kind==="🍃"){   // Baum: Stamm + runde Krone aus Blattblobs
     const h=(80+size*150+struct*60)*breath, w=6+struct*16;
     const topX=bx+Math.sin(sway)*h*0.25, topY=by-h;
     cAttr(cEl("pl-trunk","path"), {
@@ -6197,21 +6259,24 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
     roots(); return;
   }
 
-  if(kind==="🌲"){   // Nadelbaum: Stamm + gestaffelte Nadel-Dreiecke
-    const h=(90+size*150)*breath, w=6+struct*12;
-    cAttr(cEl("pl-ntr","path"), { d:`M${bx.toFixed(1)},${by.toFixed(1)}L${(bx+Math.sin(sway)*10).toFixed(1)},${(by-h).toFixed(1)}`,
+  if(kind==="🌲"||kind==="🗼"||kind==="🎋"){   // Nadelgehoelze: Stamm + gestaffelte Nadel-Dreiecke
+    const giant = kind==="🗼";     // Mammutbaum: deutlich hoeher, schlankere Krone
+    const krumm = kind==="🎋";     // Krummholz: windgebeugt, gedrungen
+    const h=(90+size*150)*breath*(giant?1.5:krumm?0.55:1), w=(6+struct*12)*(giant?1.7:1);
+    const lean=krumm?0.95:0;   // Windschiefe: Krone kippt sichtbar zur Seite
+    cAttr(cEl("pl-ntr","path"), { d:`M${bx.toFixed(1)},${by.toFixed(1)}Q${(bx+lean*h*0.25).toFixed(1)},${(by-h*0.55).toFixed(1)} ${(bx+Math.sin(sway)*10+lean*h*0.6).toFixed(1)},${(by-h).toFixed(1)}`,
       stroke: flatCol(mix([84,60,42],[110,84,54],photo)), "stroke-width": w.toFixed(1), "stroke-linecap": "round", fill: "none" });
-    const tiers=4+Math.round(size*3);
+    const tiers=(giant?6:4)+Math.round(size*3);
     const needleCol=mix([40,95,70],[80,150,100],photo);
     for(let i=0;i<tiers;i++){ const t=i/(tiers-1);
-      const ty=by-h*0.18-t*h*0.72, tw=(46+size*40)*(1-t*0.72), th=h*0.26;
+      const ty=by-h*0.18-t*h*0.72, tw=(46+size*40)*(1-t*0.72)*(giant?0.8:krumm?1.15:1), th=h*0.26;
       cAttr(cEl("pl-tier"+i,"polygon"), {
-        points:`${(bx-tw/2+Math.sin(sway)*8*t).toFixed(1)},${ty.toFixed(1)} ${(bx+tw/2+Math.sin(sway)*8*t).toFixed(1)},${ty.toFixed(1)} ${(bx+Math.sin(sway)*10*t).toFixed(1)},${(ty-th).toFixed(1)}`,
+        points:`${(bx-tw/2+(Math.sin(sway)*8+lean*h*0.5)*t).toFixed(1)},${ty.toFixed(1)} ${(bx+tw/2+(Math.sin(sway)*8+lean*h*0.5)*t).toFixed(1)},${ty.toFixed(1)} ${(bx+(Math.sin(sway)*10+lean*h*0.62)*t).toFixed(1)},${(ty-th).toFixed(1)}`,
         fill: flatCol([needleCol[0]*(0.85+t*0.25),needleCol[1]*(0.85+t*0.25),needleCol[2]*(0.85+t*0.25)]) }); }
     const snowEl = cEl("pl-snow","path");
     if(insul>0.5){ let s="";
       for(let i=0;i<tiers;i++){ const t=i/(tiers-1), ty=by-h*0.18-t*h*0.72-h*0.24;
-        s += dot(bx+Math.sin(sway)*10*t, ty, 3); }
+        s += dot(bx+(Math.sin(sway)*10+lean*h*0.62)*t, ty, 3); }
       cAttr(snowEl, { d:s, fill: flatCol([230,240,238]), "fill-opacity": .55, opacity: 1 });
     } else cAttr(snowEl, { opacity: 0 });
     roots(); return;
@@ -6235,6 +6300,32 @@ function drawPlantSvg(g, bx, by, breath, time, rnd, a){
     roots(); return;
   }
 
+  if(kind==="🏔️"){   // Polster-Kaeltepflanze: dichtes, flaches Halbkugel-Polster
+    // Eigener Habitus (Raster-Achse 1): ein Polster ist KEIN Moos-Klecks — es ist eine
+    // geschlossene, dichte Halbkugel aus vielen winzigen Rosetten, das ist seine
+    // Kaelteanpassung (minimale Oberflaeche). Vorher fiel es auf den Farn-Fallback.
+    const cw=40+size*55, ch=cw*0.55;
+    P("pl-cushion", halfEllipse(bx, by, cw, ch, "top"), { fill: flatCol(leafCol.map(c=>c*0.85)) });
+    let ros="";
+    for(let i=0;i<26;i++){
+      const u=(rnd()*2-1), v=rnd();
+      const px=bx+u*cw*0.9, py=by-Math.sqrt(Math.max(0,1-u*u))*ch*(0.25+v*0.7);
+      ros += dot(px, py, 2.4+rnd()*2.2);
+    }
+    P("pl-ros", ros, { fill: flatCol(leafVar()) });
+    return;
+  }
+  if(kind==="🍉"){   // Schneealge: duenner Belag auf der Oberflaeche, keine Gestalt
+    // Raster-Achse 1: eine Alge auf Schnee hat gar keinen aufrechten Habitus — sie ist ein
+    // flaechiger Belag. Alles Aufrechte waere hier falsch (vorher: Farn-Fallback).
+    let film="", grains="";
+    for(let i=0;i<5;i++){ const w2=(30+size*50)*(0.5+rnd()*0.8), hh=4+rnd()*5;
+      film += `M${(bx-w2).toFixed(1)},${(by-hh*0.5).toFixed(1)}q${w2.toFixed(1)},${(-hh).toFixed(1)} ${(w2*2).toFixed(1)},0q${(-w2).toFixed(1)},${(hh*1.6).toFixed(1)} ${(-w2*2).toFixed(1)},0Z`; }
+    P("pl-film", film, { fill: flatCol(mix([190,70,80],[225,140,120], photo)), "fill-opacity": .72 });
+    for(let i=0;i<40;i++) grains += dot(bx+(rnd()-0.5)*115, by-2-rnd()*7, 1+rnd()*1.4);
+    P("pl-grain", grains, { fill: flatCol([235,175,165]), "fill-opacity": .8 });
+    return;
+  }
   if(kind==="🟢"||kind==="🌱"){   // Gruenalge / Moos: niedrige Boden-Polster
     const moss = kind==="🌱";
     const blobs = moss ? 16 : 10;

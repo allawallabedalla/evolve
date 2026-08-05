@@ -25,6 +25,11 @@ const PORT = 8000 + Math.floor(Math.random() * 1000);
 const pwDir = "/opt/pw-browsers";
 const chromeDir = readdirSync(pwDir).find(d => /^chromium-\d+$/.test(d));
 const EXEC = join(pwDir, chromeDir, "chrome-linux", "chrome");
+// Reich (k) je Emoji aus archetypes.js lesen — drawCreature dispatcht darauf. Vorher war
+// k hart auf "Tier" gesetzt, wodurch Pflanzen/Pilze vom falschen Zeichner gerendert wurden.
+const _archSrc = readFileSync(join(ROOT, "app", "archetypes.js"), "utf-8");
+const kindOf = Object.fromEntries([..._archSrc.matchAll(/k:"([^"]+)",\s*n:"[^"]*",\s*e:"([^"]+)"/g)].map(m => [m[2], m[1]]));
+
 const { chromium } = await import("playwright-core");
 
 const server = spawn("python3", ["-m", "http.server", String(PORT), "--directory", join(ROOT, "app")], { stdio: "ignore" });
@@ -56,16 +61,16 @@ const geneNames = geneNamesM[1].split(",").map(s => s.trim().replace(/^"|"$/g, "
 const tiles = [];
 for (const emoji of emojis) {
   const hint = geneHint[emoji] || { size: .5 };
-  await page.evaluate(({ emoji, hint, geneNames }) => {
+  await page.evaluate(({ emoji, hint, geneNames, kindOf }) => {
     const g = new Array(NG).fill(0.5);
     g[geneNames.indexOf("biolum")] = 0;
     for (const [k, v] of Object.entries(hint)) { const i = geneNames.indexOf(k); if (i >= 0) g[i] = v; }
     genome = g; displayGenome = g.slice();
     const real = classify(g);
-    committedArch = Object.assign({}, real, { e: emoji, k: "Tier" });
+    committedArch = Object.assign({}, real, { e: emoji, k: (kindOf[emoji] || "Tier") });
     candArch = null; candCount = 0;
     drawCreature(displayGenome, 0, committedArch);
-  }, { emoji, hint, geneNames });
+  }, { emoji, hint, geneNames, kindOf });
   await page.waitForTimeout(120);
   const buf = await (await page.$("#creatureSvg")).screenshot();
   tiles.push({ emoji, data: buf.toString("base64") });
