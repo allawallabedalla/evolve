@@ -6350,10 +6350,29 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   }
   if(kind==="🐸"){   // Amphibie: gedrungen, gespreizte Beine, Augen oben
     const W=R*1.3, H=R*0.9, amb=flatCol(mix(body,[110,170,110],0.55));
-    let legs="";
-    for(const o of [-1,1]) legs += `M${(cx+o*W*0.5).toFixed(1)},${(cy+H*0.15).toFixed(1)}Q${(cx+o*W*1.05).toFixed(1)},${(cy+H*0.25).toFixed(1)} ${(cx+o*W*0.9).toFixed(1)},${(cy+H*0.9).toFixed(1)}L${(cx+o*W*1.2).toFixed(1)},${(cy+H*0.98).toFixed(1)}`;
-    for(const o of [-1,1]) legs += `M${(cx+o*W*0.3).toFixed(1)},${(cy+H*0.5).toFixed(1)}L${(cx+o*W*0.5).toFixed(1)},${(cy+H*1.02).toFixed(1)}`;
-    P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": (R*0.2).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    // Selbstabgleich gegen Referenzfoto (Rana temporaria): das praegendste Merkmal eines
+    // Frosches ist das kraeftige gefaltete Hinterbein (angelegter Oberschenkel, Knick,
+    // lange Zehen) — ein duenner Strich fester Breite (vorher) zeigt weder Kraft noch
+    // Faltung. Jetzt zwei bezierRibbon-Segmente pro Hinterbein (Oberschenkel kurz+dick,
+    // Unterschenkel laenger+verjuengt) mit sichtbarem Knick dazwischen, plus Zehenfaecher.
+    let hindFill="", pawsF="", toesF="", frontFill="";
+    for(const o of [-1,1]){
+      const hipX=cx+o*W*0.4, hipY=cy+H*0.18;
+      const kneeX=cx+o*W*1.02, kneeY=cy+H*0.32;
+      const ankleX=cx+o*W*0.8, ankleY=cy+H*0.92;
+      const footX=cx+o*W*1.18, footY=cy+H*0.98;
+      hindFill += bezierRibbon(hipX,hipY, cx+o*W*0.85,hipY+H*0.12, kneeX,kneeY, R*0.32, R*0.22);
+      hindFill += bezierRibbon(kneeX,kneeY, cx+o*W*1.08,cy+H*0.65, ankleX,ankleY, R*0.19, R*0.09);
+      pawsF += dot(ankleX, ankleY, R*0.06);
+      for(let j=0;j<4;j++){ const tt=j/3;
+        toesF += `M${ankleX.toFixed(1)},${ankleY.toFixed(1)}L${(ankleX+o*R*(0.08+tt*0.1)).toFixed(1)},${(ankleY+R*0.2-tt*R*0.04).toFixed(1)}`; }
+      // Vorderbein: kurz, staemmig, stuetzt den Rumpf ab — auch verjuengtes Band statt Strich.
+      frontFill += bezierRibbon(cx+o*W*0.3,cy+H*0.5, cx+o*W*0.42,cy+H*0.78, cx+o*W*0.52,cy+H*1.0, R*0.16, R*0.07);
+    }
+    P("an-hindlegs", hindFill, { fill: flatStep(dark,1) });
+    P("an-frontlegs", frontFill, { fill: flatStep(dark,1) });
+    P("an-pawsF", pawsF, { fill: flatStep(dark,-1) });
+    P("an-toesF", toesF, { stroke: flatStep(dark,-1), "stroke-width": 2, "stroke-linecap":"round", fill:"none" });
     E("an-body", cx, cy, W, H, amb);
     const blink=(Math.sin(time*0.0011)>0.97)?0.15:1;
     let bulge="", ey="", gl="";
