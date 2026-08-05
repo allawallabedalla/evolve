@@ -6469,6 +6469,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let ant="";
     for(const sd of [-1,1]) ant += `M${(cx-s*1.05).toFixed(1)},${(cy-s*0.3).toFixed(1)}Q${(cx-s*1.5).toFixed(1)},${(cy-s*0.9).toFixed(1)} ${(cx-s*1.25+sd*s*0.3).toFixed(1)},${(cy-s*1.1).toFixed(1)}`;
     P("an-ant", ant, { stroke: flatCol(dark), "stroke-width": 1.5, fill:"none" });
+    // Nachcheck gegen Referenzfoto (Nutzer-Frage "checkst du die gegen die Thumbnails?"):
+    // Mandibeln (Kiefer-Zangen) fehlten komplett — bei Ameisen sehr markant und deutlich
+    // sichtbar am Kopf.
+    let mand="";
+    for(const sd of [-1,1]) mand += `M${(cx-s*1.35).toFixed(1)},${(cy-s*0.05).toFixed(1)}Q${(cx-s*1.55).toFixed(1)},${(cy+sd*s*0.12).toFixed(1)} ${(cx-s*1.42).toFixed(1)},${(cy+sd*s*0.22).toFixed(1)}`;
+    P("an-mand", mand, { stroke: flatCol(dark), "stroke-width": 1.4, "stroke-linecap":"round", fill:"none" });
     const shellEl = cEl("an-shell","path");
     if(armor>0.5) cAttr(shellEl, { d: arcPath(cx+s*0.95, cy, s*0.85, s*0.85, 0, -1.2, 1.2, false),
       stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1, fill:"none", opacity: 1 });
