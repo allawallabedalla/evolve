@@ -5886,7 +5886,9 @@ function arcPath(cx, cy, rx, ry, rot, a0, a1, close){
  * der Kruemmung.
  */
 function bezierRibbon(x0,y0,x1,y1,x2,y2,w0,w1){
-  const n=10, top=[], bot=[];
+  // 22 statt urspruenglich 10 Stuetzpunkte: bei duennen Anhaengen (Gecko-Schwanz) fiel die
+  // Facettierung nicht auf, bei grossen Flaechen (Wal-Rumpf, Phase 1b) schon deutlich.
+  const n=22, top=[], bot=[];
   for(let i=0;i<=n;i++){
     const t=i/n, mt=1-t;
     const x=mt*mt*x0+2*mt*t*x1+t*t*x2, y=mt*mt*y0+2*mt*t*y1+t*t*y2;
@@ -6373,6 +6375,75 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5), sx=cx+t*bellR*1.5, sw=Math.sin(time*0.003+i)*R*0.2;
       tent += `M${sx.toFixed(1)},${(cy+R*0.2).toFixed(1)}Q${(sx+sw).toFixed(1)},${(cy+R*0.8).toFixed(1)} ${(sx+t*R*0.3+sw*1.5).toFixed(1)},${(cy+R*1.5).toFixed(1)}`; }
     P("an-tent", tent, { stroke: bellCol, "stroke-opacity": .7, "stroke-width": 1.5, "stroke-linecap":"round", fill:"none" });
+    return;
+  }
+  if(kind==="🐋"||kind==="🦭"){   // Meeressaeuger: Bartenwal / Robbe (Phase 1b)
+    // Selbstabgleich gegen Referenzfoto (Buckelwal): der Vierbeiner-Fallback machte daraus
+    // eine pelzige Kugel mit vier Beinchen — falsch in JEDEM Punkt. Ein Meeressaeuger ist
+    // stromlinienfoermig, hat KEINE Beine (Brustflosse statt dessen), eine horizontale
+    // Fluke, kein Fell, und der Kopf geht nahtlos in den Rumpf ueber (kein separater Kreis).
+    const whale = kind==="🐋";
+    const L = R*(whale?1.75:1.45), H = R*(whale?0.62:0.55);
+    const skinArr = mix(body,[95,120,140],whale?0.55:0.35), skin = flatCol(skinArr);
+    const headX = cx-L*0.98, stockX = cx+L*0.82;
+    // Rumpf als EINE durchgehende Silhouette (ein geschlossener Pfad, oben herum und unten
+    // zurueck) statt zweier bezierRibbon-Baender: zwei sich beruehrende Formen bekommen je
+    // eine eigene Tinten-Kontur und lesen als Naht quer durch den Koerper — genau der
+    // "Erdnuss"-Fehler, der beim Gecko-Kopf schon einmal auftrat (s. Nachtrag 1).
+    const backY = cy-H*0.92, bellyY = cy+H*0.9;
+    P("an-body", `M${headX.toFixed(1)},${(cy+H*0.18).toFixed(1)}`
+      + `C${(headX+L*0.22).toFixed(1)},${(cy-H*0.75).toFixed(1)} ${(cx-L*0.25).toFixed(1)},${backY.toFixed(1)} ${(cx+L*0.2).toFixed(1)},${(cy-H*0.7).toFixed(1)}`
+      + `C${(cx+L*0.5).toFixed(1)},${(cy-H*0.52).toFixed(1)} ${(stockX-R*0.15).toFixed(1)},${(cy-H*0.3).toFixed(1)} ${stockX.toFixed(1)},${(cy-H*0.12).toFixed(1)}`
+      + `L${stockX.toFixed(1)},${(cy+H*0.14).toFixed(1)}`
+      + `C${(stockX-R*0.15).toFixed(1)},${(cy+H*0.42).toFixed(1)} ${(cx+L*0.4).toFixed(1)},${(cy+H*0.72).toFixed(1)} ${(cx-L*0.05).toFixed(1)},${bellyY.toFixed(1)}`
+      + `C${(cx-L*0.45).toFixed(1)},${(cy+H*0.95).toFixed(1)} ${(headX+L*0.15).toFixed(1)},${(cy+H*0.7).toFixed(1)} ${headX.toFixed(1)},${(cy+H*0.18).toFixed(1)}Z`,
+      { fill: skin });
+    // Schwanzende: Wal hat EINE horizontale Fluke, die Robbe PAARIGE Hinterflossen — beim
+    // ersten Wurf trug die Robbe faelschlich die Wal-Fluke (eigener Nachcheck-Fund).
+    // Beide setzen bewusst INNERHALB des Schwanzstiels an, damit keine Luecke klafft.
+    const flukeEl = cEl("an-fluke","polygon"), hindEl = cEl("an-hind","path");
+    if(whale){
+      cAttr(flukeEl, { points:
+        `${(stockX-R*0.12).toFixed(1)},${cy.toFixed(1)} ${(stockX+R*0.6).toFixed(1)},${(cy-R*0.44).toFixed(1)} `
+        +`${(stockX+R*0.34).toFixed(1)},${cy.toFixed(1)} ${(stockX+R*0.6).toFixed(1)},${(cy+R*0.36).toFixed(1)}`,
+        fill: flatStep(skinArr, -1), opacity: 1,
+        transform:`rotate(${(Math.sin(time*0.003)*5).toFixed(1)},${stockX.toFixed(1)},${cy.toFixed(1)})` });
+      cAttr(hindEl, { opacity: 0 });
+    } else {
+      let hind = "";
+      for(const sd of [-1,1]) hind += bezierRibbon(stockX-R*0.12,cy, stockX+R*0.3,cy+sd*R*0.12,
+        stockX+R*0.62,cy+sd*R*0.4, R*0.2, R*0.13);
+      cAttr(hindEl, { d: hind, fill: flatStep(skinArr,-1), opacity: 1 });
+      cAttr(flukeEl, { opacity: 0 });
+    }
+    // Brustflosse statt Beinen (beim Buckelwal auffaellig lang, bei der Robbe kuerzer).
+    P("an-pect", bezierRibbon(cx-L*0.35,cy+H*0.55, cx-L*0.1,cy+H*1.3, cx+L*0.12,cy+H*(whale?1.75:1.3),
+      R*0.26, R*0.1), { fill: flatStep(skinArr, -1) });
+    const dorsalEl = cEl("an-dorsal","polygon");
+    if(whale){
+      // Rueckenfinne muss AUF der Ruecken-Kurve sitzen — schwebte vorher frei ueber dem
+      // Koerper, weil ihre y-Werte aus der alten (flacheren) Rumpfform stammten. Basis
+      // jetzt bewusst leicht IN den Ruecken hinein (+H*0.06), damit sie anwaechst.
+      const dx0=cx+L*0.24, dx1=cx+L*0.46, dyBase=cy-H*0.58;
+      cAttr(dorsalEl, { points:`${dx0.toFixed(1)},${(dyBase+H*0.06).toFixed(1)} ${((dx0+dx1)/2).toFixed(1)},${(dyBase-H*0.5).toFixed(1)} ${dx1.toFixed(1)},${(dyBase+H*0.1).toFixed(1)}`,
+        fill: skin, opacity: 1 });
+    } else cAttr(dorsalEl, { opacity: 0 });
+    // Kehlfurchen (Furchenwal — namensgebend, im Referenzfoto deutlich) bzw. bei der Robbe
+    // stattdessen Schnurrhaare.
+    let detail = "";
+    if(whale){ for(let i=0;i<5;i++){ const dy=cy+H*0.35+i*H*0.16;
+        detail += `M${(headX+L*0.18).toFixed(1)},${dy.toFixed(1)}Q${(cx-L*0.5).toFixed(1)},${(dy+H*0.12).toFixed(1)} ${(cx-L*0.02).toFixed(1)},${(dy+H*0.05).toFixed(1)}`; } }
+    else { for(let i=0;i<3;i++){ const a2=(i-1)*0.22;
+        detail += `M${(headX+L*0.12).toFixed(1)},${(cy+H*0.2).toFixed(1)}L${(headX-R*0.3).toFixed(1)},${(cy+H*0.2+a2*R*0.7).toFixed(1)}`; } }
+    P("an-detail", detail, { stroke: flatCol(dark), "stroke-opacity": whale?.35:.5, "stroke-width": 1.2, fill:"none" });
+    // Maul: lange Linie vom Schnauzenende zurueck (Wal: sehr lang, Robbe: kurz).
+    P("an-mouth", `M${(headX-R*0.05).toFixed(1)},${(cy+H*0.28).toFixed(1)}Q${(headX+L*(whale?0.35:0.18)).toFixed(1)},${(cy+H*(whale?0.62:0.5)).toFixed(1)} ${(headX+L*(whale?0.72:0.34)).toFixed(1)},${(cy+H*0.42).toFixed(1)}`,
+      { stroke: flatCol(dark), "stroke-width": 1.6, fill:"none" });
+    // Auge klein und tief sitzend (im Referenzfoto unauffaellig, nicht der Riesen-Knopf
+    // des Vierbeiner-Fallbacks).
+    const exW = headX+L*(whale?0.3:0.22), eyW = cy+H*0.08;
+    P("an-eye", dot(exW, eyW, R*(whale?0.06:0.085)), { fill: EYE });
+    P("an-glint", dot(exW-R*0.02, eyW-R*0.025, R*0.025), { fill: GLINT, "fill-opacity": .9 });
     return;
   }
   if(kind==="🐌"){   // Schnecke: Schleimfuss + Spiralhaus + Fuehler
