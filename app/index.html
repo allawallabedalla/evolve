@@ -6908,6 +6908,8 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     "🦎":{bw:1.58,bh:0.56,legL:0.8}, "🐦":{bw:0.82,bh:1.02,legL:1.4},
     // Chamaeleon: seitlich abgeflacht, also hoch statt lang (anders als der flache Gecko).
     "👁️":{bw:1.05,bh:1.0,legL:0.95},
+    // Wuehler: walzenfoermig-gedrungen, sehr kurze Beine (Grabtier).
+    "🕳️":{bw:1.3,bh:0.88,legL:0.42},
     "🦏":{bw:1.34,bh:1.0,legL:0.82}, "🐢":{bw:1.2,bh:0.82,legL:0.52},
   })[kind] || {bw:1.08,bh:0.98,legL:1.0};
   const bw=FORM.bw, bh=FORM.bh;
@@ -7034,6 +7036,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   P("an-legfill-far", legFillFar, { fill: flatStep(dark,0.5), opacity: sprawl?1:0 });
   P("an-paws-far", pawsFar, { fill: flatStep(dark,-1), opacity: sprawl?1:0 });
   P("an-paws", paws, { fill: flatStep(dark,-1) });
+  // Wuehler (Phase 1b): uebergrosse Grabschaufeln an den Vorderbeinen — das Merkmal, an
+  // dem ein Grabtier erkannt wird. Nutzt sonst komplett den Vierbeiner-Bauplan.
+  const spadeEl = cEl("an-spade","path");
+  if(kind==="🕳️"){
+    // Zwei deutlich sichtbare Grabschaufeln vorn unten, nebeneinander versetzt (nah/fern),
+    // klar groesser als eine normale Pfote — sonst lesen sie nur als dunkler Klecks.
+    let sp2="";
+    const fyB = cy+R*bh*0.55+legLen*0.8;
+    for(const sd of [0,1]){
+      const px2 = cx-R*bw*0.72+sd*R*0.34, py2 = fyB+sd*R*0.1, sw2 = R*(sd?0.3:0.34);
+      sp2 += `M${(px2+sw2*0.6).toFixed(1)},${py2.toFixed(1)}`
+        +`Q${(px2-sw2*0.9).toFixed(1)},${(py2+sw2*0.2).toFixed(1)} ${(px2-sw2*0.75).toFixed(1)},${(py2+sw2*1.05).toFixed(1)}`
+        +`Q${(px2+sw2*0.25).toFixed(1)},${(py2+sw2*1.35).toFixed(1)} ${(px2+sw2*0.7).toFixed(1)},${(py2+sw2*0.55).toFixed(1)}Z`;
+      for(const c of [0,1,2]) sp2 += `M${(px2-sw2*0.62+c*sw2*0.42).toFixed(1)},${(py2+sw2*1.0).toFixed(1)}L${(px2-sw2*0.72+c*sw2*0.46).toFixed(1)},${(py2+sw2*1.55).toFixed(1)}`;
+    }
+    cAttr(spadeEl, { d: sp2, fill: flatStep(mix(body,[214,170,160],0.5),1), stroke: flatCol(dark), "stroke-width": 1.2, opacity: 1 });
+  } else cAttr(spadeEl, { opacity: 0 });
   P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
   const furEl = cEl("an-fur","path");
   // Reptilien haben KEIN Fell — der Borsten-Kranz lief bisher rein ueber das insul-Gen und
@@ -7153,8 +7172,11 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // niedlich-cartoonhaft statt wach-reptilienhaft) — nur fuer den Gecko-Kopf, andere Kinds
   // unveraendert. rx bleibt vom Lidschlag unberuehrt (nur ry schrumpft), wie bei der Pupille.
   const ex = reptile ? hx-R*0.03 : hx-R*0.15, ey = reptile ? hy-R*0.08 : hy-R*0.05;
-  const irisRx = reptile ? R*0.105 : R*0.155, irisRy = reptile ? R*0.125 : R*0.185;
-  const eyeRx  = reptile ? R*0.075 : R*0.11,  eyeRy  = reptile ? R*0.09  : R*0.13;
+  // Wuehler leben unterirdisch und sind fast blind — Auge stark verkleinert (waere sonst
+  // derselbe grosse Knopf wie bei oberirdischen Saeugern).
+  const tinyEye = kind==="🕳️" ? 0.32 : 1;
+  const irisRx = (reptile ? R*0.105 : R*0.155)*tinyEye, irisRy = (reptile ? R*0.125 : R*0.185)*tinyEye;
+  const eyeRx  = (reptile ? R*0.075 : R*0.11)*tinyEye,  eyeRy  = (reptile ? R*0.09  : R*0.13)*tinyEye;
   // Iris-Ring vor der Pupille — ein zusaetzlicher flatStep()-Layer, kein Verlauf, gibt
   // dem Auge mehr Tiefe als die bisherige Zwei-Ton-Kombination (nur Pupille + Glanzpunkt).
   E("an-iris", ex, ey, irisRx, irisRy*blink, flatStep(dark,1));
