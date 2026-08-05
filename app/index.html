@@ -6545,13 +6545,16 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   const legLen = (12 + limb*40)*FORM.legL;
   // Pro Bein zusaetzlich Pfote + 2-3 einzeln sichtbare Zehen am Fusspunkt — die
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
-  let lp="", legFill="", paws="", toes="", shoulders="";
+  let lp="", legFill="", paws="", toes="";
+  let legFillFar="", pawsFar="";       // Nutzer-Fund: 3 Tiefenebenen (fernes Bein -> Koerper
+  let legFillNear="", pawsNear="", toesNear=""; // -> nahes Bein), nicht 2 Objekte "wer deckt wen".
   const nToes = kind==="🐦" ? 0 : 3;
   // Nutzer-Referenzbild (Gecko-Linienzeichnung) genau angeschaut: die Beine sitzen
   // GEKLUMPERT — ein Paar nah am Schulterbereich (kurz hinterm Kopf), ein Paar nah an der
   // Hueftbereich (kurz vorm Schwanzansatz), mit deutlicher Luecke dazwischen (Rippenbereich,
   // keine Beine). Die vorige Gleichverteilung (t=0,0.33,0.67,1) sah dagegen wie ein
-  // Vielbeiner aus. Feste 4 t-Werte statt Formel.
+  // Vielbeiner aus. Feste 4 t-Werte statt Formel. Je Paar: erster Wert = FERNES Bein
+  // (hinter dem Koerper gezeichnet), zweiter Wert = NAHES Bein (vor dem Koerper).
   const reptileT = [0.14, 0.30, 0.70, 0.86];
   for(let i=0;i<legs;i++){
     const t = reptile ? reptileT[i] : (legs===1?0.5:i/(legs-1));
@@ -6560,46 +6563,47 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let bx = lx, by = cy+R*bh*0.5;
     let fx, fy, elx, ely;
     if(reptile){
-      // KORREKTUR (Nutzer: "das Schultergelenk muss am unteren Teil der Seitenansicht der
-      // Koerpersilhouette sein, nicht einfach an der Unterseite drangesteckt"): das Problem
-      // war nicht die HOEHE des Ansatzpunkts, sondern dass das Bein ein von der
-      // Rumpf-Ellipse komplett GETRENNTES Objekt war, das nur zufaellig per Z-Reihenfolge
-      // verdeckt wurde — kein Teil der Silhouette selbst. Fix: ein kleiner Schulter/Huefte-
-      // Wulst (Kreis in Koerperfarbe) sitzt AUF der echten Ellipsen-Kontur, wird von der
-      // Rumpf-Ellipse zur Haelfte ueberdeckt (wie die Bauch/Ruecken-Schichtung) und ragt nur
-      // mit seiner unteren Haelfte heraus — DAS liest als "Teil der Koerperkontur", nicht
-      // als angeklebtes Fremdteil. Das Bein setzt an der Unterkante DIESES Wulstes an.
+      // KORREKTUR (Nutzer: "dein Denkfehler ist, dass dein Koerper vor dem Bein liegt —
+      // das missachtet die 3-Dimensionalitaet. Vorderes Bein, Koerper, hinteres Bein sind
+      // 3 Ebenen"): bisher war JEDES Bein hinter der Rumpf-Ellipse (nur ein Wulst zeigte
+      // etwas davon). Jetzt echte Tiefenstaffelung — s. u. bei der Ausgabe: das FERNE Bein
+      // (i gerade) bleibt hinter dem Koerper, das NAHE Bein (i ungerade) wird NACH der
+      // Rumpf-Ellipse gezeichnet, liegt also sichtbar VOR dem Koerper und braucht keinen
+      // Wulst-Trick mehr — sein eigener Umriss ueberlappt den Koerperrand direkt.
+      const isNear = (i%2)===1;
       const dx = lx-cx;
       const edgeY = cy + R*bh*Math.sqrt(Math.max(0.08, 1-(dx/(R*bw))**2));
-      const bumpR = R*0.24;
-      shoulders += dot(lx, edgeY, bumpR);
-      by = edgeY + bumpR*0.75;
-      elx = lx + R*0.1 + swing*0.3; ely = by + legLen*0.45;
-      fx = lx + swing*0.5; fy = by + legLen*0.95;
-    } else {
-      elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
-      fx = lx+swing; fy = cy+R*bh*0.5+legLen;
+      if(isNear){
+        by = edgeY - R*bh*0.2; // startet sichtbar IM Rumpf — liegt ja vor ihm, kein Verstecken noetig
+        elx = lx + R*0.12 + swing*0.3; ely = by + legLen*0.5;
+        fx = lx + swing*0.5; fy = by + legLen*1.05;
+        legFillNear += bezierRibbon(lx,by, elx,ely, fx,fy, R*0.36, R*0.16);
+        pawsNear += dot(fx, fy, R*0.09+size*0.03);
+        const nT=4, toeLen=R*0.2, toeSpread=R*0.16;
+        for(let j=0;j<nT;j++){ const tt=(j/(nT-1)-0.5)*2;
+          toesNear += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*toeSpread).toFixed(1)},${(fy+toeLen-Math.abs(tt)*R*0.03).toFixed(1)}`; }
+      } else {
+        by = edgeY - R*bh*0.1; // knapp hinter der Kontur — nur ein kurzes Stueck ragt unten raus
+        elx = lx + swing*0.2; ely = by + legLen*0.3;
+        fx = lx + swing*0.3; fy = by + legLen*0.65;
+        legFillFar += bezierRibbon(lx,by, elx,ely, fx,fy, R*0.26, R*0.12);
+        pawsFar += dot(fx, fy, R*0.07);
+      }
+      continue;
     }
-    if(reptile){
-      // Nutzer-Fund: "Echsen haben dicke Beine" — am Rumpf-Ansatz kraeftig, zum Fuss hin
-      // verjuengt (dieselbe bezierRibbon()-Technik wie beim Schwanz), statt ein duenner
-      // Strich fester Breite.
-      legFill += bezierRibbon(bx,by, elx,ely, fx,fy, R*0.34, R*0.15);
-    } else {
-      lp += `M${bx.toFixed(1)},${by.toFixed(1)}Q${elx.toFixed(1)},${ely.toFixed(1)} ${fx.toFixed(1)},${fy.toFixed(1)}`;
-    }
+    elx = lx+swing*0.4; ely = cy+R*bh*0.5+legLen*0.6;
+    fx = lx+swing; fy = cy+R*bh*0.5+legLen;
+    lp += `M${bx.toFixed(1)},${by.toFixed(1)}Q${elx.toFixed(1)},${ely.toFixed(1)} ${fx.toFixed(1)},${fy.toFixed(1)}`;
     paws += dot(fx, fy, R*0.085+size*0.03);
-    // Zehen-Faecher fuer Echsen groesser/deutlicher (Selbstabgleich gegen Referenzbild:
-    // vorher kaum als Finger lesbar, nur ein kleiner Klecks).
-    const nT = reptile ? 4 : nToes, toeLen = reptile ? R*0.2 : R*0.1, toeSpread = reptile ? R*0.16 : R*0.1;
-    for(let j=0;j<nT;j++){ const tt=(j/(nT-1||1)-0.5)*2;
-      toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*toeSpread).toFixed(1)},${(fy+toeLen-Math.abs(tt)*R*0.03).toFixed(1)}`; }
+    for(let j=0;j<nToes;j++){ const tt=(j/(nToes-1||1)-0.5)*2;
+      toes += `M${fx.toFixed(1)},${fy.toFixed(1)}L${(fx+tt*R*0.1).toFixed(1)},${(fy+R*0.15-Math.abs(tt)*R*0.02).toFixed(1)}`; }
   }
   P("an-legs", lp, { stroke: flatCol(dark), "stroke-width": (3+size*4).toFixed(1), "stroke-linecap":"round", fill:"none", opacity: reptile?0:1 });
-  P("an-shoulders", shoulders, { fill: flatCol(body), opacity: reptile?1:0 });
-  P("an-legfill", legFill, { fill: flatStep(dark,1), opacity: reptile?1:0 });
+  // Fernes Bein: VOR dem Koerper gezeichnet (dieser Aufruf), landet also dahinter.
+  P("an-legfill-far", legFillFar, { fill: flatStep(dark,0.5), opacity: reptile?1:0 });
+  P("an-paws-far", pawsFar, { fill: flatStep(dark,-1), opacity: reptile?1:0 });
   P("an-paws", paws, { fill: flatStep(dark,-1) });
-  P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": reptile?2.2:1.6, "stroke-linecap":"round", fill:"none" });
+  P("an-toes", toes, { stroke: flatStep(dark,-1), "stroke-width": 1.6, "stroke-linecap":"round", fill:"none" });
   const furEl = cEl("an-fur","path");
   if(insul>0.4){ let f="";
     const n=Math.round(30+insul*50);
@@ -6613,6 +6617,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   // flache Ellipsen mit flatStep() statt eines Gradient-Fills.
   E("an-belly", cx, cy+R*bh*0.38, R*bw*0.6, R*bh*0.3, flatStep(body,1));
   E("an-back", cx, cy-R*bh*0.55, R*bw*0.8, R*bh*0.24, flatStep(body,-1));
+  // Nahes Bein: ERST JETZT gezeichnet, NACH der Rumpf-Ellipse — liegt damit sichtbar VOR
+  // dem Koerper (dritte Tiefenebene, s. Nutzer-Erklaerung oben bei der Berechnung). Der
+  // eigene Umriss ueberlappt die Koerperkante direkt, kein Wulst-Hilfstrick noetig.
+  P("an-legfill-near", legFillNear, { fill: flatStep(dark,1), opacity: reptile?1:0 });
+  P("an-paws-near", pawsNear, { fill: flatStep(dark,-1), opacity: reptile?1:0 });
+  P("an-toes-near", toesNear, { stroke: flatStep(dark,-1), "stroke-width": 2.2, "stroke-linecap":"round", fill:"none", opacity: reptile?1:0 });
   // HINWEIS: der Canvas-Zweig hat hier noch Vogel-Fluegel/Schwanzfedern und einen
   // "🐦"-Eintrag in FORM — das ist im Original TOTER CODE, weil der Vogel weiter oben
   // per return abgehandelt wird und diese Stelle nie erreicht. Bewusst nicht mitportiert
