@@ -2084,6 +2084,50 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       - Alle Einzel-Commits: `design-audit`/`app-parity` (+ `exemplar-check` wo einschlägig)
         grün, jeweils per `creature-shot.mjs` gegengeprüft.
 
+      **Nachtrag 6 — Pflanzen/Pilze-Runde (2026-08-05) + zweiter Verstoß gegen die
+      harte Regel:** die neuen Bauplan-Zeichner für 🏔️ Polster-Kältepflanze, 🍉
+      Schneealge, 🫧 Hefe, 🍂 Myzel (plus das eigene Prüfraster: Wuchsform/Habitus,
+      Verzweigungsordnung, Blattstellung, Größengradient, Substrat-Anbindung,
+      Fruktifikationsort) wurden komplett aus botanischem/mykologischem Allgemeinwissen
+      und dem Kontaktbogen gebaut — **ohne einen einzigen Foto-Abgleich**. Vom Nutzer
+      direkt erkannt ("hast du dich selbst auditiert mit den wikidata thumbnails? das
+      war ja bedingung") — derselbe Fehler wie beim GLINT-Audit (Nachtrag 4/harte
+      Regel), zweites Mal. Retroaktiver Foto-Abgleich gegen Wikipedia-Referenzbilder
+      ergab bei allen vier neu gebauten Formen echte, konkrete Abweichungen:
+      - **🏔️ Polsterpflanze** (Ref.: Silene acaulis/Moos-Silberwurz): das
+        Kernmerkmal, an dem echte Polsterpflanzen auf Fotos erkennbar sind — die dichte
+        Blütendecke —, fehlte komplett; nur grüne Rosetten-Punkte. Ergänzt: 18
+        rosa Blüten-Punkte über dem Polster, gleiches Saison-Gate wie beim Kaktus
+        (`envLive.water>0.6 && envLive.light>0.7`).
+      - **🍉 Schneealge** (Ref.: "watermelon snow"): der Fleck bestand aus 5
+        übereinandergelegten Blobs um denselben Mittelpunkt — erzeugte mehrere
+        Kontur-Ringe statt eines glatten Belags (verwandter Fall zum Erdnuss-Fehler,
+        nur mit 5 statt 2 Teilflächen), Farbe zu braun/matt statt kräftig pink-rot.
+        Ersetzt durch EINEN durchgehenden Fleck (ein Pfad, leicht unregelmäßiger
+        Rand über Bezier-Wobble) mit kräftigerer Farbe.
+      - **🫧 Hefe** (Ref.: SEM-Aufnahme *Saccharomyces cerevisiae*): Zellen waren
+        Kreise (`dot()`), echte Hefezellen sind eiförmig/ovoid — mit Kreisen sah es
+        wie Seifenblasen statt Zellen aus. Eigener `oval()`-Helfer ergänzt (Kreisbogen
+        mit unterschiedlichem rx/ry statt gleichem r), Haupt- und Tochterzellen jetzt
+        oval.
+      - **🍂 Myzel** (Ref.: Foto eines Pilzgeflechts im Substrat): der radiale Fächer
+        deckte fast den Vollkreis ab (`Math.PI ± 0.8·π`) und ragte damit mit den
+        oberen Strängen über die Bodenlinie hinaus in den Himmel-Hintergrund — ein
+        substratgebundener Organismus wächst nicht frei nach oben. Winkelbereich auf
+        die untere Halbebene begrenzt (`Math.PI/2 ± 0.46·π`), Strangzahl 7→9 für mehr
+        Dichte.
+      - Geerbte Habitus-Fälle (🍃 vom Baum, 🗼/🎋 vom Nadelbaum, 💡 vom Hutpilz) NICHT
+        erneut geprüft — die sind über den bereits fotogeprüften Grundzeichner
+        abgesichert, nur die vier komplett neuen Baupläne waren ungeprüft.
+      - Alle vier Fixes committed mit `app-parity`/`design-audit`/`exemplar-check`/
+        `key-check` grün, jeweils per `creature-shot.mjs` gegen das frisch geladene
+        Referenzfoto verifiziert (nicht nur "sieht jetzt plausibler aus").
+      - **Konsequenz für den Prozess:** die harte Regel (Foto-Pflicht) wird jetzt nicht
+        nur pro Archetyp, sondern pro **Runde/Cluster** geprüft — bevor eine ganze
+        Gruppe (hier: alle Pflanzen/Pilze in einem Rutsch) committet wird, muss für
+        JEDE neu gebaute Form mindestens ein Referenzfoto tatsächlich geladen worden
+        sein, nicht nur für die zuerst bearbeitete.
+
 - [ ] **Phase 2 — CPPN-Musterschicht (Kernstück der Empfehlung).** Ergänzt die bestehende
       `mix()`-Farblogik um ein Pigment-/Musterfeld (Streifen, Flecken, Verlauf) als Funktion
       körperlokaler Koordinaten. Löst das Kontinuitäts-Problem strukturell: kleine
