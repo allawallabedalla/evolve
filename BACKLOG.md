@@ -2128,6 +2128,53 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         JEDE neu gebaute Form mindestens ein Referenzfoto tatsächlich geladen worden
         sein, nicht nur für die zuerst bearbeitete.
 
+      **Landgang-Befund — gebaut, gemessen, wieder abgeschaltet (2026-08-05, Opus).**
+      Ausgelöst durch Issue #31 (marine Art trotz Landeinstellung) und den Nutzer-Auftrag
+      „prüfe mal wieder von Anfang: wie entsteht Leben an Land, an Wasser — was fehlt
+      unserem Spiel". Ergebnis: **die Physik ist nicht der blockierende Punkt, der
+      Artenkatalog ist es.** Der Reihe nach, weil unterwegs zwei eigene Diagnosen kippten:
+
+      1. **Erster (richtiger) Befund:** `aridity` ist ein reiner EREIGNIS-Stressor. Ein
+         Land-*Habitat* hatte damit gar keinen Austrocknungsdruck — gemessen war
+         Landtauglichkeit in einer Landwelt (water .2) sogar ein Nachteil von **−1,2 %**
+         (`desicc` kostet Unterhalt, bringt ohne `aridity` nichts). Das ist biologisch
+         verkehrt: Austrocknung IST die definierende Herausforderung des Landgangs.
+      2. **Fix gebaut** (`landDesiccation` in `physics.json`, gespiegelt in
+         `engine/fitness.ts` + `oracle/reference_model.py`): Grundtrockenheit unterhalb
+         `aquaticWaterFloor`, Dürre-Ereignis additiv obendrauf. Bei `water ≥ 0.5` exakt 0,
+         die Rote-Königin-Testumwelt (water = 0.5) bleibt damit bitgleich — bewusst so
+         gelegt wegen des Version-7-Befunds im `physics.json`-Changelog.
+      3. **Alle 10 Gates blieben bei Stärke 0.5 grün** — `reality` 21/21, Red Queen
+         bitgleich 6.5x, Tier-Anteil 52,9 → 53,1 % (Schwelle 55 %), distribution B1–B4
+         ohne Abweichung, parity 1.4e-17 / app-parity 0.000e+0. Zielkriterium erreicht:
+         Landtauglichkeit von −1,2 % auf **+30,0 %**.
+      4. **Trotzdem abgeschaltet**, weil die Nachmessung zwei Dinge zeigte:
+         - **Der Katalog trennt Land und Wasser nicht.** Wolf `desicc` 0.008, Rotfuchs
+           0.012, Braunbär 0.031 — ein Seestern liegt mit 0.047 **höher**. Selektiert die
+           Physik korrekt auf Austrocknungs-Toleranz, entfernt sie die Wesen damit vom
+           Katalog statt sie ihm anzunähern: Median-Abstand zur nächsten realen Art stieg
+           auf Land von **0.280 auf 0.359**.
+         - **Klippe in der Linien-Stabilität** zwischen Stärke 0.35 und 0.5: Reichwechsel
+           je Linie 3,4 → **46,1**, sprunghaft, nicht graduell. Die Gate-Suite sieht das
+           NICHT — sie misst Stabilität über Zeit nirgends.
+      5. **Zwei eigene Fehldiagnosen unterwegs, beide durch Messung gefunden:**
+         - „In Landwelten sind 42 % der Artnamen rein aquatisch" — gemessen mit
+           `desicc < 0.1` als Aquatik-Marker. Der Marker ist wertlos (s. o., Wolf 0.008),
+           die Zahl damit auch.
+         - „Der Fix löst das Namensproblem (0 % aquatisch)" — die 0 % lagen auch bei
+           Stärke 0 vor. Die ursprünglichen 42 % stammten aus *unkonvergierten* Linien
+           (120 Generationen); im eingeschwungenen Zustand gab es das Problem nie.
+         Vorher notierte Erfolgskriterien haben beides aufgedeckt — ohne sie hätte ich
+         den Fix als Erfolg verbucht.
+      **Zustand im Code:** Verkabelung bleibt drin, `landDesiccation` steht auf **0** und
+      ist damit verhaltensneutral (durch `parity`/`app-parity` und einen Sweep bei 0
+      gegen die Baseline bestätigt). Warnblock direkt an der Fundstelle in
+      `engine/fitness.ts`. **Nicht hochdrehen, bevor der Katalog repariert ist.**
+      **Gemeinsame Wurzel mit #28:** dort ist Java-Nashorn `armor` = 0.153 (aus der
+      Kladen-Regel), hier sind es die `desicc`-Werte. Beides sind unzuverlässige
+      imputierte Genwerte für Merkmale, die eine Kladen-Regel nicht erfassen kann —
+      **das ist der eigentliche nächste Arbeitspunkt**, nicht die Physik.
+
       **Nachtrag 7 — Fotoaudit der 11 ursprünglichen Pflanzen/Pilz-Archetypen (2026-08-05,
       Nutzer-Auftrag „mach halt weiter der reihe nach"):** die 2026-08-04-Runde hatte für
       Baum/Kaktus/Strauch/Kraut/Nadelbaum/Blütenkraut/Farn/Moos-Alge/Hutpilz/Baumpilz/

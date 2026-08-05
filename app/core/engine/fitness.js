@@ -431,6 +431,20 @@ export function fitness(traits, env, phys) {
     //    (kompatible Solute/Trehalose, Resurrektions-Physiologie). 'desicc' puffert,
     //    kostet Unterhalt -> nur in ariden Nischen der Xerophyt/Anhydrobiont (Baerentierchen,
     //    Auferstehungspflanze). aridity kommt ueber Umwelt-Einfluesse (Duerre/Aridifizierung).
+    //    ⚠️ landDesiccation STEHT BEWUSST AUF 0 — NICHT OHNE DEN KATALOG-FIX HOCHDREHEN.
+    //    Gebaut, gemessen, wieder abgeschaltet (2026-08-05). Der Mechanismus unten ist
+    //    biologisch richtig und alle 10 Gates bleiben bei 0.5 gruen (reality 21/21, Red
+    //    Queen bitgleich 6.5x, Tier 52.9->53.1 %), er macht die Benennung aber SCHLECHTER:
+    //    der Artenkatalog haelt Landtiere faelschlich fuer austrocknungs-empfindlich
+    //    (Wolf desicc 0.008, Rotfuchs 0.012, Braunbaer 0.031 — ein Seestern liegt mit 0.047
+    //    HOEHER). Selektiert die Physik korrekt auf Austrocknungs-Toleranz, entfernt sie
+    //    die Wesen damit vom Katalog statt sie ihm anzunaehern: Median-Abstand zur naechsten
+    //    realen Art stieg auf Land von 0.280 auf 0.359. Zusaetzlich kippt die Linien-
+    //    Stabilitaet zwischen 0.35 und 0.5 abrupt (Reichwechsel je Linie 3.4 -> 46.1) —
+    //    eine Klippe, die die Gate-Suite NICHT sieht, weil sie Stabilitaet ueber Zeit
+    //    nicht misst. Erst den Katalog reparieren (s. BACKLOG Punkt 13, Landgang-Befund),
+    //    dann diese Konstante hochziehen und die Klippe erneut vermessen.
+    //
     //    LANDGANG (2026-08-05): 'aridity' allein ist ein EREIGNIS-Stressor (Duerre), der nur
     //    ueber Umwelt-Einfluesse gesetzt wird. Dadurch hatte ein Land-HABITAT bisher gar keinen
     //    Austrocknungsdruck: gemessen war Landtauglichkeit in einer Landwelt (water .2) sogar
