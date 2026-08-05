@@ -374,6 +374,10 @@
 
   /* ---- Name & Ahnenlinie (A4) ---- */
   .cname { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  /* display:flex oben gewinnt sonst gegen die UA-Regel [hidden]{display:none} (Author-
+     Origin schlaegt User-Agent-Origin bei gleicher Spezifitaet) — das hidden-Attribut auf
+     .cname (s. index.html/updateBonding()) blieb dadurch wirkungslos. */
+  .cname[hidden] { display: none; }
   .cname-txt { font-family: var(--display); font-stretch: var(--wd-display); font-weight: var(--w-medium);
     font-size: var(--fs-lg); line-height: var(--lh-snug); color: var(--bio-dim); }
   .cname-txt.unnamed { font-size: var(--fs-xs); letter-spacing: var(--tr-caps); text-transform: uppercase; color: var(--muted); }

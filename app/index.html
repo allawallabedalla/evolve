@@ -120,7 +120,7 @@
 
     <!-- Identitaets-/Detail-Karte -->
     <div class="panel card creature-card">
-      <div class="cname"><span class="cname-txt unnamed" id="cname">Unbenannt</span></div>
+      <div class="cname" hidden><span class="cname-txt unnamed" id="cname">Unbenannt</span></div>
       <div class="kingdom" id="kingdom">—</div>
       <div class="species"><span class="emoji" id="emoji"></span><span id="species">Ursprungszelle</span><a id="speciesWiki" class="species-wiki" target="_blank" rel="noopener" title="Reales Vorbild auf Wikipedia ansehen" hidden></a></div>
       <div class="species-edge" id="speciesEdge" hidden></div>
@@ -1704,11 +1704,17 @@ function describe(t, a){
       parts.push("festsitzender Filtrier-Körper");
     } else {
       // Landtier: QUALITATIVE Baupläne statt absurder Exakt-Zahlen (kein „7 Beine").
-      // Höhere Gliedmaßen = mehr/gegliederte Beine — deckt sich mit der Zeichnung.
-      if(limb<0.18) parts.push("kaum Gliedmaßen");
-      else if(limb<0.5) parts.push(limb>0.34?"vier kräftige Beine":"vier kurze Beine");
-      else if(limb<0.78) parts.push("sechs gegliederte Beine");
-      else parts.push("zahlreiche Beine (Vielfüßer)");
+      // Beinzahl jetzt PRO KIND fest, wie in drawAnimalSvg (s. dortiger Kommentar zum
+      // "Vierbeiner-Grundbauplan"): die vorige, rein aus `limb` abgeleitete Formel driftete
+      // mit wachsendem Gen auf "sechs"/"zahlreiche Beine", obwohl die generische Zeichnung
+      // (jeder Kind ausser den u. g. echten Vielbeinern) IMMER exakt vier Beine zeigt — Text
+      // und Bild widersprachen sich (Nutzer-Fund: "der Text sagt manchmal was von 6 Beinen"
+      // bei einer eindeutig vierbeinigen Zeichnung). limb bleibt Laenge/Kraft, nicht Zahl.
+      const sixLegged = a.e==="🐜"||a.e==="🪲";
+      if(sixLegged) parts.push("sechs gegliederte Beine");
+      else if(a.e==="🥟") parts.push("acht Stummelbeine");
+      else if(limb<0.18) parts.push("kaum Gliedmaßen");
+      else parts.push(limb>0.34?"vier kräftige Beine":"vier kurze Beine");
       if(limb>0.5 && metab>0.45 && size<0.5) parts.push("Greifwerkzeuge");
       if(armor>0.6) parts.push("Stacheln");
     }
@@ -3350,6 +3356,13 @@ function applyState(s){
   if(Array.isArray(s.genome) && s.genome.length>=6) genome = padGenome(s.genome);
   if(s.env){ env = Object.assign(env, s.env);
     syncLeverInputs();
+    // syncLeverInputs() ohne preserveMedium reset(t) den Land/Wasser-Umschalter blind auf
+    // "keine Auswahl" (richtig fuer Presets mit bewusst bandfremdem Wert, s. dortiger
+    // Kommentar) — beim Wiederherstellen eines Spielstands ist das falsch: env.water kommt
+    // hier aus dem SPEICHERSTAND, nicht von einem Regler-Zug, und soll den Umschalter genau
+    // dann zeigen, wenn es tatsaechlich in einem Band liegt (Nutzer-Feedback: "weder Land
+    // noch Wasser ausgewaehlt" beim Wiedereinstieg, obwohl der gespeicherte Wert eindeutig war).
+    commitMediumFromEnv(env);
     if(typeof renderStressChips === "function") renderStressChips(); }
   generation = s.generation || 0;
   // Migration (Schritt 0.1): alte Staende enthalten ANZEIGENAMEN, neue Schluessel.
@@ -3651,14 +3664,17 @@ function resetMediumUI(){
   });
   mediumsEl.appendChild(btn);
 });
-// Erststart: faellt der Start-Wert von water in eines der beiden Baender, zeigt der
-// Umschalter das gleich an — sonst bliebe das Ur-Wesen auf dem allerersten Bild ohne
-// jede Orts-Angabe. Spaetere Presets/Umwelt-Einfluesse setzen ihre eigenen Werte
-// weiterhin bewusst OHNE Band-Zuordnung (s. resetMediumUI oben, unveraendert) — das
-// hier gilt nur fuer den einmaligen Erststart, vor jeder Spieler-Handlung.
-const startMedium = Object.keys(MEDIUM_BANDS).find(k => env.water >= MEDIUM_BANDS[k].lo && env.water <= MEDIUM_BANDS[k].hi);
-if(startMedium){ committedMedium = startMedium; applyMediumUI(startMedium, env); }
-else resetMediumUI();
+// Welches Medium-Band zu einem gegebenen env.water passt, direkt committen (oder
+// "keine Auswahl", wenn keins passt). Erststart UND Session-Wiederherstellung (s.
+// applyState()) brauchen genau das: den Umschalter aus dem tatsächlichen water-Wert neu
+// herleiten, statt einen veralteten committedMedium-Stand stehen zu lassen. Presets/
+// Umwelt-Einfluesse/Fundort bleiben bewusst aussen vor (s. resetMediumUI-Kommentar) —
+// die rufen weiterhin syncLeverInputs() ohne preserveMedium.
+function commitMediumFromEnv(e){
+  const m = Object.keys(MEDIUM_BANDS).find(k => e.water >= MEDIUM_BANDS[k].lo && e.water <= MEDIUM_BANDS[k].hi);
+  if(m){ committedMedium = m; applyMediumUI(m, e); } else resetMediumUI();
+}
+commitMediumFromEnv(env);
 
 // ---- Entwurf: Vorschau + Los/Verwerfen (Nutzer-Idee, 2026-07-31) ----------------------
 // Regler/Medium-Umschalter schreiben oben bereits in envDraft statt env. Hier die
@@ -4325,9 +4341,13 @@ function updateWhy(g, force){
 }
 // A4: Name + Ahnenlinie in der Karte (aendert sich selten -> nicht pro Frame).
 function updateBonding(){
+  // Die Namenszeile stand bisher IMMER da, auch unbenannt ("Unbenannt") — quetschte sich
+  // damit dauerhaft zwischen Karten-Oberkante und die Reich-Pille (Nutzer-Feedback: "steht
+  // oben immer nur unbekannt" + "Pille sieht fehlplaziert aus"). Jetzt nur sichtbar, wenn
+  // wirklich benannt — die Pille fuehrt sonst direkt in den Artnamen.
   const c = document.getElementById("cname");
-  if(creatureName){ c.textContent = creatureName; c.classList.remove("unnamed"); }
-  else { c.textContent = "Unbenannt"; c.classList.add("unnamed"); }
+  if(creatureName){ c.textContent = creatureName; c.classList.remove("unnamed"); c.parentElement.hidden = false; }
+  else { c.parentElement.hidden = true; }
   const row = document.getElementById("ancestryRow");
   if(!ancestry.length){ row.hidden = true; row.innerHTML = ""; return; }
   row.hidden = false;
@@ -7126,8 +7146,13 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   }
   // Echsen haben immer genau 4 Beine — die generische Formel (2-7, aus limb abgeleitet)
   // gab bei mittlerem limb oft 5 und damit ein Bein zuviel/mittig, was zusammen mit dem
-  // Spreiz-Gang schnell "falsch" (Nutzer: "Ameisenbaer-Spitzmaus-Hybrid") aussah.
-  const legs = kind==="🐦" ? 2 : sprawl ? 4 : 2 + Math.round((0.3 + 0.7*limb)*5);
+  // Spreiz-Gang schnell "falsch" (Nutzer: "Ameisenbaer-Spitzmaus-Hybrid") aussah. Derselbe
+  // Fund gilt fuer JEDEN anderen Kind, der noch hier landet (Phase 1b hat allen echten
+  // Sechs-/Achtbeinern laengst einen eigenen Zweig mit fester Beinzahl gegeben, s. 🐜/🪲/🥟)
+  // — diese Funktion heisst "Vierbeiner-Grundbauplan", die Formel widersprach dem eigenen
+  // Namen. Nutzer-Fund: Beschreibungstext sprach von "sechs Beinen" bei einer eindeutig
+  // vierbeinigen Zeichnung, weil genau diese Formel mit driftendem limb-Gen hochzaehlte.
+  const legs = kind==="🐦" ? 2 : 4;
   const legLen = (12 + limb*40)*FORM.legL;
   // Pro Bein zusaetzlich Pfote + 2-3 einzeln sichtbare Zehen am Fusspunkt — die
   // Detailebene, die dem Bauplan bisher fehlte (nur ein Strich ohne Fuss).
