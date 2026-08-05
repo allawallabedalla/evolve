@@ -6338,11 +6338,19 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   if(kind==="🐙"){   // Kopffuesser: Mantel + Tentakel
     const hr=R*0.95;
     E("an-mantle", cx, cy-R*0.2, hr, hr*1.15, flatCol(body));
-    let ten="";
-    const nT=6;
+    // Selbstabgleich gegen Referenzfoto: das praegendste Merkmal eines Tentakels sind die
+    // Saugnapf-Reihen — bisher ein glatter Strich ohne jede Textur. Punkte entlang derselben
+    // Kurve abgetastet (quadratische Bezier-Auswertung) statt neuer Geometrie.
+    let ten="", suckers="";
+    const nT=6, evalQ=(p0,p1,p2,t)=>{ const mt=1-t; return p0*mt*mt+2*mt*t*p1+t*t*p2; };
     for(let i=0;i<nT;i++){ const t=(i/(nT-1)-0.5), sx=cx+t*hr*1.4, sw=Math.sin(time*0.004+i)*R*0.25;
-      ten += `M${sx.toFixed(1)},${(cy+hr*0.4).toFixed(1)}Q${(sx+sw).toFixed(1)},${(cy+hr*1.0).toFixed(1)} ${(sx+t*R*0.6+sw).toFixed(1)},${(cy+hr*1.5).toFixed(1)}`; }
+      const p0x=sx, p0y=cy+hr*0.4, p1x=sx+sw, p1y=cy+hr*1.0, p2x=sx+t*R*0.6+sw, p2y=cy+hr*1.5;
+      ten += `M${p0x.toFixed(1)},${p0y.toFixed(1)}Q${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}`;
+      for(let s=1;s<=5;s++){ const tt=s/6;
+        suckers += dot(evalQ(p0x,p1x,p2x,tt), evalQ(p0y,p1y,p2y,tt), R*0.033); }
+    }
     P("an-ten", ten, { stroke: flatCol(body), "stroke-width": (R*0.26).toFixed(1), "stroke-linecap":"round", fill:"none" });
+    P("an-suckers", suckers, { fill: flatStep(dark,-1) });
     let ey="", gl="";
     for(const o of [-1,1]){ ey += dot(cx+o*hr*0.4, cy-R*0.25, R*0.17); gl += dot(cx+o*hr*0.4-R*0.04, cy-R*0.31, R*0.06); }
     P("an-eye", ey, { fill: EYE }); P("an-glint", gl, { fill: GLINT, "fill-opacity": .9 });
