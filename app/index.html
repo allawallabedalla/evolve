@@ -6428,6 +6428,13 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     E("an-body", cx, cy, L, H, flatCol(body));
     cAttr(cEl("an-pect","ellipse"), { cx:0, cy:(R*0.2).toFixed(1), rx:(R*0.35).toFixed(1), ry:(R*0.16).toFixed(1), fill: flatCol(mix(body,dark,0.4)),
       transform:`translate(${(cx-L*0.2).toFixed(1)},${(cy+H*0.35).toFixed(1)}) rotate(${((0.5+Math.sin(time*0.005)*0.2)*180/Math.PI).toFixed(1)})` });
+    // Selbstabgleich gegen Referenzfoto (Regenbogenforelle): Bauchflossen (Becken- +
+    // Afterflosse) fehlten komplett — bisher nur die Ruecken- und Brustflosse. So gut wie
+    // jeder Fisch hat auch Flossen an der Unterseite, nicht nur oben/seitlich.
+    cAttr(cEl("an-pelvic","ellipse"), { cx:0, cy:0, rx:(R*0.22).toFixed(1), ry:(R*0.1).toFixed(1), fill: flatCol(mix(body,dark,0.4)),
+      transform:`translate(${(cx-L*0.02).toFixed(1)},${(cy+H*0.62).toFixed(1)}) rotate(${((0.55+Math.sin(time*0.005+1)*0.15)*180/Math.PI).toFixed(1)})` });
+    cAttr(cEl("an-anal","polygon"), { points:`0,0 ${(R*0.28).toFixed(1)},${(R*0.05).toFixed(1)} ${(R*0.05).toFixed(1)},${(R*0.3).toFixed(1)}`,
+      fill: flatCol(mix(body,dark,0.4)), transform:`translate(${(cx+L*0.48).toFixed(1)},${(cy+H*0.55).toFixed(1)})` });
     const scaleEl = cEl("an-scales","path");
     if(armor>0.4){ let s="";
       for(let i=0;i<5;i++) s += arcPath(cx+L*0.4-i*L*0.25, cy, H*0.7, H*0.7, 0, -0.9, 0.9, false);
@@ -6435,6 +6442,9 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     } else cAttr(scaleEl, { opacity: 0 });
     P("an-gill", arcPath(cx-L*0.35, cy, H*0.5, H*0.5, 0, -0.7, 0.7, false),
       { stroke: flatCol(dark), "stroke-width": 1.5, fill:"none" });
+    // Maul an der Kopfspitze — fehlte bisher, wie beim Frosch (derselbe Selbstabgleich-Fund).
+    P("an-mouth", `M${(cx-L*0.85).toFixed(1)},${(cy-H*0.06).toFixed(1)}Q${(cx-L*0.98).toFixed(1)},${cy.toFixed(1)} ${(cx-L*0.85).toFixed(1)},${(cy+H*0.1).toFixed(1)}`,
+      { stroke: flatCol(dark), "stroke-width": 1.4, fill:"none" });
     P("an-eye", dot(cx-L*0.62, cy-H*0.15, R*0.12), { fill: EYE });
     P("an-glint", dot(cx-L*0.66, cy-H*0.2, R*0.05), { fill: GLINT, "fill-opacity": .9 });
     return;
