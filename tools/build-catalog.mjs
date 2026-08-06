@@ -353,6 +353,12 @@ async function buildFullEntries() {
       lineage: p.v.lineage.slice(0, 12), // s. CORPUS_DEPTH in impute.mjs — mehr wird nirgends gelesen
       genome: t.map((x) => Math.max(0, Math.min(255, Math.round(x * 255)))),
       conf: placed.conf,
+      // Medium-Achse der taxonomisch hergeleiteten Umwelt (habitatOf(), Kladen-Regeln
+      // ueber die Elternkette — NICHT das gemessene/imputierte `desicc`-Gen, dessen
+      // Werte nachweislich nicht mit echtem Land/Wasser-Habitat korrelieren, s.
+      // BACKLOG „Landgang-Befund"). Quantisiert wie das Genom (Issue #31: nearestReal()
+      // wusste bislang gar nichts vom Habitat der Kandidaten).
+      habWater: Math.max(0, Math.min(255, Math.round(habEnv.water * 255))),
       src: "wikidata-full",
     });
     if (++done % 2000 === 0) process.stdout.write(`\r  ${done}/${pre.length} platziert …`);

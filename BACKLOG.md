@@ -1809,6 +1809,44 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       Zufall außerhalb des Genoms. `tools/lib/app-core.mjs` fest auf `FANTASY_MODE=false`
       gesetzt (Node-Tooling will immer die echte Klassifizierung).
 
+- [x] **7** Reptilien-Nachernte + Katalog-Neubau + Habitat-Filter fuer `nearestReal()`
+      (2026-08-06, Nutzerauftrag „Reptilien zu Ende ernten" nach GitHub-Issues #28/#31).
+      **Bugfix im Harvester:** `--retry-failed` setzte den Seiten-Offset einer
+      gescheiterten Klade auf 0 zurueck statt an der letzten gueltigen Seite
+      weiterzumachen — tief paginierende Kladen (Neodiapsida, die grosse
+      Reptilien-Teilklade) scheiterten dadurch endlos an derselben Stelle
+      (`77babce`). Nach dem Fix: Reptilien 154 -> 1232 Arten, Ernte insgesamt
+      30.286 -> 42.648 Arten (automatische Retry-Schleife bis Saettigung, zwei
+      Runden ohne Zuwachs).
+      **Katalog neu gebaut** (`5f2a789`) — inkl. neu heruntergeladener Masse-/
+      Diaet-Merkmale (PanTHERIA/EltonTraits, `pyreadr` war nicht vorinstalliert)
+      und einer neuen `Rhinocerotidae`-Kladen-Regel (behebt #28: Java-Nashorn
+      bekam bislang nur `Perissodactyla` und damit `armor 0.153` statt `0.72`,
+      wurde folgerichtig ohne Horn gezeichnet). Groessen-/Performance-Budget in
+      `tools/catalog-check.mjs` bewusst neu kalibriert (2400->3200 KB gzip,
+      2->3 ms Stufe-2-Matcher) fuer das gemessene +41%-Wachstum, mit derselben
+      moderaten Luft wie bei der letzten Kalibrierung — **nicht** automatisch
+      mitgewachsen.
+      **Habitat-Filter fuer `nearestReal()`** (behebt #31): die Ursache war
+      nicht die Physik (der fruehere `landDesiccation`-Versuch scheiterte daran,
+      dass das `desicc`-Gen nicht mit echtem Habitat korreliert, s. u.), sondern
+      dass `nearestReal()` beim Benennen einer entwickelten Art rein nach
+      Genom-Distanz suchte — ganz ohne Ruecksicht auf das gespielte Milieu. Neues
+      Katalog-Feld `habWater` (quantisierte Medium-Achse aus `habitatOf()` ueber
+      die Elternkette, Kladen-Ebene wie `clade-rules.mjs` — nicht das unzuverlaessige
+      `desicc`-Gen) plus weicher Strafterm in `nearestReal()` (`dist *= 1 + 2.0 *
+      |envWater - habWater|`, dieselbe „strecken statt ausschliessen"-Philosophie
+      wie `ARCH.requiresPenalty`). Gemessen (3000 Zufallsgenome je Umwelt, worst
+      case): Medium-Fehltreffer LAND 59,3% -> 53,7%, WASSER 31,1% -> 24,2%,
+      Aenderungen in 10-16% der Faelle. Vollstaendig validiert (`catalog-check`,
+      `clade-rules-check`, `app-parity` bitgleich, `exemplar-check`, `key-check`,
+      `design-audit`; `plausi-check` unveraendert zu vorher — dieselben 7/10
+      bekannten Altlasten, keine neuen Verstoesse). `APP_VERSION` v0.90.0 -> v0.91.0.
+      **Ehrlich offen:** die Strafe reduziert Fehltreffer statistisch, garantiert
+      aber keine Ausschluss — in Bauplan-Gruppen ohne jede habitatpassende reale
+      Art (z. B. rein marine Kladen) bleibt der naechste Genom-Nachbar die einzige
+      Wahl, auch wenn er zum Milieu nicht passt.
+
 **Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.
 
 **Umgebungs-Befund (2026-08-01, erledigt):** Wikidata/Wikipedia waren aus der

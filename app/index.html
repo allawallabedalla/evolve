@@ -450,7 +450,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.90.0";
+const APP_VERSION = "v0.91.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1423,10 +1423,20 @@ function archIcon(a, cls){ return formIcon(a.novel ? a.n : a.key, cls); }
 // hier also nicht pruefbar — sie wird in Schritt 1.4 an echter Konfidenz-Streuung
 // kalibriert statt jetzt geraten.
 const CAT = window.CATALOG || null;
-function nearestReal(t, groupKey, w){
+// Habitat-Fehlpassung (Issue #31: eine marine Art erschien als "naechste reale Art"
+// unabhaengig vom gewaehlten Milieu, weil nearestReal() rein nach Genom-Distanz suchte).
+// `habWater` kommt aus habitatOf() ueber die Elternkette (Kladen-Ebene, wie clade-rules.mjs)
+// — NICHT aus dem gemessenen/imputierten `desicc`-Gen, dessen Werte nachweislich nicht mit
+// echtem Land/Wasser-Habitat korrelieren (BACKLOG "Landgang-Befund": Wolf 0.008, Braunbaer
+// 0.031 — beide UNTER einem Seestern). Weiches Fenster wie bei ARCH.requiresPenalty
+// (matchArchetype) statt harter Ausschluss: eine Fehlpassung STRECKT den Abstand, macht
+// den Kandidaten aber nie unmoeglich (manche Bauplan-Gruppen haben nur wenige reale Arten).
+const HABITAT_PENALTY_K = 2.0;
+function nearestReal(t, groupKey, w, e){
   if(!CAT) return null;
   const idx = CAT.byGroup[groupKey];
   if(!idx || !idx.length) return null;
+  const envWater = e && e.water!=null ? e.water : 0.6;
   let best = null, dBest = Infinity;
   for(const i of idx){
     const e = CAT.entries[i];
@@ -1435,7 +1445,8 @@ function nearestReal(t, groupKey, w){
       const d = (t[g] - e.genome[g]/255) * w[g];
       sum += d*d; z += w[g]*w[g];
     }
-    const dist = Math.sqrt(sum/Math.max(z, 1e-9));
+    let dist = Math.sqrt(sum/Math.max(z, 1e-9));
+    if(e.habWater!=null) dist *= 1 + HABITAT_PENALTY_K * Math.abs(envWater - e.habWater/255);
     if(dist < dBest){ dBest = dist; best = e; }
   }
   return best ? { e: best, dist: dBest } : null;
@@ -1685,7 +1696,7 @@ function matchArchetype(t, e){
              alt: second ? second.f.n : null, novel:false, dist:dBest, real:null,
              form: best.f.n };
   }
-  const real = nearestReal(t, best.f.key, w);
+  const real = nearestReal(t, best.f.key, w, e);
   return { k:best.f.k, n: (CATALOG_NAMES && real) ? (real.e.de || real.e.sci) : best.f.n,
            e:best.f.e, key:best.f.key, conf, margin, settled,
            alt: second ? second.f.n : null, novel:false, dist:dBest, real,
