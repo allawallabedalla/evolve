@@ -12,6 +12,9 @@ __pycache__/
 scratch*.png
 scratch*
 _*.mjs
+# Wie _*.mjs oben, nur nicht auf die Endung beschraenkt (traf bisher z.B. keine
+# _tmp_*.sh-Wegwerf-Orchestrierung fuer laengere Hintergrund-Laeufe).
+_tmp_*
 
 # Persönliche lokale Claude-Code-Einstellungen (nicht versionieren)
 .claude/settings.local.json
