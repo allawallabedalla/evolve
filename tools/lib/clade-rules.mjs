@@ -298,6 +298,12 @@ export const CLADE_RULES = [
     reason: "Dieselbe Lauftier-Loesung wie bei den Paarhufern, aber durchweg groessere Koerper (Pferd, Nashorn, Tapir) — Groesse zahlt hier doppelt: als Reichweite und als defenseFromSize.",
   },
   {
+    qid: "Q34718", sci: "Rhinocerotidae", de: "Nashoerner", level: 7,
+    genes: { armor: 0.72, size: 0.85, limbLength: 0.42, mobility: 0.62,
+             insulation: 0.10, metabolism: 0.42 },
+    reason: "Die Unpaarhufer-Regel darueber gibt allen ihren Arten den Lauftier-Bauplan (limbLength 0.82, mobility 0.85, insulation 0.60) — fuer Pferd und Tapir richtig, fuer das Nashorn in jedem dieser Punkte falsch. Nashoerner sind graviportal (kurze Saeulenbeine, die Masse tragen statt Strecke zu machen) und nahezu unbehaart, ihre Verteidigung ist nicht Flucht, sondern eine bis 5 cm dicke, kollagen-geschichtete Haut, die bei Panzer- und Java-Nashorn zu plattenartigen Schilden gegliedert ist. Panzerwert bewusst unter Schildkroete (0.90) und Guerteltier (0.82): das ist zaehe, biegsame Haut, kein starrer Panzer. Ohne diese Regel fiel das Java-Nashorn mit armor 0.15 auf den Bauplan 'Generalisten-Tier' und wurde folgerichtig ohne Horn gezeichnet (Nutzer-Fund, Issue #28).",
+  },
+  {
     qid: "Q160", sci: "Cetacea", de: "Wale", level: 6,
     genes: { limbLength: 0.08, armor: 0.05, mobility: 0.92, size: 0.85, insulation: 0.30,
              metabolism: 0.85, structure: 0.45, wing: 0.02, osmo: 0.55, baro: 0.35,

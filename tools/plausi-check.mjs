@@ -102,9 +102,13 @@ const legPhrase = (d) =>
 // Die Formel wird aus app/index.html GELESEN, nicht abgeschrieben (sonst prueft der
 // Check seine eigene Kopie).
 {
-  const m = html.match(/const legs = kind===[^;]*?2 \+ Math\.round\(\(([^)]*)\)\*(\d+)\);/);
+  // Seit dem #30-Fix leitet drawAnimalSvg() die Beinzahl NICHT mehr aus `limb` ab,
+  // sondern setzt sie fest je Kind (Vierbeiner-Grundbauplan = immer vier). Genau das
+  // war der Befund, den dieser Check aufgedeckt hat. Die Formel wird weiterhin GELESEN
+  // statt abgeschrieben — nur ist sie jetzt eine Konstante.
+  const m = html.match(/const legs = kind==="🐦" \? 2 : (\d+);/);
   if (!m) { console.error("plausi-check: Bein-Formel in drawAnimalSvg() nicht gefunden."); process.exit(1); }
-  const drawnLegs = new Function("limb", `return 2 + Math.round((${m[1]})*${m[2]});`);
+  const drawnLegs = new Function("limb", `return ${m[1]};`);
   const erwartet = { keine: 0, vier: 4, sechs: 6, viele: 8 };
   let mismatch = 0, total = 0;
   const spanne = {};
@@ -126,8 +130,8 @@ const legPhrase = (d) =>
   report("P2", "Bauplan-SATZ und ZEICHNUNG nennen verschiedene Beinzahlen",
     mismatch, total,
     [...detail,
-     `Text-Schwellen: 0.18/0.50/0.78 · Zeichnung: legs = 2 + round((0.3+0.7·limb)·5)`,
-     "Beide leiten aus Gen 2 ab, aber mit unabhaengigen Formeln — sie koennen gar nicht uebereinstimmen."]);
+     `Zeichnung: feste Beinzahl je Kind (Vierbeiner-Grundbauplan = 4) · Text: ebenfalls je Kind`,
+     "Seit dem #30-Fix leiten beide die ZAHL aus dem Kind ab statt unabhaengig aus Gen 2; limb steuert nur noch die Beinlaenge."]);
 }
 
 // ---------------------------------------------------------------------------
@@ -215,7 +219,7 @@ const converge = (env, gens = 400) => {
   };
   const MERKMALE = [
     { name: "Fell / Isolationsschicht", gene: G.insulation, text: /dichtes Fell/,
-      draw: zahl(/if\(insul>([0-9.]+)\)\{ let f="";/, "Fell-Zeichnung") },
+      draw: zahl(/if\(insul>([0-9.]+) && !sprawl\)\{ let f="";/, "Fell-Zeichnung") },
     { name: "Panzerplatten", gene: G.armor, text: /Panzerplatten/,
       draw: zahl(/if\(armor>([0-9.]+)\)\{\n    cAttr\(shellEl,/, "Panzer-Zeichnung") },
     { name: "Leuchtorgan", gene: G.biolum, text: /Leuchtorgan/,

@@ -2128,6 +2128,48 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         JEDE neu gebaute Form mindestens ein Referenzfoto tatsächlich geladen worden
         sein, nicht nur für die zuerst bearbeitete.
 
+      **Issue #28 (Nashorn ohne Horn) — Regel korrigiert, greift aber erst nach einer
+      Neuernte (2026-08-05, Opus).** Nutzer-Entscheidung war „Kladen-Regel für Panzerung
+      nachschärfen". Ursache gefunden, Regel geschrieben — und dabei eine
+      Architektur-Grenze aufgedeckt, die vorher nicht dokumentiert war:
+      - **Ursache:** Java-Nashorn trifft von allen Kladen-Regeln nur `Perissodactyla`,
+        und die setzt gar kein `armor`. Ihre Begründung nennt selbst „Pferd, Nashorn,
+        Tapir" und gibt allen den Lauftier-Bauplan (`limbLength` 0.82, `mobility` 0.85,
+        `insulation` 0.60) — für Pferd und Tapir richtig, für ein Nashorn in jedem Punkt
+        falsch. Es ist graviportal und nahezu unbehaart, seine Verteidigung ist bis 5 cm
+        dicke, kollagen-geschichtete Haut. Ohne eigene Regel blieb `armor` bei 0.153, was
+        den Bauplan `Generalisten-Tier` (🦥, hornlos) statt `Gepanzerter Koloss` (🦏)
+        ergibt — genau der gemeldete Effekt.
+      - **Fix:** neue Regel `Rhinocerotidae` (Q34718, Level 7) in
+        `tools/lib/clade-rules.mjs`, `armor: 0.72` — bewusst unter Schildkröte (0.90) und
+        Gürteltier (0.82), das ist zähe biegsame Haut, kein starrer Panzer. Dazu die echte
+        42-gliedrige Wikidata-Kette als Testfall; `clade-rules-check` meldet jetzt
+        **164/164 Regeln von Testketten abgedeckt** (vorher war die neue Regel ungetestet).
+      - **⚠️ Architektur-Grenze, neu entdeckt:** die Regel wirkt **nicht** auf den
+        bestehenden `app/catalog.js`. Ein Neubau bräuchte `tools/.harvest-state.json` —
+        ein gitignoriertes Artefakt der ~30k-Arten-Ernte; ohne die Datei fällt
+        `build-catalog` in den 65-Einträge-Bootstrap und würde den Katalog zerstören.
+        Der Versuch, die Kladen-Stufe aus den gespeicherten Daten neu zu rechnen
+        (`tools/reapply-clade-rules.mjs`), scheiterte messbar: **96 % der Einträge**
+        hätten sich geändert. Grund: `lineage` ist im Katalog auf **12 QIDs gekappt**
+        (29.728 von 30.286 Einträgen haben exakt 12), die echte Kette ist 40+ lang — die
+        oberen Taxa (Mammalia, Chordata …) fehlen, es treffen also viel weniger Regeln als
+        beim Bau. **Genau daher stammt auch der Nashorn-Wert:** beim Bau matchte über die
+        volle Kette noch `Mammalia` (armor 0.15 ≈ die 0.153 im Katalog).
+        Das Werkzeug bleibt mit einem **Schutz** liegen, der bei >5 % betroffenen
+        Einträgen abbricht — es wird brauchbar, sobald der Katalog mit vollständigen
+        Ketten neu gebaut wird.
+      - **Konsequenz:** Regelkorrekturen sind ab jetzt billig zu schreiben, aber nur mit
+        einer Neuernte wirksam. Das gilt für #28 wie für die `desicc`-Werte aus dem
+        Landgang-Befund unten — beides wartet auf denselben Schritt.
+      - **Nebenbefund, eigener Fehler:** `plausi-check` stürzte seit meinem #30-Fix ab
+        (er liest die Beinzahl-Formel per Regex aus `app/index.html`, und ich hatte sie
+        durch eine Konstante ersetzt, ohne den Check laufen zu lassen). Regex nachgezogen;
+        dabei fiel ein Restwiderspruch auf: bei `limb<0.18` behauptete der Text „kaum
+        Gliedmaßen", gezeichnet wurden trotzdem vier Beine. „Kaum Gliedmaßen" hängt jetzt
+        am Kind statt an `limb`. **P1a und P2 sind damit erstmals grün** — genau die
+        beiden Regeln, die den #30-Widerspruch beschrieben haben.
+
       **Landgang-Befund — gebaut, gemessen, wieder abgeschaltet (2026-08-05, Opus).**
       Ausgelöst durch Issue #31 (marine Art trotz Landeinstellung) und den Nutzer-Auftrag
       „prüfe mal wieder von Anfang: wie entsteht Leben an Land, an Wasser — was fehlt

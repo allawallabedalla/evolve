@@ -1738,10 +1738,16 @@ function describe(t, a){
       // (jeder Kind ausser den u. g. echten Vielbeinern) IMMER exakt vier Beine zeigt — Text
       // und Bild widersprachen sich (Nutzer-Fund: "der Text sagt manchmal was von 6 Beinen"
       // bei einer eindeutig vierbeinigen Zeichnung). limb bleibt Laenge/Kraft, nicht Zahl.
+      // "kaum Gliedmassen" haengt jetzt am KIND, nicht mehr an limb: der Vierbeiner-
+      // Grundbauplan zeichnet immer vier Beine, auch bei limb=0 (nur kuerzer). Die alte
+      // limb<0.18-Schwelle behauptete dort Beinlosigkeit, die im Bild nicht vorkommt —
+      // derselbe Text/Zeichnung-Widerspruch wie bei der Beinzahl (Issue #30), von
+      // tools/plausi-check.mjs P2 aufgedeckt. limb steuert die Beinlaenge, nicht das Ob.
       const sixLegged = a.e==="🐜"||a.e==="🪲";
-      if(sixLegged) parts.push("sechs gegliederte Beine");
+      const legless = a.e==="🪱"||a.e==="🐌"||a.e==="🐙"||a.e==="🪼"||a.e==="🦪"||a.e==="⭐";
+      if(legless) parts.push("kaum Gliedmaßen");
+      else if(sixLegged) parts.push("sechs gegliederte Beine");
       else if(a.e==="🥟") parts.push("acht Stummelbeine");
-      else if(limb<0.18) parts.push("kaum Gliedmaßen");
       else parts.push(limb>0.34?"vier kräftige Beine":"vier kurze Beine");
       if(limb>0.5 && metab>0.45 && size<0.5) parts.push("Greifwerkzeuge");
       if(armor>0.6) parts.push("Stacheln");
