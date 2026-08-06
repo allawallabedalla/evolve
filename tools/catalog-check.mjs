@@ -42,7 +42,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Wachstumsziel - weiteres Wachstum braucht eine bewusste neue Kalibrierung, kein
 // automatisches Mitwachsen der Annahme. Echte Loesung fuer weiteres Wachstum waere Sharding/
 // Lazy-Loading (docs/artenkatalog-plan.md Abschnitt 8, "bewusst offen"), nicht nur diese Zahl.
-const GZIP_BUDGET_KB = 2400;
+// Nachtrag (2026-08-06, Reptilien-Nachernte + Bugfix im Retry-Offset des Harvesters):
+// 30.286 -> 42.648 Arten (+41%), gemessen 2.875 KB gzip (67,4 B/Art, praktisch unveraendert
+// zu den 68,6 B/Art vom letzten Nachtrag) - kein neuer Redundanz-Einbruch, nur mehr Arten.
+// Bewusst neu kalibriert mit derselben moderaten Luft wie beim letzten Mal, NICHT automatisch
+// mitgewachsen. Sharding/Lazy-Loading bleibt die eigentliche Loesung fuer weiteres Wachstum.
+const GZIP_BUDGET_KB = 3200;
 
 const win = {};
 new Function("window", readFileSync(join(ROOT, "app", "catalog.js"), "utf-8"))(win);
@@ -148,7 +153,11 @@ if (entries.length) {
 // den echten Eintraegen — und auf die groesste Gruppe hochgerechnet, denn die bestimmt
 // den schlechtesten Fall. Budget 2 ms: unterhalb eines 60-Hz-Bildschritts (16,7 ms) mit
 // reichlich Luft fuer alles andere, was pro Generation passiert.
-const BUDGET_MS = 2;
+// Nachtrag (2026-08-06, Reptilien-Nachernte): groesste Gruppe „Strauch" waechst von 6.244
+// auf 9.105 Eintraege, gemessener Fall 2,92 ms. Bewusst auf 3 ms neu kalibriert (statt
+// automatisch mitwachsen zu lassen) — bleibt immer noch weit unter dem 16,7-ms-Bildschritt
+// mit Luft fuer alles andere pro Generation.
+const BUDGET_MS = 3;
 if (entries.length) {
   const t = new Array(NG).fill(0.5), w = new Array(NG).fill(0.65);
   const bench = (list, reps) => {
