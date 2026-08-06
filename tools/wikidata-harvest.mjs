@@ -147,8 +147,18 @@ if (RETRY_FAILED && state.failed.length) {
   // endgueltigen Fehlschlag (Client-Timeout auf BEIDEN Versuchen kurz hintereinander).
   // Genau EIN erneuter Versuch je Knoten -- kein Endlos-Retry, sonst verstopft ein
   // wirklich zu grosser Knoten die Warteschlange dauerhaft.
+  // BUGFIX (2026-08-06): offset:0 statt f.offset gebaut ein Endlos-Rennen fuer jede
+  // Klade, die TIEF in ihrer Paginierung scheitert (gemessen an "Reptilien": blieb ueber
+  // vier Retry-Laeufe bei exakt 154 Arten stehen, waehrend Saeugetiere/Voegel im selben
+  // Zeitraum auf 100% kamen). Ursache: die grosse Teil-Klade "Neodiapsida" scheiterte
+  // immer wieder bei Seite @2000 — jeder Retry begann bei @0, fetchte die laengst
+  // bekannten (dedupliziert wirkungslosen) Seiten 0..1500 neu und starb erneut an
+  // derselben teuren Stelle, ohne je ueber @2000 hinauszukommen. Seiten VOR dem
+  // Fehlschlag sind laut derselben Fehlerbehandlung oben ("vorige Seiten bleiben
+  // gueltig") bereits sicher uebernommen — der Retry muss also genau dort weitermachen,
+  // nicht neu anfangen.
   console.log(`${state.failed.length} zuvor fehlgeschlagene Knoten werden erneut versucht.`);
-  for (const f of state.failed) state.queue.push({ qid: f.qid, label: f.label, rootLabel: f.rootLabel, offset: 0 });
+  for (const f of state.failed) state.queue.push({ qid: f.qid, label: f.label, rootLabel: f.rootLabel, offset: f.offset || 0 });
   state.failed = [];
 }
 
