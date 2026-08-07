@@ -1809,6 +1809,44 @@ entscheidet genau das, worauf die Selektion nicht schaut.
       Zufall außerhalb des Genoms. `tools/lib/app-core.mjs` fest auf `FANTASY_MODE=false`
       gesetzt (Node-Tooling will immer die echte Klassifizierung).
 
+- [x] **7** Reptilien-Nachernte + Katalog-Neubau + Habitat-Filter fuer `nearestReal()`
+      (2026-08-06, Nutzerauftrag „Reptilien zu Ende ernten" nach GitHub-Issues #28/#31).
+      **Bugfix im Harvester:** `--retry-failed` setzte den Seiten-Offset einer
+      gescheiterten Klade auf 0 zurueck statt an der letzten gueltigen Seite
+      weiterzumachen — tief paginierende Kladen (Neodiapsida, die grosse
+      Reptilien-Teilklade) scheiterten dadurch endlos an derselben Stelle
+      (`77babce`). Nach dem Fix: Reptilien 154 -> 1232 Arten, Ernte insgesamt
+      30.286 -> 42.648 Arten (automatische Retry-Schleife bis Saettigung, zwei
+      Runden ohne Zuwachs).
+      **Katalog neu gebaut** (`5f2a789`) — inkl. neu heruntergeladener Masse-/
+      Diaet-Merkmale (PanTHERIA/EltonTraits, `pyreadr` war nicht vorinstalliert)
+      und einer neuen `Rhinocerotidae`-Kladen-Regel (behebt #28: Java-Nashorn
+      bekam bislang nur `Perissodactyla` und damit `armor 0.153` statt `0.72`,
+      wurde folgerichtig ohne Horn gezeichnet). Groessen-/Performance-Budget in
+      `tools/catalog-check.mjs` bewusst neu kalibriert (2400->3200 KB gzip,
+      2->3 ms Stufe-2-Matcher) fuer das gemessene +41%-Wachstum, mit derselben
+      moderaten Luft wie bei der letzten Kalibrierung — **nicht** automatisch
+      mitgewachsen.
+      **Habitat-Filter fuer `nearestReal()`** (behebt #31): die Ursache war
+      nicht die Physik (der fruehere `landDesiccation`-Versuch scheiterte daran,
+      dass das `desicc`-Gen nicht mit echtem Habitat korreliert, s. u.), sondern
+      dass `nearestReal()` beim Benennen einer entwickelten Art rein nach
+      Genom-Distanz suchte — ganz ohne Ruecksicht auf das gespielte Milieu. Neues
+      Katalog-Feld `habWater` (quantisierte Medium-Achse aus `habitatOf()` ueber
+      die Elternkette, Kladen-Ebene wie `clade-rules.mjs` — nicht das unzuverlaessige
+      `desicc`-Gen) plus weicher Strafterm in `nearestReal()` (`dist *= 1 + 2.0 *
+      |envWater - habWater|`, dieselbe „strecken statt ausschliessen"-Philosophie
+      wie `ARCH.requiresPenalty`). Gemessen (3000 Zufallsgenome je Umwelt, worst
+      case): Medium-Fehltreffer LAND 59,3% -> 53,7%, WASSER 31,1% -> 24,2%,
+      Aenderungen in 10-16% der Faelle. Vollstaendig validiert (`catalog-check`,
+      `clade-rules-check`, `app-parity` bitgleich, `exemplar-check`, `key-check`,
+      `design-audit`; `plausi-check` unveraendert zu vorher — dieselben 7/10
+      bekannten Altlasten, keine neuen Verstoesse). `APP_VERSION` v0.90.0 -> v0.91.0.
+      **Ehrlich offen:** die Strafe reduziert Fehltreffer statistisch, garantiert
+      aber keine Ausschluss — in Bauplan-Gruppen ohne jede habitatpassende reale
+      Art (z. B. rein marine Kladen) bleibt der naechste Genom-Nachbar die einzige
+      Wahl, auch wenn er zum Milieu nicht passt.
+
 **Jeder Schritt hat ein `npm run …-check`** — die Prüfstands-Kultur gilt unverändert.
 
 **Umgebungs-Befund (2026-08-01, erledigt):** Wikidata/Wikipedia waren aus der
@@ -2043,7 +2081,29 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       - [x] 🪼 Leuchtwesen/Qualle (Schirm + Tentakel) — erledigt (2026-08-05).
             `halfEllipse` für den Schirm, radiale Markierung, sechs dünne wallende
             Tentakel (bewusst dünn/ohne Saugnäpfe, anders als der Kraken-Arm).
-      - [ ] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
+      - [x] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
+            — Zeichner am 2026-08-05 gebaut (5880e8b), **Fotoaudit erst 2026-08-07
+            nachgeholt** (Commit `44dfb7c` Wal, `6a3d16c` Robbe). Der Haken blieb bis
+            dahin bewusst offen, weil der Pflichtschritt 2 der Checkliste (Referenzfoto)
+            fehlte — **dritter Fall derselben Lücke** nach dem GLINT-Audit (Nachtrag 4)
+            und der Pflanzen-Runde (Nachtrag 6). Der Nachtrag hat sich wieder gelohnt:
+            gegen Buckelwal-Foto lief die Wal-Silhouette vorn spitz zu und die Fluke stand
+            SENKRECHT wie eine Fischschwanzflosse (das eine Merkmal, das Wal von Fisch
+            trennt), die Rückenfinne war ein Haifisch-Dreieck, das Blasloch fehlte ganz;
+            gegen Seehund-Foto hatte die Robbe überhaupt keinen Kopf (dasselbe
+            Spindelprofil wie der Wal, ohne Schädelkuppel/Halskerbe), keine Krallen an der
+            Vorderflosse, kein Nasenloch, drei statt eines Vibrissen-Fächers, und die
+            Hinterflossen kreuzten sich zu einem X. Neu dabei: Helfer `clawFan()` für
+            Krallen-/Zehenfächer an Flossenspitzen.
+            **Lehre (zur harten Regel ergänzt):** ein abgehakter Zeichner ist noch kein
+            geprüfter Zeichner — die Foto-Pflicht gilt auch dann, wenn der Zweig bereits
+            existiert und "plausibel aussieht".
+            **Werkzeug-Nebenfund (`f4543f6`):** `creature-shot` öffnete das Fenster mit
+            500 px Breite und geriet damit unter den 820-px-Umbruch von `app/style.css`,
+            der die Bühne auf 190 px Höhe beschneidet — Rücken, Blasloch und Rückenfinne
+            lagen schlicht außerhalb jedes bisherigen Screenshots. Fenster jetzt 900x820,
+            neues Flag `--bare` blendet die HUD-Leiste über der Bühne aus. Ohne diesen Fix
+            wäre das Audit gar nicht durchführbar gewesen.
       - [x] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — **alle erledigt (2026-08-05)**. Fall-für-Fall wie
             geplant entschieden: eigener Zeichner nur, wo der Bauplan strukturell abweicht
             (🦐🧂⚓ EIN gemeinsamer Krebstier-Zeichner; 🪲 Elytren+Mittelnaht; 🥟 8 Stummel-
@@ -2053,7 +2113,9 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
             **Systemischer Fund dabei:** der Fell-Borstenkranz lief rein über `insul` und
             traf damit auch Gecko/Schildkröte/Chamäleon — Reptilien mit Fell. Für alle
             `sprawl`-Kinds unterdrückt; ein Fix, drei Archetypen.
-            **Phase 1b damit abgeschlossen: 14/14.**
+            **Phase 1b damit abgeschlossen: 14/14** — Stand 2026-08-05 galt das für die
+            gebauten Zeichner; **wirklich vollständig (inkl. Foto-Abgleich für jeden der
+            14) ist Phase 1b erst seit 2026-08-07**, s. den Meeressäuger-Punkt darüber.
       **Modell:** Opus — neue Bauplan-Geometrien, großer Ermessensspielraum bei Form/Proportion.
 
       **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame

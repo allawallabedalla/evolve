@@ -37,7 +37,7 @@ export function loadAppCore(toolName = "app-core") {
   const genSrc    = grab(/function generateFormName\(t, e, w, near\)\{[\s\S]*?\n\}/, "generateFormName()");
   const matchSrc  = grab(/function matchArchetype\(t, e\)\{[\s\S]*?\n\}/, "matchArchetype()");
   // Stufe 2 des Matchers (Schritt 0.3): naechste reale Art innerhalb der Bauplan-Gruppe.
-  const realSrc   = grab(/function nearestReal\(t, groupKey, w\)\{[\s\S]*?\n\}/, "nearestReal()");
+  const realSrc   = grab(/const HABITAT_PENALTY_K[\s\S]*?function nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/, "nearestReal()");
   const classSrc  = grab(/function classify\(t, envIn\)\{[\s\S]*?\n\}/, "classify()");
   // Bauplan-SATZ (die Zeile unter dem Artnamen). Wird von tools/plausi-check.mjs
   // gegen den Katalog und gegen die Zeichnung geprueft — deshalb hier mit heraus.

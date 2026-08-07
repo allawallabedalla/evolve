@@ -189,6 +189,8 @@
         </details>
         <div class="dpanel-row"><button class="gene-nums-toggle" id="fantasyModeBtn" aria-pressed="false" title="Wesen entwickeln erfundene statt echte Arten">Fantasiemodus: Aus</button></div>
         <p class="dpanel-note">Ausgeschaltet entwickeln sich deine Wesen zu <b>echten, bei Wikipedia dokumentierten Arten</b>. Eingeschaltet entstehen stattdessen frei erfundene Namen im selben Klang — dein Wesen bleibt dann keiner realen Art mehr ähnlich benannt.</p>
+        <div class="dpanel-row"><button class="gene-nums-toggle" id="realWeatherBtn" aria-pressed="false" title="Klima beim Laden einmalig an das reale Wetter in Frankfurt koppeln">Reales Wetter: Aus</button></div>
+        <p class="dpanel-note">Eingeschaltet prüft die Seite <b>einmal beim Laden</b>, wie warm es gerade in Frankfurt ist, und verschiebt dein Klima passend — deutlich kalt wird zum Kälteeinbruch, deutlich warm zur Warmzeit. Mildes Wetter verändert nichts.</p>
       </div>
       <div class="dpanel-sec">
         <h3>Anzeige</h3>
@@ -450,7 +452,7 @@
 <script>
 "use strict";
 // App-Version — bei jedem Deploy erhöhen (PATCH = Fix/kleine Änderung, MINOR = Feature).
-const APP_VERSION = "v0.90.0";
+const APP_VERSION = "v0.91.0";
 // ======================= Engine (inline, identisch zur validierten TS-Engine) =======================
 // AUTO-GENERIERT von tools/bundle-app-fitness.mjs — nicht von Hand editieren.
 // Quelle: physics.json + dist/engine/fitness.js. Neu erzeugen: npm run bundle-app
@@ -1423,10 +1425,20 @@ function archIcon(a, cls){ return formIcon(a.novel ? a.n : a.key, cls); }
 // hier also nicht pruefbar — sie wird in Schritt 1.4 an echter Konfidenz-Streuung
 // kalibriert statt jetzt geraten.
 const CAT = window.CATALOG || null;
-function nearestReal(t, groupKey, w){
+// Habitat-Fehlpassung (Issue #31: eine marine Art erschien als "naechste reale Art"
+// unabhaengig vom gewaehlten Milieu, weil nearestReal() rein nach Genom-Distanz suchte).
+// `habWater` kommt aus habitatOf() ueber die Elternkette (Kladen-Ebene, wie clade-rules.mjs)
+// — NICHT aus dem gemessenen/imputierten `desicc`-Gen, dessen Werte nachweislich nicht mit
+// echtem Land/Wasser-Habitat korrelieren (BACKLOG "Landgang-Befund": Wolf 0.008, Braunbaer
+// 0.031 — beide UNTER einem Seestern). Weiches Fenster wie bei ARCH.requiresPenalty
+// (matchArchetype) statt harter Ausschluss: eine Fehlpassung STRECKT den Abstand, macht
+// den Kandidaten aber nie unmoeglich (manche Bauplan-Gruppen haben nur wenige reale Arten).
+const HABITAT_PENALTY_K = 2.0;
+function nearestReal(t, groupKey, w, e){
   if(!CAT) return null;
   const idx = CAT.byGroup[groupKey];
   if(!idx || !idx.length) return null;
+  const envWater = e && e.water!=null ? e.water : 0.6;
   let best = null, dBest = Infinity;
   for(const i of idx){
     const e = CAT.entries[i];
@@ -1435,7 +1447,8 @@ function nearestReal(t, groupKey, w){
       const d = (t[g] - e.genome[g]/255) * w[g];
       sum += d*d; z += w[g]*w[g];
     }
-    const dist = Math.sqrt(sum/Math.max(z, 1e-9));
+    let dist = Math.sqrt(sum/Math.max(z, 1e-9));
+    if(e.habWater!=null) dist *= 1 + HABITAT_PENALTY_K * Math.abs(envWater - e.habWater/255);
     if(dist < dBest){ dBest = dist; best = e; }
   }
   return best ? { e: best, dist: dBest } : null;
@@ -1685,7 +1698,7 @@ function matchArchetype(t, e){
              alt: second ? second.f.n : null, novel:false, dist:dBest, real:null,
              form: best.f.n };
   }
-  const real = nearestReal(t, best.f.key, w);
+  const real = nearestReal(t, best.f.key, w, e);
   return { k:best.f.k, n: (CATALOG_NAMES && real) ? (real.e.de || real.e.sci) : best.f.n,
            e:best.f.e, key:best.f.key, conf, margin, settled,
            alt: second ? second.f.n : null, novel:false, dist:dBest, real,
@@ -3584,6 +3597,52 @@ sb.auth.onAuthStateChange((event, s) => {
   document.getElementById("login").hidden = true;
   if(s && !was) restore();   // gerade angemeldet -> Cloud-Wesen laden
 });
+// ================= Reales Wetter (optional) =================
+// Nutzer-Wunsch (Issue #32): Klima kann optional an das reale Wetter gekoppelt werden —
+// "warm in Deutschland -> Warmzeit, kalt -> Eiszeit". Fest auf Frankfurt (kein
+// Geolocation-Prompt noetig, fuer jeden Besucher dieselbe, nachvollziehbare Quelle) und
+// NUR EINMAL beim Laden der Seite (kein Hintergrund-Timer, keine Netzfehler mitten im
+// Spiel). Open-Meteo: kostenlos, kein API-Key, CORS-freundlich fuer eine rein
+// clientseitige, ueber GitHub Pages ausgelieferte Seite.
+const REAL_WEATHER_KEY = "evolveRealWeather";
+const FRANKFURT = { lat: 50.11, lon: 8.68 };
+async function applyRealWeather(){
+  if(localStorage.getItem(REAL_WEATHER_KEY) !== "1") return;
+  let temp;
+  try {
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${FRANKFURT.lat}&longitude=${FRANKFURT.lon}&current=temperature_2m`,
+      { signal: ctrl.signal });
+    clearTimeout(to);
+    if(!res.ok) return;
+    temp = (await res.json())?.current?.temperature_2m;
+  } catch(e){ return; }   // kein Netz/Timeout -> still bleiben, App laeuft unbeeinflusst weiter
+  if(typeof temp !== "number") return;
+  // Dieselben Verschiebungen wie die Klima-Ereignisse "Kälteeinbruch"/"Warmzeit & Blüte"
+  // in der Lebenden Welt (s. dortiges EVENTS) — ein Wortschatz, keine zwei. Gemaessigtes
+  // Wetter (5..25°C) veraendert bewusst nichts: nicht jeder Tag ist ein Klima-Ereignis.
+  let shift = null, label = null;
+  if(temp <= 5){ shift = { temperature:.08, foodAbundance:.4 }; label = "Kälteeinbruch"; }
+  else if(temp >= 25){ shift = { temperature:.6, foodAbundance:.85, light:.7 }; label = "Warmzeit & Blüte"; }
+  if(!shift) return;
+  Object.assign(env, shift);
+  syncLeverInputs();
+  renderStressChips();
+  lastBiome = label; document.getElementById("biomeTag").textContent = label;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  _why.t = 0;   // Umwelt geaendert -> Warum-Zeile darf sofort neu rechnen
+  _story.lastEnv = Object.assign({}, env);   // Basis fuer den naechsten Spieler-Regler-Zug
+  const tRound = Math.round(temp);
+  const satz = label === "Kälteeinbruch"
+    ? `Frankfurt meldet ${tRound}°C — ein Kälteeinbruch zieht durch deine Welt.`
+    : `Frankfurt meldet ${tRound}°C — eine Warmzeit setzt ein.`;
+  chronicle.push({ t: satz, g: generation });
+  if(chronicle.length > CHRON_MAX) chronicle.shift();
+  renderChron(); saveChron();
+  showInfoToast(satz);
+}
 async function boot(){
   // ZUERST der Populations-Kern: restore()/offlineCatchup() setzen den gespeicherten
   // Stand direkt in den Schwarm. Bis das Modul da ist (wenige ms) zeigt die App das
@@ -3592,6 +3651,7 @@ async function boot(){
   try { const { data } = await sb.auth.getSession(); session = data.session; } catch(e) { console.warn(e); }
   updateAuthUI();
   await restore();
+  await applyRealWeather();
 }
 
 // ---- UI aufbauen ----
@@ -3893,6 +3953,19 @@ GENE_LABELS.forEach((lbl,i) => {
     FANTASY_MODE = !FANTASY_MODE; apply(FANTASY_MODE);
     localStorage.setItem("evolveFantasyMode", FANTASY_MODE?"1":"0");
     committedArch = classify(genome); candArch = null; candCount = 0;
+  });
+})();
+// Reales-Wetter-Umschalter (dasselbe localStorage-Muster wie oben). Nur der Schalter
+// selbst sitzt hier — der eigentliche Abruf laeuft einmalig in applyRealWeather()
+// (nach restore() in boot(), s. u.), nicht bei jedem Klick.
+(function(){
+  const btn=document.getElementById("realWeatherBtn");
+  const apply = v => { btn.setAttribute("aria-pressed", v?"true":"false");
+    btn.textContent = v ? "Reales Wetter: An" : "Reales Wetter: Aus"; };
+  apply(localStorage.getItem(REAL_WEATHER_KEY)==="1");
+  btn.addEventListener("click", ()=>{
+    const v = localStorage.getItem(REAL_WEATHER_KEY)!=="1";
+    apply(v); localStorage.setItem(REAL_WEATHER_KEY, v?"1":"0");
   });
 })();
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
@@ -6810,41 +6883,134 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     // eine eigene Tinten-Kontur und lesen als Naht quer durch den Koerper — genau der
     // "Erdnuss"-Fehler, der beim Gecko-Kopf schon einmal auftrat (s. Nachtrag 1).
     const backY = cy-H*0.92, bellyY = cy+H*0.9;
-    P("an-body", `M${headX.toFixed(1)},${(cy+H*0.18).toFixed(1)}`
-      + `C${(headX+L*0.22).toFixed(1)},${(cy-H*0.75).toFixed(1)} ${(cx-L*0.25).toFixed(1)},${backY.toFixed(1)} ${(cx+L*0.2).toFixed(1)},${(cy-H*0.7).toFixed(1)}`
-      + `C${(cx+L*0.5).toFixed(1)},${(cy-H*0.52).toFixed(1)} ${(stockX-R*0.15).toFixed(1)},${(cy-H*0.3).toFixed(1)} ${stockX.toFixed(1)},${(cy-H*0.12).toFixed(1)}`
-      + `L${stockX.toFixed(1)},${(cy+H*0.14).toFixed(1)}`
-      + `C${(stockX-R*0.15).toFixed(1)},${(cy+H*0.42).toFixed(1)} ${(cx+L*0.4).toFixed(1)},${(cy+H*0.72).toFixed(1)} ${(cx-L*0.05).toFixed(1)},${bellyY.toFixed(1)}`
-      + `C${(cx-L*0.45).toFixed(1)},${(cy+H*0.95).toFixed(1)} ${(headX+L*0.15).toFixed(1)},${(cy+H*0.7).toFixed(1)} ${headX.toFixed(1)},${(cy+H*0.18).toFixed(1)}Z`,
-      { fill: skin });
+    const N = v => v.toFixed(1);
+    // Krallen/Zehen an einer Flossenspitze: n kurze Striche, faecherfoermig um die
+    // Tangentenrichtung (ux,uy) gelegt. Auf dem Seehund-Referenzfoto sind an der
+    // Vorderflosse fuenf dunkle Krallen einzeln zu erkennen — neben den Vibrissen das
+    // auffaelligste Robbenmerkmal (und der klarste Unterschied zur glatten Walflosse).
+    const clawFan = (tx,ty,ux,uy,n,spread,len) => {
+      const nx=-uy, ny=ux; let d="";
+      for(let i=0;i<n;i++){ const o=(i-(n-1)/2)*spread, bx=tx+nx*o, by=ty+ny*o;
+        d += `M${N(bx)},${N(by)}L${N(bx+ux*len)},${N(by+uy*len)}`; }
+      return d;
+    };
+    // Fotoaudit 2026-08-07 (Buckelwal mit Kalb, Commons "Humpback whale (Megaptera
+    // novaeangliae) with calf Moorea 2"): der bisherige Umriss lief vorn SPITZ zu und las
+    // damit als Fisch/Thunfisch. Ein Bartenwal hat einen stumpfen, breiten Rostrum-Kopf,
+    // der vorn gerundet endet — die Schnauzenspitze ist im Foto so breit wie der halbe
+    // Kopf. Deshalb fuer den Wal ein eigenes Profil mit gerundeter Schnauze (die letzte
+    // C-Kurve schliesst den Umriss vorn ueber einen Bogen statt in einem Punkt) und
+    // groesstem Umfang deutlich VOR der Koerpermitte, wie im Foto.
+    const bodyPath = whale
+      ? `M${N(headX+L*0.06)},${N(cy-H*0.34)}`
+        + `C${N(headX+L*0.34)},${N(cy-H*0.80)} ${N(cx-L*0.28)},${N(backY)} ${N(cx+L*0.20)},${N(cy-H*0.70)}`
+        + `C${N(cx+L*0.50)},${N(cy-H*0.52)} ${N(stockX-R*0.15)},${N(cy-H*0.30)} ${N(stockX)},${N(cy-H*0.12)}`
+        + `L${N(stockX)},${N(cy+H*0.14)}`
+        + `C${N(stockX-R*0.15)},${N(cy+H*0.42)} ${N(cx+L*0.40)},${N(cy+H*0.72)} ${N(cx-L*0.05)},${N(bellyY)}`
+        + `C${N(cx-L*0.45)},${N(cy+H*0.95)} ${N(headX+L*0.14)},${N(cy+H*0.72)} ${N(headX+L*0.06)},${N(cy+H*0.42)}`
+        + `C${N(headX-L*0.06)},${N(cy+H*0.26)} ${N(headX-L*0.06)},${N(cy-H*0.16)} ${N(headX+L*0.06)},${N(cy-H*0.34)}Z`
+      // Fotoaudit 2026-08-07 (Seehund, Commons "Seehund2cele4"): die Robbe teilte sich mit
+      // dem Wal EIN spindelfoermiges Profil und hatte damit ueberhaupt keinen Kopf — vorn
+      // spitz, hinten spitz, dazwischen nichts. Auf dem Foto ist der Kopf einer Robbe eine
+      // deutlich abgesetzte runde Kugel mit kurzer stumpfer Schnauze, dahinter eine klar
+      // sichtbare Halseinschnuerung, dann der dickste Punkt an Brust/Schulter und ein
+      // gleichmaessiger Verlauf zu schmalen Huften. Genau diese vier Stationen als eigene
+      // Kurvenabschnitte (Schaedelkuppel -> Halskerbe -> Ruecken -> Stiel), damit die
+      // Silhouette EIN Pfad bleibt (keine zweite Kopf-Ellipse, s. "Erdnuss"-Fehler).
+      : `M${N(headX+L*0.05)},${N(cy-H*0.34)}`
+        + `C${N(headX+L*0.02)},${N(cy-H*0.62)} ${N(headX+L*0.16)},${N(cy-H*0.84)} ${N(headX+L*0.32)},${N(cy-H*0.68)}`
+        + `C${N(headX+L*0.38)},${N(cy-H*0.60)} ${N(headX+L*0.42)},${N(cy-H*0.50)} ${N(headX+L*0.48)},${N(cy-H*0.54)}`
+        + `C${N(headX+L*0.62)},${N(cy-H*0.60)} ${N(cx-L*0.38)},${N(cy-H*0.98)} ${N(cx-L*0.05)},${N(backY)}`
+        + `C${N(cx+L*0.35)},${N(cy-H*0.86)} ${N(stockX-R*0.25)},${N(cy-H*0.34)} ${N(stockX)},${N(cy-H*0.12)}`
+        + `L${N(stockX)},${N(cy+H*0.14)}`
+        + `C${N(stockX-R*0.25)},${N(cy+H*0.38)} ${N(cx+L*0.35)},${N(cy+H*0.86)} ${N(cx-L*0.05)},${N(bellyY)}`
+        + `C${N(cx-L*0.45)},${N(cy+H*0.98)} ${N(headX+L*0.24)},${N(cy+H*0.80)} ${N(headX+L*0.08)},${N(cy+H*0.46)}`
+        + `C${N(headX-L*0.04)},${N(cy+H*0.30)} ${N(headX-L*0.04)},${N(cy-H*0.14)} ${N(headX+L*0.05)},${N(cy-H*0.34)}Z`;
+    P("an-body", bodyPath, { fill: skin });
     // Schwanzende: Wal hat EINE horizontale Fluke, die Robbe PAARIGE Hinterflossen — beim
     // ersten Wurf trug die Robbe faelschlich die Wal-Fluke (eigener Nachcheck-Fund).
     // Beide setzen bewusst INNERHALB des Schwanzstiels an, damit keine Luecke klafft.
-    const flukeEl = cEl("an-fluke","polygon"), hindEl = cEl("an-hind","path");
+    const flukeEl = cEl("an-fluke","path"), hindEl = cEl("an-hind","path");
     if(whale){
-      cAttr(flukeEl, { points:
-        `${(stockX-R*0.12).toFixed(1)},${cy.toFixed(1)} ${(stockX+R*0.6).toFixed(1)},${(cy-R*0.44).toFixed(1)} `
-        +`${(stockX+R*0.34).toFixed(1)},${cy.toFixed(1)} ${(stockX+R*0.6).toFixed(1)},${(cy+R*0.36).toFixed(1)}`,
+      // Fotoaudit 2026-08-07: die Fluke war HOEHER als lang (0,8R hoch, 0,72R lang) und las
+      // damit als senkrechte Fischschwanzflosse — genau das eine Merkmal, das Wal und Fisch
+      // in der Seitenansicht unterscheidet. Auf dem Referenzfoto ist die Fluke ein flaches,
+      // WAAGERECHTES Blatt: gut doppelt so breit wie hoch, Spitzen nach hinten gepfeilt,
+      // Hinterkante konkav mit Mittelkerbe. Proportion entsprechend gedreht (1,05R lang,
+      // 0,48R hoch); die Kerbe bleibt als echte Fluke-Landmarke erhalten.
+      // Die Kerbe sitzt bewusst FLACH (bei 0,80R von 1,02R Spannweite): eine tiefe Gabelung
+      // ist der Fischschwanz, die Fluke eines Wals hat nur einen kleinen Mitteleinschnitt
+      // in einer sonst durchgehenden, leicht konkaven Hinterkante (Referenzfoto: Fluke des
+      // Kalbs). Hinterkante deshalb als Q-Boegen statt gerader Polygonkanten.
+      cAttr(flukeEl, { d:
+        `M${N(stockX-R*0.10)},${N(cy)}`
+        + `L${N(stockX+R*1.02)},${N(cy-R*0.30)}`
+        + `Q${N(stockX+R*0.80)},${N(cy-R*0.11)} ${N(stockX+R*0.80)},${N(cy)}`
+        + `Q${N(stockX+R*0.80)},${N(cy+R*0.12)} ${N(stockX+R*1.02)},${N(cy+R*0.32)}Z`,
         fill: flatStep(skinArr, -1), opacity: 1,
         transform:`rotate(${(Math.sin(time*0.003)*5).toFixed(1)},${stockX.toFixed(1)},${cy.toFixed(1)})` });
       cAttr(hindEl, { opacity: 0 });
     } else {
-      let hind = "";
-      for(const sd of [-1,1]) hind += bezierRibbon(stockX-R*0.12,cy, stockX+R*0.3,cy+sd*R*0.12,
-        stockX+R*0.62,cy+sd*R*0.4, R*0.2, R*0.13);
+      // Fotoaudit 2026-08-07: die beiden Hinterflossen liefen als gespiegelte Baender
+      // GEGENEINANDER durch den Schwanzstiel und kreuzten sich zu einem X — im Bild ein
+      // Scheren-Gewirr statt eines Koerperteils (derselbe Fehlertyp wie die sich
+      // ueberlappenden Frosch-Beinpaare, s. Nachtrag 2). Auf dem Foto sitzen sie am
+      // aeussersten Koerperende und faechern von EINER Wurzel gemeinsam nach hinten auf.
+      // Ein EINZIGER Pfad statt zweier Baender: zwei getrennte bezierRibbons haben an der
+      // gemeinsamen Wurzel zwangslaeufig ueberlappende Konturen, die sich als kleines X
+      // kreuzen (im Bild ein Knoten aus Tinte). Als ein Fanpfad mit TIEFEM Mitteleinschnitt
+      // bleibt derselbe Befund vom Foto erhalten — zwei deutlich getrennte Flossenblaetter,
+      // die erst an der Basis zusammenlaufen — ohne Konturkreuzung. Die Kerbe ist hier
+      // bewusst tief (0,30R von 0,85R), anders als die flache Fluke-Kerbe des Wals: das
+      // sind zwei einzelne Gliedmassen, kein durchgehendes Schwanzblatt.
+      // Die Spitzen enden bewusst stumpf (zwei Eckpunkte statt einer Spitze): spitz
+      // auslaufende Lappen lesen als gegabelte Fischschwanzflosse, die Hinterflosse einer
+      // Robbe ist im Foto ein breites Blatt mit gerader Hinterkante.
+      const hind = `M${N(stockX-R*0.10)},${N(cy)}`
+        + `L${N(stockX+R*0.34)},${N(cy-R*0.56)}`
+        + `L${N(stockX+R*0.62)},${N(cy-R*0.22)}`
+        + `Q${N(stockX+R*0.34)},${N(cy-R*0.10)} ${N(stockX+R*0.14)},${N(cy)}`
+        + `Q${N(stockX+R*0.34)},${N(cy+R*0.11)} ${N(stockX+R*0.62)},${N(cy+R*0.24)}`
+        + `L${N(stockX+R*0.34)},${N(cy+R*0.58)}Z`;
       cAttr(hindEl, { d: hind, fill: flatStep(skinArr,-1), opacity: 1 });
       cAttr(flukeEl, { opacity: 0 });
     }
-    // Brustflosse statt Beinen (beim Buckelwal auffaellig lang, bei der Robbe kuerzer).
-    P("an-pect", bezierRibbon(cx-L*0.35,cy+H*0.55, cx-L*0.1,cy+H*1.3, cx+L*0.12,cy+H*(whale?1.75:1.3),
-      R*0.26, R*0.1), { fill: flatStep(skinArr, -1) });
-    const dorsalEl = cEl("an-dorsal","polygon");
+    // Zehen an den Hinterflossen (nur Robbe) — im Foto sind die Zehenstrahlen an der
+    // Hinterkante einzeln sichtbar, die Flosse ist kein glattes Blatt.
+    const hindToesEl = cEl("an-hindtoes","path");
+    if(whale) cAttr(hindToesEl, { opacity: 0 });
+    else cAttr(hindToesEl, { d:
+        clawFan(stockX+R*0.48, cy-R*0.39, 0.772,-0.636, 3, R*0.10, R*0.11)
+      + clawFan(stockX+R*0.48, cy+R*0.41, 0.772, 0.636, 3, R*0.10, R*0.11),
+      stroke: flatCol(dark), "stroke-opacity": .55, "stroke-width": 1.4, "stroke-linecap":"round",
+      fill:"none", opacity: 1 });
+    // Brustflosse statt Beinen (beim Buckelwal auffaellig lang, bei der Robbe kuerzer und
+    // deutlich weiter VORN an der Brust — im Foto sitzt sie direkt hinter dem Hals, nicht
+    // auf halber Koerperlaenge wie bisher gezeichnet).
+    P("an-pect", whale
+      ? bezierRibbon(cx-L*0.35,cy+H*0.55, cx-L*0.10,cy+H*1.30, cx+L*0.12,cy+H*1.75, R*0.26, R*0.10)
+      : bezierRibbon(cx-L*0.60,cy+H*0.60, cx-L*0.44,cy+H*1.02, cx-L*0.24,cy+H*1.12, R*0.26, R*0.18),
+      { fill: flatStep(skinArr, -1) });
+    // Krallen an der Vorderflosse (nur Robbe): auf jedem Seehund-Foto einzeln zu sehen,
+    // fehlten komplett — die Flosse war ein glattes Paddel wie beim Wal.
+    const clawEl = cEl("an-claws","path");
+    if(whale) cAttr(clawEl, { opacity: 0 });
+    else cAttr(clawEl, { d: clawFan(cx-L*0.24, cy+H*1.12, 0.983, 0.186, 5, R*0.042, R*0.13),
+      stroke: flatCol(dark), "stroke-opacity": .7, "stroke-width": 1.5, "stroke-linecap":"round",
+      fill:"none", opacity: 1 });
+    const dorsalEl = cEl("an-dorsal","path");
     if(whale){
       // Rueckenfinne muss AUF der Ruecken-Kurve sitzen — schwebte vorher frei ueber dem
       // Koerper, weil ihre y-Werte aus der alten (flacheren) Rumpfform stammten. Basis
-      // jetzt bewusst leicht IN den Ruecken hinein (+H*0.06), damit sie anwaechst.
-      const dx0=cx+L*0.24, dx1=cx+L*0.46, dyBase=cy-H*0.58;
-      cAttr(dorsalEl, { points:`${dx0.toFixed(1)},${(dyBase+H*0.06).toFixed(1)} ${((dx0+dx1)/2).toFixed(1)},${(dyBase-H*0.5).toFixed(1)} ${dx1.toFixed(1)},${(dyBase+H*0.1).toFixed(1)}`,
+      // bewusst leicht IN den Ruecken hinein, damit sie anwaechst.
+      // Fotoaudit 2026-08-07: sie war ausserdem ein grosses gleichschenkliges Dreieck und
+      // las damit als HAIFISCHFLOSSE — auf dem Referenzfoto ist die Finne eines Bartenwals
+      // klein (rund ein Sechstel der Koerperhoehe statt einem Drittel), sitzt auf einem
+      // flachen Buckel und ist sichelfoermig nach hinten gebogen (konkave Hinterkante).
+      cAttr(dorsalEl, { d:
+        `M${N(cx+L*0.27)},${N(cy-H*0.62)}`
+        + `Q${N(cx+L*0.31)},${N(cy-H*0.97)} ${N(cx+L*0.43)},${N(cy-H*0.88)}`
+        + `Q${N(cx+L*0.40)},${N(cy-H*0.70)} ${N(cx+L*0.45)},${N(cy-H*0.53)}Z`,
         fill: skin, opacity: 1 });
     } else cAttr(dorsalEl, { opacity: 0 });
     // Kehlfurchen (Furchenwal — namensgebend, im Referenzfoto deutlich) bzw. bei der Robbe
@@ -6852,15 +7018,46 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let detail = "";
     if(whale){ for(let i=0;i<5;i++){ const dy=cy+H*0.35+i*H*0.16;
         detail += `M${(headX+L*0.18).toFixed(1)},${dy.toFixed(1)}Q${(cx-L*0.5).toFixed(1)},${(dy+H*0.12).toFixed(1)} ${(cx-L*0.02).toFixed(1)},${(dy+H*0.05).toFixed(1)}`; } }
-    else { for(let i=0;i<3;i++){ const a2=(i-1)*0.22;
-        detail += `M${(headX+L*0.12).toFixed(1)},${(cy+H*0.2).toFixed(1)}L${(headX-R*0.3).toFixed(1)},${(cy+H*0.2+a2*R*0.7).toFixed(1)}`; } }
+    // Fotoaudit 2026-08-07: die Vibrissen waren drei kurze gerade Striche. Auf dem
+    // Seehund-Foto ist es ein dichter Faecher aus langen, leicht gebogenen Tasthaaren,
+    // der gut eine Schnauzenlaenge nach vorn steht — das praegendste Kopfmerkmal.
+    else { for(let i=0;i<7;i++){ const a2=(i-3)*0.17;
+        detail += `M${N(headX+L*0.14)},${N(cy+H*0.16)}`
+          + `Q${N(headX-L*0.08)},${N(cy+H*0.16+a2*R*0.42)} ${N(headX-L*0.30)},${N(cy+H*0.16+a2*R*0.85)}`; } }
     P("an-detail", detail, { stroke: flatCol(dark), "stroke-opacity": whale?.35:.5, "stroke-width": 1.2, fill:"none" });
+    // Blasloch (nur Wal): auf dem Referenzfoto der eine Kopf-Landmark, die jedes
+    // Wal-Foto in Seitenansicht zeigt und die vorher komplett fehlte — ein flacher
+    // Wulst auf dem Scheitel mit dunklem Spalt darin. Sitzt bewusst auf der
+    // Ruecken-Kurve (bei x = cx-0,60L laeuft sie durch cy-0,70H), damit der Wulst
+    // anwaechst statt zu schweben.
+    const blowEl = cEl("an-blow","path"), blowSlitEl = cEl("an-blowslit","path");
+    if(whale){
+      cAttr(blowEl, { d:`M${N(cx-L*0.71)},${N(cy-H*0.63)}Q${N(cx-L*0.60)},${N(cy-H*0.97)} ${N(cx-L*0.49)},${N(cy-H*0.72)}Z`,
+        fill: skin, opacity: 1 });
+      cAttr(blowSlitEl, { d:`M${N(cx-L*0.655)},${N(cy-H*0.735)}L${N(cx-L*0.545)},${N(cy-H*0.775)}`,
+        stroke: flatCol(dark), "stroke-width": 2.4, "stroke-linecap":"round", fill:"none", opacity: 1 });
+    } else { cAttr(blowEl, { opacity: 0 }); cAttr(blowSlitEl, { opacity: 0 }); }
+    // Nasenloch (nur Robbe): auf dem Seehund-Foto ein deutlicher dunkler Schlitz vorn oben
+    // auf der Schnauze — fehlte komplett (Gesichtsdetails proaktiv pruefen, Nachtrag 2).
+    const nostrilEl = cEl("an-nostril","path");
+    if(whale) cAttr(nostrilEl, { opacity: 0 });
+    else cAttr(nostrilEl, { d:`M${N(headX+L*0.01)},${N(cy-H*0.10)}L${N(headX+L*0.06)},${N(cy+H*0.02)}`,
+      stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none", opacity: 1 });
     // Maul: lange Linie vom Schnauzenende zurueck (Wal: sehr lang, Robbe: kurz).
-    P("an-mouth", `M${(headX-R*0.05).toFixed(1)},${(cy+H*0.28).toFixed(1)}Q${(headX+L*(whale?0.35:0.18)).toFixed(1)},${(cy+H*(whale?0.62:0.5)).toFixed(1)} ${(headX+L*(whale?0.72:0.34)).toFixed(1)},${(cy+H*0.42).toFixed(1)}`,
+    // Fotoaudit 2026-08-07: beim Wal setzt die Mundlinie jetzt an der neuen, stumpfen
+    // Schnauzenspitze an und endet erst bei ~2/3 der Kopflaenge — im Referenzfoto reicht
+    // der Mundspalt eines Bartenwals bis fast unter das Auge.
+    P("an-mouth", whale
+      ? `M${N(headX-L*0.03)},${N(cy+H*0.06)}Q${N(headX+L*0.28)},${N(cy+H*0.62)} ${N(headX+L*0.64)},${N(cy+H*0.34)}`
+      : `M${N(headX+L*0.01)},${N(cy+H*0.20)}Q${N(headX+L*0.14)},${N(cy+H*0.46)} ${N(headX+L*0.30)},${N(cy+H*0.34)}`,
       { stroke: flatCol(dark), "stroke-width": 1.6, fill:"none" });
     // Auge klein und tief sitzend (im Referenzfoto unauffaellig, nicht der Riesen-Knopf
-    // des Vierbeiner-Fallbacks).
-    const exW = headX+L*(whale?0.3:0.22), eyW = cy+H*0.08;
+    // des Vierbeiner-Fallbacks). Fotoaudit 2026-08-07: beim Wal sass es auf halber
+    // Koerperhoehe mitten im Kopf; auf jedem Bartenwal-Foto liegt das Auge dicht HINTER
+    // dem Mundwinkel und tief — entsprechend nach hinten/unten versetzt. Bei der Robbe
+    // umgekehrt: das Auge sitzt im Foto HOCH in der runden Schaedelkuppel (grosse dunkle
+    // Knopfaugen sind dort richtig), nicht auf der Koerpermittellinie.
+    const exW = headX+L*(whale?0.70:0.18), eyW = cy+H*(whale?0.20:-0.10);
     P("an-eye", dot(exW, eyW, R*(whale?0.06:0.085)), { fill: EYE });
     P("an-glint", dot(exW-R*0.02, eyW-R*0.025, R*0.025), { fill: GLINT, "fill-opacity": .9 });
     return;
