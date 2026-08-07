@@ -7366,6 +7366,22 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       legs += `M${ax.toFixed(1)},${ay.toFixed(1)}Q${(ax+sd*R*0.5).toFixed(1)},${(ay+R*0.1).toFixed(1)} ${(ax+sd*R*0.85+sw).toFixed(1)},${(ay+R*0.4).toFixed(1)}`; }
     P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": 3, "stroke-linecap":"round", fill:"none" });
     E("an-body", cx, cy, W, H, shell);
+    // Panzer-Zeichnung (Referenzfoto Carcinus maenas, de.wikipedia „Gemeine Strandkrabbe",
+    // Draufsicht): der Carapax ist marmoriert — dunkelgruen-brauner Grund mit helleren,
+    // unregelmaessigen Marmorierungsfeldern, nie einfarbig. Im eigenen Render war er eine
+    // glatte Volltonellipse (Bildbefund), weil das Pigmentfeld nur am Vierbeiner-Rumpf,
+    // am Fisch und an den Falterfluegeln haengt und der Krebstier-Zweig seinen Panzer
+    // selbst zeichnet. Hier ist die Panzerflaeche eine VOLLE Ellipse (anders als die
+    // Schildkroeten-Kuppel), der Test ist also derselbe wie beim Fisch.
+    // Grundton ist der Panzerton, nicht die Rumpffarbe — sonst saessen die Flecken in
+    // einem Farbraum, den der Panzer gar nicht traegt.
+    {
+      const shellRGB = mix(body,[185,90,70],0.55);
+      patternPatches("an", cppnField(g),
+        (x,y) => { const dx=(x-cx)/W, dy=(y-cy)/H; return dx*dx+dy*dy <= 0.9; },
+        { x0: cx-W, y0: cy-H, x1: cx+W, y1: cy+H },
+        shellRGB, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+    }
     let arms="", pincer="";
     for(const sd of [-1,1]){ const cxx=cx+sd*W*0.85, cyy=cy-H*0.7;
       arms += `M${(cx+sd*W*0.6).toFixed(1)},${(cy-H*0.3).toFixed(1)}L${cxx.toFixed(1)},${cyy.toFixed(1)}`;
