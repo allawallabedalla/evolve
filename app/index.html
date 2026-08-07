@@ -6343,6 +6343,7 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
   // sein Leuchten liefert bereits der generische Biolumineszenz-Halo.
   if(kind==="🍄"||kind==="💡"){   // Hutpilz: Stiel + Kappe + Lamellen
     const caps = 1+Math.round(size*2);
+    const capField = cppnField(g);
     for(let c=0;c<caps;c++){
       const off=(c-(caps-1)/2)*22*(0.6+rnd()*0.5);
       const h=(30+size*70)*breath*(0.7+rnd()*0.5), cw=16+size*30;
@@ -6352,6 +6353,22 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
       cAttr(cEl("fun-gill"+c,"path"), { d: halfEllipse(bx+off, by-h+2, cw*0.8, 4, "bottom"),
         fill: flatStep([235,228,210], -1), "fill-opacity": .9 });
       cAttr(cEl("fun-cap"+c,"path"), { d: halfEllipse(bx+off, by-h, cw, cw*0.62, "top"), fill: flatCol(capTone) });
+      // Pigmentzeichnung auf der KAPPE (Referenzfoto Amanita muscaria, s. Archetyp-Vorbild
+      // „Hutpilz"): beim Pilz traegt genau EIN Bauteil die Zeichnung — die Kappe. Stiel,
+      // Lamellen und Myzel sind im Foto einfarbig, deshalb bekommen sie hier auch keine
+      // Musterlage. Die Kappe ist eine obere Halbellipse (halfEllipse(…,"top")), also
+      // derselbe Zuschnitt wie die Schildkroeten-Kuppel: inside() muss die untere Haelfte
+      // ausschliessen, sonst laegen Flecken unter der Kappe in den Lamellen.
+      // Pro Kappe ein eigener Praefix, aber EIN Feld — die Kappen eines Bueschels sind
+      // Klone desselben Genoms und tragen dieselbe Zeichnung.
+      {
+        const ccx = bx+off, ccy = by-h, cry = cw*0.62;
+        patternPatches("fun-cp"+c, capField,
+          (x,y) => { if(y > ccy) return false;
+            const dx=(x-ccx)/cw, dy=(y-ccy)/cry; return dx*dx+dy*dy <= 0.9; },
+          { x0: ccx-cw, y0: ccy-cry, x1: ccx+cw, y1: ccy },
+          capTone, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+      }
       let sp = "";
       for(let d2=0;d2<5;d2++){ const sx=bx+off+(rnd()-0.5)*cw*1.3, sy=by-h-rnd()*cw*0.4, sr=1.5+rnd()*2;
         sp += `M${(sx-sr).toFixed(1)},${sy.toFixed(1)}a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(sr*2).toFixed(1)},0a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(-sr*2).toFixed(1)},0`; }
