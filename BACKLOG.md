@@ -2433,11 +2433,12 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         Einzelzellen, keine Fläche.
       - **Gates nach jedem Schritt:** `design-audit`, `app-parity`, `exemplar-check`,
         `pattern-continuity-check` durchgehend grün; keine Schwelle angefasst.
-      - **Offen geblieben (kleiner, eigener Punkt):** die weißen Velum-Tupfen auf der
-        Hutpilz-Kappe (`fun-dots`) tragen als Nicht-`.cre-mark` die globale Tintenkontur
-        und lesen dadurch als Ringe/Bläschen statt als flache Flecken — im Amanita-Foto
-        sind es randlose weiße Flatschen. Nicht mitgeändert, weil es die Musterschicht
-        nicht betrifft.
+      - **Velum-Tupfen-Fund behoben (2026-08-07):** die weißen Warzen auf der
+        Hutpilz-Kappe (`fun-dots`) trugen als Nicht-`.cre-mark`-Element die globale
+        Tintenkontur und lasen dadurch als Ringe/Bläschen statt als flache Flecken — im
+        Amanita-Foto sind es randlose weiße Flatschen. Fix: `.cre-mark`-Klasse ergänzt
+        (dieselbe Ausnahme, die `patternPatches()` für seine eigenen Flecken schon
+        nutzt). Sichtgeprüft (`creature-shot`), alle vier Gates weiterhin grün.
 
   <details><summary>Ursprünglicher Vorschlag (2026-08-04)</summary>
 
