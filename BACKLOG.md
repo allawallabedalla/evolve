@@ -2314,6 +2314,61 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       - Alle Fixes committed mit `app-parity`/`design-audit`/`exemplar-check`/`key-check`
         grün.
 
+      **Nachtrag 8 — der Mobil-Crop war nur halb behoben: die Kreatur hing am falschen
+      Bezugsmaß (2026-08-07, zweiter Nutzer-Screenshot vom iPhone: „Ich seh das Tier
+      garnicht. Es sollte einen vollen screen füllen." — sichtbar waren nur Beine bzw.
+      ein Stamm, darunter leerer Boden).** Nachtrag 7 hatte `CH` korrekt auf die
+      *tatsächlich gerenderte* Bühnenhöhe umgestellt — aber genau dadurch wurde ein
+      zweiter, älterer Fehler erst scharf:
+      - **Root Cause (per Playwright-BBox-Messung belegt):** die Zeichner-Anker lagen bei
+        `CH*0.6` (Tier/Mikrobe/Protist) bzw. `CH*0.9` (Pflanze/Pilz/Sessil). Zeichner-y
+        wird über `scale(720/CW)` auf die feste 720×560-viewBox gelegt — der Nullpunkt ist
+        also die viewBox-Oberkante, NICHT die Oberkante des sichtbaren Bereichs. Solange die
+        Bühne die viewBox-Ratio hält, fällt beides zusammen. Unter `@media (max-width:820px)
+        { #habitatSvg{height:190px} }` zeigt `preserveAspectRatio="… slice"` aber nur einen
+        Mittelstreifen: auf einem 390-px-iPhone (CW=354) beginnt der sichtbare Streifen erst
+        bei Zeichner-y 42,7, endet bei 232,7, und die Bodenlinie der Bühne liegt bei 222,2 —
+        während der Tier-Anker `CH*0.6` bei 114 landete. Die Kreatur schwebte damit ~110 px
+        über ihrem eigenen Boden und ragte oben aus dem Bild. Zusätzlich passt die absolute
+        Zeichnungsgröße (für eine 560er-Bühne gebaut) nicht in einen 190-px-Streifen.
+      - **Messung vorher (Sweep 15 Archetypen × `size` ∈ {0,05 … 0,95} × 390/375 px):
+        47 von 150 Fällen abgeschnitten**, Füllquote 12 % – 191 % (🌳 ragte 121 px über den
+        oberen Rand, 🦠 füllte 12 %).
+      - **Fix, zweiteilig, beides auf der ungeschnittenen Bühne per Konstruktion ein
+        No-Op:** (1) `resize()` rechnet die Bühnengeometrie explizit aus — `SH` (Höhe der
+        ganzen Bühne in Zeichner-Koordinaten), `VT` (Beginn des sichtbaren Streifens), `GY`
+        (Bodenlinie), `CROPPED`. Die Anker hängen jetzt an `SH` statt an `CH`; ist nichts
+        beschnitten, wird `SH = CH` gesetzt, der Desktop rechnet also unverändert.
+        (2) Nur wenn `CROPPED`: die Silhouette wird gemessen (`creatureBodyBox()`, Form für
+        Form statt Sammel-`getBBox()`, weil flächenlose Platzhalter-Pfade `"M0,0"` die Hülle
+        sonst bis y=0 aufziehen) und über einen gemeinsamen Maßstab auf der Wurzelgruppe in
+        den Streifen eingepasst — Skalierung um die BODENLINIE, damit „steht auf dem Boden"
+        bzw. „schwimmt darüber" erhalten bleibt. Die Zielhöhe läuft über eine WEICHE
+        Sättigung (`FIT_SOFT` 0,55 → `FIT_CAP` 0,82) statt eines harten Deckels, sonst wäre
+        das Größen-Gen auf dem Handy ab mittlerer Größe nicht mehr ablesbar; `FIT_FLOOR`
+        0,30 hebt die ganz kleinen Baupläne auf eine sichtbare Größe.
+      - **Nicht je Bild gerechnet:** neu vermessen wird nur bei Formwechsel, Bühnenwechsel
+        oder sichtbarer Gen-Änderung (2-%-Raster), höchstens 8×/s. Zwischen zwei Messungen
+        führt `applyCreatureFit()` den Maßstab weich nach (gemessen: größter Einzelsprung
+        von 17,5 % auf 4,6 % gesunken, Protist im Schock-Schub); der Deckel dieser
+        Nachführung hängt an der zuletzt gemessenen Hülle, kann also nie aus dem Rahmen
+        laufen. Ohne Drossel würde die Atem-/Flügelanimation vom Maßstab gegenläufig
+        weggeregelt.
+      - **Messung nachher:** Sweep auf 23 Archetypen (alle 5 Reiche + Sessil) × 5 Größen ×
+        4 Viewports (390/375/430 px sowie 820 px, wo der Zuschnitt am extremsten ist) =
+        **460 zugeschnittene Fälle, 0 abgeschnitten**; Füllquote 29 % – 81 %, Median 59 %.
+        Unter 45 % bleiben nur die von Natur aus kleinen/flachen Baupläne (🦠 Mikrobe,
+        🧵 Schimmel, 🟢 Moos-Alge, Extremfall `size`=0,05) — bewusst so: ein Bakterium auf
+        70 % Bildhöhe hochzuziehen würde die Größensprache des Spiels zerstören, in der ein
+        Nashorn größer ist als eine Zelle. Sichtprüfung an Screenshots (🦏/🦊/🌳/🌵/🍄/🪸/
+        🐟/🦠): steht auf dem Boden bzw. schwimmt im Wasser, nichts gestaucht.
+      - **Desktop nachweislich unverändert:** bei 821/900/1024/1280 px ist `CROPPED=false`,
+        `SH−CH=0`, `_fitScale=1`, `_fitDy=0` und der Wurzel-Transform zeichengleich zu
+        vorher; ein Vorher/Nachher-Vergleich des gezeichneten SVG-DOM (4 Archetypen ×
+        3 Größen) ist **Zeichen für Zeichen identisch**.
+      - Gates grün: `design-audit`, `app-parity`, `pattern-continuity-check`,
+        `exemplar-check`, `ui-calm-check`.
+
 - [x] **Phase 2 — CPPN-Musterschicht — Grundlage steht (2026-08-05).** Umgesetzt als
       `cppnField()` + `patternPatches()` in `app/index.html`, verdrahtet im gemeinsamen
       Vierbeiner-Zeichner (greift damit für alle Kinds dieses Bauplans auf einmal).
