@@ -189,6 +189,8 @@
         </details>
         <div class="dpanel-row"><button class="gene-nums-toggle" id="fantasyModeBtn" aria-pressed="false" title="Wesen entwickeln erfundene statt echte Arten">Fantasiemodus: Aus</button></div>
         <p class="dpanel-note">Ausgeschaltet entwickeln sich deine Wesen zu <b>echten, bei Wikipedia dokumentierten Arten</b>. Eingeschaltet entstehen stattdessen frei erfundene Namen im selben Klang — dein Wesen bleibt dann keiner realen Art mehr ähnlich benannt.</p>
+        <div class="dpanel-row"><button class="gene-nums-toggle" id="realWeatherBtn" aria-pressed="false" title="Klima beim Laden einmalig an das reale Wetter in Frankfurt koppeln">Reales Wetter: Aus</button></div>
+        <p class="dpanel-note">Eingeschaltet prüft die Seite <b>einmal beim Laden</b>, wie warm es gerade in Frankfurt ist, und verschiebt dein Klima passend — deutlich kalt wird zum Kälteeinbruch, deutlich warm zur Warmzeit. Mildes Wetter verändert nichts.</p>
       </div>
       <div class="dpanel-sec">
         <h3>Anzeige</h3>
@@ -3595,6 +3597,52 @@ sb.auth.onAuthStateChange((event, s) => {
   document.getElementById("login").hidden = true;
   if(s && !was) restore();   // gerade angemeldet -> Cloud-Wesen laden
 });
+// ================= Reales Wetter (optional) =================
+// Nutzer-Wunsch (Issue #32): Klima kann optional an das reale Wetter gekoppelt werden —
+// "warm in Deutschland -> Warmzeit, kalt -> Eiszeit". Fest auf Frankfurt (kein
+// Geolocation-Prompt noetig, fuer jeden Besucher dieselbe, nachvollziehbare Quelle) und
+// NUR EINMAL beim Laden der Seite (kein Hintergrund-Timer, keine Netzfehler mitten im
+// Spiel). Open-Meteo: kostenlos, kein API-Key, CORS-freundlich fuer eine rein
+// clientseitige, ueber GitHub Pages ausgelieferte Seite.
+const REAL_WEATHER_KEY = "evolveRealWeather";
+const FRANKFURT = { lat: 50.11, lon: 8.68 };
+async function applyRealWeather(){
+  if(localStorage.getItem(REAL_WEATHER_KEY) !== "1") return;
+  let temp;
+  try {
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${FRANKFURT.lat}&longitude=${FRANKFURT.lon}&current=temperature_2m`,
+      { signal: ctrl.signal });
+    clearTimeout(to);
+    if(!res.ok) return;
+    temp = (await res.json())?.current?.temperature_2m;
+  } catch(e){ return; }   // kein Netz/Timeout -> still bleiben, App laeuft unbeeinflusst weiter
+  if(typeof temp !== "number") return;
+  // Dieselben Verschiebungen wie die Klima-Ereignisse "Kälteeinbruch"/"Warmzeit & Blüte"
+  // in der Lebenden Welt (s. dortiges EVENTS) — ein Wortschatz, keine zwei. Gemaessigtes
+  // Wetter (5..25°C) veraendert bewusst nichts: nicht jeder Tag ist ein Klima-Ereignis.
+  let shift = null, label = null;
+  if(temp <= 5){ shift = { temperature:.08, foodAbundance:.4 }; label = "Kälteeinbruch"; }
+  else if(temp >= 25){ shift = { temperature:.6, foodAbundance:.85, light:.7 }; label = "Warmzeit & Blüte"; }
+  if(!shift) return;
+  Object.assign(env, shift);
+  syncLeverInputs();
+  renderStressChips();
+  lastBiome = label; document.getElementById("biomeTag").textContent = label;
+  document.querySelectorAll(".biome.active").forEach(x=>x.classList.remove("active"));
+  _why.t = 0;   // Umwelt geaendert -> Warum-Zeile darf sofort neu rechnen
+  _story.lastEnv = Object.assign({}, env);   // Basis fuer den naechsten Spieler-Regler-Zug
+  const tRound = Math.round(temp);
+  const satz = label === "Kälteeinbruch"
+    ? `Frankfurt meldet ${tRound}°C — ein Kälteeinbruch zieht durch deine Welt.`
+    : `Frankfurt meldet ${tRound}°C — eine Warmzeit setzt ein.`;
+  chronicle.push({ t: satz, g: generation });
+  if(chronicle.length > CHRON_MAX) chronicle.shift();
+  renderChron(); saveChron();
+  showInfoToast(satz);
+}
 async function boot(){
   // ZUERST der Populations-Kern: restore()/offlineCatchup() setzen den gespeicherten
   // Stand direkt in den Schwarm. Bis das Modul da ist (wenige ms) zeigt die App das
@@ -3603,6 +3651,7 @@ async function boot(){
   try { const { data } = await sb.auth.getSession(); session = data.session; } catch(e) { console.warn(e); }
   updateAuthUI();
   await restore();
+  await applyRealWeather();
 }
 
 // ---- UI aufbauen ----
@@ -3904,6 +3953,19 @@ GENE_LABELS.forEach((lbl,i) => {
     FANTASY_MODE = !FANTASY_MODE; apply(FANTASY_MODE);
     localStorage.setItem("evolveFantasyMode", FANTASY_MODE?"1":"0");
     committedArch = classify(genome); candArch = null; candCount = 0;
+  });
+})();
+// Reales-Wetter-Umschalter (dasselbe localStorage-Muster wie oben). Nur der Schalter
+// selbst sitzt hier — der eigentliche Abruf laeuft einmalig in applyRealWeather()
+// (nach restore() in boot(), s. u.), nicht bei jedem Klick.
+(function(){
+  const btn=document.getElementById("realWeatherBtn");
+  const apply = v => { btn.setAttribute("aria-pressed", v?"true":"false");
+    btn.textContent = v ? "Reales Wetter: An" : "Reales Wetter: Aus"; };
+  apply(localStorage.getItem(REAL_WEATHER_KEY)==="1");
+  btn.addEventListener("click", ()=>{
+    const v = localStorage.getItem(REAL_WEATHER_KEY)!=="1";
+    apply(v); localStorage.setItem(REAL_WEATHER_KEY, v?"1":"0");
   });
 })();
 // CLS-3: welche Gene sind fuer dieses Reich (kaum) relevant? -> gedimmt.
