@@ -6059,8 +6059,15 @@ function cppnField(g){
  *
  * `amount` (aus dem Pigment-Gen) steuert, WIE STARK das Muster auftraegt; bei
  * ~0 verschwindet es ganz, damit ungemusterte Tiere nicht kuenstlich gefleckt werden.
+ *
+ * `weight(x,y)` (optional, 0..1) daempft das Muster ORTSABHAENGIG innerhalb der
+ * Silhouette — gedacht fuer die Konterschattierung (Bauchseite ungemustert, s.
+ * Vierbeiner-Zeichner). Als Faktor auf den Fleckenradius statt als harter Schnitt:
+ * echte Tiere haben dort keinen Rasierschnitt, die Zeichnung laeuft zur Unterseite hin
+ * aus (Referenzfoto Damhirsch). Rein geometrisch, genomunabhaengig — die gemessene
+ * Stetigkeit im Genom bleibt davon unberuehrt.
  */
-function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTransform){
+function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTransform, weight){
   // Fluegel (u.a.) haben ihre eigene bewegte Transform (Flatter-Flap): statt eines
   // Welt-Raum-inside()-Tests, der die Animation jedes Mal nachrechnen muesste, wird
   // dann in LOKALEN Koordinaten gerastert und die ganze Gruppe traegt dieselbe
@@ -6098,6 +6105,8 @@ function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTran
     if(fx < 0 || fx > 1) continue;
     const x = bb.x0 + fx*w, y = bb.y0 + fy*h;
     if(!inside(x,y)) continue;
+    const wgt = weight ? weight(x,y) : 1;
+    if(wgt < 0.04) continue;
     const f = field((fx*2-1)*freq, (fy*2-1)*freq);
     if(f < hi && f > lo) continue;
     // Radius waechst AB NULL, sobald die Schwelle ueberschritten wird — nicht in festen
@@ -6109,7 +6118,7 @@ function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTran
     // Das ist keine Verletzung der Flachfarben-Regel: die Regel verbietet Verlaeufe/Filter,
     // nicht unterschiedlich grosse Flecken — dieselbe Technik nutzen Rosetten/Hautkoernung.
     const over = f > hi ? (f-hi)/(1-hi) : (lo-f)/(1+lo);
-    const rr = Math.sqrt(Math.max(0, over)) * (w/cols) * 0.62;
+    const rr = Math.sqrt(Math.max(0, over)) * (w/cols) * 0.62 * wgt;
     const seg = dot(x, y, rr);
     if(f > hi) light += seg; else dark += seg;
   }
@@ -7713,10 +7722,28 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   const pField = cppnField(g);
   {
     const rx = R*bw, ry = R*bh;
+    // Konterschattierung (Referenzfoto Damhirsch, de.wikipedia): Ruecken und Flanke sind
+    // dicht gefleckt, die BAUCHSEITE traegt keine Zeichnung — und der Uebergang ist kein
+    // Rasierschnitt, die Flecken werden nach unten hin kleiner und seltener. Bisher lag
+    // das Muster gleichmaessig ueber dem ganzen Rumpf und deckte damit genau die hellere
+    // Bauch-Ellipse zu, die die Tiefenstaffelung traegt (Bildbefund am eigenen Baeren-
+    // Render: die Bauchflaeche war genauso durchgefleckt wie der Ruecken).
+    // Zwei Faktoren, multipliziert:
+    //  1) `cut` spart die Bauch-Ellipse E("an-belly") aus, mit weichem Saum darum.
+    //  2) `fade` laesst die Zeichnung zusaetzlich ueber die untere Rumpfhaelfte auslaufen,
+    //     damit nicht ein gefleckter Ring um eine leere Bauchinsel stehen bleibt.
+    const bcy = cy+R*bh*0.38, brx = R*bw*0.6, bry = R*bh*0.3;
+    const counterShade = (x,y) => {
+      const bdx=(x-cx)/brx, bdy=(y-bcy)/bry;
+      const t = Math.sqrt(bdx*bdx + bdy*bdy);
+      const cut = Math.min(1, Math.max(0, (t-0.8)/0.55));
+      const fade = Math.min(1, Math.max(0, 1 - ((y-cy)/(R*bh) - 0.15)/0.7));
+      return cut*fade;
+    };
     patternPatches("an", pField,
       (x,y) => { const dx=(x-cx)/rx, dy=(y-cy)/ry; return dx*dx+dy*dy <= 0.94; },
       { x0: cx-rx, y0: cy-ry, x1: cx+rx, y1: cy+ry },
-      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5, undefined, counterShade);
   }
   // Nahes Bein: ERST JETZT gezeichnet, NACH der Rumpf-Ellipse — liegt damit sichtbar VOR
   // dem Koerper (dritte Tiefenebene, s. Nutzer-Erklaerung oben bei der Berechnung). Der
