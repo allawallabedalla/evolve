@@ -7692,9 +7692,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   E("an-back", cx, cy-R*bh*0.55, R*bw*0.8, R*bh*0.24, flatStep(body,-1));
   // Phase 2: Pigmentzeichnung ueber den Rumpf, in der Rumpf-Ellipse gehalten.
   // camo steuert die Feinheit (feiner gesprenkelt = bessere Tarnung), pigment die Staerke.
+  // EIN Feld fuer Rumpf UND Panzer (s. u.): dieselbe Zeichnung setzt sich auf dem Panzer
+  // fort, statt dass zwei unabhaengige Muster aufeinanderstossen.
+  const pField = cppnField(g);
   {
     const rx = R*bw, ry = R*bh;
-    patternPatches("an", cppnField(g),
+    patternPatches("an", pField,
       (x,y) => { const dx=(x-cx)/rx, dy=(y-cy)/ry; return dx*dx+dy*dy <= 0.94; },
       { x0: cx-rx, y0: cy-ry, x1: cx+rx, y1: cy+ry },
       body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
@@ -7718,6 +7721,29 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(let i=1;i<4;i++) ri += arcPath(cx, cy-R*bh*0.15, R*bw*0.9*i/4, R*bh*0.82*i/4, 0, Math.PI, Math.PI*2, false);
     cAttr(shringEl, { d:ri, stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1.5, fill:"none", opacity: 1 });
   } else { cAttr(shellEl, { opacity: 0 }); cAttr(shringEl, { opacity: 0 }); }
+  // Panzer-Zeichnung (Referenzfoto Testudo hermanni boettgeri, de.wikipedia
+  // „Griechische Landschildkroete"): der Carapax ist das am STAERKSTEN gezeichnete
+  // Koerperteil — olivgelber Grund mit kraeftigen dunklen Keilen auf jedem Schild —
+  // waehrend der Panzer hier bisher eine voellig flache Flaeche war, obwohl der Rumpf
+  // direkt darunter bereits sein Pigmentfeld trug (Bildbefund am eigenen Render).
+  // Eigene inside()-Geometrie wie beim Fisch: der Panzer ist eine OBERE Halbellipse,
+  // keine ganze — die Rumpf-Ellipse als Testflaeche wiederzuverwenden haette die Flecken
+  // unter die Panzerkante laufen lassen. Die Sehne, mit der arcPath(…, true) schliesst,
+  // liegt bei sin(0.95*pi) = +0.156 der Hoehe unter dem Ellipsenmittelpunkt.
+  {
+    const scx = cx, scy = cy-R*bh*0.15, srx = R*bw*0.9, sry = R*bh*0.82;
+    const yCut = scy + sry*0.156;
+    // Immer aufrufen (amount 0 statt Aufruf ueberspringen): die Elemente entstehen so beim
+    // ERSTEN Bild in der richtigen Reihenfolge. Wuerden sie erst beim Ueberschreiten der
+    // Panzer-Schwelle angelegt, haenge die Musterlage am Ende der Ebene und damit ueber
+    // Kopf und Beinen (cEl() haengt neue Knoten hinten an, s. Kommentar dort).
+    patternPatches("an-sh", pField,
+      (x,y) => { if(y > yCut) return false;
+        const dx=(x-scx)/srx, dy=(y-scy)/sry; return dx*dx+dy*dy <= 0.88; },
+      { x0: scx-srx, y0: scy-sry, x1: scx+srx, y1: yCut },
+      mix([90,100,110],[60,70,80],armor),
+      armor>0.5 ? (g[GI.pigment] ?? 0.5) : 0, g[GI.camo] ?? 0.5);
+  }
   // Nutzer-Fund (Wiki-Foto Testudo hermanni): eine Schildkroete hat einen glatten
   // gewoelbten Panzer, keine Zacken — die generischen Panzer-Stacheln sahen "eher nach
   // Drache/Dino aus". Fuer 🐢 unterdrueckt, andere gepanzerte Kinds unveraendert.
