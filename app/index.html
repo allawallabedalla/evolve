@@ -5631,6 +5631,20 @@ const hSvg = document.getElementById("habitatSvg");
 const SVGNS = "http://www.w3.org/2000/svg";
 function el0(id){ return document.getElementById(id); }
 let CW=720, CH=560, DPR=1;
+// --- Buehnengeometrie in ZEICHNER-Koordinaten -----------------------------------
+// Die Zeichner rechnen in CSS-Pixeln der Buehnenbreite (Erbe des Canvas-Pfads); der
+// Wurzel-Transform `scale(720/CW)` legt diese Koordinaten auf die feste 720x560-viewBox.
+// Solange die Buehne die viewBox-Ratio haelt, ist das eine 1:1-Abbildung auf den Bildschirm
+// und "Zeichner-y = Abstand von der Buehnen-Oberkante". Sobald `@media (max-width:820px)
+// { #habitatSvg{height:190px} }` greift, stimmt das NICHT mehr: `preserveAspectRatio=slice`
+// zeigt dann nur noch einen waagerechten MITTELSTREIFEN der viewBox, und der
+// Koordinaten-Nullpunkt liegt oberhalb des sichtbaren Bereichs. Diese drei Groessen machen
+// den Unterschied explizit, damit ihn niemand mehr versehentlich mit CH verwechselt:
+//   SH  Hoehe der GANZEN (ggf. teils unsichtbaren) 720x560-Buehne in Zeichner-Koordinaten.
+//       Das ist die Hoehe, fuer die alle Zeichner ihre Proportionen gebaut haben.
+//   VT  y des SICHTBAREN Streifenanfangs (0, solange nichts beschnitten ist).
+//   GY  y der Bodenlinie der Buehne (groundPath() pendelt um viewBox-y 452).
+let SH=560, VT=0, GY=452, CROPPED=false;
 function resize(){
   // Die Groesse gibt das SVG vor (width:100%, height:auto ueber die viewBox-Ratio) —
   // ABER seit dem Mobil-Crop-Audit gilt das nicht mehr ueberall: `@media (max-width:820px)
@@ -5643,6 +5657,19 @@ function resize(){
   const rect = hSvg.getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio||1);
   CW = rect.width || 720; CH = rect.height || (CW * (560/720));
+  // Abbildungsmassstab der viewBox auf die Buehne — `slice` nimmt die GROESSERE der
+  // beiden Achsen-Skalen, die kleinere Achse wird beschnitten.
+  const k = 720/(CW||720);                    // Zeichner-Koordinate -> viewBox
+  const s = Math.max((CW||720)/720, (CH||560)/560);
+  SH = 560/k;                                 // = 560*CW/720
+  GY = 452/k;                                 // Bodenlinie, s. groundPath()
+  VT = (280 - (CH||560)/(2*s))/k;             // Oberkante des sichtbaren Streifens
+  if(VT < 0) VT = 0;
+  CROPPED = SH > CH + 0.5;                    // waagerechter Streifen statt voller Buehne
+  // Ist nichts beschnitten, IST die sichtbare Hoehe die Buehnenhoehe. Gleichsetzen statt
+  // die Ratio nachzurechnen: sonst weichen beide um Bruchteile eines Pixels ab (Layout-
+  // Rundung), und einzelne Zeichner mit ganzzahligen Schwellen kippen daran sichtbar.
+  if(!CROPPED) SH = CH;
 }
 window.addEventListener("resize", resize);
 
@@ -6126,6 +6153,119 @@ function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTran
   cAttr(lEl, { d: light || "M0,0", fill: flatStep(base, 1.5), "fill-opacity": (0.26+amount*0.4).toFixed(2), opacity: 1 });
 }
 
+// --- Einpassen der Silhouette in den sichtbaren Streifen ------------------------
+// Auf der ungeschnittenen Buehne (Desktop, volle 720x560-viewBox sichtbar) ist das hier
+// per Konstruktion die IDENTITAET: `CROPPED` ist falsch, Massstab 1, Versatz 0. Gebraucht
+// wird es nur, wenn die Buehne ein waagerechter Ausschnitt ist (Mobil-Regel `height:190px`):
+// dort ist der sichtbare Rahmen deutlich niedriger als die Buehne, fuer die die Zeichner
+// ihre absoluten Groessen gebaut haben — eine grosse Kreatur ragt oben heraus, eine kleine
+// verliert sich. Beides korrigiert ein einziger, gemeinsamer Massstab auf der Wurzelgruppe.
+let _fitKey = "", _fitAt = -1e9;         // zuletzt vermessene Signatur + Zeitpunkt
+let _fitY0 = 0, _fitY1 = 0, _fitWant = 1;  // zuletzt gemessene Huelle + Wunsch-Massstab
+let _fitScale = 1, _fitDy = 0;          // was dieses Bild tatsaechlich angewandt wird
+const FIT_SOFT = 0.55;   // bis hierhin bleibt die gemessene Fuellhoehe unangetastet
+const FIT_CAP  = 0.82;   // weiche Obergrenze der Fuellhoehe (Anteil des Streifens)
+const FIT_FLOOR= 0.30;   // darunter wird vergroessert — sonst "ich seh das Tier nicht"
+const FIT_MARGIN = 0.05; // Luft ueber und unter der Silhouette (Anteil des Streifens)
+const FIT_EASE = 0.35;   // Nachfuehrung je Bild (1 = sofort) — s. applyCreatureFit
+/**
+ * Gemessene Silhouettenhoehe (Anteil des sichtbaren Streifens) -> gewuenschte Hoehe.
+ * Bewusst eine WEICHE Saettigung statt eines harten Deckels: mit `Math.min(x, CAP)` liefe
+ * jede Kreatur ab mittlerer Groesse auf exakt denselben Wert und das Groessen-Gen waere auf
+ * dem Handy nicht mehr ablesbar — die Exponentialkurve laesst die Reihenfolge erhalten.
+ */
+function fitTargetFill(x){
+  if(x < FIT_FLOOR) return FIT_FLOOR;
+  if(x <= FIT_SOFT) return x;
+  const r = FIT_CAP - FIT_SOFT;
+  return FIT_SOFT + r*(1 - Math.exp(-(x - FIT_SOFT)/r));
+}
+/**
+ * Silhouetten-Huelle der Koerperebene in Zeichner-Koordinaten (ohne Leucht-Halo — der
+ * Halo ist absichtlich ausufernd und wuerde den Koerper klein rechnen).
+ * Bewusst Form fuer Form statt `cBodyLayer.getBBox()`: einzelne Zeichner legen
+ * FLAECHENLOSE Platzhalter-Pfade ("M0,0") an, wenn sie nichts zu zeichnen haben (z. B.
+ * patternPatches ohne Muster). Die liegen bei y=0, also an der Buehnen-Oberkante, und
+ * wuerden eine Sammel-getBBox() bis dorthin aufziehen — der Massstab waere Unsinn.
+ * Die Umrechnung laeuft ueber getScreenCTM relativ zur Koerperebene, damit auch Formen
+ * INNERHALB gedrehter Untergruppen (Euglena, Archaeon) richtig gemessen werden. Der
+ * Wurzel-Transform kuerzt sich dabei heraus — es gibt also keine Rueckkopplung.
+ */
+function creatureBodyBox(){
+  const rootCtm = cBodyLayer.getScreenCTM();
+  if(!rootCtm) return null;
+  const inv = rootCtm.inverse();
+  const pt = cSvg.createSVGPoint();
+  let y0 = Infinity, y1 = -Infinity;
+  for(const e of cBodyLayer.querySelectorAll("path,ellipse,circle,rect,polygon,polyline,line")){
+    let b; try { b = e.getBBox(); } catch(err){ continue; }
+    if(b.width <= 0.01 && b.height <= 0.01) continue;
+    const ctm = e.getScreenCTM();
+    if(!ctm) continue;
+    const m = inv.multiply(ctm);
+    for(let i=0;i<4;i++){
+      pt.x = b.x + (i&1 ? b.width : 0);
+      pt.y = b.y + (i&2 ? b.height : 0);
+      const yy = m.b*pt.x + m.d*pt.y + m.f;
+      if(yy < y0) y0 = yy;
+      if(yy > y1) y1 = yy;
+    }
+  }
+  return y1 > y0 ? { y0, y1 } : null;
+}
+/**
+ * Silhouette NEU VERMESSEN. Nicht je Bild: nur wenn sich Bauplan, Buehnengroesse oder eines
+ * der hoehenbestimmenden Gene sichtbar geaendert hat (2-%-Raster), und hoechstens 8x je
+ * Sekunde. Wuerde je Bild gemessen, regelte der Massstab die Atem-/Flugelanimation
+ * gegenlaeufig weg (das Atmen waere herausgerechnet, die Silhouette flackerte).
+ */
+function updateCreatureFit(g, a){
+  if(!CROPPED){ _fitKey = ""; _fitY1 = _fitY0; return; }
+  const q = i => Math.round((g[i]||0)*50);
+  const form = `${a.e}|${a.k}|${CW|0}|${CH|0}`;
+  const key = `${form}|${q(0)},${q(1)},${q(2)},${q(4)},${q(5)},${q(7)},${q(8)}`;
+  if(key === _fitKey) return;
+  // Formwechsel/Groessenaenderung der Buehne sofort, blosse Gen-Drift gedrosselt. Die
+  // Drossel haengt an der Wanduhr, nicht an der uebergebenen Animationszeit: Werkzeuge
+  // (creature-shot, Sweep-Messung) zeichnen bewusst immer mit time=0.
+  const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
+  const newForm = !_fitKey.startsWith(form + "|");
+  if(!newForm && now - _fitAt < 125) return;
+  _fitKey = key; _fitAt = now;
+  const bb = creatureBodyBox();
+  if(!bb) return;
+  const h = bb.y1 - bb.y0;
+  if(!(h > 0.5)) return;
+  _fitY0 = bb.y0; _fitY1 = bb.y1;
+  _fitWant = fitTargetFill(h/CH) * CH / h;
+  // Beim Formwechsel ist die Kreatur ohnehin eine andere — da soll der Massstab springen,
+  // nicht hinterherkriechen.
+  if(newForm) _fitScale = _fitWant;
+}
+/**
+ * Je Bild: Massstab an den Wunschwert heranfuehren und den Versatz daraus ableiten.
+ * Die Nachfuehrung ist noetig, weil zwischen zwei Messungen bis zu 125 ms Gen-Drift liegen
+ * koennen — ohne sie sprang der Massstab bei schnell driftenden Bauplaenen (gemessen:
+ * Protist im Schock-Schub) um bis zu 8 % auf einen Schlag, also sichtbar. Der Deckel
+ * `maxF` haengt an der ZULETZT GEMESSENEN Huelle, nicht am Wunschwert: dadurch kann die
+ * Nachfuehrung die Kreatur zu keinem Zeitpunkt aus dem Rahmen laufen lassen.
+ */
+function applyCreatureFit(){
+  if(!CROPPED || !(_fitY1 > _fitY0)){ _fitScale = 1; _fitDy = 0; return; }
+  _fitScale += (_fitWant - _fitScale) * FIT_EASE;
+  const m = CH*FIT_MARGIN, lo = VT + m, hi = VT + CH - m;
+  const maxF = (CH - 2*m)/(_fitY1 - _fitY0);
+  if(_fitScale > maxF) _fitScale = maxF;
+  // Der Massstab wirkt um die BODENLINIE: dadurch bleibt erhalten, wie die Kreatur zum
+  // Boden steht (Vierbeiner darauf, Schwimmer darueber) — ein Massstab um die Bildmitte
+  // wuerde Landtiere in die Luft heben.
+  const top = GY + (_fitY0 - GY)*_fitScale, bot = GY + (_fitY1 - GY)*_fitScale;
+  let dy = 0;
+  if(bot > hi) dy = hi - bot;           // nichts unten heraushaengen lassen
+  if(top + dy < lo) dy = lo - top;      // oben hat Vorrang: der Kopf muss im Bild bleiben
+  _fitDy = dy;
+}
+
 function drawCreature(g, time, a){
   a = a || classify(g);
   // Form-Details aus lineageSeed (stabil pro Leben) statt aus dem driftenden Genom
@@ -6144,28 +6284,43 @@ function drawCreature(g, time, a){
   const svgKingdom = sessile ? CREATURE_SVG.has("Sessil") : CREATURE_SVG.has(a.k);
   if(svgKingdom){
     cBegin();
-    cAttr(cRoot, { transform: `scale(${(720/(CW||720)).toFixed(4)})` });
+    // ANKER: Anteil von SH, nicht von CH. Beides ist auf der ungeschnittenen Buehne
+    // dasselbe — auf der zugeschnittenen Mobil-Buehne aber nicht, und genau daran hing der
+    // Fehlerbild-Bericht "ich seh nur die Beine": mit CH=190 landete der Tier-Anker bei
+    // y=114, waehrend die Bodenlinie der Buehne bei y=225 liegt und der sichtbare Streifen
+    // erst bei y=44 beginnt. Die Kreatur schwebte also weit ueber ihrem eigenen Boden und
+    // ragte oben aus dem Bild. SH ist die Hoehe, auf die alle Zeichner ihre Anteile
+    // (0.6 = Koerpermitte, 0.9 = Standflaeche) beziehen.
+    const by = SH*0.9, cy = SH*0.6;
     if(sessile){
-      creatureGlowSvg(g, cx, CH*0.9, time);
-      drawSessileSvg(g, cx, CH*0.9, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, by, time);
+      drawSessileSvg(g, cx, by, breath, time, rnd, a);
     } else if(a.k==="Pilz"){
-      creatureGlowSvg(g, cx, CH*0.9, time);
-      drawFungusSvg(g, cx, CH*0.9, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, by, time);
+      drawFungusSvg(g, cx, by, breath, time, rnd, a);
     } else if(a.k==="Pflanze"){
-      creatureGlowSvg(g, cx, CH*0.9, time);
-      drawPlantSvg(g, cx, CH*0.9, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, by, time);
+      drawPlantSvg(g, cx, by, breath, time, rnd, a);
     } else if(a.k==="Tier"){
-      creatureGlowSvg(g, cx, CH*0.6, time);
-      drawAnimalSvg(g, cx, CH*0.6, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, cy, time);
+      drawAnimalSvg(g, cx, cy, breath, time, rnd, a);
     } else if(a.k==="Mikrobe"){
-      creatureGlowSvg(g, cx, CH*0.6, time);
-      drawMicrobeSvg(g, cx, CH*0.6, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, cy, time);
+      drawMicrobeSvg(g, cx, cy, breath, time, rnd, a);
     } else {
-      creatureGlowSvg(g, cx, CH*0.6, time);
-      drawProtistSvg(g, cx, CH*0.6, breath, time, rnd, a);
+      creatureGlowSvg(g, cx, cy, time);
+      drawProtistSvg(g, cx, cy, breath, time, rnd, a);
     }
     applyAccentClasses();
     cEnd();
+    // Erst NACH cEnd() messen — sonst zaehlten Reste der vorigen Form mit. Der
+    // Wurzel-Transform selbst geht in die Messung nicht ein (getBBox liefert die
+    // Koordinaten der Kinder), es gibt also keine Rueckkopplung.
+    updateCreatureFit(g, a);
+    applyCreatureFit();
+    cAttr(cRoot, { transform: _fitScale === 1 && _fitDy === 0
+      ? `scale(${(720/(CW||720)).toFixed(4)})`
+      : `scale(${(720/(CW||720)).toFixed(4)}) translate(0,${_fitDy.toFixed(2)}) translate(${cx.toFixed(2)},${GY.toFixed(2)}) scale(${_fitScale.toFixed(4)}) translate(${(-cx).toFixed(2)},${(-GY).toFixed(2)})` });
     return;
   }
   // Unerreichbar, seit alle fuenf Reiche (plus die Pseudo-Kategorie "Sessil") in
