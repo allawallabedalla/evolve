@@ -14,12 +14,19 @@
 //      den Glow-Schwellenwert (0,4) und erzeugt einen ungewollten Leuchtring.
 //
 // Aufruf:
-//   node tools/creature-shot.mjs <emoji> <outPath> [--genes '{"insulation":.14,...}']
+//   node tools/creature-shot.mjs <emoji> <outPath> [--genes '{"insulation":.14,...}'] [--bare]
 //
 // Nicht genannte Gene bleiben auf 0,5 (Default), ausser biolum (fest 0, s. o.) — per
 // --genes ueberschreibbar. Gen-Namen statt Indizes, damit das Skript nicht bei einer
 // Gen-Reihenfolge-Aenderung in app/catalog.js stillschweigend falsche Werte setzt
 // (Namen werden LIVE aus app/catalog.js gelesen, s. u.).
+//
+// --bare blendet die HUD-Leiste ueber der Buehne (Generations-/Biom-Chip, Stress-Chips,
+// Toasts) fuer den Screenshot aus. Ohne das liegt die Leiste bei den flachen Viewport-
+// Proportionen genau ueber der oberen Koerperhaelfte — beim Meeressaeuger-Fotoaudit
+// (2026-08-07) verdeckte sie Ruecken, Rueckenfinne und Kopfoberseite komplett, also genau
+// die Partien, die gegen das Referenzfoto zu pruefen waren. Nur Screenshot-Kosmetik, die
+// Zeichenlogik bleibt unberuehrt.
 // ============================================================================
 import { spawn } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
@@ -27,9 +34,12 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const [, , emoji, outPath, flag, genesJson] = process.argv;
+const argv = process.argv.slice(2);
+const bare = argv.includes("--bare");
+const rest = argv.filter(a => a !== "--bare");
+const [emoji, outPath, flag, genesJson] = rest;
 if (!emoji || !outPath) {
-  console.error("Aufruf: node tools/creature-shot.mjs <emoji> <outPath> [--genes '{\"insulation\":.2,...}']");
+  console.error("Aufruf: node tools/creature-shot.mjs <emoji> <outPath> [--genes '{\"insulation\":.2,...}'] [--bare]");
   process.exit(1);
 }
 const overrides = (flag === "--genes" && genesJson) ? JSON.parse(genesJson) : {};
@@ -55,7 +65,12 @@ const { chromium } = await import("playwright-core");
 const server = spawn("python3", ["-m", "http.server", String(PORT), "--directory", join(ROOT, "app")], { stdio: "ignore" });
 await new Promise(r => setTimeout(r, 900));
 const browser = await chromium.launch({ executablePath: EXEC, args: ["--no-sandbox"] });
-const page = await browser.newPage({ viewport: { width: 500, height: 500 }, deviceScaleFactor: 2 });
+// Fenster bewusst BREITER als 820 px: darunter greift die Mobil-Regel aus app/style.css
+// (`@media (max-width: 820px) { #habitatSvg { height: 190px } }`), die die Buehne auf einen
+// waagerechten Streifen zuschneidet. Bei 500 px Breite fiel damit der gesamte Ruecken der
+// Kreatur aus dem Bild — beim Meeressaeuger-Fotoaudit (2026-08-07) waren Ruecken, Blasloch
+// und Rueckenfinne schlicht nicht pruefbar. Ueber 820 px steht die volle 720:560-Buehne.
+const page = await browser.newPage({ viewport: { width: 900, height: 820 }, deviceScaleFactor: 2 });
 const errors = [];
 page.on("pageerror", e => errors.push(String(e)));
 await page.goto(`http://localhost:${PORT}/index.html`);
@@ -81,6 +96,14 @@ const info = await page.evaluate(({ emoji, overrides, geneNames, kindOf }) => {
 }, { emoji, overrides, geneNames, kindOf });
 
 await page.waitForTimeout(300);
+if (bare) {
+  await page.evaluate(() => {
+    for (const sel of [".viewport-top-row", ".stress-chips", ".toast", ".reveal"]) {
+      for (const el of document.querySelectorAll(sel)) el.style.visibility = "hidden";
+    }
+  });
+  await page.waitForTimeout(80);
+}
 await (await page.$("#creatureSvg")).screenshot({ path: outPath });
 await browser.close();
 server.kill();
