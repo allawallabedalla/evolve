@@ -6372,7 +6372,12 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
       let sp = "";
       for(let d2=0;d2<5;d2++){ const sx=bx+off+(rnd()-0.5)*cw*1.3, sy=by-h-rnd()*cw*0.4, sr=1.5+rnd()*2;
         sp += `M${(sx-sr).toFixed(1)},${sy.toFixed(1)}a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(sr*2).toFixed(1)},0a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(-sr*2).toFixed(1)},0`; }
-      cAttr(cEl("fun-dots"+c,"path"), { d: sp, fill: flatCol([255,255,255]), "fill-opacity": .4 });
+      // .cre-mark: dieselbe Ausnahme von der globalen Tinten-Kontur wie bei
+      // patternPatches() (s. dort) — sonst umrandet jeder Velum-Tupfen sich selbst und
+      // liest als Ring statt als flacher weisser Fleck.
+      const dotsEl = cEl("fun-dots"+c,"path");
+      dotsEl.classList.add("cre-mark");
+      cAttr(dotsEl, { d: sp, fill: flatCol([255,255,255]), "fill-opacity": .4 });
     }
     myc(); return;
   }
