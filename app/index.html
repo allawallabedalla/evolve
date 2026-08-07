@@ -6059,8 +6059,15 @@ function cppnField(g){
  *
  * `amount` (aus dem Pigment-Gen) steuert, WIE STARK das Muster auftraegt; bei
  * ~0 verschwindet es ganz, damit ungemusterte Tiere nicht kuenstlich gefleckt werden.
+ *
+ * `weight(x,y)` (optional, 0..1) daempft das Muster ORTSABHAENGIG innerhalb der
+ * Silhouette — gedacht fuer die Konterschattierung (Bauchseite ungemustert, s.
+ * Vierbeiner-Zeichner). Als Faktor auf den Fleckenradius statt als harter Schnitt:
+ * echte Tiere haben dort keinen Rasierschnitt, die Zeichnung laeuft zur Unterseite hin
+ * aus (Referenzfoto Damhirsch). Rein geometrisch, genomunabhaengig — die gemessene
+ * Stetigkeit im Genom bleibt davon unberuehrt.
  */
-function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTransform){
+function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTransform, weight){
   // Fluegel (u.a.) haben ihre eigene bewegte Transform (Flatter-Flap): statt eines
   // Welt-Raum-inside()-Tests, der die Animation jedes Mal nachrechnen muesste, wird
   // dann in LOKALEN Koordinaten gerastert und die ganze Gruppe traegt dieselbe
@@ -6098,6 +6105,8 @@ function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTran
     if(fx < 0 || fx > 1) continue;
     const x = bb.x0 + fx*w, y = bb.y0 + fy*h;
     if(!inside(x,y)) continue;
+    const wgt = weight ? weight(x,y) : 1;
+    if(wgt < 0.04) continue;
     const f = field((fx*2-1)*freq, (fy*2-1)*freq);
     if(f < hi && f > lo) continue;
     // Radius waechst AB NULL, sobald die Schwelle ueberschritten wird — nicht in festen
@@ -6109,7 +6118,7 @@ function patternPatches(prefix, field, inside, bb, base, amount, fine, groupTran
     // Das ist keine Verletzung der Flachfarben-Regel: die Regel verbietet Verlaeufe/Filter,
     // nicht unterschiedlich grosse Flecken — dieselbe Technik nutzen Rosetten/Hautkoernung.
     const over = f > hi ? (f-hi)/(1-hi) : (lo-f)/(1+lo);
-    const rr = Math.sqrt(Math.max(0, over)) * (w/cols) * 0.62;
+    const rr = Math.sqrt(Math.max(0, over)) * (w/cols) * 0.62 * wgt;
     const seg = dot(x, y, rr);
     if(f > hi) light += seg; else dark += seg;
   }
@@ -6334,6 +6343,7 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
   // sein Leuchten liefert bereits der generische Biolumineszenz-Halo.
   if(kind==="🍄"||kind==="💡"){   // Hutpilz: Stiel + Kappe + Lamellen
     const caps = 1+Math.round(size*2);
+    const capField = cppnField(g);
     for(let c=0;c<caps;c++){
       const off=(c-(caps-1)/2)*22*(0.6+rnd()*0.5);
       const h=(30+size*70)*breath*(0.7+rnd()*0.5), cw=16+size*30;
@@ -6343,10 +6353,31 @@ function drawFungusSvg(g, bx, by, breath, time, rnd, a){
       cAttr(cEl("fun-gill"+c,"path"), { d: halfEllipse(bx+off, by-h+2, cw*0.8, 4, "bottom"),
         fill: flatStep([235,228,210], -1), "fill-opacity": .9 });
       cAttr(cEl("fun-cap"+c,"path"), { d: halfEllipse(bx+off, by-h, cw, cw*0.62, "top"), fill: flatCol(capTone) });
+      // Pigmentzeichnung auf der KAPPE (Referenzfoto Amanita muscaria, s. Archetyp-Vorbild
+      // „Hutpilz"): beim Pilz traegt genau EIN Bauteil die Zeichnung — die Kappe. Stiel,
+      // Lamellen und Myzel sind im Foto einfarbig, deshalb bekommen sie hier auch keine
+      // Musterlage. Die Kappe ist eine obere Halbellipse (halfEllipse(…,"top")), also
+      // derselbe Zuschnitt wie die Schildkroeten-Kuppel: inside() muss die untere Haelfte
+      // ausschliessen, sonst laegen Flecken unter der Kappe in den Lamellen.
+      // Pro Kappe ein eigener Praefix, aber EIN Feld — die Kappen eines Bueschels sind
+      // Klone desselben Genoms und tragen dieselbe Zeichnung.
+      {
+        const ccx = bx+off, ccy = by-h, cry = cw*0.62;
+        patternPatches("fun-cp"+c, capField,
+          (x,y) => { if(y > ccy) return false;
+            const dx=(x-ccx)/cw, dy=(y-ccy)/cry; return dx*dx+dy*dy <= 0.9; },
+          { x0: ccx-cw, y0: ccy-cry, x1: ccx+cw, y1: ccy },
+          capTone, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+      }
       let sp = "";
       for(let d2=0;d2<5;d2++){ const sx=bx+off+(rnd()-0.5)*cw*1.3, sy=by-h-rnd()*cw*0.4, sr=1.5+rnd()*2;
         sp += `M${(sx-sr).toFixed(1)},${sy.toFixed(1)}a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(sr*2).toFixed(1)},0a${sr.toFixed(1)},${sr.toFixed(1)} 0 1 0 ${(-sr*2).toFixed(1)},0`; }
-      cAttr(cEl("fun-dots"+c,"path"), { d: sp, fill: flatCol([255,255,255]), "fill-opacity": .4 });
+      // .cre-mark: dieselbe Ausnahme von der globalen Tinten-Kontur wie bei
+      // patternPatches() (s. dort) — sonst umrandet jeder Velum-Tupfen sich selbst und
+      // liest als Ring statt als flacher weisser Fleck.
+      const dotsEl = cEl("fun-dots"+c,"path");
+      dotsEl.classList.add("cre-mark");
+      cAttr(dotsEl, { d: sp, fill: flatCol([255,255,255]), "fill-opacity": .4 });
     }
     myc(); return;
   }
@@ -7366,6 +7397,22 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       legs += `M${ax.toFixed(1)},${ay.toFixed(1)}Q${(ax+sd*R*0.5).toFixed(1)},${(ay+R*0.1).toFixed(1)} ${(ax+sd*R*0.85+sw).toFixed(1)},${(ay+R*0.4).toFixed(1)}`; }
     P("an-legs", legs, { stroke: flatCol(dark), "stroke-width": 3, "stroke-linecap":"round", fill:"none" });
     E("an-body", cx, cy, W, H, shell);
+    // Panzer-Zeichnung (Referenzfoto Carcinus maenas, de.wikipedia „Gemeine Strandkrabbe",
+    // Draufsicht): der Carapax ist marmoriert — dunkelgruen-brauner Grund mit helleren,
+    // unregelmaessigen Marmorierungsfeldern, nie einfarbig. Im eigenen Render war er eine
+    // glatte Volltonellipse (Bildbefund), weil das Pigmentfeld nur am Vierbeiner-Rumpf,
+    // am Fisch und an den Falterfluegeln haengt und der Krebstier-Zweig seinen Panzer
+    // selbst zeichnet. Hier ist die Panzerflaeche eine VOLLE Ellipse (anders als die
+    // Schildkroeten-Kuppel), der Test ist also derselbe wie beim Fisch.
+    // Grundton ist der Panzerton, nicht die Rumpffarbe — sonst saessen die Flecken in
+    // einem Farbraum, den der Panzer gar nicht traegt.
+    {
+      const shellRGB = mix(body,[185,90,70],0.55);
+      patternPatches("an", cppnField(g),
+        (x,y) => { const dx=(x-cx)/W, dy=(y-cy)/H; return dx*dx+dy*dy <= 0.9; },
+        { x0: cx-W, y0: cy-H, x1: cx+W, y1: cy+H },
+        shellRGB, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+    }
     let arms="", pincer="";
     for(const sd of [-1,1]){ const cxx=cx+sd*W*0.85, cyy=cy-H*0.7;
       arms += `M${(cx+sd*W*0.6).toFixed(1)},${(cy-H*0.3).toFixed(1)}L${cxx.toFixed(1)},${cyy.toFixed(1)}`;
@@ -7692,12 +7739,33 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
   E("an-back", cx, cy-R*bh*0.55, R*bw*0.8, R*bh*0.24, flatStep(body,-1));
   // Phase 2: Pigmentzeichnung ueber den Rumpf, in der Rumpf-Ellipse gehalten.
   // camo steuert die Feinheit (feiner gesprenkelt = bessere Tarnung), pigment die Staerke.
+  // EIN Feld fuer Rumpf UND Panzer (s. u.): dieselbe Zeichnung setzt sich auf dem Panzer
+  // fort, statt dass zwei unabhaengige Muster aufeinanderstossen.
+  const pField = cppnField(g);
   {
     const rx = R*bw, ry = R*bh;
-    patternPatches("an", cppnField(g),
+    // Konterschattierung (Referenzfoto Damhirsch, de.wikipedia): Ruecken und Flanke sind
+    // dicht gefleckt, die BAUCHSEITE traegt keine Zeichnung — und der Uebergang ist kein
+    // Rasierschnitt, die Flecken werden nach unten hin kleiner und seltener. Bisher lag
+    // das Muster gleichmaessig ueber dem ganzen Rumpf und deckte damit genau die hellere
+    // Bauch-Ellipse zu, die die Tiefenstaffelung traegt (Bildbefund am eigenen Baeren-
+    // Render: die Bauchflaeche war genauso durchgefleckt wie der Ruecken).
+    // Zwei Faktoren, multipliziert:
+    //  1) `cut` spart die Bauch-Ellipse E("an-belly") aus, mit weichem Saum darum.
+    //  2) `fade` laesst die Zeichnung zusaetzlich ueber die untere Rumpfhaelfte auslaufen,
+    //     damit nicht ein gefleckter Ring um eine leere Bauchinsel stehen bleibt.
+    const bcy = cy+R*bh*0.38, brx = R*bw*0.6, bry = R*bh*0.3;
+    const counterShade = (x,y) => {
+      const bdx=(x-cx)/brx, bdy=(y-bcy)/bry;
+      const t = Math.sqrt(bdx*bdx + bdy*bdy);
+      const cut = Math.min(1, Math.max(0, (t-0.8)/0.55));
+      const fade = Math.min(1, Math.max(0, 1 - ((y-cy)/(R*bh) - 0.15)/0.7));
+      return cut*fade;
+    };
+    patternPatches("an", pField,
       (x,y) => { const dx=(x-cx)/rx, dy=(y-cy)/ry; return dx*dx+dy*dy <= 0.94; },
       { x0: cx-rx, y0: cy-ry, x1: cx+rx, y1: cy+ry },
-      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5);
+      body, g[GI.pigment] ?? 0.5, g[GI.camo] ?? 0.5, undefined, counterShade);
   }
   // Nahes Bein: ERST JETZT gezeichnet, NACH der Rumpf-Ellipse — liegt damit sichtbar VOR
   // dem Koerper (dritte Tiefenebene, s. Nutzer-Erklaerung oben bei der Berechnung). Der
@@ -7718,6 +7786,29 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     for(let i=1;i<4;i++) ri += arcPath(cx, cy-R*bh*0.15, R*bw*0.9*i/4, R*bh*0.82*i/4, 0, Math.PI, Math.PI*2, false);
     cAttr(shringEl, { d:ri, stroke: flatCol([20,30,30]), "stroke-opacity": .4, "stroke-width": 1.5, fill:"none", opacity: 1 });
   } else { cAttr(shellEl, { opacity: 0 }); cAttr(shringEl, { opacity: 0 }); }
+  // Panzer-Zeichnung (Referenzfoto Testudo hermanni boettgeri, de.wikipedia
+  // „Griechische Landschildkroete"): der Carapax ist das am STAERKSTEN gezeichnete
+  // Koerperteil — olivgelber Grund mit kraeftigen dunklen Keilen auf jedem Schild —
+  // waehrend der Panzer hier bisher eine voellig flache Flaeche war, obwohl der Rumpf
+  // direkt darunter bereits sein Pigmentfeld trug (Bildbefund am eigenen Render).
+  // Eigene inside()-Geometrie wie beim Fisch: der Panzer ist eine OBERE Halbellipse,
+  // keine ganze — die Rumpf-Ellipse als Testflaeche wiederzuverwenden haette die Flecken
+  // unter die Panzerkante laufen lassen. Die Sehne, mit der arcPath(…, true) schliesst,
+  // liegt bei sin(0.95*pi) = +0.156 der Hoehe unter dem Ellipsenmittelpunkt.
+  {
+    const scx = cx, scy = cy-R*bh*0.15, srx = R*bw*0.9, sry = R*bh*0.82;
+    const yCut = scy + sry*0.156;
+    // Immer aufrufen (amount 0 statt Aufruf ueberspringen): die Elemente entstehen so beim
+    // ERSTEN Bild in der richtigen Reihenfolge. Wuerden sie erst beim Ueberschreiten der
+    // Panzer-Schwelle angelegt, haenge die Musterlage am Ende der Ebene und damit ueber
+    // Kopf und Beinen (cEl() haengt neue Knoten hinten an, s. Kommentar dort).
+    patternPatches("an-sh", pField,
+      (x,y) => { if(y > yCut) return false;
+        const dx=(x-scx)/srx, dy=(y-scy)/sry; return dx*dx+dy*dy <= 0.88; },
+      { x0: scx-srx, y0: scy-sry, x1: scx+srx, y1: yCut },
+      mix([90,100,110],[60,70,80],armor),
+      armor>0.5 ? (g[GI.pigment] ?? 0.5) : 0, g[GI.camo] ?? 0.5);
+  }
   // Nutzer-Fund (Wiki-Foto Testudo hermanni): eine Schildkroete hat einen glatten
   // gewoelbten Panzer, keine Zacken — die generischen Panzer-Stacheln sahen "eher nach
   // Drache/Dino aus". Fuer 🐢 unterdrueckt, andere gepanzerte Kinds unveraendert.
