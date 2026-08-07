@@ -6884,6 +6884,16 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     // "Erdnuss"-Fehler, der beim Gecko-Kopf schon einmal auftrat (s. Nachtrag 1).
     const backY = cy-H*0.92, bellyY = cy+H*0.9;
     const N = v => v.toFixed(1);
+    // Krallen/Zehen an einer Flossenspitze: n kurze Striche, faecherfoermig um die
+    // Tangentenrichtung (ux,uy) gelegt. Auf dem Seehund-Referenzfoto sind an der
+    // Vorderflosse fuenf dunkle Krallen einzeln zu erkennen — neben den Vibrissen das
+    // auffaelligste Robbenmerkmal (und der klarste Unterschied zur glatten Walflosse).
+    const clawFan = (tx,ty,ux,uy,n,spread,len) => {
+      const nx=-uy, ny=ux; let d="";
+      for(let i=0;i<n;i++){ const o=(i-(n-1)/2)*spread, bx=tx+nx*o, by=ty+ny*o;
+        d += `M${N(bx)},${N(by)}L${N(bx+ux*len)},${N(by+uy*len)}`; }
+      return d;
+    };
     // Fotoaudit 2026-08-07 (Buckelwal mit Kalb, Commons "Humpback whale (Megaptera
     // novaeangliae) with calf Moorea 2"): der bisherige Umriss lief vorn SPITZ zu und las
     // damit als Fisch/Thunfisch. Ein Bartenwal hat einen stumpfen, breiten Rostrum-Kopf,
@@ -6899,12 +6909,23 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
         + `C${N(stockX-R*0.15)},${N(cy+H*0.42)} ${N(cx+L*0.40)},${N(cy+H*0.72)} ${N(cx-L*0.05)},${N(bellyY)}`
         + `C${N(cx-L*0.45)},${N(cy+H*0.95)} ${N(headX+L*0.14)},${N(cy+H*0.72)} ${N(headX+L*0.06)},${N(cy+H*0.42)}`
         + `C${N(headX-L*0.06)},${N(cy+H*0.26)} ${N(headX-L*0.06)},${N(cy-H*0.16)} ${N(headX+L*0.06)},${N(cy-H*0.34)}Z`
-      : `M${N(headX)},${N(cy+H*0.18)}`
-        + `C${N(headX+L*0.22)},${N(cy-H*0.75)} ${N(cx-L*0.25)},${N(backY)} ${N(cx+L*0.2)},${N(cy-H*0.7)}`
-        + `C${N(cx+L*0.5)},${N(cy-H*0.52)} ${N(stockX-R*0.15)},${N(cy-H*0.3)} ${N(stockX)},${N(cy-H*0.12)}`
+      // Fotoaudit 2026-08-07 (Seehund, Commons "Seehund2cele4"): die Robbe teilte sich mit
+      // dem Wal EIN spindelfoermiges Profil und hatte damit ueberhaupt keinen Kopf — vorn
+      // spitz, hinten spitz, dazwischen nichts. Auf dem Foto ist der Kopf einer Robbe eine
+      // deutlich abgesetzte runde Kugel mit kurzer stumpfer Schnauze, dahinter eine klar
+      // sichtbare Halseinschnuerung, dann der dickste Punkt an Brust/Schulter und ein
+      // gleichmaessiger Verlauf zu schmalen Huften. Genau diese vier Stationen als eigene
+      // Kurvenabschnitte (Schaedelkuppel -> Halskerbe -> Ruecken -> Stiel), damit die
+      // Silhouette EIN Pfad bleibt (keine zweite Kopf-Ellipse, s. "Erdnuss"-Fehler).
+      : `M${N(headX+L*0.05)},${N(cy-H*0.34)}`
+        + `C${N(headX+L*0.02)},${N(cy-H*0.62)} ${N(headX+L*0.16)},${N(cy-H*0.84)} ${N(headX+L*0.32)},${N(cy-H*0.68)}`
+        + `C${N(headX+L*0.38)},${N(cy-H*0.60)} ${N(headX+L*0.42)},${N(cy-H*0.50)} ${N(headX+L*0.48)},${N(cy-H*0.54)}`
+        + `C${N(headX+L*0.62)},${N(cy-H*0.60)} ${N(cx-L*0.38)},${N(cy-H*0.98)} ${N(cx-L*0.05)},${N(backY)}`
+        + `C${N(cx+L*0.35)},${N(cy-H*0.86)} ${N(stockX-R*0.25)},${N(cy-H*0.34)} ${N(stockX)},${N(cy-H*0.12)}`
         + `L${N(stockX)},${N(cy+H*0.14)}`
-        + `C${N(stockX-R*0.15)},${N(cy+H*0.42)} ${N(cx+L*0.4)},${N(cy+H*0.72)} ${N(cx-L*0.05)},${N(bellyY)}`
-        + `C${N(cx-L*0.45)},${N(cy+H*0.95)} ${N(headX+L*0.15)},${N(cy+H*0.7)} ${N(headX)},${N(cy+H*0.18)}Z`;
+        + `C${N(stockX-R*0.25)},${N(cy+H*0.38)} ${N(cx+L*0.35)},${N(cy+H*0.86)} ${N(cx-L*0.05)},${N(bellyY)}`
+        + `C${N(cx-L*0.45)},${N(cy+H*0.98)} ${N(headX+L*0.24)},${N(cy+H*0.80)} ${N(headX+L*0.08)},${N(cy+H*0.46)}`
+        + `C${N(headX-L*0.04)},${N(cy+H*0.30)} ${N(headX-L*0.04)},${N(cy-H*0.14)} ${N(headX+L*0.05)},${N(cy-H*0.34)}Z`;
     P("an-body", bodyPath, { fill: skin });
     // Schwanzende: Wal hat EINE horizontale Fluke, die Robbe PAARIGE Hinterflossen — beim
     // ersten Wurf trug die Robbe faelschlich die Wal-Fluke (eigener Nachcheck-Fund).
@@ -6930,15 +6951,53 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
         transform:`rotate(${(Math.sin(time*0.003)*5).toFixed(1)},${stockX.toFixed(1)},${cy.toFixed(1)})` });
       cAttr(hindEl, { opacity: 0 });
     } else {
-      let hind = "";
-      for(const sd of [-1,1]) hind += bezierRibbon(stockX-R*0.12,cy, stockX+R*0.3,cy+sd*R*0.12,
-        stockX+R*0.62,cy+sd*R*0.4, R*0.2, R*0.13);
+      // Fotoaudit 2026-08-07: die beiden Hinterflossen liefen als gespiegelte Baender
+      // GEGENEINANDER durch den Schwanzstiel und kreuzten sich zu einem X — im Bild ein
+      // Scheren-Gewirr statt eines Koerperteils (derselbe Fehlertyp wie die sich
+      // ueberlappenden Frosch-Beinpaare, s. Nachtrag 2). Auf dem Foto sitzen sie am
+      // aeussersten Koerperende und faechern von EINER Wurzel gemeinsam nach hinten auf.
+      // Ein EINZIGER Pfad statt zweier Baender: zwei getrennte bezierRibbons haben an der
+      // gemeinsamen Wurzel zwangslaeufig ueberlappende Konturen, die sich als kleines X
+      // kreuzen (im Bild ein Knoten aus Tinte). Als ein Fanpfad mit TIEFEM Mitteleinschnitt
+      // bleibt derselbe Befund vom Foto erhalten — zwei deutlich getrennte Flossenblaetter,
+      // die erst an der Basis zusammenlaufen — ohne Konturkreuzung. Die Kerbe ist hier
+      // bewusst tief (0,30R von 0,85R), anders als die flache Fluke-Kerbe des Wals: das
+      // sind zwei einzelne Gliedmassen, kein durchgehendes Schwanzblatt.
+      // Die Spitzen enden bewusst stumpf (zwei Eckpunkte statt einer Spitze): spitz
+      // auslaufende Lappen lesen als gegabelte Fischschwanzflosse, die Hinterflosse einer
+      // Robbe ist im Foto ein breites Blatt mit gerader Hinterkante.
+      const hind = `M${N(stockX-R*0.10)},${N(cy)}`
+        + `L${N(stockX+R*0.34)},${N(cy-R*0.56)}`
+        + `L${N(stockX+R*0.62)},${N(cy-R*0.22)}`
+        + `Q${N(stockX+R*0.34)},${N(cy-R*0.10)} ${N(stockX+R*0.14)},${N(cy)}`
+        + `Q${N(stockX+R*0.34)},${N(cy+R*0.11)} ${N(stockX+R*0.62)},${N(cy+R*0.24)}`
+        + `L${N(stockX+R*0.34)},${N(cy+R*0.58)}Z`;
       cAttr(hindEl, { d: hind, fill: flatStep(skinArr,-1), opacity: 1 });
       cAttr(flukeEl, { opacity: 0 });
     }
-    // Brustflosse statt Beinen (beim Buckelwal auffaellig lang, bei der Robbe kuerzer).
-    P("an-pect", bezierRibbon(cx-L*0.35,cy+H*0.55, cx-L*0.1,cy+H*1.3, cx+L*0.12,cy+H*(whale?1.75:1.3),
-      R*0.26, R*0.1), { fill: flatStep(skinArr, -1) });
+    // Zehen an den Hinterflossen (nur Robbe) — im Foto sind die Zehenstrahlen an der
+    // Hinterkante einzeln sichtbar, die Flosse ist kein glattes Blatt.
+    const hindToesEl = cEl("an-hindtoes","path");
+    if(whale) cAttr(hindToesEl, { opacity: 0 });
+    else cAttr(hindToesEl, { d:
+        clawFan(stockX+R*0.48, cy-R*0.39, 0.772,-0.636, 3, R*0.10, R*0.11)
+      + clawFan(stockX+R*0.48, cy+R*0.41, 0.772, 0.636, 3, R*0.10, R*0.11),
+      stroke: flatCol(dark), "stroke-opacity": .55, "stroke-width": 1.4, "stroke-linecap":"round",
+      fill:"none", opacity: 1 });
+    // Brustflosse statt Beinen (beim Buckelwal auffaellig lang, bei der Robbe kuerzer und
+    // deutlich weiter VORN an der Brust — im Foto sitzt sie direkt hinter dem Hals, nicht
+    // auf halber Koerperlaenge wie bisher gezeichnet).
+    P("an-pect", whale
+      ? bezierRibbon(cx-L*0.35,cy+H*0.55, cx-L*0.10,cy+H*1.30, cx+L*0.12,cy+H*1.75, R*0.26, R*0.10)
+      : bezierRibbon(cx-L*0.60,cy+H*0.60, cx-L*0.44,cy+H*1.02, cx-L*0.24,cy+H*1.12, R*0.26, R*0.18),
+      { fill: flatStep(skinArr, -1) });
+    // Krallen an der Vorderflosse (nur Robbe): auf jedem Seehund-Foto einzeln zu sehen,
+    // fehlten komplett — die Flosse war ein glattes Paddel wie beim Wal.
+    const clawEl = cEl("an-claws","path");
+    if(whale) cAttr(clawEl, { opacity: 0 });
+    else cAttr(clawEl, { d: clawFan(cx-L*0.24, cy+H*1.12, 0.983, 0.186, 5, R*0.042, R*0.13),
+      stroke: flatCol(dark), "stroke-opacity": .7, "stroke-width": 1.5, "stroke-linecap":"round",
+      fill:"none", opacity: 1 });
     const dorsalEl = cEl("an-dorsal","path");
     if(whale){
       // Rueckenfinne muss AUF der Ruecken-Kurve sitzen — schwebte vorher frei ueber dem
@@ -6959,8 +7018,12 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
     let detail = "";
     if(whale){ for(let i=0;i<5;i++){ const dy=cy+H*0.35+i*H*0.16;
         detail += `M${(headX+L*0.18).toFixed(1)},${dy.toFixed(1)}Q${(cx-L*0.5).toFixed(1)},${(dy+H*0.12).toFixed(1)} ${(cx-L*0.02).toFixed(1)},${(dy+H*0.05).toFixed(1)}`; } }
-    else { for(let i=0;i<3;i++){ const a2=(i-1)*0.22;
-        detail += `M${(headX+L*0.12).toFixed(1)},${(cy+H*0.2).toFixed(1)}L${(headX-R*0.3).toFixed(1)},${(cy+H*0.2+a2*R*0.7).toFixed(1)}`; } }
+    // Fotoaudit 2026-08-07: die Vibrissen waren drei kurze gerade Striche. Auf dem
+    // Seehund-Foto ist es ein dichter Faecher aus langen, leicht gebogenen Tasthaaren,
+    // der gut eine Schnauzenlaenge nach vorn steht — das praegendste Kopfmerkmal.
+    else { for(let i=0;i<7;i++){ const a2=(i-3)*0.17;
+        detail += `M${N(headX+L*0.14)},${N(cy+H*0.16)}`
+          + `Q${N(headX-L*0.08)},${N(cy+H*0.16+a2*R*0.42)} ${N(headX-L*0.30)},${N(cy+H*0.16+a2*R*0.85)}`; } }
     P("an-detail", detail, { stroke: flatCol(dark), "stroke-opacity": whale?.35:.5, "stroke-width": 1.2, fill:"none" });
     // Blasloch (nur Wal): auf dem Referenzfoto der eine Kopf-Landmark, die jedes
     // Wal-Foto in Seitenansicht zeigt und die vorher komplett fehlte — ein flacher
@@ -6974,19 +7037,27 @@ function drawAnimalSvg(g, cx, cy, breath, time, rnd, a){
       cAttr(blowSlitEl, { d:`M${N(cx-L*0.655)},${N(cy-H*0.735)}L${N(cx-L*0.545)},${N(cy-H*0.775)}`,
         stroke: flatCol(dark), "stroke-width": 2.4, "stroke-linecap":"round", fill:"none", opacity: 1 });
     } else { cAttr(blowEl, { opacity: 0 }); cAttr(blowSlitEl, { opacity: 0 }); }
+    // Nasenloch (nur Robbe): auf dem Seehund-Foto ein deutlicher dunkler Schlitz vorn oben
+    // auf der Schnauze — fehlte komplett (Gesichtsdetails proaktiv pruefen, Nachtrag 2).
+    const nostrilEl = cEl("an-nostril","path");
+    if(whale) cAttr(nostrilEl, { opacity: 0 });
+    else cAttr(nostrilEl, { d:`M${N(headX+L*0.01)},${N(cy-H*0.10)}L${N(headX+L*0.06)},${N(cy+H*0.02)}`,
+      stroke: flatCol(dark), "stroke-width": 2, "stroke-linecap":"round", fill:"none", opacity: 1 });
     // Maul: lange Linie vom Schnauzenende zurueck (Wal: sehr lang, Robbe: kurz).
     // Fotoaudit 2026-08-07: beim Wal setzt die Mundlinie jetzt an der neuen, stumpfen
     // Schnauzenspitze an und endet erst bei ~2/3 der Kopflaenge — im Referenzfoto reicht
     // der Mundspalt eines Bartenwals bis fast unter das Auge.
     P("an-mouth", whale
       ? `M${N(headX-L*0.03)},${N(cy+H*0.06)}Q${N(headX+L*0.28)},${N(cy+H*0.62)} ${N(headX+L*0.64)},${N(cy+H*0.34)}`
-      : `M${N(headX-R*0.05)},${N(cy+H*0.28)}Q${N(headX+L*0.18)},${N(cy+H*0.5)} ${N(headX+L*0.34)},${N(cy+H*0.42)}`,
+      : `M${N(headX+L*0.01)},${N(cy+H*0.20)}Q${N(headX+L*0.14)},${N(cy+H*0.46)} ${N(headX+L*0.30)},${N(cy+H*0.34)}`,
       { stroke: flatCol(dark), "stroke-width": 1.6, fill:"none" });
     // Auge klein und tief sitzend (im Referenzfoto unauffaellig, nicht der Riesen-Knopf
     // des Vierbeiner-Fallbacks). Fotoaudit 2026-08-07: beim Wal sass es auf halber
     // Koerperhoehe mitten im Kopf; auf jedem Bartenwal-Foto liegt das Auge dicht HINTER
-    // dem Mundwinkel und tief — entsprechend nach hinten/unten versetzt.
-    const exW = headX+L*(whale?0.70:0.22), eyW = cy+H*(whale?0.20:0.08);
+    // dem Mundwinkel und tief — entsprechend nach hinten/unten versetzt. Bei der Robbe
+    // umgekehrt: das Auge sitzt im Foto HOCH in der runden Schaedelkuppel (grosse dunkle
+    // Knopfaugen sind dort richtig), nicht auf der Koerpermittellinie.
+    const exW = headX+L*(whale?0.70:0.18), eyW = cy+H*(whale?0.20:-0.10);
     P("an-eye", dot(exW, eyW, R*(whale?0.06:0.085)), { fill: EYE });
     P("an-glint", dot(exW-R*0.02, eyW-R*0.025, R*0.025), { fill: GLINT, "fill-opacity": .9 });
     return;
