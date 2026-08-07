@@ -2081,7 +2081,29 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
       - [x] 🪼 Leuchtwesen/Qualle (Schirm + Tentakel) — erledigt (2026-08-05).
             `halfEllipse` für den Schirm, radiale Markierung, sechs dünne wallende
             Tentakel (bewusst dünn/ohne Saugnäpfe, anders als der Kraken-Arm).
-      - [ ] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
+      - [x] 🐋 Bartenwal, 🦭 Robbe (Meeressäuger — stromlinienförmig, Flossen statt Beine)
+            — Zeichner am 2026-08-05 gebaut (5880e8b), **Fotoaudit erst 2026-08-07
+            nachgeholt** (Commit `44dfb7c` Wal, `6a3d16c` Robbe). Der Haken blieb bis
+            dahin bewusst offen, weil der Pflichtschritt 2 der Checkliste (Referenzfoto)
+            fehlte — **dritter Fall derselben Lücke** nach dem GLINT-Audit (Nachtrag 4)
+            und der Pflanzen-Runde (Nachtrag 6). Der Nachtrag hat sich wieder gelohnt:
+            gegen Buckelwal-Foto lief die Wal-Silhouette vorn spitz zu und die Fluke stand
+            SENKRECHT wie eine Fischschwanzflosse (das eine Merkmal, das Wal von Fisch
+            trennt), die Rückenfinne war ein Haifisch-Dreieck, das Blasloch fehlte ganz;
+            gegen Seehund-Foto hatte die Robbe überhaupt keinen Kopf (dasselbe
+            Spindelprofil wie der Wal, ohne Schädelkuppel/Halskerbe), keine Krallen an der
+            Vorderflosse, kein Nasenloch, drei statt eines Vibrissen-Fächers, und die
+            Hinterflossen kreuzten sich zu einem X. Neu dabei: Helfer `clawFan()` für
+            Krallen-/Zehenfächer an Flossenspitzen.
+            **Lehre (zur harten Regel ergänzt):** ein abgehakter Zeichner ist noch kein
+            geprüfter Zeichner — die Foto-Pflicht gilt auch dann, wenn der Zweig bereits
+            existiert und "plausibel aussieht".
+            **Werkzeug-Nebenfund (`f4543f6`):** `creature-shot` öffnete das Fenster mit
+            500 px Breite und geriet damit unter den 820-px-Umbruch von `app/style.css`,
+            der die Bühne auf 190 px Höhe beschneidet — Rücken, Blasloch und Rückenfinne
+            lagen schlicht außerhalb jedes bisherigen Screenshots. Fenster jetzt 900x820,
+            neues Flag `--bare` blendet die HUD-Leiste über der Bühne aus. Ohne diesen Fix
+            wäre das Audit gar nicht durchführbar gewesen.
       - [x] Rest (🦐🧂⚓🥟🪲🌙🕳️🦤👁️) — **alle erledigt (2026-08-05)**. Fall-für-Fall wie
             geplant entschieden: eigener Zeichner nur, wo der Bauplan strukturell abweicht
             (🦐🧂⚓ EIN gemeinsamer Krebstier-Zeichner; 🪲 Elytren+Mittelnaht; 🥟 8 Stummel-
@@ -2091,7 +2113,9 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
             **Systemischer Fund dabei:** der Fell-Borstenkranz lief rein über `insul` und
             traf damit auch Gecko/Schildkröte/Chamäleon — Reptilien mit Fell. Für alle
             `sprawl`-Kinds unterdrückt; ein Fix, drei Archetypen.
-            **Phase 1b damit abgeschlossen: 14/14.**
+            **Phase 1b damit abgeschlossen: 14/14** — Stand 2026-08-05 galt das für die
+            gebauten Zeichner; **wirklich vollständig (inkl. Foto-Abgleich für jeden der
+            14) ist Phase 1b erst seit 2026-08-07**, s. den Meeressäuger-Punkt darüber.
       **Modell:** Opus — neue Bauplan-Geometrien, großer Ermessensspielraum bei Form/Proportion.
 
       **Nachtrag 4 — eigenständige Audit-Runde 🐟/🐙/🦇/🐜/🦀/🐌/🦋 + gemeinsame
