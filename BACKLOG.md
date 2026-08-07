@@ -2378,10 +2378,66 @@ Bildgenerierung kommt erst zuletzt, entkoppelt von der Live-Simulation.
         zu klein für die Kontaktbogen-Vorschau, kein Code-Fehler.
       - `pattern-continuity-check` bleibt unverändert grün (prüft das Feld selbst, nicht
         die Kind-spezifische Platzierung).
-      **Weiterhin offen:** Panzer (Schildkröte/Krabbe) und die Pflanzen/Pilz-Zeichner
-      haben eigene Körperformen ohne Musterschicht. Das Muster legt sich zudem
-      gleichmäßig über den ganzen Rumpf und überdeckt damit die Bauch-/Rücken-Staffelung
-      leicht — echte Tiere sind am Bauch meist ungemustert.
+      **Nachtrag — Panzer + Konterschattierung (2026-08-07): erledigt.** Damit ist der
+      zuvor hier stehende „Weiterhin offen"-Absatz (Panzer Schildkröte/Krabbe,
+      Pflanzen/Pilz-Zeichner, gleichmäßig über den Bauch gelegtes Muster) abgearbeitet.
+      Fotopflicht eingehalten, alle Referenzen über die Wikipedia-REST-Summary geholt
+      (Testudo hermanni boettgeri, Carcinus maenas, Damhirsch, Amanita muscaria,
+      Zunderschwamm/Porling, Stieleiche) — kein Anatomie-Urteil ohne Bild.
+      - **🐢 Panzer (Carapax).** Im Foto ist der Panzer das am stärksten gezeichnete
+        Körperteil (olivgelber Grund, dunkle Keile je Schild); im eigenen Render war er
+        eine völlig flache Fläche, während der Rumpf direkt darunter sein Pigmentfeld
+        schon trug — die Panzerkante trennte „gemustert" von „leer" mitten im Tier.
+        Eigener `inside()`-Test wie beim Fisch, aber auf einer OBEREN Halbellipse: der
+        Panzer schließt als `arcPath(…, true)` mit einer Sehne bei sin(0.95·π) = +0,156
+        der Höhe, die Rumpf-Ellipse als Testfläche wiederzuverwenden hätte die Flecken
+        unter die Panzerkante laufen lassen. **Ein** `cppnField(g)` für Rumpf und Panzer,
+        damit die Zeichnung über die Kante hinweg dieselbe ist.
+        **Fallstrick, vorab vermieden:** der Aufruf läuft IMMER, bei `armor<=0.5` nur mit
+        `amount` 0 — würden die Knoten erst beim Überschreiten der Panzerschwelle
+        entstehen, hängte `cEl()` sie hinten an die Ebene und das Muster läge über Kopf
+        und Beinen (`cEl()` hängt neue Knoten an, die Z-Reihenfolge ist die
+        Erzeugungs-, nicht die Aufrufreihenfolge).
+      - **🦀 Panzer (Krabbe).** Foto: marmoriert, nie einfarbig; Render: glatte
+        Volltonellipse. Hier ist die Panzerfläche eine VOLLE Ellipse, also derselbe Test
+        wie beim Fisch. Grundton ist der Panzerton `mix(body,[185,90,70],0.55)`, nicht die
+        Rumpffarbe — sonst lägen die Flecken in einem Farbraum, den der Panzer nicht trägt.
+      - **Konterschattierung (Vierbeiner).** Referenzfoto Damhirsch: Rücken und Flanke
+        dicht gefleckt, Unterseite ohne Zeichnung — und der Übergang ist **kein**
+        Rasierschnitt, die Flecken werden nach unten hin kleiner und seltener.
+        `patternPatches()` hat dafür einen optionalen `weight(x,y)`-Faktor (0..1)
+        bekommen, der als Faktor auf den **Fleckenradius** wirkt statt als harter Schnitt.
+        Der Vierbeiner multipliziert zwei Anteile: `cut` spart die Bauch-Ellipse
+        `E("an-belly")` mit weichem Saum aus, `fade` lässt die Zeichnung zusätzlich über
+        die untere Rumpfhälfte auslaufen — ohne den zweiten Anteil bliebe ein gefleckter
+        Ring um eine leere Bauchinsel stehen. Beides in `bh`-normierten Koordinaten, gilt
+        also flach (Gecko bh=0,56) wie gedrungen (Bär bh=1,04) gleich, und beides rein
+        geometrisch/genomunabhängig — `pattern-continuity-check` misst das Feld selbst.
+      - **Pflanzen/Pilze — geprüft, EINE Fläche gebaut, der Rest begründet
+        zurückgestellt.** Die Prüfung ergab kein pauschales „ja": bei Baum, Strauch,
+        Kraut, Farn, Moos, Blütenkraut und Polsterpflanze gibt es überhaupt keine
+        zusammenhängende Körperfläche, die eine Musterlage tragen kann — sie bestehen aus
+        vielen Einzelblättern/Blobs, deren Fläche kleiner ist als ein einzelner Fleck, und
+        die Farbstreuung `leafVar()` leistet dort bereits, was eine Musterlage leisten
+        würde. Genau eine Ausnahme mit klarem Fotobeleg: die **Hutpilz-Kappe** (🍄/💡) —
+        im Amanita-Foto trägt sie die gesamte Zeichnung, Stiel und Lamellen sind
+        einfarbig. Zuschnitt wie bei der Schildkrötenkuppel (`halfEllipse` „top", untere
+        Hälfte ausgeschlossen, sonst lägen Flecken unter der Kappe in den Lamellen), ein
+        Feld für alle Kappen eines Büschels (Klone desselben Genoms).
+        Bewusst **nicht** gebaut, je mit Grund: **Baumpilz/Porling** — das Foto zeigt
+        konzentrische Zonenbänder parallel zum Rand, kein Fleckenfeld; ein CPPN-Blobfeld
+        wäre dort das falsche Muster, und die Konsolen sind mit 7–12 px zu klein dafür
+        (eine echte Zonen-Ringlage wäre ein eigenes, anderes Modul). **Kaktus** —
+        durchgehende Fläche vorhanden, aber im Foto einfarbig grün mit Rippen und Dornen,
+        ein Muster wäre erfunden. **Schimmel/Hefe/Myzel/Schneealge** — Fadengeflechte und
+        Einzelzellen, keine Fläche.
+      - **Gates nach jedem Schritt:** `design-audit`, `app-parity`, `exemplar-check`,
+        `pattern-continuity-check` durchgehend grün; keine Schwelle angefasst.
+      - **Offen geblieben (kleiner, eigener Punkt):** die weißen Velum-Tupfen auf der
+        Hutpilz-Kappe (`fun-dots`) tragen als Nicht-`.cre-mark` die globale Tintenkontur
+        und lesen dadurch als Ringe/Bläschen statt als flache Flecken — im Amanita-Foto
+        sind es randlose weiße Flatschen. Nicht mitgeändert, weil es die Musterschicht
+        nicht betrifft.
 
   <details><summary>Ursprünglicher Vorschlag (2026-08-04)</summary>
 
