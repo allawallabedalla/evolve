@@ -939,7 +939,7 @@
   .gb-tile.miss .nm { color: var(--muted); }
   .gb-tile { position: relative; }
   .gb-tile.found { cursor: pointer; }
-  .gb-tile.miss { cursor: help; }
+  .gb-tile.miss { cursor: default; }   /* kein OS-Hilfe-Cursor mehr -- der eigene gbTip erklaert die Kachel bereits */
   /* Klick-Detailpanel im Genbuch (Wikipedia-Beschreibung) */
   #gbDetail { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: fadein .2s ease; }
   #gbDetail[hidden] { display: none; }

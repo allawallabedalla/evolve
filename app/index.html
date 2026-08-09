@@ -2851,7 +2851,10 @@ function renderGenbook(){
       const evo = ok ? (f.evo||"") : "Hier noch nicht gesehen — forme die passende Umwelt.";
       t.dataset.title = title; t.dataset.clade = f.cl; t.dataset.era = f.era||""; t.dataset.evo = evo;
       t.dataset.rarity = rm.label; t.dataset.rcol = rm.col;
-      t.title = `${title} · ${rm.label} · ${f.era||""} · ${evo}`;   // Fallback (Touch/a11y)
+      // aria-label statt title: gleicher Text fuer Screenreader/Touch-Long-Press,
+      // aber OHNE den nativen Browser-Tooltip, der sich sonst mit dem eigenen
+      // gbTip (mousemove weiter unten) ueberlagert — zwei Tooltips gleichzeitig.
+      t.setAttribute("aria-label", `${title} · ${rm.label} · ${f.era||""} · ${evo}`);
       t.innerHTML = `<div class="em">${ok?formIcon(f.key):ic("dot")}</div>`+
                     `<div class="nm">${ok?f.n:"???"}</div>`+
                     `<div class="cl">${f.cl}</div>`+
