@@ -855,6 +855,17 @@
   .chal-active-fill { height: 100%; background: var(--bio); border-radius: 999px; transition: width .3s ease; }
   .chal-active-status { margin-top: 5px; font-size: var(--fs-xs); color: var(--muted); }
   .chal-active-status.violated { color: var(--danger); }
+  .chal-active-target { margin-top: 4px; font-size: var(--fs-xs); color: var(--muted); }
+  .chal-active-target .ic { width: .95em; height: .95em; vertical-align: -.12em; margin: 0 2px; }
+  /* Nutzer-Befund: der Flavor-Titel allein nannte oft nur 1-2 von bis zu 6 gesperrten
+     Reglern -- diese Zeile zeigt alle mit echten Zahlen + Live-Wert, rot sobald eine
+     Achse gerade ausserhalb ihres erlaubten Bereichs steht. */
+  .chal-active-grenzen { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: var(--fs-xs); color: var(--muted); }
+  .chal-active-grenzen .ic { width: .95em; height: .95em; vertical-align: -.12em; margin-right: 3px; }
+  .chal-active-grenzen .chal-grenze i { font-style: normal; opacity: .75; }
+  .chal-active-grenzen .chal-grenze.bad { color: var(--danger); font-weight: var(--w-bold); }
+  #chalActivePin[hidden] { display: none; }
+  #chalActivePin { margin-bottom: 14px; }
   .chal-filters { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px; }
   .chal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chal-chip { font-size: var(--fs-sm); color: var(--muted); background: var(--abyss); border: 2px solid var(--line-soft); border-radius: 999px;
@@ -939,7 +950,7 @@
   .gb-tile.miss .nm { color: var(--muted); }
   .gb-tile { position: relative; }
   .gb-tile.found { cursor: pointer; }
-  .gb-tile.miss { cursor: help; }
+  .gb-tile.miss { cursor: default; }   /* kein OS-Hilfe-Cursor mehr -- der eigene gbTip erklaert die Kachel bereits */
   /* Klick-Detailpanel im Genbuch (Wikipedia-Beschreibung) */
   #gbDetail { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(36,31,40,.55); animation: fadein .2s ease; }
   #gbDetail[hidden] { display: none; }
