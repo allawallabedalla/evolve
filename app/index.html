@@ -92,6 +92,12 @@
           <span class="chal-active-title" id="chalActiveTitle"></span>
           <button class="link" id="chalAbandonBtn">aufgeben</button>
         </div>
+        <div class="chal-active-target" id="chalActiveTarget"></div>
+        <!-- Nutzer-Befund: der Flavor-Titel oben nennt oft nur 1-2 von bis zu 6
+             gesperrten Reglern (oder gar keinen) -- hier stehen ALLE mit echten
+             Zahlen, live eingefaerbt (im Rahmen/verletzt), damit man beim Spielen
+             nicht raten muss, was "in den Kronen" numerisch bedeutet. -->
+        <div class="chal-active-grenzen" id="chalActiveGrenzen"></div>
         <div class="chal-active-bar"><div class="chal-active-fill" id="chalActiveFill"></div></div>
         <div class="chal-active-status" id="chalActiveStatus"></div>
       </div>
@@ -288,6 +294,14 @@
         <button id="chalClose" class="link">schließen</button>
       </div>
       <p class="gb-sub">Ein Ziel mit einer Beschränkung und einem Zeitrahmen — eine Einladung, keine Pflicht. Du darfst weiter alles einstellen; nur zählt jetzt, ob du es innerhalb der Regel schaffst.</p>
+      <!-- Nutzer-Befund: ein erneutes Oeffnen sprang immer auf die kuratierte
+           Kurzauswahl zurueck, auch waehrend eine Herausforderung laeuft -- die
+           eigene aktive Karte konnte darin fehlen. Pin zeigt sie IMMER zuerst,
+           unabhaengig vom Kuratiert/Alle-Umschalter darunter. -->
+      <div id="chalActivePin" hidden>
+        <p class="catalog-curated-note">Gerade aktiv:</p>
+        <div id="chalActivePinBody"></div>
+      </div>
       <!-- Welt der Woche (V1-Ausbaustufe): steht bewusst HIER und nicht als eigener
            Knopf im Hauptbildschirm — sie ist eine Herausforderung mit fester Startwelt,
            also derselbe Denkrahmen, und die Einstiegsleiste bleibt bei ihren vier
@@ -4954,6 +4968,21 @@ function withinGrenzen(e, grenzen){
     if(g.max!=null && v>g.max) return false; }
   return true;
 }
+// Nutzer-Befund: ein Abbruch sagte bisher nur "die Beschraenkung wurde nicht
+// eingehalten" -- nie, WELCHE von bis zu 6 Achsen und um wie viel. Liefert die am
+// staerksten verletzte Achse (falls mehrere gleichzeitig kippen, ist das die
+// aussagekraeftigste); reine Diagnose, aendert withinGrenzen() selbst nicht.
+function worstGrenzenViolation(e, grenzen){
+  let worst = null, worstAmt = 0;
+  for(const ax in grenzen){
+    const g = grenzen[ax], v = e[ax];
+    let amt = 0;
+    if(g.min!=null && v<g.min) amt = g.min-v;
+    if(g.max!=null && v>g.max) amt = Math.max(amt, v-g.max);
+    if(amt>worstAmt){ worstAmt=amt; worst={axis:ax, val:v, min:g.min??0, max:g.max??1}; }
+  }
+  return worst;
+}
 
 // P1.4 (Komplexitaets-Audit): Startansicht = kleine kuratierte Auswahl statt aller 271
 // Einträge; die volle Liste (Suche/Filter unveraendert) liegt hinter "Alle anzeigen".
@@ -4966,7 +4995,7 @@ function showChalCurated(curated){
 function openChal(){
   if(!window.EVOLVE_CHALLENGES) return;
   _chalOpener = document.activeElement;
-  renderChalChips(); renderChalList(); renderChalCurated();
+  renderChalChips(); renderChalList(); renderChalCurated(); renderChalActivePin();
   wowShownWeek = null; renderWowCard();
   showChalCurated(true);
   _el("chal").hidden = false; _el("chalClose").focus();
@@ -5019,6 +5048,18 @@ function chalItemHtml(ch){
 function wireChalItems(host){
   host.querySelectorAll(".chal-item-start").forEach(b => b.onclick = () => startChallenge(b.dataset.id));
   host.querySelectorAll(".chal-item-fixed").forEach(b => b.onclick = () => openFixedWorld(b.dataset.fixed));
+}
+// Nutzer-Befund: erneutes Oeffnen sprang immer auf die kuratierte Kurzauswahl
+// zurueck (showChalCurated(true) in openChal()) -- die eigene laufende
+// Herausforderung konnte darin fehlen, man musste selbst suchen/filtern, um ihre
+// Beschreibung nochmal nachzulesen. Dieser Pin zeigt sie IMMER oben, unabhaengig
+// vom Kuratiert/Alle-Umschalter darunter.
+function renderChalActivePin(){
+  const box = _el("chalActivePin"); if(!box) return;
+  if(!activeChallenge){ box.hidden = true; return; }
+  box.hidden = false;
+  _el("chalActivePinBody").innerHTML = chalItemHtml(activeChallenge.ch);
+  wireChalItems(box);
 }
 function renderChalList(){
   const all = window.EVOLVE_CHALLENGES || [];
@@ -5089,12 +5130,28 @@ function abandonChallenge(){
 }
 document.getElementById("chalAbandonBtn").addEventListener("click", abandonChallenge);
 
+// Nutzer-Befund: der Flavor-Titel nennt oft nur einen Bruchteil der tatsaechlich
+// gesperrten Regler (bis zu 6 gleichzeitig, s. BACKLOG). Diese Zeile zeigt ALLE mit
+// echten Zahlen + dem aktuellen Reglerwert, live eingefaerbt -- lauft mit jedem
+// renderChalHUD()-Aufruf (also jeden Frame waehrend einer aktiven Herausforderung)
+// mit, deshalb sieht man sofort, welche Achse gerade aus dem Rahmen laeuft.
+function renderChalGrenzen(ch){
+  const box = _el("chalActiveGrenzen"); if(!box) return;
+  box.innerHTML = Object.keys(ch.grenzen).map(ax => {
+    const l = LEVERS.find(x => x.key===ax); if(!l) return "";
+    const g = ch.grenzen[ax], lo = g.min==null?0:g.min, hi = g.max==null?1:g.max;
+    const v = env[ax], ok = v>=lo && v<=hi;
+    return `<span class="chal-grenze${ok?'':' bad'}" title="${l.name}">${ic(l.ico)}${lo.toFixed(2)}–${hi.toFixed(2)} <i>(jetzt ${v.toFixed(2)})</i></span>`;
+  }).join("");
+}
 function renderChalHUD(){
   const el = _el("chalActive");
   if(!activeChallenge){ el.hidden = true; return; }
   const { ch, phase, startGen } = activeChallenge;
   el.hidden = false;
   _el("chalActiveTitle").textContent = (activeChallenge.worldKey ? worldKeyLabel(activeChallenge.worldKey) + " · " : "") + ch.titel;
+  _el("chalActiveTarget").innerHTML = `Ziel: ${chalTargetIcon(ch)} <b>${chalTargetLabel(ch)}</b>`;
+  renderChalGrenzen(ch);
   const status = _el("chalActiveStatus");
   if(phase==="warten"){
     _el("chalActiveFill").style.width = "0%";
@@ -5109,12 +5166,20 @@ function renderChalHUD(){
   }
 }
 let chalToastTimer = null;
-function showChallengeToast(ch, kind){
+// `violation` (optional, nur bei kind==="verlassen"): {axis,val,min,max} aus
+// worstGrenzenViolation() -- nennt konkret, welcher Regler gekippt ist, statt nur
+// "die Beschraenkung wurde nicht eingehalten" (Nutzer-Befund).
+function showChallengeToast(ch, kind, violation){
   const t = document.getElementById("toast");
+  let violText = "";
+  if(kind==="verlassen" && violation){
+    const l = LEVERS.find(x => x.key===violation.axis);
+    if(l) violText = ` ${l.name} lag bei ${violation.val.toFixed(2)} (erlaubt: ${violation.min.toFixed(2)}–${violation.max.toFixed(2)}).`;
+  }
   const html = kind==="geschafft"
     ? `${ic("dna")} Herausforderung geschafft: <b>${ch.titel}</b>`
     : kind==="verlassen"
-    ? `Herausforderung verlassen: <b>${ch.titel}</b> — die Beschränkung wurde nicht eingehalten. Jederzeit erneut versuchbar.`
+    ? `Herausforderung verlassen: <b>${ch.titel}</b> —${violText || " die Beschränkung wurde nicht eingehalten."} Jederzeit erneut versuchbar.`
     : `Herausforderung ausgelaufen: <b>${ch.titel}</b> — das Budget von ${ch.generationen.toLocaleString("de-DE")} Generationen ist um. Jederzeit erneut versuchbar.`;
   t.innerHTML = html;
   t.classList.toggle("legendary", kind==="geschafft");
@@ -5156,7 +5221,7 @@ function challengeTick(){
     return;
   }
   if(!inBounds){
-    showChallengeToast(ch, "verlassen");
+    showChallengeToast(ch, "verlassen", worstGrenzenViolation(env, ch.grenzen));
     activeChallenge = null; renderChalHUD(); return;
   }
   if(generation - activeChallenge.startGen >= ch.generationen){

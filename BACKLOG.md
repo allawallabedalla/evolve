@@ -991,6 +991,36 @@ Punkt kein offenes Konzept mehr** — nur die Ausbaustufen sind noch unentschied
   Lebensbaum** (verifiziert). Danach beginnt die nächste Linie.
   Gates: `design-audit` (beide Warnstufen einzeln auf AA geprüft), `ui-calm-check`,
   `app-parity` grün.
+- [x] **Audit + Fix „unklar was zu tun ist" (2026-08-07).** *(Nutzer)* Herausforderungen
+  wirkten unklar bedienbar. Befund: alle nötigen Daten (exakte Regler-Grenzen,
+  Zielform) waren längst da — sie wurden nur an der Stelle, wo der Spieler sie
+  BRAUCHT (während des Spielens), nirgends gezeigt. Konkret gemessen: 130/271 (48 %)
+  Herausforderungen sperren alle 6 Regler gleichzeitig, 206/271 (76 %) zielen auf eine
+  einzelne Form statt nur ein Reich — aber `startChallenge()` schloss das Modal sofort,
+  und die einzige während des Spiels sichtbare Zeile war der Flavor-Titel, der oft nur
+  1–2 von bis zu 6 gesperrten Achsen nennt (Beispiel: Titel nennt Licht+Wasser, echte
+  Bedingung sperrt zusätzlich Temperatur/Räuber/Nahrung/Futterhöhe). Ein Abbruch sagte
+  nur „die Beschränkung wurde nicht eingehalten", nie welche Achse.
+  **Fix, drei Teile:** (1) `#chalActive`-HUD zeigt jetzt Ziel (Reich/Form) UND alle
+  gesperrten Achsen mit echten Zahlen + Live-Wert, rot sobald eine Achse gerade
+  draußen liegt (`renderChalGrenzen()`, läuft mit jedem HUD-Update mit). (2) Ein
+  Abbruch nennt die konkret verletzte Achse mit Zahl (`worstGrenzenViolation()` +
+  erweiterter `showChallengeToast()`), z. B. „Temperatur lag bei 1.00 (erlaubt:
+  0.57–0.82)" statt nur „nicht eingehalten". (3) Erneutes Öffnen von
+  „Herausforderungen ↗" sprang bisher immer auf die kuratierte Kurzauswahl zurück,
+  auch während eine lief — ein neuer Pin (`renderChalActivePin()`) zeigt die aktive
+  Karte jetzt IMMER zuerst, unabhängig vom Kuratiert/Alle-Umschalter.
+  **Bewusst nicht angefasst:** der leise „gleiche Startwelt für alle ↗"-Link (setzt
+  alle Regler automatisch auf die Mitte des erlaubten Bereichs) — durch die HUD-Zahlen
+  ist der Sandkasten-Pfad jetzt genauso informativ, der Link bleibt bei seinem
+  ursprünglichen Zweck (Vergleichbarkeit/Bestenliste). Kein Spoiler für unentdeckte
+  Zielformen im Lebensbaum — deckt sich mit der bereits getroffenen V4-Entscheidung
+  weiter oben (eine „hier wohnt sie"-Ableitung wurde dort gebaut, gemessen und wegen
+  zu geringer Trefferquote verworfen).
+  Getestet: `design-audit`/`app-parity`/`ui-calm-check`/`exemplar-check`/`key-check`
+  grün, eigener Playwright-Lauf (HUD-Inhalt bei „warten"/„läuft", Live-Einfärbung nach
+  Reglerwechsel, Verstoß-Toast mit korrekter Achse/Zahl, Pin nach Neu-Öffnen) — 0
+  Konsolenfehler.
 
 ### 6 · Große Brocken — Rest-Achsen (Punkt 2 abgeschlossen, neu bewertet 2026-07-30 — s. u.)
 
