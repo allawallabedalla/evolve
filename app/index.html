@@ -2784,28 +2784,11 @@ function awakenedKingdoms(set){
 // 0% = nur ueber stochastische Drift erreichbar -> legendaerer "Fang".
 // Leitplanke: sanfte Anreize, kein Vollstaendigkeits-Zwang. Namen = classify().n.
 const RARITY = {
-  "Bakterie":"haeufig","Archaee · Extremophil":"haeufig","Euglenoid · Mixotroph":"haeufig","Myzel · Pilzgeflecht":"haeufig","Krebstier · Arthropode":"haeufig","Fell-Warmblüter":"haeufig","Kleines flinkes Tier":"haeufig",
-  "Protist · Amöbe":"gelegentlich","Plankton":"gelegentlich","Verholzter Strauch":"gelegentlich","Hefe":"gelegentlich","Insekt · Gliederfüßer":"gelegentlich","Gepanzertes Beutetier":"gelegentlich","Flatterer · Vogel":"gelegentlich",
-  "Laubbaum":"selten","Nadelbaum":"selten","Polster-Kältepflanze":"selten","Flechte · Symbiose":"selten","Koralle · Riffbildner":"selten","Flugsäuger · Fledermaus":"selten","Behänder Kletterer":"selten",
-  "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Baumpilz · Porling":"sehr-selten","Zunderschwamm":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Generalisten-Tier":"sehr-selten",
-  "Moos":"legendaer","Farn":"legendaer","Hutpilz":"legendaer","Schimmel · Fadenpilz":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Kopffüßer · Tintenfisch":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer","Fell-Großtier":"legendaer","Aktiver Großjäger":"legendaer","Gepanzerter Koloss":"legendaer",
-  // PHASE 1 (2026-07-30): Pakete A/B/C. Quelle abweichend von den 44 Bestandsformen oben —
-  // docs/rarity.json misst nur die 6 Kern-Regler (5^6-Gitter, NIE aktiver Stressor), kann
-  // stressor-gated Formen (Paket A) also strukturell nicht abbilden (waeren dort immer 0%,
-  // faelschlich "legendaer"). Stattdessen `node tools/research/gap-sweep.mjs 4000`
-  // (schliesst Stressor-Umwelten mit ein, wie Einfluss-Karten sie im Spiel setzen).
-  // Tier-Grenzen an der bestehenden Verteilung gespiegelt, mit einer Stufe Vorsicht nach
-  // unten für Paket A: eine Form, die NUR bei aktiver Karte gewinnt, ist nicht "haeufig"
-  // im Sinne von Bakterie (die immer erreichbar ist), sondern "gelegentlich".
-  "Schwefelbakterie · Chemotroph":"gelegentlich","Salinenkrebs · Halophil":"gelegentlich","Schneealge · UV-hart":"gelegentlich",
-  "Tiefsee-Amphipode · Druckfest":"gelegentlich","Bärtierchen · Anhydrobiont":"gelegentlich","Deinococcus · Strahlenfest":"gelegentlich",
-  "Feuerkäfer · Pyrophil":"gelegentlich","Frostspanner · Winterfalter":"gelegentlich","Krummholz · Windzwerg":"gelegentlich",
-  "Wühler · Grabtier":"gelegentlich","Bartenwal · Filtrierschwimmer":"gelegentlich","Robbe · Meeressäuger":"gelegentlich",
-  "Krill · Filtrierendes Kleinstwesen":"gelegentlich",
-  "Methanogenes Archaeon · Anaerobier":"selten","Laufvogel · Strauß":"selten","Hallimasch · Leuchtpilz":"selten",
-  "Seestern · Stachelhäuter":"selten","Mammutbaum · Riesenpflanze":"selten",
-  "Muschel · Sessiler Filtrierer":"sehr-selten","Erle · Knöllchen-Pflanze":"sehr-selten",
-  "Chamäleon · Tarnjäger":"legendaer",
+  "Euglenoid · Mixotroph":"haeufig",
+  "Fell-Warmblüter":"gelegentlich","Generalisten-Tier":"gelegentlich","Hutpilz":"gelegentlich","Fell-Großtier":"gelegentlich","Reptil · Echse":"gelegentlich","Verholzter Strauch":"gelegentlich","Protist · Amöbe":"gelegentlich","Aktiver Großjäger":"gelegentlich",
+  "Krummholz · Windzwerg":"selten","Deinococcus · Strahlenfest":"selten","Schwefelbakterie · Chemotroph":"selten","Frostspanner · Winterfalter":"selten","Feuerkäfer · Pyrophil":"selten","Schneealge · UV-hart":"selten","Bärtierchen · Anhydrobiont":"selten","Tiefsee-Amphipode · Druckfest":"selten","Salinenkrebs · Halophil":"selten","Erle · Knöllchen-Pflanze":"selten","Bakterie":"selten","Seestern · Stachelhäuter":"selten","Hefe":"selten","Archaee · Extremophil":"selten","Myzel · Pilzgeflecht":"selten","Chamäleon · Tarnjäger":"selten","Schimmel · Fadenpilz":"selten","Insekt · Gliederfüßer":"selten","Kopffüßer · Tintenfisch":"selten","Baumpilz · Porling":"selten","Polster-Kältepflanze":"selten","Flechte · Symbiose":"selten","Krebstier · Arthropode":"selten",
+  "Methanogenes Archaeon · Anaerobier":"sehr-selten","Kleines flinkes Tier":"sehr-selten","Laubbaum":"sehr-selten","Schwamm":"sehr-selten","Muschel · Sessiler Filtrierer":"sehr-selten","Schnecke · Weichtier":"sehr-selten","Behänder Kletterer":"sehr-selten","Koralle · Riffbildner":"sehr-selten","Flugsäuger · Fledermaus":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Gepanzertes Beutetier":"sehr-selten","Fisch · Aalform":"sehr-selten","Hallimasch · Leuchtpilz":"sehr-selten","Leuchtwesen · Tiefsee":"sehr-selten","Flatterer · Vogel":"sehr-selten","Gepanzerter Koloss":"sehr-selten","Krill · Filtrierendes Kleinstwesen":"sehr-selten","Robbe · Meeressäuger":"sehr-selten","Zunderschwamm":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Wurm":"sehr-selten","Grünalge":"sehr-selten","Nadelbaum":"sehr-selten","Blütenkraut":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Plankton":"sehr-selten",
+  "Moos":"legendaer","Farn":"legendaer","Amphibie · Lurch":"legendaer","Wühler · Grabtier":"legendaer","Bartenwal · Filtrierschwimmer":"legendaer","Laufvogel · Strauß":"legendaer","Mammutbaum · Riesenpflanze":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (Feldpost-Ramp: Tinte -> Petrol ->
 // Ocker -> Koralle -> Pflaume, steigende Saettigung = steigende Seltenheit).

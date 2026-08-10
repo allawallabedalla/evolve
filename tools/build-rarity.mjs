@@ -40,6 +40,9 @@ import { clusters, selectionWeights as popWeights } from "../dist/world/cluster.
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const a = argv.find(x => x.startsWith(`--${n}=`)); return a ? a.split("=")[1] : d; };
 const WRITE = argv.includes("--write");
+// --retier: Stufen aus dem vorhandenen docs/rarity.json neu ableiten, OHNE neu zu
+// messen (die Prozentwerte je Schicht stehen dort). Fuer Schwellen-Anpassungen.
+const RETIER = argv.includes("--retier");
 const SAMPLES = +opt("samples", 1500);
 const GENS = 300;
 
@@ -56,7 +59,22 @@ function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.im
 const TIERS = [
   [0.15, "haeufig"], [0.05, "gelegentlich"], [0.02, "selten"], [0, "sehr-selten"],
 ];
+const ORDER = ["haeufig","gelegentlich","selten","sehr-selten","legendaer"];
 const tierOf = (f) => { for (const [lo, t] of TIERS) if (f > lo || (lo === 0 && f > 0)) return t; return "legendaer"; };
+// STRESSOR-ABSCHLAG (Konvention aus app/index.html, hier uebernommen): eine Form, die
+// NUR mit aktiver Einfluss-Karte gewinnt, ist nicht so leicht zu finden wie eine, die
+// schon ueber die Regler allein entsteht - Schicht B hat per Konstruktion IMMER einen
+// Stressor an, im Spiel ist das die Ausnahme. Solche Formen ruecken eine Stufe runter.
+function tierWithPenalty(leverFrac, stressFrac) {
+  const base = tierOf(Math.max(leverFrac, stressFrac));
+  const stressorOnly = stressFrac > leverFrac && leverFrac < 0.005;
+  if (!stressorOnly) return base;
+  // "legendaer" ist fuer NIE beobachtete Formen reserviert - der Abschlag darf eine
+  // Form, die im Sweep tatsaechlich vorkam, nicht dorthin schieben (sonst behauptet die
+  // Anzeige "nur ueber Drift", obwohl die Form gemessen aufgetreten ist).
+  const floorIdx = ORDER.length - 2;   // hoechstens "sehr-selten"
+  return ORDER[Math.min(ORDER.indexOf(base) + 1, floorIdx)];
+}
 
 // ---- Schwarm-Setup: exakt die Live-Konfiguration aus app/index.html --------
 const html0 = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
@@ -106,17 +124,27 @@ function sweep(label, withStressor, samples, seed0) {
   return count;
 }
 
-const countA = sweep("Schicht A (nur Regler)", false, SAMPLES, 1);
-const nA = SAMPLES;
-const countB = sweep("Schicht B (mit Stressor)", true, SAMPLES, 777);
+let countA, countB, nA = SAMPLES;
+if (RETIER) {
+  const prev = JSON.parse(readFileSync(join(ROOT, "docs", "rarity.json"), "utf-8"));
+  countA = new Map(); countB = new Map(); nA = 1e4;
+  for (const r of prev.forms) {
+    countA.set(r.name, Math.round((r.leverPct / 100) * nA));
+    countB.set(r.name, Math.round((r.stressPct / 100) * nA));
+  }
+  console.log(`  --retier: Stufen aus docs/rarity.json neu abgeleitet (keine Neumessung).`);
+} else {
+  countA = sweep("Schicht A (nur Regler)", false, SAMPLES, 1);
+  countB = sweep("Schicht B (mit Stressor)", true, SAMPLES, 777);
+}
 
 // ---- Zusammenfuehren: der bessere der beiden Wege zaehlt --------------------
 const rows = FORMS.map((f) => {
   const fa = (countA.get(f.n) || 0) / nA;
-  const fb = (countB.get(f.n) || 0) / SAMPLES;
+  const fb = (countB.get(f.n) || 0) / nA;
   const frac = Math.max(fa, fb);
   return { name: f.n, kingdom: f.k, leverPct: +(fa*100).toFixed(3), stressPct: +(fb*100).toFixed(3),
-           convergencePct: +(frac*100).toFixed(3), tier: tierOf(frac) };
+           convergencePct: +(frac*100).toFixed(3), tier: tierWithPenalty(fa, fb) };
 }).sort((a,b) => b.convergencePct - a.convergencePct);
 
 // ---- Bericht + Diff gegen den Ist-Stand in app/index.html ------------------

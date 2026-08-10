@@ -1,221 +1,529 @@
 {
-  "_comment": "Raritaet je Form = Anteil der Umwelten (5^6-Gitter, deterministische Konvergenz ohne Drift), die dort landen. 0% = nur ueber stochastische Drift (legendaer). Quelle: scratchpad/rarity2.mjs. Fuers Genbuch-Unlock (Fänge).",
-  "grid": 15625,
-  "forms": [
-    {
-      "name": "Bakterie",
-      "convergencePct": 12.608,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Archaee · Extremophil",
-      "convergencePct": 9.331,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Protist · Amöbe",
-      "convergencePct": 3.859,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Euglenoid · Mixotroph",
-      "convergencePct": 8.813,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Plankton",
-      "convergencePct": 2.317,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Grünalge",
-      "convergencePct": 0.269,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Moos",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Farn",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Kraut · niedrige Pflanze",
-      "convergencePct": 0.48,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Blütenkraut",
-      "convergencePct": 0.026,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Verholzter Strauch",
-      "convergencePct": 2.758,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Laubbaum",
-      "convergencePct": 1.69,
-      "tier": "selten"
-    },
-    {
-      "name": "Nadelbaum",
-      "convergencePct": 0.55,
-      "tier": "selten"
-    },
-    {
-      "name": "Sukkulente · Kaktus",
-      "convergencePct": 0.384,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Polster-Kältepflanze",
-      "convergencePct": 1.299,
-      "tier": "selten"
-    },
-    {
-      "name": "Hutpilz",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Baumpilz · Porling",
-      "convergencePct": 0.128,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Zunderschwamm",
-      "convergencePct": 0.058,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Myzel · Pilzgeflecht",
-      "convergencePct": 6.33,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Schimmel · Fadenpilz",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Flechte · Symbiose",
-      "convergencePct": 1.734,
-      "tier": "selten"
-    },
-    {
-      "name": "Hefe",
-      "convergencePct": 4.09,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Schwamm",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Koralle · Riffbildner",
-      "convergencePct": 1.562,
-      "tier": "selten"
-    },
-    {
-      "name": "Wurm",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Schnecke · Weichtier",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Kopffüßer · Tintenfisch",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Krebstier · Arthropode",
-      "convergencePct": 7.597,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Insekt · Gliederfüßer",
-      "convergencePct": 3.462,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Fisch · Aalform",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Amphibie · Lurch",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Reptil · Echse",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Gepanzertes Beutetier",
-      "convergencePct": 5.357,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Fluginsekt · Segler",
-      "convergencePct": 0.448,
-      "tier": "sehr-selten"
-    },
-    {
-      "name": "Flatterer · Vogel",
-      "convergencePct": 4.224,
-      "tier": "gelegentlich"
-    },
-    {
-      "name": "Flugsäuger · Fledermaus",
-      "convergencePct": 1.549,
-      "tier": "selten"
-    },
-    {
-      "name": "Fell-Warmblüter",
-      "convergencePct": 7.014,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Fell-Großtier",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Aktiver Großjäger",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Gepanzerter Koloss",
-      "convergencePct": 0,
-      "tier": "legendaer"
-    },
-    {
-      "name": "Behänder Kletterer",
-      "convergencePct": 1.088,
-      "tier": "selten"
-    },
-    {
-      "name": "Kleines flinkes Tier",
-      "convergencePct": 10.771,
-      "tier": "haeufig"
-    },
-    {
-      "name": "Generalisten-Tier",
-      "convergencePct": 0.205,
-      "tier": "sehr-selten"
-    }
-  ]
+ "_comment": "Raritaet je Form = Anteil der Umwelten, in denen der SCHWARM diese Form hervorbringt (world/population.ts, Live-SWARM-Konfiguration, Cluster-Zentroide wie readSwarm() im Spiel). METHODIK-WECHSEL 2026-08-10: vorher Mittelfeld-Konvergenz - die App laeuft aber seit Migrations-Stufe 4 auf dem Schwarm, die alte Zahl mass einen Motor, den das Spiel nicht mehr benutzt (Beispiel Hutpilz: Mittelfeld 0.06 %, Schwarm 7.4 %). ZWEI Schichten, s. tools/build-rarity.mjs: (A) nur die 6 Kern-Regler; (B) zusaetzlich immer EIN aktiver Stressor, wie ihn eine Einfluss-Karte setzt - nur so sind stressor-gebundene Formen ueberhaupt sichtbar. Gewertet wird der bessere der beiden Wege. 0 % = im Sweep nie aufgetreten (extrem selten). Erzeugt mit: node tools/build-rarity.mjs --write",
+ "generatedAt": "2026-08-10",
+ "samplesPerLayer": 1500,
+ "swarmN": 200,
+ "gens": 250,
+ "forms": [
+  {
+   "name": "Euglenoid · Mixotroph",
+   "kingdom": "Protist",
+   "leverPct": 20.17,
+   "stressPct": 3.5,
+   "convergencePct": 20.17,
+   "tier": "haeufig"
+  },
+  {
+   "name": "Fell-Warmblüter",
+   "kingdom": "Tier",
+   "leverPct": 13.25,
+   "stressPct": 2.25,
+   "convergencePct": 13.25,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Krummholz · Windzwerg",
+   "kingdom": "Pflanze",
+   "leverPct": 0,
+   "stressPct": 10,
+   "convergencePct": 10,
+   "tier": "selten"
+  },
+  {
+   "name": "Deinococcus · Strahlenfest",
+   "kingdom": "Mikrobe",
+   "leverPct": 0,
+   "stressPct": 9.92,
+   "convergencePct": 9.92,
+   "tier": "selten"
+  },
+  {
+   "name": "Schwefelbakterie · Chemotroph",
+   "kingdom": "Mikrobe",
+   "leverPct": 0,
+   "stressPct": 9.67,
+   "convergencePct": 9.67,
+   "tier": "selten"
+  },
+  {
+   "name": "Frostspanner · Winterfalter",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 9.58,
+   "convergencePct": 9.58,
+   "tier": "selten"
+  },
+  {
+   "name": "Feuerkäfer · Pyrophil",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 9.42,
+   "convergencePct": 9.42,
+   "tier": "selten"
+  },
+  {
+   "name": "Schneealge · UV-hart",
+   "kingdom": "Pflanze",
+   "leverPct": 0,
+   "stressPct": 9.25,
+   "convergencePct": 9.25,
+   "tier": "selten"
+  },
+  {
+   "name": "Bärtierchen · Anhydrobiont",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 8.67,
+   "convergencePct": 8.67,
+   "tier": "selten"
+  },
+  {
+   "name": "Tiefsee-Amphipode · Druckfest",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 7.5,
+   "convergencePct": 7.5,
+   "tier": "selten"
+  },
+  {
+   "name": "Generalisten-Tier",
+   "kingdom": "Tier",
+   "leverPct": 7,
+   "stressPct": 2.42,
+   "convergencePct": 7,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Salinenkrebs · Halophil",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 6.92,
+   "convergencePct": 6.92,
+   "tier": "selten"
+  },
+  {
+   "name": "Hutpilz",
+   "kingdom": "Pilz",
+   "leverPct": 6.42,
+   "stressPct": 1,
+   "convergencePct": 6.42,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Fell-Großtier",
+   "kingdom": "Tier",
+   "leverPct": 5.92,
+   "stressPct": 0.25,
+   "convergencePct": 5.92,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Reptil · Echse",
+   "kingdom": "Tier",
+   "leverPct": 5.83,
+   "stressPct": 0.67,
+   "convergencePct": 5.83,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Verholzter Strauch",
+   "kingdom": "Pflanze",
+   "leverPct": 5.75,
+   "stressPct": 1.5,
+   "convergencePct": 5.75,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Protist · Amöbe",
+   "kingdom": "Mikrobe",
+   "leverPct": 5.75,
+   "stressPct": 1.17,
+   "convergencePct": 5.75,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Aktiver Großjäger",
+   "kingdom": "Tier",
+   "leverPct": 5.58,
+   "stressPct": 1.75,
+   "convergencePct": 5.58,
+   "tier": "gelegentlich"
+  },
+  {
+   "name": "Erle · Knöllchen-Pflanze",
+   "kingdom": "Pflanze",
+   "leverPct": 4.92,
+   "stressPct": 1.25,
+   "convergencePct": 4.92,
+   "tier": "selten"
+  },
+  {
+   "name": "Bakterie",
+   "kingdom": "Mikrobe",
+   "leverPct": 4.83,
+   "stressPct": 0.33,
+   "convergencePct": 4.83,
+   "tier": "selten"
+  },
+  {
+   "name": "Seestern · Stachelhäuter",
+   "kingdom": "Tier",
+   "leverPct": 4.17,
+   "stressPct": 0.17,
+   "convergencePct": 4.17,
+   "tier": "selten"
+  },
+  {
+   "name": "Hefe",
+   "kingdom": "Pilz",
+   "leverPct": 4.08,
+   "stressPct": 0.42,
+   "convergencePct": 4.08,
+   "tier": "selten"
+  },
+  {
+   "name": "Methanogenes Archaeon · Anaerobier",
+   "kingdom": "Mikrobe",
+   "leverPct": 0.08,
+   "stressPct": 4.08,
+   "convergencePct": 4.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Archaee · Extremophil",
+   "kingdom": "Mikrobe",
+   "leverPct": 3.58,
+   "stressPct": 1.42,
+   "convergencePct": 3.58,
+   "tier": "selten"
+  },
+  {
+   "name": "Myzel · Pilzgeflecht",
+   "kingdom": "Pilz",
+   "leverPct": 3.5,
+   "stressPct": 0.58,
+   "convergencePct": 3.5,
+   "tier": "selten"
+  },
+  {
+   "name": "Chamäleon · Tarnjäger",
+   "kingdom": "Tier",
+   "leverPct": 3.42,
+   "stressPct": 0.67,
+   "convergencePct": 3.42,
+   "tier": "selten"
+  },
+  {
+   "name": "Schimmel · Fadenpilz",
+   "kingdom": "Pilz",
+   "leverPct": 3.17,
+   "stressPct": 0.33,
+   "convergencePct": 3.17,
+   "tier": "selten"
+  },
+  {
+   "name": "Insekt · Gliederfüßer",
+   "kingdom": "Tier",
+   "leverPct": 3,
+   "stressPct": 0.58,
+   "convergencePct": 3,
+   "tier": "selten"
+  },
+  {
+   "name": "Kopffüßer · Tintenfisch",
+   "kingdom": "Tier",
+   "leverPct": 2.92,
+   "stressPct": 0.42,
+   "convergencePct": 2.92,
+   "tier": "selten"
+  },
+  {
+   "name": "Baumpilz · Porling",
+   "kingdom": "Pilz",
+   "leverPct": 2.75,
+   "stressPct": 0.75,
+   "convergencePct": 2.75,
+   "tier": "selten"
+  },
+  {
+   "name": "Polster-Kältepflanze",
+   "kingdom": "Pflanze",
+   "leverPct": 2.67,
+   "stressPct": 0.25,
+   "convergencePct": 2.67,
+   "tier": "selten"
+  },
+  {
+   "name": "Flechte · Symbiose",
+   "kingdom": "Pilz",
+   "leverPct": 2.58,
+   "stressPct": 0.58,
+   "convergencePct": 2.58,
+   "tier": "selten"
+  },
+  {
+   "name": "Krebstier · Arthropode",
+   "kingdom": "Tier",
+   "leverPct": 2.42,
+   "stressPct": 0.25,
+   "convergencePct": 2.42,
+   "tier": "selten"
+  },
+  {
+   "name": "Kleines flinkes Tier",
+   "kingdom": "Tier",
+   "leverPct": 1.5,
+   "stressPct": 0.42,
+   "convergencePct": 1.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Laubbaum",
+   "kingdom": "Pflanze",
+   "leverPct": 1.33,
+   "stressPct": 0.5,
+   "convergencePct": 1.33,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Schwamm",
+   "kingdom": "Tier",
+   "leverPct": 1.08,
+   "stressPct": 0.08,
+   "convergencePct": 1.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Muschel · Sessiler Filtrierer",
+   "kingdom": "Tier",
+   "leverPct": 1.08,
+   "stressPct": 0.08,
+   "convergencePct": 1.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Schnecke · Weichtier",
+   "kingdom": "Tier",
+   "leverPct": 1,
+   "stressPct": 0.08,
+   "convergencePct": 1,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Behänder Kletterer",
+   "kingdom": "Tier",
+   "leverPct": 1,
+   "stressPct": 0.25,
+   "convergencePct": 1,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Koralle · Riffbildner",
+   "kingdom": "Tier",
+   "leverPct": 1,
+   "stressPct": 0,
+   "convergencePct": 1,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Flugsäuger · Fledermaus",
+   "kingdom": "Tier",
+   "leverPct": 0.92,
+   "stressPct": 0.33,
+   "convergencePct": 0.92,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Sukkulente · Kaktus",
+   "kingdom": "Pflanze",
+   "leverPct": 0.75,
+   "stressPct": 0.08,
+   "convergencePct": 0.75,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Gepanzertes Beutetier",
+   "kingdom": "Tier",
+   "leverPct": 0.75,
+   "stressPct": 0.08,
+   "convergencePct": 0.75,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Fisch · Aalform",
+   "kingdom": "Tier",
+   "leverPct": 0.75,
+   "stressPct": 0.08,
+   "convergencePct": 0.75,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Hallimasch · Leuchtpilz",
+   "kingdom": "Pilz",
+   "leverPct": 0.75,
+   "stressPct": 0.25,
+   "convergencePct": 0.75,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Leuchtwesen · Tiefsee",
+   "kingdom": "Tier",
+   "leverPct": 0.5,
+   "stressPct": 0.08,
+   "convergencePct": 0.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Flatterer · Vogel",
+   "kingdom": "Tier",
+   "leverPct": 0.5,
+   "stressPct": 0.17,
+   "convergencePct": 0.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Gepanzerter Koloss",
+   "kingdom": "Tier",
+   "leverPct": 0.42,
+   "stressPct": 0.5,
+   "convergencePct": 0.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Krill · Filtrierendes Kleinstwesen",
+   "kingdom": "Tier",
+   "leverPct": 0.5,
+   "stressPct": 0.17,
+   "convergencePct": 0.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Robbe · Meeressäuger",
+   "kingdom": "Tier",
+   "leverPct": 0.5,
+   "stressPct": 0,
+   "convergencePct": 0.5,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Zunderschwamm",
+   "kingdom": "Pilz",
+   "leverPct": 0.33,
+   "stressPct": 0,
+   "convergencePct": 0.33,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Kraut · niedrige Pflanze",
+   "kingdom": "Pflanze",
+   "leverPct": 0.17,
+   "stressPct": 0,
+   "convergencePct": 0.17,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Wurm",
+   "kingdom": "Tier",
+   "leverPct": 0.17,
+   "stressPct": 0,
+   "convergencePct": 0.17,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Grünalge",
+   "kingdom": "Pflanze",
+   "leverPct": 0.08,
+   "stressPct": 0,
+   "convergencePct": 0.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Nadelbaum",
+   "kingdom": "Pflanze",
+   "leverPct": 0.08,
+   "stressPct": 0,
+   "convergencePct": 0.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Blütenkraut",
+   "kingdom": "Pflanze",
+   "leverPct": 0.08,
+   "stressPct": 0,
+   "convergencePct": 0.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Fluginsekt · Segler",
+   "kingdom": "Tier",
+   "leverPct": 0.08,
+   "stressPct": 0,
+   "convergencePct": 0.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Plankton",
+   "kingdom": "Protist",
+   "leverPct": 0.08,
+   "stressPct": 0,
+   "convergencePct": 0.08,
+   "tier": "sehr-selten"
+  },
+  {
+   "name": "Moos",
+   "kingdom": "Pflanze",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Farn",
+   "kingdom": "Pflanze",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Amphibie · Lurch",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Wühler · Grabtier",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Bartenwal · Filtrierschwimmer",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Laufvogel · Strauß",
+   "kingdom": "Tier",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  },
+  {
+   "name": "Mammutbaum · Riesenpflanze",
+   "kingdom": "Pflanze",
+   "leverPct": 0,
+   "stressPct": 0,
+   "convergencePct": 0,
+   "tier": "legendaer"
+  }
+ ]
 }
