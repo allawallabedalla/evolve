@@ -98,7 +98,15 @@ export function fitness(traits, env, phys) {
     //       Stuetzgewebe hilft dem Licht nur bei echter vertikaler Konkurrenz
     //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
     //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
-    const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
+    const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
+    //       STOERUNG ENTWERTET DAUERHAFTES STUETZGEWEBE (Backlog Punkt 14, Nachtrag):
+    //       Wiederkehrendes Feuer/Frost verbrennt die Krone - der Hoehen-Vorsprung, den
+    //       `structure` erkauft, muss immer wieder neu aufgebaut werden. Rinde schuetzt den
+    //       STAMM, nicht die Blattflaeche, deshalb hier bewusst KEIN fireres-Schutzterm
+    //       (gemessen: ein solcher Term kippt die AXIS-25-Regel wieder, s. Changelog V11).
+    //       disturbStructureLoss = 0 reproduziert exakt das alte Verhalten.
+    const structureBurn = 1 - phys.disturbStructureLoss * disturbance;
+    const structureLight = (phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight) * structureBurn;
     //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
     //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
     //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
@@ -115,7 +123,6 @@ export function fitness(traits, env, phys) {
     //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
     //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
     //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
-    const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
     const lightAccess = clamp01(phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
         phys.resproutReach * resprout * disturbance * (1 - size));
     //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
@@ -354,7 +361,11 @@ export function fitness(traits, env, phys) {
         sense * m.sense +
         desicc * m.desicc +
         radres * m.radres +
-        fireres * m.fireres +
+        //     Rinde IST verholztes Gewebe: fuer einen Baum billig, fuer ein Kraut praktisch
+        //     nicht verfuegbar. Ohne diese Kopplung ist fireres fuer JEDEN Bauplan billig und
+        //     macht `resprout` strukturell redundant (regrowthSurvival nutzt
+        //     max(fireres, resprout) - der billigere Weg gewinnt immer). 0 = neutral.
+        fireres * m.fireres * (1 + phys.fireresWoodCost * (1 - structure)) +
         frostres * m.frostres +
         windres * m.windres +
         nfix * m.nfix +

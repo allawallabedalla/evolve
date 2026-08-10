@@ -90,6 +90,8 @@
   "endothermyMetabFloor": 0.5,
   "photoTempOpt": 0.6,
   "photoTempStrength": 0.6,
+  "disturbStructureLoss": 0.0,
+  "fireresWoodCost": 0.0,
   "photoWaterSat": 0.35,
   "photoYield": 1.0,
   "maintenance": {

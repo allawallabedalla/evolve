@@ -114,11 +114,13 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     thermal = 1.0 - d_t * d_t
 
     # 2) Energie - zwei sich ausschliessende Strategien
-    structure_light = phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]
     # Wiederaustrieb (AXIS-25, resprout): zweiter, billigerer Weg ins Licht - s.
     # engine/fitness.ts fuer den vollen Kommentar. Skaliert mit (1-size) UND mit
     # disturbance (Feuer/Frost) - ohne Stoerung gibt es nichts wiederherzustellen.
     disturbance = _clamp01(max(env.get("fire", 0.0), env.get("frost", 0.0)))
+    # Stoerung entwertet dauerhaftes Stuetzgewebe (Backlog 14) - s. engine/fitness.ts.
+    structure_burn = 1.0 - phys["disturbStructureLoss"] * disturbance
+    structure_light = (phys["structureLightFloor"] + (1.0 - phys["structureLightFloor"]) * env["foodHeight"]) * structure_burn
     light_access = _clamp01(
         phys["lightAccessBase"] + (1.0 - phys["lightAccessBase"]) * structure * structure_light
         + phys["resproutReach"] * resprout * disturbance * (1.0 - size)
@@ -307,7 +309,8 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
         + sense * m["sense"]
         + desicc * m["desicc"]
         + radres * m["radres"]
-        + fireres * m["fireres"]
+        # Rinde ist verholztes Gewebe - fuer Krautiges teuer (Backlog 14).
+        + fireres * m["fireres"] * (1.0 + phys["fireresWoodCost"] * (1.0 - structure))
         + frostres * m["frostres"]
         + windres * m["windres"]
         + nfix * m["nfix"]
