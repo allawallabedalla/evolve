@@ -2699,7 +2699,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
 
 ---
 
-- [ ] **Stufe 0 — Baseline einfrieren, bevor irgendetwas angefasst wird.**
+- [x] **Stufe 0 — Baseline einfrieren, bevor irgendetwas angefasst wird.**
       **Modell: Sonnet** (mechanisch, aber vollständig).
       Alle Pflicht-Gates einmal laufen lassen und die Zahlen schriftlich festhalten
       (`docs/photo-water-baseline.md`), plus die drei Diagnose-Werkzeuge, die später den
@@ -2710,7 +2710,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
       sichern — ohne gecachte Baseline ist der `spectrum-check`-Vergleich in Stufe 3 wertlos.
       Abnahme: eine Datei, in der jede Kennzahl mit ihrem Ist-Wert steht.
 
-- [ ] **Stufe 1 — Formel + zwei Parameter, dreifach synchron; erst neutral, dann kalibriert.**
+- [x] **Stufe 1 — Formel + zwei Parameter, dreifach synchron; erst neutral, dann kalibriert.**
       **Modell: Opus** (Formel-Entwurf + Kalibrierung, echter Ermessensspielraum).
       `photoWater`/`photoYield` in `engine/fitness.ts`, `oracle/reference_model.py` UND der
       App-Inline-Kopie (über `npm run bundle-app`, nicht von Hand) — die drei Kopien müssen
@@ -2723,7 +2723,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
       ~22 % Angebot, ein Ergebnis in dieser Größenordnung ist das ehrliche Ziel.
       `physics.json` bekommt einen „Version 10"-Kommentarblock im Stil der bisherigen.
 
-- [ ] **Stufe 2 — Orakel neu erzeugen + neu trainieren.**
+- [x] **Stufe 2 — Orakel neu erzeugen + neu trainieren.**
       **Modell: Sonnet** (mechanisch, aber langlaufend — kein Ermessen).
       `npm run oracle` → `npm run train` → `npm run parity` (muss exakt/1e-16 sein).
       Erst wenn Parität steht, ist Stufe 3 überhaupt aussagekräftig. Falls `train` in einer
@@ -2731,7 +2731,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
       dokumentierten AXIS-25-Hebel nutzen (`training/fit.ts` POP/GENS) — der berührt die
       Physik nicht.
 
-- [ ] **Stufe 3 — Gate-Suite + Rekalibrierung.**
+- [x] **Stufe 3 — Gate-Suite + Rekalibrierung.**
       **Modell: Opus** — das ist die Stufe, an der AXIS-25 zweimal Whack-a-Mole erlebt hat
       (ein Fix an einer Stelle riss eine andere auf). Braucht Urteilsvermögen, keine
       Parameter-Jagd.
@@ -2749,7 +2749,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
       lässt sich das nicht an der Wurzel beheben, wird der Umbau zurückgenommen und der Befund
       dokumentiert — genau wie beim Landgang-Befund (2026-08-05) und bei Version 7.
 
-- [ ] **Stufe 4 — Nachzüge, die der Physik-Eingriff erzwingt.**
+- [x] **Stufe 4 — Nachzüge, die der Physik-Eingriff erzwingt.**
       **Modell: Sonnet**, mit EINER Opus-Teilentscheidung (s. Punkt b).
       a) **`docs/rarity.json` neu ableiten** — ist schon vor diesem Umbau nachweislich veraltet
          (gemessen im Sweep: 10 Formen stehen auf „legendär/0 %", kamen aber 15–222× vor, u. a.
@@ -2767,7 +2767,7 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
          laufen lassen (der dort selbst notierte Folgeschritt).
       d) `npm run catalog-check`, `key-check`, `exemplar-check`, `plausi-check` grün halten.
 
-- [ ] **Stufe 5 — Wirkung messen und ehrlich berichten.**
+- [x] **Stufe 5 — Wirkung messen und ehrlich berichten.**
       **Modell: Sonnet.**
       Dieselben drei Diagnose-Läufe wie Stufe 0, mit identischen Seeds, als direkter
       Vorher/Nachher-Vergleich in `docs/photo-water-ergebnis.md`. **Auch das Negative
@@ -2775,6 +2775,24 @@ filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; for
       Erreichbarkeit verlor). Erwartete Kennzahlen: Pflanzen-Anteil, erreichte Baupläne
       (Ist 47/65), Land- vs. Wasser-Gewinnquote der Pflanzen-Strategie (Ist 3 % / 11 %),
       JSD im `spectrum-check`.
+
+**✅ STUFEN 1–5 UMGESETZT (2026-08-10). Volles Ergebnis: `docs/photo-water-ergebnis.md`.**
+Kurz: die Land/Wasser-Asymmetrie ist weg (Pflanzen-Strategie gewinnt im Land-Band 3 % →
+**10 %**, im Wasser-Band 11 % → 9 % — vorher Faktor 3,7 auseinander, jetzt gleichauf).
+Pflanzen-Anteil `ecology` 3,3 % → **12,1 %**, Schwarm-Sweep 5,0 % → **10,3 %**.
+**Alle Gates grün**, `reality` wieder 21/21, Reich-Verteilung ausgewogener als die Baseline.
+Gebaut wurden vier Parameter (drei Physik, einer Klassifikator), alle mit neutralem
+Default; Gegentest zweimal über je 200.000 Stichproben bit-identisch.
+**Der eigentliche Fund war nicht die Photosynthese**, sondern eine vorbestehende Schwäche
+in AXIS-25, die sie freilegte: `max(fireres, resprout)` macht die beiden zu perfekten
+Substituten, und Rinde ist billiger — `resprout` sitzt dadurch in einem Fitness-Tal, das
+Selektion nicht überqueren kann. Behoben, indem Feuer dauerhaftes Holz entwertet UND Rinde
+für Krautiges teuer wird (zwei Hypothesen davor gemessen und verworfen).
+**Zwei Werkzeug-Befunde nebenbei:** `spectrum-check` erkennt eine durch Physik-Änderung
+veraltete Orakel-Referenz NICHT (prüft nur die Schwarm-Konfig) — lieferte still einen
+falschen Wert. Und `docs/rarity.json` maß seit der Schwarm-Migration den falschen Motor
+(Hutpilz: Mittelfeld 0,06 % vs. Schwarm 6,4 %); neu erzeugt mit dem erstmals
+eingecheckten `tools/build-rarity.mjs`, 38 von 65 Formen änderten ihre Stufe.
 
 - [ ] **Stufe 6 — Ursache (A), das trophische Gratis-Buffet — EIGENE Entscheidung, nicht Teil
       dieses Auftrags.** **Modell: Opus**, und erst nach ausdrücklicher Freigabe.
