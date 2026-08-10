@@ -90,6 +90,8 @@
   "endothermyMetabFloor": 0.5,
   "photoTempOpt": 0.6,
   "photoTempStrength": 0.6,
+  "photoWaterSat": 1.0,
+  "photoYield": 1.0,
   "maintenance": {
     "base": 0.05,
     "size": 0.22,

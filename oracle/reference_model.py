@@ -128,8 +128,12 @@ def fitness(traits: Sequence[float], env: Dict[str, float], phys: Dict) -> float
     # in Kaelte/Hitze sinkt die Enzym-Leistung (milde Glocke).
     dtp = env["temperature"] - phys["photoTempOpt"]
     photo_thermal = _clamp01(1.0 - phys["photoTempStrength"] * dtp * dtp)
+    # Wasser-Kopplung (Backlog Punkt 14): Saettigung statt linearem env["water"] -
+    # s. engine/fitness.ts fuer die volle Begruendung. photoWaterSat = 1.0 reproduziert
+    # exakt das alte Verhalten; photoYield ist der Ertrags-/Kalibrierregler (1.0 = neutral).
+    photo_water = _clamp01(env["water"] / phys["photoWaterSat"])
     energy_photo = (
-        photo * env["light"] * env["water"] * light_access * photo_size * photo_thermal * (1.0 - phys["exclusion"] * mobility)
+        phys["photoYield"] * photo * env["light"] * photo_water * light_access * photo_size * photo_thermal * (1.0 - phys["exclusion"] * mobility)
     )
 
     # Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND

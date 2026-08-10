@@ -137,8 +137,25 @@ export function fitness(traits: TraitVector, env: Environment, phys: Physics): n
   const photoThermal = clamp01(
     1 - phys.photoTempStrength * (env.temperature - phys.photoTempOpt) * (env.temperature - phys.photoTempOpt)
   );
+  //       WASSER-KOPPLUNG (Backlog Punkt 14): frueher ging `env.water` LINEAR in die
+  //       Photosynthese ein. Diese Achse traegt in der App aber zwei Bedeutungen
+  //       (MEDIUM_BANDS in app/index.html: Land 0.02-0.35 = Bodenfeuchte, Wasser
+  //       0.65-1.00 = Wassertiefe). Linear hiess daher zweierlei Falsches: (a) Land war
+  //       fuer Photosynthese strukturell feindlich (gemessen, tools/research/plant-gap.mjs:
+  //       Pflanzen-Strategie gewinnt im Land-Band 3 %, im Wasser-Band 11 %), (b) tieferes
+  //       Wasser gab faelschlich einen Photosynthese-Bonus (real ist es umgekehrt -
+  //       Tiefsee = kein Licht). Jetzt eine SAETTIGUNG: ab `photoWaterSat` ist Wasser
+  //       kein limitierender Faktor mehr. Feuchtes Land zaehlt damit voll, trockenes
+  //       Land bleibt zu Recht schlecht, und Tiefe bringt keinen Bonus mehr.
+  //       photoWaterSat = 1.0 reproduziert exakt das alte Verhalten (Gegentest).
+  const photoWater = clamp01(env.water / phys.photoWaterSat);
+  //       photoYield: reiner Ertrags-/Kalibrierregler. Photosynthese war der EINZIGE der
+  //       neun Energiekanaele ohne einen solchen (absorb 1.3, aquatic 1.4, amphibious 0.8,
+  //       biolum 0.72, filter 0.5, nfix 0.35, traction 2) - ohne ihn liesse sich die
+  //       Pflanzenstaerke nur durch Formel-Umbau nachjustieren. 1.0 = neutral.
   const energyPhoto =
-    photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
+    phys.photoYield * photo * env.light * photoWater * lightAccess * photoSize * photoThermal *
+    (1 - phys.exclusion * mobility);
 
   //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
   //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
