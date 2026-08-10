@@ -2624,6 +2624,174 @@ Re-verifiziert nach den Fixes mit `npm run design-audit` (0 AA-Verstöße) und
 `npm run ui-calm-check` (beide grün), Playwright-Screenshots auf Mobil (375/393px) + Desktop
 (1280px, unverändert) — Details/Zahlen je Befund in `docs/iphone-usability-audit.md`.
 
+### 14 · Photosynthese-Wasserkopplung entkoppeln (2026-08-09, Nutzer-Auftrag „groß und richtig")
+
+**Modell:** je Stufe einzeln vermerkt — grob **Opus** für Formel-Entwurf, Kalibrierung und
+Gate-Rekalibrierung (Ermessen, Whack-a-Mole-Gefahr — s. AXIS-25), **Sonnet** für Baseline,
+Orakel-/Trainingslauf und die mechanischen Nachzüge.
+
+**Auslöser:** `tools/research/random-diversity-sweep.mjs` (neu, 1000 Zufalls-Umwelten × echter
+Schwarm-Lauf) zeigte eine stark schiefe Reich-Verteilung: Tier 46,7 % · Pilz 21,8 % ·
+Protist 14,8 % · Mikrobe 11,7 % · **Pflanze 5,0 %** — obwohl Pflanzen mit **14 Bauplänen das
+zweitgrößte Angebot** stellen (Tier 35, Pilz 8, Mikrobe 6, Protist 2) und 9 davon erreichbar
+sind. Pflanzen sind also nicht unerreichbar, sie **gewinnen nur fast nie**.
+
+**Ursachen — gemessen, nicht vermutet** (`tools/research/plant-gap.mjs`, neu; vergleicht je
+Umwelt die erreichbare Fitness einer erzwungenen Pflanzen-Strategie gegen eine ohne
+Photosynthese, ohne die Kanal-Formeln nachzubauen — gemessen wird das Ergebnis):
+
+- **(A) `foodAbundance` ist ein Gratis-Buffet für alles außer Pflanzen.** Pflanzen-Fitness ist
+  über die Nahrungsmenge praktisch FLACH (0.287 / 0.256 / 0.236 / 0.268 / 0.237 über die
+  Fünftel), heterotrophe Fitness steigt 0.367 → 0.817. Korrelation des Abstands mit
+  `foodAbundance`: **r = −0.796** — der dominante Faktor. Logisch ist das halb richtig
+  (Pflanzen machen ihr eigenes Futter), im Modell aber schief: real SIND die Pflanzen die
+  Nahrungsmenge, hier ist sie ein exogener Regler, der Heterotrophen Biomasse aus dem Nichts
+  schenkt. → **Stufe 6, eigene Entscheidung** (s. u.), NICHT Teil dieses Auftrags.
+- **(B) `env.water` ist ein direkter linearer Multiplikator auf `energyPhoto`** — und `water`
+  trägt in dieser App zwei verschiedene Bedeutungen (MEDIUM_BANDS: Land 0.02–0.35 = Boden­feuchte,
+  Wasser 0.65–1.00 = Wassertiefe). Daraus zwei falsche Verhalten:
+  1. **Land ist für Photosynthese strukturell feindlich.** Gemessen im Land-Band gewinnt die
+     Pflanze **3 %** (mittlere Fitness 0.226 vs 0.538), im Wasser-Band 11 % (0.286 vs 0.571).
+     Selbst in der sonst idealsten Pflanzenwelt (Licht 0.9, Futter 0.10, mild) gewinnt sie
+     erst **ab water ≥ 0.75** — also unter Wasser.
+  2. **„Tieferes Wasser = bessere Photosynthese"** — real ist es umgekehrt (Tiefsee = kein
+     Licht).
+- **Der Zangengriff:** fast alle Land-Pflanzen-Baupläne haben ein `requires`-Fenster, das sie
+  bei water ≤ 0.65–0.7 deckelt (Laubbaum/Strauch/Mammutbaum ≤0.65, Blütenkraut/Kraut/Erle ≤0.7,
+  Farn ≤0.75, Sukkulente ≤0.45). Die Physik belohnt Photosynthese **genau dort, wo die Fenster
+  diese Pflanzen verbieten.** Das ist eine direkte Spätfolge des Phase-0-Fixes (2026-07-30,
+  Punkt 10): damals gewannen Landpflanzen fälschlich unter Wasser, und es wurden Fenster
+  ergänzt statt die Wasser-Achse aufzuspalten — das behob das Symptom (falsche Namen), die
+  Spannung blieb. Bezeichnend: die im Sweep häufigsten Pflanzen sind die **ohne** Fenster
+  (Polster-Kältepflanze 26×, Verholzter Strauch 20×).
+
+**Der Eingriff — eine Sättigungsfunktion statt eines linearen Multiplikators.** Kein neues Gen,
+keine neue Achse, keine Aufspaltung von `water`:
+
+```
+photoWater  = clamp01(env.water / phys.photoWaterSat)
+energyPhoto = phys.photoYield * photo * env.light * photoWater * lightAccess
+              * photoSize * photoThermal * (1 - exclusion * mobility)
+```
+
+`photoWaterSat` ≈ **0.35** (Oberkante des Land-Bandes) bewirkt: water 0.05 (trockenes Land) →
+0.14 (bleibt schlecht — Wüsten SIND pflanzenfeindlich, das ist korrekt), water 0.35 (feuchtes
+Land) → 1.00 (eine feuchte Wiese ist für Photosynthese so gut wie ein See), water 0.90 (tiefes
+Wasser) → 1.00 (**kein Tiefenbonus mehr**). Behebt beide Fehlverhalten mit einem Parameter.
+
+`photoYield` kommt als reiner Kalibrier-Regler dazu: Photosynthese ist **der einzige der neun
+Energiekanäle ohne Ertrags-Regler** (absorb 1.3 · aquatic 1.4 · amphibious 0.8 · biolum 0.72 ·
+filter 0.5 · nfix 0.35 · traction 2 — nur photo und forage haben keinen; forage hat immerhin
+`forageBase` 0.55). Ohne ihn ließe sich die Pflanzenstärke nur durch Formel-Umbau nachjustieren.
+
+> **⚠️ Beide Parameter haben einen NEUTRALEN Default, der das heutige Verhalten bit-identisch
+> reproduziert** (`photoWaterSat = 1.0` ⇒ `clamp01(water/1) = water`; `photoYield = 1.0`).
+> Das ist die AXIS-25-Lehre und **Pflicht**: Stufe 1 muss zuerst mit den Neutralwerten
+> `npm run parity` / `npm run app-parity` auf exakt 0 zeigen, BEVOR irgendein Wert bewegt wird.
+> Ohne diesen Gegentest ist später nicht trennbar, was der Umbau und was die Kalibrierung tat.
+
+> **⚠️ Namentlich vorhergesagtes Risiko — Rote Königin.** `tools/coevolution-check.mjs` misst in
+> einer Testumwelt bei **water = 0.5**. Heute liefert das `photoWater = 0.5`, mit
+> `photoWaterSat = 0.35` schlägt es auf **1.0** um — die Photosynthese in genau dieser Testumwelt
+> **verdoppelt sich**. Das ist exakt die Konstellation, an der `physics.json` Version 7
+> (energyAmphibious) gescheitert ist. `coevolution-check` gehört deshalb in Stufe 3 an die
+> ERSTE Stelle, nicht ans Ende.
+
+---
+
+- [ ] **Stufe 0 — Baseline einfrieren, bevor irgendetwas angefasst wird.**
+      **Modell: Sonnet** (mechanisch, aber vollständig).
+      Alle Pflicht-Gates einmal laufen lassen und die Zahlen schriftlich festhalten
+      (`docs/photo-water-baseline.md`), plus die drei Diagnose-Werkzeuge, die später den
+      Vorher/Nachher-Beweis tragen: `npm run coverage-check` (voll, nicht `--quick`),
+      `node tools/research/random-diversity-sweep.mjs --n=1000 --seed=1`,
+      `node tools/research/plant-gap.mjs --n=300 --seed=1`. **Wichtig:**
+      `npm run oracle-swarm` einmal laufen lassen (~45 min, 5 Kerne) und `.swarm-oracle.json`
+      sichern — ohne gecachte Baseline ist der `spectrum-check`-Vergleich in Stufe 3 wertlos.
+      Abnahme: eine Datei, in der jede Kennzahl mit ihrem Ist-Wert steht.
+
+- [ ] **Stufe 1 — Formel + zwei Parameter, dreifach synchron; erst neutral, dann kalibriert.**
+      **Modell: Opus** (Formel-Entwurf + Kalibrierung, echter Ermessensspielraum).
+      `photoWater`/`photoYield` in `engine/fitness.ts`, `oracle/reference_model.py` UND der
+      App-Inline-Kopie (über `npm run bundle-app`, nicht von Hand) — die drei Kopien müssen
+      bit-identisch bleiben (`npm run app-fitness-check`, `npm run app-parity`).
+      **Reihenfolge zwingend:** (a) mit Neutralwerten einbauen → `parity`/`app-parity` müssen
+      exakt 0 zeigen (Gegentest, s. Kasten oben); (b) erst danach `photoWaterSat` auf 0.35
+      setzen und `photoYield` kalibrieren. Zielkorridor für die Kalibrierung, aus der
+      Baseline abgeleitet: **Pflanzen-Anteil im Zufalls-Sweep von 5 % auf 12–20 %** — bewusst
+      NICHT auf „gleichauf mit Tier", das wäre eine andere Willkür; 14 von 65 Bauplänen sind
+      ~22 % Angebot, ein Ergebnis in dieser Größenordnung ist das ehrliche Ziel.
+      `physics.json` bekommt einen „Version 10"-Kommentarblock im Stil der bisherigen.
+
+- [ ] **Stufe 2 — Orakel neu erzeugen + neu trainieren.**
+      **Modell: Sonnet** (mechanisch, aber langlaufend — kein Ermessen).
+      `npm run oracle` → `npm run train` → `npm run parity` (muss exakt/1e-16 sein).
+      Erst wenn Parität steht, ist Stufe 3 überhaupt aussagekräftig. Falls `train` in einer
+      Reich-Balance landet, die C4 reißt: **nicht** an `physics.json` drehen, sondern den
+      dokumentierten AXIS-25-Hebel nutzen (`training/fit.ts` POP/GENS) — der berührt die
+      Physik nicht.
+
+- [ ] **Stufe 3 — Gate-Suite + Rekalibrierung.**
+      **Modell: Opus** — das ist die Stufe, an der AXIS-25 zweimal Whack-a-Mole erlebt hat
+      (ein Fix an einer Stelle riss eine andere auf). Braucht Urteilsvermögen, keine
+      Parameter-Jagd.
+      Reihenfolge nach Risiko, **nicht** alphabetisch:
+      1. `npm run coevolution-check` (Red Queen — das namentlich vorhergesagte Risiko, s. Kasten)
+      2. `npm run ecology` + `npm run ecology-full` (C1–C6, Reich-Balance — hier sollte sich der
+         Tier-Anteil ENTSPANNEN, das ist die erwartete gute Nachricht)
+      3. `npm run reality` (21/21)
+      4. `npm run distribution-check` (B1–B4; B4 Trophie reagiert auf verschobene Biomasse)
+      5. `npm run symbiosis-check`, `phenomena-check` (8/8), `pop-check`, `branching-check`,
+         `world-check`, `census-check`, `seed-check`, `rarity-check`, `mf-fidelity`
+      6. `npm run spectrum-check` gegen die in Stufe 0 gesicherte Orakel-Baseline (JSD-Ziel
+         < 0.15; Ist vor dem Umbau 0.0218)
+      **Leitplanke:** eine Schwelle wird NICHT aufgeweicht, damit es passt. Reißt ein Gate und
+      lässt sich das nicht an der Wurzel beheben, wird der Umbau zurückgenommen und der Befund
+      dokumentiert — genau wie beim Landgang-Befund (2026-08-05) und bei Version 7.
+
+- [ ] **Stufe 4 — Nachzüge, die der Physik-Eingriff erzwingt.**
+      **Modell: Sonnet**, mit EINER Opus-Teilentscheidung (s. Punkt b).
+      a) **`docs/rarity.json` neu ableiten** — ist schon vor diesem Umbau nachweislich veraltet
+         (gemessen im Sweep: 10 Formen stehen auf „legendär/0 %", kamen aber 15–222× vor, u. a.
+         Hutpilz 7,4 %, Fell-Großtier 5,6 %, Aktiver Großjäger 4,6 %; umgekehrt „Bakterie"
+         als häufig 12,6 % gegen real 3,1 %; **9 neuere Formen fehlen ganz** — Seestern,
+         Chamäleon, Muschel, Robbe, Bartenwal, Krill, Erle, Hallimasch, Leuchtwesen·Tiefsee —
+         und fallen still auf „häufig" zurück). Nach dem Umbau ist sie ohnehin doppelt falsch.
+      b) **`requires`-Fenster der Land-Pflanzen erneut prüfen** — **Modell: Opus.** Die
+         Deckelung bei ≤0.65–0.7 war ein Workaround gegen die falsche Physik (Phase 0). Mit
+         korrigierter Photosynthese ist zu prüfen, ob sie noch nötig ist oder Landpflanzen
+         jetzt unnötig einengt. **Nicht blind entfernen** — sie verhindern weiterhin korrekt,
+         dass ein Laubbaum unter Wasser gewinnt.
+      c) **`app/archetypes.js`-Prototypen prüfen** — sie enthalten laut Migrations-Stufe 2 zu
+         50 % die *damalige* Engine-Dynamik; `tools/research/archetype-derive.mjs` ggf. neu
+         laufen lassen (der dort selbst notierte Folgeschritt).
+      d) `npm run catalog-check`, `key-check`, `exemplar-check`, `plausi-check` grün halten.
+
+- [ ] **Stufe 5 — Wirkung messen und ehrlich berichten.**
+      **Modell: Sonnet.**
+      Dieselben drei Diagnose-Läufe wie Stufe 0, mit identischen Seeds, als direkter
+      Vorher/Nachher-Vergleich in `docs/photo-water-ergebnis.md`. **Auch das Negative
+      berichten** (AXIS-25-Standard: dort wurde offen dokumentiert, dass `kraut` seine
+      Erreichbarkeit verlor). Erwartete Kennzahlen: Pflanzen-Anteil, erreichte Baupläne
+      (Ist 47/65), Land- vs. Wasser-Gewinnquote der Pflanzen-Strategie (Ist 3 % / 11 %),
+      JSD im `spectrum-check`.
+
+- [ ] **Stufe 6 — Ursache (A), das trophische Gratis-Buffet — EIGENE Entscheidung, nicht Teil
+      dieses Auftrags.** **Modell: Opus**, und erst nach ausdrücklicher Freigabe.
+      `foodAbundance` schenkt Heterotrophen Biomasse ohne Produzenten. Eine Kopplung
+      („verfügbare Nahrung hängt davon ab, wie viel Photosynthese die Welt trägt") wäre der
+      biologisch richtigere Schritt, ist aber ein Eingriff in die **Bedeutung eines der sechs
+      Kern-Regler** — also in die Semantik, auf die Presets, Herausforderungs-Grenzen,
+      `docs/rarity.json`, die Biom-Empfehlungen und jeder gespeicherte Spielstand aufsetzen.
+      Risiko deutlich höher als Stufen 1–5. **Bewusst hier geparkt und nicht mitgebaut** —
+      erst messen, was (B) allein bringt (Stufe 5), dann neu entscheiden.
+
+**Was dieser Punkt ausdrücklich NICHT vorschlägt:** die Aufspaltung von `water` in zwei Achsen
+(Bodenfeuchte / Wassertiefe). Das wurde in Phase 0 bewusst verworfen („der invasivere Weg") und
+würde einen siebten Dauer-Regler bedeuten — im Widerspruch zum Komplexitäts-Audit (Punkt 3),
+das die Regleranzahl gerade reduziert hat. Die Sättigungsfunktion erreicht dasselbe Ziel
+innerhalb der bestehenden Achse.
+
 ## 🧭 Produkt-Pfeiler (Leitplanken)
 
 - **Neugier + Bindung, KEIN Vollständigkeits-Zwang** (Resume-Pfeiler).
