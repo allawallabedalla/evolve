@@ -85,7 +85,19 @@ window.ARCHETYPES = {
           "desicc","radres","fireres","frostres","windres","nfix","resprout"],
 
   // Weiche Strafe auf den Abstand, wenn die Umwelt ausserhalb von `requires` liegt.
-  requiresPenalty: 1.30,
+  // 1.30 -> 3.00 (2026-08-10, BACKLOG Punkt 14 Stufe 4b): bei 1.30 war das Fenster fast
+  // wirkungslos. Gemessen ueber 300 AQUATISCHE Umwelten (water 0.70-1.00, echter Schwarm):
+  // Landpflanzen (Strauch/Laubbaum/Erle) gewannen dort 4.6 % der Endpunkte -- genau das
+  // Phase-0-Symptom ("Sonniges Flachmeer" -> "Verholzter Strauch", s. Punkt 10), das die
+  // Fenster eigentlich abstellen sollten. Die Photosynthese-Wasserkopplung (Stufe 1) hat
+  // das auf 8.1 % verdoppelt, weil Landpflanzen im Wasser physikalisch nicht mehr
+  // benachteiligt sind. Sweep ueber die Strafe (Genome einmal gerechnet, mehrfach
+  // klassifiziert): 1.3 -> 8.1 % | 1.5 -> 7.1 % | 1.8 -> 6.6 % | 2.2 -> 6.4 % | 3.0 -> 4.0 %.
+  // 3.00 unterbietet damit den Vorzustand, OHNE den Landpflanzen-Gewinn zu kosten
+  // (Pflanzen im Land-Band unveraendert 10.4 -> 10.7 %) und ohne Formen zu verlieren
+  // (erreichte Formen 43 -> 45). Reiner Klassifikator-Parameter: beruehrt die Physik
+  // nicht, daher kein Orakel-Neulauf noetig.
+  requiresPenalty: 3.00,
 
   // Abstands-Schwelle, ab der KEINE Form mehr erzwungen wird, sondern ein Name aus den
   // staerksten Abweichungen entsteht. Kalibriert am Abstandsspektrum echter Genome:
