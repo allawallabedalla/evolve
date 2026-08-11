@@ -25,6 +25,7 @@ import { readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
+import { loadAppCore } from "./lib/app-core.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // GEZIPPT, nicht roh: GitHub Pages liefert .js immer komprimiert aus, die rohe
@@ -157,26 +158,28 @@ if (entries.length) {
 // auf 9.105 Eintraege, gemessener Fall 2,92 ms. Bewusst auf 3 ms neu kalibriert (statt
 // automatisch mitwachsen zu lassen) — bleibt immer noch weit unter dem 16,7-ms-Bildschritt
 // mit Luft fuer alles andere pro Generation.
+// Nachtrag (2026-08-11, Massnahmenplan A2): dieser Block hat bis hierhin eine EIGENE
+// Kopie der inneren Schleife gemessen — nicht nearestReal() selbst. Damit war er blind
+// fuer jede Aenderung an der echten Funktion: die Konfidenz-Gewichtung (A2) veraenderte
+// den Aufwand sichtbar, die Zahl hier reagierte nicht. Gemessen wird jetzt die ECHTE
+// Funktion auf der ECHTEN groessten Gruppe, aus app/index.html geladen (dieselbe Technik
+// wie app-parity). Kein Hochrechnen mehr ueber alle Eintraege — der schlechteste Fall
+// wird direkt ausgefuehrt.
 const BUDGET_MS = 3;
+const core = loadAppCore("catalog-check");
 if (entries.length) {
   const t = new Array(NG).fill(0.5), w = new Array(NG).fill(0.65);
-  const bench = (list, reps) => {
+  const env = { water: 0.5 };
+  let biggestKey = null, biggest = 0;
+  for (const [k, a] of Object.entries(CAT.byGroup)) if (a.length > biggest) { biggest = a.length; biggestKey = k; }
+  const bench = (reps) => {
     const t0 = process.hrtime.bigint();
-    for (let r = 0; r < reps; r++) {
-      let dBest = Infinity;
-      for (const e of list) {
-        let sum = 0, z = 0;
-        for (let g = 0; g < NG; g++) { const d = (t[g] - e.genome[g] / 255) * w[g]; sum += d * d; z += w[g] * w[g]; }
-        const dist = Math.sqrt(sum / Math.max(z, 1e-9));
-        if (dist < dBest) dBest = dist;
-      }
-    }
+    for (let r = 0; r < reps; r++) core.nearestReal(t, biggestKey, w, env);
     return Number(process.hrtime.bigint() - t0) / 1e6 / reps;
   };
-  bench(entries, 200);                                   // aufwaermen (JIT)
-  const perEntryMs = bench(entries, 2000) / entries.length;
-  const biggest = Math.max(...Object.values(CAT.byGroup).map((a) => a.length));
-  const worstMs = perEntryMs * biggest;
+  bench(20);                                             // aufwaermen (JIT + Gruppen-Cache)
+  const worstMs = bench(200);
+  const perEntryMs = worstMs / biggest;
   console.log(`  Stufe-2-Kosten: ${(perEntryMs * 1000).toFixed(2)} µs/Eintrag · groesste Gruppe ${biggest} `
     + `-> ${worstMs.toFixed(3)} ms je classify() (Budget ${BUDGET_MS} ms)`);
   console.log(`  Hochrechnung: ${Math.floor(BUDGET_MS / perEntryMs).toLocaleString("de-DE")} Eintraege je Gruppe passen ins Budget`);

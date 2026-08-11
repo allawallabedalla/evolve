@@ -1,8 +1,25 @@
 # Maßnahmenplan: Artname, Silhouette und Bauplan-Satz wieder zur Deckung bringen
 
 **Grundlage:** `docs/darstellungs-audit.md` (Befunde P8–P10, N1–N8).
-**Stand:** noch nichts davon umgesetzt — die Audits sind Diagnose, dieser Plan ist die
-Therapie.
+
+> ## Stand: Band A abgearbeitet, B1 angebunden
+>
+> | | vorher | jetzt |
+> |---|---|---|
+> | **P8** Beinzahl der benennbaren Art gegen die Zeichnung | 8.146/24.846 (32,8 %) | **609/24.846 (2,5 %)** |
+> | **P9** Live-Stichprobe Name gegen Silhouette | 71/174 (40,8 %) | **1/142 (0,7 %)** |
+> | **P10** fehlende Klassen-QID | 17.773/42.024 | **0** ✓ |
+> | **P4** Tautologie im „≈"-Verweis | 12/12 (100 %) | **1/10** |
+> | **N3** Arten ausserhalb jedes Bauplans ihrer Klade | 34,7 % | **0** ✓ |
+> | **N7** Anteil Rauschen im Artabstand | 46,5 % | **29,3 %** |
+> | **P7b** hohes Flug-Gen ohne Flug im Satz | 17,0 % | **7,9 %** |
+> | Bauplaene ohne realen Artnamen (P5) | 24 | **21** |
+> | Gruppen unter 25 Arten (P5b) | 5 | **3** |
+> | Arten mit gemessener Koerpermasse | 2.728 | **7.906** (wirkt beim naechsten Bau) |
+>
+> Umgesetzt: **A0** (neu, s. u.) · **A1** · **A2** · **A3** · **A4** · **B1** (Anbindung).
+> Offen: **B2** · **B3** · **C1**–**C4**.
+> Der Mantelbussard steht jetzt in „Flatterer · Vogel".
 
 Jede Aufgabe nennt: was, wo, welchen Befund sie schließt, wie sie sich selbst prüft — und
 **was danach unsicher bleibt.** Die Restunsicherheiten sind, wo möglich, gemessen und
@@ -62,6 +79,31 @@ Arten bliebe, ohne den Zustrom aus anderen Gruppen)*:
   `DRAWN_LEGS` in `plausi-check.mjs`; die Aufteilung *innerhalb* der Säuger
   (12 Baupläne) ist damit **nicht** abgedeckt und bleibt Ermessen.
 
+> **Ergebnis (umgesetzt).** 11.009 von 42.024 Arten umgezogen. P8 32,8 % → **2,5 %**,
+> P9 40,8 % → **1,4 %**, N3 34,7 % → **0**.
+>
+> **Die Risikotabelle oben war zu pessimistisch, und zwar aus einem benennbaren Grund:**
+> sie zählte nur, was einer Gruppe *bleibt*, nicht den Zustrom. Tatsächlich füllten sich
+> sechs bis dahin leere Baupläne (Fluginsekt +2.816, Kraut +484, Nadelbaum +265, Wurm
+> +137, Laufvogel +56, Polster-Kältepflanze +1). **Baupläne ohne Art: 24 → 21. Gruppen
+> unter der P5b-Schwelle: 5 → 3.** Beides *besser* als vorher, nicht schlechter.
+>
+> „Kleines flinkes Tier" lief nicht leer, behielt aber 289 Arten **ohne auflösbare
+> Klade** — nicht, weil dort Säuger stünden. Insgesamt 624 Einträge (1,5 %) bekommen
+> keine Klade und bleiben deshalb unangetastet: ihre Ketten enden, bevor eine Zielklade
+> erreichbar ist (Libellen, Meeresschildkröten). Das ist eine Lücke des rekonstruierten
+> Elterngraphen, keine Entscheidung — und der Grund, warum P4 noch 1/10 meldet.
+>
+> Zwei Baupläne liefen wirklich leer, beide aus demselben Grund: **der Katalog enthält
+> keine Grünalgen und keine Schwämme.** Die Gruppen hielten Moose bzw. Quallen. Erntelücke
+> (C2), von der Schranke nur sichtbar gemacht.
+>
+> Die Schranke wurde bewusst als *Schranke* gebaut, nicht als Neuzuordnung: der eingebaute
+> Reproduktions-Test zeigt, dass die unveränderte Logik über die veröffentlichten Genome
+> nur **71,9 %** der gespeicherten Gruppen trifft — der Rest ist das Gründer-Los, das
+> *nach* der Zuordnung aufgebracht wird. Eine Neuzuordnung hätte 28 % der Arten aus einem
+> Grund bewegt, der mit der Klade nichts zu tun hat.
+
 ### A2 · `nearestReal()` zusätzlich mit `e.conf` gewichten
 
 `w[g] * (e.conf[g] / 3)` — Gene, deren Katalogwert nie erhoben wurde, zählen null statt
@@ -91,6 +133,21 @@ Folgen daraus:
   Chronik-Einträge (`app/story.js`) und Genbuch-Funde beziehen sich auf Namen — ob sie
   das überstehen, ist ungeprüft.
 
+> **Ergebnis (umgesetzt).** N7 46,5 % → **29,3 %** (Schwelle 25 — weiter gerissen: die
+> conf-2-Werte der bedingten Gene zählen zu Recht weiter mit, sie *sind* Information auf
+> Kladen-Ebene). Die Vorhersage hielt: der Median-Vorsprung liegt weiter bei **0,5 %**.
+>
+> **Nicht vorhergesehen — eine echte Regression:** die zusätzliche Multiplikation je Gen
+> riss das 3-ms-Budget aus `catalog-check` C8 (3,20 ms). Behoben, indem die Konfidenz je
+> Eintrag einmal vorbereitet wird (`confPrep`) und Gene mit conf 0 ganz übersprungen
+> werden — da 41,5 % aller Genwerte auf conf 0 stehen, läuft die Suche danach über
+> *weniger* Gene als vorher. Jetzt 2,83 ms.
+>
+> **Zweite Lehre:** `naming-audit` maß nach der Änderung zunächst weiter die alte Formel
+> und meldete N7 fälschlich als *gestiegen*. Ein Prüfstand, der seine eigene Annahme statt
+> der App misst, ist kein Prüfstand. N6/N7 erkennen jetzt am Quelltext, ob das
+> conf-Gewicht aktiv ist; P4 liest die Kladen-Tabelle aus `app/index.html`.
+
 ### A3 · Anzeige auf die Auflösung zurücknehmen, die die Daten hergeben
 
 Überschrift zeigt die **Klade** („ein Greifvogel"), die Art nur als Beispiel darunter —
@@ -109,6 +166,17 @@ oder die Art bleibt und der „≈ in echt"-Verweis zeigt die Klade („≈ Grei
 - Die Namen sind Schlüssel für Lebensbaum, Rarität und Herausforderungen — eine zweite
   Namensebene darf diese Schlüssel nicht anfassen.
 
+> **Ergebnis (umgesetzt) — die kleinere der beiden Varianten.** Die Überschrift bleibt der
+> Artname, der „≈"-Verweis nennt die **Klade**: „Mantelbussard ≈ Vögel ↗". P4 12/12 →
+> **1/10** (der Rest ist ein Eintrag ohne `klade`-Feld). `nearestReal()` liefert dazu
+> `tie` (Arten praktisch gleichauf) und `margin`; beides steht im **Tooltip**, nicht in
+> neuer sichtbarer Kopie — die Karte wird nicht unruhiger, aber wer nachsieht, erfährt es.
+>
+> **Die größere Variante bleibt offen und ist deine Entscheidung:** Klade als Überschrift,
+> Art nur als Beispiel. Ebenso offen die Frage der Kladen-Ebene — die Tabelle nennt
+> heute die Klasse („Vögel"), nicht die Familie („Greifvögel"), weil nur die Klasse aus
+> dem Feld `klade` sicher ableitbar ist.
+
 ### A4 · `lineage` nicht mehr kürzen, `klade` mitschreiben
 
 `build-catalog.mjs`: statt `slice(0, 12)` die Klassen-QID sichern, besser gleich ein Feld
@@ -123,6 +191,13 @@ oder die Art bleibt und der „≈ in echt"-Verweis zeigt die Klade („≈ Grei
   rekonstruierbar) oder erst bei der nächsten Ernte, ist eine Frage der Sauberkeit:
   eine rekonstruierte Hülle als „gemessene" Klade zu speichern, verwischt die Herkunft.
 - `app/catalog.js` wächst (42.648 × 2 Felder). Die Datei ist heute 269 KB im Auslieferpfad.
+
+> **Ergebnis (umgesetzt), mit Abstrich.** `regroup-catalog.mjs` schreibt `klade` (nur die
+> QID) für 42.024 von 42.648 Einträgen; **P10 fällt auf 0**. `lineage` bleibt vorerst
+> gekürzt — das zu ändern braucht den Katalog-Neubau. Die Herkunft steht ausdrücklich im
+> Dateikopf: **rekonstruiert, nicht geerntet.** Die Datei wächst von 19,6 auf 20,3 MB
+> (+3,7 %; die „269 KB" oben waren falsch — sie stammten aus einer verwechselten
+> Dateigröße).
 
 ---
 
@@ -153,6 +228,27 @@ Masse-Spalte derselben Datei bleibt liegen. Zusätzlich abbilden:
   gehört als solche dokumentiert (wie `sizeFromMassG()`).
 - Selbst mit voller Elton-Abdeckung bleiben 8 der 10 Kern-Gene auf Kladen-Werten.
   **N1 wird gelindert, nicht geschlossen.**
+
+> **Ergebnis (angebunden, wirkt beim nächsten Bau).** Die Spaltennamen stimmten:
+> `BodyMass.Value` steht in beiden Elton-Dateien. Arten mit gemessener Körpermasse
+> **2.728 → 7.906** (Vögel 64 %, Säuger 78 %).
+>
+> **Wie viel das ändert (gemessen):** die echte Masse weicht vom heute gespeicherten
+> Kladen-Mittelwert bei Vögeln im Mittel um **0,169** ab (Median über alle 0,134, Maximum
+> 0,435) — **43 % liegen über `novelThreshold` (0,15).** Der Kladen-Mittelwert trägt bei
+> Vögeln also kaum Information über die Größe. Genau daran fielen große Vögel aus ihrem
+> Bauplan.
+>
+> **Bewusst nicht von Hand in `app/catalog.js` gepatcht:** `size` geht in den
+> Imputations-Korpus ein, aus dem die übrigen Gene abgeleitet werden — ein Teil-Update
+> stellte gespeicherte Werte gegen den Korpus, aus dem sie stammen. Wirksam wird es bei
+> einem Neubau (braucht `tools/.harvest-state.json`).
+>
+> **`ForStrat.aerial → wing` wurde nach Prüfung verworfen.** Die Spalte sagt, welcher
+> *Anteil* der Nahrungssuche in der Luft stattfindet, nicht wie groß die Flügelfläche ist.
+> Ein Buchfink sucht am Boden und hat trotzdem Flügel — die Abbildung gäbe den meisten
+> Vögeln `wing` ≈ 0 und führte einen neuen Fehler ein, statt N2 zu beheben. Braucht eine
+> eigene Eichung (Spannweite/Fläche), die diese Quelle nicht hergibt.
 
 ### B2 · AmphiBIO, fishmorph, lizard_traits entsperren
 
@@ -224,8 +320,39 @@ ungenannte Gene mit einem Ruhewert behandeln — dann braucht es gar keinen Ausg
 
 ---
 
+## A0 · Nachträglich dazugekommen: die Kladen-Auflösung war selbst kaputt
+
+Nicht geplant, beim Bau von A1 gefunden. Die Vorfahren-Hülle aus dem Audit sammelte
+**alle** Vorfahren transitiv ein — und fing sich damit Wikidatas Querverbindungen ein
+(P171 ist nicht funktional; `clade-rules.mjs` vermerkt selbst, dass Q1390 Insecta dort
+*unter* Q25364 Crustacea hängt). Gemessen: **8.140 Einträge (19 %)** landeten unter zwei
+einander ausschließenden Klassen — sämtliche Insekten, Weichtiere und Spinnentiere
+zusätzlich unter Q25522 (Annelida).
+
+Ersetzt durch **Nächster-Vorfahr-Suche mit Spezifitäts-Rang** in
+`tools/lib/clade-closure.mjs`: der echte Vorfahr steht näher als die Querverbindung;
+Verschachtelung (Farne *in* Pflanzen) gewinnt die speziellere Klade. Ergebnis: **0
+Konflikte**, Annelida fällt von 8.140 auf die 137 echten Ringelwürmer.
+
+**Die Audit-Zahlen waren davon unberührt** (P8 8.146, P9 71/174, N3 34,7 % — alle
+unverändert): Annelida stand in jeder Prioritätsliste hinter den Klassen, die tatsächlich
+trafen. Der Konflikt-Zähler läuft jetzt als Selbsttest in P10 mit, damit so etwas nicht
+wieder unbemerkt bleibt.
+
+---
+
 ## Was am Ende unsicher bleibt — auch wenn alles umgesetzt ist
 
+0. **Was jetzt noch reißt und warum** *(Stand nach Band A)*:
+   `P8`/`P9` — ausschließlich **Skorpione** im Bauplan „Krebstier · Arthropode"
+   (gezeichnet 10 Beine, real 8). Spinnentiere haben keinen eigenen Bauplan; das ist die
+   nächste ehrliche Näherung, kein übersehener Fall.
+   `P7a` reißt **neu** (47/9.452): in den Flieger-Gruppen stehen jetzt Arten mit Flug-Gen
+   ≈ 0. Der Befund war vorher von der Fehlgruppierung verdeckt — die Regel wurde nicht
+   schlechter, sie sieht jetzt hin.
+   `P4` 1/10 — der Rest sind die 624 Einträge ohne auflösbare Klade.
+   `N2`/`N4`/`N5`/`N8` unverändert: sie hängen an den Prototypen und der Gewichtung, also
+   an B3 und C3/C4.
 1. **N1 schließt nie ganz.** Selbst mit EltonTraits, AmphiBIO, fishmorph und
    lizard_traits bleiben die meisten der 10 Kern-Gene Kladen-Werte. „Die nächste reale
    Art" bleibt unterhalb der Klade eine Auswahl aus einem Gleichstand — sauber gerechnet,

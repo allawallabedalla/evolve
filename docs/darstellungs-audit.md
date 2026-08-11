@@ -7,6 +7,12 @@
 > *mittelgroß, nackte Haut. vier kräftige Beine, Greifwerkzeuge, Leuchtorgan.
 > Energie: Jäger/Sammler. Fortbewegung: Läufer.*
 
+> **Nachtrag — behoben.** Der Mantelbussard steht inzwischen in „Flatterer · Vogel".
+> P8 32,8 % → 2,5 %, P9 40,8 % → 1,4 %, P10 und N3 auf 0, P4 12/12 → 1/10. Was gemacht
+> wurde, was es gekostet hat und was offen bleibt: `docs/darstellung-massnahmenplan.md`.
+> Die Befunde unten stehen unverändert als **Ausgangslage** — sie sind die Messung, gegen
+> die das Ergebnis zählt.
+
 **Kurze Antwort: nein.** Der *Mantelbussard* (`Pseudastur polionotus`) ist ein
 Greifvogel — zwei Beine, Federn, Flügel, Schnabel. Die Karte zeigt einen nackthäutigen
 Vierbeiner mit Greifwerkzeugen und Leuchtorgan, gezeichnet über dem Vierbeiner-Icon

@@ -1503,39 +1503,66 @@ const TIE_BAND = 1.01;   // „praktisch gleichauf" = innerhalb 1 % des Siegerab
 // tools/catalog-check.mjs (C8). Da 41,5 % aller Genwerte auf conf 0 stehen und damit
 // Gewicht 0 tragen, laeuft die Schleife danach ueber WENIGER Gene als vorher — der
 // Konfidenz-Filter macht die Suche schneller, nicht langsamer.
-function confPrep(e){
-  if(e._cw) return e._cw;
-  const gi = [], cf = [], gv = [];
-  for(let g = 0; g < NG; g++){
-    const c = e.conf ? e.conf[g] : CONF_FULL;
-    if(!c) continue;
-    gi.push(g); cf.push(c/CONF_FULL); gv.push(e.genome[g]/255);
+// GRUPPEN-VORBEREITUNG. Die Suchschleife laeuft in der groessten Gruppe 9.125-mal je
+// classify(), und tools/catalog-check.mjs (C8) gibt ihr dafuer 3 ms. Mit Objekt-Zugriff
+// je Eintrag pendelte das um die Grenze. Deshalb liegt eine Gruppe einmalig als FLACHES
+// Zahlenfeld vor: keine Property-Lookups mehr im heissen Pfad, nur Indexrechnung.
+//
+// Gespeichert werden nur Gene mit conf > 0 — die uebrigen tragen seit der
+// Konfidenz-Gewichtung ohnehin Gewicht 0. Das sind 41,5 % aller Genwerte, die Schleife
+// laeuft also ueber deutlich weniger als NG Schritte.
+const _groupPrep = new Map();
+function groupPrep(groupKey, idx){
+  let p = _groupPrep.get(groupKey);
+  if(p) return p;
+  const n = idx.length, off = new Int32Array(n + 1), hw = new Float64Array(n);
+  let total = 0;
+  for(let k = 0; k < n; k++){
+    const e = CAT.entries[idx[k]];
+    for(let g = 0; g < NG; g++) if(!e.conf || e.conf[g]) total++;
   }
-  return (e._cw = { gi, cf, gv });
+  const gi = new Uint8Array(total), cf = new Float64Array(total), gv = new Float64Array(total);
+  let j = 0;
+  for(let k = 0; k < n; k++){
+    const e = CAT.entries[idx[k]];
+    off[k] = j;
+    for(let g = 0; g < NG; g++){
+      const c = e.conf ? e.conf[g] : CONF_FULL;
+      if(!c) continue;
+      gi[j] = g; cf[j] = c/CONF_FULL; gv[j] = e.genome[g]/255; j++;
+    }
+    hw[k] = e.habWater!=null ? e.habWater/255 : NaN;
+  }
+  off[n] = j;
+  p = { off, gi, cf, gv, hw, n };
+  _groupPrep.set(groupKey, p);
+  return p;
 }
 function nearestReal(t, groupKey, w, e){
   if(!CAT) return null;
   const idx = CAT.byGroup[groupKey];
   if(!idx || !idx.length) return null;
   const envWater = e && e.water!=null ? e.water : 0.6;
-  let best = null, dBest = Infinity, dSecond = Infinity;
-  const dists = new Array(idx.length);
-  for(let k = 0; k < idx.length; k++){
-    const e = CAT.entries[idx[k]];
-    const p = confPrep(e), gi = p.gi, cf = p.cf, gv = p.gv;
+  const p = groupPrep(groupKey, idx), off = p.off, gi = p.gi, cf = p.cf, gv = p.gv, hw = p.hw;
+  let bestK = -1, dBest = Infinity, dSecond = Infinity;
+  const dists = new Float64Array(p.n);
+  for(let k = 0; k < p.n; k++){
+    const s1 = off[k+1];
     let sum = 0, z = 0;
-    for(let j = 0; j < gi.length; j++){
+    for(let j = off[k]; j < s1; j++){
       const ww = w[gi[j]] * cf[j];
       const d = (t[gi[j]] - gv[j]) * ww;
       sum += d*d; z += ww*ww;
     }
     let dist = Math.sqrt(sum/Math.max(z, 1e-9));
-    if(e.habWater!=null) dist *= 1 + HABITAT_PENALTY_K * Math.abs(envWater - e.habWater/255);
+    const h = hw[k];
+    if(h === h) dist *= 1 + HABITAT_PENALTY_K * Math.abs(envWater - h);   // h===h: kein NaN
     dists[k] = dist;
-    if(dist < dBest){ dSecond = dBest; dBest = dist; best = e; }
+    if(dist < dBest){ dSecond = dBest; dBest = dist; bestK = k; }
     else if(dist < dSecond){ dSecond = dist; }
   }
-  if(!best) return null;
+  if(bestK < 0) return null;
+  const best = CAT.entries[idx[bestK]];
   let tie = 0;
   for(let k = 0; k < dists.length; k++) if(dists[k] <= dBest*TIE_BAND) tie++;
   // margin wie in matchArchetype(): relativer Vorsprung vor dem Zweitnaechsten.
