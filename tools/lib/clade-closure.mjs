@@ -51,6 +51,14 @@ export const KLASSEN = [
   { qid: "Q129026", de: "Knorpelfische",  beine: 0,  rang: 1 },
   { qid: "Q1390",   de: "Insekten",       beine: 6,  rang: 1 },
   { qid: "Q1358",   de: "Spinnentiere",   beine: 8,  rang: 1 },
+  // Q25375 Odonata (Libellen) — Unterklade von Q1390 Insecta, aber im rekonstruierten
+  // Elterngraphen NICHT mit ihr verbunden: alle 289 Libellen-Ketten enden auf derselben
+  // Tiefe, es gibt also keine flacher verschachtelte Art, die den fehlenden Schritt
+  // beisteuern koennte (s. Kopfkommentar). Ohne diesen Eintrag blieben sie ohne Klade —
+  // und damit im Bauplan „Kleines flinkes Tier" (Mausform). Beinzahl und zugelassene
+  // Bauplaene sind identisch mit Insecta, die Zeile aendert also nichts ausser der
+  // Erreichbarkeit. Label gegen Wikidata geprueft (Q25375 = Libellen / Odonata).
+  { qid: "Q25375",  de: "Libellen",       beine: 6,  rang: 1 },
   { qid: "Q25364",  de: "Krebse",         beine: 10, rang: 1 },
   { qid: "Q5194",   de: "Baertierchen",   beine: 8,  rang: 1 },
   { qid: "Q25314",  de: "Bedecktsamer",   beine: -1, rang: 1 },
@@ -64,6 +72,12 @@ export const KLASSEN = [
   { qid: "Q44631",  de: "Stachelhaeuter", beine: 0,  rang: 2 },
   { qid: "Q25441",  de: "Nesseltiere",    beine: 0,  rang: 2 },
   { qid: "Q18960",  de: "Schwaemme",      beine: 0,  rang: 2 },
+  // Q473809 Amoebozoa — dasselbe Muster wie Q25375: die Schleimpilze (Licea, Lycogala,
+  // Ceratiomyxa) haengen im Katalog an keiner der bisherigen Zielkladen. Sie stehen
+  // bereits im Bauplan „Plankton"; der Eintrag verschiebt sie nicht, sondern gibt ihnen
+  // eine Klade — und damit einen sinnvollen „≈ in echt"-Verweis statt einer Tautologie.
+  // Label gegen Wikidata geprueft (Q473809 = Amoebozoa).
+  { qid: "Q473809", de: "Amoeben",        beine: -1, rang: 2 },
   { qid: "Q764",    de: "Pilze",          beine: -1, rang: 3 },
   { qid: "Q10876",  de: "Bakterien",      beine: -1, rang: 3 },
   { qid: "Q10872",  de: "Archaeen",       beine: -1, rang: 3 },

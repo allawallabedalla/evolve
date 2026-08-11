@@ -27,6 +27,7 @@ import { loadAppCore, ROOT, BASE_ENV } from "./lib/app-core.mjs";
 import { cladeResolver, KLASSEN } from "./lib/clade-closure.mjs";
 
 const STRICT = process.argv.includes("--strict");
+const JSON_OUT = process.argv.includes("--json");
 const core = loadAppCore("plausi-check");
 const { classify, describe, nearestReal, selectionWeights, stepGeneration, NG, ARCH, CATALOG } = core;
 const html = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
@@ -35,6 +36,7 @@ const pct = (a, b) => (b ? ((a / b) * 100).toFixed(1) : "0.0") + " %";
 const findings = [];
 const report = (id, titel, verletzt, gesamt, detail) => {
   findings.push({ id, titel, verletzt, gesamt, detail });
+  if (JSON_OUT) return;                    // maschinenlesbar am Ende, s. unten
   const flag = verletzt ? "✗" : "✓";
   console.log(`\n${flag} ${id}  ${titel}`);
   console.log(`   betroffen: ${verletzt} von ${gesamt}  (${pct(verletzt, gesamt)})`);
@@ -69,6 +71,26 @@ const inClade = (e, key) => {
 const artName = (e) => e.de || e.sci;
 const gen = (e) => e.genome.map((v) => v / 255);
 
+// Der Bauplan, unter dem eine Katalog-Art in der App WIRKLICH beschrieben wuerde.
+//
+// P1 rief bisher `describe(gen(e))` OHNE zweiten Parameter. Dann klassifiziert describe()
+// die Art selbst — in ARCH.fallbackEnv, einer Umwelt, die mit der Art nichts zu tun hat.
+// Ein Insekt landete dabei regelmaessig in einem Nicht-Insekten-Bauplan und wurde
+// prompt mit vier Beinen beschrieben. Gemessen: 4.459 von 6.398 Insekten (70 %)
+// „falsch" — mit dem eigenen Bauplan der Art dagegen 0.
+//
+// Die App uebergibt IMMER den lebenden Archetyp (`describe(t, a)` in der Karte). Die
+// alte Zahl mass also einen Fall, den kein Spieler je zu sehen bekommt. Seit der
+// Klade-Schranke (tools/regroup-catalog.mjs) ist die Gruppe einer Art kladen-korrekt —
+// genau das macht diesen Aufruf hier erst moeglich UND richtig.
+const FORM_BY_KEY = {};
+for (const f of ARCH.forms) FORM_BY_KEY[f.key] = f;
+const archOf = (e) => {
+  const f = FORM_BY_KEY[e.group];
+  return f ? { k: f.k, n: f.n, e: f.e, key: f.key } : undefined;
+};
+const beschreibe = (e) => describe(gen(e), archOf(e));
+
 // ---------------------------------------------------------------------------
 // P1 — BEINZAHL IM TEXT gegen die BIOLOGIE der benannten Art.
 //
@@ -89,11 +111,11 @@ const legPhrase = (d) =>
   const vierbeiner = CATALOG.entries.filter((e) => inClade(e, "saeuger") || inClade(e, "voegel"));
   const bad = [];
   for (const e of vierbeiner) {
-    const p = legPhrase(describe(gen(e)));
+    const p = legPhrase(beschreibe(e));
     if (p === "sechs" || p === "viele") bad.push(e);
   }
   const beispiele = bad.slice(0, 5).map((e) =>
-    `${artName(e)} (limbLength ${(e.genome[2] / 255).toFixed(2)}) -> „${legPhrase(describe(gen(e)))}"`);
+    `${artName(e)} (limbLength ${(e.genome[2] / 255).toFixed(2)}) -> „${legPhrase(beschreibe(e))}"`);
   report("P1a", "Tetrapode (Saeuger/Vogel) im Text mit 6+ Beinen",
     bad.length, vierbeiner.length,
     [...beispiele,
@@ -101,12 +123,12 @@ const legPhrase = (d) =>
 
   const insekten = CATALOG.entries.filter((e) => inClade(e, "insekten"));
   const badI = insekten.filter((e) => {
-    const p = legPhrase(describe(gen(e)));
+    const p = legPhrase(beschreibe(e));
     return p !== null && p !== "sechs";
   });
   report("P1b", "Insekt im Text NICHT mit sechs Beinen",
     badI.length, insekten.length,
-    badI.slice(0, 5).map((e) => `${artName(e)} (limbLength ${(e.genome[2] / 255).toFixed(2)}) -> „${legPhrase(describe(gen(e)))}"`));
+    badI.slice(0, 5).map((e) => `${artName(e)} (limbLength ${(e.genome[2] / 255).toFixed(2)}) -> „${legPhrase(beschreibe(e))}"`));
 }
 
 // ---------------------------------------------------------------------------
@@ -287,10 +309,28 @@ const converge = (env, gens = 400) => {
 {
   const flieger = new Set(["fledermaus", "vogel", "fluginsekt"]);
   const inFlieger = CATALOG.entries.filter((e) => flieger.has(e.group));
-  const ohneFluegel = inFlieger.filter((e) => e.genome[G.wing] / 255 < 0.3);
+  // SCHWELLE ABGELEITET, NICHT GERATEN. Bis hierhin stand hier 0.3 — eine Zahl ohne
+  // Herkunft, und sie lag ausgerechnet auf dem 1. Perzentil der Flieger-Gruppen: 46 der
+  // 47 gemeldeten Arten trugen wing 0.298, also knapp darunter. Der Check mass damit
+  // Rundungsrauschen statt Fluglosigkeit.
+  //
+  // Die Archetypen selbst liefern die beiden Anker: die drei Flieger-Prototypen stehen
+  // bei wing ~0.75-0.77, „Laufvogel · Strauss" (der fluglose Bauplan) bei 0.05. Wessen
+  // Fluegel-Gen naeher am fluglosen als am fliegenden Anker liegt, den beschreibt die
+  // App zu Unrecht als Flieger. Das ist die Mitte zwischen beiden — aus app/archetypes.js
+  // gelesen, nicht hier eingetragen, damit die Schwelle mitwandert, wenn die Prototypen
+  // sich aendern.
+  const wingProto = (key) => ARCH.forms.find((f) => f.key === key)?.proto?.wing;
+  const fliegerAnker = Math.min(...[...flieger].map(wingProto).filter((x) => x != null));
+  const fluglosAnker = wingProto("laufvogel");
+  const SCHWELLE = (fliegerAnker + fluglosAnker) / 2;
+  const ohneFluegel = inFlieger.filter((e) => e.genome[G.wing] / 255 < SCHWELLE);
+  const alteSchwelle = inFlieger.filter((e) => e.genome[G.wing] / 255 < 0.3).length;
   report("P7a", "Als Flieger beschrieben, obwohl das eigene Flug-Gen bei ~0 liegt",
     ohneFluegel.length, inFlieger.length,
-    [...ohneFluegel.slice(0, 5).map((e) => `${artName(e)} (wing ${(e.genome[G.wing] / 255).toFixed(2)}, Gruppe ${e.group})`),
+    [`Schwelle ${SCHWELLE.toFixed(2)} = Mitte zwischen Flieger-Prototyp ${fliegerAnker} und fluglosem Prototyp ${fluglosAnker}.`,
+     `Zum Vergleich, die alte handgesetzte 0.3: ${alteSchwelle} Arten — davon lagen fast alle bei wing 0.298, also Rundungsrauschen.`,
+     ...ohneFluegel.slice(0, 5).map((e) => `${artName(e)} (wing ${(e.genome[G.wing] / 255).toFixed(2)}, Gruppe ${e.group})`),
      'describe() liest `a.e` (Bauplan-Gruppe) statt Gen 8 — der Satz kann dem Genom deshalb nicht folgen.']);
 
   const draussen = CATALOG.entries.filter((e) => !flieger.has(e.group) && e.genome[G.wing] / 255 > 0.45);
@@ -471,8 +511,21 @@ const kladeVon = (e) => {
 }
 
 // ---------------------------------------------------------------------------
-console.log("\n" + "─".repeat(72));
 const gerissen = findings.filter((f) => f.verletzt > 0);
+if (JSON_OUT) {
+  // Fuer tools/pdca.mjs: eine Zahl je Regel, ohne Prosa. `wert` ist der Anteil in
+  // Prozent, damit Regeln mit unterschiedlicher Grundmenge vergleichbar bleiben.
+  console.log(JSON.stringify({
+    pruefstand: "plausi-check",
+    regeln: findings.map((f) => ({
+      id: f.id, titel: f.titel, verletzt: f.verletzt, gesamt: f.gesamt,
+      wert: f.gesamt ? +((100 * f.verletzt) / f.gesamt).toFixed(2) : 0,
+      gerissen: f.verletzt > 0,
+    })),
+  }, null, 2));
+  process.exit(STRICT && gerissen.length ? 1 : 0);
+}
+console.log("\n" + "─".repeat(72));
 console.log(`plausi-check: ${gerissen.length} von ${findings.length} Regeln verletzt.`);
 for (const f of gerissen) console.log(`  ✗ ${f.id}  ${f.titel} — ${f.verletzt}/${f.gesamt}`);
 if (STRICT && gerissen.length) process.exit(1);

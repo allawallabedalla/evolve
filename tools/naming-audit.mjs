@@ -28,6 +28,7 @@ import { loadAppCore, ROOT, BASE_ENV } from "./lib/app-core.mjs";
 import { cladeResolver } from "./lib/clade-closure.mjs";
 
 const STRICT = process.argv.includes("--strict");
+const JSON_OUT = process.argv.includes("--json");
 const core = loadAppCore("naming-audit");
 const { classify, selectionWeights, stepGeneration, NG, ARCH, CATALOG } = core;
 const GENES = ARCH.genes;
@@ -37,7 +38,8 @@ const report = (id, titel, wert, schwelle, richtung, detail) => {
   // `richtung` = "hoch-ist-schlecht" | "tief-ist-schlecht"; `wert`/`schwelle` in Prozent
   // bzw. in der Einheit der Regel. Eine Regel reisst, wenn sie ueber (bzw. unter) liegt.
   const gerissen = richtung === "hoch" ? wert > schwelle : wert < schwelle;
-  findings.push({ id, titel, wert, schwelle, gerissen });
+  findings.push({ id, titel, wert, schwelle, richtung, gerissen });
+  if (JSON_OUT) return;
   console.log(`\n${gerissen ? "✗" : "✓"} ${id}  ${titel}`);
   console.log(`   gemessen: ${wert}  (Schwelle ${richtung === "hoch" ? "≤" : "≥"} ${schwelle})`);
   for (const d of detail) console.log("   · " + d);
@@ -66,12 +68,14 @@ const konvergiere = (env, gens = 300) => {
 // app/index.html GELESEN, nicht angenommen — N6 und N7 sollen messen, was die App tut,
 // nicht was dieser Check fuer richtig haelt.
 const HTML = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
-// Der Konfidenz-Faktor steckt in confPrep(), das nearestReal() je Eintrag einmal
-// aufruft — beide Funktionen zusammen lesen, damit die Erkennung nicht an einer
-// Umstellung der Schleife scheitert.
-const NEAREST_SRC = (HTML.match(/function confPrep\(e\)\{[\s\S]*?\nfunction nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/)
+// Der Konfidenz-Faktor steckt in einer Hilfsfunktion, die nearestReal() je Gruppe einmal
+// aufruft. Beim ersten Anlauf hing die Erkennung am NAMEN dieser Funktion — und ging
+// still kaputt, als sie beim Optimieren von confPrep() zu groupPrep() wurde: N7 meldete
+// wieder die alte Formel. Gelesen wird deshalb der ganze Abschnitt von der Konstanten
+// CONF_FULL bis zum Ende von nearestReal(), egal wie die Hilfsfunktion heisst.
+const NEAREST_SRC = (HTML.match(/const CONF_FULL[\s\S]*?function nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/)
   || HTML.match(/function nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/) || [""])[0];
-const CONF_GEWICHT = /e\.conf\s*\?\s*e\.conf\[g\]/.test(NEAREST_SRC) && /CONF_FULL/.test(NEAREST_SRC);
+const CONF_GEWICHT = /e\.conf\s*(\?|&&)/.test(NEAREST_SRC) && /CONF_FULL/.test(NEAREST_SRC);
 /** Gewicht je Gen genau so, wie nearestReal() es benutzt. */
 const genGewicht = (w, e, g) => w[g] * (CONF_GEWICHT ? (e.conf ? e.conf[g] / 3 : 1) : 1);
 
@@ -357,8 +361,12 @@ const HABITAT_PENALTY_K = 2.0;
 }
 
 // ---------------------------------------------------------------------------
-console.log("\n" + "─".repeat(72));
 const gerissen = findings.filter((f) => f.gerissen);
+if (JSON_OUT) {
+  console.log(JSON.stringify({ pruefstand: "naming-audit", regeln: findings }, null, 2));
+  process.exit(STRICT && gerissen.length ? 1 : 0);
+}
+console.log("\n" + "─".repeat(72));
 console.log(`naming-audit: ${gerissen.length} von ${findings.length} Schwellen gerissen.`);
 for (const f of gerissen) console.log(`  ✗ ${f.id}  ${f.titel} — ${f.wert} (Schwelle ${f.schwelle})`);
 console.log("\nDie Kette in einem Satz: der Artname stuetzt sich auf Koordinaten, die zu 99 % aus");

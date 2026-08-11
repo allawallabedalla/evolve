@@ -64,6 +64,7 @@ const ERLAUBT = {
   Q127282: ["fisch", "leuchtwesen"],                                // Knochenfische
   Q129026: ["fisch"],                                               // Knorpelfische
   Q1390:   ["insekt", "fluginsekt", "feuerkaefer", "frostspanner"], // Insekten
+  Q25375:  ["insekt", "fluginsekt", "feuerkaefer", "frostspanner"], // Libellen (= Insekten)
   // Spinnentiere haben KEINEN eigenen Bauplan (offener Rest, s. docs/darstellungs-audit.md
   // Abschnitt 7). „Krebstier · Arthropode" ist die naechste ehrliche Naeherung — der Name
   // sagt Arthropode, die Zeichnung zeigt einen Panzer mit Gliedmassen. Bewusst KEIN
@@ -76,6 +77,8 @@ const ERLAUBT = {
   Q44631:  ["seestern"],                                            // Stachelhaeuter
   Q25441:  ["koralle", "leuchtwesen"],                              // Nesseltiere (Qualle = leuchtwesen)
   Q18960:  ["schwamm"],                                             // Schwaemme
+  // --- Protisten ---
+  Q473809: ["plankton", "amoebe", "euglenoid"],                     // Amoeben/Schleimpilze
   // --- Pflanzen ---
   Q25314:  ["laubbaum", "strauch", "bluetenkraut", "kraut", "sukkulente", "erle",
             "polsterpflanze", "krummholz"],                         // Bedecktsamer
@@ -152,8 +155,23 @@ for (const f of ARCH.forms) FORM[f.key] = f;
 //
 // Ohne diesen Test waere jede Umgruppierung blind: eine abgedriftete Kopie der
 // Distanzformel wuerde Arten aus einem Grund verschieben, der nichts mit der Klade zu
-// tun hat. Erwartet wird KEINE 100 % (s. Kopfkommentar, Gruender-Los), aber ein Wert,
-// der sich nicht ploetzlich aendert.
+// tun hat.
+//
+// GEPRUEFT WIRD EINE INVARIANTE, KEIN VORHER/NACHHER. Der erste Entwurf verglich gegen
+// den naechsten Prototyp im REICH — das galt nur beim allerersten Lauf. Danach sitzen
+// die umgezogenen Arten per Konstruktion NICHT mehr an ihrem reichsweit naechsten
+// Prototyp, und der Test schlug gegen seinen eigenen Erfolg an (57,6 % beim zweiten
+// Lauf). Statt dessen wird geprueft: eine Art, deren Klade zu ihrer Gruppe PASST, muss
+// bereits am naechsten ZUGELASSENEN Prototyp stehen.
+//
+// Das gilt vor und nach jedem Lauf: vorher, weil ihre Gruppe das globale Minimum war und
+// in der erlaubten Teilmenge liegt (ein Minimum ueber der Obermenge ist auch Minimum
+// ueber der Teilmenge, wenn es darin enthalten ist); nachher, weil genau das die Regel
+// ist, nach der umgezogen wurde. Weicht die Zahl ab, stimmt die Formel nicht mehr —
+// unabhaengig davon, wie oft das Werkzeug schon lief. Erwartet wird KEINE 100 %: das
+// Gruender-Los verschiebt die Genome NACH der Zuordnung (s. Kopfkommentar), aus dem
+// veroeffentlichten Genom ist die urspruengliche Entscheidung also nicht exakt
+// nachvollziehbar.
 const REPRO_MIN = 0.65;
 {
   const N = 4000;
@@ -162,15 +180,20 @@ const REPRO_MIN = 0.65;
     const e = CATALOG.entries[Math.floor((i * CATALOG.entries.length) / N)];
     const b = BIOM_NACH_WATER.get(e.habWater);
     if (!b) continue;
+    const k = RESOLVER.klasseVon(e);
+    const erlaubt = k ? ERLAUBT[k.qid] : null;
+    // Nur Arten, die die Schranke gar nicht betrifft — an ihnen zeigt sich, ob die
+    // Formel hier dieselbe ist wie die, die sie einst platziert hat.
+    if (!erlaubt || !erlaubt.includes(e.group)) continue;
     const t = e.genome.map((v) => v / 255);
     const w = selectionWeights(t, b.env);
-    const reich = FORM[e.group]?.k;
-    const best = naechsterPrototyp(t, b.env, w, ARCH.forms.filter((f) => f.k === reich));
+    const pool = erlaubt.map((key) => FORM[key]).filter(Boolean);
+    const best = naechsterPrototyp(t, b.env, w, pool);
     n++;
-    if (best.key === e.group) treffer++;
+    if (best && best.key === e.group) treffer++;
   }
-  const rate = treffer / n;
-  console.log(`Reproduktions-Test: ${treffer}/${n} (${(100 * rate).toFixed(1)} %) der bestehenden Zuordnungen`);
+  const rate = n ? treffer / n : 0;
+  console.log(`Reproduktions-Test: ${treffer}/${n} (${(100 * rate).toFixed(1)} %) der nicht betroffenen Arten stehen am naechsten zugelassenen Prototyp`);
   console.log(`  Rest = Gruender-Los (nach der Zuordnung aufgebracht, s. Kopfkommentar) — erwartet.`);
   if (rate < REPRO_MIN) {
     console.error(`  ✗ unter ${(100 * REPRO_MIN).toFixed(0)} %: die Distanzformel hier weicht vom Original ab. Abbruch.`);

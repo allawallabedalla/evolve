@@ -1,0 +1,162 @@
+{
+ "_kommentar": "Festgehaltener Regelstand fuer tools/pdca.mjs. Wird NUR mit --write erneuert, damit eine Verschlechterung nicht still zum neuen Normal wird. Werte in Prozent (Anteil betroffener Faelle) bzw. 0/1 bei Pruefstaenden ohne maschinelles Format. Bei N1/N6 ist GROESSER besser, sonst kleiner.",
+ "gemessenAm": "2026-08-11",
+ "regeln": {
+  "BND": {
+   "pruefstand": "bundle-app-fitness",
+   "titel": "app/index.html auf dem generierten Stand",
+   "wert": 0,
+   "gerissen": false
+  },
+  "CAT": {
+   "pruefstand": "catalog-check",
+   "titel": "Katalog-Format, Schluessel, Budget",
+   "wert": 0,
+   "gerissen": false
+  },
+  "EXE": {
+   "pruefstand": "exemplar-check",
+   "titel": "Jeder Archetyp hat Vorbild + Icon",
+   "wert": 0,
+   "gerissen": false
+  },
+  "KEY": {
+   "pruefstand": "key-check",
+   "titel": "Alle Form-Schluessel loesen auf",
+   "wert": 0,
+   "gerissen": false
+  },
+  "N1": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil der KERN-Genwerte, die an der realen Art GEMESSEN sind",
+   "wert": 0.6,
+   "gerissen": true
+  },
+  "N2": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil der Gene, die HOECHSTENS 4 von 65 Prototypen ueberhaupt nennen",
+   "wert": 69.2,
+   "gerissen": true
+  },
+  "N3": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil der Arten, die ausserhalb jedes Bauplans ihrer eigenen Klade stehen",
+   "wert": 0,
+   "gerissen": false
+  },
+  "N4": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil der Gengewichte, die auf dem Boden liegen",
+   "wert": 78.4,
+   "gerissen": true
+  },
+  "N5": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil der Karten, deren Form NICHT der roh naechste Prototyp ist",
+   "wert": 13.6,
+   "gerissen": true
+  },
+  "N6": {
+   "pruefstand": "naming-audit",
+   "titel": "Median-Vorsprung der benannten Art vor der zweitnaechsten (Prozent)",
+   "wert": 0.7,
+   "gerissen": true
+  },
+  "N7": {
+   "pruefstand": "naming-audit",
+   "titel": "Anteil des Artabstands, der aus den bedingten Genen 10–25 stammt",
+   "wert": 28.3,
+   "gerissen": true
+  },
+  "N8": {
+   "pruefstand": "naming-audit",
+   "titel": "Erreichbarkeits-Verhaeltnis Generalisten-Tier zu Flatterer · Vogel",
+   "wert": 23,
+   "gerissen": true
+  },
+  "P10": {
+   "pruefstand": "plausi-check",
+   "titel": "Klassen-QID faellt aus `lineage` heraus (slice(0,12) in build-catalog.mjs)",
+   "wert": 0,
+   "gerissen": false
+  },
+  "P1a": {
+   "pruefstand": "plausi-check",
+   "titel": "Tetrapode (Saeuger/Vogel) im Text mit 6+ Beinen",
+   "wert": 0,
+   "gerissen": false
+  },
+  "P1b": {
+   "pruefstand": "plausi-check",
+   "titel": "Insekt im Text NICHT mit sechs Beinen",
+   "wert": 0,
+   "gerissen": false
+  },
+  "P2": {
+   "pruefstand": "plausi-check",
+   "titel": "Bauplan-SATZ und ZEICHNUNG nennen verschiedene Beinzahlen",
+   "wert": 0,
+   "gerissen": false
+  },
+  "P3": {
+   "pruefstand": "plausi-check",
+   "titel": "Artname und beschriebener Koerper widersprechen sich",
+   "wert": 16.67,
+   "gerissen": true
+  },
+  "P4": {
+   "pruefstand": "plausi-check",
+   "titel": "„≈ in echt\"-Verweis wiederholt nur den Artnamen (Tautologie)",
+   "wert": 0,
+   "gerissen": false
+  },
+  "P5": {
+   "pruefstand": "plausi-check",
+   "titel": "Bauplan-Gruppen, die NIE einen realen Artnamen bekommen koennen",
+   "wert": 33.85,
+   "gerissen": true
+  },
+  "P5b": {
+   "pruefstand": "plausi-check",
+   "titel": "Gruppen mit unter 25 Katalog-Eintraegen (Stufe 2 hat kaum Auswahl)",
+   "wert": 4.62,
+   "gerissen": true
+  },
+  "P6": {
+   "pruefstand": "plausi-check",
+   "titel": "Merkmal ist gezeichnet, aber im Text nicht genannt (oder umgekehrt)",
+   "wert": 4.95,
+   "gerissen": true
+  },
+  "P7a": {
+   "pruefstand": "plausi-check",
+   "titel": "Als Flieger beschrieben, obwohl das eigene Flug-Gen bei ~0 liegt",
+   "wert": 4.57,
+   "gerissen": true
+  },
+  "P7b": {
+   "pruefstand": "plausi-check",
+   "titel": "Hohes Flug-Gen, das im Bauplan-Satz nirgends vorkommt",
+   "wert": 7.67,
+   "gerissen": true
+  },
+  "P8": {
+   "pruefstand": "plausi-check",
+   "titel": "Benennbare Art hat eine andere Beinzahl als die Zeichnung ihrer Gruppe",
+   "wert": 2.42,
+   "gerissen": true
+  },
+  "P9": {
+   "pruefstand": "plausi-check",
+   "titel": "Live-Stichprobe: gezeigter Artname widerspricht der gezeigten Silhouette",
+   "wert": 0.7,
+   "gerissen": true
+  },
+  "PAR": {
+   "pruefstand": "app-parity",
+   "titel": "App-Inline-fitness deckt sich mit der Engine",
+   "wert": 0,
+   "gerissen": false
+  }
+ }
+}
