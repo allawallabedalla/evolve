@@ -24,6 +24,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadAppCore, ROOT, BASE_ENV } from "./lib/app-core.mjs";
+import { cladeResolver, KLASSEN } from "./lib/clade-closure.mjs";
 
 const STRICT = process.argv.includes("--strict");
 const core = loadAppCore("plausi-check");
@@ -53,48 +54,18 @@ const CLADE = {
 };
 
 // ---------------------------------------------------------------------------
-// VORFAHREN-HUELLE — und warum dieser Check sie selbst berechnen muss.
+// KLADEN-AUFLOESUNG — und warum dieser Check sie selbst berechnen muss.
 //
-// `entry.lineage` ist in app/catalog.js auf 12 Eintraege GEKUERZT
-// (tools/build-catalog.mjs: `p.v.lineage.slice(0, 12)`, begruendet mit CORPUS_DEPTH).
-// Bei tief verschachtelten Taxa faellt die KLASSEN-QID damit aus dem Feld heraus: eine
-// Muecke traegt Q1390 (Insecta) 15 Ebenen ueber sich, im gespeicherten Feld steht sie
-// nicht mehr. Ein direktes `lineage.includes(qid)` misst deshalb nur einen Bruchteil der
-// gemeinten Menge (gemessen in P10 unten: bei Insekten 3 %). Genau daran haben P1 und P7
-// bisher vorbeigemessen.
-//
-// Die fehlenden Ebenen lassen sich OHNE Netz rekonstruieren: jede der 42.648 Ketten ist
-// ein Stueck desselben Baums, und flacher verschachtelte Arten enthalten genau die
-// Knoten, die den tieferen abgeschnitten wurden. Die Vereinigung aller Ketten ergibt
-// einen Elterngraphen, dessen transitive Huelle die vollstaendige Vorfahrenmenge liefert.
-const _parent = new Map();
-for (const e of CATALOG.entries) {
-  const L = e.lineage || [];
-  for (let i = 0; i < L.length - 1; i++) {
-    if (!_parent.has(L[i])) _parent.set(L[i], new Set());
-    _parent.get(L[i]).add(L[i + 1]);
-  }
-}
-const _ancMemo = new Map();
-const ancestorsOf = (qid) => {
-  if (_ancMemo.has(qid)) return _ancMemo.get(qid);
-  const out = new Set(), stack = [qid];
-  while (stack.length) {
-    const x = stack.pop();
-    for (const p of (_parent.get(x) || [])) if (!out.has(p)) { out.add(p); stack.push(p); }
-  }
-  _ancMemo.set(qid, out);
-  return out;
+// `entry.lineage` ist in app/catalog.js auf 12 Eintraege GEKUERZT (s. P10 unten). Ein
+// direktes `lineage.includes(qid)` misst deshalb nur einen Bruchteil der gemeinten Menge
+// — genau daran haben P1 und P7 bisher vorbeigemessen. Die fehlenden Ebenen rekonstruiert
+// tools/lib/clade-closure.mjs aus allen 42.648 Ketten, per Naechster-Vorfahr-Suche statt
+// blinder transitiver Huelle (Begruendung und Messwerte dort im Kopfkommentar).
+const RESOLVER = cladeResolver(CATALOG);
+const inClade = (e, key) => {
+  const k = RESOLVER.klasseVon(e);
+  return !!k && k.qid === CLADE[key].qid;
 };
-const _closMemo = new Map();
-const cladeClosure = (e) => {
-  if (_closMemo.has(e)) return _closMemo.get(e);
-  const S = new Set(e.lineage || []);
-  for (const q of (e.lineage || [])) for (const a of ancestorsOf(q)) S.add(a);
-  _closMemo.set(e, S);
-  return S;
-};
-const inClade = (e, key) => cladeClosure(e).has(CLADE[key].qid);
 const artName = (e) => e.de || e.sci;
 const gen = (e) => e.genome.map((v) => v / 255);
 
@@ -369,18 +340,12 @@ const DRAWN_LEGS = {
   kletterer: 4, flink: 4, amphibie: 4, reptil: 4, generalist: 4, wuehler: 4, chamaeleon: 4,
 };
 // Beinzahl je Grossklade — dieselbe Ground Truth wie in P1 (dort nur fuer Tetrapoden und
-// Insekten), hier auf alle Tierstaemme des Katalogs ausgedehnt. -1 = keine Tierklade.
-const KLADEN_BEINE = [
-  ["Q5113", "Voegel", 2], ["Q7377", "Saeuger", 4], ["Q10811", "Reptilien", 4],
-  ["Q10908", "Amphibien", 4], ["Q127282", "Knochenfische", 0], ["Q1390", "Insekten", 6],
-  ["Q1358", "Spinnentiere", 8], ["Q25364", "Krebse", 10], ["Q25326", "Weichtiere", 0],
-  ["Q25522", "Ringelwuermer", 0], ["Q44631", "Stachelhaeuter", 0], ["Q25441", "Nesseltiere", 0],
-  ["Q18960", "Schwaemme", 0],
-];
+// Insekten), hier auf alle Tierstaemme ausgedehnt. Die Tabelle steht in
+// tools/lib/clade-closure.mjs (KLASSEN), damit regroup-catalog dieselbe benutzt.
+// `beine: -1` = keine Tierklade, faellt hier heraus.
 const kladeVon = (e) => {
-  const S = cladeClosure(e);
-  for (const [q, n, beine] of KLADEN_BEINE) if (S.has(q)) return { name: n, beine };
-  return null;
+  const k = RESOLVER.klasseVon(e);
+  return k && k.beine >= 0 ? { name: k.de, beine: k.beine } : null;
 };
 {
   let gesamt = 0, falsch = 0;
@@ -463,25 +428,30 @@ const kladeVon = (e) => {
 // gesehen und „0 Verstoesse" gemeldet, wo er schlicht nicht hingeschaut hat. Die Zahl
 // steht hier, damit der blinde Fleck nicht wieder unbemerkt zurueckkommt.
 {
+  // Traegt der Eintrag das Feld `klade` (A4, von regroup-catalog.mjs geschrieben), ist
+  // nichts mehr zu rekonstruieren — dann ist der blinde Fleck geschlossen.
+  const mitFeld = CATALOG.entries.filter((e) => e.klade).length;
   let verloren = 0, mitKlasse = 0;
   for (const e of CATALOG.entries) {
-    const direkt = new Set(e.lineage || []);
-    const voll = cladeClosure(e);
-    const hatVoll = KLADEN_BEINE.some(([q]) => voll.has(q));
-    if (!hatVoll) continue;
+    const k = RESOLVER.klasseVon(e);
+    if (!k) continue;
     mitKlasse++;
-    if (!KLADEN_BEINE.some(([q]) => direkt.has(q))) verloren++;
+    if (!e.klade && !(e.lineage || []).includes(k.qid)) verloren++;
   }
-  const abdeckung = Object.values(CLADE).map((c) => {
+  const abdeckung = KLASSEN.filter((k) => ["Q7377", "Q5113", "Q1390", "Q1358"].includes(k.qid)).map((c) => {
     const direkt = CATALOG.entries.filter((e) => (e.lineage || []).includes(c.qid)).length;
-    const voll = CATALOG.entries.filter((e) => cladeClosure(e).has(c.qid)).length;
+    const voll = CATALOG.entries.filter((e) => RESOLVER.klasseVon(e)?.qid === c.qid).length;
     return `${c.de}: ${direkt} von ${voll} (${voll ? ((100 * direkt) / voll).toFixed(0) : 0} %)`;
   });
+  const konf = RESOLVER.conflicts();
   report("P10", "Klassen-QID faellt aus `lineage` heraus (slice(0,12) in build-catalog.mjs)",
     verloren, mitKlasse,
     [...abdeckung,
      "So viel sah ein direktes `lineage.includes(qid)` — der Rest der Kette ist im Katalog nicht gespeichert.",
-     "Behoben durch die Vorfahren-Huelle oben (aus allen 42.648 Ketten rekonstruiert, ohne Netz)."]);
+     mitFeld ? `Eintraege mit gespeichertem Feld \`klade\`: ${mitFeld} — fuer sie ist nichts zu rekonstruieren.`
+             : "Kein Eintrag traegt ein Feld `klade` — die Aufloesung muss bei jedem Lauf neu rekonstruiert werden.",
+     `Selbsttest des Aufloesers: ${konf.n} Eintraege mit zwei Zielkladen auf derselben Ebene` +
+       (konf.n ? ` — ${konf.beispiele[0]}` : " (= die Naechster-Vorfahr-Annahme haelt).")]);
 }
 
 // ---------------------------------------------------------------------------

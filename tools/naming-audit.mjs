@@ -25,6 +25,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadAppCore, ROOT, BASE_ENV } from "./lib/app-core.mjs";
+import { cladeResolver } from "./lib/clade-closure.mjs";
 
 const STRICT = process.argv.includes("--strict");
 const core = loadAppCore("naming-audit");
@@ -120,28 +121,11 @@ const pct = (x) => x.toFixed(1) + " %";
 // auch nicht im Prototyp. „Flatterer · Vogel" hat dadurch size 0.10 — die Groesse eines
 // Singvogels. Jede reale Art, die deutlich darueber liegt, faellt aus ihrem eigenen
 // Bauplan heraus, obwohl an ihrer Klade nichts zweifelhaft ist.
-const parentGraph = new Map();
-for (const e of CATALOG.entries) {
-  const L = e.lineage || [];
-  for (let i = 0; i < L.length - 1; i++) {
-    if (!parentGraph.has(L[i])) parentGraph.set(L[i], new Set());
-    parentGraph.get(L[i]).add(L[i + 1]);
-  }
-}
-const _anc = new Map();
-const ancestorsOf = (q) => {
-  if (_anc.has(q)) return _anc.get(q);
-  const out = new Set(), st = [q];
-  while (st.length) { const x = st.pop(); for (const p of (parentGraph.get(x) || [])) if (!out.has(p)) { out.add(p); st.push(p); } }
-  _anc.set(q, out); return out;
-};
-const _clo = new Map();
-const kladenHuelle = (e) => {
-  if (_clo.has(e)) return _clo.get(e);
-  const S = new Set(e.lineage || []);
-  for (const q of (e.lineage || [])) for (const a of ancestorsOf(q)) S.add(a);
-  _clo.set(e, S); return S;
-};
+// Kladen-Aufloesung aus tools/lib/clade-closure.mjs — Naechster-Vorfahr-Suche statt
+// blinder transitiver Huelle (Begruendung dort im Kopfkommentar).
+const RESOLVER = cladeResolver(CATALOG);
+const istKlade = (e, qid) => RESOLVER.klasseVon(e)?.qid === qid;
+
 // Klade -> Bauplan-Gruppen, die ihren Koerperbau zeichnen (kuratiert wie FICON).
 const HEIMAT = [
   { qid: "Q5113", de: "Voegel", gruppen: ["vogel", "laufvogel"] },
@@ -154,7 +138,7 @@ const HEIMAT = [
   const zeilen = [];
   let heimatlos = 0, gesamt = 0;
   for (const h of HEIMAT) {
-    const arten = CATALOG.entries.filter((e) => kladenHuelle(e).has(h.qid));
+    const arten = CATALOG.entries.filter((e) => istKlade(e, h.qid));
     const draussen = arten.filter((e) => !h.gruppen.includes(e.group));
     gesamt += arten.length; heimatlos += draussen.length;
     // Welches Gen schiebt sie hinaus? Vergleich der Verteilung drinnen/draussen.
@@ -167,7 +151,7 @@ const HEIMAT = [
       + (treiber && draussen.length ? ` — staerkster Unterschied: ${treiber.g} ${treiber.innen.toFixed(2)} drinnen vs ${treiber.aussen.toFixed(2)} draussen` : ""));
   }
   // Der Vogel-Fall im Detail: die Groesse ist die harte Kante.
-  const voegel = CATALOG.entries.filter((e) => kladenHuelle(e).has("Q5113"));
+  const voegel = CATALOG.entries.filter((e) => istKlade(e, "Q5113"));
   const proto = ARCH.forms.find((f) => f.key === "vogel").proto.size;
   const gross = voegel.filter((e) => e.genome[1] / 255 > 0.30);
   const grossDraussen = gross.filter((e) => !["vogel", "laufvogel"].includes(e.group)).length;
