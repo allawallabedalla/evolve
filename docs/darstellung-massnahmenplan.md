@@ -19,10 +19,14 @@
 > | Gruppen unter 25 Arten (P5b) | 5 | **3** |
 > | Arten mit gemessener Koerpermasse | 2.728 | **7.906** (wirkt beim naechsten Bau) |
 >
-> **P7a meldet jetzt MEHR** (47 → 436): die alte Schwelle 0,3 lag auf dem 1. Perzentil,
-> 46 der 47 Treffer waren Rundungsrauschen bei `wing` 0,298. Die abgeleitete Schwelle
-> (0,40, Mitte zwischen Flieger- und Laufvogel-Prototyp) findet flugunfähige Laufkäfer im
-> Bauplan „Fluginsekt · Segler" — ein echter Befund, den die geratene Zahl verdeckt hat.
+> | **P6** Merkmal gezeichnet, im Text nicht genannt | 15/303 (4,95 %) | **0/7** ✓ |
+> | **P7a** als Flieger beschrieben ohne Flug-Gen | 436 (4,6 %) | **0** ✓ |
+>
+> **P7a hat unterwegs zugenommen, bevor es auf 0 fiel** (47 → 436 → 0). Die alte Schwelle
+> 0,3 lag auf dem 1. Perzentil: 46 der 47 Treffer waren Rundungsrauschen bei `wing` 0,298.
+> Die abgeleitete Schwelle (0,40, Mitte der größten Lücke zwischen den Prototyp-Werten)
+> fand dann 436 echte Fälle — flugunfähige Laufkäfer in „Fluginsekt · Segler" und
+> Bodenvögel in „Flatterer · Vogel". Die **Flügel-Schranke** (s. u.) hat sie aufgelöst.
 >
 > Umgesetzt: **A0** · **A1** · **A2** · **A3** · **A4** · **B1** (Anbindung) · **C1**
 > (als `npm run pdca`) · Odonata/Amoebozoa-Kladen · drei Prüfstand-Korrekturen.
@@ -328,6 +332,51 @@ ungenannte Gene mit einem Ruhewert behandeln — dann braucht es gar keinen Ausg
 - **Restunsicherheit:** der Bonus bildet die Reihenfolge der alten Kaskade nach. Ihn zu
   entfernen heißt, diese Reihenfolge aufzugeben — mit unbekannter Wirkung auf die
   Formverteilung. Nur zusammen mit C3 und einem Vorher/Nachher-Lauf sinnvoll.
+
+---
+
+## PDCA-Runden — was der laufende Zyklus gefunden hat
+
+`npm run pdca` misst alle Prüfstände gegen `docs/pdca-stand.json` und bricht bei jeder
+Verschlechterung ab. Was die Runden bisher ergaben:
+
+### Runde 1 · P6 — ein Wert je Merkmal statt zweier handgesetzter Zahlen
+
+Fell, Panzer und Leuchten standen mit **zwei Zahlen an zwei Stellen**: die Zeichnung
+zeigte Fell ab 0,4, der Satz nannte es erst ab 0,5; beim Leuchten 0,4 gegen 0,45.
+Dazwischen ein Genom-Band, in dem der Spieler etwas *sieht*, was der Text leugnet.
+
+`app/index.html` führt jetzt `SICHTBAR_AB` — ein Wert je Merkmal, gelesen von der
+Beschreibung und allen sieben Zeichen-Zweigen. Die Werte wurden nicht neu gewählt,
+sondern nach einer Regel angeglichen: **der Text darf nicht leugnen, was gezeichnet ist**
+— also gilt die niedrigere der beiden Zahlen, in beiden Fällen die der Zeichnung.
+P6 prüft seither nicht mehr „sind zwei Zahlen gleich", sondern „lesen alle Stellen
+dieselbe Konstante". **15/303 → 0/7.**
+
+### Runde 2 · Flügel-Schranke — dieselbe Regel, zweites Merkmal
+
+Die Klade-Schranke (A1) verhindert, dass ein Vogel auf einer Vierbeiner-Silhouette
+landet. Für das zweite, was die Zeichnung unmissverständlich behauptet — **Flügel** —
+gab es kein Gegenstück. Gemessen: 436 Arten in einem Bauplan, der Flügel zeichnet,
+obwohl ihr eigenes Flügel-Gen dagegen spricht.
+
+Der Grund lag nicht am Flügel-Gen: bei *Badister bullatus* (wing 0,32) gewann
+„Fluginsekt" mit 0,1235 gegen „Insekt · Gliederfüßer" mit 0,1257 — **1,8 % Vorsprung**,
+ein Münzwurf, entschieden durch `limbLength`. Die Flügelfrage entschied gar nicht mit,
+obwohl sie das Einzige ist, was man auf der Zeichnung sofort sieht.
+
+Die Schwelle ist **abgeleitet, nicht gesetzt**: vier Prototypen nennen `wing` — drei
+Flieger bei 0,75–0,77 und „Laufvogel · Strauß" bei 0,05. Die Mitte der größten Lücke
+(0,40) trennt „fliegt" von „fliegt nicht" und wandert mit, wenn die Prototypen sich
+ändern.
+
+| Umzug | Anzahl | wer |
+|---|---|---|
+| `vogel` → `laufvogel` | 247 | Frankoline, Chachalacas, Guane, Raufuß- und Großfußhühner |
+| `fluginsekt` → `insekt` | 189 | Laufkäfer (*Carabus*, *Badister*, *Demetrias*) |
+
+Gegenprobe: die echten Flieger bleiben (Enten bei 0,67–0,73). Kein Bauplan läuft leer,
+P5b unverändert. **P7a 4,6 % → 0, P7b 7,67 % → 7,57 %.**
 
 ---
 

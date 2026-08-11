@@ -100,6 +100,42 @@ const ERLAUBT = {
 // Kladen ohne Eintrag hier (z. B. Protisten) haben keine Schranke — ihre Arten bleiben,
 // wo sie sind. Lieber keine Regel als eine geratene.
 
+// ---------------------------------------------------------------------------
+// FLUEGEL-SCHRANKE — dieselbe Regel wie die Klade-Schranke, nur auf das ZWEITE, was die
+// Zeichnung unmissverstaendlich behauptet.
+//
+// Die Klade-Schranke oben verhindert, dass ein Vogel auf einer Vierbeiner-Silhouette
+// landet: die gezeichnete BEINZAHL widerspraeche seiner Klade. Genau dieselbe Lage gibt
+// es bei den FLUEGELN — nur laesst sich die nicht aus der Klade ablesen, sondern steht im
+// Genom der Art selbst. Gemessen (plausi-check P7a): 436 Arten sitzen in einem Bauplan,
+// der Fluegel zeichnet, obwohl ihr eigenes Fluegel-Gen dagegen spricht — 189 fluglose
+// Laufkaefer in „Fluginsekt · Segler", der Rest schlechte Flieger unter den Voegeln.
+//
+// Warum sie dort landen: bei „Badister bullatus" (wing 0.32) gewinnt „Fluginsekt" mit
+// 0.1235 gegen „Insekt · Gliederfuesser" mit 0.1257 — 1,8 % Vorsprung, ein Muenzwurf.
+// Der Grund ist nicht das Fluegel-Gen, sondern `limbLength`: der Insekten-Prototyp
+// verlangt 0.82, ein Laufkaefer hat kuerzere Beine. Die Fluegel-Frage entscheidet der
+// Abstand also gar nicht mit — obwohl sie das Einzige ist, was man auf der Zeichnung
+// sofort sieht.
+//
+// SCHWELLE ABGELEITET, NICHT GESETZT. Vier Prototypen nennen `wing`: drei Flieger bei
+// 0.75–0.77 und „Laufvogel · Strauss" bei 0.05. Die Luecke dazwischen ist die groesste
+// im Feld; ihre Mitte trennt „fliegt" von „fliegt nicht". Aendern sich die Prototypen,
+// wandert die Schwelle mit.
+const FLUEGEL = (() => {
+  const werte = ARCH.forms.filter((f) => f.proto.wing !== undefined)
+    .map((f) => ({ key: f.key, wing: f.proto.wing })).sort((a, b) => a.wing - b.wing);
+  // groesste Luecke suchen
+  let gap = -1, at = 0;
+  for (let i = 1; i < werte.length; i++) {
+    const d = werte[i].wing - werte[i - 1].wing;
+    if (d > gap) { gap = d; at = i; }
+  }
+  const schwelle = (werte[at - 1].wing + werte[at].wing) / 2;
+  const zeichnetFluegel = new Set(werte.filter((x) => x.wing >= schwelle).map((x) => x.key));
+  return { schwelle, zeichnetFluegel, werte };
+})();
+
 // Selbsttest der Tabelle: jeder genannte Schluessel muss ein echter Bauplan sein.
 {
   const bekannt = new Set(ARCH.forms.map((f) => f.key));
@@ -206,7 +242,7 @@ const REPRO_MIN = 0.65;
 const vorher = {};
 for (const e of CATALOG.entries) vorher[e.group] = (vorher[e.group] || 0) + 1;
 
-let geprueft = 0, verstoss = 0, ohneKlade = 0, ohneBiom = 0;
+let geprueft = 0, verstoss = 0, ohneKlade = 0, ohneBiom = 0, fluegelUmzug = 0;
 const umzug = {};
 const neueKlade = new Map();
 for (const e of CATALOG.entries) {
@@ -215,15 +251,26 @@ for (const e of CATALOG.entries) {
   const erlaubt = k ? ERLAUBT[k.qid] : null;
   if (!erlaubt) { ohneKlade++; continue; }
   geprueft++;
-  if (erlaubt.includes(e.group)) continue;         // passt — bleibt unangetastet
+  // Zwei Arten von Verstoss: die Klade passt nicht zum Bauplan — oder der Bauplan
+  // zeichnet Fluegel, die das eigene Genom der Art nicht hergibt.
+  const fluegelVerstoss = FLUEGEL.zeichnetFluegel.has(e.group)
+    && e.genome[ARCH.genes.indexOf("wing")] / 255 < FLUEGEL.schwelle;
+  if (erlaubt.includes(e.group) && !fluegelVerstoss) continue;   // passt — unangetastet
   const b = BIOM_NACH_WATER.get(e.habWater);
   if (!b) { ohneBiom++; continue; }
   const t = e.genome.map((v) => v / 255);
   const w = selectionWeights(t, b.env);
-  const pool = erlaubt.map((key) => FORM[key]).filter(Boolean);
+  let pool = erlaubt.map((key) => FORM[key]).filter(Boolean);
+  // Bei einem Fluegel-Verstoss fallen die fluegelzeichnenden Bauplaene aus dem Kreis —
+  // sonst zoege die Art gleich wieder dorthin zurueck.
+  if (fluegelVerstoss) {
+    const ohne = pool.filter((f) => !FLUEGEL.zeichnetFluegel.has(f.key));
+    if (ohne.length) pool = ohne;   // bleibt sonst lieber, wo sie ist, als nirgends
+  }
   const best = naechsterPrototyp(t, b.env, w, pool);
-  if (!best) continue;
+  if (!best || best.key === e.group) continue;
   verstoss++;
+  if (fluegelVerstoss) fluegelUmzug++;
   const schluessel = `${e.group} -> ${best.key}`;
   umzug[schluessel] = (umzug[schluessel] || 0) + 1;
   e.group = best.key;
@@ -232,7 +279,8 @@ for (const e of CATALOG.entries) {
 const nachher = {};
 for (const e of CATALOG.entries) nachher[e.group] = (nachher[e.group] || 0) + 1;
 
-console.log(`\nKlade-Schranke: ${geprueft} Arten mit Kladen-Regel · ${verstoss} Verstoesse umgezogen`);
+console.log(`\nSchranken: ${geprueft} Arten mit Kladen-Regel · ${verstoss} umgezogen, davon ${fluegelUmzug} wegen der Fluegel-Schranke`);
+console.log(`  Fluegel-Schwelle ${FLUEGEL.schwelle.toFixed(2)} (groesste Luecke zwischen ${FLUEGEL.werte.map((x) => x.wing).join(", ")}) · zeichnen Fluegel: ${[...FLUEGEL.zeichnetFluegel].join(", ")}`);
 console.log(`  ohne Kladen-Regel (bleiben unberuehrt): ${ohneKlade} · ohne Biom: ${ohneBiom}`);
 console.log("\ngroesste Umzuege:");
 for (const [k, v] of Object.entries(umzug).sort((a, b) => b[1] - a[1]).slice(0, 12))

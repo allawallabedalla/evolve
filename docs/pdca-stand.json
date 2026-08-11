@@ -131,13 +131,13 @@
   "P7a": {
    "pruefstand": "plausi-check",
    "titel": "Als Flieger beschrieben, obwohl das eigene Flug-Gen bei ~0 liegt",
-   "wert": 4.57,
-   "gerissen": true
+   "wert": 0,
+   "gerissen": false
   },
   "P7b": {
    "pruefstand": "plausi-check",
    "titel": "Hohes Flug-Gen, das im Bauplan-Satz nirgends vorkommt",
-   "wert": 7.67,
+   "wert": 7.57,
    "gerissen": true
   },
   "P8": {
