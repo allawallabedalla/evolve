@@ -21,6 +21,12 @@ ausliest — keine abgeschriebene Kopie, keine geratene Ground Truth.
 > `lineage.slice(0, 12)` nur einen Bruchteil ihrer Prüfmenge (bei Insekten 3 %). Seit der
 > Vorfahren-Hülle in `plausi-check.mjs` misst **P1a** über 11.294 statt 5.187 Arten
 > (weiter 0 Verstöße) und **P1b** meldet 4.459 von 6.398 statt 85 von 213.
+>
+> Die *Ursachenkette* hinter allen P-Befunden misst `npm run naming-audit`
+> (`tools/naming-audit.mjs`, Regeln N1–N8): nur **0,6 %** der Kern-Genwerte im Katalog
+> sind an der realen Art gemessen, `wing` wird von 4 von 65 Prototypen genannt, 78 % der
+> Selektionsgewichte liegen auf dem Boden, und der benannte Artsieger führt im Median mit
+> **0,44 %** vor dem Zweiten. Alle acht Schwellen reißen.
 
 ---
 

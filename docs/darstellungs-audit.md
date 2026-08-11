@@ -12,13 +12,24 @@ Greifvogel — zwei Beine, Federn, Flügel, Schnabel. Die Karte zeigt einen nack
 Vierbeiner mit Greifwerkzeugen und Leuchtorgan, gezeichnet über dem Vierbeiner-Icon
 `quadruped`. Der Name ist das Einzige an dieser Karte, das von einem Vogel stammt.
 
-**Nachrechenbar gemacht durch:** `npm run plausi-check` — drei neue Regeln
-(**P8**, **P9**, **P10**) in `tools/plausi-check.mjs`. Alle Zahlen unten sind gemessen,
-nicht geschätzt.
+**Nachrechenbar gemacht durch:**
+`npm run plausi-check` — drei neue Regeln (**P8**, **P9**, **P10**) in
+`tools/plausi-check.mjs`, die das *Symptom* an der fertigen Karte messen; und
+`npm run naming-audit` — acht neue Regeln (**N1**–**N8**) in `tools/naming-audit.mjs`,
+die die *Ursachenkette* messen. Alle Zahlen sind gemessen, nicht geschätzt.
 
 Dieses Dokument ergänzt `docs/plausibilitaets-audit.md` (Runde 1, Befunde P1–P7). Der
 dort beschriebene Riss geht tiefer als angenommen: Runde 1 hat die *Merkmale* einer Karte
 gegeneinander geprüft, nicht die *Klade* des Namens.
+
+**Aufbau.** Abschnitte 1–2 zeigen den Fall, Abschnitt 3 die naheliegende Wurzel (eine
+fehlende Schranke), **Abschnitt 3b die eigentliche Ursachenkette** (sechs Stellen, an
+denen die Benennung ihr Signal verliert), 4–6 die Verbreitung, 7 die Konsequenzen.
+
+**Wenn nur eine Zahl hängen bleiben soll:** **0,6 %** der Kern-Genwerte im Artenkatalog
+sind an der realen Art gemessen. Die übrigen 99,4 % sind Kladen-Mittelwerte, aus dem
+Habitat abgeleitete Werte und ein absichtlich eingestreutes Zufallslos. Der Artname unter
+der Bühne beruft sich auf eine Genauigkeit, die es in den Daten nicht gibt.
 
 ---
 
@@ -85,7 +96,7 @@ Artname anders aus — der Mechanismus ist identisch.
 
 ---
 
-## 3. Die Wurzel
+## 3. Die Wurzel — erste Schicht
 
 `tools/build-catalog.mjs`, Zeile ~313:
 
@@ -108,6 +119,187 @@ und erbt dessen Silhouette. Der Abstand entscheidet damit über etwas, das er ni
 entscheiden kann: **welchen Körperbau der Spieler zu sehen bekommt.**
 
 Dass das nicht auffiel, hat einen zweiten Grund — s. Abschnitt 5.
+
+Aber die fehlende Klade-Schranke ist nur die äußerste Schicht. Sie erklärt, *dass* ein
+Bussard in der Generalisten-Gruppe stehen darf — nicht, *warum* sein Genom dort
+überhaupt landet. Das ist Abschnitt 3b.
+
+---
+
+## 3b. Die Ursachenkette — sechs Stellen, an denen Information verloren geht
+
+`npm run naming-audit` misst nicht Widersprüche, sondern **Tragfähigkeit**: wie viel
+Signal steckt an jeder Station der Benennung noch in der Zahl, auf die sich der
+angezeigte Name beruft? **Alle acht Schwellen reißen.**
+
+### N1 · Die Koordinaten sind gar keine Artdaten (0,6 % gemessen)
+
+Jeder Katalog-Eintrag trägt neben dem Genom ein Feld `conf` — die Herkunft je Gen
+(3 = an der Art gemessen, 2 = aus der Klade, 1 = imputiert, 0 = aus dem Habitat).
+Für die **Kern-Gene 0–9**, die den Körperbau tragen:
+
+| Herkunft | Kern-Gene 0–9 | alle 26 Gene |
+|---|---|---|
+| **gemessen (3)** | **0,6 %** | 0,2 % |
+| aus Klade (2) | **99,1 %** | 46,0 % |
+| imputiert (1) | 0,3 % | 12,3 % |
+| aus Habitat (0) | 0,0 % | 41,5 % |
+
+Der Mantelbussard trägt `conf` = `2222222222 0010011020 000000` — **kein einziger
+gemessener Wert.** Sein Genom ist der Mittelwert seiner Klade. Damit teilen sich alle
+Greifvögel praktisch **einen Punkt** im Merkmalsraum. Ein Verfahren, das „die nächste
+reale Art" sucht, kann unterhalb der Klade nichts mehr unterscheiden — egal wie genau
+gerechnet wird.
+
+### N2 · Das entscheidende Gen ist für 61 von 65 Formen unsichtbar
+
+Ein Prototyp ist eine **Teil**-Spezifikation: nur Gene, zu denen sein Kaskaden-Zweig
+etwas sagte, gehen in den Abstand ein. Wie oft wird jedes Gen genannt?
+
+```
+mobility 52 · size 48 · photosynthesis 47 · armor 41 · structure 22 · insulation 20
+limbLength 17 · metabolism 14 · … · wing 4 · biolum 3 · sense 0
+```
+
+- **`wing`: 4 von 65.** Das Flügel-Gen entscheidet nur zwischen den vier Flieger-Formen
+  mit. Der Mantelbussard hat **wing = 0,85** — der eindeutigste Vogel-Hinweis, den ein
+  Genom überhaupt geben kann. Für „Generalisten-Tier", „Fell-Warmblüter", „Fisch ·
+  Aalform" und 58 weitere Formen existiert dieser Wert schlicht nicht.
+- **`sense`: 0 von 65.** Das Gen steht als „Sinne" im Genbuch, evolviert mit, kostet
+  Unterhalt — und berührt die Identität des Wesens nie.
+- 18 der 26 Gene (69 %) werden von höchstens 4 Prototypen genannt.
+
+Die Formwahl läuft effektiv auf **sechs Genen**: Mobilität, Größe, Photosynthese,
+Panzerung, Stützgewebe, Wärmedämmung.
+
+### N3 · Der Vogel-Prototyp ist ein Singvogel — größere Vögel fallen heraus
+
+Die Prototyp-Zahlen sind zur Hälfte Mittelwert über *erreichbare* Genome
+(`app/archetypes.js`, Methode 2). Was die Engine nie hervorbringt, steht auch nicht im
+Prototyp. Ergebnis:
+
+```
+Flatterer · Vogel   size 0.10   ← die Größe eines Singvogels
+Generalisten-Tier   size 0.51
+Mantelbussard       size 0.45
+```
+
+Der Bussard liegt in `size` **3,5-mal näher am Generalisten als am Vogel**. Der einzige
+Wert, der ihn zurückholen könnte, ist `wing` — und den sieht der Generalisten-Prototyp
+nicht (N2). Gemessen:
+
+> Von 6.371 Vogelarten liegen 1.090 über `size` 0.30. Davon stehen **1.090 — also
+> ausnahmslos alle — in einer Nicht-Vogel-Gruppe.**
+
+**Ein großer Vogel ist in diesem Merkmalsraum per Konstruktion kein Vogel.**
+
+Dasselbe Muster in anderen Kladen (Anteil außerhalb jedes Bauplans der eigenen Klade,
+gesamt 34,7 %):
+
+| Klade | außerhalb | Gen, das sie hinausdrückt |
+|---|---|---|
+| Insekten | 4.525 von 6.398 (71 %) | `limbLength` 0.69 drinnen vs. 0.50 draußen |
+| Weichtiere | 719 von 1.133 (64 %) | `mobility` 0.40 drinnen vs. 0.20 draußen |
+| **Vögel** | **1.505 von 6.371 (24 %)** | **`size` 0.13 drinnen vs. 0.33 draußen** |
+| Säuger | 57 von 4.923 (1 %) | `size` 0.32 drinnen vs. 0.67 draußen |
+| Krebse | 7 von 828 (1 %) | `armor` 0.73 drinnen vs. 0.13 draußen |
+
+Es ist jedes Mal **ein einzelnes Gen**, an dem der Prototyp zu eng steht.
+
+### N4 · Die Gewichtung, die das retten sollte, liegt auf dem Boden
+
+`selectionWeights()` soll den Abstand auf die Gene lenken, die in *dieser* Umwelt über
+Leben und Tod entscheiden. Gemessen wird `|∂Fitness/∂Gen|` **am Genom selbst** — und ein
+auskonvergiertes Genom sitzt per Definition auf einem Gipfel, wo alle Ableitungen klein
+sind. Nach Normierung auf das Maximum und dem Schärfen mit `weightSharpen` 2.5 bleibt:
+
+> **78,4 % aller Gengewichte liegen auf dem Boden** (`weightFloor` 0.3).
+> In 9,6 % der Fälle ragt **höchstens ein einziges Gen** darüber.
+
+Beim Mantelbussard in der Screenshot-Umwelt sieht das so aus:
+
+```
+photosynthesis  1.000   ← das einzige Gen mit Gradient
+insulation      0.300   size 0.302   limbLength 0.300   metabolism 0.363
+armor           0.300   mobility 0.306   structure 0.300   wing 0.303   biolum 0.302
+```
+
+Ein Landtier wird also fast ausschließlich danach gewichtet, wie wenig es
+Photosynthese betreibt. Der „selektions-gewichtete Abstand" ist in der Praxis ein
+**ungewichteter** Abstand — er kann eine Fehlzuordnung nicht mehr korrigieren.
+
+### N5 · Der Spezifitäts-Bonus überstimmt den Abstand selbst
+
+`specificityBonus` = **0.55**. Ein Prototyp, der alle 8 Gene nennt, bekommt **55 %
+Rabatt** auf seinen Abstand; einer mit 1 Gen nur 6,9 %. Der Bonus soll die Reihenfolge
+der alten Kaskade nachbilden — gemessen kippt er sie:
+
+> In **13,6 %** der Karten gewinnt eine Form, die **roh nicht die nächste** ist.
+> `Krill (roh 0.070)` verliert gegen `Fledermaus (roh 0.097)` ·
+> `Fisch · Aalform (roh 0.090)` verliert gegen `Bartenwal (roh 0.103)`
+
+### N6 · Die Artwahl ist ein Losentscheid
+
+Stufe 2 sucht die nächste reale Art *innerhalb* der Gruppe. Wenn dort hunderte Arten
+auf demselben Punkt liegen (N1), ist der Sieger keine Aussage mehr:
+
+> **Median-Vorsprung des Siegers vor dem Zweiten: 0,44 %.**
+> Median liegen **3 Arten innerhalb von 1 %** Abstand — im Extremfall
+> **369 von 3.987** („Monopis obviella", zweiter Platz „Catopsilia pyranthe").
+
+### N7 · Fast die Hälfte des Abstands ist absichtlich erzeugtes Rauschen
+
+Woraus besteht der Abstand, den `nearestReal()` misst?
+
+> **46,5 %** stammen aus den Genen 10–25 — jenen, die im Katalog zu 41,5 % gar nicht
+> erhoben, sondern aus dem Habitat abgeleitet sind (`conf` 0).
+
+Und genau diese Gene hat `build-catalog.mjs` anschließend **bewusst verstreut**: das
+Gründer-Los (`world/founder.ts`, Radius bis 0.5 in Genen ohne Fitness-Wirkung, Budget
+0,5 % Fitness-Kosten) war der Fix gegen die „Genom-Zwillinge" — 96,6 % der Arten teilten
+sich vorher einen. Der Effekt ist im Katalog messbar:
+
+| Gruppe | mittlere SD Kern-Gene | mittlere SD bedingte Gene |
+|---|---|---|
+| kletterer | **0,009** | 0,054 (6×) |
+| generalist | 0,045 | 0,069 |
+| fellwarm | 0,084 | 0,089 |
+
+Bei „Behänder Kletterer" ist die Streuung in den *nicht erhobenen* Genen **sechsmal so
+groß** wie in den Genen, die den Körperbau tragen — und die Quantisierung liegt bei
+1/255 = 0,004. `weightFloor` 0.3 blendet diese Richtungen nie ganz aus, also **zählt das
+eigens erzeugte Rauschen mit 30 % Gewicht in den Abstand ein, der den Artnamen bestimmt.**
+
+Damit schließt sich N1 zu N6: Die Arten einer Gruppe unterscheiden sich vor allem dort,
+wo nichts gemessen wurde — und genau dort entscheidet die Namenswahl.
+
+### N8 · Der Namensvorrat passt nicht zu dem, was erreichbar ist
+
+Erreichbarkeit am Schwarm gemessen (`docs/rarity.json`):
+
+| Bauplan | erreichbar | hält Artnamen |
+|---|---|---|
+| **Generalisten-Tier** | **7,67 %** | 623 (davon 96 % Vögel) |
+| **Flatterer · Vogel** | **0,33 %** | 4.868 |
+| Fisch · Aalform | 0,75 % | 3.686 |
+| Blütenkraut | 0,08 % | 1.395 |
+| Moos | 0,08 % | 934 |
+| Amphibie · Lurch | **0 %** | 264 |
+
+Der Bauplan, der einen Vogel **zeichnen** würde, ist 23-mal unwahrscheinlicher als der,
+der die Vogel-**Namen** hält. Die Namen haben nirgendwo sonst hin.
+
+### Die Kette in einem Satz
+
+> Der Artname stützt sich auf Koordinaten, die zu 99 % aus der Klade stammen (N1), wird
+> auf Prototypen abgebildet, die das entscheidende Gen nicht ansehen (N2) und für ihre
+> eigene Klade zu eng stehen (N3), mit Gewichten, die zu 78 % auf dem Boden liegen (N4)
+> und einem Bonus, der die Reihenfolge kippt (N5) — und fällt am Ende zwischen Arten,
+> die sich nur im absichtlich erzeugten Rauschen unterscheiden (N6/N7), in einem
+> Bauplan, den die Evolution 23-mal häufiger trifft als den richtigen (N8).
+
+Die fehlende Klade-Schranke aus Abschnitt 3 ist damit **nicht die Ursache, sondern die
+letzte fehlende Sicherung** vor einer Kette, die schon vorher kein Signal mehr trägt.
 
 ---
 
@@ -242,46 +434,99 @@ Unverändert aus Runde 1, hier nur eingeordnet — es sind Symptome derselben Tr
 
 ## 7. Was zu tun wäre
 
-Nicht umgesetzt — dieser Auftrag war ein Audit. Nach Wirkung sortiert:
+Nicht umgesetzt — dieser Auftrag war ein Audit. Die Reihenfolge ist bewusst nach
+**Wirkung pro Aufwand** sortiert, nicht nach Tiefe der Ursache.
 
-1. **Klade-Schranke in `build-catalog.mjs`** *(behebt P8/P9 an der Wurzel)*
+### Sofort, ohne Katalog-Neubau
+
+1. **Nicht in Dimensionen messen, in denen nichts gemessen wurde** *(behebt N7, entschärft N6)*
+   `nearestReal()` gewichtet jedes Gen zusätzlich mit der **Konfidenz** des
+   Katalog-Eintrags (`e.conf[g]`): `w[g] * (conf ? conf/3 : 0)`. Ein Gen, dessen Wert
+   aus dem Habitat abgeleitet und anschließend vom Gründer-Los verstreut wurde, zählt
+   dann null statt 30 %. Eine Zeile Code, kein Datei-Neubau — und die 46,5 % Rauschen im
+   Artabstand fallen weg. **Der billigste echte Fix im ganzen Dokument.**
+2. **Klade-Schranke zur Laufzeit** *(behebt P8/P9)*
+   Die Kladen-Hülle lässt sich beim App-Start aus `CATALOG` selbst rekonstruieren (der
+   Code steht in `plausi-check.mjs`, ~20 Zeilen, einmalig über 42.648 Einträge).
+   `nearestReal()` überspringt dann Kandidaten, deren Klade dem gezeichneten Bauplan
+   widerspricht — kein Greifvogel auf einer Vierbeiner-Silhouette. Die falsche
+   Gruppierung bleibt aber in den Daten stehen und verzerrt weiter Rarität, Lebensbaum
+   und Abdeckungs-Metrik.
+3. **Ehrlich sein, wo nichts zu entscheiden ist** *(N1/N6, behebt zugleich P4)*
+   Bei einem Vorsprung von 0,44 % ist „Mantelbussard" eine Behauptung, die die Daten
+   nicht tragen. Zwei Möglichkeiten: entweder die **Klade** als Überschrift
+   („ein Greifvogel") und die Art nur als Beispiel darunter — oder die Art behalten und
+   den „≈ in echt"-Verweis auf die Klade umstellen („≈ Greifvögel ↗"), was die Tautologie
+   aus P4 gleich mit auflöst. Der `margin`-Wert für so eine Anzeige wird ohnehin schon
+   berechnet, nur eben für Stufe 1 statt Stufe 2.
+
+### Struktur — die Prototypen stimmen nicht mehr
+
+4. **`wing` (und `sense`) in die Prototypen aufnehmen** *(behebt N2)*
+   Die Prototyp-Gene stammen aus der **Geometrie der alten Kaskade** — und die hat
+   `wing` nur in ihren Flieger-Zweigen abgefragt. Solange das so bleibt, kann kein
+   Merkmalsraum-Verfahren einen Großvogel als Vogel erkennen. `sense` wird von *keinem*
+   Prototyp genannt und sollte entweder hinein oder aus dem Genbuch heraus.
+5. **Prototypen aus dem Katalog ableiten statt aus der Kaskade** *(behebt N3)*
+   Der eigentliche Konstruktionsfehler: „Flatterer · Vogel" hat `size` 0.10, weil die
+   *Engine* nur Singvögel hervorbringt. Ein Prototyp-Satz, der aus den 42.648 realen
+   Arten geclustert wird (statt aus dem, was die alte Kaskade erreichte), hätte
+   automatisch die volle Spannweite jeder Klade — und die Formen wären per Konstruktion
+   die, für die es Namen gibt. Das ist der größte Eingriff auf dieser Liste und die
+   einzige Änderung, die N2, N3 und N8 gemeinsam auflöst.
+6. **`weightFloor`/`weightSharpen` neu kalibrieren** *(N4)*
+   Dass 78 % der Gewichte auf dem Boden liegen, ist kein Bug in der Formel, sondern ihre
+   Folge: die Ableitung wird auf einem Fitness-Gipfel gemessen, wo sie überall klein ist.
+   Wer eine wirksame Gewichtung will, misst nicht den Gradienten am Optimum, sondern die
+   **Fitness-Kosten einer endlichen Auslenkung** — das tut `unusedBurden()` an anderer
+   Stelle bereits, und `founderSpreads()` in `world/founder.ts` ebenfalls.
+7. **`specificityBonus` 0.55 senken oder ersetzen** *(N5)*
+   Er soll die Reihenfolge der alten Kaskade nachbilden, überstimmt aber in 13,6 % der
+   Fälle den Abstand selbst. Sauberer wäre, den Abstand über *alle* Gene zu mitteln und
+   ungenannte Gene mit einem Ruhewert statt mit Schweigen zu behandeln — dann braucht es
+   gar keinen Ausgleich für unterschiedlich gesprächige Prototypen.
+
+### Datenhaltung
+
+8. **`lineage` nicht mehr kürzen** *(behebt P10 dauerhaft)*
+   Statt `slice(0, 12)` die Klassen-QID mitschreiben — oder gleich ein Feld `klade`
+   (bzw. `beine`) pro Eintrag, beim Bau einmal aufgelöst.
+9. **Klade-Schranke schon in `build-catalog.mjs`** *(die saubere Fassung von Punkt 2)*
    Der `ROOT_KINGDOM`-Wächter bekommt eine Ebene darunter ein Gegenstück: eine Tabelle
    `Bauplan-Gruppe → erlaubte Großkladen`, kuratiert wie `FICON` und die
-   `requires`-Fenster. `nearestInKingdom()` sucht dann nur unter Prototypen, deren
-   Körperbau die Art überhaupt haben kann — ein Bussard landet bei „Flatterer · Vogel"
-   oder „Laufvogel", nie bei „Generalisten-Tier".
+   `requires`-Fenster.
    ⚠️ **Blockiert in dieser Sitzung:** ein Neubau des Katalogs braucht
    `tools/.harvest-state.json` (gitignored, nicht im Repo) und damit eine neue Ernte.
-2. **Oder: Schranke zur Laufzeit in `nearestReal()`** *(ohne Katalog-Neubau)*
-   Die Kladen-Hülle lässt sich beim App-Start aus `CATALOG` selbst rekonstruieren (der
-   Code dafür steht jetzt in `plausi-check.mjs`, ~20 Zeilen, einmalig über 42.648
-   Einträge). `nearestReal()` überspringt dann Kandidaten, deren Klade dem gezeichneten
-   Bauplan widerspricht. Billiger, aber die falsche Gruppierung bleibt in den Daten
-   stehen und verzerrt weiter Rarität, Lebensbaum und Abdeckungs-Metrik.
-3. **`lineage` nicht mehr kürzen** *(behebt P10 dauerhaft)*
-   Statt `slice(0, 12)` die Klassen-QID mitschreiben — oder gleich ein Feld `klade`
-   (bzw. `beine`) pro Eintrag, beim Bau einmal aufgelöst. Dann braucht keine spätere
-   Prüfung mehr eine rekonstruierte Hülle.
-4. **P4 auflösen:** der „≈ in echt"-Verweis zeigt die **Klade** statt des Namens
-   („≈ Greifvögel ↗"). Der Wikipedia-Link bleibt, die Zeile sagt wieder etwas.
-5. **P1b:** `describe()` leitet die Beinzahl aus dem Kind ab (seit #30) — aber das Kind
-   ist bei 71 % der Insekten kein Insekten-Kind. Fällt mit Punkt 1 oder 2 von selbst weg.
 
-Punkt 1 ist die einzige Änderung, die alle vier Karten-Zeilen wieder auf dieselbe
-Aussage bringt. Punkt 2 ist der Weg, der ohne Netzzugang möglich wäre.
+### Was das *nicht* löst
+
+Punkt 1–3 machen die Karte widerspruchsfrei, **nicht** genauer. Solange 99,1 % der
+Kern-Genwerte Kladen-Mittelwerte sind (N1), bleibt „die nächste reale Art" eine Auswahl
+aus einem Gleichstand — sauber gerechnet, aber ohne Information unterhalb der Klade.
+Die einzigen Wege dort heraus: echte Merkmalsdaten je Art erheben (`conf` 3 statt 2), oder
+die Anzeige auf die Auflösung zurücknehmen, die die Daten hergeben.
 
 ---
 
 ## 8. Reproduktion
 
 ```bash
-npm run plausi-check              # alle 13 Regeln, P8/P9/P10 neu
+npm run plausi-check              # Symptome an der Karte — 13 Regeln, P8/P9/P10 neu
+npm run naming-audit              # Ursachenkette — 8 Regeln, N1–N8, ~5 s
 npm run plausi-check -- --strict  # Exit 1, sobald eine Regel reißt
+npm run naming-audit -- --strict
 ```
 
-Stand dieses Audits: **10 von 13 Regeln verletzt** (vorher 7 von 10 — die drei neuen
-Regeln reißen alle).
+Stand dieses Audits:
 
-Der Check liest den App-Kern aus `app/index.html` (dieselbe Technik wie `app-parity`),
-die gezeichneten Beinzahlen aus `drawAnimalSvg()` und die Kladen aus `app/catalog.js` —
-keine abgeschriebene Kopie, keine geratene Ground Truth.
+| Prüfstand | Ergebnis |
+|---|---|
+| `plausi-check` | **10 von 13 Regeln verletzt** (vorher 7 von 10) |
+| `naming-audit` | **8 von 8 Schwellen gerissen** |
+
+Beide Checks lesen den App-Kern aus `app/index.html` (dieselbe Technik wie `app-parity`),
+die gezeichneten Beinzahlen aus `drawAnimalSvg()`, die Prototypen und Parameter aus
+`app/archetypes.js`, die Kladen und Konfidenzen aus `app/catalog.js` und die
+Erreichbarkeit aus `docs/rarity.json` — keine abgeschriebene Kopie, keine geratene
+Ground Truth. Die Stichproben laufen mit fester Saat und ohne Rauschen in der
+Konvergenz, sind also reproduzierbar.
