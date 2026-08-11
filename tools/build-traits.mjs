@@ -79,11 +79,27 @@ function loadTraitSource(file, genusCol, speciesCol, fields) {
 
 const pantheria = loadTraitSource("pantheria.csv", "Genus", "Species",
   { AdultBodyMass_g: "massG" });
+// KOERPERMASSE AUS ELTONTRAITS (Massnahmenplan B1). Bis hierher kam `massG` nur aus
+// PanTHERIA — 5.510 Saeugetiere. EltonTraits fuehrt dieselbe Groesse in derselben
+// Einheit (Gramm) fuer 5.494 Saeuger UND 10.009 VOEGEL, und die Datei wurde ohnehin
+// schon geladen; nur die Spalte blieb liegen. `massG` ist das einzige Merkmal mit einer
+// geeichten Gen-Abbildung (sizeFromMassG in tools/lib/impute.mjs, an den Prototyp-Zahlen
+// aus app/archetypes.js kalibriert) — und `size` ist genau das Gen, an dem grosse Voegel
+// aus ihrem eigenen Bauplan fallen (naming-audit N3).
+//
+// BEWUSST NICHT ABGEBILDET: `ForStrat.aerial` als `wing`. Die Spalte sagt, WIE VIEL
+// ANTEIL der Nahrungssuche in der Luft stattfindet — nicht, wie gross die Fluegelflaeche
+// ist. Ein Buchfink sucht am Boden und hat trotzdem Fluegel; eine Abbildung aerial->wing
+// wuerde den meisten Voegeln wing ~0 geben und damit einen NEUEN Fehler einfuehren, statt
+// N2 zu beheben. Dafuer braeuchte es eine eigene Eichung (Fluegelspannweite/Flaeche), die
+// diese Quelle nicht hergibt. Offener Rest, s. docs/darstellung-massnahmenplan.md.
 const eltonMammals = loadTraitSource("elton_mammals.csv", "Genus", "Species",
-  { "Diet.Vend": "dietVertEndo", "Diet.Vect": "dietVertEcto", "Diet.Inv": "dietInvert",
+  { "BodyMass.Value": "massG",
+    "Diet.Vend": "dietVertEndo", "Diet.Vect": "dietVertEcto", "Diet.Inv": "dietInvert",
     "Diet.PlantO": "dietPlant", "Activity.Nocturnal": "nocturnal" });
 const eltonBirds = loadTraitSource("elton_birds.csv", "Genus", "Species",
-  { "Diet.Inv": "dietInvert", "Diet.Vend": "dietVertEndo", "Diet.PlantO": "dietPlant",
+  { "BodyMass.Value": "massG",
+    "Diet.Inv": "dietInvert", "Diet.Vend": "dietVertEndo", "Diet.PlantO": "dietPlant",
     "ForStrat.watbelowsurf": "diving", "ForStrat.aerial": "aerial" });
 
 if (!pantheria && !eltonMammals && !eltonBirds) {
@@ -121,8 +137,48 @@ function coverage(name, table, rootFilter) {
 }
 
 coverage("PanTHERIA (Saeugetiere, Masse)", pantheria, ["Saeugetiere"]);
-coverage("EltonTraits Saeugetiere (Diaet)", eltonMammals, ["Saeugetiere"]);
-coverage("EltonTraits Voegel (Diaet)", eltonBirds, ["Voegel"]);
+coverage("EltonTraits Saeugetiere (Masse + Diaet)", eltonMammals, ["Saeugetiere"]);
+coverage("EltonTraits Voegel (Masse + Diaet)", eltonBirds, ["Voegel"]);
+
+// ZWEITE MESSUNG, ohne Ernte-Zustand: gegen den ausgelieferten Katalog. Die Ernte
+// (tools/.harvest-state.json) ist gitignored und in einer frischen Arbeitskopie nicht da
+// — dann liefe `coverage()` oben stumm ueber eine leere Menge. app/catalog.js liegt
+// dagegen immer vor und ist ohnehin die Menge, um die es geht.
+{
+  const catPath = join(ROOT, "app", "catalog.js");
+  if (existsSync(catPath)) {
+    const box = {};
+    new Function("window", readFileSync(catPath, "utf-8"))(box);
+    const cat = box.CATALOG;
+    const alleMassen = new Map();
+    for (const src of [pantheria, eltonMammals, eltonBirds])
+      for (const [k, v] of Object.entries(src || {})) if (v.massG && !alleMassen.has(k)) alleMassen.set(k, v.massG);
+    let mitMasse = 0, gesamt = 0;
+    const proKlade = {};
+    for (const e of cat.entries) {
+      if (!e.sci) continue;
+      const p = e.sci.split(" ");
+      if (p.length < 2) continue;
+      gesamt++;
+      const treffer = alleMassen.has(key(p[0], p[1]));
+      const kl = e.klade || "ohne";
+      (proKlade[kl] ??= { n: 0, hit: 0 }).n++;
+      if (treffer) { mitMasse++; proKlade[kl].hit++; }
+    }
+    const nurPantheria = cat.entries.filter((e) => {
+      if (!e.sci) return false;
+      const p = e.sci.split(" ");
+      return p.length >= 2 && pantheria && pantheria[key(p[0], p[1])]?.massG;
+    }).length;
+    console.log(`\napp/catalog.js: ${mitMasse}/${gesamt} Arten mit gemessener Koerpermasse `
+      + `(${((100 * mitMasse) / gesamt).toFixed(1)} %) — vorher, nur PanTHERIA: ${nurPantheria}.`);
+    const top = Object.entries(proKlade).sort((a, b) => b[1].hit - a[1].hit).slice(0, 6);
+    for (const [kl, v] of top)
+      console.log(`  ${kl}: ${v.hit}/${v.n} (${((100 * v.hit) / v.n).toFixed(0)} %)`);
+    console.log("  Wirksam wird das erst bei einem Katalog-Neubau (tools/build-catalog.mjs,");
+    console.log("  braucht tools/.harvest-state.json) — dieses Skript schreibt nur die Verknuepfung.");
+  }
+}
 
 // Ergebnis als Zwischenformat sichern (Schluessel = "genus species" klein) — Schritt 1.4
 // liest das beim Zusammenbau, GENAU wie catalog-check spaeter die Konfidenz prueft.

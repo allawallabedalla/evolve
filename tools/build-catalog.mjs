@@ -180,12 +180,32 @@ const RANK_LABEL = { Q7432: "species", Q34740: "genus", Q35409: "family", Q36602
 // 1.1 (Ernte) + 1.2 (Kladen-Regeln) + 1.3 (Imputation/Habitat-Rueckwaertslauf) zum
 // vollen Katalog. Reine Zusammensetzung: keine neue Platzierungslogik hier.
 
-/** "Genus species" (klein) -> massG aus PanTHERIA, fuer traitsToGenes() (Stufe a). */
+/** "Genus species" (klein) -> massG, fuer traitsToGenes() (Stufe a).
+ *
+ *  Massnahmenplan B1: bis hierher wurde NUR `linked.pantheria` gelesen — 2.728 der
+ *  42.648 Katalog-Arten bekamen dadurch einen gemessenen `size`-Wert, praktisch nur
+ *  Saeuger. EltonTraits fuehrt dieselbe Groesse in derselben Einheit auch fuer Voegel
+ *  (`BodyMass.Value`, s. tools/build-traits.mjs); die Datei wurde schon geladen, nur
+ *  die Spalte lag brach. Mit allen drei Quellen: 7.906 Arten (18,5 %), darunter 64 %
+ *  der Voegel und 78 % der Saeuger.
+ *
+ *  WARUM DAS ZAEHLT: `size` ist genau das Gen, an dem grosse Voegel aus ihrem eigenen
+ *  Bauplan fielen (naming-audit N3, „Flatterer · Vogel" hat Prototyp-size 0.10).
+ *  Gemessen gegen die heute gespeicherten Werte weicht die echte Masse bei Voegeln im
+ *  Mittel um 0.169 ab (Median ueber alle 0.134, 43 % ueber novelThreshold 0.15) — der
+ *  Kladen-Mittelwert traegt bei Voegeln also kaum Information.
+ *
+ *  REIHENFOLGE: PanTHERIA zuerst (eigenstaendiges Datenpapier zur Masse), dann
+ *  EltonTraits — nicht umgekehrt, damit sich die bisherigen Saeuger-Werte NICHT
+ *  aendern und der Unterschied im naechsten Bau allein aus den neu abgedeckten Arten
+ *  kommt. */
 function loadTraitLookup() {
   if (!existsSync(TRAITS_PATH)) return new Map();
   const linked = JSON.parse(readFileSync(TRAITS_PATH, "utf-8"));
   const m = new Map();
-  for (const [k, v] of Object.entries(linked.pantheria || {})) if (v.massG) m.set(k, { massG: v.massG });
+  for (const quelle of [linked.pantheria, linked.eltonMammals, linked.eltonBirds])
+    for (const [k, v] of Object.entries(quelle || {}))
+      if (v.massG && !m.has(k)) m.set(k, { massG: v.massG });
   return m;
 }
 
