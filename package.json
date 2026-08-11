@@ -37,6 +37,7 @@
     "exemplar-check": "node tools/exemplar-check.mjs",
     "plausi-check": "node tools/plausi-check.mjs",
     "naming-audit": "node tools/naming-audit.mjs",
+    "physics-sync": "node tools/physics-sync.mjs",
     "pdca": "node tools/pdca.mjs",
     "key-check": "node tools/key-check.mjs",
     "build-catalog": "npm run build && NODE_USE_ENV_PROXY=1 node tools/build-catalog.mjs",

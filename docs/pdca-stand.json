@@ -14,6 +14,12 @@
    "wert": 0,
    "gerissen": false
   },
+  "CEN": {
+   "pruefstand": "census-check",
+   "titel": "Welt bringt emergente Arten hervor (Stufe 6)",
+   "wert": 0,
+   "gerissen": false
+  },
   "EXE": {
    "pruefstand": "exemplar-check",
    "titel": "Jeder Archetyp hat Vorbild + Icon",
@@ -155,6 +161,12 @@
   "PAR": {
    "pruefstand": "app-parity",
    "titel": "App-Inline-fitness deckt sich mit der Engine",
+   "wert": 0,
+   "gerissen": false
+  },
+  "PHY": {
+   "pruefstand": "physics-sync",
+   "titel": "physics.json und world/physics-v2.json sind dieselbe Physik",
    "wert": 0,
    "gerissen": false
   }

@@ -67,6 +67,13 @@ for (const datei of ["plausi-check.mjs", "naming-audit.mjs"]) {
 // Pruefstaende ohne JSON: nur Ausgang. `wert` 0 = bestanden, 1 = gerissen.
 const BINAER = [
   { datei: "catalog-check.mjs", id: "CAT", titel: "Katalog-Format, Schluessel, Budget" },
+  // PHY/CEN nachtraeglich aufgenommen: `world/physics-v2.json` war stehengeblieben und
+  // liess fitness() im Welt-Kern NaN liefern — census-check meldete deshalb 0 Arten,
+  // waehrend rarity/seed/world-ecology gruen blieben, obwohl sie auf einer Welt ohne
+  // Selektion liefen. Der Befund stand in einer Notiz zwischen zwei Sitzungen und wurde
+  // dort fast vergessen. Genau dafuer gibt es diese Liste.
+  { datei: "physics-sync.mjs", id: "PHY", titel: "physics.json und world/physics-v2.json sind dieselbe Physik" },
+  { datei: "census-check.mjs", id: "CEN", titel: "Welt bringt emergente Arten hervor (Stufe 6)" },
   { datei: "key-check.mjs", id: "KEY", titel: "Alle Form-Schluessel loesen auf" },
   { datei: "exemplar-check.mjs", id: "EXE", titel: "Jeder Archetyp hat Vorbild + Icon" },
   { datei: "app-parity.mjs", id: "PAR", titel: "App-Inline-fitness deckt sich mit der Engine" },
@@ -74,7 +81,8 @@ const BINAER = [
 ];
 for (const b of BINAER) {
   const r = lauf(b.datei, b.args || []);
-  const gerissen = !r.ok || /Problem\(e\)|✗|FEHLER/.test(r.out);
+  // „Status: FAIL." gehoerte nicht ins Muster — census-check meldete damit still gruen.
+  const gerissen = !r.ok || /Problem\(e\)|✗|FEHLER|FAIL/.test(r.out);
   regeln.set(b.id, { pruefstand: b.datei.replace(".mjs", ""), titel: b.titel, wert: gerissen ? 1 : 0, einheit: "", gerissen });
 }
 

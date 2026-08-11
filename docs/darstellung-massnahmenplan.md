@@ -337,6 +337,80 @@ ungenannte Gene mit einem Ruhewert behandeln — dann braucht es gar keinen Ausg
 
 ## PDCA-Runden — was der laufende Zyklus gefunden hat
 
+### Runde 3 · `world/physics-v2.json` — der Welt-Kern rechnete mit NaN
+
+Kam nicht aus einer Regel, sondern aus einer Notiz einer früheren Sitzung: „`census-check`
+fällt vorbestehend aus (fehlende Schlüssel in `world/physics-v2.json`)". Nachgeprüft —
+und der Befund war größer als die Notiz:
+
+```
+fitness(0.5er-Genom, world/physics-v2.json) = NaN
+```
+
+**Zehn Schlüssel fehlten** (`photoYield`, `photoWaterSat`, `landDesiccation`,
+`disturbStructureLoss`, `fireresWoodCost`, fünf `amphibious*`), und alle zehn werden in
+`engine/fitness.ts` dereferenziert. `undefined · x = NaN`, und NaN pflanzt sich durch die
+ganze Bewertung fort. Der Welt-Kern lief **ohne wirksame Selektion**: die Gene drifteten
+zur Mitte (Photosynthese-Mittel 0,35–0,60 statt 0,06–0,11 mit echter Fitness).
+
+**Drei von vier Prüfständen meldeten dabei OK.** `rarity-check`, `seed-check` und
+`world-ecology-check` liefen grün auf einer Welt, die gar nicht rechnete —
+`world-ecology-check` gab „Protist · gepanzert, geflügelt, leuchtend" aus, ein reines
+Drift-Artefakt. Nur `census-check` fiel auf (0 Arten).
+
+#### Warum Vollabgleich und nicht nur die zehn Schlüssel
+
+Die Dateien wichen zusätzlich in **vier Werten** ab — drei skalar, einer verschachtelt
+(`maintenance.size` 0,14 statt 0,22; den hatte meine erste Analyse übersehen, der Check
+fand ihn):
+
+```
+defenseFromArmor     0,45 vs 0,46
+defenseFromMobility  0,35 vs 0,18     ← Faktor 2
+defenseFromCamo      0,30 vs 0,50
+maintenance.size     0,14 vs 0,22
+```
+
+Entscheidend war nicht die Prüfstands-Lage — beide Reparatur-Varianten machen alle vier
+Checks grün — sondern **dass die App beide Dateien gleichzeitig lädt**:
+
+```
+app/index.html:473    const PHYS = { … }                    ← physics.json
+app/index.html:8797   PHYS2 = fetch("./core/physics-v2.json")
+```
+
+Dieselbe Kreatur wird von der Kreatur-Simulation nach der einen und vom Welt-Kern nach
+der anderen Physik bewertet. Über 4.000 Zufallsproben:
+
+| | mittlere Abweichung | Maximum |
+|---|---|---|
+| nur die 10 Schlüssel ergänzen | **2,25 %** | 6,3 % (0,2989 gegen 0,3620) |
+| voll abgleichen | **0,00 %** | **0,000e+0** |
+
+Dazu kommt: `physics.json` ist die Datei, gegen die **23 der 27 Prüfstände** validieren
+(`reality` 21/21, `distribution` B3 auf dem Baseline-Wert, Orakel-Parität 1,388e-17).
+`physics-v2.json` wurde von nichts validiert — seine vier Konsumenten liefen auf NaN. Die
+vier abweichenden Werte tragen keinen Kalibrier-Beleg: `fitted-params.json` enthält keinen
+davon, `Stufe 3b` hat sie nicht angefasst.
+
+#### Ergebnis
+
+| | vorher | jetzt |
+|---|---|---|
+| `census-check` | **FAIL**, 0 Arten | **OK**, 5 isoliert / 2 verbunden |
+| `rarity-check` Formen im Sweep | 46 | **61** |
+| max \|Δfitness\| zwischen beiden Physiken | NaN | **0,000e+0** |
+
+`world/physics-v2.json` wird jetzt von `tools/physics-sync.mjs` **erzeugt statt gepflegt**.
+Zwei neue Regeln im PDCA-Umfang: **PHY** (beide Physiken bitweise gleich) und **CEN**
+(`census-check`). Gegenprobe: mit dem alten Stand melden beide Regression und der Lauf
+endet mit Exit 1 — das Tor hätte den Fehler gefangen.
+
+**Einschränkung, die ich nicht messen kann:** `defenseFromMobility` halbiert sich von 0,35
+auf 0,18. Es gibt keinen „vorherigen guten Zustand" zum Vergleich, weil vorher NaN gerechnet
+wurde. Dass die validierte Datei die bessere Wette ist, bleibt ein Argument, keine Messung.
+
+
 `npm run pdca` misst alle Prüfstände gegen `docs/pdca-stand.json` und bricht bei jeder
 Verschlechterung ab. Was die Runden bisher ergaben:
 
