@@ -125,8 +125,8 @@
   "P6": {
    "pruefstand": "plausi-check",
    "titel": "Merkmal ist gezeichnet, aber im Text nicht genannt (oder umgekehrt)",
-   "wert": 4.95,
-   "gerissen": true
+   "wert": 0,
+   "gerissen": false
   },
   "P7a": {
    "pruefstand": "plausi-check",

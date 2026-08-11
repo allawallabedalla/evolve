@@ -41,6 +41,9 @@ export function loadAppCore(toolName = "app-core") {
   const classSrc  = grab(/function classify\(t, envIn\)\{[\s\S]*?\n\}/, "classify()");
   // Bauplan-SATZ (die Zeile unter dem Artnamen). Wird von tools/plausi-check.mjs
   // gegen den Katalog und gegen die Zeichnung geprueft — deshalb hier mit heraus.
+  // SICHTBAR_AB steht VOR describe() und wird von ihm gelesen — ohne diese Zeile
+  // wirft der extrahierte Kern beim ersten describe()-Aufruf ReferenceError.
+  const sichtbarSrc = grab(/const SICHTBAR_AB = \{[^}]*\};/, "SICHTBAR_AB");
   const descSrc   = grab(/function describe\(t, a\)\{[\s\S]*?\n\}/, "describe()");
   const geneLabels = eval(grab(/const GENE_LABELS = \[[\s\S]*?\];/, "GENE_LABELS")
     .replace(/^const GENE_LABELS = /, "").replace(/;$/, ""));
@@ -82,6 +85,7 @@ export function loadAppCore(toolName = "app-core") {
     ${realSrc}
     ${matchSrc}
     ${classSrc}
+    ${sichtbarSrc}
     ${descSrc}
     box.fitness = fitness; box.stepGeneration = stepGeneration; box.classify = classify;
     box.matchArchetype = matchArchetype; box.selectionWeights = selectionWeights; box.NG = NG;

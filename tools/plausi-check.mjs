@@ -257,46 +257,44 @@ const converge = (env, gens = 400) => {
 }
 
 // ---------------------------------------------------------------------------
-// P6 — WEITERE MERKMALE: TEXT-Schwelle gegen ZEICHNUNGS-Schwelle.
+// P6 — EIN WERT JE MERKMAL, GELESEN VON TEXT UND ZEICHNUNG.
 //
-// Fell, Panzer und Leuchten stehen im Satz UND in der Silhouette — jedes mit einer
-// EIGENEN, von Hand gesetzten Schwelle. Wo die beiden Zahlen auseinanderliegen, gibt
-// es ein Genom-Band, in dem der Spieler etwas SIEHT, was der Text leugnet (oder
-// umgekehrt). Die Zeichnungs-Schwellen werden aus app/index.html gelesen.
+// Fell, Panzer und Leuchten stehen im Satz UND in der Silhouette. Solange beide Seiten
+// ihre eigene, von Hand gesetzte Zahl trugen, gab es ein Genom-Band, in dem der Spieler
+// etwas SIEHT, was der Text leugnet (gemessen: Fell 0.41–0.50, Leuchten 0.41–0.45).
+//
+// Seit app/index.html `SICHTBAR_AB` fuehrt, ist die Frage nicht mehr „stimmen die zwei
+// Zahlen ueberein", sondern „benutzen ALLE Stellen dieselbe eine Zahl". Genau das wird
+// hier geprueft — und zwar am Quelltext, nicht an einer Kopie: jede uebrig gebliebene
+// nackte Zahl an einer dieser Stellen ist der Rueckfall, den der Check verhindern soll.
 {
-  const zahl = (re, was) => {
-    const m = html.match(re);
-    if (!m) { console.error(`plausi-check: Schwelle „${was}" nicht gefunden.`); process.exit(1); }
-    return parseFloat(m[1]);
-  };
-  const MERKMALE = [
-    { name: "Fell / Isolationsschicht", gene: G.insulation, text: /dichtes Fell/,
-      draw: zahl(/if\(insul>([0-9.]+) && !sprawl\)\{ let f="";/, "Fell-Zeichnung") },
-    { name: "Panzerplatten", gene: G.armor, text: /Panzerplatten/,
-      draw: zahl(/if\(armor>([0-9.]+)\)\{\n    cAttr\(shellEl,/, "Panzer-Zeichnung") },
-    { name: "Leuchtorgan", gene: G.biolum, text: /Leuchtorgan/,
-      draw: zahl(/const bl = g\[9\]\|\|0;\n  if\(bl <= ([0-9.]+)\) return;/, "Leucht-Zeichnung") },
+  const konstSrc = html.match(/const SICHTBAR_AB = \{[^}]*\};/);
+  if (!konstSrc) { console.error("plausi-check: SICHTBAR_AB nicht in app/index.html gefunden."); process.exit(1); }
+  const SICHTBAR = eval("(" + konstSrc[0].replace(/^const SICHTBAR_AB = /, "").replace(/;$/, "") + ")");
+
+  // Die Stellen, die diese Schwellen benutzen — Text wie Zeichnung. Jede muss den
+  // NAMEN nennen, nicht die Zahl.
+  const STELLEN = [
+    { was: "Fell im Satz",            re: /if\(insul>(\S+)\) cover\.push\(plant\?"isolierende Behaarung"/,     soll: "fellAb" },
+    { was: "Fell in der Zeichnung",   re: /if\(insul>(\S+) && !sprawl\)\{ let f="";/,                            soll: "SICHTBAR_AB.fell" },
+    { was: "Pflanzenhaar (2 Zweige)", re: /if\(insul>(\S+)\)\{ let s="";/,                                       soll: "SICHTBAR_AB.pflanzenhaar" },
+    { was: "Panzer im Satz",          re: /if\(armor>(\S+)\) cover\.push\(plant\?"harte Rinde"/,                soll: "SICHTBAR_AB.panzer" },
+    { was: "Panzer in der Zeichnung", re: /if\(armor>(\S+)\)\{\n    cAttr\(shellEl,/,                           soll: "SICHTBAR_AB.panzer" },
+    { was: "Leuchten im Satz",        re: /if\(biolum>(\S+)\) parts\.push\("Leuchtorgan"\);/,                   soll: "SICHTBAR_AB.leucht" },
+    { was: "Leuchten in der Zeichnung", re: /const bl = g\[9\]\|\|0;\n  if\(bl <= (\S+)\) return;/,           soll: "SICHTBAR_AB.leucht" },
   ];
-  let band = 0, schritte = 0;
+  let abweichend = 0;
   const detail = [];
-  for (const mk of MERKMALE) {
-    let n = 0; const grenzen = [];
-    for (let i = 0; i <= 100; i++) {
-      const v = i / 100;
-      const t = new Array(NG).fill(0.12);
-      t[G.size] = 0.5; t[G.mobility] = 0.8; t[G.metabolism] = 0.6; t[G.photosynthesis] = 0.02;
-      t[G.limbLength] = 0.3; t[mk.gene] = v;
-      const imText = mk.text.test(describe(t));
-      const gezeichnet = v > mk.draw;
-      schritte++;
-      if (imText !== gezeichnet) { n++; band++; grenzen.push(v.toFixed(2)); }
-    }
-    detail.push(n
-      ? `${mk.name}: Zeichnung ab ${mk.draw}, Text ab anderem Wert — Widerspruch bei Gen ${grenzen[0]}–${grenzen[grenzen.length - 1]}`
-      : `${mk.name}: Schwellen decken sich (${mk.draw})`);
+  for (const st of STELLEN) {
+    const m = html.match(st.re);
+    if (!m) { abweichend++; detail.push(`${st.was}: Stelle nicht mehr gefunden — Regel blind, bitte nachziehen.`); continue; }
+    if (m[1] !== st.soll) { abweichend++; detail.push(`${st.was}: benutzt „${m[1]}" statt ${st.soll}`); }
   }
+  if (!abweichend)
+    detail.push(`alle ${STELLEN.length} Stellen lesen SICHTBAR_AB — Fell ${SICHTBAR.fell} · Pflanzenhaar ${SICHTBAR.pflanzenhaar} · Panzer ${SICHTBAR.panzer} · Leuchten ${SICHTBAR.leucht}`);
+  detail.push("Regel dahinter: der Text darf nicht leugnen, was gezeichnet ist — deshalb gilt je Merkmal EIN Wert.");
   report("P6", "Merkmal ist gezeichnet, aber im Text nicht genannt (oder umgekehrt)",
-    band, schritte, detail);
+    abweichend, STELLEN.length, detail);
 }
 
 // ---------------------------------------------------------------------------
