@@ -106,6 +106,16 @@ export interface Physics {
   endothermyMetabFloor: number;
   photoTempOpt: number;
   photoTempStrength: number;
+  /** Wie stark wiederkehrende Stoerung (Feuer/Frost) den Lichtvorteil von `structure`
+   *  entwertet (Backlog 14). 0 = neutral, Stoerung laesst Stuetzgewebe unberuehrt. */
+  disturbStructureLoss: number;
+  /** Aufschlag auf den Rinden-Unterhalt fuer UNVERHOLZTE Baublaene (Backlog 14).
+   *  0 = neutral, Rinde kostet jeden Bauplan gleich viel. */
+  fireresWoodCost: number;
+  /** Saettigungspunkt der Wasser-Kopplung der Photosynthese (Backlog 14). 1.0 = altes lineares Verhalten. */
+  photoWaterSat: number;
+  /** Ertrags-/Kalibrierregler des Photosynthese-Kanals (Backlog 14). 1.0 = neutral. */
+  photoYield: number;
   toxLethality: number;
   wTox: number;
   insulWaterLoss: number;

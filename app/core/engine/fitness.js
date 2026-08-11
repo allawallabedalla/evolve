@@ -98,7 +98,15 @@ export function fitness(traits, env, phys) {
     //       Stuetzgewebe hilft dem Licht nur bei echter vertikaler Konkurrenz
     //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
     //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
-    const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
+    const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
+    //       STOERUNG ENTWERTET DAUERHAFTES STUETZGEWEBE (Backlog Punkt 14, Nachtrag):
+    //       Wiederkehrendes Feuer/Frost verbrennt die Krone - der Hoehen-Vorsprung, den
+    //       `structure` erkauft, muss immer wieder neu aufgebaut werden. Rinde schuetzt den
+    //       STAMM, nicht die Blattflaeche, deshalb hier bewusst KEIN fireres-Schutzterm
+    //       (gemessen: ein solcher Term kippt die AXIS-25-Regel wieder, s. Changelog V11).
+    //       disturbStructureLoss = 0 reproduziert exakt das alte Verhalten.
+    const structureBurn = 1 - phys.disturbStructureLoss * disturbance;
+    const structureLight = (phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight) * structureBurn;
     //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
     //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
     //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
@@ -115,7 +123,6 @@ export function fitness(traits, env, phys) {
     //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
     //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
     //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
-    const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
     const lightAccess = clamp01(phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
         phys.resproutReach * resprout * disturbance * (1 - size));
     //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
@@ -125,7 +132,24 @@ export function fitness(traits, env, phys) {
     //       Temperatur-Optimum; in starker Kaelte/Hitze sinkt die Enzym-Leistung.
     //       Milde Glocke -> Kaelte-Standorte (Tundra) tragen weniger Pflanzen.
     const photoThermal = clamp01(1 - phys.photoTempStrength * (env.temperature - phys.photoTempOpt) * (env.temperature - phys.photoTempOpt));
-    const energyPhoto = photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
+    //       WASSER-KOPPLUNG (Backlog Punkt 14): frueher ging `env.water` LINEAR in die
+    //       Photosynthese ein. Diese Achse traegt in der App aber zwei Bedeutungen
+    //       (MEDIUM_BANDS in app/index.html: Land 0.02-0.35 = Bodenfeuchte, Wasser
+    //       0.65-1.00 = Wassertiefe). Linear hiess daher zweierlei Falsches: (a) Land war
+    //       fuer Photosynthese strukturell feindlich (gemessen, tools/research/plant-gap.mjs:
+    //       Pflanzen-Strategie gewinnt im Land-Band 3 %, im Wasser-Band 11 %), (b) tieferes
+    //       Wasser gab faelschlich einen Photosynthese-Bonus (real ist es umgekehrt -
+    //       Tiefsee = kein Licht). Jetzt eine SAETTIGUNG: ab `photoWaterSat` ist Wasser
+    //       kein limitierender Faktor mehr. Feuchtes Land zaehlt damit voll, trockenes
+    //       Land bleibt zu Recht schlecht, und Tiefe bringt keinen Bonus mehr.
+    //       photoWaterSat = 1.0 reproduziert exakt das alte Verhalten (Gegentest).
+    const photoWater = clamp01(env.water / phys.photoWaterSat);
+    //       photoYield: reiner Ertrags-/Kalibrierregler. Photosynthese war der EINZIGE der
+    //       neun Energiekanaele ohne einen solchen (absorb 1.3, aquatic 1.4, amphibious 0.8,
+    //       biolum 0.72, filter 0.5, nfix 0.35, traction 2) - ohne ihn liesse sich die
+    //       Pflanzenstaerke nur durch Formel-Umbau nachjustieren. 1.0 = neutral.
+    const energyPhoto = phys.photoYield * photo * env.light * photoWater * lightAccess * photoSize * photoThermal *
+        (1 - phys.exclusion * mobility);
     //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
     //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
     //       Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND
@@ -337,7 +361,11 @@ export function fitness(traits, env, phys) {
         sense * m.sense +
         desicc * m.desicc +
         radres * m.radres +
-        fireres * m.fireres +
+        //     Rinde IST verholztes Gewebe: fuer einen Baum billig, fuer ein Kraut praktisch
+        //     nicht verfuegbar. Ohne diese Kopplung ist fireres fuer JEDEN Bauplan billig und
+        //     macht `resprout` strukturell redundant (regrowthSurvival nutzt
+        //     max(fireres, resprout) - der billigere Weg gewinnt immer). 0 = neutral.
+        fireres * m.fireres * (1 + phys.fireresWoodCost * (1 - structure)) +
         frostres * m.frostres +
         windres * m.windres +
         nfix * m.nfix +

@@ -505,6 +505,10 @@ const PHYS = {
   endothermyMetabFloor: 0.5,
   photoTempOpt: 0.6,
   photoTempStrength: 0.6,
+  disturbStructureLoss: 0.7,
+  fireresWoodCost: 4,
+  photoWaterSat: 0.35,
+  photoYield: 1,
   maintenance: {
     base: 0.05,
     size: 0.22,
@@ -894,7 +898,15 @@ function fitness(t, e){
       //       Stuetzgewebe hilft dem Licht nur bei echter vertikaler Konkurrenz
       //       (foodHeight = wie hoch das Licht umkaempft ist) - auf offenem Boden
       //       bringt Hochwachsen nichts, daher bleiben niedrige Pflanzen (Kraut) moeglich.
-      const structureLight = phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight;
+      const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
+      //       STOERUNG ENTWERTET DAUERHAFTES STUETZGEWEBE (Backlog Punkt 14, Nachtrag):
+      //       Wiederkehrendes Feuer/Frost verbrennt die Krone - der Hoehen-Vorsprung, den
+      //       `structure` erkauft, muss immer wieder neu aufgebaut werden. Rinde schuetzt den
+      //       STAMM, nicht die Blattflaeche, deshalb hier bewusst KEIN fireres-Schutzterm
+      //       (gemessen: ein solcher Term kippt die AXIS-25-Regel wieder, s. Changelog V11).
+      //       disturbStructureLoss = 0 reproduziert exakt das alte Verhalten.
+      const structureBurn = 1 - phys.disturbStructureLoss * disturbance;
+      const structureLight = (phys.structureLightFloor + (1 - phys.structureLightFloor) * env.foodHeight) * structureBurn;
       //       Wiederaustrieb (AXIS-25, resprout): ein zweiter, BILLIGERER Weg ins Licht neben
       //       dauerhaftem Stuetzgewebe - Krautschicht/Graeser bauen ihr Blattwerk aus
       //       bodennahen Meristemen/Speicherorganen jede Saison neu auf, statt es zu
@@ -911,7 +923,6 @@ function fitness(t, e){
       //       - das zog selbst KONTROLL-Populationen ohne jede Kopplung in tools/symbiosis-
       //       check.mjs (matchAxis=size) zueinander (gemessen: Kontroll-Abstand 0.033 -> 0.008,
       //       Test verlangt gerade das GEGENTEIL) und war der zugrunde liegende Fehler.
-      const disturbance = clamp01(Math.max(env.fire ?? 0, env.frost ?? 0));
       const lightAccess = clamp01(phys.lightAccessBase + (1 - phys.lightAccessBase) * structure * structureLight +
           phys.resproutReach * resprout * disturbance * (1 - size));
       //       Groessere Pflanzen haben mehr Blattflaeche -> Groesse zahlt auf
@@ -921,7 +932,24 @@ function fitness(t, e){
       //       Temperatur-Optimum; in starker Kaelte/Hitze sinkt die Enzym-Leistung.
       //       Milde Glocke -> Kaelte-Standorte (Tundra) tragen weniger Pflanzen.
       const photoThermal = clamp01(1 - phys.photoTempStrength * (env.temperature - phys.photoTempOpt) * (env.temperature - phys.photoTempOpt));
-      const energyPhoto = photo * env.light * env.water * lightAccess * photoSize * photoThermal * (1 - phys.exclusion * mobility);
+      //       WASSER-KOPPLUNG (Backlog Punkt 14): frueher ging `env.water` LINEAR in die
+      //       Photosynthese ein. Diese Achse traegt in der App aber zwei Bedeutungen
+      //       (MEDIUM_BANDS in app/index.html: Land 0.02-0.35 = Bodenfeuchte, Wasser
+      //       0.65-1.00 = Wassertiefe). Linear hiess daher zweierlei Falsches: (a) Land war
+      //       fuer Photosynthese strukturell feindlich (gemessen, tools/research/plant-gap.mjs:
+      //       Pflanzen-Strategie gewinnt im Land-Band 3 %, im Wasser-Band 11 %), (b) tieferes
+      //       Wasser gab faelschlich einen Photosynthese-Bonus (real ist es umgekehrt -
+      //       Tiefsee = kein Licht). Jetzt eine SAETTIGUNG: ab `photoWaterSat` ist Wasser
+      //       kein limitierender Faktor mehr. Feuchtes Land zaehlt damit voll, trockenes
+      //       Land bleibt zu Recht schlecht, und Tiefe bringt keinen Bonus mehr.
+      //       photoWaterSat = 1.0 reproduziert exakt das alte Verhalten (Gegentest).
+      const photoWater = clamp01(env.water / phys.photoWaterSat);
+      //       photoYield: reiner Ertrags-/Kalibrierregler. Photosynthese war der EINZIGE der
+      //       neun Energiekanaele ohne einen solchen (absorb 1.3, aquatic 1.4, amphibious 0.8,
+      //       biolum 0.72, filter 0.5, nfix 0.35, traction 2) - ohne ihn liesse sich die
+      //       Pflanzenstaerke nur durch Formel-Umbau nachjustieren. 1.0 = neutral.
+      const energyPhoto = phys.photoYield * photo * env.light * photoWater * lightAccess * photoSize * photoThermal *
+          (1 - phys.exclusion * mobility);
       //    b) Nahrungssuche: braucht Mobilitaet + erreichbares Futter.
       //       Flug erweitert die Reichweite in die Hoehe (Luftraum/Kronendach).
       //       Biologie-Audit: GLIEDMASSEN erschliessen hohes Futter nur an LAND
@@ -1133,7 +1161,11 @@ function fitness(t, e){
           sense * m.sense +
           desicc * m.desicc +
           radres * m.radres +
-          fireres * m.fireres +
+          //     Rinde IST verholztes Gewebe: fuer einen Baum billig, fuer ein Kraut praktisch
+          //     nicht verfuegbar. Ohne diese Kopplung ist fireres fuer JEDEN Bauplan billig und
+          //     macht `resprout` strukturell redundant (regrowthSurvival nutzt
+          //     max(fireres, resprout) - der billigere Weg gewinnt immer). 0 = neutral.
+          fireres * m.fireres * (1 + phys.fireresWoodCost * (1 - structure)) +
           frostres * m.frostres +
           windres * m.windres +
           nfix * m.nfix +
@@ -2752,28 +2784,11 @@ function awakenedKingdoms(set){
 // 0% = nur ueber stochastische Drift erreichbar -> legendaerer "Fang".
 // Leitplanke: sanfte Anreize, kein Vollstaendigkeits-Zwang. Namen = classify().n.
 const RARITY = {
-  "Bakterie":"haeufig","Archaee · Extremophil":"haeufig","Euglenoid · Mixotroph":"haeufig","Myzel · Pilzgeflecht":"haeufig","Krebstier · Arthropode":"haeufig","Fell-Warmblüter":"haeufig","Kleines flinkes Tier":"haeufig",
-  "Protist · Amöbe":"gelegentlich","Plankton":"gelegentlich","Verholzter Strauch":"gelegentlich","Hefe":"gelegentlich","Insekt · Gliederfüßer":"gelegentlich","Gepanzertes Beutetier":"gelegentlich","Flatterer · Vogel":"gelegentlich",
-  "Laubbaum":"selten","Nadelbaum":"selten","Polster-Kältepflanze":"selten","Flechte · Symbiose":"selten","Koralle · Riffbildner":"selten","Flugsäuger · Fledermaus":"selten","Behänder Kletterer":"selten",
-  "Grünalge":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Blütenkraut":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Baumpilz · Porling":"sehr-selten","Zunderschwamm":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Generalisten-Tier":"sehr-selten",
-  "Moos":"legendaer","Farn":"legendaer","Hutpilz":"legendaer","Schimmel · Fadenpilz":"legendaer","Schwamm":"legendaer","Wurm":"legendaer","Schnecke · Weichtier":"legendaer","Kopffüßer · Tintenfisch":"legendaer","Fisch · Aalform":"legendaer","Amphibie · Lurch":"legendaer","Reptil · Echse":"legendaer","Fell-Großtier":"legendaer","Aktiver Großjäger":"legendaer","Gepanzerter Koloss":"legendaer",
-  // PHASE 1 (2026-07-30): Pakete A/B/C. Quelle abweichend von den 44 Bestandsformen oben —
-  // docs/rarity.json misst nur die 6 Kern-Regler (5^6-Gitter, NIE aktiver Stressor), kann
-  // stressor-gated Formen (Paket A) also strukturell nicht abbilden (waeren dort immer 0%,
-  // faelschlich "legendaer"). Stattdessen `node tools/research/gap-sweep.mjs 4000`
-  // (schliesst Stressor-Umwelten mit ein, wie Einfluss-Karten sie im Spiel setzen).
-  // Tier-Grenzen an der bestehenden Verteilung gespiegelt, mit einer Stufe Vorsicht nach
-  // unten für Paket A: eine Form, die NUR bei aktiver Karte gewinnt, ist nicht "haeufig"
-  // im Sinne von Bakterie (die immer erreichbar ist), sondern "gelegentlich".
-  "Schwefelbakterie · Chemotroph":"gelegentlich","Salinenkrebs · Halophil":"gelegentlich","Schneealge · UV-hart":"gelegentlich",
-  "Tiefsee-Amphipode · Druckfest":"gelegentlich","Bärtierchen · Anhydrobiont":"gelegentlich","Deinococcus · Strahlenfest":"gelegentlich",
-  "Feuerkäfer · Pyrophil":"gelegentlich","Frostspanner · Winterfalter":"gelegentlich","Krummholz · Windzwerg":"gelegentlich",
-  "Wühler · Grabtier":"gelegentlich","Bartenwal · Filtrierschwimmer":"gelegentlich","Robbe · Meeressäuger":"gelegentlich",
-  "Krill · Filtrierendes Kleinstwesen":"gelegentlich",
-  "Methanogenes Archaeon · Anaerobier":"selten","Laufvogel · Strauß":"selten","Hallimasch · Leuchtpilz":"selten",
-  "Seestern · Stachelhäuter":"selten","Mammutbaum · Riesenpflanze":"selten",
-  "Muschel · Sessiler Filtrierer":"sehr-selten","Erle · Knöllchen-Pflanze":"sehr-selten",
-  "Chamäleon · Tarnjäger":"legendaer",
+  "Euglenoid · Mixotroph":"haeufig",
+  "Fell-Warmblüter":"gelegentlich","Generalisten-Tier":"gelegentlich","Hutpilz":"gelegentlich","Reptil · Echse":"gelegentlich","Fell-Großtier":"gelegentlich","Protist · Amöbe":"gelegentlich","Aktiver Großjäger":"gelegentlich","Chamäleon · Tarnjäger":"gelegentlich",
+  "Krummholz · Windzwerg":"selten","Deinococcus · Strahlenfest":"selten","Schwefelbakterie · Chemotroph":"selten","Frostspanner · Winterfalter":"selten","Feuerkäfer · Pyrophil":"selten","Schneealge · UV-hart":"selten","Bärtierchen · Anhydrobiont":"selten","Tiefsee-Amphipode · Druckfest":"selten","Salinenkrebs · Halophil":"selten","Bakterie":"selten","Verholzter Strauch":"selten","Hefe":"selten","Erle · Knöllchen-Pflanze":"selten","Insekt · Gliederfüßer":"selten","Archaee · Extremophil":"selten","Myzel · Pilzgeflecht":"selten","Schimmel · Fadenpilz":"selten","Flechte · Symbiose":"selten","Baumpilz · Porling":"selten","Krebstier · Arthropode":"selten","Polster-Kältepflanze":"selten",
+  "Methanogenes Archaeon · Anaerobier":"sehr-selten","Seestern · Stachelhäuter":"sehr-selten","Muschel · Sessiler Filtrierer":"sehr-selten","Kopffüßer · Tintenfisch":"sehr-selten","Kleines flinkes Tier":"sehr-selten","Nadelbaum":"sehr-selten","Laubbaum":"sehr-selten","Schnecke · Weichtier":"sehr-selten","Behänder Kletterer":"sehr-selten","Schwamm":"sehr-selten","Flugsäuger · Fledermaus":"sehr-selten","Koralle · Riffbildner":"sehr-selten","Sukkulente · Kaktus":"sehr-selten","Gepanzertes Beutetier":"sehr-selten","Fisch · Aalform":"sehr-selten","Hallimasch · Leuchtpilz":"sehr-selten","Gepanzerter Koloss":"sehr-selten","Leuchtwesen · Tiefsee":"sehr-selten","Krill · Filtrierendes Kleinstwesen":"sehr-selten","Flatterer · Vogel":"sehr-selten","Zunderschwamm":"sehr-selten","Robbe · Meeressäuger":"sehr-selten","Wurm":"sehr-selten","Grünalge":"sehr-selten","Moos":"sehr-selten","Blütenkraut":"sehr-selten","Farn":"sehr-selten","Kraut · niedrige Pflanze":"sehr-selten","Fluginsekt · Segler":"sehr-selten","Plankton":"sehr-selten",
+  "Amphibie · Lurch":"legendaer","Wühler · Grabtier":"legendaer","Bartenwal · Filtrierschwimmer":"legendaer","Laufvogel · Strauß":"legendaer","Mammutbaum · Riesenpflanze":"legendaer",
 };
 // Reihenfolge selten->haeufig; Label + Farbe (Feldpost-Ramp: Tinte -> Petrol ->
 // Ocker -> Koralle -> Pflaume, steigende Saettigung = steigende Seltenheit).
