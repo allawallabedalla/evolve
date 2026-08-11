@@ -437,6 +437,12 @@ Unverändert aus Runde 1, hier nur eingeordnet — es sind Symptome derselben Tr
 Nicht umgesetzt — dieser Auftrag war ein Audit. Die Reihenfolge ist bewusst nach
 **Wirkung pro Aufwand** sortiert, nicht nach Tiefe der Ursache.
 
+> **Ausgearbeitet als Aufgabenliste mit gemessenen Restunsicherheiten:**
+> `docs/darstellung-massnahmenplan.md`. Wichtigster Befund von dort: die `conf`-Gewichtung
+> (Punkt 1 unten) **senkt** den Vorsprung des benannten Siegers von 0,58 % auf 0,32 % und
+> ändert 81 % der angezeigten Namen — sie macht die Beliebigkeit sichtbar, statt sie zu
+> beheben, und darf deshalb nicht ohne Punkt 3 ausgeliefert werden.
+
 ### Sofort, ohne Katalog-Neubau
 
 1. **Nicht in Dimensionen messen, in denen nichts gemessen wurde** *(behebt N7, entschärft N6)*
