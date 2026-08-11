@@ -51,7 +51,50 @@ const CLADE = {
   insekten: { qid: "Q1390", de: "Insekten" },
   spinnen:  { qid: "Q1358", de: "Spinnentiere" },
 };
-const inClade = (e, key) => e.lineage.includes(CLADE[key].qid);
+
+// ---------------------------------------------------------------------------
+// VORFAHREN-HUELLE — und warum dieser Check sie selbst berechnen muss.
+//
+// `entry.lineage` ist in app/catalog.js auf 12 Eintraege GEKUERZT
+// (tools/build-catalog.mjs: `p.v.lineage.slice(0, 12)`, begruendet mit CORPUS_DEPTH).
+// Bei tief verschachtelten Taxa faellt die KLASSEN-QID damit aus dem Feld heraus: eine
+// Muecke traegt Q1390 (Insecta) 15 Ebenen ueber sich, im gespeicherten Feld steht sie
+// nicht mehr. Ein direktes `lineage.includes(qid)` misst deshalb nur einen Bruchteil der
+// gemeinten Menge (gemessen in P10 unten: bei Insekten 3 %). Genau daran haben P1 und P7
+// bisher vorbeigemessen.
+//
+// Die fehlenden Ebenen lassen sich OHNE Netz rekonstruieren: jede der 42.648 Ketten ist
+// ein Stueck desselben Baums, und flacher verschachtelte Arten enthalten genau die
+// Knoten, die den tieferen abgeschnitten wurden. Die Vereinigung aller Ketten ergibt
+// einen Elterngraphen, dessen transitive Huelle die vollstaendige Vorfahrenmenge liefert.
+const _parent = new Map();
+for (const e of CATALOG.entries) {
+  const L = e.lineage || [];
+  for (let i = 0; i < L.length - 1; i++) {
+    if (!_parent.has(L[i])) _parent.set(L[i], new Set());
+    _parent.get(L[i]).add(L[i + 1]);
+  }
+}
+const _ancMemo = new Map();
+const ancestorsOf = (qid) => {
+  if (_ancMemo.has(qid)) return _ancMemo.get(qid);
+  const out = new Set(), stack = [qid];
+  while (stack.length) {
+    const x = stack.pop();
+    for (const p of (_parent.get(x) || [])) if (!out.has(p)) { out.add(p); stack.push(p); }
+  }
+  _ancMemo.set(qid, out);
+  return out;
+};
+const _closMemo = new Map();
+const cladeClosure = (e) => {
+  if (_closMemo.has(e)) return _closMemo.get(e);
+  const S = new Set(e.lineage || []);
+  for (const q of (e.lineage || [])) for (const a of ancestorsOf(q)) S.add(a);
+  _closMemo.set(e, S);
+  return S;
+};
+const inClade = (e, key) => cladeClosure(e).has(CLADE[key].qid);
 const artName = (e) => e.de || e.sci;
 const gen = (e) => e.genome.map((v) => v / 255);
 
@@ -296,6 +339,149 @@ const converge = (env, gens = 400) => {
   report("P5b", "Gruppen mit unter 25 Katalog-Eintraegen (Stufe 2 hat kaum Auswahl)",
     duenn.length, ARCH.forms.length,
     duenn.map((x) => `${x.f.n}: ${x.n}`));
+}
+
+// ---------------------------------------------------------------------------
+// P8 — DIE BAUPLAN-GRUPPE HAELT ARTEN AUS EINER ANDEREN GROSSKLADE.
+//
+// Anlass: Screenshot aus der Live-App — „Mantelbussard" (Pseudastur polionotus, ein
+// Greifvogel) auf der Silhouette eines vierbeinigen Saeugers, mit dem Bauplan-Satz
+// „vier kraeftige Beine, Greifwerkzeuge, Leuchtorgan".
+//
+// Das ist KEIN Fehler von nearestReal(): der Bussard steht wirklich in der Gruppe, in
+// der gesucht wurde. Er ist dort gelandet, weil tools/build-catalog.mjs die Gruppe eines
+// Katalog-Eintrags per GENOM-ABSTAND zum naechsten Prototyp vergibt (nearestInKingdom),
+// abgesichert nur durch einen REICH-Waechter — „Vogel" und „Generalisten-Tier" sind aber
+// beide das Reich „Tier". Fuer die Anzeige entscheidet der Genom-Abstand damit ueber
+// etwas, das er nicht entscheiden kann: welchen KOERPERBAU der Spieler zu sehen bekommt.
+//
+// Gemessen wird gegen die einzige Behauptung, die die Zeichnung eindeutig aufstellt —
+// die BEINZAHL. Sie ist in drawAnimalSvg() pro Bauplan-Gruppe fest verdrahtet (seit dem
+// #30-Fix, s. P2), und sie steht fuer jede Grossklade biologisch fest.
+const DRAWN_LEGS = {
+  // eigene Zeichen-Zweige in drawAnimalSvg()
+  vogel: 2, laufvogel: 2, insekt: 6, feuerkaefer: 6, fluginsekt: 6, frostspanner: 6,
+  baertierchen: 8, krebstier: 10, krill: 10, salinenkrebs: 10, tiefseeamphipode: 10,
+  wurm: 0, schnecke: 0, kopffuesser: 0, leuchtwesen: 0, muschel: 0, seestern: 0,
+  fisch: 0, bartenwal: 0, robbe: 0, koralle: 0, schwamm: 0,
+  // Vierbeiner-Grundbauplan (Fallback der Zeichnung) + die Zweige, die ihn nur schmuecken
+  fledermaus: 4, koloss: 4, beutetier: 4, grossjaeger: 4, fellgrosstier: 4, fellwarm: 4,
+  kletterer: 4, flink: 4, amphibie: 4, reptil: 4, generalist: 4, wuehler: 4, chamaeleon: 4,
+};
+// Beinzahl je Grossklade — dieselbe Ground Truth wie in P1 (dort nur fuer Tetrapoden und
+// Insekten), hier auf alle Tierstaemme des Katalogs ausgedehnt. -1 = keine Tierklade.
+const KLADEN_BEINE = [
+  ["Q5113", "Voegel", 2], ["Q7377", "Saeuger", 4], ["Q10811", "Reptilien", 4],
+  ["Q10908", "Amphibien", 4], ["Q127282", "Knochenfische", 0], ["Q1390", "Insekten", 6],
+  ["Q1358", "Spinnentiere", 8], ["Q25364", "Krebse", 10], ["Q25326", "Weichtiere", 0],
+  ["Q25522", "Ringelwuermer", 0], ["Q44631", "Stachelhaeuter", 0], ["Q25441", "Nesseltiere", 0],
+  ["Q18960", "Schwaemme", 0],
+];
+const kladeVon = (e) => {
+  const S = cladeClosure(e);
+  for (const [q, n, beine] of KLADEN_BEINE) if (S.has(q)) return { name: n, beine };
+  return null;
+};
+{
+  let gesamt = 0, falsch = 0;
+  const proGruppe = [];
+  for (const f of ARCH.forms) {
+    const idx = CATALOG.byGroup[f.key] || [];
+    const gez = DRAWN_LEGS[f.key];
+    if (!idx.length || gez === undefined) continue;
+    let n = 0; const kladen = {};
+    for (const i of idx) {
+      const k = kladeVon(CATALOG.entries[i]);
+      if (!k) continue;
+      gesamt++; kladen[k.name] = (kladen[k.name] || 0) + 1;
+      if (k.beine !== gez) { n++; falsch++; }
+    }
+    if (n) proGruppe.push({ f, gez, n, tot: idx.length,
+      kladen: Object.entries(kladen).sort((a, b) => b[1] - a[1]).slice(0, 3)
+        .map(([k, v]) => `${k} ${((100 * v) / idx.length).toFixed(0)} %`).join(", ") });
+  }
+  proGruppe.sort((a, b) => b.n / b.tot - a.n / a.tot);
+  report("P8", "Benennbare Art hat eine andere Beinzahl als die Zeichnung ihrer Gruppe",
+    falsch, gesamt,
+    [...proGruppe.slice(0, 8).map((x) =>
+      `${x.f.n}: ${((100 * x.n) / x.tot).toFixed(0)} % von ${x.tot} — gezeichnet ${x.gez} Beine, im Katalog ${x.kladen}`),
+     "Ursache: build-catalog.mjs vergibt die Gruppe per Genom-Abstand, abgesichert nur durch den REICH-Waechter.",
+     "Eine Klade-Schranke (Vogel bleibt bei Vogel-Bauplaenen) gibt es nicht."]);
+}
+
+// ---------------------------------------------------------------------------
+// P9 — DIESELBE FRAGE AUF DEM LIVE-PFAD, als Stichprobe.
+//
+// P8 zaehlt, was im Katalog STEHT. Diese Regel zaehlt, was ein Spieler tatsaechlich zu
+// SEHEN bekommt: zufaellige Umwelten (die 6 Kern-Regler frei, in der Haelfte der Faelle
+// zusaetzlich ein Stressor wie bei einer Einfluss-Karte), auskonvergiert, dann die
+// fertige Karte pruefen — Name gegen gezeichneten Koerperbau.
+{
+  const N = 600;
+  let seed = 20260811 >>> 0;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const converge2 = (env, gens = 300) => {
+    let g = new Array(NG).fill(0.5);
+    for (let i = 0; i < gens; i++) g = stepGeneration(g, env, null);
+    return g;
+  };
+  const STRESS = ["toxicity", "salinity", "uv", "pressure", "aridity", "radiation", "fire", "frost", "wind"];
+  let benannt = 0, widerspruch = 0;
+  const beispiele = [], proForm = {};
+  for (let k = 0; k < N; k++) {
+    const env = { ...BASE_ENV };
+    for (const ax of ["temperature", "predation", "foodAbundance", "foodHeight", "light", "water"]) env[ax] = rnd();
+    for (const s of STRESS) env[s] = 0;
+    if (k % 2 === 0) env[STRESS[Math.floor(rnd() * STRESS.length)]] = 0.3 + rnd() * 0.6;
+    env.oxygen = 1;
+    const t = converge2(env);
+    const a = classify(t, env);
+    if (!a.real) continue;
+    const gez = DRAWN_LEGS[a.key], k2 = kladeVon(a.real.e);
+    if (gez === undefined || !k2) continue;
+    benannt++;
+    if (k2.beine !== gez) {
+      widerspruch++;
+      proForm[a.form] = (proForm[a.form] || 0) + 1;
+      if (beispiele.length < 6)
+        beispiele.push(`„${a.n}" (${k2.name}, real ${k2.beine} Beine) auf „${a.form}" — gezeichnet ${gez}`);
+    }
+  }
+  report("P9", "Live-Stichprobe: gezeigter Artname widerspricht der gezeigten Silhouette",
+    widerspruch, benannt,
+    [...beispiele,
+     "je Bauplan: " + Object.entries(proForm).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(" · "),
+     `${N} zufaellige Umwelten, deterministisch auskonvergiert (300 Generationen, kein Rauschen).`]);
+}
+
+// ---------------------------------------------------------------------------
+// P10 — BLINDER FLECK DIESES CHECKS SELBST.
+//
+// P1 und P7 fragen die Klade ueber `entry.lineage`. Das Feld ist in app/catalog.js auf
+// 12 Ebenen gekuerzt — bei tief verschachtelten Taxa fehlt die Klassen-QID darin. Bis zu
+// dieser Erweiterung hat der Check deshalb einen Bruchteil seiner eigenen Pruefmenge
+// gesehen und „0 Verstoesse" gemeldet, wo er schlicht nicht hingeschaut hat. Die Zahl
+// steht hier, damit der blinde Fleck nicht wieder unbemerkt zurueckkommt.
+{
+  let verloren = 0, mitKlasse = 0;
+  for (const e of CATALOG.entries) {
+    const direkt = new Set(e.lineage || []);
+    const voll = cladeClosure(e);
+    const hatVoll = KLADEN_BEINE.some(([q]) => voll.has(q));
+    if (!hatVoll) continue;
+    mitKlasse++;
+    if (!KLADEN_BEINE.some(([q]) => direkt.has(q))) verloren++;
+  }
+  const abdeckung = Object.values(CLADE).map((c) => {
+    const direkt = CATALOG.entries.filter((e) => (e.lineage || []).includes(c.qid)).length;
+    const voll = CATALOG.entries.filter((e) => cladeClosure(e).has(c.qid)).length;
+    return `${c.de}: ${direkt} von ${voll} (${voll ? ((100 * direkt) / voll).toFixed(0) : 0} %)`;
+  });
+  report("P10", "Klassen-QID faellt aus `lineage` heraus (slice(0,12) in build-catalog.mjs)",
+    verloren, mitKlasse,
+    [...abdeckung,
+     "So viel sah ein direktes `lineage.includes(qid)` — der Rest der Kette ist im Katalog nicht gespeichert.",
+     "Behoben durch die Vorfahren-Huelle oben (aus allen 42.648 Ketten rekonstruiert, ohne Netz)."]);
 }
 
 // ---------------------------------------------------------------------------

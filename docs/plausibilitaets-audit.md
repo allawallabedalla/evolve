@@ -15,6 +15,13 @@ ausliest — keine abgeschriebene Kopie, keine geratene Ground Truth.
 
 **Ergebnis:** 9 von 10 Regeln verletzt. Alle Zahlen unten sind gemessen.
 
+> **Runde 2 — s. `docs/darstellungs-audit.md`** („Mantelbussard" auf einer
+> Vierbeiner-Silhouette). Dort kommen P8/P9/P10 dazu. Zwei Zahlen aus diesem Dokument
+> haben sich dadurch geändert: die Kladen-Abfrage `entry.lineage.includes(qid)` sah wegen
+> `lineage.slice(0, 12)` nur einen Bruchteil ihrer Prüfmenge (bei Insekten 3 %). Seit der
+> Vorfahren-Hülle in `plausi-check.mjs` misst **P1a** über 11.294 statt 5.187 Arten
+> (weiter 0 Verstöße) und **P1b** meldet 4.459 von 6.398 statt 85 von 213.
+
 ---
 
 ## Die Wurzel: drei Quellen, die nichts voneinander wissen
