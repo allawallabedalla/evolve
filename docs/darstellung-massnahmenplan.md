@@ -9,17 +9,28 @@
 > | **P8** Beinzahl der benennbaren Art gegen die Zeichnung | 8.146/24.846 (32,8 %) | **609/24.846 (2,5 %)** |
 > | **P9** Live-Stichprobe Name gegen Silhouette | 71/174 (40,8 %) | **1/142 (0,7 %)** |
 > | **P10** fehlende Klassen-QID | 17.773/42.024 | **0** ✓ |
-> | **P4** Tautologie im „≈"-Verweis | 12/12 (100 %) | **1/10** |
+> | **P4** Tautologie im „≈"-Verweis | 12/12 (100 %) | **0** ✓ |
+> | **P1b** Insekten mit falscher Beinzahl | 4.459/6.398 (70 %) | **0** ✓ (war Messfehler) |
 > | **N3** Arten ausserhalb jedes Bauplans ihrer Klade | 34,7 % | **0** ✓ |
-> | **N7** Anteil Rauschen im Artabstand | 46,5 % | **29,3 %** |
-> | **P7b** hohes Flug-Gen ohne Flug im Satz | 17,0 % | **7,9 %** |
-> | Bauplaene ohne realen Artnamen (P5) | 24 | **21** |
+> | **N7** Anteil Rauschen im Artabstand | 46,5 % | **28,3 %** |
+> | **P7b** hohes Flug-Gen ohne Flug im Satz | 17,0 % | **7,7 %** |
+> | Eintraege ohne auflösbare Klade | 624 | **201** |
+> | Bauplaene ohne realen Artnamen (P5) | 24 | **22** |
 > | Gruppen unter 25 Arten (P5b) | 5 | **3** |
 > | Arten mit gemessener Koerpermasse | 2.728 | **7.906** (wirkt beim naechsten Bau) |
 >
-> Umgesetzt: **A0** (neu, s. u.) · **A1** · **A2** · **A3** · **A4** · **B1** (Anbindung).
-> Offen: **B2** · **B3** · **C1**–**C4**.
+> **P7a meldet jetzt MEHR** (47 → 436): die alte Schwelle 0,3 lag auf dem 1. Perzentil,
+> 46 der 47 Treffer waren Rundungsrauschen bei `wing` 0,298. Die abgeleitete Schwelle
+> (0,40, Mitte zwischen Flieger- und Laufvogel-Prototyp) findet flugunfähige Laufkäfer im
+> Bauplan „Fluginsekt · Segler" — ein echter Befund, den die geratene Zahl verdeckt hat.
+>
+> Umgesetzt: **A0** · **A1** · **A2** · **A3** · **A4** · **B1** (Anbindung) · **C1**
+> (als `npm run pdca`) · Odonata/Amoebozoa-Kladen · drei Prüfstand-Korrekturen.
+> Offen: **B2** (gemessen blockiert) · **B3** · **C2**–**C4**.
 > Der Mantelbussard steht jetzt in „Flatterer · Vogel".
+>
+> **Laufender Zyklus:** `npm run pdca` misst alle Prüfstände gegen
+> `docs/pdca-stand.json` und bricht bei jeder Verschlechterung ab.
 
 Jede Aufgabe nennt: was, wo, welchen Befund sie schließt, wie sie sich selbst prüft — und
 **was danach unsicher bleibt.** Die Restunsicherheiten sind, wo möglich, gemessen und
