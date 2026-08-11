@@ -1480,25 +1480,99 @@ const CAT = window.CATALOG || null;
 // (matchArchetype) statt harter Ausschluss: eine Fehlpassung STRECKT den Abstand, macht
 // den Kandidaten aber nie unmoeglich (manche Bauplan-Gruppen haben nur wenige reale Arten).
 const HABITAT_PENALTY_K = 2.0;
+// KONFIDENZ-GEWICHT (Massnahmenplan A2). `conf` sagt je Gen, WOHER der Katalogwert
+// stammt: 3 gemessen · 2 aus der Klade · 1 imputiert · 0 aus dem Habitat abgeleitet.
+// Die Gene 10..25 stehen zu 41,5 % auf 0 — sie wurden nie erhoben, sondern aus dem
+// Habitat geraten und danach vom Gruender-Los absichtlich verstreut (build-catalog.mjs,
+// gegen die Genom-Zwillinge). ARCH.weightFloor (0.3) blendet solche Richtungen aber nie
+// ganz aus, also ging dieses eigens erzeugte Rauschen bisher mit 30 % Gewicht in genau
+// den Abstand ein, der den Artnamen bestimmt — gemessen 46,5 % der Abstandsquadrate
+// (naming-audit N7). Wer in einer Dimension nichts gemessen hat, soll dort auch nicht
+// messen: conf 0 -> Gewicht 0.
+//
+// EHRLICH DAZU (naming-audit N6, docs/darstellung-massnahmenplan.md): das macht die
+// Artwahl nicht sicherer, sondern SICHTBAR beliebiger — der Vorsprung des Siegers vor
+// dem Zweiten sinkt, weil er vorher aus dem Rauschen kam. Deshalb liefert die Funktion
+// jetzt zusaetzlich `tie`: wie viele Arten praktisch gleichauf liegen. Die Oberflaeche
+// nennt das, statt eine Genauigkeit zu behaupten, die es nicht gibt.
+const CONF_FULL = 3;
+const TIE_BAND = 1.01;   // „praktisch gleichauf" = innerhalb 1 % des Siegerabstands
+// Je Eintrag EINMAL vorbereitet: welche Gene zaehlen ueberhaupt mit (conf > 0), mit
+// welchem Faktor, und wie steht der Genwert normiert da. Ohne diesen Schritt kostete
+// Stufe 2 in der groessten Gruppe (9.125 Arten) 3.20 ms und riss das 3-ms-Budget aus
+// tools/catalog-check.mjs (C8). Da 41,5 % aller Genwerte auf conf 0 stehen und damit
+// Gewicht 0 tragen, laeuft die Schleife danach ueber WENIGER Gene als vorher — der
+// Konfidenz-Filter macht die Suche schneller, nicht langsamer.
+function confPrep(e){
+  if(e._cw) return e._cw;
+  const gi = [], cf = [], gv = [];
+  for(let g = 0; g < NG; g++){
+    const c = e.conf ? e.conf[g] : CONF_FULL;
+    if(!c) continue;
+    gi.push(g); cf.push(c/CONF_FULL); gv.push(e.genome[g]/255);
+  }
+  return (e._cw = { gi, cf, gv });
+}
 function nearestReal(t, groupKey, w, e){
   if(!CAT) return null;
   const idx = CAT.byGroup[groupKey];
   if(!idx || !idx.length) return null;
   const envWater = e && e.water!=null ? e.water : 0.6;
-  let best = null, dBest = Infinity;
-  for(const i of idx){
-    const e = CAT.entries[i];
+  let best = null, dBest = Infinity, dSecond = Infinity;
+  const dists = new Array(idx.length);
+  for(let k = 0; k < idx.length; k++){
+    const e = CAT.entries[idx[k]];
+    const p = confPrep(e), gi = p.gi, cf = p.cf, gv = p.gv;
     let sum = 0, z = 0;
-    for(let g = 0; g < NG; g++){
-      const d = (t[g] - e.genome[g]/255) * w[g];
-      sum += d*d; z += w[g]*w[g];
+    for(let j = 0; j < gi.length; j++){
+      const ww = w[gi[j]] * cf[j];
+      const d = (t[gi[j]] - gv[j]) * ww;
+      sum += d*d; z += ww*ww;
     }
     let dist = Math.sqrt(sum/Math.max(z, 1e-9));
     if(e.habWater!=null) dist *= 1 + HABITAT_PENALTY_K * Math.abs(envWater - e.habWater/255);
-    if(dist < dBest){ dBest = dist; best = e; }
+    dists[k] = dist;
+    if(dist < dBest){ dSecond = dBest; dBest = dist; best = e; }
+    else if(dist < dSecond){ dSecond = dist; }
   }
-  return best ? { e: best, dist: dBest } : null;
+  if(!best) return null;
+  let tie = 0;
+  for(let k = 0; k < dists.length; k++) if(dists[k] <= dBest*TIE_BAND) tie++;
+  // margin wie in matchArchetype(): relativer Vorsprung vor dem Zweitnaechsten.
+  const margin = dSecond>0 && dSecond<Infinity ? clamp01((dSecond-dBest)/dSecond) : 1;
+  return { e: best, dist: dBest, tie, margin };
 }
+// KLADEN-NAMEN fuer den „≈ in echt"-Verweis (Massnahmenplan A3). Der Katalog traegt seit
+// tools/regroup-catalog.mjs je Eintrag ein Feld `klade` (QID der naechsten Grossklade).
+// Hier steht dazu, wie sie heisst und wo ihr Artikel liegt — kuratiert wie FICON, an
+// EINER Stelle, damit es pruefbar bleibt. QIDs wie in tools/lib/clade-closure.mjs.
+const KLADE_NAMEN = {
+  Q5113:   { de: "Vögel",           wiki: "Vögel" },
+  Q7377:   { de: "Säugetiere",      wiki: "Säugetiere" },
+  Q10811:  { de: "Reptilien",       wiki: "Reptilien" },
+  Q10908:  { de: "Amphibien",       wiki: "Amphibien" },
+  Q127282: { de: "Knochenfische",   wiki: "Strahlenflosser" },
+  Q129026: { de: "Knorpelfische",   wiki: "Knorpelfische" },
+  Q1390:   { de: "Insekten",        wiki: "Insekten" },
+  Q1358:   { de: "Spinnentiere",    wiki: "Spinnentiere" },
+  Q25364:  { de: "Krebstiere",      wiki: "Krebstiere" },
+  Q5194:   { de: "Bärtierchen",     wiki: "Bärtierchen" },
+  Q25326:  { de: "Weichtiere",      wiki: "Weichtiere" },
+  Q25522:  { de: "Ringelwürmer",    wiki: "Ringelwürmer" },
+  Q44631:  { de: "Stachelhäuter",   wiki: "Stachelhäuter" },
+  Q25441:  { de: "Nesseltiere",     wiki: "Nesseltiere" },
+  Q18960:  { de: "Schwämme",        wiki: "Schwämme" },
+  Q25314:  { de: "Blütenpflanzen",  wiki: "Bedecktsamer" },
+  Q133712: { de: "Nacktsamer",      wiki: "Nacktsamer" },
+  Q373615: { de: "Farne",           wiki: "Farne" },
+  Q25347:  { de: "Moose",           wiki: "Laubmoose" },
+  Q174726: { de: "Schlauchpilze",   wiki: "Schlauchpilze" },
+  Q174698: { de: "Ständerpilze",    wiki: "Ständerpilze" },
+  Q764:    { de: "Pilze",           wiki: "Pilze" },
+  Q10876:  { de: "Bakterien",       wiki: "Bakterien" },
+  Q10872:  { de: "Archaeen",        wiki: "Archaeen" },
+  Q756:    { de: "Pflanzen",        wiki: "Pflanzen" },
+};
 // Wann traegt der Katalog den ANZEIGENAMEN? Die Antwort steht in den Daten, nicht im Code:
 // solange `stage` "bootstrap" ist, hat jede Gruppe genau einen Eintrag (aus den 65
 // kuratierten „≈ in echt"-Zuordnungen) — Stufe 2 haette dann keine echte Wahl, und der
@@ -8751,16 +8825,39 @@ try {
     // Vorbild zeigte, egal wie sich das Wesen innerhalb seines Bauplans entwickelt hatte.
     // Der Rueckfall auf exemplar.js bleibt fuer erzeugte Formen (kein Katalog-Eintrag).
     const arch = (typeof committedArch !== "undefined" && committedArch) || classify(genome);
-    let href = null, label = null;
+    let href = null, label = null, hint = null;
     if (arch && arch.real) {
       const e = arch.real.e;
-      href = "https://de.wikipedia.org/wiki/" + encodeURIComponent(e.wiki.replace(/ /g, "_"));
-      label = e.de || e.sci;
+      // Massnahmenplan A3: der Verweis nennt die KLADE, nicht noch einmal die Ueberschrift.
+      // Seit Schritt 0.3 zog er sein Label aus derselben Quelle wie der Titel („e.de ||
+      // e.sci") und las sich dadurch als „Mantelbussard ≈ Mantelbussard" — eine
+      // Tautologie (plausi-check P4, 12 von 12). Die Klade ist die Aussage, die die
+      // Daten wirklich tragen: die Kern-Gene im Katalog stammen zu 99 % aus ihr, die
+      // Artwahl darunter entscheidet im Median mit unter 1 % Vorsprung (naming-audit
+      // N1/N6). Faellt die Klade aus (kein `klade`-Feld), bleibt der alte Artverweis.
+      const kl = e.klade && KLADE_NAMEN[e.klade];
+      if (kl) {
+        href = "https://de.wikipedia.org/wiki/" + encodeURIComponent(kl.wiki.replace(/ /g, "_"));
+        label = kl.de;
+        // Wie eindeutig war die Artwahl? Kein neuer Text in der Zeile, nur im Tooltip —
+        // wer es wissen will, erfaehrt es, ohne dass die Karte unruhiger wird.
+        const tie = arch.real.tie || 1;
+        hint = tie > 1
+          ? `„${e.de || e.sci}" ist eine von ${tie} praktisch gleichauf liegenden Arten dieser Gruppe — auf Wikipedia die Klade ansehen`
+          : `Nächste reale Art: ${e.de || e.sci} — auf Wikipedia die Klade ansehen`;
+      } else {
+        href = "https://de.wikipedia.org/wiki/" + encodeURIComponent(e.wiki.replace(/ /g, "_"));
+        label = e.de || e.sci;
+      }
     } else {
       const ex = (pet.form && archetypeWiki(pet.form)) || realExample(describe(pet.genome));
       href = ex.wiki; label = ex.name;
     }
-    if (a.dataset.k !== href) { a.href = href; a.textContent = "≈ " + label + " ↗"; a.hidden = false; a.dataset.k = href; }
+    const k = href + "|" + label;
+    if (a.dataset.k !== k) {
+      a.href = href; a.textContent = "≈ " + label + " ↗"; a.hidden = false; a.dataset.k = k;
+      a.title = hint || "Reales Vorbild auf Wikipedia ansehen";
+    }
   }
   updateSpeciesWiki();
   setInterval(updateSpeciesWiki, 700);

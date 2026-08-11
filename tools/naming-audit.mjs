@@ -62,6 +62,19 @@ const konvergiere = (env, gens = 300) => {
   for (let i = 0; i < gens; i++) g = stepGeneration(g, env, null);
   return g;
 };
+// Wendet nearestReal() in der App ein KONFIDENZ-Gewicht an (Massnahmenplan A2)? Wird aus
+// app/index.html GELESEN, nicht angenommen — N6 und N7 sollen messen, was die App tut,
+// nicht was dieser Check fuer richtig haelt.
+const HTML = readFileSync(join(ROOT, "app", "index.html"), "utf-8");
+// Der Konfidenz-Faktor steckt in confPrep(), das nearestReal() je Eintrag einmal
+// aufruft — beide Funktionen zusammen lesen, damit die Erkennung nicht an einer
+// Umstellung der Schleife scheitert.
+const NEAREST_SRC = (HTML.match(/function confPrep\(e\)\{[\s\S]*?\nfunction nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/)
+  || HTML.match(/function nearestReal\(t, groupKey, w, e\)\{[\s\S]*?\n\}/) || [""])[0];
+const CONF_GEWICHT = /e\.conf\s*\?\s*e\.conf\[g\]/.test(NEAREST_SRC) && /CONF_FULL/.test(NEAREST_SRC);
+/** Gewicht je Gen genau so, wie nearestReal() es benutzt. */
+const genGewicht = (w, e, g) => w[g] * (CONF_GEWICHT ? (e.conf ? e.conf[g] / 3 : 1) : 1);
+
 const STICHPROBE = 250;
 const karten = [];
 for (let k = 0; k < STICHPROBE; k++) {
@@ -237,7 +250,10 @@ const HABITAT_PENALTY_K = 2.0;
     const ds = idx.map((i) => {
       const e = CATALOG.entries[i];
       let s = 0, z = 0;
-      for (let g = 0; g < NG; g++) { const d = (k.t[g] - e.genome[g] / 255) * k.w[g]; s += d * d; z += k.w[g] * k.w[g]; }
+      for (let g = 0; g < NG; g++) {
+        const ww = genGewicht(k.w, e, g);
+        const d = (k.t[g] - e.genome[g] / 255) * ww; s += d * d; z += ww * ww;
+      }
       let d = Math.sqrt(s / Math.max(z, 1e-9));
       if (e.habWater != null) d *= 1 + HABITAT_PENALTY_K * Math.abs(k.env.water - e.habWater / 255);
       return { d, name: e.de || e.sci };
@@ -255,6 +271,9 @@ const HABITAT_PENALTY_K = 2.0;
     [`${vorspruenge.length} Karten aus Gruppen mit ≥20 Arten.`,
      `Median ${med(gleichstand)} Arten liegen innerhalb von 1 % Abstand zum Sieger.`,
      ...beispiele,
+     CONF_GEWICHT
+       ? "Mit conf-Gewicht (A2) SINKT dieser Vorsprung — das Rauschen war der Vorsprung. Erwartet, s. Massnahmenplan A2."
+       : "Ohne conf-Gewicht stammt ein Teil des Vorsprungs aus nie erhobenen Genen.",
      "Der angezeigte Artname ist in diesem Bereich keine Messung mehr, sondern ein Losentscheid",
      "zwischen praktisch gleichwertigen Kandidaten."]);
 }
@@ -272,7 +291,10 @@ const HABITAT_PENALTY_K = 2.0;
     if (!k.a.real) continue;
     const e = k.a.real.e;
     let sk = 0, sb = 0;
-    for (let g = 0; g < NG; g++) { const d = (k.t[g] - e.genome[g] / 255) * k.w[g]; if (g < 10) sk += d * d; else sb += d * d; }
+    for (let g = 0; g < NG; g++) {
+      const d = (k.t[g] - e.genome[g] / 255) * genGewicht(k.w, e, g);
+      if (g < 10) sk += d * d; else sb += d * d;
+    }
     if (sk + sb <= 0) continue;
     kernAnteil += sk / (sk + sb); n++;
   }
@@ -295,7 +317,9 @@ const HABITAT_PENALTY_K = 2.0;
     [...streuung,
      "Quantisierung des Katalogs: 1/255 = 0.004 — die Streuung liegt teils nur wenige Stufen darueber.",
      "Die bedingten Gene sind im Katalog zu 41,5 % aus dem Habitat abgeleitet (conf 0) und",
-     "anschliessend vom Gruender-Los verstreut. weightFloor 0.3 laesst dieses Rauschen mitzaehlen.",
+     CONF_GEWICHT
+       ? "nearestReal() gewichtet inzwischen mit `conf` (A2) — nie erhobene Gene zaehlen null."
+       : "weightFloor 0.3 laesst dieses Rauschen mit 30 % Gewicht mitzaehlen (A2 nicht umgesetzt).",
      "Die Arten einer Gruppe unterscheiden sich damit vor allem dort, wo nichts gemessen wurde."]);
 }
 

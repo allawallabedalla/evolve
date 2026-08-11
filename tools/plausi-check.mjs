@@ -161,6 +161,18 @@ const legPhrase = (d) =>
 // Gemessen an evolvierten Genomen aus den 12 Presets der App, jeweils mit einem
 // Ausschlag im irrelevanten Gen — so, wie er in der lebenden Population durch
 // Mutations-Selektions-Gleichgewicht real vorkommt.
+// Wie bildet updateSpeciesWiki() sein Label? Die Tabelle wird aus app/index.html
+// GELESEN, nicht abgeschrieben — sonst prueft P4 seine eigene Kopie.
+const KLADE_NAMEN = (() => {
+  const src = html.match(/const KLADE_NAMEN = \{[\s\S]*?\n\};/);
+  if (!src) return null;
+  return eval("(" + src[0].replace(/^const KLADE_NAMEN = /, "").replace(/;$/, "") + ")");
+})();
+const wikiLabel = (e) => {
+  const kl = KLADE_NAMEN && e.klade && KLADE_NAMEN[e.klade];
+  return kl ? kl.de : (e.de || e.sci);
+};
+
 const BIOMES = (() => {
   const src = html.match(/const BIOMES = \[[\s\S]*?\n\];/);
   return eval(src[0].replace(/^const BIOMES = /, "").replace(/;$/, ""));
@@ -177,7 +189,7 @@ const converge = (env, gens = 400) => {
 };
 
 {
-  let cases = 0, widerspruch = 0, tautologie = 0, namen = 0;
+  let cases = 0, widerspruch = 0, tautologie = 0, namen = 0, ohneKlade = 0;
   const beispiele = [];
   for (const b of BIOMES) {
     const env = envOfBiome(b);
@@ -193,7 +205,8 @@ const converge = (env, gens = 400) => {
         // Tautologie: Ueberschrift und „≈ in echt"-Chip zeigen DENSELBEN Namen.
         // updateSpeciesWiki() nimmt bei vorhandenem arch.real dieselbe Quelle wie
         // die Ueberschrift (app/index.html, „label = e.de || e.sci").
-        if ((a.real.e.de || a.real.e.sci) === a.n) tautologie++;
+        if (wikiLabel(a.real.e) === a.n) tautologie++;
+        if (!a.real.e.klade) ohneKlade++;
         const eigen = t[gene], benannt = a.real.e.genome[gene] / 255;
         const zeigtMerkmal = merkmal === "Leuchtorgan"
           ? /Leuchtorgan/.test(describe(t, a))
@@ -214,8 +227,11 @@ const converge = (env, gens = 400) => {
 
   report("P4", '„≈ in echt"-Verweis wiederholt nur den Artnamen (Tautologie)',
     tautologie, namen,
-    ['updateSpeciesWiki() nimmt bei vorhandenem arch.real „e.de || e.sci" — dieselbe Quelle wie die Ueberschrift.',
-     'Der Verweis sollte die REALE Klade zeigen ("≈ Schweine"), nicht denselben Namen noch einmal.']);
+    [KLADE_NAMEN
+      ? `updateSpeciesWiki() nimmt die KLADE aus dem Feld \`klade\` (${Object.keys(KLADE_NAMEN).length} Kladen in app/index.html).`
+      : 'KLADE_NAMEN nicht in app/index.html gefunden — der Verweis nimmt weiter „e.de || e.sci", dieselbe Quelle wie die Ueberschrift.',
+     `ohne Feld \`klade\` (Verweis faellt auf den Artnamen zurueck): ${ohneKlade} von ${namen}`,
+     'Der Verweis soll die REALE Klade zeigen („≈ Voegel"), nicht denselben Namen noch einmal.']);
 }
 
 // ---------------------------------------------------------------------------
