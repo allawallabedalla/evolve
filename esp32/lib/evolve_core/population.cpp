@@ -53,6 +53,10 @@ real Population::randn() {
   return std::sqrt(real(-2) * std::log(u)) * std::cos(real(6.283185307179586) * v);  // 2 * Math.PI
 }
 
+void Population::foundUniform() {
+  for (int i = 0; i < cfg_.size * G; i++) genomes_[i] = rng_.next();
+}
+
 void Population::seedFrom(const real *genome, real spread) {
   real base[G];
   for (int g = 0; g < G; g++) base[g] = clamp01(genome[g]);

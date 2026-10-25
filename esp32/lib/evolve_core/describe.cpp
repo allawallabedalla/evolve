@@ -23,12 +23,30 @@ static const Axis AXES[] = {
     {9, "leuchtend", nullptr, real(0.5), 0},
 };
 
-const char *kingdomOf(const real *g) {
+const char *const KINGDOM_NAMES[K_COUNT] = {"Pflanze", "Tier", "Pilz", "Mikrobe", "Protist"};
+
+Kingdom kingdomIdOf(const real *g) {
   const real size = g[1], photo = g[5], mob = g[6];
-  if (photo > real(0.45) && mob < real(0.4)) return "Pflanze";
-  if (mob > real(0.45) && photo < real(0.4)) return "Tier";
-  if (photo < real(0.45) && mob < real(0.4)) return size < real(0.18) ? "Mikrobe" : "Pilz";
-  return "Protist";
+  if (photo > real(0.45) && mob < real(0.4)) return K_PFLANZE;
+  if (mob > real(0.45) && photo < real(0.4)) return K_TIER;
+  if (photo < real(0.45) && mob < real(0.4)) return size < real(0.18) ? K_MIKROBE : K_PILZ;
+  return K_PROTIST;
+}
+
+const char *kingdomOf(const real *g) { return KINGDOM_NAMES[kingdomIdOf(g)]; }
+
+uint32_t formKeyCode(const real *g) {
+  uint32_t key = uint32_t(kingdomIdOf(g)) << 16;
+  int i = 0;
+  for (const Axis &a : AXES) {
+    const real v = g[a.idx];
+    if (v >= a.hiT)
+      key |= 1u << (2 * i);
+    else if (a.lo && v <= a.loT)
+      key |= 1u << (2 * i + 1);
+    i++;
+  }
+  return key;
 }
 
 int describeGenes(const real *g, int genes[3], bool high[3]) {

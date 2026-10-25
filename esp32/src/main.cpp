@@ -5,6 +5,7 @@
 #include <lvgl.h>
 
 #include "board.h"
+#include "challenges.h"
 #include "explain.h"
 #include "sim.h"
 #include "ui.h"
@@ -146,13 +147,49 @@ static void bench_tick() {
   }
 }
 
+// Bildschirm-Schlaf: nach 30 s ohne Berührung geht das Licht aus (spart Akku), die
+// Simulation läuft weiter. Die erste Berührung weckt nur – sie löst nichts aus – und
+// die Oberfläche zeigt einen Rückblick. Die Aussterbe-Uhr steht, solange es dunkel ist.
+static constexpr uint32_t SLEEP_AFTER_MS = 30000;
+static constexpr uint8_t BRIGHTNESS = 200;
+static bool sleeping = false;
+static bool swallow_touch = false;
+static uint32_t last_input_ms = 0;
+
+static void go_sleep() {
+  sleeping = true;
+  ui_sleep();
+  sim_set_watching(false);
+  lcd.setBrightness(0);
+  Serial.println("Bildschirm schläft");
+}
+
+static void wake_up() {
+  sleeping = false;
+  lcd.setBrightness(BRIGHTNESS);
+  sim_set_watching(true);
+  ui_wake();
+  last_input_ms = millis();
+  Serial.println("Bildschirm wach");
+}
+
 static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
   uint16_t x, y;
   if (lcd.getTouch(&x, &y)) {
+    last_input_ms = millis();
+    if (sleeping) {
+      wake_up();
+      swallow_touch = true;
+    }
+    if (swallow_touch) {
+      data->state = LV_INDEV_STATE_REL;
+      return;
+    }
     data->state = LV_INDEV_STATE_PR;
     data->point.x = x;
     data->point.y = y;
   } else {
+    swallow_touch = false;
     data->state = LV_INDEV_STATE_REL;
   }
 }
@@ -163,6 +200,10 @@ static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 //   forget               Speicherstand löschen, Neustart mit frischer Welt
 //   info                 Erklärtext zum aktuellen Wesen (wie beim Antippen)
 //   bench                Erklärung 4 s automatisch scrollen, Bildrate messen
+//   new                  neue Linie (wie „Neues Leben“ im Menü)
+//   ch <nr>              Herausforderung annehmen (0 .. NUM_CHALLENGES-1)
+//   chron                Chronik ausgeben
+//   sleep / wake         Bildschirm schlafen legen / wecken
 static void serial_commands() {
   static char line[64];
   static size_t n = 0;
@@ -174,7 +215,23 @@ static void serial_commands() {
     }
     line[n] = 0;
     n = 0;
+    if (strcmp(line, "sleep")) last_input_ms = millis();  // Befehle zählen als Aktivität
     if (!strcmp(line, "forget")) sim_forget();
+    if (!strcmp(line, "new")) sim_new_lineage();
+    if (!strncmp(line, "ch ", 3)) {
+      const int idx = atoi(line + 3);
+      if (idx >= 0 && idx < NUM_CHALLENGES) {
+        sim_accept_challenge(idx);
+        Serial.printf("Herausforderung %d: %s\n", idx, CHALLENGES[idx].title);
+      }
+    }
+    if (!strcmp(line, "sleep")) go_sleep();
+    if (!strcmp(line, "wake")) wake_up();
+    if (!strcmp(line, "chron")) {
+      static ChronicleEntry ch[CHRONICLE_LEN];
+      const int n = sim_chronicle(ch, CHRONICLE_LEN);
+      for (int i = 0; i < n; i++) Serial.printf("chron: Gen. %u: %s\n", unsigned(ch[i].gen), ch[i].desc);
+    }
     // bench = scrollen, bench r = ohne Scrollen neu zeichnen, bench e = dasselbe ohne Text
     if (!strncmp(line, "bench", 5)) {
       bench = {};
@@ -251,6 +308,7 @@ void loop() {
   serial_commands();
   bench_tick();
   ui_tick();
+  if (!sleeping && !bench.active && millis() - last_input_ms > SLEEP_AFTER_MS) go_sleep();
   // So lange schlafen, wie LVGL nichts zu tun hat (höchstens 5 ms) – die Zeit
   // bekommt der Sim-Task, der unter loop() läuft.
   const uint32_t idle = lv_timer_handler();

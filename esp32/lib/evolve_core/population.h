@@ -43,6 +43,9 @@ class Population {
   int size() const { return cfg_.size; }
   const real *genome(int i) const { return genomes_ + i * G; }
 
+  // Neu gründen mit gestreuten Gründern (jedes Gen gleichverteilt) – „Neues Leben“
+  void foundUniform();
+
   // Population aus einem Genom neu befüllen (mit kleiner Streuung), wie seedFrom().
   void seedFrom(const real *genome, real spread);
   void seedFrom(const real *genome) { seedFrom(genome, cfg_.startSpread); }

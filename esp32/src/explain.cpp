@@ -62,7 +62,10 @@ static void append(char *out, size_t len, const char *s) { strncat(out, s, len -
 
 void explain_creature(const SimSnapshot &s, const Environment &env, char *out, size_t len) {
   out[0] = 0;
-  const char *k = kingdomOf(s.mean);
+  char line[200];
+  snprintf(line, sizeof line, "%s, %u Generationen alt, %s.\n\n", s.name, unsigned(s.age), STATUS_TEXT[s.status]);
+  append(out, len, line);
+  const char *k = kingdomOf(s.rep);
   for (const auto &kt : KINGDOMS)
     if (!strcmp(kt.kingdom, k)) append(out, len, kt.text);
 
@@ -71,7 +74,7 @@ void explain_creature(const SimSnapshot &s, const Environment &env, char *out, s
   int n = 0;
   int titleGenes[3];
   bool high[3];
-  const int nt = describeGenes(s.mean, titleGenes, high);
+  const int nt = describeGenes(s.rep, titleGenes, high);
   for (int i = 0; i < nt; i++)
     if (high[i]) shown[n++] = titleGenes[i];  // Gen-Texte beschreiben die Oberseite
   while (n < 2) {
@@ -79,15 +82,14 @@ void explain_creature(const SimSnapshot &s, const Environment &env, char *out, s
     for (int g = 0; g < P::NUM_GENES; g++) {
       bool used = false;
       for (int i = 0; i < n; i++) used |= shown[i] == g;
-      if (used || gene_score(g, s.mean[g]) < 0) continue;
-      if (best < 0 || gene_score(g, s.mean[g]) > gene_score(best, s.mean[best])) best = g;
+      if (used || gene_score(g, s.rep[g]) < 0) continue;
+      if (best < 0 || gene_score(g, s.rep[g]) > gene_score(best, s.rep[best])) best = g;
     }
     if (best < 0) break;
     shown[n++] = best;
   }
   append(out, len, "\n\nPrägt es:");
   if (n == 0) append(out, len, "\nKein Merkmal sticht heraus – ein Allrounder.");
-  char line[200];
   for (int i = 0; i < n; i++) {
     snprintf(line, sizeof line, "\n· %s: %s", texts::GENE_LABEL[shown[i]], texts::GENE_EXPLAIN[shown[i]]);
     append(out, len, line);
@@ -115,8 +117,7 @@ void explain_creature(const SimSnapshot &s, const Environment &env, char *out, s
     append(out, len, env.*WORLD[p].field < real(0.5) ? WORLD[p].low : WORLD[p].high);
   }
 
-  snprintf(line, sizeof line,
-           "\n\nGeneration %u. Du steuerst nur die Welt – das Wesen passt sich über Generationen selbst an.",
-           s.generation);
-  append(out, len, line);
+  append(out, len, "\n\nDu steuerst nur die Welt – das Wesen passt sich über Generationen selbst an. "
+                   "Regler wirken nicht sofort: die Welt braucht ein paar Generationen, um umzuschlagen.");
+  append(out, len, "\nLange drücken: Menü mit Herausforderungen, Chronik und neuem Leben.");
 }

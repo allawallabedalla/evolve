@@ -1,5 +1,6 @@
 #include "creature.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "describe.h"
@@ -9,6 +10,18 @@ namespace P = phys;
 
 static real genome[P::NUM_GENES];
 static bool have_genome = false;
+
+// Animationszustand, von creature_tick() je Bild gesetzt
+static float breath = 0;   // relative Größenänderung des Körpers (Atmen)
+static int off_x = 0, off_y = 0;  // Wiegen, Wippen, Hüpfen
+static float flap = 1;     // Flügelspannweite 0.7..1
+static float glow_k = 1;   // Puls des Leuchtens
+static bool blinking = false;
+static float jiggle = 0;   // Zellen der Mikroben zittern
+static uint32_t hop_start = 0, hop_len = 0;
+static int hop_height = 0, hop_count = 1;
+
+static inline int breathe(int r) { return int(r * (1 + breath) + 0.5f); }
 
 static inline float clamp01(float x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
 static inline lv_coord_t lerp(float a, float b, float t) { return lv_coord_t(a + (b - a) * t); }
@@ -65,7 +78,7 @@ static void tri(lv_draw_ctx_t *ctx, int x1, int y1, int x2, int y2, int x3, int 
 // Leuchten (Biolumineszenz) als Hof hinter dem Körper
 static void glow(lv_draw_ctx_t *ctx, int cx, int cy, int r, float biolum) {
   if (biolum < 0.3f) return;
-  const lv_opa_t opa = lv_opa_t(clamp01((biolum - 0.3f) / 0.7f) * 140 + 30);
+  const lv_opa_t opa = lv_opa_t((clamp01((biolum - 0.3f) / 0.7f) * 140 + 30) * glow_k);
   ellipse(ctx, cx, cy, r + 10, r + 10, lv_color_hex(0x40FFE0), opa / 2);
   ellipse(ctx, cx, cy, r + 5, r + 5, lv_color_hex(0x40FFE0), opa);
 }
@@ -82,8 +95,10 @@ static void draw_plant(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const int base = cy + 46;
   const int stemLen = structure > 0.25f ? lerp(10, 44, structure) : 6;
   const int stemW = lerp(2, 7, structure) + lerp(0, 3, size);
-  const int r = lerp(12, 30, size);
+  const int r = breathe(lerp(12, 30, size));
   const int crownY = base - stemLen - r;
+  const int sx = cx;  // Stamm und Wurzeln bleiben stehen …
+  cx += off_x;        // … die Krone wiegt sich
   const lv_color_t wood = lv_color_hex(0x7A5230);
   const lv_color_t green = body_color(lv_color_hex(0x4CAF50), g[P::T_PIGMENT], g[P::T_CAMO]);
 
@@ -93,16 +108,18 @@ static void draw_plant(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
     const int n = 2 + int(structure * 3 + 0.5f);
     for (int i = 0; i < n; i++) {
       const int dx = (i - (n - 1) / 2.0f) * 6;
-      line(ctx, cx, base, cx + dx, base + 9, 2, wood);
+      line(ctx, sx, base, sx + dx, base + 9, 2, wood);
     }
   }
-  rect(ctx, cx - stemW / 2, base - stemLen - 2, cx + stemW / 2, base, wood, stemW / 2);
+  // Stamm als leicht geneigte Linie zur wiegenden Krone
+  line(ctx, sx, base, cx, base - stemLen - 2, stemW, wood);
   // Dornen am Stamm
   if (armor > 0.6f)
     for (int i = 1; i <= 3; i++) {
       const int y = base - stemLen * i / 4;
+      const int x = sx + (cx - sx) * i / 4;
       const int s = i % 2 ? 1 : -1;
-      tri(ctx, cx + s * stemW / 2, y - 3, cx + s * stemW / 2, y + 3, cx + s * (stemW / 2 + 6), y, wood);
+      tri(ctx, x + s * stemW / 2, y - 3, x + s * stemW / 2, y + 3, x + s * (stemW / 2 + 6), y, wood);
     }
   // Blätter rund um die Krone, Anzahl wie development.ts (photo * 8)
   const int leaves = int(photo * 8 + 0.5f);
@@ -121,7 +138,7 @@ static void draw_plant(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
 
 static void draw_fungus(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const float size = g[P::T_SIZE];
-  const int capR = lerp(14, 36, size);
+  const int capR = breathe(lerp(14, 36, size));
   const int stalkH = lerp(14, 34, size);
   const int stalkW = lerp(5, 12, size);
   const int base = cy + 44;
@@ -147,16 +164,18 @@ static void cell(lv_draw_ctx_t *ctx, int cx, int cy, int r, lv_color_t c, bool c
 
 static void draw_microbe(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const lv_color_t c = body_color(lv_color_hex(0x9C7BD0), g[P::T_PIGMENT], g[P::T_CAMO]);
-  const int r = lerp(7, 12, g[P::T_SIZE] / 0.18f);
+  const int r = breathe(lerp(7, 12, g[P::T_SIZE] / 0.18f));
   glow(ctx, cx, cy, r * 2, g[P::T_BIOLUM]);
-  cell(ctx, cx - r - 4, cy + 4, r, c, true);
-  cell(ctx, cx + r + 2, cy + 8, r - 2, c, true);
-  cell(ctx, cx, cy - r - 2, r + 1, c, true);
+  // drei Zellen, die gegeneinander zittern
+  const int j = int(jiggle * 2);
+  cell(ctx, cx - r - 4 + j, cy + 4, r, c, true);
+  cell(ctx, cx + r + 2, cy + 8 - j, r - 2, c, true);
+  cell(ctx, cx - j, cy - r - 2, r + 1, c, true);
 }
 
 static void draw_protist(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const float size = g[P::T_SIZE];
-  const int r = lerp(12, 30, size);
+  const int r = breathe(lerp(12, 30, size));
   const lv_color_t c = body_color(lv_color_hex(0x3FB8A8), g[P::T_PIGMENT], g[P::T_CAMO]);
   glow(ctx, cx, cy, r, g[P::T_BIOLUM]);
   // Geißel als Wellenlinie, Länge mit Mobilität
@@ -164,7 +183,7 @@ static void draw_protist(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   int x0 = cx + r - 2, y0 = cy;
   for (int i = 1; i <= 8; i++) {
     const int x1 = cx + r - 2 + len * i / 8;
-    const int y1 = cy + (lv_trigo_sin(i * 70) * 5) / 32767;
+    const int y1 = cy + (lv_trigo_sin(i * 70 + int(jiggle * 180)) * 5) / 32767;  // Geißel schlägt
     line(ctx, x0, y0, x1, y1, 2, c);
     x0 = x1;
     y0 = y1;
@@ -181,7 +200,7 @@ static void draw_animal(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const float size = g[P::T_SIZE], limb = g[P::T_LIMBLENGTH], mob = g[P::T_MOBILITY];
   const float armor = g[P::T_ARMOR], insul = g[P::T_INSULATION], wing = g[P::T_WING];
   const float sense = g[P::T_SENSE];
-  const int rw = lerp(14, 34, size);
+  const int rw = breathe(lerp(14, 34, size));
   const int rh = rw * 3 / 4;
   const int by = cy - 10;
   const lv_color_t body = body_color(lv_color_hex(0xE0874A), g[P::T_PIGMENT], g[P::T_CAMO]);
@@ -193,6 +212,7 @@ static void draw_animal(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   if (wing > 0.3f) {
     int span = lerp(8, 36, (wing - 0.3f) / 0.7f);
     if (rw + span > 60) span = 60 - rw;
+    span = int(span * flap);  // Flügelschlag
     const lv_color_t wc = lv_color_hex(0xDDE8F0);
     for (int s = -1; s <= 1; s += 2)
       tri(ctx, cx + s * rw / 2, by - rh / 2, cx + s * (rw + span), by - rh - span / 3, cx + s * (rw + span * 2 / 3),
@@ -242,6 +262,10 @@ static void draw_animal(lv_draw_ctx_t *ctx, int cx, int cy, const real *g) {
   const int e = lerp(2, 6, sense);
   for (int s = -1; s <= 1; s += 2) {
     const int ex = cx + s * rw * 35 / 100, ey = by - rh / 4;
+    if (blinking) {
+      line(ctx, ex - e - 1, ey, ex + e + 1, ey, 2, lv_color_black());
+      continue;
+    }
     ellipse(ctx, ex, ey, e + 2, e + 2, lv_color_white());
     ellipse(ctx, ex, ey + 1, e * 6 / 10 + 1, e * 6 / 10 + 1, lv_color_black());
   }
@@ -253,9 +277,11 @@ static void draw_cb(lv_event_t *e) {
   lv_draw_ctx_t *ctx = lv_event_get_draw_ctx(e);
   lv_area_t a;
   lv_obj_get_coords(obj, &a);
-  const int cx = (a.x1 + a.x2) / 2, cy = (a.y1 + a.y2) / 2;
   const char *k = kingdomOf(genome);
-  if (!strcmp(k, "Pflanze"))
+  const bool plant = !strcmp(k, "Pflanze");
+  // Pflanzen wiegen sich nur oben (draw_plant), alle anderen wippen als Ganzes
+  const int cx = (a.x1 + a.x2) / 2 + (plant ? 0 : off_x), cy = (a.y1 + a.y2) / 2 + off_y;
+  if (plant)
     draw_plant(ctx, cx, cy, genome);
   else if (!strcmp(k, "Tier"))
     draw_animal(ctx, cx, cy, genome);
@@ -280,4 +306,51 @@ void creature_set_genome(lv_obj_t *obj, const real *g) {
   memcpy(genome, g, sizeof genome);
   have_genome = true;
   lv_obj_invalidate(obj);
+}
+
+// sin in Grad, -1..1
+static inline float sind(uint32_t deg) { return lv_trigo_sin(int16_t(deg % 360)) / 32767.0f; }
+
+void creature_tick(lv_obj_t *obj, uint32_t t) {
+  if (!have_genome) return;
+  const float metab = genome[P::T_METABOLISM], mob = genome[P::T_MOBILITY];
+  // Atmen: hoher Stoffwechsel atmet schneller (Periode 3,2 s .. 1,2 s)
+  const uint32_t breathPeriod = 3200 - uint32_t(2000 * clamp01(metab));
+  breath = 0.035f * sind(t * 360 / breathPeriod);
+  // Wippen bzw. Wiegen: bewegliche Wesen zappeln mehr, Pflanzen wiegen sich langsam im Wind
+  if (kingdomIdOf(genome) == K_PFLANZE) {
+    off_x = int(3 * sind(t * 360 / 2600));
+    off_y = 0;
+  } else {
+    off_x = int(2.5f * mob * sind(t * 360 / 1700));
+    off_y = int(2.0f * mob * sind(t * 360 / 600));
+  }
+  // Hüpfen (Antippen, Formwechsel)
+  if (hop_len && t - hop_start < hop_len) {
+    const uint32_t one = hop_len / hop_count;
+    const uint32_t p = (t - hop_start) % one;
+    off_y -= int(hop_height * sind(p * 180 / one));
+  } else {
+    hop_len = 0;
+  }
+  flap = 0.75f + 0.25f * sind(t * 360 / 220);  // ~4,5 Flügelschläge je Sekunde
+  glow_k = 0.75f + 0.25f * sind(t * 360 / 1400);
+  jiggle = sind(t * 360 / 450);
+  // Blinzeln: alle 3–5 s für 140 ms
+  static uint32_t next_blink = 0;
+  if (t >= next_blink) {
+    blinking = true;
+    if (t >= next_blink + 140) {
+      blinking = false;
+      next_blink = t + 3000 + uint32_t(rand() % 2000);
+    }
+  }
+  lv_obj_invalidate(obj);
+}
+
+void creature_hop(int strength) {
+  hop_start = lv_tick_get();
+  hop_count = strength >= 2 ? 3 : 1;
+  hop_len = strength >= 2 ? 1200 : 380;
+  hop_height = strength >= 2 ? 16 : 10;
 }
