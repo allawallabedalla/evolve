@@ -18,3 +18,9 @@ void creature_tick(lv_obj_t *obj, uint32_t now_ms);
 
 // Hüpfer: als Reaktion aufs Antippen (1) oder zum Feiern eines Formwechsels (2 = doppelt hoch, drei Sprünge)
 void creature_hop(int strength);
+
+// Streicheln: Finger an Bildschirmposition (x, y) streicht über das Wesen. Es schaut
+// dem Finger nach, lehnt sich hinein, wackelt; nach genug Streicheln steigen Herzen
+// (Tiere) bzw. Funken (alle anderen) auf. Rein zur Zuneigung – die Gene bleiben, wie sie sind.
+void creature_pet(lv_obj_t *obj, int x, int y);
+void creature_pet_end();

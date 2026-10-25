@@ -31,6 +31,8 @@ struct SaveBlob {
   GamePersist game;
 };
 
+volatile bool g_serial_quiet = false;
+
 static SemaphoreHandle_t lock;
 static Environment target;  // Regler
 static Environment actual;  // Welt
@@ -58,7 +60,7 @@ static void push_event(const GameEvent &e) {
     ev_head = (ev_head + 1) % 8;
   mark_dirty();
   xSemaphoreGive(lock);
-  Serial.printf("Ereignis %d gen=%u | %s | %s\n", e.type, e.gen, e.a, e.b);
+  if (!g_serial_quiet) Serial.printf("Ereignis %d gen=%u | %s | %s\n", e.type, e.gen, e.a, e.b);
 }
 
 static bool load_state() {
@@ -79,7 +81,7 @@ static void save_state(uint32_t gen, const Population &pop) {
   const uint32_t t0 = millis();
   prefs.putBytes("state", &b, sizeof b);
   prefs.putUChar("ver", SAVE_VERSION);
-  Serial.printf("gespeichert: gen=%u (%u Byte, %u ms)\n", gen, unsigned(sizeof b), millis() - t0);
+  if (!g_serial_quiet) Serial.printf("gespeichert: gen=%u (%u Byte, %u ms)\n", gen, unsigned(sizeof b), millis() - t0);
 }
 
 static void publish(uint32_t gen, float stepMs) {
@@ -164,7 +166,7 @@ static void sim_task(void *arg) {
     game_step(game, pop, e, gen, watch, dt > 2 ? 2 : dt, push_event);
     publish(gen, (t1 - t0) / 1000.0f);
 
-    Serial.printf("gen=%u fit=%.3f step=%.0fms game=%.0fms heap=%u peril=%.0f | %s · %s\n", gen,
+    if (!g_serial_quiet) Serial.printf("gen=%u fit=%.3f step=%.0fms game=%.0fms heap=%u peril=%.0f | %s · %s\n", gen,
                   double(game.fitness), (t1 - t0) / 1000.0, (micros() - t1) / 1000.0, ESP.getFreeHeap(),
                   double(game.peril), game.p.name, game.p.committedDesc);
 

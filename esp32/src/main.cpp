@@ -133,13 +133,13 @@ static void bench_tick() {
     if ((now - bench.start) % 2000 < 16) bench.dir = -bench.dir;  // alle 2 s Richtung wechseln
     if (bench.mode == 's')
       ui_info_scroll(4 * bench.dir);
-    else
+    else if (bench.mode != 'a')
       ui_info_invalidate();
   }
   if (now - bench.start >= 4000) {
     bench.active = false;
     ui_info_text_visible(true);
-    ui_info_close();
+    if (bench.mode != 'a') ui_info_close();
     const uint32_t f = bench.frames ? bench.frames : 1;
     Serial.printf("bench: %u Bilder, Render Ø %u ms / max %u ms, davon SPI Ø %u ms, Ø %u px/Bild, CPU %u MHz\n",
                   bench.frames, bench.render_sum / f, bench.render_max, bench.flush_us / 1000 / f, bench.px / f,
@@ -204,6 +204,9 @@ static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 //   ch <nr>              Herausforderung annehmen (0 .. NUM_CHALLENGES-1)
 //   chron                Chronik ausgeben
 //   sleep / wake         Bildschirm schlafen legen / wecken
+//   pose <nr> / pose off Beispiel-Wesen zeigen (zum Gestalten) / zurück zum echten
+//   shot                 Bildschirm als RGB565 binär schicken (tools/shot.py macht PNGs daraus)
+//   pet                  Streicheln vorführen
 static void serial_commands() {
   static char line[64];
   static size_t n = 0;
@@ -225,6 +228,12 @@ static void serial_commands() {
         Serial.printf("Herausforderung %d: %s\n", idx, CHALLENGES[idx].title);
       }
     }
+    if (!strncmp(line, "pose", 4)) {
+      const int n = ui_pose(line[4] == ' ' && line[5] != 'o' ? atoi(line + 5) : -1);
+      Serial.printf("pose: %s (%d Posen)\n", line + 4, n);
+    }
+    if (!strcmp(line, "shot")) ui_screenshot();
+    if (!strcmp(line, "pet")) ui_pet_demo();
     if (!strcmp(line, "sleep")) go_sleep();
     if (!strcmp(line, "wake")) wake_up();
     if (!strcmp(line, "chron")) {
@@ -232,13 +241,14 @@ static void serial_commands() {
       const int n = sim_chronicle(ch, CHRONICLE_LEN);
       for (int i = 0; i < n; i++) Serial.printf("chron: Gen. %u: %s\n", unsigned(ch[i].gen), ch[i].desc);
     }
-    // bench = scrollen, bench r = ohne Scrollen neu zeichnen, bench e = dasselbe ohne Text
+    // bench = scrollen, bench r = ohne Scrollen neu zeichnen, bench e = dasselbe ohne Text,
+    // bench a = Übersicht mit animiertem Wesen
     if (!strncmp(line, "bench", 5)) {
       bench = {};
       bench.dir = -1;
       bench.mode = line[5] == ' ' ? line[6] : 's';
       ui_info_text_visible(bench.mode != 'e');
-      ui_info_open();
+      if (bench.mode != 'a') ui_info_open();
       bench.start = bench.last_scroll = millis();
       bench.active = true;
       continue;

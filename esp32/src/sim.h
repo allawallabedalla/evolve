@@ -9,6 +9,9 @@
 #include "game.h"
 #include "physics.h"
 
+// true = keine Log-Ausgaben (während ui_screenshot() Binärdaten schickt)
+extern volatile bool g_serial_quiet;
+
 struct SimSnapshot {
   uint32_t generation;
   float stepMs;

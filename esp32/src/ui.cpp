@@ -271,8 +271,9 @@ static void refresh_segments() {
   for (int i = 0; i < NUM_REGLER; i++) lv_arc_set_value(seg[i], pct(*env_field(a, i)));
 }
 
+static int posing_now();
 static void update_status_line() {
-  if (!have_snap || millis() < banner_until) return;
+  if (!have_snap || millis() < banner_until || posing_now() >= 0) return;
   uint32_t color = 0xFFFFFF;
   char t[64];
   if (snap.extinct) {
@@ -309,6 +310,35 @@ static void banner(const char *title, uint32_t color, const char *line1, const c
   }
   if (line2) lv_label_set_text(desc_label, line2);
   banner_until = millis() + BANNER_MS;
+}
+
+// Lebensraum als Hintergrund: oben Himmel (hell je nach Licht), unten Land oder Wasser.
+// Bewusst als Verlauf des ganzen Bildschirms statt als runde Fläche – ohne Kreismaske
+// kostet das beim Neuzeichnen um das animierte Wesen herum fast nichts.
+static void update_habitat() {
+  if (!have_snap) return;
+  const Environment &e = snap.envActual;
+  const lv_color_t night = lv_color_hex(0x07120C);
+  const lv_color_t top = lv_color_mix(lv_color_hex(0x2C5A85), night, lv_opa_t(float(e.light) * 255));
+  lv_color_t bottom;
+  if (e.water > real(0.6)) {
+    // je tiefer, desto dunkler blau
+    bottom = lv_color_mix(lv_color_hex(0x071C3E), lv_color_hex(0x144A7A), lv_opa_t(float((e.water - real(0.6)) / real(0.4)) * 255));
+  } else {
+    // trocken = braun, feucht und futterreich = grün
+    const lv_color_t dry = lv_color_hex(0x3D2E17), lush = lv_color_hex(0x1C4D28);
+    bottom = lv_color_mix(lush, dry, lv_opa_t(float(e.water / real(0.6) * real(0.5) + e.foodAbundance * real(0.5)) * 255));
+  }
+  static uint32_t last = 0;
+  const uint32_t key = (uint32_t(lv_color_to16(top)) << 16) | lv_color_to16(bottom);
+  if (key == last) return;
+  last = key;
+  lv_obj_t *scr = lv_scr_act();
+  lv_obj_set_style_bg_color(scr, top, 0);
+  lv_obj_set_style_bg_grad_color(scr, bottom, 0);
+  lv_obj_set_style_bg_main_stop(scr, 110, 0);
+  lv_obj_set_style_bg_grad_stop(scr, 190, 0);
+  lv_obj_set_style_bg_grad_dir(scr, LV_GRAD_DIR_VER, 0);
 }
 
 static void show_overview() {
@@ -428,21 +458,56 @@ static bool in_center(lv_point_t &p) {
   return dx * dx + dy * dy < RING_TOUCH_R * RING_TOUCH_R;
 }
 
+// Übersicht: über das Wesen streichen = streicheln, lange drücken = Erklärung,
+// kurz antippen = Hüpfer + Menü, Tippen auf den Ring = Regler
+static constexpr int STROKE_PX = 10;  // ab so viel Fingerweg ist es Streicheln statt Tippen
+static lv_point_t press_at;
+static bool press_center = false, stroking = false;
+static int stroke_total = 0;
+
 static void screen_event(lv_event_t *e) {
   if (editing >= 0 || card != CARD_NONE) return;
   const lv_event_code_t code = lv_event_get_code(e);
   lv_point_t p;
   const bool center = in_center(p);
-  if (code == LV_EVENT_LONG_PRESSED && center) {
-    creature_hop(1);
-    open_menu();
-    return;
+  switch (code) {
+    case LV_EVENT_PRESSED:
+      press_at = p;
+      press_center = center;
+      stroking = false;
+      stroke_total = 0;
+      return;
+    case LV_EVENT_PRESSING:
+      if (!press_center) return;
+      if (!stroking && abs(p.x - press_at.x) + abs(p.y - press_at.y) > STROKE_PX) stroking = true;
+      if (stroking) {
+        stroke_total += abs(p.x - press_at.x) + abs(p.y - press_at.y);
+        press_at = p;
+        creature_pet(creature, p.x, p.y);
+        last_touch_ms = millis();
+      }
+      return;
+    case LV_EVENT_RELEASED:
+    case LV_EVENT_PRESS_LOST:
+      if (stroking) Serial.printf("gestreichelt: %d px\n", stroke_total);
+      creature_pet_end();
+      return;
+    case LV_EVENT_LONG_PRESSED:
+      if (center && !stroking) {
+        creature_hop(1);
+        open_info();
+      }
+      return;
+    case LV_EVENT_SHORT_CLICKED:
+      break;
+    default:
+      return;
   }
-  if (code != LV_EVENT_SHORT_CLICKED) return;
+  if (stroking) return;  // Streicheln ist kein Tippen
   if (center) {
-    // erst hüpfen, dann erklären
+    // erst hüpfen, dann das Menü
     creature_hop(1);
-    lv_timer_t *t = lv_timer_create([](lv_timer_t *) { if (card == CARD_NONE && editing < 0) open_info(); }, 380,
+    lv_timer_t *t = lv_timer_create([](lv_timer_t *) { if (card == CARD_NONE && editing < 0) open_menu(); }, 380,
                                     nullptr);
     lv_timer_set_repeat_count(t, 1);
     return;
@@ -554,8 +619,9 @@ void ui_tick() {
     shown = snap.generation;
   }
   while (sim_pop_event(ev)) handle_event(ev);
-  if (!fresh) return;
+  if (!fresh || posing_now() >= 0) return;
   creature_set_genome(creature, snap.rep);
+  update_habitat();
   if (editing < 0) refresh_segments();
   else update_edit_labels();
   update_status_line();
@@ -617,8 +683,9 @@ void ui_build() {
   lv_obj_t *scr = lv_scr_act();
   lv_obj_set_style_bg_color(scr, lv_color_hex(0x0B1A12), 0);
   lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_add_event_cb(scr, screen_event, LV_EVENT_SHORT_CLICKED, nullptr);
-  lv_obj_add_event_cb(scr, screen_event, LV_EVENT_LONG_PRESSED, nullptr);
+  for (lv_event_code_t c : {LV_EVENT_PRESSED, LV_EVENT_PRESSING, LV_EVENT_RELEASED, LV_EVENT_PRESS_LOST,
+                            LV_EVENT_LONG_PRESSED, LV_EVENT_SHORT_CLICKED})
+    lv_obj_add_event_cb(scr, screen_event, c, nullptr);
 
   // Übersicht: ein kurzer Bogen je Regler, Füllung = wie die Welt gerade ist
   for (int i = 0; i < NUM_REGLER; i++) {
@@ -632,8 +699,8 @@ void ui_build() {
     seg[i] = a;
   }
 
-  creature = creature_create(scr, 140, 124);
-  lv_obj_align(creature, LV_ALIGN_CENTER, 0, -26);
+  creature = creature_create(scr, 176, 150);
+  lv_obj_align(creature, LV_ALIGN_CENTER, 0, -24);
 
   banner_label = label(scr, &font_de_20, 0xFFD54F, -86);
   lv_obj_add_flag(banner_label, LV_OBJ_FLAG_HIDDEN);
@@ -729,7 +796,7 @@ void ui_build() {
   lv_obj_add_event_cb(card_next, [](lv_event_t *) { show_challenge(ch_view + 1); }, LV_EVENT_CLICKED, nullptr);
 
   lv_obj_add_flag(card_panel, LV_OBJ_FLAG_HIDDEN);
-  lv_timer_create(anim_tick, 50, nullptr);
+  lv_timer_create(anim_tick, 70, nullptr);  // ~14 Bilder/s reichen für Atmen und Wiegen
   show_overview();
 }
 
@@ -777,6 +844,95 @@ void ui_wake() {
   card_set_buttons(nullptr);
   card_show(CARD_REVEAL, "tippen = weiter");
   if (changes) creature_hop(2);
+}
+
+// ======================================================================== Gestalten
+
+struct Pose {
+  const char *name;
+  struct { int gene; float v; } set[8];
+};
+// Beispiel-Genome je Bauplan; nicht genannte Gene: Kern 0.5, bedingte Kosten-Gene 0.12
+static const Pose POSES[] = {
+    {"Kraut", {{5, .8f}, {6, .1f}, {1, .3f}, {7, .2f}, {-1, 0}}},
+    {"Baum", {{5, .85f}, {6, .05f}, {1, .85f}, {7, .9f}, {4, .3f}, {21, .6f}, {-1, 0}}},
+    {"Pilz", {{5, .1f}, {6, .1f}, {1, .5f}, {4, .3f}, {-1, 0}}},
+    {"Mikrobe", {{5, .2f}, {6, .2f}, {1, .08f}, {-1, 0}}},
+    {"Protist", {{5, .5f}, {6, .5f}, {1, .3f}, {-1, 0}}},
+    {"Fell-Tier", {{5, .05f}, {6, .8f}, {0, .85f}, {1, .5f}, {2, .5f}, {3, .7f}, {18, .6f}, {-1, 0}}},
+    {"Panzer-Tier", {{5, .05f}, {6, .6f}, {4, .9f}, {1, .7f}, {2, .4f}, {-1, 0}}},
+    {"Leuchtflieger", {{5, .05f}, {6, .8f}, {8, .9f}, {1, .2f}, {9, .8f}, {2, .3f}, {3, .8f}, {-1, 0}}},
+    {"Insekt", {{5, .05f}, {6, .7f}, {2, .9f}, {1, .1f}, {4, .1f}, {0, .1f}, {-1, 0}}},
+    {"Leuchtpilz", {{5, .1f}, {6, .1f}, {1, .35f}, {9, .8f}, {14, .6f}, {-1, 0}}},
+};
+static constexpr int NUM_POSES = sizeof POSES / sizeof POSES[0];
+static int posing = -1;
+static int posing_now() { return posing; }
+
+int ui_pose(int idx) {
+  posing = idx >= 0 && idx < NUM_POSES ? idx : -1;
+  if (posing < 0) {
+    if (have_snap) creature_set_genome(creature, snap.rep);
+    update_status_line();
+    return NUM_POSES;
+  }
+  real g[phys::NUM_GENES];
+  // Grundwerte wie ein unauffälliges Wesen: Kern-Gene mittel, Flügel/Leuchten/Panzer/Fell niedrig
+  for (int k = 0; k < phys::NUM_GENES; k++) g[k] = k < 10 ? real(0.4) : real(0.12);
+  g[0] = g[4] = g[8] = g[9] = real(0.2);
+  for (const auto &s : POSES[posing].set) {
+    if (s.gene < 0) break;
+    g[s.gene] = real(s.v);
+  }
+  if (card != CARD_NONE) card_close();
+  if (editing >= 0) show_overview();
+  creature_set_genome(creature, g);
+  char d[DESC_LEN];
+  describe(g, d, sizeof d);
+  lv_label_set_text(status_label, POSES[posing].name);
+  lv_label_set_text(desc_label, d);
+  return NUM_POSES;
+}
+
+void ui_pet_demo() {
+  static int step = 0;
+  step = 0;
+  lv_timer_t *t = lv_timer_create(
+      [](lv_timer_t *tm) {
+        // hin und her über die Körpermitte, wie ein Finger
+        const int x = LCD_W / 2 + (lv_trigo_sin(int16_t((step * 24) % 360)) * 40) / 32767;
+        creature_pet(creature, x, LCD_H / 2 - 20);
+        if (++step >= 50) {
+          creature_pet_end();
+          lv_timer_del(tm);
+        }
+      },
+      30, nullptr);
+  (void)t;
+}
+
+void ui_screenshot() {
+  lv_obj_t *scr = lv_scr_act();
+  const uint32_t size = lv_snapshot_buf_size_needed(scr, LV_IMG_CF_TRUE_COLOR);
+  void *buf = heap_caps_malloc(size, MALLOC_CAP_8BIT);
+  if (!buf) {
+    Serial.printf("shot: %u Byte frei? nein\n", unsigned(size));
+    return;
+  }
+  lv_img_dsc_t dsc;
+  if (lv_snapshot_take_to_buf(scr, LV_IMG_CF_TRUE_COLOR, &dsc, buf, size) == LV_RES_OK) {
+    g_serial_quiet = true;  // Sim-Task schweigt, sonst landet Text mitten in den Bilddaten
+    delay(30);
+    // USB-CDC verwirft sonst Daten, wenn der PC nicht binnen 100 ms abholt
+    Serial.setTxTimeoutMs(2000);
+    const uint32_t bytes = uint32_t(dsc.header.w) * dsc.header.h * sizeof(lv_color_t);  // data_size setzt LVGL hier nicht
+    Serial.printf("SHOT %u %u %u\n", unsigned(dsc.header.w), unsigned(dsc.header.h), unsigned(bytes));
+    Serial.write((const uint8_t *)buf, bytes);
+    Serial.flush();
+    Serial.setTxTimeoutMs(100);
+    g_serial_quiet = false;
+  }
+  heap_caps_free(buf);
 }
 
 // ======================================================================== Messlauf

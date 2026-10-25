@@ -119,5 +119,5 @@ void explain_creature(const SimSnapshot &s, const Environment &env, char *out, s
 
   append(out, len, "\n\nDu steuerst nur die Welt – das Wesen passt sich über Generationen selbst an. "
                    "Regler wirken nicht sofort: die Welt braucht ein paar Generationen, um umzuschlagen.");
-  append(out, len, "\nLange drücken: Menü mit Herausforderungen, Chronik und neuem Leben.");
+  append(out, len, "\nÜber das Wesen streichen: streicheln. Antippen: Menü mit Herausforderungen, Chronik und neuem Leben.");
 }

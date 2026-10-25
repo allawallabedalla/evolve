@@ -18,6 +18,7 @@
 #define LV_INDEV_DEF_READ_PERIOD 20
 
 #define LV_USE_LOG 0
+#define LV_USE_SNAPSHOT 1  // Serial-Befehl "shot": Bildschirm als Bild zum PC
 #define LV_USE_PERF_MONITOR 0
 
 // Eigene Montserrat-Schnitte (SIL OFL, TTF aus lvgl/scripts/built_in_font) mit Latin-1

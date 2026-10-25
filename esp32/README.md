@@ -14,12 +14,17 @@ pio run -d esp32 -t upload && pio device monitor -d esp32
 
 ## Bedienung
 
-- **Mitte:** dein Wesen – die stärkste Art im Schwarm, gezeichnet aus ihren Genen.
-  Es atmet, blinzelt, wippt (je beweglicher, desto mehr), Pflanzen wiegen sich,
-  Leuchten pulsiert, Flügel schlagen.
-  - **Antippen:** es hüpft, dann eine kurze Erklärung (was es ist, was es prägt,
-    was an der Welt auffällt). Scrollen mit dem Finger, Tippen = zurück
-  - **Lange drücken:** Menü – Herausforderung, Chronik, Neues Leben (mit Rückfrage)
+- **Mitte:** dein Wesen – die stärkste Art im Schwarm, gezeichnet aus ihren Genen,
+  mit Licht und Schatten vor einem Lebensraum aus der aktuellen Welt (Himmel je nach
+  Licht, unten Land oder Wasser). Es atmet, blinzelt, wippt (je beweglicher, desto
+  mehr), Pflanzen wiegen sich, Leuchten pulsiert, Flügel schlagen.
+  - **Darüber streichen:** streicheln – es schaut deinem Finger nach, lehnt sich
+    hinein, schnurrt, lächelt; Herzen (Tiere) bzw. Funken steigen auf. Reine
+    Zuneigung, die Gene bleiben unberührt.
+  - **Lange drücken:** kurze Erklärung (was es ist, was es prägt, was an der Welt
+    auffällt). Scrollen mit dem Finger, Tippen = zurück
+  - **Antippen:** es hüpft, dann das Menü – Herausforderung, Chronik, Neues Leben
+    (mit Rückfrage)
 - **Rand:** sechs Bögen = Wärme, Licht, Wasser, Futter, Futterhöhe, Räuber; die
   Füllung zeigt, wie die Welt *gerade ist*
 - Bogen antippen → Regler bearbeiten: Finger am Ring = Ziel der Welt, in der Mitte
@@ -65,6 +70,18 @@ Regler-Änderung oder jedem Spielereignis (NVS); nach dem Einschalten geht es do
 | `ch <nr>` | Herausforderung annehmen (0–64) |
 | `chron` | Chronik ausgeben |
 | `sleep` / `wake` | Bildschirm schlafen legen / wecken |
+| `pose <nr>` / `pose off` | Beispiel-Wesen zeigen (0 Kraut … 9 Leuchtpilz) / zurück zum echten |
+| `pet` | Streicheln vorführen |
+| `shot` | Bildschirm als Bild schicken – besser über `tools/shot.py` |
+
+### Bildschirmfotos
+
+```bash
+python esp32/tools/shot.py COM7 bild.png               # aktueller Bildschirm
+python esp32/tools/shot.py COM7 bogen.png --poses 0-9  # Kontaktbogen aller Beispiel-Wesen
+```
+
+So lassen sich Änderungen an der Wesen-Zeichnung prüfen, ohne aufs Display zu schauen.
 
 Serielle Befehle zählen als Aktivität (der Bildschirm bleibt an).
 
