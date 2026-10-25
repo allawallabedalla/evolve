@@ -106,6 +106,7 @@ static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 // Serielle Befehle zum Testen ohne Finger:
 //   env                  aktuelle Umwelt ausgeben
 //   env <feld> <0..1>    Feld setzen, z. B. "env temperature 0.9"
+//   forget               Speicherstand löschen, Neustart mit frischer Welt
 static void serial_commands() {
   static char line[64];
   static size_t n = 0;
@@ -117,6 +118,7 @@ static void serial_commands() {
     }
     line[n] = 0;
     n = 0;
+    if (!strcmp(line, "forget")) sim_forget();
     if (strncmp(line, "env", 3)) continue;
     Environment e = sim_get_env();
     struct { const char *name; real *v; } F[] = {
@@ -141,7 +143,7 @@ static void serial_commands() {
 void setup() {
   Serial.begin(115200);
   delay(1500);  // USB-CDC Zeit zum Verbinden geben
-  Serial.println("\nEvolve ESP32 – Phase 4");
+  Serial.println("\nEvolve ESP32");
 
   lcd.init();
   lcd.setBrightness(200);
