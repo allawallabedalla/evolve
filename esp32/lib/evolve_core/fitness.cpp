@@ -3,6 +3,7 @@
 // stehen in engine/fitness.ts und werden hier nicht wiederholt.
 #include "fitness.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "physics.h"
@@ -11,6 +12,8 @@ namespace P = phys;
 
 static inline real clamp01(real x) { return x < 0 ? real(0) : x > 1 ? real(1) : x; }
 static inline real sigmoid(real x) { return real(1) / (real(1) + std::exp(-x)); }
+// Fast alle Gewichte sind 1 – pow(x, 1) ist exakt x, spart auf dem Board soft-float-pow()
+static inline real wpow(real x, real w) { return w == real(1) ? x : std::pow(x, w); }
 
 real fitness(const real *t, const Environment &env) {
   const real insulation = t[P::T_INSULATION];
@@ -160,13 +163,13 @@ real fitness(const real *t, const Environment &env) {
   const real regrowthSurvival =
       clamp01(1 - disturbance * (1 - std::max(fireres, resprout)) * P::resproutSeverity);
 
-  const real fit = std::pow(thermal, P::wThermal) * std::pow(predSurvival, P::wPred) *
-                   std::pow(nutrition, P::wNutrition) * std::pow(toxSurvival, P::wTox) *
-                   std::pow(oxySurvival, P::wOxy) * std::pow(osmoSurvival, P::wOsmo) *
-                   std::pow(uvSurvival, P::wUv) * std::pow(baroSurvival, P::wBaro) *
-                   std::pow(desiccSurvival, P::wDesicc) * std::pow(radSurvival, P::wRad) *
-                   std::pow(fireSurvival, P::wFire) * std::pow(frostSurvival, P::wFrost) *
-                   std::pow(windSurvival, P::wWind) * std::pow(regrowthSurvival, P::wResprout);
+  const real fit = wpow(thermal, P::wThermal) * wpow(predSurvival, P::wPred) *
+                   wpow(nutrition, P::wNutrition) * wpow(toxSurvival, P::wTox) *
+                   wpow(oxySurvival, P::wOxy) * wpow(osmoSurvival, P::wOsmo) *
+                   wpow(uvSurvival, P::wUv) * wpow(baroSurvival, P::wBaro) *
+                   wpow(desiccSurvival, P::wDesicc) * wpow(radSurvival, P::wRad) *
+                   wpow(fireSurvival, P::wFire) * wpow(frostSurvival, P::wFrost) *
+                   wpow(windSurvival, P::wWind) * wpow(regrowthSurvival, P::wResprout);
 
   return std::max(fit, P::floor);
 }

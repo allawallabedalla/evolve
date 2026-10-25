@@ -5,9 +5,16 @@
 //   B  Fitness:    3000 Zufalls-Genome × Zufalls-Umwelten, |C++ - TS| < 1e-4
 //   C  Population: gleicher Seed + Umwelt, Mittelwert-Genom nach 50 Gen., Abweichung < 0.02
 //   D  describe(): gleiche Kurzbeschreibung (nur double – float darf an Schwellen kippen)
+//   E  Board-Kernel: Reproduktions-Gewichte der Gründer, relative Abweichung < 1e-3
+//   F  Board-Kernel: Mittelwert-Genom über 16 Seeds je Umwelt statistisch gleich (|z| < 4)
 //
-// Geprüft wird zweimal: native (double, muss praktisch exakt sein) und native_float
-// (derselbe float-Kern wie auf dem Board – hier wird die float-Abweichung gemessen).
+// Warum E/F statt C für den Board-Build: der Ganzzahl-Kernel (EVO_FAST_KERNEL) weicht je
+// Gewicht um ~1e-4 ab. Das kippt früher oder später eine Elternwahl, und ab da läuft der
+// Lauf eine andere, gleich gültige Bahn – wie mit einem anderen Seed. Bahn-Gleichheit ist
+// dafür das falsche Maß; gleich sein müssen die Gewichte und die Verteilung der Ergebnisse.
+//
+// A–D laufen gegen native (double, muss praktisch exakt sein) und native_float (float-Kern),
+// E/F gegen native_fast (float + Ganzzahl-Konkurrenz-Kernel = genau der Board-Build).
 //
 // Voraussetzung: npm run build (dist/) und g++ im PATH. Aufruf:
 //   node esp32/tools/parity.mjs
@@ -29,7 +36,7 @@ const phys = JSON.parse(readFileSync(join(ROOT, "physics.json"), "utf-8"));
 const NG = phys.traits.length;
 
 // C++-Seite bauen (beide Gleitkomma-Varianten)
-execFileSync("python", ["-m", "platformio", "run", "-d", ESP, "-e", "native", "-e", "native_float"], {
+execFileSync("python", ["-m", "platformio", "run", "-d", ESP, "-e", "native", "-e", "native_float", "-e", "native_fast"], {
   stdio: ["ignore", "ignore", "inherit"],
 });
 const bin = (env) => join(ESP, ".pio", "build", env, process.platform === "win32" ? "program.exe" : "program");
@@ -131,6 +138,62 @@ for (const env of ["native", "native_float"]) {
     console.log(`     describe() ${env}: ${runs - descMism}/${runs} gleich (informativ)`);
     for (const l of floatDesc) console.log("     " + l);
   }
+}
+
+// --- E: Board-Kernel, Gewichte ------------------------------------------------
+{
+  let max = 0, worst = "";
+  for (const e of ENVS) {
+    for (const seed of SEEDS) {
+      const ref = new Population(POP_CFG, seed).weights(e, phys);
+      const out = run("native_fast", ["weights", String(seed), String(N), ...envArgs(e)]).map(Number);
+      out.forEach((v, i) => {
+        const rel = Math.abs(v - ref[i]) / Math.max(ref[i], 1e-12);
+        if (rel > max) { max = rel; worst = `${e.name}, Seed ${seed}, Individuum ${i}`; }
+      });
+    }
+  }
+  console.log(verdict(max < 1e-3, `E  Gewichte   native_fast  max relative Abweichung = ${max.toExponential(2)} (${worst})`));
+}
+
+// --- F: Board-Kernel, Ergebnis-Verteilung -------------------------------------
+{
+  const SEEDS_F = Array.from({ length: 16 }, (_, k) => k + 1);
+  const stats = (rows) => {
+    const n = rows.length;
+    const m = rows[0].map((_, g) => rows.reduce((s, r) => s + r[g], 0) / n);
+    const v = rows[0].map((_, g) => rows.reduce((s, r) => s + (r[g] - m[g]) ** 2, 0) / (n - 1));
+    return { n, m, v };
+  };
+  const compare = (a, b) => {
+    let maxD = 0, maxZ = 0;
+    for (let g = 0; g < NG; g++) {
+      const d = Math.abs(a.m[g] - b.m[g]);
+      const se = Math.sqrt(a.v[g] / a.n + b.v[g] / b.n);
+      maxD = Math.max(maxD, d);
+      maxZ = Math.max(maxZ, d / Math.max(se, 1e-6));
+    }
+    return { maxD, maxZ };
+  };
+  const tsRun = (e, seeds) => seeds.map((seed) => {
+    const pop = new Population(POP_CFG, seed);
+    for (let g = 0; g < GENS; g++) pop.step(e, phys);
+    return pop.mean();
+  });
+  let worstZ = 0, worstD = 0, baseZ = 0, where = "";
+  for (const e of ENVS) {
+    const ts = stats(tsRun(e, SEEDS_F));
+    const fast = stats(SEEDS_F.map((seed) =>
+      run("native_fast", ["run", String(seed), String(GENS), String(N), ...envArgs(e)]).slice(0, NG).map(Number)));
+    // Vergleichsmaß: TS gegen TS mit anderen Seeds – so groß ist reines Seed-Rauschen
+    const ts2 = stats(tsRun(e, SEEDS_F.map((s) => s + 1000)));
+    const c = compare(ts, fast);
+    if (c.maxZ > worstZ) { worstZ = c.maxZ; where = e.name; }
+    worstD = Math.max(worstD, c.maxD);
+    baseZ = Math.max(baseZ, compare(ts, ts2).maxZ);
+  }
+  console.log(verdict(worstZ < 4,
+    `F  Verteilung native_fast  ${ENVS.length} Umwelten × ${SEEDS_F.length} Seeds, max |z| = ${worstZ.toFixed(2)} (${where}), max |Δ| = ${worstD.toFixed(3)}; Seed-Rauschen TS↔TS max |z| = ${baseZ.toFixed(2)}`));
 }
 
 console.log(failed ? "\nparity: ABWEICHUNG" : "\nparity: alles im Rahmen");

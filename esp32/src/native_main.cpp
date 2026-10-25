@@ -2,6 +2,7 @@
 //
 //   program rng <seed> <count>        -> eine uint32 je Zeile
 //   program fitness < samples.txt     -> eine Fitness je Zeile (26 Gene + 16 Umweltwerte je Zeile)
+//   program weights <seed> <N> <16 Umweltwerte>  -> Reproduktions-Gewichte der Gründer
 //   program run <seed> <gens> <N> <16 Umweltwerte> [uniform|gaussian]
 //                                     -> Mittelwert-Genom (26 Werte), dann describe()
 #include <stdio.h>
@@ -60,6 +61,18 @@ int main(int argc, char **argv) {
     char d[128];
     describe(m, d, sizeof d);
     printf("%s\n", d);
+    return 0;
+  }
+  if (argc >= 4 + ENV_N && !strcmp(argv[1], "weights")) {
+    PopulationConfig cfg;
+    cfg.size = atoi(argv[3]);
+    double v[ENV_N];
+    for (int k = 0; k < ENV_N; k++) v[k] = atof(argv[4 + k]);
+    Environment e;
+    set_env(e, v);
+    Population pop(cfg, (uint32_t)strtoul(argv[2], nullptr, 10));
+    pop.computeWeights(e);
+    for (int i = 0; i < cfg.size; i++) printf("%.9g\n", (double)pop.weights()[i]);
     return 0;
   }
   fprintf(stderr, "Aufruf: rng <seed> <n> | fitness < datei | run <seed> <gens> <N> <16 Umweltwerte>\n");

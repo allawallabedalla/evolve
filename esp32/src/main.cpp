@@ -1,4 +1,5 @@
-// Phase 1 – Board läuft: Testbild + Touch-Koordinaten über Serial.
+// Phase 3 – Simulation auf dem Board: Testbild + Touch über Serial, darunter
+// Generation und Kurzbeschreibung aus dem Sim-Task.
 #include <Arduino.h>
 #include <Wire.h>
 #define LGFX_USE_V1
@@ -6,6 +7,7 @@
 #include <lvgl.h>
 
 #include "board.h"
+#include "sim.h"
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_GC9A01 panel;
@@ -82,6 +84,8 @@ static lv_disp_drv_t disp_drv;
 static lv_indev_drv_t indev_drv;
 static lv_obj_t *touch_dot;
 static lv_obj_t *coord_label;
+static lv_obj_t *gen_label;
+static lv_obj_t *desc_label;
 
 static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *px) {
   uint32_t w = a->x2 - a->x1 + 1;
@@ -175,6 +179,19 @@ static void build_test_screen() {
   corner_label("UL", LV_ALIGN_BOTTOM_LEFT, 52, -52);
   corner_label("UR", LV_ALIGN_BOTTOM_RIGHT, -52, -52);
 
+  gen_label = lv_label_create(scr);
+  lv_label_set_text(gen_label, "Gen 0");
+  lv_obj_set_style_text_color(gen_label, lv_color_hex(0xFFFFFF), 0);
+  lv_obj_align(gen_label, LV_ALIGN_CENTER, 0, 44);
+
+  desc_label = lv_label_create(scr);
+  lv_label_set_text(desc_label, "");
+  lv_obj_set_width(desc_label, 170);
+  lv_label_set_long_mode(desc_label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_align(desc_label, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_style_text_color(desc_label, lv_color_hex(0x8899AA), 0);
+  lv_obj_align(desc_label, LV_ALIGN_CENTER, 0, 74);
+
   touch_dot = lv_obj_create(scr);
   lv_obj_set_size(touch_dot, 12, 12);
   lv_obj_set_style_radius(touch_dot, LV_RADIUS_CIRCLE, 0);
@@ -212,9 +229,45 @@ void setup() {
 
   build_test_screen();
   Serial.printf("Freier Heap: %u Byte\n", ESP.getFreeHeap());
+  sim_start(esp_random());
+}
+
+// Die eingebauten Montserrat-Schriften haben nur ASCII – Umlaute bis Phase 4 umschreiben
+static void ascii_fold(const char *in, char *out, size_t len) {
+  static const struct { const char *from, *to; } MAP[] = {
+      {"ß", "ss"}, {"ä", "ae"}, {"ö", "oe"}, {"ü", "ue"}, {"·", "-"}};
+  size_t o = 0;
+  while (*in && o + 3 < len) {
+    bool hit = false;
+    for (const auto &m : MAP) {
+      size_t n = strlen(m.from);
+      if (!strncmp(in, m.from, n)) {
+        for (const char *t = m.to; *t && o + 1 < len; t++) out[o++] = *t;
+        in += n;
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) out[o++] = *in++;
+  }
+  out[o] = 0;
+}
+
+static void update_sim_labels() {
+  static uint32_t shown = 0;
+  SimSnapshot s;
+  if (!sim_snapshot(s) || s.generation == shown) return;
+  shown = s.generation;
+  // lv_snprintf kann kein %f
+  const int f = int(s.meanFitness * 100 + 0.5f);
+  lv_label_set_text_fmt(gen_label, "Gen %u  -  Fitness 0.%02d", s.generation, f > 99 ? 99 : f);
+  char d[sizeof s.desc];
+  ascii_fold(s.desc, d, sizeof d);
+  lv_label_set_text(desc_label, d);
 }
 
 void loop() {
+  update_sim_labels();
   lv_timer_handler();
   delay(5);
 }

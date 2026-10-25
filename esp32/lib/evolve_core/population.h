@@ -60,6 +60,10 @@ class Population {
   real randn();
   int pick(real total);
   void reproduce();
+  void competitionExact();
+#if EVO_FAST_KERNEL
+  void competitionFast();
+#endif
 
   PopulationConfig cfg_;
   Mulberry32 rng_;
@@ -67,4 +71,13 @@ class Population {
   real *next_;
   real *w_;
   real *cum_;
+#if EVO_FAST_KERNEL
+  // Ganzzahl-Kernel (s. competitionFast): Achsenwerte in Q12, exp() als Tabelle
+  static constexpr int LUT_SIZE = 1024;
+  int16_t *q_;     // [size * numAxes]
+  uint32_t *acc_;  // [size] Konkurrenz-Dichte in Q16
+  uint32_t lut_[LUT_SIZE + 1];
+  uint32_t lutMaxD2_;  // d2 (Q24) jenseits dessen exp() als 0 zählt
+  int lutShift_;
+#endif
 };
