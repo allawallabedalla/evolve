@@ -120,6 +120,7 @@ app/                  DIE Live-App (deployt via GitHub Pages) — die maßgeblic
 mockup/               archivierter Single-File-Snapshot (Text-I/O + Validitäts-Balken),
                         von app/ abgelöst; NICHT mehr gepflegt (kein Renderer/classify-Nachzug)
 tools/                parity.mjs (TS↔Python-Fitness-Paritätsprüfung)
+esp32/                Firmware fürs runde ESP32-2424S012C-Display (Plan: docs/esp32-port.md)
 ```
 
 ## Korrektheit & Audit
