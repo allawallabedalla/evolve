@@ -7,6 +7,7 @@
 #include "board.h"
 #include "challenges.h"
 #include "explain.h"
+#include "power.h"
 #include "sim.h"
 #include "ui.h"
 
@@ -288,6 +289,7 @@ void setup() {
   delay(1500);  // USB-CDC Zeit zum Verbinden geben
   Serial.println("\nEvolve ESP32");
 
+  power_init();  // vor lcd.init(): nutzt kurz den Touch-I2C-Bus
   lcd.init();
   lcd.setBrightness(200);
   lcd.fillScreen(TFT_BLACK);
