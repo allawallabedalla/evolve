@@ -2,7 +2,8 @@
 // unten Generation + Kurzbeschreibung.
 //
 // Bedienung
-//   Übersicht:   Bogen am Rand antippen -> Regler bearbeiten
+//   Übersicht:   Wesen antippen -> Erklärung (scrollen, Tippen = zurück)
+//                Bogen am Rand antippen -> Regler bearbeiten
 //   Bearbeiten:  Finger am Ring entlangziehen = Wert,
 //                in der Mitte nach links/rechts wischen = anderer Regler,
 //                Mitte antippen (oder 6 s nichts tun) = zurück

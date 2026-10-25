@@ -31,16 +31,30 @@ const char *kingdomOf(const real *g) {
   return "Protist";
 }
 
-void describe(const real *g, char *out, size_t len) {
-  const char *traits[3];
+int describeGenes(const real *g, int genes[3], bool high[3]) {
   int n = 0;
   for (const Axis &a : AXES) {
     if (n == 3) break;
     const real v = g[a.idx];
-    if (v >= a.hiT)
-      traits[n++] = a.hi;
-    else if (a.lo && v <= a.loT)
-      traits[n++] = a.lo;
+    if (v >= a.hiT) {
+      genes[n] = a.idx;
+      high[n++] = true;
+    } else if (a.lo && v <= a.loT) {
+      genes[n] = a.idx;
+      high[n++] = false;
+    }
+  }
+  return n;
+}
+
+void describe(const real *g, char *out, size_t len) {
+  int genes[3];
+  bool high[3];
+  const int n = describeGenes(g, genes, high);
+  const char *traits[3];
+  for (int i = 0; i < n; i++) {
+    for (const Axis &a : AXES)
+      if (a.idx == genes[i]) traits[i] = high[i] ? a.hi : a.lo;
   }
   char desc[96];
   if (n == 0) {

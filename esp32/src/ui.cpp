@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "creature.h"
+#include "explain.h"
 #include "sim.h"
 
 LV_FONT_DECLARE(font_de_14);
@@ -32,6 +33,7 @@ static constexpr int SEG_SPAN = 360 / NUM_REGLER;
 static constexpr int SEG_GAP = 10;
 static constexpr int SEG_FIRST = -60;  // Mitte des ersten Bogens (LVGL: 0° = 3 Uhr, im Uhrzeigersinn)
 static constexpr uint32_t EDIT_TIMEOUT_MS = 6000;
+static constexpr uint32_t INFO_TIMEOUT_MS = 30000;
 static constexpr lv_coord_t RING = 232;
 static constexpr lv_coord_t RING_W = 14;
 static constexpr lv_coord_t RING_TOUCH_R = 80;  // ab diesem Radius zählt ein Tippen als Ring
@@ -47,7 +49,14 @@ static lv_obj_t *edit_name;
 static lv_obj_t *edit_value;
 static lv_obj_t *edit_hint;
 
+static lv_obj_t *info_panel;
+static lv_obj_t *info_scroll;
+static lv_obj_t *info_title;
+static lv_obj_t *info_body;
+static char info_text[1024];
+
 static int editing = -1;  // -1 = Übersicht
+static bool info_open = false;
 static uint32_t last_touch_ms = 0;
 static bool swallow_click = false;
 
@@ -100,13 +109,33 @@ static void show_edit(int i) {
   lv_obj_clear_flag(edit_panel, LV_OBJ_FLAG_HIDDEN);
 }
 
-// Übersicht: Tippen auf den Ring wählt den Bogen unter dem Finger
+static void show_info() {
+  SimSnapshot s;
+  if (!sim_snapshot(s)) return;
+  explain_creature(s, sim_get_env(), info_text, sizeof info_text);
+  lv_label_set_text(info_title, s.desc);
+  lv_label_set_text(info_body, info_text);
+  lv_obj_scroll_to_y(info_scroll, 0, LV_ANIM_OFF);
+  lv_obj_clear_flag(info_panel, LV_OBJ_FLAG_HIDDEN);
+  info_open = true;
+  last_touch_ms = millis();
+}
+
+static void hide_info(lv_event_t *) {
+  lv_obj_add_flag(info_panel, LV_OBJ_FLAG_HIDDEN);
+  info_open = false;
+}
+
+// Übersicht: Tippen aufs Wesen = Erklärung, Tippen auf den Ring = Bogen unter dem Finger
 static void screen_clicked(lv_event_t *) {
   if (editing >= 0) return;
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
   const int dx = p.x - LCD_W / 2, dy = p.y - LCD_H / 2;
-  if (dx * dx + dy * dy < RING_TOUCH_R * RING_TOUCH_R) return;
+  if (dx * dx + dy * dy < RING_TOUCH_R * RING_TOUCH_R) {
+    show_info();
+    return;
+  }
   const int deg = int(lroundf(atan2f(float(dy), float(dx)) * 180.0f / float(M_PI)));
   for (int i = 0; i < NUM_REGLER; i++) {
     int d = norm360(deg - seg_center(i));
@@ -221,6 +250,49 @@ void ui_build() {
   lv_obj_t *nav = label(edit_panel, &font_de_14, 0x5F7468, 52);
   lv_label_set_text(nav, "< wischen >");
 
+  // Erklärung: runde Fläche über allem, Text scrollt, Tippen schließt
+  info_panel = lv_obj_create(scr);
+  lv_obj_remove_style_all(info_panel);
+  lv_obj_set_size(info_panel, LCD_W, LCD_H);
+  lv_obj_set_style_radius(info_panel, LV_RADIUS_CIRCLE, 0);
+  lv_obj_set_style_bg_color(info_panel, lv_color_hex(0x0B1A12), 0);
+  lv_obj_set_style_bg_opa(info_panel, LV_OPA_COVER, 0);
+  lv_obj_clear_flag(info_panel, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_flag(info_panel, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(info_panel, hide_info, LV_EVENT_CLICKED, nullptr);
+
+  info_scroll = lv_obj_create(info_panel);
+  lv_obj_remove_style_all(info_scroll);
+  lv_obj_set_size(info_scroll, 172, 212);
+  lv_obj_center(info_scroll);
+  lv_obj_set_style_pad_ver(info_scroll, 26, 0);
+  lv_obj_set_style_pad_row(info_scroll, 8, 0);
+  lv_obj_set_flex_flow(info_scroll, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_scroll_dir(info_scroll, LV_DIR_VER);
+  lv_obj_set_scrollbar_mode(info_scroll, LV_SCROLLBAR_MODE_OFF);
+  lv_obj_add_flag(info_scroll, LV_OBJ_FLAG_EVENT_BUBBLE);  // Tippen ohne Scrollen schließt
+  lv_obj_add_event_cb(info_scroll, [](lv_event_t *) { last_touch_ms = millis(); }, LV_EVENT_SCROLL, nullptr);
+
+  info_title = lv_label_create(info_scroll);
+  lv_obj_set_width(info_title, lv_pct(100));
+  lv_obj_set_style_text_font(info_title, &font_de_20, 0);
+  lv_obj_set_style_text_color(info_title, lv_color_hex(0xFFFFFF), 0);
+  lv_obj_set_style_text_align(info_title, LV_TEXT_ALIGN_CENTER, 0);
+  lv_label_set_long_mode(info_title, LV_LABEL_LONG_WRAP);
+
+  info_body = lv_label_create(info_scroll);
+  lv_obj_set_width(info_body, lv_pct(100));
+  lv_obj_set_style_text_font(info_body, &font_de_14, 0);
+  lv_obj_set_style_text_color(info_body, lv_color_hex(0xC8D6CE), 0);
+  lv_label_set_long_mode(info_body, LV_LABEL_LONG_WRAP);
+
+  lv_obj_t *close = lv_label_create(info_scroll);
+  lv_obj_set_width(close, lv_pct(100));
+  lv_obj_set_style_text_color(close, lv_color_hex(0x5F7468), 0);
+  lv_obj_set_style_text_align(close, LV_TEXT_ALIGN_CENTER, 0);
+  lv_label_set_text(close, "tippen = zurück");
+
+  lv_obj_add_flag(info_panel, LV_OBJ_FLAG_HIDDEN);
   show_overview();
 }
 
@@ -235,6 +307,7 @@ void ui_env_changed() {
 
 void ui_tick() {
   if (editing >= 0 && millis() - last_touch_ms > EDIT_TIMEOUT_MS) show_overview();
+  if (info_open && millis() - last_touch_ms > INFO_TIMEOUT_MS) hide_info(nullptr);
 
   static uint32_t shown = 0;
   SimSnapshot s;

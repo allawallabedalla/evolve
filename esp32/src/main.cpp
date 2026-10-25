@@ -5,6 +5,7 @@
 #include <lvgl.h>
 
 #include "board.h"
+#include "explain.h"
 #include "sim.h"
 #include "ui.h"
 
@@ -107,6 +108,7 @@ static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 //   env                  aktuelle Umwelt ausgeben
 //   env <feld> <0..1>    Feld setzen, z. B. "env temperature 0.9"
 //   forget               Speicherstand löschen, Neustart mit frischer Welt
+//   info                 Erklärtext zum aktuellen Wesen (wie beim Antippen)
 static void serial_commands() {
   static char line[64];
   static size_t n = 0;
@@ -119,6 +121,15 @@ static void serial_commands() {
     line[n] = 0;
     n = 0;
     if (!strcmp(line, "forget")) sim_forget();
+    if (!strcmp(line, "info")) {
+      static char text[1024];
+      SimSnapshot s;
+      if (sim_snapshot(s)) {
+        explain_creature(s, sim_get_env(), text, sizeof text);
+        Serial.printf("--- %s ---\n%s\n---\n", s.desc, text);
+      }
+      continue;
+    }
     if (strncmp(line, "env", 3)) continue;
     Environment e = sim_get_env();
     struct { const char *name; real *v; } F[] = {

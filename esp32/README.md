@@ -14,7 +14,9 @@ pio run -d esp32 -t upload && pio device monitor -d esp32
 
 ## Bedienung
 
-- **Mitte:** das Wesen, gezeichnet aus dem Mittelwert-Genom
+- **Mitte:** das Wesen, gezeichnet aus dem Mittelwert-Genom. Antippen → kurze
+  Erklärung: was für ein Lebewesen, welche Merkmale es prägen (Nutzen und Kosten)
+  und was an der eingestellten Welt auffällt. Scrollen mit dem Finger, Tippen = zurück
 - **Rand:** sechs Bögen = Wärme, Licht, Wasser, Futter, Futterhöhe, Räuber
 - Bogen antippen → Regler bearbeiten: Finger am Ring = Wert,
   in der Mitte wischen = anderer Regler, Mitte tippen oder 6 s warten = zurück
@@ -30,6 +32,7 @@ einer Regler-Änderung (NVS); nach dem Einschalten geht es dort weiter.
 | `env` | aktuelle Umwelt ausgeben |
 | `env <feld> <0..1>` | z. B. `env temperature 0.9` (`temperature predation foodAbundance foodHeight light water`) |
 | `forget` | Speicherstand löschen, Neustart mit frischer Welt |
+| `info` | Erklärtext zum aktuellen Wesen ausgeben (wie beim Antippen) |
 
 ## Aufbau
 
@@ -39,6 +42,8 @@ einer Regler-Änderung (NVS); nach dem Einschalten geht es dort weiter.
 | `include/physics.h` | erzeugt von `tools/gen-physics.mjs` aus `physics.json` – nicht von Hand ändern |
 | `src/sim.*` | Sim-Task, Schnappschuss für die Oberfläche, Speichern/Laden |
 | `src/ui.*`, `src/creature.*` | runde Oberfläche, Wesen-Zeichnung |
+| `src/explain.*` | Lern-Text zum Wesen |
+| `include/gene_texts.h` | erzeugt von `tools/gen-texts.mjs` aus `app/index.html` (Gen-Namen) und `app/gene-explain.js` (Erklärsätze) |
 | `src/fonts/` | Montserrat mit Umlauten (lv_font_conv) |
 | `tools/parity.mjs` | Paritätstest C++ ↔ TS |
 
