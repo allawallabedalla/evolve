@@ -20,9 +20,12 @@
 #define LV_USE_LOG 0
 #define LV_USE_PERF_MONITOR 0
 
-#define LV_FONT_MONTSERRAT_14 1
-#define LV_FONT_MONTSERRAT_28 1
-#define LV_FONT_DEFAULT &lv_font_montserrat_14
+// Eigene Montserrat-Schnitte (SIL OFL, TTF aus lvgl/scripts/built_in_font) mit Latin-1
+// (ä ö ü ß ·), erzeugt mit lv_font_conv@1.5.2: src/fonts/font_de_*.c, Optionen im Dateikopf.
+// Die eingebauten Schriften können nur ASCII.
+#define LV_FONT_MONTSERRAT_14 0
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(font_de_14) LV_FONT_DECLARE(font_de_20)
+#define LV_FONT_DEFAULT &font_de_14
 
 #endif
 #endif

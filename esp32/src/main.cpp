@@ -1,13 +1,12 @@
-// Phase 3 – Simulation auf dem Board: Testbild + Touch über Serial, darunter
-// Generation und Kurzbeschreibung aus dem Sim-Task.
+// Evolve auf dem ESP32-2424S012C: Display/Touch-Treiber, LVGL, Sim-Task, Oberfläche.
 #include <Arduino.h>
-#include <Wire.h>
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 #include <lvgl.h>
 
 #include "board.h"
 #include "sim.h"
+#include "ui.h"
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_GC9A01 panel;
@@ -82,10 +81,6 @@ static lv_color_t buf[LCD_W * BUF_LINES];
 static lv_disp_draw_buf_t draw_buf;
 static lv_disp_drv_t disp_drv;
 static lv_indev_drv_t indev_drv;
-static lv_obj_t *touch_dot;
-static lv_obj_t *coord_label;
-static lv_obj_t *gen_label;
-static lv_obj_t *desc_label;
 
 static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *px) {
   uint32_t w = a->x2 - a->x1 + 1;
@@ -98,115 +93,55 @@ static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *px) {
 }
 
 static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
-  static uint32_t last_log = 0;
   uint16_t x, y;
   if (lcd.getTouch(&x, &y)) {
     data->state = LV_INDEV_STATE_PR;
     data->point.x = x;
     data->point.y = y;
-    if (millis() - last_log > 100) {
-      last_log = millis();
-      const char *q = (y < LCD_H / 2) ? (x < LCD_W / 2 ? "oben-links" : "oben-rechts")
-                                      : (x < LCD_W / 2 ? "unten-links" : "unten-rechts");
-      Serial.printf("touch x=%3u y=%3u  %s\n", x, y, q);
-      lv_obj_set_pos(touch_dot, x - 6, y - 6);
-      lv_label_set_text_fmt(coord_label, "%u, %u", x, y);
-    }
   } else {
     data->state = LV_INDEV_STATE_REL;
   }
 }
 
-// Touch-Controller zurücksetzen und I2C-Bus scannen, bevor LovyanGFX ihn übernimmt.
-// Der CST816 schläft ohne Berührung – nach dem Reset antwortet er kurz.
-static void i2c_scan() {
-  pinMode(PIN_TP_RST, OUTPUT);
-  digitalWrite(PIN_TP_RST, LOW);
-  delay(10);
-  digitalWrite(PIN_TP_RST, HIGH);
-  delay(50);
-  Wire.begin(PIN_TP_SDA, PIN_TP_SCL, 400000);
-  Serial.print("I2C-Scan:");
-  int found = 0;
-  for (uint8_t addr = 1; addr < 127; addr++) {
-    Wire.beginTransmission(addr);
-    if (Wire.endTransmission() == 0) {
-      Serial.printf(" 0x%02X", addr);
-      found++;
+// Serielle Befehle zum Testen ohne Finger:
+//   env                  aktuelle Umwelt ausgeben
+//   env <feld> <0..1>    Feld setzen, z. B. "env temperature 0.9"
+static void serial_commands() {
+  static char line[64];
+  static size_t n = 0;
+  while (Serial.available()) {
+    const char c = Serial.read();
+    if (c != '\n' && c != '\r') {
+      if (n + 1 < sizeof line) line[n++] = c;
+      continue;
     }
+    line[n] = 0;
+    n = 0;
+    if (strncmp(line, "env", 3)) continue;
+    Environment e = sim_get_env();
+    struct { const char *name; real *v; } F[] = {
+        {"temperature", &e.temperature}, {"predation", &e.predation}, {"foodAbundance", &e.foodAbundance},
+        {"foodHeight", &e.foodHeight},   {"light", &e.light},         {"water", &e.water}};
+    char key[24];
+    float val;
+    if (sscanf(line + 3, "%23s %f", key, &val) == 2) {
+      for (auto &f : F)
+        if (!strcmp(key, f.name)) {
+          *f.v = real(val < 0 ? 0 : val > 1 ? 1 : val);
+          sim_set_env(e);
+          ui_env_changed();
+        }
+    }
+    Serial.print("env:");
+    for (auto &f : F) Serial.printf(" %s=%.2f", f.name, double(*f.v));
+    Serial.println();
   }
-  Serial.println(found ? "" : " nichts gefunden (Touch berühren und neu starten)");
-  Wire.end();
-}
-
-static lv_obj_t *corner_label(const char *txt, lv_align_t align, int dx, int dy) {
-  lv_obj_t *l = lv_label_create(lv_scr_act());
-  lv_label_set_text(l, txt);
-  lv_obj_set_style_text_color(l, lv_color_hex(0x8899AA), 0);
-  lv_obj_align(l, align, dx, dy);
-  return l;
-}
-
-static void build_test_screen() {
-  lv_obj_t *scr = lv_scr_act();
-  lv_obj_set_style_bg_color(scr, lv_color_hex(0x0B1A12), 0);
-  lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
-
-  // Kreis am Rand: zeigt, ob das runde Panel voll ausgeleuchtet und zentriert ist
-  lv_obj_t *ring = lv_obj_create(scr);
-  lv_obj_set_size(ring, 232, 232);
-  lv_obj_center(ring);
-  lv_obj_set_style_radius(ring, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_opa(ring, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_color(ring, lv_color_hex(0x3DDC84), 0);
-  lv_obj_set_style_border_width(ring, 3, 0);
-  lv_obj_clear_flag(ring, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-
-  lv_obj_t *title = lv_label_create(scr);
-  lv_label_set_text(title, "Evolve");
-  lv_obj_set_style_text_font(title, &lv_font_montserrat_28, 0);
-  lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
-  lv_obj_align(title, LV_ALIGN_CENTER, 0, -14);
-
-  coord_label = lv_label_create(scr);
-  lv_label_set_text(coord_label, "beruehren");
-  lv_obj_set_style_text_color(coord_label, lv_color_hex(0x3DDC84), 0);
-  lv_obj_align(coord_label, LV_ALIGN_CENTER, 0, 20);
-
-  // Quadranten-Marken (rund: nicht in die Ecken, sondern auf die Diagonalen nach innen)
-  corner_label("OL", LV_ALIGN_TOP_LEFT, 52, 52);
-  corner_label("OR", LV_ALIGN_TOP_RIGHT, -52, 52);
-  corner_label("UL", LV_ALIGN_BOTTOM_LEFT, 52, -52);
-  corner_label("UR", LV_ALIGN_BOTTOM_RIGHT, -52, -52);
-
-  gen_label = lv_label_create(scr);
-  lv_label_set_text(gen_label, "Gen 0");
-  lv_obj_set_style_text_color(gen_label, lv_color_hex(0xFFFFFF), 0);
-  lv_obj_align(gen_label, LV_ALIGN_CENTER, 0, 44);
-
-  desc_label = lv_label_create(scr);
-  lv_label_set_text(desc_label, "");
-  lv_obj_set_width(desc_label, 170);
-  lv_label_set_long_mode(desc_label, LV_LABEL_LONG_WRAP);
-  lv_obj_set_style_text_align(desc_label, LV_TEXT_ALIGN_CENTER, 0);
-  lv_obj_set_style_text_color(desc_label, lv_color_hex(0x8899AA), 0);
-  lv_obj_align(desc_label, LV_ALIGN_CENTER, 0, 74);
-
-  touch_dot = lv_obj_create(scr);
-  lv_obj_set_size(touch_dot, 12, 12);
-  lv_obj_set_style_radius(touch_dot, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_color(touch_dot, lv_color_hex(0xFF5050), 0);
-  lv_obj_set_style_border_width(touch_dot, 0, 0);
-  lv_obj_clear_flag(touch_dot, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_pos(touch_dot, -20, -20);
 }
 
 void setup() {
   Serial.begin(115200);
   delay(1500);  // USB-CDC Zeit zum Verbinden geben
-  Serial.println("\nEvolve ESP32 – Phase 1");
-
-  i2c_scan();
+  Serial.println("\nEvolve ESP32 – Phase 4");
 
   lcd.init();
   lcd.setBrightness(200);
@@ -227,47 +162,14 @@ void setup() {
   indev_drv.read_cb = touch_cb;
   lv_indev_drv_register(&indev_drv);
 
-  build_test_screen();
-  Serial.printf("Freier Heap: %u Byte\n", ESP.getFreeHeap());
   sim_start(esp_random());
-}
-
-// Die eingebauten Montserrat-Schriften haben nur ASCII – Umlaute bis Phase 4 umschreiben
-static void ascii_fold(const char *in, char *out, size_t len) {
-  static const struct { const char *from, *to; } MAP[] = {
-      {"ß", "ss"}, {"ä", "ae"}, {"ö", "oe"}, {"ü", "ue"}, {"·", "-"}};
-  size_t o = 0;
-  while (*in && o + 3 < len) {
-    bool hit = false;
-    for (const auto &m : MAP) {
-      size_t n = strlen(m.from);
-      if (!strncmp(in, m.from, n)) {
-        for (const char *t = m.to; *t && o + 1 < len; t++) out[o++] = *t;
-        in += n;
-        hit = true;
-        break;
-      }
-    }
-    if (!hit) out[o++] = *in++;
-  }
-  out[o] = 0;
-}
-
-static void update_sim_labels() {
-  static uint32_t shown = 0;
-  SimSnapshot s;
-  if (!sim_snapshot(s) || s.generation == shown) return;
-  shown = s.generation;
-  // lv_snprintf kann kein %f
-  const int f = int(s.meanFitness * 100 + 0.5f);
-  lv_label_set_text_fmt(gen_label, "Gen %u  -  Fitness 0.%02d", s.generation, f > 99 ? 99 : f);
-  char d[sizeof s.desc];
-  ascii_fold(s.desc, d, sizeof d);
-  lv_label_set_text(desc_label, d);
+  ui_build();
+  Serial.printf("Freier Heap: %u Byte\n", ESP.getFreeHeap());
 }
 
 void loop() {
-  update_sim_labels();
+  serial_commands();
+  ui_tick();
   lv_timer_handler();
   delay(5);
 }
