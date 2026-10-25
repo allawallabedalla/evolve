@@ -14,3 +14,10 @@ void ui_tick();  // aus loop(): Sim-Schnappschuss übernehmen
 
 // Regler von außen setzen (Serial, später NVS) – hält die Anzeige synchron
 void ui_env_changed();
+
+// Für den Scroll-Messlauf (Serial "bench"): Erklärung öffnen, scrollen, schließen
+void ui_info_open();
+void ui_info_scroll(int dy);
+void ui_info_close();
+void ui_info_invalidate();
+void ui_info_text_visible(bool on);

@@ -4,7 +4,7 @@
 #define LV_CONF_H
 
 #define LV_COLOR_DEPTH 16
-#define LV_COLOR_16_SWAP 0  // LovyanGFX tauscht die Bytes selbst
+#define LV_COLOR_16_SWAP 1  // Bytes in Display-Reihenfolge -> DMA direkt aus dem LVGL-Puffer
 
 // Kein PSRAM: LVGL-Heap klein halten
 #define LV_MEM_CUSTOM 0
@@ -14,7 +14,7 @@
 #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"
 #define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())
 
-#define LV_DISP_DEF_REFR_PERIOD 20
+#define LV_DISP_DEF_REFR_PERIOD 15
 #define LV_INDEV_DEF_READ_PERIOD 20
 
 #define LV_USE_LOG 0

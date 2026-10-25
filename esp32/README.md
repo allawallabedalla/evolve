@@ -33,6 +33,7 @@ einer Regler-Änderung (NVS); nach dem Einschalten geht es dort weiter.
 | `env <feld> <0..1>` | z. B. `env temperature 0.9` (`temperature predation foodAbundance foodHeight light water`) |
 | `forget` | Speicherstand löschen, Neustart mit frischer Welt |
 | `info` | Erklärtext zum aktuellen Wesen ausgeben (wie beim Antippen) |
+| `bench` | Erklärung 4 s automatisch scrollen und Renderzeit je Bild messen (`bench r` = neu zeichnen ohne Scrollen, `bench e` = ohne Text) |
 
 ## Aufbau
 

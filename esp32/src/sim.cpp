@@ -123,7 +123,10 @@ void sim_start(uint32_t seed) {
   } else {
     Serial.println("kein Speicherstand – neue Welt");
   }
-  // Gleiche Priorität wie loop(): FreeRTOS teilt die Zeit, LVGL bleibt flüssig
+  // Priorität 1, loop() läuft auf 2 (setup()): die Oberfläche hat immer Vorrang, die
+  // Simulation rechnet in den Pausen von LVGL. Bei gleicher Priorität stahl ein
+  // 180-ms-Schritt der Oberfläche Zeitscheiben (Ruckeln); auf 0 teilte sie sich die
+  // CPU mit dem Idle-Task und brauchte doppelt so lang.
   xTaskCreate(sim_task, "sim", 8192, (void *)(uintptr_t)seed, 1, nullptr);
 }
 

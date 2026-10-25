@@ -76,21 +76,74 @@ class LGFX : public lgfx::LGFX_Device {
 
 static LGFX lcd;
 
-// 240 × 24 Zeilen, einfach gepuffert (kein PSRAM)
-static constexpr int BUF_LINES = 24;
-static lv_color_t buf[LCD_W * BUF_LINES];
+// Zwei Puffer à 240 × 40 Zeilen (2 × 19 KB, kein PSRAM nötig): während DMA den
+// einen Streifen zum Display schiebt, zeichnet LVGL schon in den anderen.
+static constexpr int BUF_LINES = 40;
+static lv_color_t buf1[LCD_W * BUF_LINES];
+static lv_color_t buf2[LCD_W * BUF_LINES];
 static lv_disp_draw_buf_t draw_buf;
 static lv_disp_drv_t disp_drv;
 static lv_indev_drv_t indev_drv;
 
+// Scroll-Messlauf (Serial "bench"): Erklärung 4 s lang automatisch scrollen und
+// die Bildwiederholung protokollieren – Renderzeit je Bild und längste Lücke.
+static struct {
+  bool active;
+  uint32_t start, last_scroll, last_frame;
+  uint32_t frames, render_sum, render_max, gap_max;
+  uint32_t flush_us, px;
+  int dir;
+  char mode;
+} bench;
+
 static void flush_cb(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *px) {
   uint32_t w = a->x2 - a->x1 + 1;
   uint32_t h = a->y2 - a->y1 + 1;
-  lcd.startWrite();
-  lcd.setAddrWindow(a->x1, a->y1, w, h);
-  lcd.writePixels((lgfx::rgb565_t *)&px->full, w * h);
-  lcd.endWrite();
+  const uint32_t t0 = micros();
+  // Bus bleibt dauerhaft offen; pushImageDMA wartet selbst, bis der vorige Streifen
+  // draußen ist – danach ist dessen Puffer frei, LVGL darf sofort weiterzeichnen.
+  // LV_COLOR_16_SWAP = 1 liefert die Bytes schon in Display-Reihenfolge (kein Umkopieren).
+  if (lcd.getStartCount() == 0) lcd.startWrite();
+  lcd.pushImageDMA(a->x1, a->y1, w, h, (lgfx::swap565_t *)&px->full);
+  bench.flush_us += micros() - t0;
   lv_disp_flush_ready(drv);
+}
+
+
+static void monitor_cb(lv_disp_drv_t *, uint32_t time_ms, uint32_t px) {
+  if (!bench.active) return;
+  bench.px += px;
+  const uint32_t now = millis();
+  if (bench.frames) {
+    const uint32_t gap = now - bench.last_frame;
+    if (gap > bench.gap_max) bench.gap_max = gap;
+  }
+  bench.last_frame = now;
+  bench.frames++;
+  bench.render_sum += time_ms;
+  if (time_ms > bench.render_max) bench.render_max = time_ms;
+}
+
+static void bench_tick() {
+  if (!bench.active) return;
+  const uint32_t now = millis();
+  if (now - bench.last_scroll >= 16) {
+    bench.last_scroll = now;
+    if ((now - bench.start) % 2000 < 16) bench.dir = -bench.dir;  // alle 2 s Richtung wechseln
+    if (bench.mode == 's')
+      ui_info_scroll(4 * bench.dir);
+    else
+      ui_info_invalidate();
+  }
+  if (now - bench.start >= 4000) {
+    bench.active = false;
+    ui_info_text_visible(true);
+    ui_info_close();
+    const uint32_t f = bench.frames ? bench.frames : 1;
+    Serial.printf("bench: %u Bilder, Render Ø %u ms / max %u ms, davon SPI Ø %u ms, Ø %u px/Bild, CPU %u MHz\n",
+                  bench.frames, bench.render_sum / f, bench.render_max, bench.flush_us / 1000 / f, bench.px / f,
+                  getCpuFrequencyMhz());
+  }
 }
 
 static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
@@ -109,6 +162,7 @@ static void touch_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 //   env <feld> <0..1>    Feld setzen, z. B. "env temperature 0.9"
 //   forget               Speicherstand löschen, Neustart mit frischer Welt
 //   info                 Erklärtext zum aktuellen Wesen (wie beim Antippen)
+//   bench                Erklärung 4 s automatisch scrollen, Bildrate messen
 static void serial_commands() {
   static char line[64];
   static size_t n = 0;
@@ -121,6 +175,17 @@ static void serial_commands() {
     line[n] = 0;
     n = 0;
     if (!strcmp(line, "forget")) sim_forget();
+    // bench = scrollen, bench r = ohne Scrollen neu zeichnen, bench e = dasselbe ohne Text
+    if (!strncmp(line, "bench", 5)) {
+      bench = {};
+      bench.dir = -1;
+      bench.mode = line[5] == ' ' ? line[6] : 's';
+      ui_info_text_visible(bench.mode != 'e');
+      ui_info_open();
+      bench.start = bench.last_scroll = millis();
+      bench.active = true;
+      continue;
+    }
     if (!strcmp(line, "info")) {
       static char text[1024];
       SimSnapshot s;
@@ -162,12 +227,13 @@ void setup() {
   Serial.printf("Touch-Treiber: %s\n", lcd.touch() ? "aktiv" : "FEHLT");
 
   lv_init();
-  lv_disp_draw_buf_init(&draw_buf, buf, nullptr, LCD_W * BUF_LINES);
+  lv_disp_draw_buf_init(&draw_buf, buf1, buf2, LCD_W * BUF_LINES);
   lv_disp_drv_init(&disp_drv);
   disp_drv.hor_res = LCD_W;
   disp_drv.ver_res = LCD_H;
   disp_drv.flush_cb = flush_cb;
   disp_drv.draw_buf = &draw_buf;
+  disp_drv.monitor_cb = monitor_cb;
   lv_disp_drv_register(&disp_drv);
 
   lv_indev_drv_init(&indev_drv);
@@ -175,6 +241,7 @@ void setup() {
   indev_drv.read_cb = touch_cb;
   lv_indev_drv_register(&indev_drv);
 
+  vTaskPrioritySet(nullptr, 2);  // Oberfläche vor Simulation (s. sim_start)
   sim_start(esp_random());
   ui_build();
   Serial.printf("Freier Heap: %u Byte\n", ESP.getFreeHeap());
@@ -182,7 +249,10 @@ void setup() {
 
 void loop() {
   serial_commands();
+  bench_tick();
   ui_tick();
-  lv_timer_handler();
-  delay(5);
+  // So lange schlafen, wie LVGL nichts zu tun hat (höchstens 5 ms) – die Zeit
+  // bekommt der Sim-Task, der unter loop() läuft.
+  const uint32_t idle = lv_timer_handler();
+  delay(idle > 5 ? 5 : idle ? idle : 1);
 }

@@ -52,7 +52,12 @@ static lv_obj_t *edit_hint;
 static lv_obj_t *info_panel;
 static lv_obj_t *info_scroll;
 static lv_obj_t *info_title;
-static lv_obj_t *info_body;
+// Ein Label je Zeile des Erklärtexts statt eines langen: LVGL zeichnet in Streifen
+// und bricht für jeden Streifen den Text eines Labels komplett neu um. Mit kurzen
+// Labels fasst ein Streifen nur die Zeilen an, die er schneidet (gemessen: ein
+// 900-Zeichen-Label kostete ~50 ms je Scrollbild).
+static constexpr int INFO_LINES = 14;
+static lv_obj_t *info_line[INFO_LINES];
 static char info_text[1024];
 
 static int editing = -1;  // -1 = Übersicht
@@ -114,7 +119,21 @@ static void show_info() {
   if (!sim_snapshot(s)) return;
   explain_creature(s, sim_get_env(), info_text, sizeof info_text);
   lv_label_set_text(info_title, s.desc);
-  lv_label_set_text(info_body, info_text);
+  // Zeilen verteilen, Leerzeilen übernimmt der Zeilenabstand; „Prägt es:“ usw. hell
+  int n = 0;
+  for (char *p = info_text; *p && n < INFO_LINES;) {
+    char *end = strchr(p, '\n');
+    if (end) *end = 0;
+    if (*p) {
+      const size_t len = strlen(p);
+      lv_obj_set_style_text_color(info_line[n], lv_color_hex(p[len - 1] == ':' ? 0xFFFFFF : 0xC8D6CE), 0);
+      lv_label_set_text(info_line[n], p);
+      lv_obj_clear_flag(info_line[n++], LV_OBJ_FLAG_HIDDEN);
+    }
+    if (!end) break;
+    p = end + 1;
+  }
+  for (; n < INFO_LINES; n++) lv_obj_add_flag(info_line[n], LV_OBJ_FLAG_HIDDEN);
   lv_obj_scroll_to_y(info_scroll, 0, LV_ANIM_OFF);
   lv_obj_clear_flag(info_panel, LV_OBJ_FLAG_HIDDEN);
   info_open = true;
@@ -254,7 +273,9 @@ void ui_build() {
   info_panel = lv_obj_create(scr);
   lv_obj_remove_style_all(info_panel);
   lv_obj_set_size(info_panel, LCD_W, LCD_H);
-  lv_obj_set_style_radius(info_panel, LV_RADIUS_CIRCLE, 0);
+  // Bewusst eckig (das Panel ist ohnehin rund): nur ein deckendes Rechteck erkennt
+  // LVGL als „verdeckt alles dahinter“ – mit Radius zeichnete es bei jedem Scrollbild
+  // Wesen und Ringbögen unter der Fläche mit (gemessen 4,5 fps).
   lv_obj_set_style_bg_color(info_panel, lv_color_hex(0x0B1A12), 0);
   lv_obj_set_style_bg_opa(info_panel, LV_OPA_COVER, 0);
   lv_obj_clear_flag(info_panel, LV_OBJ_FLAG_SCROLLABLE);
@@ -280,11 +301,12 @@ void ui_build() {
   lv_obj_set_style_text_align(info_title, LV_TEXT_ALIGN_CENTER, 0);
   lv_label_set_long_mode(info_title, LV_LABEL_LONG_WRAP);
 
-  info_body = lv_label_create(info_scroll);
-  lv_obj_set_width(info_body, lv_pct(100));
-  lv_obj_set_style_text_font(info_body, &font_de_14, 0);
-  lv_obj_set_style_text_color(info_body, lv_color_hex(0xC8D6CE), 0);
-  lv_label_set_long_mode(info_body, LV_LABEL_LONG_WRAP);
+  for (auto &l : info_line) {
+    l = lv_label_create(info_scroll);
+    lv_obj_set_width(l, lv_pct(100));
+    lv_obj_set_style_text_font(l, &font_de_14, 0);
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+  }
 
   lv_obj_t *close = lv_label_create(info_scroll);
   lv_obj_set_width(close, lv_pct(100));
@@ -302,6 +324,22 @@ void ui_env_changed() {
     update_edit_labels();
   } else {
     refresh_segments();
+  }
+}
+
+void ui_info_open() { show_info(); }
+void ui_info_scroll(int dy) {
+  last_touch_ms = millis();
+  lv_obj_scroll_by_bounded(info_scroll, 0, -dy, LV_ANIM_OFF);
+}
+void ui_info_close() { hide_info(nullptr); }
+void ui_info_invalidate() { lv_obj_invalidate(info_panel); }
+void ui_info_text_visible(bool on) {
+  // Nur für den Messlauf: Text weg, um Text- von Flächenkosten zu trennen
+  if (on) {
+    lv_obj_clear_flag(info_scroll, LV_OBJ_FLAG_HIDDEN);
+  } else {
+    lv_obj_add_flag(info_scroll, LV_OBJ_FLAG_HIDDEN);
   }
 }
 
