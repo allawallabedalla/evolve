@@ -30,6 +30,26 @@ Beim Standard-IP5306 lässt sich beides weder per Software noch per Widerstand �
    - **keine** Abschaltung bei wenig Last, 5 V dauerhaft an
    - Ohne Umbau erkennt sie den Standard-Chip und lässt alles, wie es ist.
 
+### Zweite Bezugsquelle: Liter Energy (li-polymer.com)
+
+[Runde Akkus bei Liter Energy / BIHUADE](https://www.li-polymer.com/index.php?s=akkus&c=category&id=5)
+(Shenzhen, deutschsprachige Seite, geprüft 26.10.2026): Ø 30–50 mm ab Lager, Muster ab
+**5 Stück**, Schutzschaltung, Kabel und Stecker nach Wunsch, 4–7 Tage Vorlauf plus DHL/UPS.
+Preise und Datenblätter nur auf Anfrage – Ladegrenzen stehen nicht auf der Seite.
+
+Passend unter die Platine (Ø ≤ 38 mm):
+
+| Typ | Maße | Kapazität | Hinweis |
+|---|---|---|---|
+| 703535 | 7,0 × Ø 35 mm | 725 mAh | einfachste Wahl, 3,7 V |
+| 553535 ×2 parallel | ≈ 11 × Ø 35 mm | ≈ 1200 mAh | wie Topwell TWE0102, als 1S2P anfragen |
+| 603535 | 6,0 × Ø 35 mm | 650 mAh | 3,8-V-Typ (LiHV, lädt bis 4,35 V) – am IP5306 (4,2 V) nur ~90 % voll |
+| 653929 | 6,5 × Ø 39 mm | 665 mAh | etwa so groß wie die Platine |
+
+Größer als die Platine: 604543 (6,0 × Ø 45 mm, 1050 mAh), 704230 (7,0 × Ø 42 mm, 835 mAh).
+
+Geschätzte Laufzeit mit 725 mAh: ~9 h Bildschirm dauernd an, ~16 h im Normalbetrieb.
+
 ### Warum nicht anders
 
 - **Größere eckige Akkus** (2000 mAh, 1C = 2 A) würden den Ladestrom vertragen, passen aber
